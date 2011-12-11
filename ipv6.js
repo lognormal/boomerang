@@ -41,8 +41,8 @@ Algorithm:
 */
 var impl = {
 	complete: false,
-	ipv6_url: "",
-	host_url: "",
+	ipv6_url: "http://[2600:3c03::f03c:91ff:fe93:d155]/boomerang/image-l.gif",
+	host_url: "http://ipv6.204st.us/boomerang/image-l.gif",
 	timeout: 1200,
 
 	timers: {
