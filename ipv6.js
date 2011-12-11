@@ -54,20 +54,19 @@ var impl = {
 		this.load_img('ipv6', 'host');
 	},
 
-	load_img: function(which) {
+	load_img: function() {
 		var img,
 			rnd = "?t=" + (new Date().getTime()) + Math.random(),
 			timer=0, error = null,
-			that = this, a;
+			that = this,
+			which = Array.prototype.shift.call(arguments),
+			a = arguments;
 
 		// Terminate if we've reached end of test list
 		if(!which || !(which in this.timers)) {
 			this.done();
 			return false;
 		}
-
-		Array.prototype.shift.call(arguments);
-		a = arguments;
 
 		// Skip if URL wasn't set for this test
 		if(!this[which + '_url']) {
