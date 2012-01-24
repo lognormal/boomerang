@@ -1,0 +1,4 @@
+/*
+Boomerang is Copyright (c) 2010 Yahoo! Inc. All rights reserved.
+Code licensed and distributed under the BSD License.
+*/

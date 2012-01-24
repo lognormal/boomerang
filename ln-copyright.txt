@@ -1,0 +1,4 @@
+/*
+The LOGN plugin for Boomerang is Copyright (c) 2011 Log-Normal, Inc. All rights reserved.
+Code licensed and distributed under the BSD License.
+*/

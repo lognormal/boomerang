@@ -7,6 +7,11 @@ MINIFIER := cat
 
 all: boomerang-$(VERSION).$(DATE).js
 
+lognormal: all
+
+lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
+lognormal : override PLUGINS := ipv6.js logn_config.js
+
 usage:
 	echo "Create a release version of boomerang:"
 	echo "	make"
@@ -25,7 +30,7 @@ boomerang-$(VERSION).$(DATE).js: boomerang.js $(PLUGINS)
 	echo
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
-	cat boomerang.js $(PLUGINS) | $(MINIFIER) > $@ && echo "done"
+	cat boomerang.js $(PLUGINS) | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g" > $@ && echo "done"
 	echo
 
 .PHONY: all
