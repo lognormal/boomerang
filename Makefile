@@ -10,7 +10,7 @@ all: boomerang-$(VERSION).$(DATE).js
 lognormal: all
 
 lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
-lognormal : override PLUGINS := ipv6.js logn_config.js
+lognormal : override PLUGINS := ipv6.js navtiming.js mobile.js logn_config.js
 
 usage:
 	echo "Create a release version of boomerang:"
