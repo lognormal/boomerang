@@ -538,6 +538,11 @@ var impl = {
 			BOOMR.addVar("rt.start", "navigation");
 			this.navigationStart = ti.navigationStart || undefined;
 			this.responseStart = ti.responseStart || undefined;
+
+			// bug in Firefox 7 & 8 https://bugzilla.mozilla.org/show_bug.cgi?id=691547
+			if(navigator.userAgent.match(/Firefox\/[78]\./)) {
+				this.navigationStart = ti.unloadEventStart || ti.fetchStart || undefined;
+			}
 		}
 		else {
 			BOOMR.warn("This browser doesn't support the WebTiming API", "rt");
