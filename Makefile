@@ -10,12 +10,14 @@ all: boomerang-$(VERSION).$(DATE).js
 lognormal: all
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
+	gzip -c boomerang-$(VERSION).$(DATE).js > boomerang-$(VERSION).$(DATE).js.gz
 
 lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
 lognormal : override PLUGINS := ipv6.js navtiming.js mobile.js logn_config.js
 
 lognormal-push: lognormal
-	scp boomerang-$(VERSION).$(DATE).js linode:boomerang/
+	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode:boomerang/
+	ssh linode "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
 
 usage:
 	echo "Create a release version of boomerang:"
