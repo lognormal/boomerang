@@ -380,7 +380,12 @@ boomr = {
 			if(impl.vars.hasOwnProperty(k)) {
 				nparams++;
 				url += "&" + encodeURIComponent(k)
-					+ "=" + encodeURIComponent(impl.vars[k]);
+					+ "="
+					+ (
+						impl.vars[k]===undefined || impl.vars[k]===null
+						? ''
+						: encodeURIComponent(impl.vars[k])
+					);
 			}
 		}
 	
