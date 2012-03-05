@@ -498,7 +498,7 @@ var impl = {
 	},
 
 	initNavTiming: function() {
-		var ti, p;
+		var ti, p, source;
 
 		if(this.navigationStart) {
 			return;
@@ -522,7 +522,7 @@ var impl = {
 				navigationStart: w.chrome.csi().startE,
 				responseStart: undefined
 			};
-			BOOMR.addVar("rt.start", "csi");
+			source = "csi";
 		}
 		else if(w.gtbExternal) {
 			// The Google Toolbar exposes navigation start time similar to old versions of chrome
@@ -531,7 +531,7 @@ var impl = {
 				navigationStart: w.gtbExternal.startE(),
 				responseStart: undefined
 			};
-			BOOMR.addVar("rt.start", "gtb");
+			source = 'gtb';
 		}
 
 		if(ti) {
@@ -540,7 +540,7 @@ var impl = {
 			// on it don't get sent back.  Never use requestStart since if
 			// the first request fails and the browser retries, it will contain
 			// the value for the new request.
-			BOOMR.addVar("rt.start", "navigation");
+			BOOMR.addVar("rt.start", source || "navigation");
 			this.navigationStart = ti.navigationStart || undefined;
 			this.responseStart = ti.responseStart || undefined;
 
