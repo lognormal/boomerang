@@ -3,7 +3,7 @@ var s0=doc.getElementsByTagName(s)[0],
     s1=doc.createElement(s),
     d=doc.URL.replace(/^https?:\/\//, '').replace(/[:?;\/].*$/, '');
 
-if(d=='localhost' || d=='127.0.0.1' || d.match(/^mhtml/))
+if(d.match(/^mhtml/))
 	return;
 
 s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(d);
