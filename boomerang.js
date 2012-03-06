@@ -216,7 +216,7 @@ boomr = {
 		for(k in this.plugins) {
 			// config[pugin].enabled has been set to false
 			if( config[k]
-				&& typeof config[k].enabled !== "undefined"
+				&& ("enabled" in config[k])
 				&& config[k].enabled === false
 			) {
 				impl.disabled_plugins[k] = 1;
@@ -235,7 +235,7 @@ boomr = {
 		}
 	
 		// The developer can override onload by setting autorun to false
-		if(typeof config.autorun === "undefined" || config.autorun !== false) {
+		if(!("autorun" in config) || config.autorun !== false) {
 			impl.addListener(w, "load",
 						function() {
 							impl.fireEvent("page_ready");
@@ -579,7 +579,7 @@ BOOMR.plugins.RT = {
 	endTimer: function(timer_name, time_value) {
 		if(timer_name) {
 			impl.timers[timer_name] = impl.timers[timer_name] || {};
-			if(typeof impl.timers[timer_name].end === "undefined") {
+			if(!("end" in impl.timers[timer_name])) {
 				impl.timers[timer_name].end =
 						(typeof time_value === "number" ? time_value : new Date().getTime());
 			}
@@ -665,10 +665,7 @@ BOOMR.plugins.RT = {
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
 			BOOMR.utils.removeCookie(impl.cookie);
 
-			if(subcookies !== null
-				&& typeof subcookies.s !== "undefined"
-				&& typeof subcookies.r !== "undefined"
-			) {
+			if(subcookies && subcookies.s && subcookies.r) {
 				r = subcookies.r;
 				if(!impl.strict_referrer || r === r2) {
 					t_start = parseInt(subcookies.s, 10);
@@ -895,7 +892,7 @@ var impl = {
 			nimgs=0;
 			for(j=r.length-1; j>=0 && nimgs<3; j--) {
 				// if we hit an undefined image time, we skipped everything before this
-				if(typeof r[j] === "undefined") {
+				if(!r[j]) {
 					break;
 				}
 				if(r[j].t === null) {
