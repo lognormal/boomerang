@@ -513,23 +513,21 @@ var impl = {
 		if(p && p.timing) {
 			ti = p.timing;
 		}
-		else if(w.chrome && w.chrome.csi) {
+		else if(w.chrome && w.chrome.csi && w.chrome.csi().startE) {
 			// Older versions of chrome also have a timing API that's sort of documented here:
 			// http://ecmanaut.blogspot.com/2010/06/google-bom-feature-ms-since-pageload.html
 			// source here:
 			// http://src.chromium.org/viewvc/chrome/trunk/src/chrome/renderer/loadtimes_extension_bindings.cc?view=markup
 			ti = {
 				navigationStart: w.chrome.csi().startE,
-				responseStart: undefined
 			};
 			source = "csi";
 		}
-		else if(w.gtbExternal) {
+		else if(w.gtbExternal && w.gtbExternal.startE()) {
 			// The Google Toolbar exposes navigation start time similar to old versions of chrome
 			// This would work for any browser that has the google toolbar installed
 			ti = {
 				navigationStart: w.gtbExternal.startE(),
-				responseStart: undefined
 			};
 			source = 'gtb';
 		}
