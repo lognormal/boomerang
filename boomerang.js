@@ -410,14 +410,8 @@ boomr.info = make_logger("info");
 boomr.warn = make_logger("warn");
 boomr.error = make_logger("error");
 
-if(w.YAHOO && w.YAHOO.widget && w.YAHOO.widget.Logger) {
-	boomr.log = w.YAHOO.log;
-}
-else if(typeof w.Y !== "undefined" && typeof w.Y.log !== "undefined") {
-	boomr.log = w.Y.log;
-}
-else if(typeof console !== "undefined" && typeof console.log !== "undefined") {
-	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] ", m); };
+if(console && console.log) {
+	boomr.log = function(m,l,s) { console.log("%s: [%s] %s", s, l, m); };
 }
 
 
