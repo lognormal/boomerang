@@ -20,7 +20,7 @@ for the full license text.
 var impl, boomr, k, d=w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
-if(!BOOMR) {
+if(typeof BOOMR === "undefined") {
 	BOOMR = {};
 }
 // don't allow this code to be included twice
