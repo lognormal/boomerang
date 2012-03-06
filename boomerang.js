@@ -134,8 +134,7 @@ boomr = {
 			c = nameval +
 				((max_age) ? "; expires=" + exp : "" ) +
 				((path) ? "; path=" + path : "") +
-				((typeof domain !== "undefined") ? "; domain="
-						+ (domain !== null ? domain : impl.site_domain ) : "") +
+				"; domain=" + (domain || impl.site_domain) +
 				((sec) ? "; secure" : "");
 		
 			if ( nameval.length < 4000 ) {
