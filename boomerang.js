@@ -512,7 +512,7 @@ var impl = {
 			// source here:
 			// http://src.chromium.org/viewvc/chrome/trunk/src/chrome/renderer/loadtimes_extension_bindings.cc?view=markup
 			ti = {
-				navigationStart: w.chrome.csi().startE,
+				navigationStart: w.chrome.csi().startE
 			};
 			source = "csi";
 		}
@@ -520,7 +520,7 @@ var impl = {
 			// The Google Toolbar exposes navigation start time similar to old versions of chrome
 			// This would work for any browser that has the google toolbar installed
 			ti = {
-				navigationStart: w.gtbExternal.startE(),
+				navigationStart: w.gtbExternal.startE()
 			};
 			source = 'gtb';
 		}
