@@ -410,8 +410,8 @@ boomr.info = make_logger("info");
 boomr.warn = make_logger("warn");
 boomr.error = make_logger("error");
 
-if(console && console.log) {
-	boomr.log = function(m,l,s) { console.log("%s: [%s] %s", s, l, m); };
+if(typeof console !== "undefined" && typeof console.log !== "undefined") {
+	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] ", m); };
 }
 
 
