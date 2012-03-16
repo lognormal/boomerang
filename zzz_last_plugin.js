@@ -1,1 +1,1 @@
-BOOMR.t_end = new Date.getTime();
+BOOMR.t_end = new Date().getTime();

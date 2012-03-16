@@ -18,7 +18,7 @@ for the full license text.
 // BOOMR function to download and execute before measuring the
 // time.  We also declare it without `var` so that we can later
 // `delete` it.  This is the only way that works on Internet Explorer
-BOOMR_start = new Date.getTime();
+BOOMR_start = new Date().getTime();
 
 // beaconing section
 // the parameter is the window
