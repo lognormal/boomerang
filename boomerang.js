@@ -13,6 +13,13 @@ Code licensed under the BSD License.  See the file LICENSE.txt
 for the full license text.
 */
 
+// Measure the time the script started
+// This has to be global so that we don't wait for the entire
+// BOOMR function to download and execute before measuring the
+// time.  We also declare it without `var` so that we can later
+// `delete` it.  This is the only way that works on Internet Explorer
+BOOMR_start = new Date.getTime();
+
 // beaconing section
 // the parameter is the window
 (function(w) {
@@ -87,6 +94,9 @@ impl = {
 // we don't overwrite anything additional that was added to BOOMR before this
 // was called... for example, a plugin.
 boomr = {
+	t_start: BOOMR_start,
+	t_end: null,
+
 	// Utility functions
 	utils: {
 		getCookie: function(name) {
@@ -399,6 +409,8 @@ boomr = {
 
 };
 
+delete BOOMR_start;
+
 var make_logger = function(l) {
 	return function(m, s) {
 		this.log(m, l, "boomerang" + (s?"."+s:"")); return this;
@@ -560,6 +572,15 @@ BOOMR.plugins.RT = {
 
 		BOOMR.subscribe("page_ready", this.done, null, this);
 		BOOMR.subscribe("page_unload", impl.start, null, impl);
+
+		if(BOOMR.t_start) {
+			// How long does it take Boomerang to load up and execute
+			this.startTimer('boomerang', BOOMR.t_start);
+			this.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
+
+			// How long did it take till Boomerang started
+			this.endTimer('boomr_lat', BOOMR.t_start);
+		}
 
 		return this;
 	},
