@@ -3,10 +3,4 @@
 Plugin to capture navigator.connection.type on browsers that support it
 */
 
-(function() {
-	var ct = 0;
-	if(typeof navigator != 'undefined' && navigator.connection) {
-		ct = navigator.connection.type
-	}
-	BOOMR.addVar("mob.ct", ct);
-}());
+BOOMR.addVar("mob.ct", (typeof navigator !== 'undefined' && navigator.connection) ? navigator.connection.type : 0);
