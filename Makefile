@@ -7,17 +7,26 @@ MINIFIER := cat
 
 all: boomerang-$(VERSION).$(DATE).js
 
-lognormal: all
+lognormal-plugins : override PLUGINS := ipv6.js navtiming.js mobile.js logn_config.js
+lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
+
+lognormal-plugins: all
+
+lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
 	gzip -7 -c boomerang-$(VERSION).$(DATE).js > boomerang-$(VERSION).$(DATE).js.gz
 
-lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
-lognormal : override PLUGINS := ipv6.js navtiming.js mobile.js logn_config.js
+lognormal-debug: lognormal-plugins
+	mv boomerang-$(VERSION).$(DATE).js boomerang-debug-latest.js
+	scp boomerang-debug-latest.js linode2:boomerang/
+	ssh linode2 "sudo nginx -s reload"
 
 lognormal-push: lognormal
 	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode:boomerang/
 	ssh linode "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
+	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode2:boomerang/
+	ssh linode2 "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
 
 usage:
 	echo "Create a release version of boomerang:"
