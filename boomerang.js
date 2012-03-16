@@ -707,6 +707,15 @@ BOOMR.plugins.RT = {
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);
 
+		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
+			if('t_configjs' in impl.timers && typeof impl.timers.t_configjs.start == 'number') {
+				impl.timers.t_configfb.start = impl.timers.t_configjs.start;
+			}
+			else {
+				delete impl.timers.t_configfb;
+			}
+		}
+
 		for(t_name in impl.timers) {
 			if(!impl.timers.hasOwnProperty(t_name)) {
 				continue;
