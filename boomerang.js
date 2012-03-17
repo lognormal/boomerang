@@ -1274,7 +1274,7 @@ BOOMR.plugins.BW = {
 
 		if(!cookies || !cookies.ba || !impl.setVarsFromCookie(cookies)) {
 			BOOMR.subscribe("page_ready", this.run, null, this);
-			BOOMR.subscribe("page_unload", impl.skip, null, impl);
+			BOOMR.subscribe("page_unload", this.skip, null, this);
 		}
 
 		return this;
@@ -1315,6 +1315,22 @@ BOOMR.plugins.BW = {
 		}
 		return this;
 	},
+
+	skip: function() {
+		// this is called on unload, so we should abort the test
+		// if it's already started and report results.
+		this.abort();
+
+		// it's also possible that we didn't start, so sendBeacon never
+		// gets called.  Let's set our complete state and call sendBeacon
+
+		if(!impl.complete) {
+			impl.complete = true;
+			BOOMR.sendBeacon();
+		}
+
+		return this;
+	}
 
 	is_complete: function() { return impl.complete; }
 };
