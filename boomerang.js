@@ -452,6 +452,10 @@ BOOMR.plugins = BOOMR.plugins || {};
 
 // private object
 var impl = {
+	onloadfired: false,	//! Set when the page_ready even fires
+				//  Use this to determine if unload fires before onload
+	visiblefired: null,	//! Set when page becomes visible (Chrome), null if not supported
+				//  Use this to determine if user bailed without opening the tab
 	complete: false,	//! Set when this plugin has completed
 
 	timers: {},		//! Custom timers that the developer can use
@@ -500,6 +504,14 @@ var impl = {
 		}
 
 		return this;
+	},
+
+	page_ready: function() {
+		this.onloadfired = true;
+	},
+
+	visibility_changed: function() {
+		impl.visiblefired = (d.webkitVisibilityState === "visible");
 	},
 
 	initNavTiming: function() {
@@ -570,8 +582,15 @@ BOOMR.plugins.RT = {
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "strict_referrer"]);
 
+		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
+		if(d.webkitVisibilityState) {
+			impl.visiblefired = (d.webkitVisibilityState === "visible");
+			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
+		}
 		BOOMR.subscribe("page_ready", this.done, null, this);
+		BOOMR.subscribe("page_unload", this.done, null, this);	// this runs if the user aborts before onload
 		BOOMR.subscribe("page_unload", impl.start, null, impl);
+
 
 		if(BOOMR.t_start) {
 			// How long does it take Boomerang to load up and execute
@@ -621,7 +640,7 @@ BOOMR.plugins.RT = {
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
 	done: function() {
-		var t_start, r, r2,
+		var t_start, t_done=new Date().getTime(), r, r2,
 		    subcookies, basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];
 
@@ -631,7 +650,7 @@ BOOMR.plugins.RT = {
 
 		impl.initNavTiming();
 
-		if(document.webkitVisibilityState && document.webkitVisibilityState === "prerender") {
+		if(d.webkitVisibilityState && d.webkitVisibilityState === "prerender") {
 			// This means that onload fired through a pre-render.  We'll capture this
 			// time, but wait for t_done until after the page has become either visible
 			// or hidden (ie, it moved out of the pre-render state)
@@ -651,7 +670,7 @@ BOOMR.plugins.RT = {
 
 		// If the dev has already called endTimer, then this call will do nothing
 		// else, it will stop the page load timer
-		this.endTimer("t_done");
+		this.endTimer("t_done", t_done);
 
 		if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
@@ -706,6 +725,12 @@ BOOMR.plugins.RT = {
 
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);
+		if(!impl.onloadfired) {
+			BOOMR.addVar('rt.abld', '');
+		}
+		if(impl.visiblefired === false) {	// has to be a strict equals because null => not supported
+			BOOMR.addVar('rt.abvs', '');
+		}
 
 		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
 			if('t_configjs' in impl.timers && typeof impl.timers.t_configjs.start == 'number') {
@@ -1249,6 +1274,7 @@ BOOMR.plugins.BW = {
 
 		if(!cookies || !cookies.ba || !impl.setVarsFromCookie(cookies)) {
 			BOOMR.subscribe("page_ready", this.run, null, this);
+			BOOMR.subscribe("page_unload", impl.skip, null, impl);
 		}
 
 		return this;
