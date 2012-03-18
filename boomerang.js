@@ -736,9 +736,6 @@ BOOMR.plugins.RT = {
 		if(!impl.onloadfired) {
 			BOOMR.addVar('rt.abld', '');
 		}
-		if(impl.visiblefired === false) {	// has to be a strict equals because null => not supported
-			BOOMR.addVar('rt.abvs', '');
-		}
 
 		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
 			if('t_configjs' in impl.timers && typeof impl.timers.t_configjs.start == 'number') {
