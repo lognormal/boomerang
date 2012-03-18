@@ -588,12 +588,11 @@ BOOMR.plugins.RT = {
 					["cookie", "cookie_exp", "strict_referrer"]);
 
 		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
-		if(d.webkitVisibilityState) {
-			impl.visiblefired = (d.webkitVisibilityState === "visible");
+		impl.visiblefired = !(d.hidden || d.msHidden || d.webkitHidden);
+		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
-		}
 		BOOMR.subscribe("page_ready", this.done, null, this);
-		BOOMR.subscribe("page_unload", this.done, null, this);	// this runs if the user aborts before onload
+		BOOMR.subscribe("page_unload", this.done, "unload", this);	// this runs if the user aborts before onload
 		BOOMR.subscribe("page_unload", impl.start, null, impl);
 
 
