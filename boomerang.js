@@ -514,7 +514,9 @@ var impl = {
 	},
 
 	visibility_changed: function() {
-		impl.visiblefired = (d.webkitVisibilityState === "visible");
+		// we care if the page became visible at some point
+		if(!(d.hidden || d.msHidden || d.webkitHidden))
+			impl.visiblefired = true;
 	},
 
 	initNavTiming: function() {
@@ -653,7 +655,11 @@ BOOMR.plugins.RT = {
 
 		impl.initNavTiming();
 
-		if(d.webkitVisibilityState && d.webkitVisibilityState === "prerender") {
+		if(
+			(d.webkitVisibilityState && d.webkitVisibilityState === "prerender")
+			||
+			(d.msVisibilityState && d.msVisibilityState === 3)
+		) {
 			// This means that onload fired through a pre-render.  We'll capture this
 			// time, but wait for t_done until after the page has become either visible
 			// or hidden (ie, it moved out of the pre-render state)
