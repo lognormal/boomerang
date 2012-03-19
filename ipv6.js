@@ -104,6 +104,10 @@ var impl = {
 	},
 
 	done: function() {
+		if(this.complete) {
+			return this;
+		}
+
 		BOOMR.removeVar('ipv6_latency', 'ipv6_lookup');
 		if(this.timers.ipv6.end !== null) {
 			BOOMR.addVar('ipv6_latency', this.timers.ipv6.end - this.timers.ipv6.start);
@@ -121,6 +125,19 @@ var impl = {
 
 		this.complete = true;
 		BOOMR.sendBeacon();
+	},
+
+	skip: function() {
+		// it's possible that we didn't start, so sendBeacon never
+		// gets called.  Let's set our complete state and call sendBeacon.
+		// This happens if onunload fires before onload
+
+		if(!this.complete) {
+			this.complete = true;
+			BOOMR.sendBeacon();
+		}
+
+		return this;
 	}
 };
 	
@@ -150,6 +167,7 @@ BOOMR.plugins.IPv6 = {
 		}
 
 		BOOMR.subscribe("page_ready", impl.start, null, impl);
+		BOOMR.subscribe("page_unload", impl.skip, null, impl);
 
 		return this;
 	},
