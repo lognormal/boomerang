@@ -457,7 +457,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 var impl = {
 	onloadfired: false,	//! Set when the page_ready even fires
 				//  Use this to determine if unload fires before onload
-	visiblefired: null,	//! Set when page becomes visible (Chrome), null if not supported
+	visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
 				//  Use this to determine if user bailed without opening the tab
 	complete: false,	//! Set when this plugin has completed
 
