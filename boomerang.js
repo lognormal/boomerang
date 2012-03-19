@@ -510,6 +510,9 @@ var impl = {
 	},
 
 	page_ready: function() {
+		// we need onloadfired because it's possible to reset "impl.complete"
+		// if you're measuring multiple xhr loads, but not possible to reset
+		// impl.onloadfired
 		this.onloadfired = true;
 	},
 
@@ -1338,7 +1341,8 @@ BOOMR.plugins.BW = {
 		this.abort();
 
 		// it's also possible that we didn't start, so sendBeacon never
-		// gets called.  Let's set our complete state and call sendBeacon
+		// gets called.  Let's set our complete state and call sendBeacon.
+		// This happens if onunload fires before onload
 
 		if(!impl.complete) {
 			impl.complete = true;
