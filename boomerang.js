@@ -649,7 +649,12 @@ BOOMR.plugins.RT = {
 		    ntimers = 0, t_name, timer, t_other=[];
 
 		if(impl.complete) {
-			return this;
+			// if we're in unload and page never became visible
+			// we want to measure the time again so we can figure
+			// out why the user never looked at this tab
+			if(!(ename == "unload" && !impl.visiblefired)) {
+				return this;
+			}
 		}
 
 		impl.initNavTiming();
@@ -735,6 +740,12 @@ BOOMR.plugins.RT = {
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);
 		if(!impl.onloadfired) {
 			BOOMR.addVar('rt.abld', '');
+		}
+		if(ename=='unload') {
+			BOOMR.addVar('rt.quit', '');
+			if(!impl.visiblefired) {
+				BOOMR.addVar('rt.ntvu', '');
+			}
 		}
 
 		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
