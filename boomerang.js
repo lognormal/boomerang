@@ -1350,7 +1350,7 @@ BOOMR.plugins.BW = {
 		}
 
 		return this;
-	}
+	},
 
 	is_complete: function() { return impl.complete; }
 };
