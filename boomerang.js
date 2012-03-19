@@ -591,7 +591,7 @@ BOOMR.plugins.RT = {
 		impl.visiblefired = !(d.hidden || d.msHidden || d.webkitHidden);
 		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
-		BOOMR.subscribe("page_ready", this.done, null, this);
+		BOOMR.subscribe("page_ready", this.done, "load", this);
 		BOOMR.subscribe("page_unload", this.done, "unload", this);	// this runs if the user aborts before onload
 		BOOMR.subscribe("page_unload", impl.start, null, impl);
 
@@ -643,7 +643,7 @@ BOOMR.plugins.RT = {
 	// Called when the page has reached a "usable" state.  This may be when the
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
-	done: function() {
+	done: function(edata, ename) {
 		var t_start, t_done=new Date().getTime(), r, r2,
 		    subcookies, basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];
