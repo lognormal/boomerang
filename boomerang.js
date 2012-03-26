@@ -258,9 +258,12 @@ boomr = {
 		// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
 		// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
 		var fire_visible = function() { impl.fireEvent("visibility_changed"); }
-		impl.addListener(d, "webkitvisibilitychange", fire_visible);
-		impl.addListener(d, "msvisibilitychange", fire_visible);
-		impl.addListener(d, "visibilitychange", fire_visible);
+		if(d.webkitVisibilityState)
+			impl.addListener(d, "webkitvisibilitychange", fire_visible);
+		else if(d.msVisibilityState)
+			impl.addListener(d, "msvisibilitychange", fire_visible);
+		else if(d.visibilityState)
+			impl.addListener(d, "visibilitychange", fire_visible);
 
 		// This must be the last one to fire
 		impl.addListener(w, "unload", function() { w=null; });
