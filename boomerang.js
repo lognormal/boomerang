@@ -471,6 +471,13 @@ var impl = {
 
 	navigationStart: undefined,
 	responseStart: undefined,
+	sessionStart: undefined,
+	sessionLength: 1,
+	loadTime: 0,
+	lastLoadTime: -1,
+	t_start: undefined,
+	r: undefined,
+	r2: undefined,
 
 	// The start method is fired on page unload.  It is called with the scope
 	// of the BOOMR.plugins.RT object
@@ -485,7 +492,13 @@ var impl = {
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
 		if(!BOOMR.utils.setCookie(this.cookie,
-						{ s: t_start, r: d.URL.replace(/#.*/, '') },
+						{
+							s: t_start,
+							r: d.URL.replace(/#.*/, ''),
+							ss: this.sessionStart,
+							sl: this.sessionLength,
+							tt: this.loadTime
+						},
 						this.cookie_exp,
 						"/", null)
 		) {
@@ -584,6 +597,8 @@ BOOMR.plugins.RT = {
 	// Methods
 
 	init: function(config) {
+		var subcookies;
+
 		impl.complete = false;
 		impl.timers = {};
 
@@ -595,6 +610,8 @@ BOOMR.plugins.RT = {
 		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
+		// set complete to false when unload starts so that this.done can run again
+		BOOMR.subscribe("page_unload", function() { this.complete = false; }, null, impl);
 		BOOMR.subscribe("page_unload", this.done, "unload", this);	// this runs if the user aborts before onload
 		BOOMR.subscribe("page_unload", impl.start, null, impl);
 
@@ -606,6 +623,32 @@ BOOMR.plugins.RT = {
 
 			// How long did it take till Boomerang started
 			this.endTimer('boomr_lat', BOOMR.t_start);
+		}
+
+		// A beacon may be fired automatically on page load or if the page dev fires
+		// it manually with their own timers.  It may not always contain a referrer
+		// (eg: XHR calls).  We set default values for these cases
+		impl.r = impl.r2 = d.referrer.replace(/#.*/, '');
+
+		// If impl.cookie is not set, the dev does not want to use cookie time
+		if(impl.cookie) {
+			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
+			BOOMR.utils.removeCookie(impl.cookie);
+
+			if(subcookies) {
+				if(subcookies.s && subcookies.r) {
+					impl.r = subcookies.r;
+					if(!impl.strict_referrer || impl.r === impl.r2) {
+						impl.t_start = parseInt(subcookies.s, 10);
+					}
+				}
+				if(subcookies.ss)
+					impl.sessionStart = parseInt(subcookies.ss, 10);
+				if(subcookies.sl)
+					impl.sessionLength = parseInt(subcookies.sl, 10)+1;
+				if(subcookies.tt)
+					impl.lastLoadTime = impl.loadTime = parseInt(subcookies.tt, 10);
+			}
 		}
 
 		return this;
@@ -647,17 +690,12 @@ BOOMR.plugins.RT = {
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
 	done: function(edata, ename) {
-		var t_start, t_done=new Date().getTime(), r, r2,
-		    subcookies, basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
+		var t_done=new Date().getTime(), r, r2,
+		    basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];
 
 		if(impl.complete) {
-			// if we're in unload and page never became visible
-			// we want to measure the time again so we can figure
-			// out why the user never looked at this tab
-			if(!(ename == "unload" && !impl.visiblefired)) {
-				return this;
-			}
+			return this;
 		}
 
 		impl.initNavTiming();
@@ -710,46 +748,21 @@ BOOMR.plugins.RT = {
 			this.endTimer("t_prerender");
 		}
 
-		// A beacon may be fired automatically on page load or if the page dev fires
-		// it manually with their own timers.  It may not always contain a referrer
-		// (eg: XHR calls).  We set default values for these cases
-
-		r = r2 = d.referrer.replace(/#.*/, '');
-
-		// If impl.cookie is not set, the dev does not want to use cookie time
-		if(impl.cookie) {
-			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
-			BOOMR.utils.removeCookie(impl.cookie);
-
-			if(subcookies && subcookies.s && subcookies.r) {
-				r = subcookies.r;
-				if(!impl.strict_referrer || r === r2) {
-					t_start = parseInt(subcookies.s, 10);
-				}
-			}
-		}
-
-		if(t_start) {
+		if(impl.t_start) {
 			BOOMR.addVar("rt.start", "cookie");
 		}
 		else {
-			t_start = impl.navigationStart;
+			impl.t_start = impl.navigationStart;
 		}
 
+		if(!impl.sessionStart)
+			impl.sessionStart = impl.t_start || BOOMR.t_start;
+
 		// make sure old variables don't stick around
-		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.bstart', 'rt.end', 'rt.abld');
+		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt');
 
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);
-		if(!impl.onloadfired) {
-			BOOMR.addVar('rt.abld', '');
-		}
-		if(ename=='unload') {
-			BOOMR.addVar('rt.quit', '');
-			if(!impl.visiblefired) {
-				BOOMR.addVar('rt.ntvu', '');
-			}
-		}
 
 		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
 			if('t_configjs' in impl.timers && typeof impl.timers.t_configjs.start == 'number') {
@@ -771,7 +784,7 @@ BOOMR.plugins.RT = {
 			// if not, then we have to calculate it using start & end
 			if(typeof timer.delta !== "number") {
 				if(typeof timer.start !== "number") {
-					timer.start = t_start;
+					timer.start = impl.t_start;
 				}
 				timer.delta = timer.end - timer.start;
 			}
@@ -792,10 +805,10 @@ BOOMR.plugins.RT = {
 		}
 
 		if(ntimers) {
-			BOOMR.addVar("r", r);
+			BOOMR.addVar("r", impl.r);
 
-			if(r2 !== r) {
-				BOOMR.addVar("r2", r2);
+			if(impl.r2 !== impl.r) {
+				BOOMR.addVar("r2", impl.r2);
 			}
 
 			if(t_other.length) {
@@ -803,6 +816,28 @@ BOOMR.plugins.RT = {
 			}
 		}
 
+		// we're either in onload, or onunload fired before onload
+		if(ename == 'load' || !impl.onloadfired) {
+			impl.loadTime += impl.timers.t_done.delta;
+		}
+
+		if(!impl.onloadfired) {
+			BOOMR.addVar('rt.abld', '');
+		}
+
+		if(ename=='unload') {
+			// session details only sent at end
+			BOOMR.addVar({
+				'rt.quit': '',
+				'rt.ss': impl.sessionStart,
+				'rt.sl': impl.sessionLength,
+				'rt.tt': impl.loadTime,
+				'rt.lt': impl.lastLoadTime
+			});
+			if(!impl.visiblefired) {
+				BOOMR.addVar('rt.ntvu', '');
+			}
+		}
 		impl.timers = {};
 		impl.complete = true;
 
