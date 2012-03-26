@@ -469,6 +469,7 @@ var impl = {
 				// If set to false, beacon both referrer values and let
 				// the back end decide
 
+	navigationType: 0,
 	navigationStart: undefined,
 	responseStart: undefined,
 	sessionStart: undefined,
@@ -547,6 +548,10 @@ var impl = {
 		// http://blogs.msdn.com/b/ie/archive/2010/06/28/measuring-web-page-performance.aspx
 		// http://blog.chromium.org/2010/07/do-you-know-how-slow-your-web-page-is.html
 		p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
+
+		if(p && p.navigation) {
+			this.navigationType = p.navigation.type;
+		}
 
 		if(p && p.timing) {
 			ti = p.timing;
@@ -748,9 +753,9 @@ BOOMR.plugins.RT = {
 			this.endTimer("t_prerender");
 		}
 
-		if(impl.t_start) {
-			BOOMR.addVar("rt.start", "cookie");
-		}
+		if(impl.t_start && impl.navigationType !== 2) {	// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
+			BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
+		}						// but will have time of previous page start, so t_done will be wrong
 		else {
 			impl.t_start = impl.navigationStart;
 		}
