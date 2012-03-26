@@ -79,9 +79,9 @@ impl = {
 		return true;
 	},
 
-	addListener: function(el, sType, fn, capture) {
+	addListener: function(el, sType, fn) {
 		if(el.addEventListener) {
-			el.addEventListener(sType, fn, (capture));
+			el.addEventListener(sType, fn, false);
 		}
 		else if(el.attachEvent) {
 			el.attachEvent("on" + sType, fn);
