@@ -630,7 +630,7 @@ BOOMR.plugins.RT = {
 			this.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
 
 			// How long did it take till Boomerang started
-			this.endTimer('boomr_lat', BOOMR.t_start);
+			this.endTimer('boomr_fb', BOOMR.t_start);
 		}
 
 		// A beacon may be fired automatically on page load or if the page dev fires
