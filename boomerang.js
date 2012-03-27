@@ -598,6 +598,16 @@ var impl = {
 		}
 
 		return;
+	},
+
+	page_unload: function(edata) {
+		// set complete to false so that done can run again
+		this.complete = false;
+		// run done on abort or on page_unload to measure session length
+		BOOMR.plugins.RT.done(edata, "unload");
+
+		// set cookie for next page
+		this.start();
 	}
 };
 
@@ -618,10 +628,7 @@ BOOMR.plugins.RT = {
 		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
-		// set complete to false when unload starts so that this.done can run again
-		BOOMR.subscribe("page_unload", function() { this.complete = false; }, null, impl);
-		BOOMR.subscribe("page_unload", this.done, "unload", this);	// this runs if the user aborts before onload
-		BOOMR.subscribe("page_unload", impl.start, null, impl);
+		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 
 
 		if(BOOMR.t_start) {
