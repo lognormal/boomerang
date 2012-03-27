@@ -501,7 +501,7 @@ var impl = {
 							r: d.URL.replace(/#.*/, ''),
 							ss: this.sessionStart,
 							sl: this.sessionLength,
-							tt: this.loadTime
+							tt: this.loadTime|0
 						},
 						this.cookie_exp,
 						"/", null)
