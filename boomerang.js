@@ -833,8 +833,7 @@ BOOMR.plugins.RT = {
 
 		// we're either in onload, or onunload fired before onload
 		if(ename == 'load' || !impl.onloadfired) {
-			if(!isNaN(impl.loadTime))
-				impl.loadTime += impl.timers.t_done.delta;
+			impl.loadTime += (t_done - (impl.t_start || BOOMR.t_start));
 		}
 
 		if(!impl.onloadfired) {
