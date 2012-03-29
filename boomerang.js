@@ -501,7 +501,7 @@ var impl = {
 							r: d.URL.replace(/#.*/, ''),
 							ss: this.sessionStart,
 							sl: this.sessionLength,
-							tt: this.loadTime|0
+							tt: this.loadTime
 						},
 						this.cookie_exp,
 						"/", null)
@@ -666,7 +666,7 @@ BOOMR.plugins.RT = {
 					impl.sessionStart = parseInt(subcookies.ss, 10);
 				if(subcookies.sl)
 					impl.sessionLength = parseInt(subcookies.sl, 10)+1;
-				if(subcookies.tt)
+				if(subcookies.tt && subcookies.tt.match(/\d/))
 					impl.lastLoadTime = impl.loadTime = parseInt(subcookies.tt, 10);
 			}
 		}
