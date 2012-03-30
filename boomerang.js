@@ -1324,6 +1324,10 @@ BOOMR.plugins.BW = {
 	init: function(config) {
 		var cookies;
 
+		if(impl.complete) {
+			return this;
+		}
+
 		BOOMR.utils.pluginConfig(impl, config, "BW",
 						["base_url", "timeout", "nruns", "cookie", "cookie_exp"]);
 
