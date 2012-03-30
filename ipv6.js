@@ -150,6 +150,10 @@ BOOMR.plugins.IPv6 = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "IPv6", ["ipv6_url", "host_url", "timeout"]);
 
+		if(config && config.wait) {
+			return this;
+		}
+
 		if(!impl.ipv6_url) {
 			BOOMR.warn("IPv6.ipv6_url is not set.  Cannot run IPv6 test.", "ipv6");
 			impl.complete = true;	// set to true so that is_complete doesn't
