@@ -919,7 +919,7 @@ images.l = { name: "image-l.gif", size: 35, timeout: 1000 };
 // private object
 var impl = {
 	// properties
-	base_url: 'images/',
+	base_url: '',
 	timeout: 15000,
 	nruns: 5,
 	latency_runs: 10,
@@ -1339,6 +1339,10 @@ BOOMR.plugins.BW = {
 
 		if(config && config.user_ip) {
 			impl.user_ip = config.user_ip;
+		}
+
+		if(!impl.base_url) {
+			return this;
 		}
 
 		images.start = 0;
