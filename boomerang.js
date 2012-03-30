@@ -616,11 +616,17 @@ BOOMR.plugins.RT = {
 	init: function(config) {
 		var subcookies;
 
-		impl.complete = false;
-		impl.timers = {};
-
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "strict_referrer"]);
+
+		// if onload has already fired or complete is true
+		// then we've already collected t_done so no point running init
+		if(impl.onloadfired || impl.complete) {
+			return this;
+		}
+
+		impl.complete = false;
+		impl.timers = {};
 
 		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
 		impl.visiblefired = !(d.hidden || d.msHidden || d.webkitHidden);
