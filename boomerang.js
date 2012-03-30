@@ -243,7 +243,7 @@ boomr = {
 		}
 
 		// The developer can override onload by setting autorun to false
-		if(!("autorun" in config) || config.autorun !== false) {
+		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
 			impl.addListener(w, "load", BOOMR.page_ready);
 		}
 
