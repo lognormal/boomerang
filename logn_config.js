@@ -5,7 +5,7 @@ var d=w.document,
     complete = false;
 
 // Don't even bother creating the plugin if this is mhtml
-if(d.match(/^mhtml/) || d.match(/^file:\//)) {
+if(dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
@@ -21,7 +21,7 @@ var load=function() {
 
 	s1.onload=loaded;
 	BOOMR.plugins.RT.startTimer('t_configjs');
-	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(d);
+	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(dom);
 
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
