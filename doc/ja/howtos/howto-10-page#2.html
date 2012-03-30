@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Boomerang 使用方法 #10: Google Chrome による prerendered されたページの読み込み時間</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../../boomerang-docs.css">
+</head>
+<body>
+<span style="float:right;"><a href="../">ドキュメント一覧</a> | <a href="index.html">使用方法一覧</a></span>
+<h1>Boomerang 使用方法 #10:<br>Google Chrome による prerendered されたページの読み込み時間</h1>
+<p>
+このユースケースは Google Chrome 13 に実装された <a href="http://code.google.com/chrome/whitepapers/prerender.html">prerender</a> 機能をベースにしています。このユースケースのために2つのページを使います。このページはサンプルの2番目のページになります。詳しい説明は <a href="howto-10-page%231.html">1番目のページ</a> をご覧ください。
+</p>
+
+<p>
+<a href="howto-10-page%231.html">1番目のページ</a> からこのページへクリックしていれば、下の方にパフォーマンスの結果が確認できるはずです。もしこれが帯域幅のテスト以来の初回のテストなら6秒ほど時間がかかるかもしれません。1番目のページからリンクをクリックすれば同じ結果を確認できます。
+</p>
+
+<p>
+下のボックス内で、rt.start に cookie が設定されていれば、次のようなことが確認できるはずです:
+</p>
+<ol>
+<li>t_done (load time): クリックしてから表示されるまでの時間 (perceived load time)</li>
+<li>t_load: fetchStart/navigationStart から prerender が終わるまでの時間</li>
+<li>t_prerender: fetchStart/navigationStart から表示されるまでの時間</li>
+<li>t_postrender: prerender が終わってから表示されるまでの時間</li>
+</ol>
+<p>
+もし rt.start に navigation（かそれ以外）が設定してあれば、t_done は t_prerender と同じになります。もし t_prerender が設定されていなければ、このページは prerender されておらず、t_done は実際の読み込み時間と認識されています。
+</p>
+
+<p class="perma-link">
+最新のソースコードとドキュメントは <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a> に公開されています。
+</p>
+
+<p id="results">
+</p>
+
+<script src="../../../boomerang.js" type="text/javascript"></script>
+<script src="../../howtos/howtos.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.init({
+		BW: {
+			enabled: false
+		},
+		RT: {
+			cookie: 'HOWTO-RT'
+		}
+	});
+</script>
+</body>
+</html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+-->

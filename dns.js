@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+ * Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+ */
+
 /**
 \file dns.js
 Plugin to measure DNS latency.
@@ -78,7 +83,7 @@ var impl = {
 		return true;
 	}
 };
-	
+
 BOOMR.plugins.DNS = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "DNS", ["base_url"]);

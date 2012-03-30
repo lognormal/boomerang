@@ -1,3 +1,7 @@
+/*
+ * Copyright (c), Buddy Brewer.
+ */
+
 /**
 \file navtiming.js
 Plugin to collect metrics from the W3C Navigation Timing API. For more information about Navigation Timing,
@@ -42,7 +46,8 @@ var impl = {
 				nt_res_end: pt.responseEnd,
 				nt_domloading: pt.domLoading,
 				nt_domint: pt.domInteractive,
-				nt_domcontloaded: pt.domContentLoaded,
+				nt_domcontloaded_st: pt.domContentLoadedEventStart,
+				nt_domcontloaded_end: pt.domContentLoadedEventEnd,
 				nt_domcomp: pt.domComplete,
 				nt_load_st: pt.loadEventStart,
 				nt_load_end: pt.loadEventEnd,
@@ -59,7 +64,7 @@ var impl = {
 		BOOMR.sendBeacon();
 	}
 };
-	
+
 BOOMR.plugins.NavigationTiming = {
 	init: function() {
 		// we'll fire on whichever happens first

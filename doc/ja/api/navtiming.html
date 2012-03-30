@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Navigation Timing プラグイン API</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../../boomerang-docs.css">
+</head>
+<body>
+<span style="float:right;"><a href="../">ドキュメント一覧</a> | <a href="index.html">API</a></span>
+<h1>Navigation Timing プラグイン API</h1>
+<p>
+<strong>注意:</strong>この Navigation Timing プラグインはまだテストされていません。テストに協力してくれる方を歓迎します。
+</p>
+<p>
+Navigation Timing プラグインは <a href="http://w3c-test.org/webperf/specs/NavigationTiming/">W3C Navigation Timing</a> の仕様をサポートしているモダンなユーザーエージェントによって回収されたメトリクスを回収します。Navigation Timing API は <code>BOOMR.plugins.NavigationTiming</code> に内包されます。
+</p>
+
+<p>
+<strong>注意</strong> Navigation Timing プラグインはデフォルトでは boomerang.js には含まれていません。詳しい boomerang へのプラグインの含め方については <a href="../howtos/howto-9.html">使用方法 #9</a> をご覧ください。
+</p>
+
+<h2 id="methods">メソッド</h2>
+
+<dl class="api">
+
+<dt>init()</dt>
+<dd>
+<p>
+Navigation Timing プラグインを設定するために <a href="BOOMR.html#init">BOOMR.init()</a> メソッドによって呼び出されます。
+Navigation Timing プラグインは設定パラメーターを必要としないため、シンプルにブラウザーの <code>window.performance</code> オブジェクト（もしあれば）から値を参照して、それらをビーコンのクエリー文字に追加します。
+</p>
+
+<h3>返り値</h3>
+<p>
+<code>BOOMR.plugins.NavigationTiming</code> オブジェクトへの参照。メソッドチェーンをサポートします。
+</p>
+<h3>注意</h3>
+<p>
+ユーザーエージェントが Navigation Timing の仕様を実装していない場合、プラグインはビーコンにパラメーターを追加しません。
+</p>
+</dd>
+
+<dt>is_complete()</dt>
+<dd>
+<p>
+Navigation Timing プラグインが終了したのかどうかを確認するために <a href="BOOMR.html#sendBeacon">BOOMR.sendBeacon()</a> によって呼び出されます。
+</p>
+<h3>返り値</h3>
+<ul>
+<li>プラグインが終了している場合は <code>true</code> を返します。</li>
+<li>プラグインが終了していない場合は <code>false</code> を返します。</li>
+</ul>
+</dd>
+
+</dl>
+
+<h2 id="beacon">ビーコンパラメーター</h2>
+<p>
+Navigation Timing プラグインはビーコンに次のパラメーターを追加します。それぞれブラウザーの Navigation Timing API の属性に対応しています。
+</p>
+<table>
+<tr>
+  <th>ビーコンパラメーター</th>
+  <th>Navigation Timing 属性</th>
+</tr>
+<tr><td><code>nt_red_cnt</code></td><td><code>window.performance.navigation.redirectCount</code></td></tr>
+<tr><td><code>nt_nav_type</code></td><td><code>window.performance.navigation.type</code></td></tr>
+<tr><td><code>nt_nav_st</code></td><td><code>window.performance.timing.navigationStart</code></td></tr>
+<tr><td><code>nt_red_st</code></td><td><code>window.performance.timing.redirectStart</code></td></tr>
+<tr><td><code>nt_red_end</code></td><td><code>window.performance.timing.redirectEnd</code></td></tr>
+<tr><td><code>nt_fet_st</code></td><td><code>window.performance.timing.fetchStart</code></td></tr>
+<tr><td><code>nt_dns_st</code></td><td><code>window.performance.timing.domainLookupStart</code></td></tr>
+<tr><td><code>nt_dns_end</code></td><td><code>window.performance.timing.domainLookupEnd</code></td></tr>
+<tr><td><code>nt_con_st</code></td><td><code>window.performance.timing.connectStart</code></td></tr>
+<tr><td><code>nt_con_end</code></td><td><code>window.performance.timing.connectEnd</code></td></tr>
+<tr><td><code>nt_req_st</code></td><td><code>window.performance.timing.requestStart</code></td></tr>
+<tr><td><code>nt_res_st</code></td><td><code>window.performance.timing.responseStart</code></td></tr>
+<tr><td><code>nt_res_end</code></td><td><code>window.performance.timing.responseEnd</code></td></tr>
+<tr><td><code>nt_domloading</code></td><td><code>window.performance.timing.domLoading</code></td></tr>
+<tr><td><code>nt_domint</code></td><td><code>window.performance.timing.domInteractive</code></td></tr>
+<tr><td><code>nt_domcontloaded</code></td><td><code>window.performance.timing.domContentLoaded</code></td></tr>
+<tr><td><code>nt_domcomp</code></td><td><code>window.performance.timing.domComplete</code></td></tr>
+<tr><td><code>nt_load_st</code></td><td><code>window.performance.timing.loadEventStart</code></td></tr>
+<tr><td><code>nt_load_end</code></td><td><code>window.performance.timing.loadEventEnd</code></td></tr>
+<tr><td><code>nt_unload_st</code></td><td><code>window.performance.timing.unloadEventStart</code></td></tr>
+<tr><td><code>nt_unload_end</code></td><td><code>window.performance.timing.unloadEventEnd</code></td></tr>
+<tr><td><code>nt_ssl_st</code></td><td><strong>[オプション]</strong> <code>window.performance.secureConnectionStart</code></td></tr>
+</table>
+
+<p class="perma-link">
+最新のソースコードとドキュメントは <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a> に公開されています。
+</p>
+
+</body>
+</html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+-->

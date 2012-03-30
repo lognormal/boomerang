@@ -23,7 +23,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 // This is optional, but the way we recommend you do it.
 var impl = {
 };
-	
+
 BOOMR.plugins.MyPlugin = {
 	init: function(config) {
 		var i, properties = ["prop1", "prop2"];	// list of user configurable properties in O

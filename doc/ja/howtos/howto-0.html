@@ -37,16 +37,21 @@ BOOMR.init({
 <h4>boomerang のパラメーター</h4>
 <dl>
 <dt>v</dt> <dd>使用している boomerang のバージョン。</dd>
+<dt>u</dt> <dd>ビーコンを送信したページの URL 。</dd>
 </dl>
 
 <h4>roundtrip プラグインのパラメーター</h4>
 <dl>
-<dt>t_done</dt> <dd>[オプション] ページの往復時間。</dd>
-<dt>t_page</dt> <dd>[オプション] ページの先頭から page_ready までにかかった時間。開発時には必要になります。</dd>
-<dt>t_other</dt> <dd>[オプション] コンマで区切った開発者によって設定されたタイマーのリスト。いずれのタイマーも <code>name|value</code> の形式になります。</dd>
-<dt>u</dt> <dd>ビーコンを送信するページの URL 。</dd>
+<dt>t_done</dt> <dd><strong>[オプション]</strong> ページの往復時間。</dd>
+<dt>t_page</dt> <dd><strong>[オプション]</strong> ページの先頭から page_ready までにかかった時間。開発時には必要になります。</dd>
+<dt>t_resp</dt> <dd><strong>[オプション]</strong> ユーザーがリクエストを初期化してからレスポンスの最初のバイトまでにかかった時間。</dd>
+<dt>t_other</dt> <dd><strong>[オプション]</strong> コンマで区切った開発者によって設定されたタイマーのリスト。いずれのタイマーも <code>name|value</code> の形式になります。</dd>
+<dt>t_load</dt> <dd><strong>[オプション]</strong> ページがもし prerender の状態であれば、ページを fetch と prerender するために要した時間になります。</dd>
+<dt>t_prerender</dt> <dd><strong>[オプション]</strong> ページがもし prerender の状態であれば、prefetch の開始からページが実際に表示されるまでの時間になります。これはデバッグ時に便利です。</dd>
+<dt>t_postrender</dt> <dd><strong>[オプション]</strong> ページがもし prerender の状態であれば、prerender 後から実際にページが表示されるまでの時間になります。これはデバッグ時に便利です。</dd>
 <dt>r</dt> <dd>ビーコンの開始時間を設定したページの URL 。</dd>
-<dt>r2</dt> <dd>[オプション] 現在のページのリファラーの URL 。<code>r</code> と <code>strict_referrer</code> が明らかに違う場合だけ設定します。</dd>
+<dt>r2</dt> <dd><strong>[オプション]</strong> 現在のページのリファラーの URL 。<code>r</code> と <code>strict_referrer</code> が明らかに違う場合だけ設定します。</dd>
+<dt>rt.start</dt> <dd>どこから開始するかを記述します。Cookie を開始するための <code>cookie</code> の1つや、W3C Navigation Timing API のための <code>navigation</code> や、Google Toolbar のための古い Chrome の <code>csi</code> や <code>gtb</code> などといったものになるでしょう。</dd>
 </dl>
 
 <h4>帯域幅と遅延プラグインのパラメーター</h4>
@@ -154,7 +159,7 @@ function extract_boomerang_data(params)
 データを取得できると、その解析した統計があると便利です。これは今後の使用方法で説明しますが、今のところ <a href="http://www.slideshare.net/bluesmoon/index-3441823">the statistics of web performance</a> の ConFoo 2010 の資料が参考になると思います。
 </p>
 
-<p>
+<p class="perma-link">
 最新のソースコードとドキュメントは <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a> に公開されています。
 </p>
 
@@ -177,3 +182,7 @@ BOOMR.init({
 </script>
 </body>
 </html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+-->

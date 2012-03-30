@@ -38,7 +38,7 @@ BOOMR.subscribe('before_beacon', function(o) {
 			r.innerHTML += "&nbsp;&nbsp;&nbsp;";
 			r.appendChild(t);
 			r.innerHTML += "<br>";
-			
+
 		}
 	}
 

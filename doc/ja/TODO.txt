@@ -18,6 +18,3 @@
 3. Rewrite bandwidth testing code to be pretty and clean
 
 4. Create a yui-gallery module
-
-5. Add plugin to pull all timing information from native WebTiming API
-   http://dev.w3.org/2006/webapi/WebTiming/

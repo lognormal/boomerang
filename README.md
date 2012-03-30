@@ -1,3 +1,6 @@
+Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+
 boomerang always comes back, except when it hits something.
 
 This piece of javascript measures a whole bunch of performance characteristics of your user's

@@ -1,4 +1,7 @@
-PLUGINS := 
+# Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+# Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+
+PLUGINS :=
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+ * Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+ */
+
 /**
 \file ipv6.js
 Plugin to measure various ipv6 related metrics.
@@ -140,7 +145,7 @@ var impl = {
 		return this;
 	}
 };
-	
+
 BOOMR.plugins.IPv6 = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "IPv6", ["ipv6_url", "host_url", "timeout"]);

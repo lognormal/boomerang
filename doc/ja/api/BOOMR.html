@@ -40,6 +40,58 @@ BOOMR.plugins.MyPlugin = {
 
 </dl>
 
+<h2 id="config">設定</h2>
+<p>
+boomerang の設定については <a href="../howtos/howto-6.html">使用方法 #6 &mdash; boomerang を設定する</a> に記載されています。<code>BOOMR</code> オブジェクトに関係があるパラメーターは:
+</p>
+<dl>
+<dt>beacon_url</dt>
+<dd>
+<strong>[強く推奨]</strong>
+ビーコンの結果を送る URL 。全てのパラメーターはこの URL の QueryString に追加されます。この URL は QueryString 部分を事前に持っておく必要はありません。このパラメーターには初期値はありません。もし設定されていなければビーコンは送信されません。
+</dd>
+
+<dt>site_domain</dt>
+<dd>
+<strong>[推奨]</strong>
+全ての Cookie がセットされるドメイン。boomerang はこれを自動判別しようとしますが、あなたのサイトが foo.com の形式の場合を除き、実際には取得に失敗します。これはドメイン間で共有する帯域幅やパフォーマンスを測定したいときに役立ちます。もし複数のドメインを持っている場合はうまくいきません。別々に測定しなければなりません。
+</dd>
+
+<dt>user_ip</dt>
+<dd>
+<strong>[推奨]</strong>
+この名前にもかかわらず、これはユーザーのコネクションをユニークに区別するために使われる自由な文字列です。これは主にユーザーの帯域幅を再測定するかどうかの判断に使われるか、または Cookie に格納される値に使われます。IPv4 アドレスや IPv6 アドレスまたはそれ以外のユーザーのコネクションを区別できるものを使うことになります。
+</dd>
+
+<dt>log</dt>
+<dd>
+<strong>[オプション]</strong>
+初期値では boomerang は YUI のロガーコンポーネントが見つかればそれを、Firebug が見つかれば代わりにそれを使おうと試みます。どちらもない場合は、初期状態では何もログに残しません。ログメッセージ用の関数のために log パラメーターを設定することで自身のロガーを定義することができます。<br>
+この関数については:
+<pre>
+function log(oMessage, sLevel, sSource);
+</pre>
+どこに:<dl>
+<dt>oMessage</dt> <dd>記録されるオブジェクトまたはメッセージ。記録するオブジェクトを決定するだけです。<dd>
+<dt>sLevel</dt> <dd>"error"、"warn"、"info"、"debug" などのログレベル。</dd>
+<dt>sSource</dt> <dd>ログメッセージのソース。通常はプラグインの名前がついた "boomerang" の文字列になります。</dd>
+</dl>
+<code>log</code> に <code>null</code> を設定することでログの記録を無効にできます。
+</dd>
+
+<dt>autorun</dt>
+<dd>
+<strong>[オプション]</strong>
+初期値では boomerang は自動的に実行され <code>window.onload</code> イベントに <code>page_ready</code> ハンドラーが登録されます。もし <code>autorun</code> を <code>false</code> にすると、これは起こらず、<code>BOOMR.page_ready()</code> を自分で呼び出す必要があります。
+</dd>
+
+<dt>&lt;plugin_name&gt;<dt>
+<dd>
+それぞれのプラグインは設定オブジェクトのサブオブジェクトを通して設定を行ないます。キーはプラグインの名前になります。ビルトインのプラグインの設定方法については次の各セクションをご覧ください。
+</dd>
+
+</dl>
+
 <h2 id="methods">メソッド</h2>
 
 <dl class="api">
@@ -47,7 +99,7 @@ BOOMR.plugins.MyPlugin = {
 <dt>init(oConfig)</dt>
 <dd>
 <p>
-boomerang を初期化するために呼び出すのが init メソッドです。boomerang の JavaScript の読み込みが終わったあとにこのメソッドを一度だけ呼び出します。一つの設定オブジェクトをパラメーターとして受け取ります。設定オブジェクトについては <a href="../howtos/howto-6.html">使用方法 #6 &mdash; Configuring boomerang</a> に記述しています。
+boomerang を初期化するために呼び出すのが init メソッドです。boomerang の JavaScript の読み込みが終わったあとにこのメソッドを一度だけ呼び出します。一つの設定オブジェクトをパラメーターとして受け取ります。詳細は <a href="#config">設定項目の説明</a> をご覧ください。
 </p>
 <h3>返り値</h3>
 <p>
@@ -244,9 +296,28 @@ subscribe メソッドは boomerang の <a href="#events">イベント</a> に�
 
 </dl>
 
+<h2 id="beacon">ビーコンパラメーター</h2>
 <p>
+独自のプラグインがない場合、boomerang はビーコンを通して次のパラメーターを送ります:
+</p>
+<dl>
+<dt>v</dt>
+<dd>使用している boomerang ライブラリーのバージョン。</dd>
+<dt>u</dt>
+<dd>ビーコンを送るページの URL 。</dd>
+</dl>
+
+<p>
+プラグインによってはそれぞれのプラグインの API ドキュメントに記述されている独自のパラメーターを追加するかもしれません。
+</p>
+
+<p class="perma-link">
 最新のソースコードとドキュメントは <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a> に公開されています。
 </p>
 
 </body>
 </html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE file for terms.
+-->
