@@ -242,11 +242,7 @@ boomr = {
 
 		// The developer can override onload by setting autorun to false
 		if(!("autorun" in config) || config.autorun !== false) {
-			impl.addListener(w, "load",
-						function() {
-							impl.fireEvent("page_ready");
-						}
-					);
+			impl.addListener(w, "load", BOOMR.page_ready);
 		}
 
 		// visibilitychange is useful to detect if the page loaded through prerender
