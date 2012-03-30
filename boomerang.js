@@ -291,6 +291,13 @@ boomr = {
 		}
 		e.push([ fn, cb_data || {}, cb_scope || null ]);
 
+		// attaching to page_ready after onload fires, so call soon
+		if(e_name == 'page_ready' && impl.onloadfired) {
+			setTimeout(function() {
+					fn.call(cb_scope || null, null, cb_data || {});
+				}, 50);
+		}
+
 		// Attach unload handlers directly to the window.onunload and
 		// window.onbeforeunload events. The first of the two to fire will clear
 		// fn so that the second doesn't fire. We do this because technically
