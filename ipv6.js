@@ -110,7 +110,7 @@ var impl = {
 
 	done: function() {
 		if(this.complete) {
-			return this;
+			return;
 		}
 
 		BOOMR.removeVar('ipv6_latency', 'ipv6_lookup');
