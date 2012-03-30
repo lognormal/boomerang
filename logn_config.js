@@ -44,3 +44,5 @@ BOOMR.plugins.LOGN = {
 };
 
 }(window));
+
+BOOMR.init({log:null,wait:true});
