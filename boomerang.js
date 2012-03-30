@@ -53,6 +53,8 @@ impl = {
 	//! User's ip address determined on the server.  Used for the BA cookie
 	user_ip: '',
 
+	onloadfired: false,
+
 	events: {
 		"page_ready": [],
 		"page_unload": [],
@@ -267,6 +269,7 @@ boomr = {
 	// Only call this if autorun is explicitly set to false
 	page_ready: function() {
 		impl.fireEvent("page_ready");
+		impl.onloadfired = true;
 		return this;
 	},
 
