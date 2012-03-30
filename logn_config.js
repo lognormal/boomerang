@@ -17,7 +17,7 @@ var loaded=function() {
 
 var load=function() {
 	var s0=d.getElementsByTagName(s)[0],
-	    s1=d.createElement(s),
+	    s1=d.createElement(s);
 
 	s1.onload=loaded;
 	BOOMR.plugins.RT.startTimer('t_configjs');
