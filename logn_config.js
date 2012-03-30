@@ -2,7 +2,8 @@
 var d=w.document,
     s="script",
     dom=d.URL.replace(/^https?:\/\//, '').replace(/[:?;\/].*$/, ''),
-    complete = false;
+    complete=false, running=false,
+    t_start;
 
 // Don't even bother creating the plugin if this is mhtml
 if(dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -10,8 +11,12 @@ if(dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 }
 
 var loaded=function() {
-	BOOMR.plugins.RT.endTimer('t_configjs');
-	complete=true;
+	if(complete) {
+		return;
+	}
+	BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
+	complete = true;
+	running = false;
 	BOOMR.sendBeacon();
 };
 
@@ -19,8 +24,7 @@ var load=function() {
 	var s0=d.getElementsByTagName(s)[0],
 	    s1=d.createElement(s);
 
-	s1.onload=loaded;
-	BOOMR.plugins.RT.startTimer('t_configjs');
+	t_start=new Date().getTime();
 	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(dom);
 
 	s0.parentNode.insertBefore(s1, s0);
@@ -33,6 +37,16 @@ BOOMR.plugins.LOGN = {
 			return this;
 		}
 
+		// if we are called a second time while running, it means config.js has finished loading
+		if(running) {
+			// We need this monstrosity because Internet Explorer is quite moody
+			// regarding whether it will or willn't fire onreadystatechange for
+			// every change of readyState
+			setTimeout(loaded, 10);
+			return;
+		}
+
+		running=true;
 		BOOMR.subscribe("page_ready", load, null, null);
 
 		return this;
