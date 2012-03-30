@@ -15,6 +15,10 @@ var loaded=function() {
 		return;
 	}
 	BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
+	if(typeof BOOMR_configt != "undefined") {
+		BOOMR.addVar('t_configfb', BOOMR_configt-t_start);
+		delete BOOMR_configt;
+	}
 	complete = true;
 	running = false;
 	BOOMR.sendBeacon();
