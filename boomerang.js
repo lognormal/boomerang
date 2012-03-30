@@ -639,11 +639,6 @@ BOOMR.plugins.RT = {
 			this.endTimer('boomr_fb', BOOMR.t_start);
 		}
 
-		if(typeof BOOMR_configt != 'undefined') {
-			this.endTimer('t_configfb', BOOMR_configt);
-			delete BOOMR_configt;
-		}
-
 		// A beacon may be fired automatically on page load or if the page dev fires
 		// it manually with their own timers.  It may not always contain a referrer
 		// (eg: XHR calls).  We set default values for these cases
