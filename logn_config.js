@@ -14,11 +14,6 @@ var loaded=function() {
 	if(complete) {
 		return;
 	}
-	BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
-	if(typeof BOOMR_configt != "undefined") {
-		BOOMR.addVar('t_configfb', BOOMR_configt-t_start);
-		delete BOOMR_configt;
-	}
 	complete = true;
 	running = false;
 	BOOMR.sendBeacon();
@@ -47,6 +42,12 @@ BOOMR.plugins.LOGN = {
 			// regarding whether it will or willn't fire onreadystatechange for
 			// every change of readyState
 			setTimeout(loaded, 10);
+
+			BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
+			if(typeof BOOMR_configt != "undefined") {
+				BOOMR.addVar('t_configfb', BOOMR_configt-t_start);
+				delete BOOMR_configt;
+			}
 			return;
 		}
 
