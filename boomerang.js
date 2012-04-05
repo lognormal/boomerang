@@ -1130,7 +1130,7 @@ var impl = {
 	load_img: function(i, run, callback)
 	{
 		var url = this.base_url + images[i].name
-			+ '?t=' + (new Date().getTime()) + Math.random(),
+			+ '?t=' + (new Date().getTime()) + Math.random(),	// Math.random() is slow, but we get it before we start the timer
 		    timer=0, tstart=0,
 		    img = new Image(),
 		    that=this;

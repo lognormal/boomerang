@@ -27,7 +27,8 @@ var impl = {
 	gen_url: "",
 
 	start: function() {
-		var random = Math.floor(Math.random()*(2147483647)).toString(36);
+		var random = Math.floor(Math.random()*(2147483647)).toString(36),
+		    cache_bust = "" + (new Date().getTime()) + (Math.random());
 
 		this.gen_url = this.base_url.replace(/\*/, random);
 
@@ -35,19 +36,20 @@ var impl = {
 		impl.img.onload = impl.A_loaded;
 
 		impl.t_start = new Date().getTime();
-		impl.img.src = this.gen_url + "image-l.gif?t="
-					+ (new Date().getTime()) + Math.random();
+		impl.img.src = this.gen_url + "image-l.gif?t=" + cache_bust;
 	},
 
 	A_loaded: function() {
+		var cache_bust;
 		impl.t_dns = new Date().getTime() - impl.t_start;
+
+		cache_bust = "" + (new Date().getTime()) + (Math.random());
 
 		impl.img = new Image();
 		impl.img.onload = impl.B_loaded;
 
 		impl.t_start = new Date().getTime();
-		impl.img.src = impl.gen_url + "image-l.gif?t="
-					+ (new Date().getTime()) + Math.random();
+		impl.img.src = impl.gen_url + "image-l.gif?t=" + cache_bust;
 	},
 
 	B_loaded: function() {
