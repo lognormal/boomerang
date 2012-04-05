@@ -97,6 +97,7 @@ impl = {
 // we don't overwrite anything additional that was added to BOOMR before this
 // was called... for example, a plugin.
 boomr = {
+	t_lstart: null,
 	t_start: BOOMR_start,
 	t_end: null,
 
@@ -422,6 +423,10 @@ boomr = {
 };
 
 delete BOOMR_start;
+if(typeof BOOMR_lstart == 'number') {
+	boomr.t_lstart = BOOMR_lstart;
+	delete BOOMR_lstart;
+}
 
 var make_logger = function(l) {
 	return function(m, s) {
@@ -649,6 +654,11 @@ BOOMR.plugins.RT = {
 
 			// How long did it take till Boomerang started
 			this.endTimer('boomr_fb', BOOMR.t_start);
+
+			if(BOOMR.t_lstart) {
+				this.endTimer('boomr_ld', BOOMR.t_lstart);
+				this.setTimer('boomr_lat', BOOMR.t_start - BOOMR.t_lstart);
+			}
 		}
 
 		// A beacon may be fired automatically on page load or if the page dev fires
