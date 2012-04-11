@@ -784,11 +784,16 @@ BOOMR.plugins.RT = {
 			this.endTimer("t_prerender");
 		}
 
-		if(impl.t_start && impl.navigationType !== 2) {	// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
+		if(impl.navigationStart) {
+			impl.t_start = impl.navigationStart;
+		}
+		else if(impl.t_start && impl.navigationType !== 2) {
+								// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
 			BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
 		}						// but will have time of previous page start, so t_done will be wrong
 		else {
-			impl.t_start = impl.navigationStart;
+			BOOMR.addVar("rt.start", "none");
+			impl.t_start = undefined;		// force all timers to NaN state
 		}
 
 		if(!impl.sessionStart)
