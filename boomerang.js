@@ -486,6 +486,7 @@ var impl = {
 	navigationType: 0,
 	navigationStart: undefined,
 	responseStart: undefined,
+	sessionID: Math.floor(Math.random()*1000000).toString(36),
 	sessionStart: undefined,
 	sessionLength: 1,
 	loadTime: 0,
@@ -510,6 +511,7 @@ var impl = {
 						{
 							s: t_start,
 							r: d.URL.replace(/#.*/, ''),
+							si: this.sessionID,
 							ss: this.sessionStart,
 							sl: this.sessionLength,
 							tt: this.loadTime
@@ -678,6 +680,8 @@ BOOMR.plugins.RT = {
 						impl.t_start = parseInt(subcookies.s, 10);
 					}
 				}
+				if(subcookies.si)
+					impl.sessionID = subcookies.si;
 				if(subcookies.ss)
 					impl.sessionStart = parseInt(subcookies.ss, 10);
 				if(subcookies.sl)
@@ -871,6 +875,7 @@ BOOMR.plugins.RT = {
 			// session details only sent at end
 			BOOMR.addVar({
 				'rt.quit': '',
+				'rt.si': impl.sessionID,
 				'rt.ss': impl.sessionStart,
 				'rt.sl': impl.sessionLength,
 				'rt.tt': impl.loadTime,
