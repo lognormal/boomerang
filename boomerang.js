@@ -43,7 +43,7 @@ BOOMR.version = "0.9";
 // users can set properties by passing in to the init() method
 impl = {
 	// properties
-	beacon_url: "http://204st.us/",
+	beacon_url: location.protocol + "//204st.us/",
 	// strip out everything except last two parts of hostname.
 	// This doesn't work well for domains that end with a country tld,
 	// but we allow the developer to override site_domain for that.
