@@ -778,11 +778,11 @@ BOOMR.plugins.RT = {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
 			this.endTimer("t_resp", impl.responseStart);
-			if(impl.timers.t_load) {
+			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
 				this.setTimer("t_page", impl.timers.t_load.end - impl.responseStart);
 			}
 			else {
-				this.setTimer("t_page", new Date().getTime() - impl.responseStart);
+				this.setTimer("t_page", t_done - impl.responseStart);
 			}
 		}
 		else if(impl.timers.hasOwnProperty('t_page')) {
