@@ -835,8 +835,10 @@ BOOMR.plugins.RT = {
 			impl.t_start = undefined;		// force all timers to NaN state
 		}
 
-		if(!impl.sessionStart)
+		if(!impl.sessionStart) {
 			impl.sessionStart = impl.t_start || BOOMR.t_start;
+			impl.sessionLength = 1;
+		}
 
 		// If the dev has already called endTimer, then this call will do nothing
 		// else, it will stop the page load timer
