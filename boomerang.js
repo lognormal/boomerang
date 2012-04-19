@@ -870,6 +870,7 @@ BOOMR.plugins.RT = {
 			}
 
 			// If the caller did not set a start time, and if there was no start cookie
+			// Or if there was no end time for this timer,
 			// then timer.delta will be NaN, in which case we discard it.
 			if(isNaN(timer.delta)) {
 				continue;
