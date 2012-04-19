@@ -818,7 +818,7 @@ BOOMR.plugins.RT = {
 		this.endTimer("t_done", t_done);
 
 		// make sure old variables don't stick around
-		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt');
+		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt', 't_postrender', 't_prerender', 't_load');
 
 		BOOMR.addVar('rt.tstart', impl.t_start);
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
