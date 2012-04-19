@@ -572,7 +572,7 @@ var impl = {
 		BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
 		BOOMR.plugins.RT.startTimer("t_postrender");				// time from prerender to visible or hidden
 
-		BOOMR.subscribe("visibility_changed", BOOMR.plugins.RT.done, null, BOOMR.plugins.RT);
+		BOOMR.subscribe("visibility_changed", BOOMR.plugins.RT.done, "visible", BOOMR.plugins.RT);
 
 		return true;
 	},
