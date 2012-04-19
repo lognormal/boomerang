@@ -903,10 +903,6 @@ BOOMR.plugins.RT = {
 			impl.loadTime += (t_done - (impl.t_start || BOOMR.t_start));
 		}
 
-		if(ename == "unload" && !impl.onloadfired) {
-			BOOMR.addVar('rt.abld', '');
-		}
-
 		if(ename=='unload') {
 			// session details only sent at end
 			BOOMR.addVar({
@@ -916,6 +912,11 @@ BOOMR.plugins.RT = {
 				'rt.sl': impl.sessionLength,
 				'rt.tt': impl.loadTime
 			});
+
+			if(!impl.onloadfired) {
+				BOOMR.addVar('rt.abld', '');
+			}
+
 			if(!impl.visiblefired) {
 				BOOMR.addVar('rt.ntvu', '');
 			}
