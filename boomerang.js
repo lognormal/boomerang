@@ -639,6 +639,13 @@ var impl = {
 		return;
 	},
 
+	xhr_load: function(edata, ename) {
+		// set complete to false so that done can run again
+		this.complete = false;
+		
+		BOOMR.plugins.RT.done(edata, ename);
+	},
+
 	page_unload: function(edata) {
 		// set complete to false so that done can run again
 		this.complete = false;
@@ -673,7 +680,7 @@ BOOMR.plugins.RT = {
 		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
-		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
+		BOOMR.subscribe("xhr_load", impl.xhr_load, "xhr", this);
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 
 
