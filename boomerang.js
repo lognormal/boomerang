@@ -673,6 +673,7 @@ BOOMR.plugins.RT = {
 		if(!impl.visiblefired)
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
+		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 
 
