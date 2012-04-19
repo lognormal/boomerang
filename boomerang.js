@@ -59,7 +59,8 @@ impl = {
 		"page_ready": [],
 		"page_unload": [],
 		"visibility_changed": [],
-		"before_beacon": []
+		"before_beacon": [],
+		"xhr_load": []
 	},
 
 	vars: {},
