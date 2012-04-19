@@ -886,10 +886,12 @@ BOOMR.plugins.RT = {
 		}
 
 		if(ntimers) {
-			BOOMR.addVar("r", impl.r);
+			if(ename != "xhr") {
+				BOOMR.addVar("r", impl.r);
 
-			if(impl.r2 !== impl.r) {
-				BOOMR.addVar("r2", impl.r2);
+				if(impl.r2 !== impl.r) {
+					BOOMR.addVar("r2", impl.r2);
+				}
 			}
 
 			if(t_other.length) {
@@ -902,7 +904,7 @@ BOOMR.plugins.RT = {
 			impl.loadTime += (t_done - (impl.t_start || BOOMR.t_start));
 		}
 
-		if(!impl.onloadfired) {
+		if(ename == "unload" && !impl.onloadfired) {
 			BOOMR.addVar('rt.abld', '');
 		}
 
