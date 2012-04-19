@@ -794,7 +794,11 @@ BOOMR.plugins.RT = {
 			}
 		}
 
-		if(impl.navigationStart) {
+		if(ename=="xhr" && edata.name && impl.timers[edata.name]) {
+			impl.t_start = impl.timers[edata.name].start;
+			BOOMR.addVar("rt.start", "manual");
+		}
+		else if(impl.navigationStart) {
 			impl.t_start = impl.navigationStart;
 		}
 		else if(impl.t_start && impl.navigationType !== 2) {
