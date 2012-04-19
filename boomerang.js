@@ -781,7 +781,7 @@ BOOMR.plugins.RT = {
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
 	done: function(edata, ename) {
-		var t_done=new Date().getTime(),
+		var t_start, t_done=new Date().getTime(),
 		    basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];
 
@@ -820,19 +820,19 @@ BOOMR.plugins.RT = {
 		}
 
 		if(ename=="xhr" && edata.name && impl.timers[edata.name]) {
-			impl.t_start = impl.timers[edata.name].start;
+			t_start = impl.timers[edata.name].start;
 			BOOMR.addVar("rt.start", "manual");
 		}
 		else if(impl.navigationStart) {
-			impl.t_start = impl.navigationStart;
+			t_start = impl.navigationStart;
 		}
 		else if(impl.t_start && impl.navigationType !== 2) {
-								// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
+			t_start = impl.t_start;			// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
 			BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
 		}						// but will have time of previous page start, so t_done will be wrong
 		else {
 			BOOMR.addVar("rt.start", "none");
-			impl.t_start = undefined;		// force all timers to NaN state
+			t_start = undefined;			// force all timers to NaN state
 		}
 
 		if(ename == "xhr") {
@@ -841,8 +841,8 @@ BOOMR.plugins.RT = {
 
 		// if session hasn't started yet, or if it's been more than an hour since the last beacon,
 		// reset the session
-		if(!impl.sessionStart || t_done - (impl.t_start || BOOMR.t_start) > 60*60*1000) {
-			impl.sessionStart = impl.t_start || BOOMR.t_start;
+		if(!impl.sessionStart || t_done - (t_start || BOOMR.t_start) > 60*60*1000) {
+			impl.sessionStart = t_start || BOOMR.t_start;
 			impl.sessionLength = 1;
 			impl.loadTime = 0;
 		}
@@ -854,7 +854,7 @@ BOOMR.plugins.RT = {
 		// make sure old variables don't stick around
 		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt', 't_postrender', 't_prerender', 't_load');
 
-		BOOMR.addVar('rt.tstart', impl.t_start);
+		BOOMR.addVar('rt.tstart', t_start);
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
 
@@ -878,7 +878,7 @@ BOOMR.plugins.RT = {
 			// if not, then we have to calculate it using start & end
 			if(typeof timer.delta !== "number") {
 				if(typeof timer.start !== "number") {
-					timer.start = impl.t_start;
+					timer.start = t_start;
 				}
 				timer.delta = timer.end - timer.start;
 			}
@@ -915,7 +915,7 @@ BOOMR.plugins.RT = {
 
 		// we're either in onload, or onunload fired before onload
 		if(ename == 'load' || !impl.onloadfired) {
-			impl.loadTime += (t_done - (impl.t_start || BOOMR.t_start));
+			impl.loadTime += (t_done - (t_start || BOOMR.t_start));
 		}
 
 		if(ename=='unload') {
