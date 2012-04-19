@@ -502,7 +502,6 @@ var impl = {
 	sessionStart: undefined,
 	sessionLength: 1,
 	loadTime: 0,
-	lastLoadTime: -1,
 	t_start: undefined,
 	r: undefined,
 	r2: undefined,
@@ -733,7 +732,7 @@ BOOMR.plugins.RT = {
 				if(subcookies.sl)
 					impl.sessionLength = parseInt(subcookies.sl, 10)+1;
 				if(subcookies.tt && subcookies.tt.match(/\d/))
-					impl.lastLoadTime = impl.loadTime = parseInt(subcookies.tt, 10);
+					impl.loadTime = parseInt(subcookies.tt, 10);
 			}
 		}
 
@@ -915,8 +914,7 @@ BOOMR.plugins.RT = {
 				'rt.si': impl.sessionID,
 				'rt.ss': impl.sessionStart,
 				'rt.sl': impl.sessionLength,
-				'rt.tt': impl.loadTime,
-				'rt.lt': impl.lastLoadTime
+				'rt.tt': impl.loadTime
 			});
 			if(!impl.visiblefired) {
 				BOOMR.addVar('rt.ntvu', '');
