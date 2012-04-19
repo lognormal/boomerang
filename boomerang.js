@@ -822,7 +822,7 @@ BOOMR.plugins.RT = {
 
 		BOOMR.addVar('rt.tstart', impl.t_start);
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
-		BOOMR.addVar('rt.end', impl.timers.t_done.end);
+		BOOMR.addVar('rt.end', impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
 
 		if('t_configfb' in impl.timers && typeof impl.timers.t_configfb.start != 'number') {
 			if('t_configjs' in impl.timers && typeof impl.timers.t_configjs.start == 'number') {
