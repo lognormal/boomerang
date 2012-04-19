@@ -369,18 +369,29 @@ boomr = {
 	requestStart: function(name) {
 		var t_start = new Date().getTime();
 		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
-		BOOMR.addVar('xhr.pg', name);
 
 		return {
 			loaded: function() {
-				BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
-				BOOMR.responseEnd(name);
+				BOOMR.responseEnd(name, t_start);
 			}
 		};
 	},
 
-	responseEnd: function(name) {
-		impl.fireEvent("xhr_load", { "name": "xhr_" + name });
+	responseEnd: function(name, t_start) {
+		if(impl.vars['h.cr']) {
+			BOOMR.addVar('xhr.pg', name);
+			BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
+			impl.fireEvent("xhr_load", { "name": "xhr_" + name });
+		}
+		else {
+			var timer = name + "|" + (new Date().getTime()-t_start);
+			if(impl.vars.qt) {
+				impl.vars.qt += "," + timer;
+			}
+			else {
+				impl.vars.qt = timer;
+			}
+		}
 	},
 
 	sendBeacon: function() {
@@ -426,8 +437,10 @@ boomr = {
 						? ''
 						: encodeURIComponent(impl.vars[k])
 					);
+
 			}
 		}
+		BOOMR.removeVar("qt");
 
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {
