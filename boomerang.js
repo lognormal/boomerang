@@ -366,6 +366,17 @@ boomr = {
 		return this;
 	},
 
+	requestStart: function(name) {
+		BOOMR.plugins.RT.startTimer("xhr_" + name);
+		BOOMR.addVar('h.pg', name);
+
+		return { loaded: function() { BOOMR.responseEnd(name); } };
+	},
+
+	responseEnd: function(name) {
+		impl.fireEvent("xhr_load", { "name": "xhr_" + name });
+	},
+
 	sendBeacon: function() {
 		var k, url, img, nparams=0;
 
