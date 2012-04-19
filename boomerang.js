@@ -789,9 +789,9 @@ BOOMR.plugins.RT = {
 			return this;
 		}
 
-		impl.initNavTiming();
-
 		if(ename=="load" || ename=="visible") {
+			impl.initNavTiming();
+
 			if(impl.checkPreRender()) {
 				return this;
 			}
