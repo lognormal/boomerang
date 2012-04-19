@@ -270,6 +270,9 @@ boomr = {
 	// The page dev calls this method when they determine the page is usable.
 	// Only call this if autorun is explicitly set to false
 	page_ready: function() {
+		if(impl.onloadfired) {
+			return this;
+		}
 		impl.fireEvent("page_ready");
 		impl.onloadfired = true;
 		return this;
