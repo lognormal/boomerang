@@ -770,10 +770,6 @@ BOOMR.plugins.RT = {
 			return this;
 		}
 
-		// If the dev has already called endTimer, then this call will do nothing
-		// else, it will stop the page load timer
-		this.endTimer("t_done", t_done);
-
 		if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
@@ -810,6 +806,10 @@ BOOMR.plugins.RT = {
 
 		if(!impl.sessionStart)
 			impl.sessionStart = impl.t_start || BOOMR.t_start;
+
+		// If the dev has already called endTimer, then this call will do nothing
+		// else, it will stop the page load timer
+		this.endTimer("t_done", t_done);
 
 		// make sure old variables don't stick around
 		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt');
