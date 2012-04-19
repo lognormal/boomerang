@@ -785,9 +785,7 @@ BOOMR.plugins.RT = {
 		    basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];
 
-		if(impl.complete) {
-			return this;
-		}
+		impl.complete = false;
 
 		if(ename=="load" || ename=="visible") {
 			impl.initNavTiming();
