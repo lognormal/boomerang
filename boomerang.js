@@ -835,9 +835,16 @@ BOOMR.plugins.RT = {
 			impl.t_start = undefined;		// force all timers to NaN state
 		}
 
-		if(!impl.sessionStart) {
+		if(ename == "xhr") {
+			impl.sessionLength++;
+		}
+
+		// if session hasn't started yet, or if it's been more than an hour since the last beacon,
+		// reset the session
+		if(!impl.sessionStart || t_done - (impl.t_start || BOOMR.t_start) > 60*60*1000) {
 			impl.sessionStart = impl.t_start || BOOMR.t_start;
 			impl.sessionLength = 1;
+			impl.loadTime = 0;
 		}
 
 		// If the dev has already called endTimer, then this call will do nothing
