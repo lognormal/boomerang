@@ -551,6 +551,32 @@ var impl = {
 			impl.visiblefired = true;
 	},
 
+	checkPreRender: function() {
+		if(
+			!(d.webkitVisibilityState && d.webkitVisibilityState === "prerender")
+			&&
+			!(d.msVisibilityState && d.msVisibilityState === 3)
+		) {
+			return false;
+		}
+
+		// This means that onload fired through a pre-render.  We'll capture this
+		// time, but wait for t_done until after the page has become either visible
+		// or hidden (ie, it moved out of the pre-render state)
+		// http://code.google.com/chrome/whitepapers/pagevisibility.html
+		// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
+		// http://code.google.com/chrome/whitepapers/prerender.html
+
+		BOOMR.plugins.RT.startTimer("t_load", this.navigationStart);
+		BOOMR.plugins.RT.endTimer("t_load");					// this will measure actual onload time for a prerendered page
+		BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
+		BOOMR.plugins.RT.startTimer("t_postrender");				// time from prerender to visible or hidden
+
+		BOOMR.subscribe("visibility_changed", BOOMR.plugins.RT.done, null, BOOMR.plugins.RT);
+
+		return true;
+	},
+
 	initNavTiming: function() {
 		var ti, p, source;
 
@@ -740,25 +766,7 @@ BOOMR.plugins.RT = {
 
 		impl.initNavTiming();
 
-		if(
-			(d.webkitVisibilityState && d.webkitVisibilityState === "prerender")
-			||
-			(d.msVisibilityState && d.msVisibilityState === 3)
-		) {
-			// This means that onload fired through a pre-render.  We'll capture this
-			// time, but wait for t_done until after the page has become either visible
-			// or hidden (ie, it moved out of the pre-render state)
-			// http://code.google.com/chrome/whitepapers/pagevisibility.html
-			// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
-			// http://code.google.com/chrome/whitepapers/prerender.html
-
-			this.startTimer("t_load", impl.navigationStart);
-			this.endTimer("t_load");		// this will measure actual onload time for a prerendered page
-			this.startTimer("t_prerender", impl.navigationStart);
-			this.startTimer("t_postrender");	// time from prerender to visible or hidden
-
-			BOOMR.subscribe("visibility_changed", this.done, null, this);
-
+		if(impl.checkPreRender()) {
 			return this;
 		}
 
