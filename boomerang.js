@@ -367,10 +367,16 @@ boomr = {
 	},
 
 	requestStart: function(name) {
-		BOOMR.plugins.RT.startTimer("xhr_" + name);
+		var t_start = new Date().getTime();
+		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
 		BOOMR.addVar('h.pg', name);
 
-		return { loaded: function() { BOOMR.responseEnd(name); } };
+		return {
+			loaded: function() {
+				BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
+				BOOMR.responseEnd(name);
+			}
+		};
 	},
 
 	responseEnd: function(name) {
