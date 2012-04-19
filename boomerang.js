@@ -369,7 +369,7 @@ boomr = {
 	requestStart: function(name) {
 		var t_start = new Date().getTime();
 		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
-		BOOMR.addVar('h.pg', name);
+		BOOMR.addVar('xhr.pg', name);
 
 		return {
 			loaded: function() {
