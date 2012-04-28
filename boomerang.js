@@ -923,15 +923,15 @@ BOOMR.plugins.RT = {
 			impl.loadTime += (t_done - (t_start || BOOMR.t_lstart || BOOMR.t_start));
 		}
 
+		BOOMR.addVar({
+			'rt.si': impl.sessionID,
+			'rt.ss': impl.sessionStart,
+			'rt.sl': impl.sessionLength,
+			'rt.tt': impl.loadTime
+		});
+
 		if(ename=='unload') {
-			// session details only sent at end
-			BOOMR.addVar({
-				'rt.quit': '',
-				'rt.si': impl.sessionID,
-				'rt.ss': impl.sessionStart,
-				'rt.sl': impl.sessionLength,
-				'rt.tt': impl.loadTime
-			});
+			BOOMR.addVar('rt.quit', '');
 
 			if(!impl.onloadfired) {
 				BOOMR.addVar('rt.abld', '');
