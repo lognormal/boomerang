@@ -520,7 +520,7 @@ var impl = {
 	navigationType: 0,
 	navigationStart: undefined,
 	responseStart: undefined,
-	sessionID: Math.floor(Math.random()*1000000).toString(36),
+	sessionID: Math.floor(Math.random()*1048576).toString(36),
 	sessionStart: undefined,
 	sessionLength: 1,
 	loadTime: 0,
