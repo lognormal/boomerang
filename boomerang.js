@@ -528,8 +528,7 @@ var impl = {
 	r: undefined,
 	r2: undefined,
 
-	// The start method is fired on page unload.
-	start: function() {
+	setCookie: function() {
 		var t_end, t_start = new Date().getTime();
 
 		// Disable use of RT cookie by setting its name to a falsy value
@@ -675,7 +674,7 @@ var impl = {
 		BOOMR.plugins.RT.done(edata, "unload");
 
 		// set cookie for next page
-		this.start();
+		this.setCookie();
 	}
 };
 
