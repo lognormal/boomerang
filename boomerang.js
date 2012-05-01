@@ -61,7 +61,7 @@ impl = {
 		"visibility_changed": [],
 		"before_beacon": [],
 		"xhr_load": [],
-		"onclick": []
+		"click": []
 	},
 
 	vars: {},
