@@ -524,6 +524,7 @@ var impl = {
 	sessionStart: undefined,
 	sessionLength: 1,
 	loadTime: 0,
+	oboError: 0,
 	t_start: undefined,
 	r: undefined,
 	r2: undefined,
@@ -545,7 +546,8 @@ var impl = {
 							si: this.sessionID,
 							ss: this.sessionStart,
 							sl: this.sessionLength,
-							tt: this.loadTime
+							tt: this.loadTime,
+							obo:this.oboError
 						},
 						this.cookie_exp)
 		) {
@@ -567,6 +569,39 @@ var impl = {
 		}
 
 		return this;
+	},
+
+	initFromCookie: function(update_start) {
+		var subcookies;
+		if(!this.cookie) {
+			return;
+		}
+
+		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
+
+		if(!subcookies) {
+			return;
+		}
+
+		if(update_start && subcookies.s && subcookies.r) {
+			this.r = subcookies.r;
+			if(!this.strict_referrer || this.r === this.r2) {
+				this.t_start = parseInt(subcookies.s, 10);
+			}
+		}
+		if(subcookies.s)
+			this.lastActionTime = parseInt(subcookies.s, 10);
+		if(subcookies.si)
+			this.sessionID = subcookies.si;
+		if(subcookies.ss)
+			this.sessionStart = parseInt(subcookies.ss, 10);
+		if(subcookies.sl)
+			this.sessionLength = parseInt(subcookies.sl, 10);
+		if(subcookies.tt && subcookies.tt.match(/\d/))
+			this.loadTime = parseInt(subcookies.tt, 10);
+		if(subcookies.obo)
+			this.oboError = parseInt(subcookies.obo, 10)|0;
+
 	},
 
 	page_ready: function() {
@@ -682,8 +717,6 @@ BOOMR.plugins.RT = {
 	// Methods
 
 	init: function(config) {
-		var subcookies;
-
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "strict_referrer"]);
 
@@ -724,28 +757,11 @@ BOOMR.plugins.RT = {
 		// (eg: XHR calls).  We set default values for these cases
 		impl.r = impl.r2 = d.referrer.replace(/#.*/, '');
 
-		// If impl.cookie is not set, the dev does not want to use cookie time
-		if(impl.cookie) {
-			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
-			BOOMR.utils.removeCookie(impl.cookie);
-
-			if(subcookies) {
-				if(subcookies.s && subcookies.r) {
-					impl.r = subcookies.r;
-					if(!impl.strict_referrer || impl.r === impl.r2) {
-						impl.t_start = parseInt(subcookies.s, 10);
-					}
-				}
-				if(subcookies.si)
-					impl.sessionID = subcookies.si;
-				if(subcookies.ss)
-					impl.sessionStart = parseInt(subcookies.ss, 10);
-				if(subcookies.sl)
-					impl.sessionLength = parseInt(subcookies.sl, 10)+1;
-				if(subcookies.tt && subcookies.tt.match(/\d/))
-					impl.loadTime = parseInt(subcookies.tt, 10);
-			}
+		impl.initFromCookie(true);
+		if(!impl.sessionStart) {
+			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
 		}
+		impl.setCookie();
 
 		return this;
 	},
@@ -838,16 +854,15 @@ BOOMR.plugins.RT = {
 			t_start = undefined;			// force all timers to NaN state
 		}
 
-		if(ename == "xhr") {
-			impl.sessionLength++;
-		}
+		impl.initFromCookie(false);
 
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
-		if(!impl.sessionStart || t_done - (t_start || BOOMR.t_start) > 30*60*1000) {
-			impl.sessionStart = t_start || BOOMR.t_start;
+		if((t_start && impl.sessionStart > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > 30*60*1000) {
+			impl.sessionStart = t_start || BOOMR.t_lstart || BOOMR.t_start;
 			impl.sessionLength = 1;
 			impl.loadTime = 0;
+			impl.oboError = 0;
 		}
 
 		// If the dev has already called endTimer, then this call will do nothing
@@ -917,16 +932,25 @@ BOOMR.plugins.RT = {
 		}
 
 		// we're either in onload, or onunload fired before onload
-		if(ename == 'load' || !impl.onloadfired) {
-			impl.loadTime += (impl.timers.t_done.end - (t_start || BOOMR.t_lstart || BOOMR.t_start));
+		if(ename == 'load' || ename == 'xhr' || !impl.onloadfired) {
+			impl.sessionLength++;
+			if(isNaN(impl.timers.t_done.delta)) {
+				impl.oboError++;
+			}
+			else {
+				impl.loadTime += impl.timers.t_done.delta;
+			}
 		}
 
 		BOOMR.addVar({
 			'rt.si': impl.sessionID,
 			'rt.ss': impl.sessionStart,
 			'rt.sl': impl.sessionLength,
-			'rt.tt': impl.loadTime
+			'rt.tt': impl.loadTime,
+			'rt.obo': impl.oboError
 		});
+
+		impl.setCookie();
 
 		if(ename=='unload') {
 			BOOMR.addVar('rt.quit', '');
