@@ -528,8 +528,7 @@ var impl = {
 	r: undefined,
 	r2: undefined,
 
-	// The start method is fired on page unload.  It is called with the scope
-	// of the BOOMR.plugins.RT object
+	// The start method is fired on page unload.
 	start: function() {
 		var t_end, t_start = new Date().getTime();
 
