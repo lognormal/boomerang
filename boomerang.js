@@ -60,12 +60,24 @@ impl = {
 		"page_unload": [],
 		"visibility_changed": [],
 		"before_beacon": [],
-		"xhr_load": []
+		"xhr_load": [],
+		"onclick": []
 	},
 
 	vars: {},
 
 	disabled_plugins: {},
+
+	onclick_handler: function(ev) {
+		var target;
+		if (!ev) ev = w.event;
+		if (ev.target) target = ev.target;
+		else if (ev.srcElement) target = ev.srcElement;
+		if (target.nodeType == 3) // defeat Safari bug
+			target = target.parentNode;
+
+		impl.fireEvent("click", target);
+	},
 
 	fireEvent: function(e_name, data) {
 		var i, h, e;
@@ -260,6 +272,8 @@ boomr = {
 			impl.addListener(d, "msvisibilitychange", fire_visible);
 		else if(d.visibilityState)
 			impl.addListener(d, "visibilitychange", fire_visible);
+
+		impl.addListener(d, "click", impl.onclick_handler);
 
 		// This must be the last one to fire
 		impl.addListener(w, "unload", function() { w=null; });
@@ -710,6 +724,16 @@ var impl = {
 
 		// set cookie for next page
 		this.setCookie();
+	},
+
+	onclick: function(etarget) {
+		if(etarget && etarget.nodeName.toUpperCase()=="A") {
+			// user clicked a link, they may be going to another page
+			// if this page is being opened in a different tab, then
+			// our unload handler won't fire, so we need to set our
+			// cookie on click
+			this.setCookie();
+		}
 	}
 };
 
@@ -736,6 +760,7 @@ BOOMR.plugins.RT = {
 		BOOMR.subscribe("page_ready", this.done, "load", this);
 		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
+		BOOMR.subscribe("click", impl.onclick, null, impl);
 
 
 		if(BOOMR.t_start) {
