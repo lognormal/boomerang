@@ -273,7 +273,7 @@ boomr = {
 		else if(d.visibilityState)
 			impl.addListener(d, "visibilitychange", fire_visible);
 
-		impl.addListener(d, "click", impl.onclick_handler);
+		impl.addListener(d, "mouseup", impl.onclick_handler);
 
 		// This must be the last one to fire
 		impl.addListener(w, "unload", function() { w=null; });
