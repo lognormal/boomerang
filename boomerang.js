@@ -732,6 +732,7 @@ var impl = {
 			// if this page is being opened in a different tab, then
 			// our unload handler won't fire, so we need to set our
 			// cookie on click
+			this.initFromCookie(false);
 			this.setCookie();
 		}
 	}
