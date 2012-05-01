@@ -522,7 +522,7 @@ var impl = {
 	responseStart: undefined,
 	sessionID: Math.floor(Math.random()*1048576).toString(36),
 	sessionStart: undefined,
-	sessionLength: 1,
+	sessionLength: 0,
 	loadTime: 0,
 	oboError: 0,
 	t_start: undefined,
@@ -860,7 +860,7 @@ BOOMR.plugins.RT = {
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 		if((t_start && impl.sessionStart > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > 30*60*1000) {
 			impl.sessionStart = t_start || BOOMR.t_lstart || BOOMR.t_start;
-			impl.sessionLength = 1;
+			impl.sessionLength = 0;
 			impl.loadTime = 0;
 			impl.oboError = 0;
 		}
