@@ -58,6 +58,7 @@ impl = {
 	events: {
 		"page_ready": [],
 		"page_unload": [],
+		"dom_loaded": [],
 		"visibility_changed": [],
 		"before_beacon": [],
 		"xhr_load": [],
@@ -260,6 +261,8 @@ boomr = {
 		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
 			impl.addListener(w, "load", BOOMR.page_ready);
 		}
+
+		impl.addListenenr(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		// visibilitychange is useful to detect if the page loaded through prerender
 		// or if the page never became visible
@@ -735,6 +738,10 @@ var impl = {
 			this.initFromCookie(false);
 			this.setCookie();
 		}
+	},
+
+	domloaded: function() {
+		BOOMR.plugins.RT.endTimer("t_domloaded");
 	}
 };
 
@@ -760,6 +767,7 @@ BOOMR.plugins.RT = {
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
 		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
+		BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 		BOOMR.subscribe("click", impl.onclick, null, impl);
 
