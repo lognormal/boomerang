@@ -38,20 +38,18 @@ Breaking this into four separate use cases:
 
 <ol type="a">
 <li>User clicks a link on a page we control and page is usable when onload fires<br>
+    OR<br>
+    User types in URL/clicks a bookmark or link on a page we don't control and our page is usable when onload fires and
+    the user is using a browser that supports the <a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a>
+    API (IE9+, Chrome, Firefox 7+).<br>
     See <a href="howtos/howto-1a-page%231.html">HOWTO #1a</a>.</li>
 
 <li>User clicks a link on a page we control and page is usable at some developer determined point<br>
+    OR<br>
+    User types in URL/clicks a bookmark or link on a page we don't control and our page is usable at some developer determined point and
+    the user is using a browser that supports the <a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a>
+    API (IE9+, Chrome, Firefox 7+), but not in other browsers.<br>
     See <a href="howtos/howto-1b-page%231.html">HOWTO #1b</a>.</li>
-
-<li>User types in URL/clicks a bookmark or link on a page we don't control and our page is usable when onload fires.<br>
-    This is currently possible in browsers that support the <a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a>
-    API (eg: IE9), but not in other browsers.<br>
-    See <a href="TODO.txt">TODO #2</a>.</li>
-
-<li>User types in URL/clicks a bookmark or link on a page we don't control and our page is usable at some developer determined point<br>
-    This is currently possible in browsers that support the <a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a>
-    API (eg: IE9), but not in other browsers.<br>
-    See <a href="TODO.txt">TODO #2</a>.</li>
 </ol>
 
 
@@ -199,7 +197,7 @@ See <a href="howtos/howto-9.html">HOWTO #9</a>
 </p>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
 
 </body>

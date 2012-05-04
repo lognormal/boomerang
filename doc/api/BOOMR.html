@@ -31,6 +31,20 @@ Standard version numbering rules apply
 </p>
 </dd>
 
+<dt>t_start</dt>
+<dd>
+<p>
+The timestamp when the boomerang code showed up on the page.
+</p>
+</dd>
+
+<dt>t_end</dt>
+<dd>
+<p>
+The timestamp when the boomerang code finished loading.  Note, this will only be set if you used <code>make</code> to make a combined version of boomerang.
+</p>
+</dd>
+
 <dt>plugins</dt>
 <dd>
 <p>
@@ -339,6 +353,18 @@ the <code>subscribe()</code> method.
 </p>
 </dd>
 
+<dt>visibility_changed</dt>
+<dd>
+<p>
+Fired if the page's visibility state changes.  Currently only supported on IE10 and Chrome.
+</p>
+<h3>Callback</h3>
+<p>
+No additional event data is passed to the callback function.  Any callback data is passed as specified in
+the <code>subscribe()</code> method.
+</p>
+</dd>
+
 <dt>before_beacon</dt>
 <dd>
 <p>
@@ -372,7 +398,7 @@ Each plugin may add its own parameters, and these are specified in each plugin's
 </p>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
 
 </body>

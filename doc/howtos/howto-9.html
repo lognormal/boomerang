@@ -8,9 +8,6 @@
 <body>
 <span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
 <h1>Boomerang Howto #9: Collect performance data from the Navigation Timing API</h1>
-<p>
-<strong>Note:</strong> The Navigation Timing plugin hasn't been tested.  Your help in testing it is appreciated.
-</p>
 
 <p>The W3C Navigation Timing API is an interface implemented by modern browsers that
 provides broad and deep data related to the performance of page loads.  At the time
@@ -19,7 +16,7 @@ of this writing, it is supported by the following browsers:</p>
 <ul>
 <li>Chrome 6+</li>
 <li>Internet Explorer 9+</li>
-<li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=570341">Coming soon to Firefox</a></li>
+<li>Firefox 7+ (<strong>note</strong> that a bug in Firefox 7 and 8 reports the incorrect time for navigationStart.  Use unloadEventStart or fetchStart for a close proximation.)</li>
 </ul>
 
 <p>The navtiming.js plugin doesn't require any configuration options as it simply
@@ -61,7 +58,8 @@ in the <a href="http://www.w3.org/TR/navigation-timing/">W3C Navigation Timing s
 <tr><td><code>nt_res_end</code></td><td><code>window.performance.timing.responseEnd</code></td></tr>
 <tr><td><code>nt_domloading</code></td><td><code>window.performance.timing.domLoading</code></td></tr>
 <tr><td><code>nt_domint</code></td><td><code>window.performance.timing.domInteractive</code></td></tr>
-<tr><td><code>nt_domcontloaded</code></td><td><code>window.performance.timing.domContentLoaded</code></td></tr>
+<tr><td><code>nt_domcontloaded_st</code></td><td><code>window.performance.timing.domContentLoadedStart</code></td></tr>
+<tr><td><code>nt_domcontloaded_end</code></td><td><code>window.performance.timing.domContentLoadedEnd</code></td></tr>
 <tr><td><code>nt_domcomp</code></td><td><code>window.performance.timing.domComplete</code></td></tr>
 <tr><td><code>nt_load_st</code></td><td><code>window.performance.timing.loadEventStart</code></td></tr>
 <tr><td><code>nt_load_end</code></td><td><code>window.performance.timing.loadEventEnd</code></td></tr>
@@ -70,7 +68,7 @@ in the <a href="http://www.w3.org/TR/navigation-timing/">W3C Navigation Timing s
 </table>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
 
 <p id="results">

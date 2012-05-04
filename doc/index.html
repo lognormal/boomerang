@@ -4,20 +4,6 @@
 <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 <title>this, is boomerang</title>
 <link rel="stylesheet" type="text/css" href="boomerang-docs.css">
-<style type="text/css">
-div.gadget { background-color: #f8f8f8; float: right; padding: 10px; }
-</style>
-<script type="text/javascript">
-window.Delicious = {
-	BLOGBADGE_GRAPH_SHOW:true,
-	BLOGBADGE_MANUAL_MODE:true
-};
-</script>
-<script src='http://static.delicious.com/js/d2-blogbadge.js'></script>
-<style type='text/css'>
-.delicious-blogbadge { border: none; }
-.delicious-blogbadge .graph a img { height: auto; width: auto; }
-</style>
 </head>
 <body>
 <span style="float:right;"><a href="ja/">日本語</a></span>
@@ -54,24 +40,10 @@ Developer Network</a>.
 </p>
 <h2>where?</h2>
 <ul>
-<li>Get a zip or tarball from <a href="http://github.com/yahoo/boomerang/archives/master">github.com/yahoo/boomerang/archives/master</a></li>
-<li>Get the working source code from <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a></li>
+<li>Get a zip or tarball from <a href="http://github.com/lognormal/boomerang/archives/master">github.com/lognormal/boomerang/archives/master</a></li>
+<li>Get the working source code from <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a></li>
 </ul>
 <!-- script type="text/javascript" src="http://www.ohloh.net/p/483832/widgets/project_basic_stats.js"></script -->
-<script type='text/javascript'>
-Delicious.BlogBadge.renderGraph = function(badge) {
-	if (Delicious.BlogBadge.graph_show && badge.data.total_posts > 0) {
-		var type      = "4-1277362800-" + parseInt(new Date().getTime()/1000);
-		var el        = this.bind(this.el);
-		var graph_url = Delicious.BlogBadge.graph_url_root + badge.hash + '-' + type + '.png';
-
-		return [
-			el('div',{'class':'graph'}, [el('a', {'href':Delicious.BlogBadge.url_root + '/url/' + badge.hash + '?g=1'}, [el('img', {'src':graph_url, 'title':'Save History Trend'})])])
-		];
-	}
-};
-Delicious.BlogBadge.writeBadge("delicious-blogbadge-"+Math.random(), document.URL.replace(/\?.*/, ''), document.title, {});
-</script>
 </body>
 </html>
 <!--

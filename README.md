@@ -10,9 +10,9 @@ init() method.
 documentation is in the docs/ directory, it's all HTML, so your best bet is to check it out
 and view it locally, though it works best through a web server (you'll need cookies).
 
-An online version of the docs is here: http://yahoo.github.com/boomerang/doc/
+An online version of the docs is here: http://lognormal.github.com/boomerang/doc/
 
-The latest code and docs is available on http://github.com/yahoo/boomerang/
+The latest code and docs is available on http://github.com/lognormal/boomerang/
 
-Discussions are best done using github issues at https://github.com/yahoo/boomerang/issues
+Discussions are best done using github issues at https://github.com/lognormal/boomerang/issues
 You'll need a github account to participate.

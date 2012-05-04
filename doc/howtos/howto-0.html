@@ -54,13 +54,19 @@ This is what you get from the default install:
 <dt>t_done</dt> <dd><strong>[optional]</strong> Perceived load time of the page.</dd>
 <dt>t_page</dt> <dd><strong>[optional]</strong> Time taken from the head of the page to page_ready.</dd>
 <dt>t_resp</dt> <dd><strong>[optional]</strong> Time taken from the user initiating the request to the first byte of the response.</dd>
-<dt>t_other</dt> <dd><strong>[optional]</strong> Comma separated list of additional timers set by page developer.  Each timer is of the format <code>name|value</code></dd>
-<dt>t_load</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time to fetch and prerender the page.</dd>
-<dt>t_prerender</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time from start of prefetch to the actual page display.  It may only be useful for debugging.</dd>
-<dt>t_postrender</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time from prerender finish to actual page display.  It may only be useful for debugging.</dd>
+<dt>t_other</dt> <dd><strong>[optional]</strong> Comma separated list of additional timers set by page developer.  Each timer is of the format <code>name|value</code>.  The following timers may be included:
+<dl>
+	<dt>t_load</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time to fetch and prerender the page.</dd>
+	<dt>t_prerender</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time from start of prefetch to the actual page display.  It may only be useful for debugging.</dd>
+	<dt>t_postrender</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time from prerender finish to actual page display.  It may only be useful for debugging.</dd>
+	<dt>boomerang</dt> <dd>The time it took boomerang to load up from first byte to last byte</dd>
+	<dt>boomr_fb</dt> <dd><strong>[optional</strong> The time it took from the start of page load to the first byte of boomerang.  Only included if we know when page load started.</dd>
+</dl></dd>
 <dt>r</dt> <dd>URL of page that set the start time of the beacon.</dd>
 <dt>r2</dt> <dd><strong>[optional]</strong> URL of referrer of current page.  Only set if different from <code>r</code> and <code>strict_referrer</code> has been explicitly turned off.</dd>
 <dt>rt.start</dt> <dd>Specifies where the start time came from.  May be one of <code>cookie</code> for the start cookie, <code>navigation</code> for the W3C navigation timing API, <code>csi</code> for older versions of Chrome or <code>gtb</code> for the Google Toolbar.</dd>
+<dt>rt.bstart</dt> <dd>The timestamp when boomerang showed up on the page</dd>
+<dt>rt.end</dt> <dd>The timestamp when the done() method was called</dd>
 </dl>
 
 <h4>bandwidth &amp; latency plugin</h4>
@@ -184,7 +190,7 @@ future howto, but for now, have a look at my ConFoo 2010 talk on
 </p>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
 
 <p id="results">

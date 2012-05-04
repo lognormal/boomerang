@@ -13,8 +13,7 @@
 <p>
 We define round trip time as the time taken from the user initiating a resource request
 to when that resource is completely available for the user to interact with.  We limit
-our measurements only to HTML page type resources and only to resources requested by a
-click or link activation on a page that we control.
+our measurements only to HTML page type resources.
 </p>
 <p>
 The round trip time is therefore the time from the user clicking on a link to the page
@@ -41,11 +40,14 @@ session cookie along with the URL of the current page.
 attach a function to the <code>window.onload</code> event.
 </p>
 <p>
-Inside this function, we take a time reading (in milliseconds).  Then we look for
-the cookie that was set in the onbeforeunload handler of the previous page.  If we don't
-find a cookie, we check to see if the browser has implemented the
-<a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a> API.  If so, we
-use data from there instead.  If we find neither, we abort <a href="#fn-1" class="fn">[1]</a>.
+Inside this function, we take a time reading (in milliseconds).  If the browser has implemented the
+<a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a> API, we
+pull out <code>navigationStart</code> (or <code>fetchStart</code> if <code>navigationStart</code>
+is unset).  To get around a bug in Firefox 7 and 8, we use <code>unloadEventStart</code> instead.
+</p>
+<p>
+If the WebTiming API is not supported, we look for the cookie where we set the start time, and if found,
+use that.  If we find neither, we abort <a href="#fn-1" class="fn">[1]</a>.
 </p>
 <p>
 If we find a cookie, we check the URL stored in the cookie with the <code>document.referrer</code>
@@ -96,7 +98,7 @@ possible.  See the code comments in <a href="../boomerang.js">boomerang.js</a> f
 full details.
 </p>
 <p>
-Image timeouts are set at between 1.2 and 1.5seconds.  If an image times out, we
+Image timeouts are set at between 1.2 and 1.5 seconds.  If an image times out, we
 stop downloading larger images, and retry the largest image 4 more times<a href="#fn-3" class="fn">[3]</a>.
 We then calculate the bandwidth for the largest 3 images that we downloaded.  This
 should result in 7 readings unless the test timed out before that <a href="#fn-4" class="fn">[4]</a>.
@@ -107,7 +109,7 @@ and this is the bandwidth that we beacon back to our server.
 </ul>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/yahoo/boomerang/">github.com/yahoo/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
 
 <div id="footnotes">
@@ -117,7 +119,7 @@ The latest code and docs is available on <a href="http://github.com/yahoo/boomer
 We don't actually abort at this point, but give the developer the ability to
 salvage the moment by setting his/her own start time.  This is most useful when the
 developer isn't measuring full page load time, but possibly the load time of some
-dynamic content loaded via Javascript.
+dynamic content loaded via JavaScript.
 </li>
 <li id="fn-2">
 We offer the developer the ability to not abort at this point, but instead
@@ -131,7 +133,7 @@ This value is configured using the <code>BW.nruns</code> parameter.  See
 <a href="howtos/howto-6.html">Howto #6</a> for details on configuring boomerang.
 </li>
 <li id="fn-4">
-The bandwidth test times out after 15seconds.  At that point it will try to
+The bandwidth test times out after 15 seconds.  At that point it will try to
 determine the bandwidth based on data that it has already collected.
 </li>
 </ol>
