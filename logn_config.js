@@ -26,6 +26,7 @@ var load=function() {
 	t_start=new Date().getTime();
 	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(dom)
 		+ '&t=' + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
+		+ '&v=' + BOOMR.version				// boomerang version so we can force a reload for old versions
 		+ (complete?"&r=":"");				// if this is running after complete, then we're just refreshing the crumb
 
 	s0.parentNode.insertBefore(s1, s0);
