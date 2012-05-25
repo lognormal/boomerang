@@ -32,7 +32,9 @@ var load=function() {
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
 
-	setTimeout(load, 5.5*60*1000);
+	if(complete) {
+		setTimeout(load, 5.5*60*1000);
+	}
 };
 
 BOOMR.plugins.LOGN = {
@@ -47,6 +49,7 @@ BOOMR.plugins.LOGN = {
 			// regarding whether it will or willn't fire onreadystatechange for
 			// every change of readyState
 			setTimeout(loaded, 10);
+			setTimeout(load, 5.5*60*1000);
 
 			BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
 			if(typeof BOOMR_configt != "undefined") {
