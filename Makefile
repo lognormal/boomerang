@@ -25,6 +25,8 @@ lognormal-debug: lognormal-plugins
 	rm boomerang-$(VERSION).$(DATE).js
 	scp boomerang-debug-latest.js linode2:boomerang/
 	ssh linode2 "sudo nginx -s reload"
+	scp boomerang-debug-latest.js linode3:boomerang/
+	ssh linode3 "sudo nginx -s reload"
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
@@ -32,6 +34,8 @@ lognormal-push: lognormal
 	ssh linode "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
 	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode2:boomerang/
 	ssh linode2 "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
+	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode3:boomerang/
+	ssh linode3 "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
 
 usage:
 	echo "Create a release version of boomerang:"
