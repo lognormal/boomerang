@@ -500,7 +500,7 @@ boomr.warn = make_logger("warn");
 boomr.error = make_logger("error");
 
 if(typeof console !== "undefined" && typeof console.log !== "undefined") {
-	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] ", m); };
+	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
 }
 
 
