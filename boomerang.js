@@ -259,7 +259,12 @@ boomr = {
 
 		// The developer can override onload by setting autorun to false
 		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
-			impl.addListener(w, "load", BOOMR.page_ready);
+			if("onpagehide" in w) {
+				impl.addListener(w, "pageshow", BOOMR.page_ready);
+			}
+			else {
+				impl.addListener(w, "load", BOOMR.page_ready);
+			}
 		}
 
 		impl.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
@@ -278,8 +283,13 @@ boomr = {
 
 		impl.addListener(d, "mouseup", impl.onclick_handler);
 
-		// This must be the last one to fire
-		impl.addListener(w, "unload", function() { w=null; });
+		if(!("onpagehide" in w)) {
+			// This must be the last one to fire
+			// We only clear w on browsers that don't support onpagehide because
+			// those that do are new enough to not have memory leak problems of
+			// some older browsers
+			impl.addListener(w, "unload", function() { w=null; });
+		}
 
 		return this;
 	},
@@ -327,22 +337,21 @@ boomr = {
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
 		if(e_name === 'page_unload') {
-			impl.addListener(w, "unload",
-						function() {
+			var unload_handler = function() {
 							if(fn) {
 								fn.call(cb_scope, null, cb_data);
 							}
 							fn=cb_scope=cb_data=null;
-						}
-					);
-			impl.addListener(w, "beforeunload",
-						function() {
-							if(fn) {
-								fn.call(cb_scope, null, cb_data);
-							}
-							fn=cb_scope=cb_data=null;
-						}
-					);
+						};
+			// pagehide is for iOS devices
+			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+			if("onpagehide" in w) {
+				impl.addListener(w, "pagehide", unload_handler);
+			}
+			else {
+				impl.addListener(w, "unload", unload_handler);
+				impl.addListener(w, "beforeunload", unload_handler);
+			}
 		}
 
 		return this;
