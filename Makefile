@@ -19,23 +19,22 @@ lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
 	gzip -7 -c boomerang-$(VERSION).$(DATE).js > boomerang-$(VERSION).$(DATE).js.gz
+	mv boomerang-$(VERSION).$(DATE).js* build/
 
 lognormal-debug: lognormal-plugins
 	cat boomerang-$(VERSION).$(DATE).js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE).js
-	scp boomerang-debug-latest.js linode2:boomerang/
-	ssh linode2 "sudo nginx -s reload"
-	scp boomerang-debug-latest.js linode3:boomerang/
-	ssh linode3 "sudo nginx -s reload"
+	for host in linode2 linode3; do \
+		scp boomerang-debug-latest.js $$host:boomerang/; \
+		ssh $$host "sudo nginx -s reload"; \
+	done
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
-	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode:boomerang/
-	ssh linode "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
-	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode2:boomerang/
-	ssh linode2 "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
-	scp boomerang-$(VERSION).$(DATE).js boomerang-$(VERSION).$(DATE).js.gz linode3:boomerang/
-	ssh linode3 "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"
+	for host in linode linode2 linode3; do \
+		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $$host:boomerang/; \
+		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"; \
+	done
 
 usage:
 	echo "Create a release version of boomerang:"
