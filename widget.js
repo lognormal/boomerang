@@ -10,7 +10,7 @@ BOOMR.subscribe('before_beacon', function(o) {
 		return;
 	}
 
-	html.push('<div style="max-width:20em;font-family:Trebuchet,Helvetica,sans-serif;border:solid 1px #ccc;background-color:#eee;opacity:0.7;padding:0.5em 0.5em 0.1em;">');
+	html.push('<div style="width:20em;font-family:Trebuchet,Helvetica,sans-serif;border:solid 1px #ccc;background-color:#eee;opacity:0.7;padding:0.5em 0.5em 0.1em;color:black;">');
 	html.push('This page loaded in <span class="ln_load_time">');
 	html.push((o.t_done/1000).toFixed(2));
 	html.push('</span> seconds');
