@@ -22,6 +22,8 @@ var impl = {
 	done: function() {
 		var p = w.performance,
 		    c = w.console,
+		    d = w.document,
+		    f = (navigator.userAgent.match(/Opera/) ? d.querySelectorAll : d.getElementsByTagName),
 		    m;
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
@@ -32,6 +34,11 @@ var impl = {
 				'mem.used' : m.usedJSHeapSize
 			});
 		}
+
+		BOOMR.addVar({
+			'dom.ln': f.call(d, '*').length,
+			'dom.sz': f.call(d, 'html')[0].innerHTML.length
+		}); 
 
 		this.complete = true;
 		BOOMR.sendBeacon();
