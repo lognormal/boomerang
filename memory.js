@@ -47,7 +47,7 @@ var impl = {
 
 BOOMR.plugins.Memory = {
 	init: function() {
-		// we do this on onload so that we take a memory snapshot after most things have run
+		// we do this on onload so that we take a memory and dom snapshot after most things have run
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
 		return this;
 	},
