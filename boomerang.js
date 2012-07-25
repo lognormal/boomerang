@@ -1156,7 +1156,7 @@ var impl = {
 			sum=0, sumsq=0, sum_corrected=0, sumsq_corrected=0,
 			amean, std_dev, std_err, median,
 			amean_corrected, std_dev_corrected, std_err_corrected, median_corrected,
-			nimgs, bw, bw_c;
+			nimgs, bw, bw_c, debug_info=[];
 
 		for(i=0; i<this.nruns; i++) {
 			if(!this.results[i] || !this.results[i].r) {
@@ -1187,6 +1187,10 @@ var impl = {
 
 				bw_c = images[j].size*1000/(r[j].t - this.latency.mean);
 				bandwidths_corrected.push(bw_c);
+
+				if(r[j].t < this.latency.mean) {
+					debug_info.push("" + j + "_" + r[j].t);
+				}
 			}
 		}
 
@@ -1259,7 +1263,8 @@ var impl = {
 			mean_corrected: amean_corrected,
 			stddev_corrected: std_dev_corrected,
 			stderr_corrected: std_err_corrected,
-			median_corrected: median_corrected
+			median_corrected: median_corrected,
+			debug_info: debug_info
 		};
 	},
 
@@ -1324,7 +1329,7 @@ var impl = {
 			var lat = new Date().getTime() - tstart;
 			this.latencies.push(lat);
 		}
-		// if we've got all the latency images at this point,
+		// we've got all the latency images at this point,
 		// so we can calculate latency
 		if(this.latency_runs === 0) {
 			this.latency = this.calc_latency();
@@ -1394,10 +1399,13 @@ var impl = {
 			};
 
 		BOOMR.addVar(o);
+		if(bw.debug_info.length > 0) {
+			BOOMR.addVar("bw_debug", bw.debug_info.join(','));
+		}
 
 		// If we have an IP address we can make the BA cookie persistent for a while
 		// because we'll recalculate it if necessary (when the user's IP changes).
-		if(!isNaN(o.bw)) {
+		if(!isNaN(o.bw) && o.bw > 0) {
 			BOOMR.utils.setCookie(this.cookie,
 						{
 							ba: Math.round(o.bw),
@@ -1451,7 +1459,7 @@ var impl = {
 
 		// If the subnet changes or the cookie is more than 7 days old,
 		// then we recheck the bandwidth, else we just use what's in the cookie
-		if(c_sn === p_sn && t >= t_now - this.cookie_exp) {
+		if(c_sn === p_sn && t >= t_now - this.cookie_exp && ba > 0) {
 			this.complete = true;
 			BOOMR.addVar({
 				'bw': ba,
