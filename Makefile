@@ -24,14 +24,14 @@ lognormal: lognormal-plugins
 lognormal-debug: lognormal-plugins
 	cat boomerang-$(VERSION).$(DATE).js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE).js
-	for host in linode2 linode3; do \
+	for host in bacon2 bacon3; do \
 		scp boomerang-debug-latest.js $$host:boomerang/; \
 		ssh $$host "sudo nginx -s reload"; \
 	done
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
-	for host in linode linode2 linode3; do \
+	for host in bacon1 bacon2 bacon3; do \
 		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $$host:boomerang/; \
 		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload"; \
 	done
