@@ -10,7 +10,7 @@ MINIFIER := cat
 
 all: boomerang-$(VERSION).$(DATE).js
 
-lognormal-plugins : override PLUGINS := ipv6.js navtiming.js mobile.js memory.js logn_config.js
+lognormal-plugins : override PLUGINS := ipv6.js dns.js navtiming.js mobile.js memory.js logn_config.js
 lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
 
 lognormal-plugins: all
