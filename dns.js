@@ -69,7 +69,7 @@ var impl = {
 
 		var dns = impl.t_dns - impl.t_http;
 
-		BOOMR.addVar("dns", dns);
+		BOOMR.addVar("dns.t", dns);
 		impl.complete = true;
 		impl.gen_url = "";
 		BOOMR.sendBeacon();
