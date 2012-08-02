@@ -18,7 +18,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 
 var impl = {
 	complete: false,
-	base_url: "",
+	base_url: "http://*.wc.lognormal.net/",
 	t_start: null,
 	t_dns: null,
 	t_http: null,
