@@ -27,7 +27,7 @@ var impl = {
 	gen_url: "",
 
 	start: function() {
-		var random = Math.floor(Math.random()*(2147483647)).toString(36),
+		var random = Math.random().toString(36),
 		    cache_bust = "" + (new Date().getTime()) + (Math.random());
 
 		this.gen_url = this.base_url.replace(/\*/, random);
