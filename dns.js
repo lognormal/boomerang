@@ -18,7 +18,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 
 var impl = {
 	complete: false,
-	base_url: "http://*.wc.lognormal.net/",
+	base_url: "http://*.wc.lognormal.net/boomerang/images/",
 	t_start: null,
 	t_dns: null,
 	t_http: null,
