@@ -68,35 +68,12 @@ var impl = {
 		BOOMR.addVar("dns", dns);
 		this.complete = true;
 		BOOMR.sendBeacon();
-	},
-
-	read_timing_api: function(t) {
-		if(typeof t.domainLookupStart === "undefined"
-				|| typeof t.domainLookupEnd === "undefined") {
-			return false;
-		}
-
-		// This will be 0 if we read DNS from cache, but that's what
-		// we want because it's what the user experiences
-		BOOMR.addVar("dns", t.domainLookupEnd - t.domainLookupStart);
-
-		impl.complete = true;
-
-		return true;
 	}
 };
 
 BOOMR.plugins.DNS = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "DNS", ["base_url"]);
-
-		// If this browser supports the WebTiming API, then we just
-		// use that and don't bother doing the test
-		if(w.performance && w.performance.timing) {
-			if(impl.read_timing_api(w.performance.timing)) {
-				return this;
-			}
-		}
 
 		if(!impl.base_url) {
 			BOOMR.warn("DNS.base_url is not set.  Cannot run DNS test.", "dns");
