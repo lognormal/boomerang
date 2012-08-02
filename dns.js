@@ -27,6 +27,10 @@ var impl = {
 	gen_url: "",
 
 	start: function() {
+		if(impl.gen_url) {	// already running
+			return;
+		}
+
 		var random = Math.random().toString(36),
 		    cache_bust = "" + (new Date().getTime()) + (Math.random());
 
@@ -67,6 +71,7 @@ var impl = {
 
 		BOOMR.addVar("dns", dns);
 		impl.complete = true;
+		impl.gen_url = "";
 		BOOMR.sendBeacon();
 	}
 };
