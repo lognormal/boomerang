@@ -80,6 +80,10 @@ BOOMR.plugins.DNS = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "DNS", ["base_url"]);
 
+		if(config && config.wait) {
+			return this;
+		}
+
 		if(!impl.base_url) {
 			BOOMR.warn("DNS.base_url is not set.  Cannot run DNS test.", "dns");
 			impl.complete = true;	// set to true so that is_complete doesn't
