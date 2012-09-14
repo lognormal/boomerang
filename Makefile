@@ -1,7 +1,7 @@
 # Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
 # Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
-PLUGINS :=
+PLUGINS := rt.js bw.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
@@ -10,7 +10,7 @@ MINIFIER := cat
 
 all: boomerang-$(VERSION).$(DATE).js
 
-lognormal-plugins : override PLUGINS := ipv6.js dns.js navtiming.js mobile.js memory.js logn_config.js
+lognormal-plugins : override PLUGINS := rt.js bw.js ipv6.js dns.js navtiming.js mobile.js memory.js logn_config.js
 lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
 
 lognormal-plugins: all
