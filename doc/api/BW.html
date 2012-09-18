@@ -21,12 +21,11 @@ The full configuration object is described in <a href="../howtos/howto-6.html">H
 <dl>
 <dt>base_url</dt>
 <dd>
-<strong>[recommended]</strong>
-By default, the bandwidth plugin looks for its bandwidth measurement images in the <code>images/</code> subdirectory
-of the current directory.  This may not be true for all pages on your site.  You can set the <code>base_url</code>
-parameter to the HTTP path of the directory that contains the bandwidth images.  This can be an absolute or a relative
-URL.  If it's relative, remember that it's relative to the page that boomerang is included in and not to the javascript
-file.
+<strong>[required]</strong>
+By default, this is set to the empty string, which has the effect of disabling the bandwidth plugin.  Set the <code>base_url</code>
+parameter to the HTTP path of the directory that contains the bandwidth images to enable this test.  This can be an absolute or
+a relative URL.  If it's relative, remember that it's relative to the page that boomerang is included in and not to the javascript
+file.  The trailing / is required.
 </dd>
 
 <dt>cookie</dt>
