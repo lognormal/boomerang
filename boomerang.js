@@ -470,7 +470,6 @@ boomr = {
 						? ''
 						: encodeURIComponent(impl.vars[k])
 					);
-
 			}
 		}
 		BOOMR.removeVar("qt");
