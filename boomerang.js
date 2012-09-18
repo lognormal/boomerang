@@ -202,7 +202,7 @@ boomr = {
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "site_domain", "user_ip"];
+		    properties = ["beacon_url", "site_domain", "user_ip", "beacon_callback"];
 
 		if(!config) {
 			config = {};
@@ -368,7 +368,7 @@ boomr = {
 	},
 
 	sendBeacon: function() {
-		var k, url, img, nparams=0;
+		var k, url, img, nparams=0, params=[], str_params = [];
 
 		// At this point someone is ready to send the beacon.  We send
 		// the beacon only if all plugins have finished doing what they
@@ -392,31 +392,34 @@ boomr = {
 			return this;
 		}
 
-		// if there are already url parameters in the beacon url,
-		// change the first parameter prefix for the boomerang url parameters to &
-
-		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') +
-			'v=' + encodeURIComponent(BOOMR.version) +
-			'&u=' + encodeURIComponent(d.URL.replace(/#.*/, ''));
+		// Add some common parameters
+		params['v'] = BOOMR.version;
+		params['u'] = d.URL.replace( /#.*/, '' );
 			// use d.URL instead of location.href because of a safari bug
 
 		for(k in impl.vars) {
 			if(impl.vars.hasOwnProperty(k)) {
 				nparams++;
-				url += "&" + encodeURIComponent(k)
-					+ "="
-					+ (
-						impl.vars[k]===undefined || impl.vars[k]===null
+				params[k] = (impl.vars[k]===undefined || impl.vars[k]===null
 						? ''
-						: encodeURIComponent(impl.vars[k])
+						: impl.vars[k]
 					);
 			}
 		}
 
-		// only send beacon if we actually have something to beacon back
+		// Only send beacon if we actually have something to beacon back
 		if(nparams) {
-			img = new Image();
-			img.src=url;
+			// If a callback is defined, use that instead of the default beacon method
+			if (typeof impl.beacon_callback === "function") {
+				impl.beacon_callback(impl.beacon_url, params);
+			} else {
+				for(k  in params) {
+					str_params.push( encodeURIComponent(k) + '=' + encodeURIComponent(params[k]) );
+				}
+				url = impl.beacon_url + (impl.beacon_url.indexOf('?') > -1)?'&':'?') + str_params.join('&');
+				img = new Image();
+				img.src=url;
+			}
 		}
 
 		return this;
