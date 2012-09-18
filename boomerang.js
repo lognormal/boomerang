@@ -441,10 +441,16 @@ boomr = {
 			}
 		}
 
+		impl.vars.v = BOOMR.version;
+		impl.vars.u = d.URL.replace(/#.*/, '');
+		// use d.URL instead of location.href because of a safari bug
+
 		// If we reach here, all plugins have completed
 		impl.fireEvent("before_beacon", impl.vars);
 
 		// Don't send a beacon if no beacon_url has been set
+		// you would do this if you want to do some fancy beacon handling
+		// in the `before_beacon` event instead of a simple GET request
 		if(!impl.beacon_url) {
 			return this;
 		}
@@ -452,10 +458,7 @@ boomr = {
 		// if there are already url parameters in the beacon url,
 		// change the first parameter prefix for the boomerang url parameters to &
 
-		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') +
-			'v=' + encodeURIComponent(BOOMR.version) +
-			'&u=' + encodeURIComponent(d.URL.replace(/#.*/, ''));
-			// use d.URL instead of location.href because of a safari bug
+		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?');
 
 		for(k in impl.vars) {
 			if(impl.vars.hasOwnProperty(k)) {
