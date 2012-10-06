@@ -37,7 +37,9 @@ var impl = {
 
 		BOOMR.addVar({
 			'dom.ln': f.call(d, '*').length,
-			'dom.sz': f.call(d, 'html')[0].innerHTML.length
+			'dom.sz': f.call(d, 'html')[0].innerHTML.length,
+			'dom.img': f.call(d, 'img').length,
+			'dom.script': f.call(d, 'script').length
 		}); 
 
 		this.complete = true;
