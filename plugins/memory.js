@@ -23,7 +23,7 @@ var impl = {
 		var p = w.performance,
 		    c = w.console,
 		    d = w.document,
-		    f = (({}).toString.call(window.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
+		    f = (({}).toString.call(w.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
 		    m;
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
