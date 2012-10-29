@@ -58,8 +58,22 @@ var impl = {
 				// secureConnectionStart is OPTIONAL in the spec
 				data.nt_ssl_st = pt.secureConnectionStart;
 			}
+
 			BOOMR.addVar(data);
 		}
+
+		if(w.chrome && w.chrome.loadTimes) {
+			pt = w.chrome.loadTimes();
+			if(pt) {
+				data = {
+					nt_spdy: (pt.wasFetchedViaSpdy?1:0),
+					nt_first_paint: pt.firstPaintTime
+				};
+
+				BOOMR.addVar(data);
+			}
+		}
+
 		this.complete = true;
 		BOOMR.sendBeacon();
 	}
