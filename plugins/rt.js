@@ -244,6 +244,11 @@ BOOMR.plugins.RT = {
 	// Methods
 
 	init: function(config) {
+		if(w != BOOMR.window) {
+			w = BOOMR.window;
+			d = w.document;
+		}
+
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "strict_referrer"]);
 
