@@ -70,6 +70,6 @@ BOOMR.plugins.LOGN = {
 	}
 };
 
-}(window));
+}(BOOMR.window));
 
 BOOMR.init({log:null,wait:true});
