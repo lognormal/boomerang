@@ -8,8 +8,7 @@ Plugin to collect memory metrics when available.
 see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
-// w is the window object
-(function(w) {
+(function() {
 
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
@@ -20,7 +19,8 @@ BOOMR.plugins = BOOMR.plugins || {};
 var impl = {
 	complete: false,
 	done: function() {
-		var p = w.performance,
+		var w = BOOMR.window,
+		    p = w.performance,
 		    c = w.console,
 		    d = w.document,
 		    f = (({}).toString.call(w.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
@@ -59,5 +59,5 @@ BOOMR.plugins.Memory = {
 	}
 };
 
-}(window));
+}());
 

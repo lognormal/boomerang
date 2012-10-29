@@ -10,8 +10,7 @@ This code is based on Carlos Bueno's guide to DNS on the YDN blog:
 http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 */
 
-// w is the window object
-(function(w) {
+(function() {
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
@@ -92,7 +91,7 @@ BOOMR.plugins.DNS = {
 		}
 
 		// do not run test over https
-		if(w.location.protocol === 'https:') {
+		if(BOOMR.window.location.protocol === 'https:') {
 			impl.complete = true;
 			return this;
 		}
@@ -107,5 +106,5 @@ BOOMR.plugins.DNS = {
 	}
 };
 
-}(window));
+}());
 

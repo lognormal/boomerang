@@ -5,8 +5,7 @@
  */
 
 // This is the Bandwidth & Latency plugin abbreviated to BW
-// the parameter is the window
-(function(w) {
+(function() {
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
@@ -502,7 +501,7 @@ BOOMR.plugins.BW = {
 			return this;
 		}
 
-		if(w.location.protocol === 'https:') {
+		if(BOOMR.window.location.protocol === 'https:') {
 			// we don't run the test for https because SSL stuff will mess up b/w
 			// calculations we could run the test itself over HTTP, but then IE
 			// will complain about insecure resources, so the best is to just bail
@@ -553,7 +552,7 @@ BOOMR.plugins.BW = {
 	is_complete: function() { return impl.complete; }
 };
 
-}(window));
+}());
 // End of BW plugin
 
 

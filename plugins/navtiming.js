@@ -8,8 +8,7 @@ Plugin to collect metrics from the W3C Navigation Timing API. For more informati
 see: http://www.w3.org/TR/navigation-timing/
 */
 
-// w is the window object
-(function(w) {
+(function() {
 
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
@@ -20,7 +19,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 var impl = {
 	complete: false,
 	done: function() {
-		var p, pn, pt, data;
+		var w = BOOMR.window, p, pn, pt, data;
 		if(this.complete) {
 			return this;
 		}
@@ -92,5 +91,5 @@ BOOMR.plugins.NavigationTiming = {
 	}
 };
 
-}(window));
+}());
 
