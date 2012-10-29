@@ -167,8 +167,8 @@ BOOMR.plugins.IPv6 = {
 
 		// make sure that test images use the same protocol as the host page
 		if(w.location.protocol === 'https:') {
-			impl.ipv6_url = impl.ipv6_url.replace(/^http:/, 'https:');
-			impl.host_url = impl.host_url.replace(/^http:/, 'https:');
+			impl.complete = true;
+			return this;
 		}
 		else {
 			impl.ipv6_url = impl.ipv6_url.replace(/^https:/, 'http:');
