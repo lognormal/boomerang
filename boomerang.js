@@ -26,12 +26,20 @@ BOOMR_start = new Date().getTime();
 // the parameter is the window
 (function(w) {
 
+// This is the only block where we use document without the w. qualifier
+if(w.parent != w
+		&& document.getElementById('boomr-if-as')
+		&& document.getElementById('boomr-if-as').nodeName.toLowerCase() == 'script') {
+	w = w.parent;
+}
+
 var impl, boomr, k, d=w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
-if(typeof BOOMR === "undefined") {
-	BOOMR = {};
+if(typeof w.BOOMR === "undefined") {
+	w.BOOMR = {};
 }
+BOOMR = w.BOOMR;
 // don't allow this code to be included twice
 if(BOOMR.version) {
 	return;
