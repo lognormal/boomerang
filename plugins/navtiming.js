@@ -27,8 +27,8 @@ var impl = {
 		p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
 		if(p && p.timing && p.navigation) {
 			BOOMR.info("This user agent supports NavigationTiming.", "nt");
-			pn = w.performance.navigation;
-			pt = w.performance.timing;
+			pn = p.navigation;
+			pt = p.timing;
 			data = {
 				nt_red_cnt: pn.redirectCount,
 				nt_nav_type: pn.type,
