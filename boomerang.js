@@ -46,6 +46,7 @@ if(BOOMR.version) {
 }
 
 BOOMR.version = "0.9";
+BOOMR.window = w;
 
 
 // impl is a private object not reachable from outside the BOOMR object
