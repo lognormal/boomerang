@@ -8,8 +8,6 @@
 // the parameter is the window
 (function(w) {
 
-var d=w.document;
-
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
