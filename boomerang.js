@@ -298,7 +298,7 @@ boomr = {
 			// We only clear w on browsers that don't support onpagehide because
 			// those that do are new enough to not have memory leak problems of
 			// some older browsers
-			impl.addListener(w, "unload", function() { w=null; });
+			impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
 		}
 
 		return this;
