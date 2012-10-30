@@ -95,6 +95,8 @@ browser's NavigationTiming API.
 <tr><td><code>nt_unload_st</code></td><td><code>window.performance.timing.unloadEventStart</code></td></tr>
 <tr><td><code>nt_unload_end</code></td><td><code>window.performance.timing.unloadEventEnd</code></td></tr>
 <tr><td><code>nt_ssl_st</code></td><td><strong>[optional]</strong> <code>window.performance.secureConnectionStart</code></td></tr>
+<tr><td><code>nt_spdy</code></td><td><strong>[optional]</strong> 1 if page was loaded over SPDY, 0 otherwise</td></tr>
+<tr><td><code>nt_first_paint</code></td><td><strong>[optional]</strong> The time in <code>seconds.microseconds</code> when the first paint happened.  Note, you will need to multiply this number by 1000 to compare it to the others.</td></tr>
 </table>
 
 <p class="perma-link">
