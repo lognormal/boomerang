@@ -1,5 +1,5 @@
 (function(w) {
-var d=w.document,
+var d=w.document, dc=document,
     s="script",
     dom=d.URL.replace(/^https?:\/\//, '').replace(/[:?;\/].*$/, ''),
     complete=false, running=false,
@@ -20,8 +20,8 @@ var loaded=function() {
 };
 
 var load=function() {
-	var s0=d.getElementsByTagName(s)[0],
-	    s1=d.createElement(s);
+	var s0=dc.getElementsByTagName(s)[0],
+	    s1=dc.createElement(s);
 
 	t_start=new Date().getTime();
 	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(dom)
