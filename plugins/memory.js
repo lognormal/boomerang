@@ -19,6 +19,10 @@ BOOMR.plugins = BOOMR.plugins || {};
 var impl = {
 	complete: false,
 	done: function() {
+		if(this.complete) {
+			return this;
+		}
+
 		var w = BOOMR.window,
 		    p = w.performance,
 		    c = w.console,
