@@ -51,6 +51,7 @@ Install this file on your web server or origin server where your CDN can pick it
 
 ### 3. Asynchronously include the script on your page
 
+#### 3.1. Adding it to the main document
 Include the following code at the *top* of your HTML document:
 ```html
 <script>
@@ -68,6 +69,36 @@ Yes, the best practices say to include scripts at the bottom.  That's different.
 way will not block other resources, however it _will_ block <code>onload</code>.  Including the script at the top of your page gives it a good chance of loading
 before the rest of your page does thereby reducing the probability of it blocking the `onload` event.  If you don't want to block `onload` either, follow Stoyan's
 <a href="http://www.phpied.com/non-onload-blocking-async-js/">advice from the Meebo team</a>.
+
+#### 3.2. Adding it via an iframe
+
+The method described in 3.1 will still block `onload` on most browsers (Internet Explorer not included).  To avoid
+blocking `onload`, we could load boomerang in an iframe.  Stoyan's <a href="http://www.phpied.com/non-onload-blocking-async-js/">documented
+the technique on his blog</a>, so read that for the details.
+
+For boomerang, this is the code you'll include:
+
+```html
+<script>
+(function(){
+  var iframe = document.createElement('iframe');
+  iframe.src="javascript:false";
+  (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
+  var where = document.getElementsByTagName('script')[0];
+  where.parentNode.insertBefore(iframe, where);
+  var doc = iframe.contentWindow.document;
+  doc.open().write('<body onload="'+
+    'var js = document.createElement(\'script\');'+
+    'js.id = \'boomr-if-as\';'+
+    'js.src = \'http://your-cdn.host.com/path/to/boomerang-<version>.js\';'+
+    'document.body.appendChild(js);">');
+  doc.close();
+})();
+</script>
+```
+The `id` of the script node created by this code MUST be `boomr-if-as` as boomerang looks for that id to determine if it's running within an iframe or not.
+
+Boomerang will still export the `BOOMR` object to the parent window if running inside an iframe, so the rest of your code should remain unchanged.
 
 docs
 ---
