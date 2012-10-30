@@ -66,7 +66,7 @@ var impl = {
 			if(pt) {
 				data = {
 					nt_spdy: (pt.wasFetchedViaSpdy?1:0),
-					nt_first_paint: (pt.firstPaintTime|0)*1000
+					nt_first_paint: pt.firstPaintTime
 				};
 
 				BOOMR.addVar(data);
