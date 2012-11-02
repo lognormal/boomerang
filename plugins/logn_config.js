@@ -60,7 +60,12 @@ BOOMR.plugins.LOGN = {
 		}
 
 		running=true;
-		BOOMR.subscribe("page_ready", load, null, null);
+		if(w == window) {
+			BOOMR.subscribe("page_ready", load, null, null);
+		}
+		else {
+			load();
+		}
 
 		return this;
 	},
