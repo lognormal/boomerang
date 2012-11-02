@@ -1,12 +1,12 @@
 (function(w) {
-var d=w.document, dc=document,
+var dc=document,
     s="script",
-    dom=d.URL.replace(/^https?:\/\//, '').replace(/[:?;\/].*$/, ''),
+    dom=w.location.hostname,
     complete=false, running=false,
     t_start;
 
 // Don't even bother creating the plugin if this is mhtml
-if(dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if(!dom || dom == 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
