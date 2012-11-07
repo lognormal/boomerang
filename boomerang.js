@@ -470,21 +470,24 @@ boomr = {
 		// if there are already url parameters in the beacon url,
 		// change the first parameter prefix for the boomerang url parameters to &
 
-		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?');
+		url = [];
 
 		for(k in impl.vars) {
 			if(impl.vars.hasOwnProperty(k)) {
 				nparams++;
-				url += "&" + encodeURIComponent(k)
+				url.push(encodeURIComponent(k)
 					+ "="
 					+ (
 						impl.vars[k]===undefined || impl.vars[k]===null
 						? ''
 						: encodeURIComponent(impl.vars[k])
-					);
+					)
+				);
 			}
 		}
 		BOOMR.removeVar("qt");
+
+		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') + url.join('&');
 
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {
