@@ -454,7 +454,7 @@ boomr = {
 		impl.vars.u = d.URL.replace(/#.*/, '');
 		// use d.URL instead of location.href because of a safari bug
 		if(w != window) {
-			impl.vars.if = "";
+			impl.vars["if"] = "";
 		}
 
 		// If we reach here, all plugins have completed
