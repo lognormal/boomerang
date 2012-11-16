@@ -15,8 +15,10 @@ BOOMR.plugins = BOOMR.plugins || {};
 
 // private object
 var impl = {
-	onloadfired: false,	//! Set when the page_ready even fires
+	onloadfired: false,	//! Set when the page_ready event fires
 				//  Use this to determine if unload fires before onload
+	unloadfired: false,	//! Set when the first unload event fires
+				//  Use this to make sure we don't beacon twice for beforeunload and unload
 	visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
 				//  Use this to determine if user bailed without opening the tab
 	complete: false,	//! Set when this plugin has completed
@@ -220,11 +222,15 @@ var impl = {
 	},
 
 	page_unload: function(edata) {
-		// run done on abort or on page_unload to measure session length
-		BOOMR.plugins.RT.done(edata, "unload");
+		if(!this.unloadfired) {
+			// run done on abort or on page_unload to measure session length
+			BOOMR.plugins.RT.done(edata, "unload");
+		}
 
 		// set cookie for next page
 		this.setCookie(edata.type == 'beforeunload'?'ul':'hd');
+
+		this.unloadfired = true;
 	},
 
 	onclick: function(etarget) {
