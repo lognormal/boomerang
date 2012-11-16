@@ -38,31 +38,31 @@ var impl = {
 	loadTime: 0,
 	oboError: 0,
 	t_start: undefined,
+	t_fb_approx: undefined,
 	r: undefined,
 	r2: undefined,
 
-	setCookie: function() {
-		var t_end, t_start = new Date().getTime();
+	setCookie: function(how) {
+		var t_end, t_start = new Date().getTime(), subcookies;
 
 		// Disable use of RT cookie by setting its name to a falsy value
 		if(!this.cookie) {
 			return this;
 		}
 
+		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
+		subcookies[how] = t_start
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
-		if(!BOOMR.utils.setCookie(this.cookie,
-						{
-							s: t_start,
-							r: d.URL.replace(/#.*/, ''),
-							si: this.sessionID,
-							ss: this.sessionStart,
-							sl: this.sessionLength,
-							tt: this.loadTime,
-							obo:this.oboError
-						},
-						this.cookie_exp)
-		) {
+		subcookies.r = d.URL.replace(/#.*/, '');
+
+		subcookies.si = this.sessionID;
+		subcookies.ss = this.sessionStart;
+		subcookies.sl = this.sessionLength;
+		subcookies.tt = this.loadTime;
+		subcookies.obo = this.oboError;
+
+		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
 			return this;
 		}
@@ -95,10 +95,13 @@ var impl = {
 			return;
 		}
 
+		subcookies.s = subcookies.ul || subcookies.cl;
+
 		if(update_start && subcookies.s && subcookies.r) {
 			this.r = subcookies.r;
 			if(!this.strict_referrer || this.r === this.r2) {
 				this.t_start = parseInt(subcookies.s, 10);
+				this.t_fb_approx = parseInt(subcookies.hd, 10);
 			}
 		}
 		if(subcookies.s)
@@ -221,7 +224,7 @@ var impl = {
 		BOOMR.plugins.RT.done(edata, "unload");
 
 		// set cookie for next page
-		this.setCookie();
+		this.setCookie(edata.type == 'beforeunload'?'ul':'hd');
 	},
 
 	onclick: function(etarget) {
@@ -231,7 +234,7 @@ var impl = {
 			// our unload handler won't fire, so we need to set our
 			// cookie on click
 			this.initFromCookie(false);
-			this.setCookie();
+			this.setCookie('cl');
 		}
 	},
 
@@ -363,6 +366,10 @@ BOOMR.plugins.RT = {
 			else if(impl.timers.hasOwnProperty('t_page')) {
 				// If the dev has already started t_page timer, we can end it now as well
 				this.endTimer("t_page");
+			}
+			else if(impl.t_fb_approx) {
+				this.endTimer('t_resp', impl.t_fb_approx);
+				this.setTimer("t_page", t_done - impl.t_fb_approx);
 			}
 
 			// If a prerender timer was started, we can end it now as well
