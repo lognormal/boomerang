@@ -347,9 +347,9 @@ boomr = {
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
 		if(e_name === 'page_unload') {
-			var unload_handler = function() {
+			var unload_handler = function(ev) {
 							if(fn) {
-								fn.call(cb_scope, null, cb_data);
+								fn.call(cb_scope, ev || w.event, cb_data);
 							}
 							fn=cb_scope=cb_data=null;
 						};
