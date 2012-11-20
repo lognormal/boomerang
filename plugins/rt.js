@@ -250,6 +250,9 @@ impl = {
 					this.t_fb_approx = parseInt(subcookies.hd, 10);
 				}
 			}
+			else {
+				this.t_start = this.t_fb_approx = undefined;
+			}
 		}
 
 		// regardless of whether the start time was usable or not, it's the last action that
@@ -578,6 +581,7 @@ BOOMR.plugins.RT = {
 		impl.complete = false;
 
 		if(ename==="load" || ename==="visible") {
+			impl.initFromCookie();
 			impl.initNavTiming();
 
 			if(impl.checkPreRender()) {
