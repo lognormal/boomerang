@@ -26,7 +26,7 @@ var impl = {
 	timers: {},		//! Custom timers that the developer can use
 				// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
 	cookie: 'RT',		//! Name of the cookie that stores the start time and referrer
-	cookie_exp:1800,	//! Cookie expiry in seconds
+	cookie_exp:60*60*24*7,	//! Cookie expiry in seconds
 	strict_referrer: true,	//! By default, don't beacon if referrers don't match.
 				// If set to false, beacon both referrer values and let
 				// the back end decide
@@ -259,7 +259,7 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
-					["cookie", "cookie_exp", "strict_referrer"]);
+					["cookie", "cookie_exp", "strict_referrer", "sessionID"]);
 
 		// if onload has already fired or complete is true
 		// then we've already collected t_done so no point running init
@@ -490,7 +490,7 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.addVar({
-			'rt.si': impl.sessionID,
+			'rt.si': impl.sessionID + '-' + Math.round(impl.sessionStart/1000).toString(36),
 			'rt.ss': impl.sessionStart,
 			'rt.sl': impl.sessionLength,
 			'rt.tt': impl.loadTime,
