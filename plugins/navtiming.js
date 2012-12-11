@@ -57,10 +57,18 @@ var impl = {
 				// secureConnectionStart is OPTIONAL in the spec
 				data.nt_ssl_st = pt.secureConnectionStart;
 			}
+			if (pt.msFirstPaint) {
+				// msFirstPaint is IE9+ http://msdn.microsoft.com/en-us/library/ff974719
+				data.nt_first_paint = pt.msFirstPaint;
+			}
 
 			BOOMR.addVar(data);
 		}
 
+		// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
+		//     firstPaintTime below is in seconds.microseconds.  The server needs to deal with this.
+
+		// This is Chrome only, so will not overwrite nt_first_paint above
 		if(w.chrome && w.chrome.loadTimes) {
 			pt = w.chrome.loadTimes();
 			if(pt) {

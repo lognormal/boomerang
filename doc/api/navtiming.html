@@ -96,7 +96,7 @@ browser's NavigationTiming API.
 <tr><td><code>nt_unload_end</code></td><td><code>window.performance.timing.unloadEventEnd</code></td></tr>
 <tr><td><code>nt_ssl_st</code></td><td><strong>[optional]</strong> <code>window.performance.secureConnectionStart</code></td></tr>
 <tr><td><code>nt_spdy</code></td><td><strong>[optional]</strong> 1 if page was loaded over SPDY, 0 otherwise</td></tr>
-<tr><td><code>nt_first_paint</code></td><td><strong>[optional]</strong> The time in <code>seconds.microseconds</code> when the first paint happened.  Note, you will need to multiply this number by 1000 to compare it to the others.</td></tr>
+<tr><td><code>nt_first_paint</code></td><td><strong>[optional]</strong> The time when the first paint happened.  On Internet Explorer, this is milliseconds since the epoch, while on Chrome this is seconds.microseconds since the epoch.  If you detect a decimal point in this number, multiply it by 1000 to compare it to the other timers.</td></tr>
 </table>
 
 <p class="perma-link">
