@@ -53,7 +53,8 @@ var impl = {
 		}
 
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
-		subcookies[how] = t_start
+		if(how)
+			subcookies[how] = t_start
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
 		subcookies.r = d.URL.replace(/#.*/, '');
