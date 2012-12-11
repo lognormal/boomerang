@@ -1,5 +1,5 @@
 (function() {
-BOOMR = BOOMR || {};
+BOOMR = window.BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
 var dc=document,
@@ -38,7 +38,7 @@ BOOMR.plugins.CT = {
 			return this;
 		}
 
-		if(w == window) {
+		if(BOOMR.window == window) {
 			BOOMR.subscribe("page_ready", load, null, null);
 		}
 		else {
