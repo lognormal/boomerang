@@ -26,6 +26,7 @@ var load=function() {
 
 	s1.onload = loaded;
 	s1.src="//lognormal.net/boomerang/cache-test.js";
+	BOOMR.addVar('cch.ce', new Date().getTime());
 
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
