@@ -2,6 +2,7 @@
 # Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
 PLUGINS := plugins/rt.js plugins/bw.js
+STANDALONE_PLUGINS := plugins/cache-test-plugin.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
@@ -26,14 +27,14 @@ lognormal-debug: lognormal-plugins
 	cat boomerang-$(VERSION).$(DATE).js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE).js
 	for host in $(HOSTS); do \
-		scp boomerang-debug-latest.js $$host:boomerang/ 2>/dev/null; \
+		scp boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
 		ssh $$host "sudo nginx -s reload" 2>/dev/null; \
 	done
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
 	for host in $(HOSTS); do \
-		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $$host:boomerang/ 2>/dev/null; \
+		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
 		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload" 2>/dev/null; \
 	done
 
