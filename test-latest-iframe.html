@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<script>
+(function(url){
+  var iframe = document.createElement('iframe');
+  iframe.src="javascript:false";
+  (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
+  var where = document.getElementsByTagName('script')[0];
+  where.parentNode.insertBefore(iframe, where);
+  var doc = iframe.contentWindow.document;
+  doc.open().write('<body onload="'+
+    'var js = document.createElement(\'script\');'+
+    'js.id = \'boomr-if-as\';'+
+    'js.src = \''+ url +'\';'+
+    'document.body.appendChild(js);">');
+  doc.close();
+})('boomerang-debug-latest.js');
+</script>
+</html>
+<body>
+<a href="test-latest-iframe.html">test</a>
+<a href="http://www.lognormal.com/">test 2</a><br>
+<script>
+document.write('<img src="images/image-2.png?' + Math.random() + '">');
+</script>
+<div id="ln_widget"></div>
+</body>
+</html>
