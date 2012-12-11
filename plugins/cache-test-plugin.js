@@ -1,10 +1,10 @@
-(function(w) {
+(function() {
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
 var dc=document,
     s="script",
-    dom=w.location.hostname,
+    dom=location.hostname,
     complete=false;
 
 // Don't even bother creating the plugin if this is mhtml
@@ -53,5 +53,5 @@ BOOMR.plugins.CT = {
 	}
 };
 
-}(BOOMR.window));
+}());
 
