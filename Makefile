@@ -17,6 +17,12 @@ lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6
 
 lognormal-plugins: all
 
+soasta: lognormal-plugins
+	mv boomerang-$(VERSION).$(DATE).js* build/
+
+soasta-push: soasta
+	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/src/com/soasta/rum/collector/boomerang/boomerang-wizard-min.js
+
 lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
