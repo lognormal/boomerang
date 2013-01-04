@@ -270,7 +270,7 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
-					["cookie", "cookie_exp", "strict_referrer", "sessionID"]);
+					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
 
 		// if onload has already fired or complete is true
 		// then we've already collected t_done so no point running init
