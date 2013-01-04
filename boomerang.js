@@ -57,6 +57,7 @@ impl = {
 	// strip out everything except last two parts of hostname.
 	// This doesn't work well for domains that end with a country tld,
 	// but we allow the developer to override site_domain for that.
+	// You can disable all cookies by setting site_domain to a falsy value
 	site_domain: w.location.hostname.
 				replace(/.*?([^.]+\.[^.]+)\.?$/, '$1').
 				toLowerCase(),
@@ -148,7 +149,7 @@ boomr = {
 		setCookie: function(name, subcookies, max_age) {
 			var value=[], k, nameval, c, exp;
 
-			if(!name) {
+			if(!name || !impl.site_domain) {
 				return false;
 			}
 
