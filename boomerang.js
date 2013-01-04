@@ -432,8 +432,14 @@ boomr = {
 		}
 	},
 
-	sendBeacon: function() {
+	sendBeacon: function(beacon_url_override) {
 		var k, url, img, nparams=0;
+
+		// This plugin wants the beacon to go somewhere else,
+		// so update the location
+		if(beacon_url_override) {
+			impl.beacon_url = beacon_url_override;
+		}
 
 		// At this point someone is ready to send the beacon.  We send
 		// the beacon only if all plugins have finished doing what they
