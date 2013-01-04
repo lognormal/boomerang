@@ -3,6 +3,7 @@
 
 PLUGINS := plugins/rt.js plugins/bw.js
 STANDALONE_PLUGINS := plugins/cache-test-plugin.js
+LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
@@ -12,16 +13,21 @@ HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9
 
 all: boomerang-$(VERSION).$(DATE).js
 
-lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
+lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
 lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
 
 lognormal-plugins: all
 
-soasta: lognormal-plugins
-	mv boomerang-$(VERSION).$(DATE).js* build/
+soasta: boomerang.js $(LOGNORMAL_PLUGINS)
+	echo
+	echo "Making boomerang-$(VERSION).$(DATE).js ..."
+	cat boomerang.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > build/boomerang-$(VERSION).$(DATE).js && echo "done"
+	echo
 
 soasta-push: soasta
-	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/src/com/soasta/rum/collector/boomerang/boomerang-wizard-min.js
+	git tag soasta.$(VERSION).$(DATE)
+	cp $(LOGNORMAL_PLUGINS) ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
+	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 
 lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
