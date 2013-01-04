@@ -53,7 +53,7 @@ BOOMR.window = w;
 // users can set properties by passing in to the init() method
 impl = {
 	// properties
-	beacon_url: location.protocol + "//204st.us/",
+	beacon_url: location.protocol + "//%beacon_dest_host%%beacon_dest_path%",
 	// strip out everything except last two parts of hostname.
 	// This doesn't work well for domains that end with a country tld,
 	// but we allow the developer to override site_domain for that.
