@@ -44,6 +44,8 @@ var impl = {
 	t_fb_approx: undefined,
 	r: undefined,
 	r2: undefined,
+	beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
+	next_beacon_url: undefined,	// beacon_url to use when session expires
 
 	setCookie: function(how) {
 		var t_end, t_start = new Date().getTime(), subcookies;
@@ -65,6 +67,10 @@ var impl = {
 		subcookies.sl = this.sessionLength;
 		subcookies.tt = this.loadTime;
 		subcookies.obo = this.oboError;
+
+		// If we got a beacon_url from config, set it into the cookie
+		if(this.beacon_url)
+			subcookies.bcn = this.beacon_url;
 
 		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
@@ -120,6 +126,9 @@ var impl = {
 			this.loadTime = parseInt(subcookies.tt, 10);
 		if(subcookies.obo)
 			this.oboError = parseInt(subcookies.obo, 10)|0;
+
+		if(subcookies.bcn)
+			this.beacon_url = subcookies.bcn;
 
 	},
 
@@ -262,6 +271,13 @@ BOOMR.plugins.RT = {
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
+
+		if(config && config.beacon_url) {
+			if(!impl.beacon_url) {
+				impl.beacon_url = config.beacon_url;
+			}
+			impl.next_beacon_url = config.beacon_url;
+		}
 
 		// if onload has already fired or complete is true
 		// then we've already collected t_done so no point running init
@@ -412,6 +428,7 @@ BOOMR.plugins.RT = {
 			impl.sessionLength = 0;
 			impl.loadTime = 0;
 			impl.oboError = 0;
+			impl.beacon_url = impl.next_beacon_url;
 		}
 
 		// If the dev has already called endTimer, then this call will do nothing
@@ -515,7 +532,8 @@ BOOMR.plugins.RT = {
 		impl.timers = {};
 		impl.complete = true;
 
-		BOOMR.sendBeacon();	// we call sendBeacon() anyway because some other plugin
+		BOOMR.sendBeacon(impl.beacon_url);
+					// we call sendBeacon() anyway because some other plugin
 					// may have blocked waiting for RT to complete
 		return this;
 	},
