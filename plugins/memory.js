@@ -23,12 +23,16 @@ var impl = {
 			return this;
 		}
 
-		var w = BOOMR.window,
-		    p = w.performance,
-		    c = w.console,
-		    d = w.document,
-		    f = (({}).toString.call(w.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
+		var w  = BOOMR.window,
+		    p  = w.performance,
+		    c  = w.console,
+		    d  = w.document,
+		    _f = (({}).toString.call(w.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
 		    m;
+
+		// handle IE6/7 weirdness regarding host objects
+		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
+		var f  = (typeof _f.call === 'undefined' ? function(tag) { return _f(tag) } : _f);
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
 
@@ -44,7 +48,7 @@ var impl = {
 			'dom.sz': f.call(d, 'html')[0].innerHTML.length,
 			'dom.img': f.call(d, 'img').length,
 			'dom.script': f.call(d, 'script').length
-		}); 
+		});
 
 		this.complete = true;
 		BOOMR.sendBeacon();
