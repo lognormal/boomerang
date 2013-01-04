@@ -270,11 +270,16 @@ boomr = {
 
 		// The developer can override onload by setting autorun to false
 		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
-			if("onpagehide" in w) {
-				impl.addListener(w, "pageshow", BOOMR.page_ready);
+			if(d.readyState && d.readyState === "complete") {
+				this.setImmediate(BOOMR.page_ready, null, null, BOOMR);
 			}
 			else {
-				impl.addListener(w, "load", BOOMR.page_ready);
+				if("onpagehide" in w) {
+					impl.addListener(w, "pageshow", BOOMR.page_ready);
+				}
+				else {
+					impl.addListener(w, "load", BOOMR.page_ready);
+				}
 			}
 		}
 
