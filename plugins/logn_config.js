@@ -78,4 +78,4 @@ BOOMR.plugins.LOGN = {
 
 }(BOOMR.window));
 
-BOOMR.init({log:null,wait:true});
+BOOMR.init({log:null,wait:true,site_domain:null});
