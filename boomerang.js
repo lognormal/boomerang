@@ -316,6 +316,29 @@ boomr = {
 		return this;
 	},
 
+	setImmediate: function(fn, data, cb_data, cb_scope) {
+		var cb = function() {
+			fn.call(cb_scope || null, data, cb_data || {});
+			cb=null;
+		};
+
+		if(w.setImmediate) {
+			w.setImmediate(cb);
+		}
+		else if(w.msSetImmediate) {
+			w.msSetImmediate(cb);
+		}
+		else if(w.webkitSetImmediate) {
+			w.webkitSetImmediate(cb);
+		}
+		else if(w.mozSetImmediate) {
+			w.mozSetImmediate(cb);
+		}
+		else {
+			setTimeout(cb, 50);
+		}
+	},
+
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
 		var i, h, e;
 
@@ -336,9 +359,7 @@ boomr = {
 
 		// attaching to page_ready after onload fires, so call soon
 		if(e_name == 'page_ready' && impl.onloadfired) {
-			setTimeout(function() {
-					fn.call(cb_scope || null, null, cb_data || {});
-				}, 50);
+			this.setImmediate(fn, cb_scope, null, cb_data);
 		}
 
 		// Attach unload handlers directly to the window.onunload and
