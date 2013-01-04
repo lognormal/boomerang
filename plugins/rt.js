@@ -26,7 +26,8 @@ var impl = {
 	timers: {},		//! Custom timers that the developer can use
 				// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
 	cookie: 'RT',		//! Name of the cookie that stores the start time and referrer
-	cookie_exp:60*60*24*7,	//! Cookie expiry in seconds
+	cookie_exp:60*60*24*7,	//! Cookie expiry in seconds (7 days)
+	session_exp:60*30,	//! Session expiry in seconds (30 minutes)
 	strict_referrer: true,	//! By default, don't beacon if referrers don't match.
 				// If set to false, beacon both referrer values and let
 				// the back end decide
@@ -260,7 +261,7 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
-					["cookie", "cookie_exp", "strict_referrer", "sessionID"]);
+					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
 
 		// if onload has already fired or complete is true
 		// then we've already collected t_done so no point running init
@@ -406,7 +407,7 @@ BOOMR.plugins.RT = {
 
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
-		if((t_start && impl.sessionStart > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > 30*60*1000) {
+		if((t_start && impl.sessionStart > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
 			impl.sessionStart = t_start || BOOMR.t_lstart || BOOMR.t_start;
 			impl.sessionLength = 0;
 			impl.loadTime = 0;
