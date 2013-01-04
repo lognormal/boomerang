@@ -272,6 +272,13 @@ BOOMR.plugins.RT = {
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
 
+		if(config && config.beacon_url) {
+			if(!impl.beacon_url) {
+				impl.beacon_url = config.beacon_url;
+			}
+			impl.next_beacon_url = config.beacon_url;
+		}
+
 		// if onload has already fired or complete is true
 		// then we've already collected t_done so no point running init
 		if(impl.onloadfired || impl.complete) {
