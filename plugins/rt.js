@@ -306,15 +306,17 @@ BOOMR.plugins.RT = {
 
 
 		if(BOOMR.t_start) {
-			// How long does it take Boomerang to load up and execute
+			// How long does it take Boomerang to load up and execute (fb to lb)
 			this.startTimer('boomerang', BOOMR.t_start);
 			this.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
 
-			// How long did it take till Boomerang started
+			// How long did it take from page request to boomerang fb
 			this.endTimer('boomr_fb', BOOMR.t_start);
 
 			if(BOOMR.t_lstart) {
+				// when did boomerang show up on the page
 				this.endTimer('boomr_ld', BOOMR.t_lstart);
+				// what was the network latency for boomerang
 				this.setTimer('boomr_lat', BOOMR.t_start - BOOMR.t_lstart);
 			}
 		}
