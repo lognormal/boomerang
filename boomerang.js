@@ -364,7 +364,7 @@ boomr = {
 
 		// attaching to page_ready after onload fires, so call soon
 		if(e_name == 'page_ready' && impl.onloadfired) {
-			this.setImmediate(fn, cb_scope, null, cb_data);
+			this.setImmediate(fn, null, cb_data, cb_scope);
 		}
 
 		// Attach unload handlers directly to the window.onunload and
