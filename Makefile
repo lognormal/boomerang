@@ -14,7 +14,7 @@ HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9
 all: boomerang-$(VERSION).$(DATE).js
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
-lognormal : MINIFIER := java -jar /Users/philip/Projects/yui/builder/componentbuild/lib/yuicompressor/yuicompressor-2.4.4.jar --type js
+lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
 
 lognormal-plugins: all
 
@@ -32,22 +32,21 @@ soasta-push: soasta
 lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
-	gzip -7 -c boomerang-$(VERSION).$(DATE).js > boomerang-$(VERSION).$(DATE).js.gz
-	mv boomerang-$(VERSION).$(DATE).js* build/
+	mv boomerang-$(VERSION).$(DATE)* build/
 
-lognormal-debug: lognormal-plugins
-	cat boomerang-$(VERSION).$(DATE).js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
-	rm boomerang-$(VERSION).$(DATE).js
+lognormal-debug: lognormal
+	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
+	rm boomerang-$(VERSION).$(DATE)*
 	for host in $(HOSTS); do \
-		scp boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
+		scp -C boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
 		ssh $$host "sudo nginx -s reload" 2>/dev/null; \
 	done
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
 	for host in $(HOSTS); do \
-		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
-		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload" 2>/dev/null; \
+		scp -C build/boomerang-$(VERSION).$(DATE)* $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
+		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; ln -f boomerang/boomerang-$(VERSION).$(DATE)-debug.js boomerang/boomerang-wizard-debug.js; sudo nginx -s reload" 2>/dev/null; \
 	done
 
 usage:
@@ -64,11 +63,16 @@ usage:
 	echo "	make MINIFIER=\"/path/to/jsmin\""
 	echo ""
 
-boomerang-$(VERSION).$(DATE).js: boomerang.js $(PLUGINS)
+boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
+	echo "Making $@ ..."
+	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g;s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
+	echo
+
+boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
 	echo
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
-	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g" > $@ && echo "done"
+	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > $@ && echo "done"
 	echo
 
 .PHONY: all

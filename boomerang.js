@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
  * Copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
+ * Copyright (c) 2013, SOASTA, Inc. All rights reserved.
  * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
  */
 
@@ -340,7 +341,7 @@ boomr = {
 			w.mozSetImmediate(cb);
 		}
 		else {
-			setTimeout(cb, 50);
+			setTimeout(cb, 10);
 		}
 	},
 
@@ -364,7 +365,7 @@ boomr = {
 
 		// attaching to page_ready after onload fires, so call soon
 		if(e_name == 'page_ready' && impl.onloadfired) {
-			this.setImmediate(fn, cb_scope, null, cb_data);
+			this.setImmediate(fn, null, cb_data, cb_scope);
 		}
 
 		// Attach unload handlers directly to the window.onunload and
