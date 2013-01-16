@@ -340,7 +340,7 @@ boomr = {
 			w.mozSetImmediate(cb);
 		}
 		else {
-			setTimeout(cb, 50);
+			setTimeout(cb, 10);
 		}
 	},
 
