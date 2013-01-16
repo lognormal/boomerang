@@ -49,7 +49,7 @@ BOOMR.plugins.LOGN = {
 			// We need this monstrosity because Internet Explorer is quite moody
 			// regarding whether it will or willn't fire onreadystatechange for
 			// every change of readyState
-			setTimeout(loaded, 10);
+			BOOMR.setImmediate(loaded);
 			setTimeout(load, 5.5*60*1000);
 
 			BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
