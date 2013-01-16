@@ -20,22 +20,21 @@ lognormal-plugins: all
 lognormal: lognormal-plugins
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
-	gzip -7 -c boomerang-$(VERSION).$(DATE).js > boomerang-$(VERSION).$(DATE).js.gz
-	mv boomerang-$(VERSION).$(DATE).js* build/
+	mv boomerang-$(VERSION).$(DATE)* build/
 
-lognormal-debug: lognormal-plugins
-	cat boomerang-$(VERSION).$(DATE).js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
-	rm boomerang-$(VERSION).$(DATE).js
+lognormal-debug: lognormal
+	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
+	rm boomerang-$(VERSION).$(DATE)*
 	for host in $(HOSTS); do \
-		scp boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
+		scp -C boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
 		ssh $$host "sudo nginx -s reload" 2>/dev/null; \
 	done
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
 	for host in $(HOSTS); do \
-		scp build/boomerang-$(VERSION).$(DATE).js build/boomerang-$(VERSION).$(DATE).js.gz $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
-		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; sudo nginx -s reload" 2>/dev/null; \
+		scp -C build/boomerang-$(VERSION).$(DATE)* $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
+		ssh $$host "ln -f boomerang/boomerang-$(VERSION).$(DATE).js boomerang/boomerang-wizard-min.js; ln -f boomerang/boomerang-$(VERSION).$(DATE)-debug.js boomerang/boomerang-wizard-debug.js; sudo nginx -s reload" 2>/dev/null; \
 	done
 
 usage:
