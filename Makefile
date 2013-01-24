@@ -2,7 +2,7 @@
 # Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
 PLUGINS := plugins/rt.js plugins/bw.js
-STANDALONE_PLUGINS := plugins/cache-test-plugin.js
+STANDALONE_PLUGINS := 
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
