@@ -101,7 +101,7 @@ var impl = {
 			return;
 		}
 
-		subcookies.s = subcookies.ul || subcookies.cl;
+		subcookies.s = Math.max(+subcookies.ul||0, +subcookies.cl||0);
 
 		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(update_start && subcookies.s && subcookies.r) {
@@ -112,7 +112,7 @@ var impl = {
 			}
 		}
 		if(subcookies.s)
-			this.lastActionTime = parseInt(subcookies.s, 10);
+			this.lastActionTime = subcookies.s;
 		if(subcookies.si)
 			this.sessionID = subcookies.si;
 		if(subcookies.ss)
