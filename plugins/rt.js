@@ -244,10 +244,10 @@ var impl = {
 			return;
 		}
 		BOOMR.debug("Click called with " + etarget.nodeName, "rt");
-		while(etarget != d.body && etarget.nodeName.toUpperCase() != "A") {
+		while(etarget && etarget.nodeName.toUpperCase() != "A") {
 			etarget = etarget.parentNode;
 		}
-		if(etarget.nodeName.toUpperCase()=="A") {
+		if(etarget && etarget.nodeName.toUpperCase()=="A") {
 			BOOMR.debug("passing through", "rt");
 			// user clicked a link, they may be going to another page
 			// if this page is being opened in a different tab, then
