@@ -15,14 +15,14 @@ all: boomerang-$(VERSION).$(DATE).js
 lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
 
-lognormal-plugins: all
+lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
-lognormal: lognormal-plugins
+lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
 	mv boomerang-$(VERSION).$(DATE)* build/
 
-lognormal-debug: lognormal
+lognormal-debug: lognormal-plugins
 	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/;s/BOOMR.init({log:null,/BOOMR.init({/;' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE)*
 	for host in $(HOSTS); do \
