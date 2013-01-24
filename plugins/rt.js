@@ -46,7 +46,7 @@ var impl = {
 	r: undefined,
 	r2: undefined,
 
-	setCookie: function(how) {
+	setCookie: function(how, url) {
 		var t_end, t_start = new Date().getTime(), subcookies;
 
 		// Disable use of RT cookie by setting its name to a falsy value
@@ -60,6 +60,16 @@ var impl = {
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
 		subcookies.r = d.URL.replace(/#.*/, '');
+
+		if(how === "cl") {
+			if(url)
+				subcookies.nu = url;
+			else if(subcookies.nu)
+				delete subcookies.nu;
+		}
+		if(url === false) {
+			delete subcookies.nu;
+		}
 
 		subcookies.si = this.sessionID;
 		subcookies.ss = this.sessionStart;
@@ -106,9 +116,12 @@ var impl = {
 		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(update_start && subcookies.s && subcookies.r) {
 			this.r = subcookies.r;
-			if(!this.strict_referrer || this.r === this.r2) {
-				this.t_start = parseInt(subcookies.s, 10);
-				this.t_fb_approx = parseInt(subcookies.hd, 10);
+			if(!this.strict_referrer || this.r === this.r2 ||
+					( subcookies.s === +subcookies.cl && subcookies.nu === d.URL.replace(/#.*/, '') )
+			) {
+				this.t_start = subcookies.s;
+				if(+subcookies.hd > subcookies.s)
+					this.t_fb_approx = parseInt(subcookies.hd, 10);
 			}
 		}
 		if(subcookies.s)
@@ -254,7 +267,7 @@ var impl = {
 			// our unload handler won't fire, so we need to set our
 			// cookie on click
 			this.initFromCookie(false);
-			this.setCookie('cl');
+			this.setCookie('cl', etarget.href);
 		}
 	},
 
@@ -321,7 +334,7 @@ BOOMR.plugins.RT = {
 		if(!impl.sessionStart) {
 			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
 		}
-		impl.setCookie();
+		impl.setCookie(null, false);
 
 		impl.initialized = true;
 		return this;
