@@ -67,6 +67,7 @@ impl = {
 
 	onloadfired: false,
 
+	handlers_attached: false,
 	events: {
 		"page_ready": [],
 		"page_unload": [],
@@ -279,6 +280,9 @@ boomr = {
 			}
 		}
 
+		if(impl.handlers_attached)
+			return this;
+
 		// The developer can override onload by setting autorun to false
 		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
 			if(d.readyState && d.readyState === "complete") {
@@ -318,6 +322,7 @@ boomr = {
 			impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
 		}
 
+		impl.handlers_attached = true;
 		return this;
 	},
 
