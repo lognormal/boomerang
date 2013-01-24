@@ -139,7 +139,7 @@ boomr = {
 				separator="\n\t";
 
 			for(k in o) {
-				if(o.hasOwnProperty(k)) {
+				if(Object.prototype.hasOwnProperty.call(o, k)) {
 					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(o[k]));
 				}
 			}
