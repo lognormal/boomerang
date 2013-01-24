@@ -516,6 +516,8 @@ boomr = {
 
 		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') + url.join('&');
 
+		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
+
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {
 			img = new Image();
