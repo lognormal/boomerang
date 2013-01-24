@@ -67,6 +67,7 @@ impl = {
 
 	onloadfired: false,
 
+	handlers_attached: false,
 	events: {
 		"page_ready": [],
 		"page_unload": [],
@@ -129,6 +130,23 @@ boomr = {
 
 	// Utility functions
 	utils: {
+		objectToString: function(o, separator) {
+			var value = [], k;
+
+			if(!o || typeof o != "object")
+				return o;
+			if(typeof separator === "undefined")
+				separator="\n\t";
+
+			for(k in o) {
+				if(Object.prototype.hasOwnProperty.call(o, k)) {
+					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(o[k]));
+				}
+			}
+
+			return value.join(separator);
+		},
+
 		getCookie: function(name) {
 			if(!name) {
 				return null;
@@ -148,20 +166,13 @@ boomr = {
 		},
 
 		setCookie: function(name, subcookies, max_age) {
-			var value=[], k, nameval, c, exp;
+			var value, nameval, c, exp;
 
 			if(!name || !impl.site_domain) {
 				return false;
 			}
 
-			for(k in subcookies) {
-				if(subcookies.hasOwnProperty(k)) {
-					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(subcookies[k]));
-				}
-			}
-
-			value = value.join('&');
-
+			value = this.objectToString(subcookies, "&");
 			nameval = name + '=' + value;
 
 			c = [nameval, "path=/", "domain=" + impl.site_domain];
@@ -269,6 +280,9 @@ boomr = {
 			}
 		}
 
+		if(impl.handlers_attached)
+			return this;
+
 		// The developer can override onload by setting autorun to false
 		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
 			if(d.readyState && d.readyState === "complete") {
@@ -308,6 +322,7 @@ boomr = {
 			impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
 		}
 
+		impl.handlers_attached = true;
 		return this;
 	},
 
@@ -521,6 +536,8 @@ boomr = {
 		BOOMR.removeVar("qt");
 
 		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') + url.join('&');
+
+		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
 
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {

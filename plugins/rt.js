@@ -21,6 +21,7 @@ var impl = {
 				//  Use this to make sure we don't beacon twice for beforeunload and unload
 	visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
 				//  Use this to determine if user bailed without opening the tab
+	initialized: false,	//! Set when init has completed to prevent double initialization
 	complete: false,	//! Set when this plugin has completed
 
 	timers: {},		//! Custom timers that the developer can use
@@ -47,7 +48,7 @@ var impl = {
 	beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
 	next_beacon_url: undefined,	// beacon_url to use when session expires
 
-	setCookie: function(how) {
+	setCookie: function(how, url) {
 		var t_end, t_start = new Date().getTime(), subcookies;
 
 		// Disable use of RT cookie by setting its name to a falsy value
@@ -62,6 +63,16 @@ var impl = {
 		// where location.href is URL decoded
 		subcookies.r = d.URL.replace(/#.*/, '');
 
+		if(how === "cl") {
+			if(url)
+				subcookies.nu = url;
+			else if(subcookies.nu)
+				delete subcookies.nu;
+		}
+		if(url === false) {
+			delete subcookies.nu;
+		}
+
 		subcookies.si = this.sessionID;
 		subcookies.ss = this.sessionStart;
 		subcookies.sl = this.sessionLength;
@@ -72,6 +83,7 @@ var impl = {
 		if(this.beacon_url)
 			subcookies.bcn = this.beacon_url;
 
+		BOOMR.debug("Setting cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
 			return this;
@@ -105,17 +117,21 @@ var impl = {
 			return;
 		}
 
-		subcookies.s = subcookies.ul || subcookies.cl;
+		subcookies.s = Math.max(+subcookies.ul||0, +subcookies.cl||0);
 
+		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(update_start && subcookies.s && subcookies.r) {
 			this.r = subcookies.r;
-			if(!this.strict_referrer || this.r === this.r2) {
-				this.t_start = parseInt(subcookies.s, 10);
-				this.t_fb_approx = parseInt(subcookies.hd, 10);
+			if(!this.strict_referrer || this.r === this.r2 ||
+					( subcookies.s === +subcookies.cl && subcookies.nu === d.URL.replace(/#.*/, '') )
+			) {
+				this.t_start = subcookies.s;
+				if(+subcookies.hd > subcookies.s)
+					this.t_fb_approx = parseInt(subcookies.hd, 10);
 			}
 		}
 		if(subcookies.s)
-			this.lastActionTime = parseInt(subcookies.s, 10);
+			this.lastActionTime = subcookies.s;
 		if(subcookies.si)
 			this.sessionID = subcookies.si;
 		if(subcookies.ss)
@@ -233,6 +249,7 @@ var impl = {
 	},
 
 	page_unload: function(edata) {
+		BOOMR.debug("Unload called with " + BOOMR.utils.objectToString(edata) + " when unloadfired = " + this.unloadfired, "rt");
 		if(!this.unloadfired) {
 			// run done on abort or on page_unload to measure session length
 			BOOMR.plugins.RT.done(edata, "unload");
@@ -248,16 +265,18 @@ var impl = {
 		if(!etarget) {
 			return;
 		}
-		while(etarget != d.body && etarget.nodeName.toUpperCase() != "A") {
+		BOOMR.debug("Click called with " + etarget.nodeName, "rt");
+		while(etarget && etarget.nodeName.toUpperCase() != "A") {
 			etarget = etarget.parentNode;
 		}
-		if(etarget.nodeName.toUpperCase()=="A") {
+		if(etarget && etarget.nodeName.toUpperCase()=="A") {
+			BOOMR.debug("passing through", "rt");
 			// user clicked a link, they may be going to another page
 			// if this page is being opened in a different tab, then
 			// our unload handler won't fire, so we need to set our
 			// cookie on click
 			this.initFromCookie(false);
-			this.setCookie('cl');
+			this.setCookie('cl', etarget.href);
 		}
 	},
 
@@ -270,6 +289,7 @@ BOOMR.plugins.RT = {
 	// Methods
 
 	init: function(config) {
+		BOOMR.debug("init RT", "rt");
 		if(w != BOOMR.window) {
 			w = BOOMR.window;
 			d = w.document;
@@ -285,9 +305,9 @@ BOOMR.plugins.RT = {
 			impl.next_beacon_url = config.beacon_url;
 		}
 
-		// if onload has already fired or complete is true
-		// then we've already collected t_done so no point running init
-		if(impl.onloadfired || impl.complete) {
+		// only initialize once.  we still collect config every time init is called, but we set
+		// event handlers only once
+		if(impl.initialized) {
 			return this;
 		}
 
@@ -330,8 +350,9 @@ BOOMR.plugins.RT = {
 		if(!impl.sessionStart) {
 			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
 		}
-		impl.setCookie();
+		impl.setCookie(null, false);
 
+		impl.initialized = true;
 		return this;
 	},
 
@@ -371,6 +392,7 @@ BOOMR.plugins.RT = {
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
 	done: function(edata, ename) {
+		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata) + ", " + ename, "rt");
 		var t_start, t_done=new Date().getTime(),
 		    basic_timers = { t_done: 1, t_resp: 1, t_page: 1},
 		    ntimers = 0, t_name, timer, t_other=[];

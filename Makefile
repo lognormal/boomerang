@@ -2,21 +2,21 @@
 # Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
 PLUGINS := plugins/rt.js plugins/bw.js
-STANDALONE_PLUGINS := plugins/cache-test-plugin.js
+STANDALONE_PLUGINS := 
 LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
 
 MINIFIER := cat
-HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9
+HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9 bacon13
 
 all: boomerang-$(VERSION).$(DATE).js
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
 
-lognormal-plugins: all
+lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
 soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 	echo
@@ -29,13 +29,13 @@ soasta-push: soasta
 	cp $(LOGNORMAL_PLUGINS) ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 
-lognormal: lognormal-plugins
+lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
 		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
 	mv boomerang-$(VERSION).$(DATE)* build/
 
-lognormal-debug: lognormal
-	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
+lognormal-debug: lognormal-plugins
+	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/;s/BOOMR.init({log:null,/BOOMR.init({/;' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE)*
 	for host in $(HOSTS); do \
 		scp -C boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
