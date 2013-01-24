@@ -132,8 +132,10 @@ boomr = {
 		objectToString: function(o, separator) {
 			var value = [], k;
 
+			if(!o || typeof o != "object")
+				return o;
 			if(typeof separator === "undefined")
-				separator="&";
+				separator="\n\t";
 
 			for(k in o) {
 				if(o.hasOwnProperty(k)) {
@@ -169,7 +171,7 @@ boomr = {
 				return false;
 			}
 
-			value = this.objectToString(subcookies);
+			value = this.objectToString(subcookies, "&");
 			nameval = name + '=' + value;
 
 			c = [nameval, "path=/", "domain=" + impl.site_domain];
