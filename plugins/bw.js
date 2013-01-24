@@ -55,8 +55,10 @@ var impl = {
 	latency: null,
 	runs_left: 0,
 	aborted: false,
-	complete: false,
+	complete: true,		// defaults to true so we don't block other plugins if this cannot start.
+				// init sets it to false
 	running: false,
+	initialized: false,
 
 	// methods
 
@@ -460,7 +462,7 @@ BOOMR.plugins.BW = {
 	init: function(config) {
 		var cookies;
 
-		if(impl.complete) {
+		if(impl.initialized) {
 			return this;
 		}
 
@@ -492,6 +494,8 @@ BOOMR.plugins.BW = {
 			BOOMR.subscribe("page_ready", this.run, null, this);
 			BOOMR.subscribe("page_unload", this.skip, null, this);
 		}
+
+		impl.initialized = true;
 
 		return this;
 	},
