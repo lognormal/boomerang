@@ -21,6 +21,7 @@ var impl = {
 				//  Use this to make sure we don't beacon twice for beforeunload and unload
 	visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
 				//  Use this to determine if user bailed without opening the tab
+	initialized: false,	//! Set when init has completed to prevent double initialization
 	complete: false,	//! Set when this plugin has completed
 
 	timers: {},		//! Custom timers that the developer can use
@@ -261,6 +262,7 @@ BOOMR.plugins.RT = {
 	// Methods
 
 	init: function(config) {
+		BOOMR.debug("init RT", "rt");
 		if(w != BOOMR.window) {
 			w = BOOMR.window;
 			d = w.document;
@@ -269,9 +271,9 @@ BOOMR.plugins.RT = {
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer"]);
 
-		// if onload has already fired or complete is true
-		// then we've already collected t_done so no point running init
-		if(impl.onloadfired || impl.complete) {
+		// only initialize once.  we still collect config every time init is called, but we set
+		// event handlers only once
+		if(impl.initialized) {
 			return this;
 		}
 
@@ -316,6 +318,7 @@ BOOMR.plugins.RT = {
 		}
 		impl.setCookie();
 
+		impl.initialized = true;
 		return this;
 	},
 
