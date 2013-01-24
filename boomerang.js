@@ -129,6 +129,21 @@ boomr = {
 
 	// Utility functions
 	utils: {
+		objectToString: function(o, separator) {
+			var value = [], k;
+
+			if(typeof separator === "undefined")
+				separator="&";
+
+			for(k in o) {
+				if(o.hasOwnProperty(k)) {
+					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(o[k]));
+				}
+			}
+
+			return value.join(separator);
+		},
+
 		getCookie: function(name) {
 			if(!name) {
 				return null;
@@ -148,20 +163,13 @@ boomr = {
 		},
 
 		setCookie: function(name, subcookies, max_age) {
-			var value=[], k, nameval, c, exp;
+			var value, nameval, c, exp;
 
 			if(!name || !impl.site_domain) {
 				return false;
 			}
 
-			for(k in subcookies) {
-				if(subcookies.hasOwnProperty(k)) {
-					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(subcookies[k]));
-				}
-			}
-
-			value = value.join('&');
-
+			value = this.objectToString(subcookies);
 			nameval = name + '=' + value;
 
 			c = [nameval, "path=/", "domain=" + impl.site_domain];
