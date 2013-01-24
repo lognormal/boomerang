@@ -23,7 +23,7 @@ lognormal: lognormal-plugins
 	mv boomerang-$(VERSION).$(DATE)* build/
 
 lognormal-debug: lognormal
-	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/%client_apikey%/0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/' > boomerang-debug-latest.js
+	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/;s/BOOMR.init({log:null,/BOOMR.init({/;' > boomerang-debug-latest.js
 	rm boomerang-$(VERSION).$(DATE)*
 	for host in $(HOSTS); do \
 		scp -C boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
