@@ -1,14 +1,24 @@
 <!doctype html>
 <html>
 <head>
-<script src="/boomerang/%client_apikey%"></script>
+<script>
+var key = decodeURIComponent(location.search.replace(/.*key=([\w.-]+).*/, '$1')),
+    v   = decodeURIComponent(location.search.replace(/.*v=([0-9.]+).*/, '$1'));
+
+document.write('<sc' + 'ript src="/boomerang/' + key + '"></scr' + 'ipt>');
+window.onload = function() {
+	var boom_ver = BOOMR.version.split('.'),
+	    reqd_ver = v.split('.');
+	if (	(boom_ver[0] < reqd_ver[0])
+	     || (boom_ver[0] == reqd_ver[0] && boom_ver[1] < reqd_ver[1])
+	     || (boom_ver[0] == reqd_ver[0] && boom_ver[1] == reqd_ver[1] && boom_ver[2] < reqd_ver[2])
+	)
+	{
+		location.reload(true);
+	}
+};
+</script>
 </head>
 <body>
-<script>
-if (location.hash === '') {
-    location.hash = "check";
-    location.reload(true);
-}
-</script>
 </body>
 </html>
