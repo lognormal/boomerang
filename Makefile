@@ -29,6 +29,7 @@ soasta-push: soasta
 	git tag soasta.$(VERSION).$(DATE)
 	cp $(LOGNORMAL_PLUGINS) ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
+	cp boomerang-reload.html ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
