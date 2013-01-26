@@ -15,6 +15,7 @@ all: boomerang-$(VERSION).$(DATE).js
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
+lognormal : tmpfile := $(shell mktemp boomerang.XXXXXX)
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
@@ -30,8 +31,8 @@ soasta-push: soasta
 	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
-	ln=`awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js`; \
-		echo "$$ln" > boomerang-$(VERSION).$(DATE).js
+	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
+	mv $(tmpfile) boomerang-$(VERSION).$(DATE).js
 	mv boomerang-$(VERSION).$(DATE)* build/
 
 lognormal-debug: lognormal-plugins
