@@ -33,6 +33,7 @@ soasta-push: soasta
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
+	chmod a+r $(tmpfile)
 	mv $(tmpfile) boomerang-$(VERSION).$(DATE).js
 	mv boomerang-$(VERSION).$(DATE)* build/
 
