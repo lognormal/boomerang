@@ -5,7 +5,7 @@
 var key = decodeURIComponent(location.search.replace(/.*key=([\w.-]+).*/, '$1')),
     v   = decodeURIComponent(location.search.replace(/.*v=([0-9.]+).*/, '$1'));
 
-document.write('<sc' + 'ript src="/boomerang/' + key + '"></scr' + 'ipt>');
+document.write('<sc' + 'ript src="' + key + '"></scr' + 'ipt>');
 window.onload = function() {
 	var boom_ver = BOOMR.version.split('.'),
 	    reqd_ver = v.split('.');
