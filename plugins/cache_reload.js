@@ -11,33 +11,22 @@ BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
 var impl = {
-	url: "",
-	initialized: false
+	url: ""
 };
 
 BOOMR.plugins.CACHE_RELOAD = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "CACHE_RELOAD", ["url"]);
 
-		if(this.initalized)
+		if(!impl.url)
 			return this;
 
-		BOOMR.subscribe(
-			"page_ready",
-			function() {
-				if(!impl.url)
-					return;
-				// we use document and not BOOMR.window.document since
-				// we can run inside the boomerang iframe if any
-				var i=document.createElement('iframe');
-				i.style.display="none";
-				i.src=impl.url;
-				document.body.appendChild(i);
-			},
-			null,
-			null
-		);
-		this.initialized = true;
+		// we use document and not BOOMR.window.document since
+		// we can run inside the boomerang iframe if any
+		var i=document.createElement('iframe');
+		i.style.display="none";
+		i.src=impl.url;
+		document.body.appendChild(i);
 
 		return this;
 	},
