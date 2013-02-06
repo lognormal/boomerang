@@ -289,8 +289,14 @@ BOOMR.plugins.RT = {
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer"]);
 
-		// only initialize once.  we still collect config every time init is called, but we set
-		// event handlers only once
+		impl.initFromCookie(true);
+		if(!impl.sessionStart) {
+			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
+		}
+		impl.setCookie(null, false);
+
+		// only initialize once.  we still collect config and check/set cookies
+		// every time init is called, but we attach event handlers only once
 		if(impl.initialized) {
 			return this;
 		}
@@ -329,12 +335,6 @@ BOOMR.plugins.RT = {
 		// it manually with their own timers.  It may not always contain a referrer
 		// (eg: XHR calls).  We set default values for these cases
 		impl.r = impl.r2 = d.referrer.replace(/#.*/, '');
-
-		impl.initFromCookie(true);
-		if(!impl.sessionStart) {
-			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
-		}
-		impl.setCookie(null, false);
 
 		impl.initialized = true;
 		return this;
