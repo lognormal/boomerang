@@ -14,7 +14,7 @@ all: boomerang-$(VERSION).$(DATE).js
 
 lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
-lognormal : tmpfile := $(shell mktemp boomerang.XXXXXX)
+lognormal : tmpfile := boomerang.working
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
