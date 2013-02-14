@@ -90,6 +90,11 @@ impl = {
 		if (target.nodeType == 3) // defeat Safari bug
 			target = target.parentNode;
 
+		// don't capture clicks on flash objects
+		// because of context slowdowns in PepperFlash
+		if(target && target.nodeName.toUpperCase() == "OBJECT" && target.type == "application/x-shockwave-flash") {
+			return;
+		}
 		impl.fireEvent("click", target);
 	},
 
