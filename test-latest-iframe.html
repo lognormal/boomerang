@@ -5,24 +5,29 @@
 if(location.href.match(/doc-domain/)) {
 	document.domain=document.domain;
 }
-(function(url){
-  var doc,where,iframe = document.createElement('iframe');
+(function(){
+  var dom,doc,where,iframe = document.createElement('iframe');
   iframe.src="javascript:false";
   (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
   where = document.getElementsByTagName('script')[0];
   where.parentNode.insertBefore(iframe, where);
   try { doc = iframe.contentWindow.document; }
   catch(e) {
-    iframe.src="javascript:var d=document.open();d.domain='"+document.domain+"';void(0);";
+    dom = document.domain;
+    iframe.src="javascript:var d=document.open();d.domain='"+dom+"';void(0);";
     doc = iframe.contentWindow.document;
   }
-  doc.open().c=function() {
+  doc.open()._l=function() {
     var js = this.createElement("script");
-    js.id = "boomr-if-as"; js.src = url; this.body.appendChild(js);
+    if(dom) this.domain=dom;
+    js.id = "boomr-if-as";
+    js.src = 'boomerang-debug-latest.js';
+    BOOMR_lstart=new Date().getTime();
+    this.body.appendChild(js);
   };
-  doc.write('<body onload="document.c();">');
+  doc.write('<body onload="document._l();">');
   doc.close();
-})('boomerang-debug-latest.js');
+})();
 </script>
 </head>
 <body>
@@ -31,6 +36,7 @@ if(location.href.match(/doc-domain/)) {
 <script>
 document.write('<img src="images/image-2.png?' + Math.random() + '">');
 </script>
+<object id="foo" style="height:100px;width:100px;border:solid 1px gray;" type="application/x-shockwave-flash"></object>
 <div id="ln_widget"></div>
 </body>
 </html>
