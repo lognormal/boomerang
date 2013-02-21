@@ -74,24 +74,35 @@ before the rest of your page does thereby reducing the probability of it blockin
 
 The method described in 3.1 will still block `onload` on most browsers (Internet Explorer not included).  To avoid
 blocking `onload`, we could load boomerang in an iframe.  Stoyan's <a href="http://www.phpied.com/non-onload-blocking-async-js/">documented
-the technique on his blog</a>, so read that for the details.
+the technique on his blog</a>.  We've modified it to work across browsers with different configurations, documented on
+<a href="http://www.lognormal.com/blog/2012/12/12/the-script-loader-pattern/">the lognormal blog</a>.
 
 For boomerang, this is the code you'll include:
 
 ```html
 <script>
 (function(){
-  var iframe = document.createElement('iframe');
-  iframe.src="javascript:false";
+  var dom,doc,where,iframe = document.createElement('iframe');
+  iframe.src = "javascript:false";
   (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
   var where = document.getElementsByTagName('script')[0];
   where.parentNode.insertBefore(iframe, where);
-  var doc = iframe.contentWindow.document;
-  doc.open().write('<body onload="'+
-    'var js = document.createElement(\'script\');'+
-    'js.id = \'boomr-if-as\';'+
-    'js.src = \'http://your-cdn.host.com/path/to/boomerang-<version>.js\';'+
-    'document.body.appendChild(js);">');
+
+  try {
+    doc = iframe.contentWindow.document;
+  } catch(e) {
+    dom = document.domain;
+    iframe.src="javascript:var d=document.open();d.domain='"+dom+"';void(0);";
+    doc = iframe.contentWindow.document;
+  }
+  doc.open()._l = function() {
+    var js = this.createElement("script");
+    if(dom) this.domain = dom;
+    js.id = "js-iframe-async";
+    js.src = 'http://your-cdn.host.com/path/to/boomerang-<version>.js';
+    this.body.appendChild(js);
+  };
+  doc.write('<body onload="document._l();">');
   doc.close();
 })();
 </script>
