@@ -3,14 +3,15 @@ var dc=document,
     s="script",
     dom=w.location.hostname,
     complete=false, running=false,
-    t_start;
+    t_start,
+    load, loaded;
 
 // Don't even bother creating the plugin if this is mhtml
-if(!dom || dom == 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
-var loaded=function() {
+loaded=function() {
 	if(complete) {
 		return;
 	}
@@ -19,7 +20,7 @@ var loaded=function() {
 	BOOMR.sendBeacon();
 };
 
-var load=function() {
+load=function() {
 	var s0=dc.getElementsByTagName(s)[0],
 	    s1=dc.createElement(s);
 
@@ -27,7 +28,7 @@ var load=function() {
 	s1.src="//lognormal.net/boomerang/config.js?key=%client_apikey%&d=" + encodeURIComponent(dom)
 		+ '&t=' + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 		+ '&v=' + BOOMR.version				// boomerang version so we can force a reload for old versions
-		+ (w == window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
+		+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
 		+ (complete?"&r=":"");				// if this is running after complete, then we're just refreshing the crumb
 
 	s0.parentNode.insertBefore(s1, s0);
@@ -53,7 +54,7 @@ BOOMR.plugins.LOGN = {
 			setTimeout(load, 5.5*60*1000);
 
 			BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
-			if(typeof BOOMR_configt != "undefined") {
+			if(typeof BOOMR_configt === "number") {
 				BOOMR.addVar('t_configfb', BOOMR_configt-t_start);
 				delete BOOMR_configt;
 			}
@@ -61,7 +62,7 @@ BOOMR.plugins.LOGN = {
 		}
 
 		running=true;
-		if(w == window) {
+		if(w === window) {
 			BOOMR.subscribe("page_ready", load, null, null);
 		}
 		else {

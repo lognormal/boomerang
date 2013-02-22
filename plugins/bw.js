@@ -6,6 +6,7 @@
 
 // This is the Bandwidth & Latency plugin abbreviated to BW
 (function() {
+var impl, images;
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
@@ -20,7 +21,7 @@ BOOMR.plugins = BOOMR.plugins || {};
 // bytes respectively
 // See https://spreadsheets.google.com/ccc?key=0AplxPyCzmQi6dDRBN2JEd190N1hhV1N5cHQtUVdBMUE&hl=en_GB
 // for a spreadsheet with the details
-var images=[
+images=[
 	{ name: "image-0.png", size: 11483, timeout: 1400 },
 	{ name: "image-1.png", size: 40658, timeout: 1200 },
 	{ name: "image-2.png", size: 164897, timeout: 1300 },
@@ -39,7 +40,7 @@ images.start = 0;
 images.l = { name: "image-l.gif", size: 35, timeout: 1000 };
 
 // private object
-var impl = {
+impl = {
 	// properties
 	base_url: '',
 	timeout: 15000,
@@ -171,7 +172,7 @@ var impl = {
 				bandwidths_corrected.push(bw_c);
 
 				if(r[j].t < this.latency.mean) {
-					debug_info.push("" + j + "_" + r[j].t);
+					debug_info.push(j + "_" + r[j].t);
 				}
 			}
 		}
@@ -350,9 +351,7 @@ var impl = {
 
 		// we terminate if an image timed out because that means the connection is
 		// too slow to go to the next image
-		if(i >= images.end-1
-			|| typeof this.results[this.nruns-run].r[i+1] !== "undefined"
-		) {
+		if(i >= images.end-1 || this.results[this.nruns-run].r[i+1] !== undefined) {
 			BOOMR.debug(this.results[this.nruns-run], "bw");
 			// First run is a pilot test to decide what the largest image
 			// that we can download is. All following runs only try to
