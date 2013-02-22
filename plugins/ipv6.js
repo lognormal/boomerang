@@ -68,7 +68,7 @@ var impl = {
 			a = arguments;
 
 		// Terminate if we've reached end of test list
-		if(!which || !(which in this.timers)) {
+		if(!which || !this.timers.hasOwnProperty(which)) {
 			this.done();
 			return false;
 		}
@@ -170,10 +170,9 @@ BOOMR.plugins.IPv6 = {
 			impl.complete = true;
 			return this;
 		}
-		else {
-			impl.ipv6_url = impl.ipv6_url.replace(/^https:/, 'http:');
-			impl.host_url = impl.host_url.replace(/^https:/, 'http:');
-		}
+
+		impl.ipv6_url = impl.ipv6_url.replace(/^https:/, 'http:');
+		impl.host_url = impl.host_url.replace(/^https:/, 'http:');
 
 		BOOMR.subscribe("page_ready", impl.start, null, impl);
 		BOOMR.subscribe("page_unload", impl.skip, null, impl);

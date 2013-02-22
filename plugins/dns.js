@@ -31,7 +31,7 @@ var impl = {
 		}
 
 		var random = Math.random().toString(36),
-		    cache_bust = "" + (new Date().getTime()) + (Math.random());
+		    cache_bust = (new Date().getTime()) + "." + (Math.random());
 
 		impl.gen_url = impl.base_url.replace(/\*/, random);
 
@@ -46,7 +46,7 @@ var impl = {
 		var cache_bust;
 		impl.t_dns = new Date().getTime() - impl.t_start;
 
-		cache_bust = "" + (new Date().getTime()) + (Math.random());
+		cache_bust = (new Date().getTime()) + "." + (Math.random());
 
 		impl.img = new Image();
 		impl.img.onload = impl.B_loaded;

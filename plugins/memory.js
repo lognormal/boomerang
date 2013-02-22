@@ -27,12 +27,12 @@ var impl = {
 		    p  = w.performance,
 		    c  = w.console,
 		    d  = w.document,
-		    _f = (({}).toString.call(w.opera) == '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
-		    m;
+		    fn = (({}).toString.call(w.opera) === '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
+		    m, f;
 
 		// handle IE6/7 weirdness regarding host objects
 		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
-		var f  = (typeof _f.call === 'undefined' ? function(tag) { return _f(tag) } : _f);
+		f  = (fn.call === undefined ? function(tag) { return fn(tag); } : fn);
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
 

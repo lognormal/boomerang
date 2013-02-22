@@ -28,16 +28,16 @@ BOOMR_start = new Date().getTime();
 (function(w) {
 
 // This is the only block where we use document without the w. qualifier
-if(w.parent != w
+if(w.parent !== w
 		&& document.getElementById('boomr-if-as')
-		&& document.getElementById('boomr-if-as').nodeName.toLowerCase() == 'script') {
+		&& document.getElementById('boomr-if-as').nodeName.toLowerCase() === 'script') {
 	w = w.parent;
 }
 
 var impl, boomr, k, d=w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
-if(typeof w.BOOMR === "undefined") {
+if(w.BOOMR === undefined) {
 	w.BOOMR = {};
 }
 BOOMR = w.BOOMR;
@@ -84,15 +84,16 @@ impl = {
 
 	onclick_handler: function(ev) {
 		var target;
-		if (!ev) ev = w.event;
-		if (ev.target) target = ev.target;
-		else if (ev.srcElement) target = ev.srcElement;
-		if (target.nodeType == 3) // defeat Safari bug
+		if (!ev) { ev = w.event; }
+		if (ev.target) { target = ev.target; }
+		else if (ev.srcElement) { target = ev.srcElement; }
+		if (target.nodeType === 3) {// defeat Safari bug
 			target = target.parentNode;
+		}
 
 		// don't capture clicks on flash objects
 		// because of context slowdowns in PepperFlash
-		if(target && target.nodeName.toUpperCase() == "OBJECT" && target.type == "application/x-shockwave-flash") {
+		if(target && target.nodeName.toUpperCase() === "OBJECT" && target.type === "application/x-shockwave-flash") {
 			return;
 		}
 		impl.fireEvent("click", target);
@@ -138,10 +139,12 @@ boomr = {
 		objectToString: function(o, separator) {
 			var value = [], k;
 
-			if(!o || typeof o != "object")
+			if(!o || typeof o !== "object") {
 				return o;
-			if(typeof separator === "undefined")
+			}
+			if(separator === undefined) {
 				separator="\n\t";
+			}
 
 			for(k in o) {
 				if(Object.prototype.hasOwnProperty.call(o, k)) {
@@ -233,7 +236,7 @@ boomr = {
 			}
 
 			for(i=0; i<properties.length; i++) {
-				if(typeof config[plugin_name][properties[i]] !== "undefined") {
+				if(config[plugin_name][properties[i]] !== undefined) {
 					o[properties[i]] = config[plugin_name][properties[i]];
 					props++;
 				}
@@ -252,49 +255,50 @@ boomr = {
 		}
 
 		for(i=0; i<properties.length; i++) {
-			if(typeof config[properties[i]] !== "undefined") {
+			if(config[properties[i]] !== undefined) {
 				impl[properties[i]] = config[properties[i]];
 			}
 		}
 
-		if(typeof config.log  !== "undefined") {
+		if(config.log  !== undefined) {
 			this.log = config.log;
 		}
 		if(!this.log) {
-			this.log = function(m,l,s) { };
+			this.log = function(/* m,l,s */) { };
 		}
 
 		for(k in this.plugins) {
-			// config[pugin].enabled has been set to false
-			if( config[k]
-				&& ("enabled" in config[k])
-				&& config[k].enabled === false
-			) {
-				impl.disabled_plugins[k] = 1;
-				continue;
-			}
-			else if(impl.disabled_plugins[k]) {
-				delete impl.disabled_plugins[k];
-			}
+			if(this.plugins.hasOwnProperty(k)) {
+				// config[pugin].enabled has been set to false
+				if( config[k]
+					&& config[k].hasOwnProperty("enabled")
+					&& config[k].enabled === false
+				) {
+					impl.disabled_plugins[k] = 1;
+					continue;
+				}
+				else if(impl.disabled_plugins[k]) {
+					delete impl.disabled_plugins[k];
+				}
 
-			// plugin exists and has an init method
-			if(this.plugins.hasOwnProperty(k)
-				&& typeof this.plugins[k].init === "function"
-			) {
-				this.plugins[k].init(config);
+				// plugin exists and has an init method
+				if(typeof this.plugins[k].init === "function") {
+					this.plugins[k].init(config);
+				}
 			}
 		}
 
-		if(impl.handlers_attached)
+		if(impl.handlers_attached) {
 			return this;
+		}
 
 		// The developer can override onload by setting autorun to false
-		if(!impl.onloadfired && (!("autorun" in config) || config.autorun !== false)) {
+		if(!impl.onloadfired && (config.autorun === undefined || config.autorun !== false)) {
 			if(d.readyState && d.readyState === "complete") {
 				this.setImmediate(BOOMR.page_ready, null, null, BOOMR);
 			}
 			else {
-				if("onpagehide" in w) {
+				if(w.onpagehide || w.onpagehide === null) {
 					impl.addListener(w, "pageshow", BOOMR.page_ready);
 				}
 				else {
@@ -305,27 +309,32 @@ boomr = {
 
 		impl.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
-		// visibilitychange is useful to detect if the page loaded through prerender
-		// or if the page never became visible
-		// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
-		// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
-		var fire_visible = function() { impl.fireEvent("visibility_changed"); }
-		if(d.webkitVisibilityState)
-			impl.addListener(d, "webkitvisibilitychange", fire_visible);
-		else if(d.msVisibilityState)
-			impl.addListener(d, "msvisibilitychange", fire_visible);
-		else if(d.visibilityState)
-			impl.addListener(d, "visibilitychange", fire_visible);
+		(function() {
+			// visibilitychange is useful to detect if the page loaded through prerender
+			// or if the page never became visible
+			// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
+			// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
+			var fire_visible = function() { impl.fireEvent("visibility_changed"); };
+			if(d.webkitVisibilityState) {
+				impl.addListener(d, "webkitvisibilitychange", fire_visible);
+			}
+			else if(d.msVisibilityState) {
+				impl.addListener(d, "msvisibilitychange", fire_visible);
+			}
+			else if(d.visibilityState) {
+				impl.addListener(d, "visibilitychange", fire_visible);
+			}
 
-		impl.addListener(d, "mouseup", impl.onclick_handler);
+			impl.addListener(d, "mouseup", impl.onclick_handler);
 
-		if(!("onpagehide" in w)) {
-			// This must be the last one to fire
-			// We only clear w on browsers that don't support onpagehide because
-			// those that do are new enough to not have memory leak problems of
-			// some older browsers
-			impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
-		}
+			if(!w.onpagehide && w.onpagehide !== null) {
+				// This must be the last one to fire
+				// We only clear w on browsers that don't support onpagehide because
+				// those that do are new enough to not have memory leak problems of
+				// some older browsers
+				impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
+			}
+		}());
 
 		impl.handlers_attached = true;
 		return this;
@@ -366,7 +375,7 @@ boomr = {
 	},
 
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
-		var i, h, e;
+		var i, h, e, unload_handler;
 
 		if(!impl.events.hasOwnProperty(e_name)) {
 			return this;
@@ -384,7 +393,7 @@ boomr = {
 		e.push([ fn, cb_data || {}, cb_scope || null ]);
 
 		// attaching to page_ready after onload fires, so call soon
-		if(e_name == 'page_ready' && impl.onloadfired) {
+		if(e_name === 'page_ready' && impl.onloadfired) {
 			this.setImmediate(fn, null, cb_data, cb_scope);
 		}
 
@@ -395,14 +404,14 @@ boomr = {
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
 		if(e_name === 'page_unload') {
-			var unload_handler = function(ev) {
+			unload_handler = function(ev) {
 							if(fn) {
 								fn.call(cb_scope, ev || w.event, cb_data);
 							}
 						};
 			// pagehide is for iOS devices
 			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
-			if("onpagehide" in w) {
+			if(w.onpagehide || w.onpagehide === null) {
 				impl.addListener(w, "pagehide", unload_handler);
 			}
 			else {
@@ -429,15 +438,15 @@ boomr = {
 		return this;
 	},
 
-	removeVar: function() {
+	removeVar: function(arg0) {
 		var i, params;
 		if(!arguments.length) {
 			return this;
 		}
 
 		if(arguments.length === 1
-				&& Object.prototype.toString.apply(arguments[0]) === "[object Array]") {
-			params = arguments[0];
+				&& Object.prototype.toString.apply(arg0) === "[object Array]") {
+			params = arg0;
 		}
 		else {
 			params = arguments;
@@ -506,7 +515,7 @@ boomr = {
 		impl.vars.v = BOOMR.version;
 		impl.vars.u = d.URL.replace(/#.*/, '');
 		// use d.URL instead of location.href because of a safari bug
-		if(w != window) {
+		if(w !== window) {
 			impl.vars["if"] = "";
 		}
 
@@ -556,23 +565,26 @@ boomr = {
 };
 
 delete BOOMR_start;
-if(typeof BOOMR_lstart == 'number') {
+if(typeof BOOMR_lstart === 'number') {
 	boomr.t_lstart = BOOMR_lstart;
 	delete BOOMR_lstart;
 }
 
-var make_logger = function(l) {
-	return function(m, s) {
-		this.log(m, l, "boomerang" + (s?"."+s:"")); return this;
+(function() {
+	var make_logger = function(l) {
+		return function(m, s) {
+			this.log(m, l, "boomerang" + (s?"."+s:""));
+			return this;
+		};
 	};
-};
 
-boomr.debug = make_logger("debug");
-boomr.info = make_logger("info");
-boomr.warn = make_logger("warn");
-boomr.error = make_logger("error");
+	boomr.debug = make_logger("debug");
+	boomr.info = make_logger("info");
+	boomr.warn = make_logger("warn");
+	boomr.error = make_logger("error");
+}());
 
-if(typeof console !== "undefined" && typeof console.log !== "undefined") {
+if(typeof console === "object" && console.log !== undefined) {
 	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
 }
 
@@ -592,4 +604,3 @@ BOOMR.plugins = BOOMR.plugins || {};
 
 
 
-/*jslint white: false, devel: true, onevar: true, browser: true, undef: true, nomen: true, regexp: false, continue: true, plusplus: false, bitwise: false, newcap: true, maxerr: 50, indent: 4 */
