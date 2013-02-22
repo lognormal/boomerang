@@ -83,8 +83,9 @@ impl = {
 		subcookies.obo = this.oboError;
 
 		// If we got a beacon_url from config, set it into the cookie
-		if(this.beacon_url)
+		if(this.beacon_url) {
 			subcookies.bcn = this.beacon_url;
+		}
 
 		BOOMR.debug("Setting cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
@@ -153,8 +154,9 @@ impl = {
 			this.oboError = parseInt(subcookies.obo, 10)||0;
 		}
 
-		if(subcookies.bcn)
+		if(subcookies.bcn) {
 			this.beacon_url = subcookies.bcn;
+		}
 
 	},
 
