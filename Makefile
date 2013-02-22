@@ -27,7 +27,7 @@ soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 
 soasta-push: soasta
 	git tag soasta.$(VERSION).$(DATE)
-	cp $(LOGNORMAL_PLUGINS) ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
+	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 	cp boomerang-reload.html ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/boomerang/
 
