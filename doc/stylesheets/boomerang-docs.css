@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+ * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+ */
+
+body { font-size: 0.9em; background-color: #eeeee4; padding: 5% 10% 15% 10%; margin: 0; font-family: "Trebuchet MS",Trebuchet,Tahoma,Verdana,Sans-Serif; }
+a { color: #571; }
+a:hover, a:active { color: #350; }
+h1 { padding-left: .8in; text-indent: -.8in; }
+h2, h2 a, h3, h3 a, h4, h4 a { color:#793; }
+
+p#results { background-color: #ffa; border: solid 2px #d82; padding: 1em; position: absolute; width: 25%; overflow: hidden; white-space: pre;}
+p#results:hover { width: auto; }
+div#dynamic-content { font-size: 0.5em; border: solid 3px #9a5; padding: 1em; margin: 1em 10% 1em 40%; text-align: justify; color: #9a8; }
+div#dynamic-content > p:first-child { font-size: 2em; }
+
+dd strong { color: #a43; background-color: #ddc; }
+dd h3 { color: black; margin-left: -0.8em; }
+
+dl.api {border-bottom: solid 1px #aaa; }
+dl.api > dt { font-weight: bolder; border-top: solid 1px #aaa; padding: 3px; }
+dl.api > dd { font-size: 0.9em; color: #222; }
+dl.api > dd > ul { padding-bottom: 0.5em; }
+
+p.perma-link { margin-top: 4em; font-size: 0.9em; }
+
+pre { line-height:1.4em; font-size: 1.1em; margin-right: 4%; padding: 1em 1em 1em 1.5em; background-color: #bba; border-left: solid 5px #9a5; }
+pre em { background-color: #ccb; color: #a32; font-style: normal; padding: 2px;}
+pre span.comment { background-color: #ccb; color: #56a; padding: 2px;}
+
+pre span.ni { color: #886; }
+
+a.fn { position: relative; top: -0.4em; font-size: 0.7em; text-decoration: none; }
+#footnotes { font-size: 0.8em; width: 50%; text-align: justify; border-top: solid 1px #888; padding-right: 0.5em; margin: 3em 0 0 0;}
+#footnotes li { margin-bottom: 0.8em; }

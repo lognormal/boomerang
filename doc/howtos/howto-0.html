@@ -1,12 +1,8 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-<title>Boomerang Howto #0: How to read data out of a beacon or before_beacon event handler</title>
-<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
-</head>
-<body>
-<span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
+---
+layout: default
+title: Boomerang Howto #0: How to read data out of a beacon or before_beacon event handler
+---
+
 <h1>Boomerang Howto #0:<br>How to read data out of a beacon or before_beacon event handler</h1>
 <p>
 For all subsequent examples, you'll need to pull performance data out of the beacon or out of a
@@ -196,16 +192,16 @@ The latest code and docs is available on <a href="http://github.com/lognormal/bo
 <p id="results">
 </p>
 
-<script src="../../boomerang.js" type="text/javascript"></script>
-<script src="../../plugins/bw.js" type="text/javascript"></script>
-<script src="../../plugins/navtiming.js" type="text/javascript"></script>
-<script src="../../plugins/rt.js" type="text/javascript"></script>
+<script src="/boomerang.js" type="text/javascript"></script>
+<script src="/plugins/bw.js" type="text/javascript"></script>
+<script src="/plugins/navtiming.js" type="text/javascript"></script>
+<script src="/plugins/rt.js" type="text/javascript"></script>
 <script src="howtos.js" type="text/javascript"></script>
 <script type="text/javascript">
 BOOMR.init({
 		user_ip: '10.0.0.1',
 		BW: {
-			base_url: '../../images/',
+			base_url: '/images/',
 			cookie: 'HOWTO-BA'
 		},
 		RT: {
@@ -213,9 +209,3 @@ BOOMR.init({
 		}
 	});
 </script>
-</body>
-</html>
-<!--
-    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
--->
