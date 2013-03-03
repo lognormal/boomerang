@@ -3,4 +3,4 @@ layout: default
 title: boomerang
 ---
 
-Test page
+All documentation ca be found at [/boomerang/doc](the following location).
