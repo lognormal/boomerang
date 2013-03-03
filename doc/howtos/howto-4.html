@@ -1,8 +1,9 @@
 ---
-layout: howto
-title: Boomerang Howto 0
-howto_title: How to read data out of a beacon or before_beacon event handler
+layout: default
+title: boomerang Howto 4
 ---
+
+<h2>Measure more than just page load time</2>
 
 <!DOCTYPE HTML>
 <html>
@@ -28,7 +29,6 @@ BOOMR.init({
 BOOMR.plugins.RT.setTimer("t_js", new Date().getTime() - t_pagestart).
 		startTimer("t_head");
 </script>
-<title>Boomerang Howto #4: Measure more than just page load time</title>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
 <script type="text/javascript">
@@ -37,8 +37,7 @@ BOOMR.plugins.RT.endTimer("t_head").
 </script>
 </head>
 <body>
-<span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
-<h1>Boomerang Howto #4: Measure more than just page load time</h1>
+
 <p>
 See <a href="../use-cases.html#uc-4">use case #4</a> for a description of this requirement.
 </p>
@@ -159,5 +158,3 @@ BOOMR.plugins.RT.startTimer("t_howtojs");
 <script type="text/javascript">
 BOOMR.plugins.RT.endTimer("t_howtojs").endTimer("t_body");
 </script>
-</body>
-</html>

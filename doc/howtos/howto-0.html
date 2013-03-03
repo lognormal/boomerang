@@ -1,8 +1,9 @@
 ---
-layout: howto
-title: Boomerang Howto 0
-howto_title: How to read data out of a beacon or before_beacon event handler
+layout: default
+title: boomerang Howto 0
 ---
+
+<h2>How to read data out of a beacon or before_beacon event handler</h2>
 
 <p>
 For all subsequent examples, you'll need to pull performance data out of the beacon or out of a
@@ -17,14 +18,14 @@ will use as a beacon.  We'll look at the back end details a little later.  You t
 about your beacon URL by passing the <code>beacon_url</code> parameter to the <code>BOOMR.init()</code>
 method:
 </p>
-<pre>
-&lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script type="text/javascript"&gt;
+{% highlight javascript %}
+<script src="boomerang.js" type="text/javascript">
+<script type="text/javascript">
 BOOMR.init({
-		beacon_url: "http://yoursite.com/path/to/beacon.gif"
-	});
-&lt;/script&gt;
-</pre>
+	beacon_url: "http://yoursite.com/path/to/beacon.gif"
+});
+</script>
+{% endhighlight %}
 
 <p>
 I've used beacon.gif as an example, but it could really be any thing.  You could write a script
@@ -81,11 +82,11 @@ to inspect performance numbers in javascript itself and perhaps make some decisi
 You can get at this data before the beacon fires by subscribing to the <code>before_beacon</code> event.
 </p>
 
-<pre>
+{% highlight javascript %}
 BOOMR.subscribe('before_beacon', function(o) {
-	<span class="comment">// Do something with o</span>
+	// Do something with o
 });
-</pre>
+{% endhighlight %}
 
 <p>
 Your event handler is called with a single object parameter.  This object contains all of the beacon parameters
@@ -96,7 +97,7 @@ described above except for the <code>v</code> (version) parameter.  To get boome
 <p>
 In all these howto documents, we use the following code in the <code>before_beacon</code> handler:
 </p>
-<pre>
+{% highlight javascript %}
 BOOMR.subscribe('before_beacon', function(o) {
 	var html = "";
 	if(o.t_done) { html += "This page took " + o.t_done + "ms to load&lt;br&gt;"; }
@@ -105,7 +106,7 @@ BOOMR.subscribe('before_beacon', function(o) {
 
 	document.getElementById('results').innerHTML = html;
 });
-</pre>
+{% endhighlight %}
 
 <h2>Back end script</h2>
 <p>
@@ -115,7 +116,7 @@ these parameters are in a variable named <code>params</code>.  The code is in Ja
 it in any language that you like.
 </p>
 
-<pre>
+{% highlight javascript %}
 function extract_boomerang_data(params)
 {
 	var bw_buckets = [64, 256, 1024, 8192, 30720],
@@ -123,18 +124,18 @@ function extract_boomerang_data(params)
 	    i, url, page_id, ip, ua, woeid;
 
 
-	<span class="comment">// First validate your beacon, make sure all datatypes               </span>
-	<span class="comment">// are correct and values within reasonable range                    </span>
-	<span class="comment">// We'll also want to detect fake beacons, but that's more complex   </span>
+	// First validate your beacon, make sure all datatypes
+	// are correct and values within reasonable range
+	// We'll also want to detect fake beacons, but that's more complex
 	if(! validate_beacon(params)) {
 		return false;
 	}
 
-	<span class="comment">// You may also want to do some kind of random sampling at this point</span>
+	// You may also want to do some kind of random sampling at this point
 
-	<span class="comment">// Figure out a bandwidth bucket.                                    </span>
-	<span class="comment">// we could get more complex and consider bw_err as well,            </span>
-	<span class="comment">// but for this example I'll ignore it                               </span>
+	// Figure out a bandwidth bucket.
+	// we could get more complex and consider bw_err as well,
+	// but for this example I'll ignore it
 	for(i=0; i&lt;bw_buckets.length; i++) {
 		if(params.bw &lt;= bw_buckets[i]) {
 			bw_bucket = i;
@@ -142,27 +143,27 @@ function extract_boomerang_data(params)
 		}
 	}
 
-	<span class="comment">// Now figure out a page id from the u parameter                     </span>
-	<span class="comment">// Since we might have a very large number of URLs that all          </span>
-	<span class="comment">// map onto a very small number (possibly 1) of distinct page types  </span>
-	<span class="comment">// It's good to create page groups to simplify performance analysis. </span>
+	// Now figure out a page id from the u parameter
+	// Since we might have a very large number of URLs that all
+	// map onto a very small number (possibly 1) of distinct page types
+	// It's good to create page groups to simplify performance analysis.
 
-	url = canonicalize_url(params.u); <span class="comment">// get a canonical form for the URL</span>
-	page_id = get_page_id(url);	  <span class="comment">// get a page id.  (many-&gt;1 map?)  </span>
+	url = canonicalize_url(params.u); // get a canonical form for the URL
+	page_id = get_page_id(url);	  // get a page id.  (many-&gt;1 map?)
 
 
-	<span class="comment">// At this point we can extract other information from the request   </span>
-	<span class="comment">// eg, the user's IP address (good for geo location) and user agent  </span>
-	ip = get_user_ip();              <span class="comment">// get user's IP from request       </span>
-	woeid = ip_to_woeid(ip);         <span class="comment">// convert IP to a Where on earth ID</span>
-	ua = get_normalized_uastring();	 <span class="comment">// get a normalized useragent string</span>
+	// At this point we can extract other information from the request
+	// eg, the user's IP address (good for geo location) and user agent
+	ip = get_user_ip();              // get user's IP from request
+	woeid = ip_to_woeid(ip);         // convert IP to a Where on earth ID
+	ua = get_normalized_uastring();	 // get a normalized useragent string
 
-	<span class="comment">// Now insert the data into our database                             </span>
+	// Now insert the data into our database
 	insert_data(page_id, params.t_done, params.bw, params.bw_err, bw_bucket, params.lat, params.lat_err, ip, woeid, ua);
 
 	return true;
 }
-</pre>
+{% endhighlight %}
 
 <h3>Scaling up</h3>
 <p>

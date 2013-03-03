@@ -385,6 +385,24 @@ Full-Width Styles
   text-shadow: #FFF 0px 0px 10px;
 }
 
+#navlist li {
+  display: inline;
+  list-style-type: none;
+  padding-right: 20px;
+}
+
+#header_wrap a {
+  color: #FFF;
+}
+
+#results {
+  background-color: #E4E4E4;
+  border: solid 2px #525252;
+  padding: 1em;
+  width: 65%;
+  overflow: hidden;
+  white-space: pre;
+}
 
 /*******************************************************************************
 Small Device Styles

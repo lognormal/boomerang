@@ -1,3 +1,12 @@
+---
+layout: default
+title: Todo for boomerang, a Real User Monitoring library
+---
+
+## List of things to do
+
+Here are some of the things you can tackle:
+
 1. Add random sampling
    This needs to be a little intelligent because plugins may have different
    criteria for sampling.  For example, the RT plugin requires two pages --
