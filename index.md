@@ -27,7 +27,7 @@ and we have a whole bunch of documentation about it.
 
 ## In the press
 
-[Elsewhere](press.html) — A list of articles about boomerang
+[Elsewhere](doc/press.html) — A list of articles about boomerang
 
 ## Who built it?
 

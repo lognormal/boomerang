@@ -3,7 +3,7 @@ layout: default
 title: Boomerang off the press
 ---
 
-## articles talking about boomerang
+## Articles talking about boomerang
 
 This is a list of articles (that we are aware of) that speak about boomerang.  If you write one,
 or know of one that isn't here, let us know, and we'll add it.
