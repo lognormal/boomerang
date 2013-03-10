@@ -15,15 +15,15 @@ and we have a whole bunch of documentation about it.
 
 ## Users
 
-- [Use cases](use-cases.html) — Just some of the uses of boomerang that we can think of
-- [Howto](howtos/index.html) — Short recipes on how to do a bunch of things with boomerang
+- [Use cases](doc/use-cases.html) — Just some of the uses of boomerang that we can think of
+- [Howto](doc/howtos/index.html) — Short recipes on how to do a bunch of things with boomerang
 
 ## Developers
 
-- [How it works](methodology.html) — A short description of how boomerang works internally
-- [API](api/index.html) — For all you hackers out there
-- [Bugs, hugs and code](community.html) — This is where the community comes in
-- [TODO](TODO.txt) — There's a lot that we still need to do.  Wanna help?
+- [How it works](doc/methodology.html) — A short description of how boomerang works internally
+- [API](doc/api/index.html) — For all you hackers out there
+- [Bugs, hugs and code](doc/community.html) — This is where the community comes in
+- [TODO](doc/TODO.txt) — There's a lot that we still need to do.  Wanna help?
 
 ## In the press
 
