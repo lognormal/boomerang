@@ -2,11 +2,10 @@
 layout: default
 title: boomerang Howto 0
 ---
-[All Docs](../) | [Index](index.html)
+[All Docs](/) | [Index](index.html)
 
-Boomerang Howto \#0:\
-How to read data out of a beacon or before\_beacon event handler
-================================================================
+Boomerang Howto \#0: How to read data out of a beacon or before\_beacon event handler
+======================================================================================
 
 For all subsequent examples, you'll need to pull performance data out of
 the beacon or out of a `before_beacon` event handler. This howto
@@ -54,29 +53,37 @@ u
 
 t\_done
 :   **[optional]** Perceived load time of the page.
+
 t\_page
 :   **[optional]** Time taken from the head of the page to page\_ready.
+
 t\_resp
 :   **[optional]** Time taken from the user initiating the request to
     the first byte of the response.
+
 t\_other
 :   **[optional]** Comma separated list of additional timers set by page
     developer. Each timer is of the format `name|value`. The following
     timers may be included:
+
     t\_load
     :   **[optional]** If the page were prerendered, this is the time to
         fetch and prerender the page.
+
     t\_prerender
     :   **[optional]** If the page were prerendered, this is the time
         from start of prefetch to the actual page display. It may only
         be useful for debugging.
+
     t\_postrender
     :   **[optional]** If the page were prerendered, this is the time
         from prerender finish to actual page display. It may only be
         useful for debugging.
+
     boomerang
     :   The time it took boomerang to load up from first byte to last
         byte
+
     boomr\_fb
     :   **[optional** The time it took from the start of page load to
         the first byte of boomerang. Only included if we know when page
@@ -84,16 +91,20 @@ t\_other
 
 r
 :   URL of page that set the start time of the beacon.
+
 r2
 :   **[optional]** URL of referrer of current page. Only set if
     different from `r` and `strict_referrer` has been explicitly turned
     off.
+
 rt.start
 :   Specifies where the start time came from. May be one of `cookie` for
     the start cookie, `navigation` for the W3C navigation timing API,
     `csi` for older versions of Chrome or `gtb` for the Google Toolbar.
+
 rt.bstart
 :   The timestamp when boomerang showed up on the page
+
 rt.end
 :   The timestamp when the done() method was called
 
@@ -101,13 +112,17 @@ rt.end
 
 bw
 :   User's measured bandwidth in bytes per second
+
 bw\_err
 :   95% confidence interval margin of error in measuring user's
     bandwidth
+
 lat
 :   User's measured HTTP latency in milliseconds
+
 lat\_err
 :   95% confidence interval margin of error in measuring user's latency
+
 bw\_time
 :   Timestamp (seconds since the epoch) on the user's browser when the
     bandwidth and latency was measured
