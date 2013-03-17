@@ -60,7 +60,7 @@ The latest code and docs is available on
 </div>
 
 {% raw %}
-<script type="text/javascript" src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-base-min.js&3.1.1/build/oop/oop-min.js&3.1.1/build/yui/yui-later-min.js&3.1.1/build/event-custom/event-custom-base-min.js&3.1.1/build/querystring/querystring-stringify-simple-min.js&3.1.1/build/io/io-base-min.js"></script>
+<script src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-base-min.js&3.1.1/build/oop/oop-min.js&3.1.1/build/yui/yui-later-min.js&3.1.1/build/event-custom/event-custom-base-min.js&3.1.1/build/querystring/querystring-stringify-simple-min.js&3.1.1/build/io/io-base-min.js" type="text/javascript" > </script>
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
