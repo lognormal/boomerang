@@ -68,7 +68,7 @@ out what this error is, but for now we'll just do it once.
 BOOMR.init({
 		user_ip: '10.0.0.1',
 		BW: {
-			base_url: '../../images/',
+			base_url: '/boomerang/images/',
 			cookie: 'HOWTO-BA'
 		},
 		RT: {
