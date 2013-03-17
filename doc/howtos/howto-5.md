@@ -90,9 +90,6 @@ Inside your `before_beacon` event handler, simply remove all parameters.
     });
 {% endhighlight %}
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
 <div id="results"></div>
 
 {% raw %}

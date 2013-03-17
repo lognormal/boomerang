@@ -206,10 +206,6 @@ is, however, possible to get up and running by doing nothing more than
 putting your bandwidth images in the right directory, including the code
 and calling `init()`.
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
-
 <div id="results">
 </div>
 

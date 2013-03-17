@@ -50,9 +50,6 @@ code below, but you could use anything you like.
     });
 {% endhighlight %}
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
 <div id="results">
 </div>
 

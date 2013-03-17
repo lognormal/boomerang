@@ -156,9 +156,6 @@ options.
     </script>
 {% endhighlight %}
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
 <div id="results">
 </div>
 
