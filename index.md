@@ -23,7 +23,7 @@ and we have a whole bunch of documentation about it.
 - [How it works](doc/methodology.html) — A short description of how boomerang works internally
 - [API](doc/api/index.html) — For all you hackers out there
 - [Bugs, hugs and code](doc/community.html) — This is where the community comes in
-- [TODO](doc/TODO.txt) — There's a lot that we still need to do.  Wanna help?
+- [TODO](doc/TODO.html) — There's a lot that we still need to do.  Wanna help?
 
 ## In the press
 

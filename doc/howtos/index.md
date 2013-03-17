@@ -35,5 +35,5 @@ HOWTO
 TODO
 ----
 
--   [TODO 1](../TODO.txt) — Measure a random sample of users instead of
+-   [TODO 1](../TODO.html) — Measure a random sample of users instead of
     all users
