@@ -1,7 +1,10 @@
---- layout: default title: boomerang Howto 10 ---
+---
+layout: default
+title: boomerang Howto 10
+---
 
-\>load time of a page prerendered by Google Chrome
---------------------------------------------------
+Load time of a page prerendered by Google Chrome
+------------------------------------------------
 
 This use case is based on Google Chrome's
 [prerender](http://code.google.com/chrome/whitepapers/prerender.html)
@@ -31,4 +34,23 @@ wasn't prerendered, and t\_done is the actual perceived load time.
 The latest code and docs is available on
 [github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
 
+<div id="results">
+</div>
 
+{% raw %}
+<script src="/boomerang/boomerang.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/rt.js" type="text/javascript"> </script>
+<script src="howtos.js" type="text/javascript"> </script>
+<script type="text/javascript">
+BOOMR.init({
+		BW: {
+			enabled: false
+		},
+		RT: {
+			cookie: 'HOWTO-RT'
+		}
+	});
+</script>
+{% endraw %}

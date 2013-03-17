@@ -1,9 +1,9 @@
---- layout: default
-title: Boomerang Howto \#10: Load time of a page prerendered by Google Chrome 
+---
+layout: default
+title: Boomerang Howto 10
 ---
 
-boomerang howto \#10:\
-load time of a page prerendered by Google Chrome
+Load time of a page prerendered by Google Chrome
 ================================================
 
 This use case is based on Google Chrome's
@@ -36,7 +36,23 @@ rendering to complete.
 Go to [Page \#2](howto-10-page%232.html) now to see the results of the
 page load test.
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
+<div id="results">
+</div>
 
-
+{% raw %}
+<script src="/boomerang/boomerang.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/rt.js" type="text/javascript"> </script>
+<script src="howtos.js" type="text/javascript"> </script>
+<script type="text/javascript">
+BOOMR.init({
+		BW: {
+			enabled: false
+		},
+		RT: {
+			cookie: 'HOWTO-RT'
+		}
+	});
+</script>
+{% endraw %}
