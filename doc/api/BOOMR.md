@@ -1,6 +1,6 @@
 ---
 layout: default
-title: How to do stuff with boomerang
+title: API - BOOMR
 ---
 
 [All Docs](../) | [Index](index.html)

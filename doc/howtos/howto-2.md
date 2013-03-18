@@ -16,7 +16,7 @@ it:
 1.  Copy boomerang.js and the images/ directory into your document root
 2.  Add the code below to your page, somewhere before your XHR calls.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -25,7 +25,7 @@ it:
             auto_run: false
         });
     </script>
-{% endhighlight %}
+    {% endhighlight %}
 
 Next fetch your content. Right before the call to fetch content, start
 the timer. The load time timer is called `t_done`. In the callback
@@ -33,14 +33,14 @@ function where the content has been fetched, call the `done()` method.
 This measures and beacons back the response time. I use YUI 3 in the
 code below, but you could use anything you like.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     YUI().use("io-base", function(Y) {
         var uri = "dynamic-content.txt";
 
         function complete(id, o) {
             var html = o.responseText;
-        document.getElementById("dynamic-content").innerHTML = html;
-        BOOMR.plugins.RT.done();    // Tell boomerang to measure time and fire a beacon
+            document.getElementById("dynamic-content").innerHTML = html;
+            BOOMR.plugins.RT.done();    // Tell boomerang to measure time and fire a beacon
         };
 
         Y.on('io:complete', complete);
@@ -48,7 +48,7 @@ code below, but you could use anything you like.
         BOOMR.plugins.RT.startTimer("t_done");  // Start measuring download time
         var request = Y.io(uri);
     });
-{% endhighlight %}
+    {% endhighlight %}
 
 <div id="results">
 </div>
@@ -57,7 +57,7 @@ code below, but you could use anything you like.
 </div>
 
 {% raw %}
-<script src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-base-min.js&3.1.1/build/oop/oop-min.js&3.1.1/build/yui/yui-later-min.js&3.1.1/build/event-custom/event-custom-base-min.js&3.1.1/build/querystring/querystring-stringify-simple-min.js&3.1.1/build/io/io-base-min.js" type="text/javascript" > </script>
+<script src="http://yui.yahooapis.com/combo?3.1.1/build/yui/yui-base-min.js&3.1.1/build/oop/oop-min.js&3.1.1/build/yui/yui-later-min.js&3.1.1/build/event-custom/event-custom-base-min.js&3.1.1/build/querystring/querystring-stringify-simple-min.js&3.1.1/build/io/io-base-min.js" type="text/javascript"> </script>
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>

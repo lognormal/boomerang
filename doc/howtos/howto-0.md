@@ -21,14 +21,14 @@ We'll look at the back end details a little later. You tell boomerang
 about your beacon URL by passing the `beacon_url` parameter to the
 `BOOMR.init()` method:
 
-{% highlight javascript %}
+    {% highlight javascript %}
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
             beacon_url: "http://yoursite.com/path/to/beacon.gif"
         });
     </script>
-{% endhighlight %}
+    {% endhighlight %}
 
 I've used beacon.gif as an example, but it could really be any thing.
 You could write a script in PHP or C\# or JSP to handle the beacons as
@@ -136,11 +136,11 @@ javascript itself and perhaps make some decisions based on this data.
 You can get at this data before the beacon fires by subscribing to the
 `before_beacon` event.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.subscribe('before_beacon', function(o) {
         // Do something with o
     });
-{% endhighlight %}
+    {% endhighlight %}
 
 Your event handler is called with a single object parameter. This object
 contains all of the beacon parameters described above except for the `v`
@@ -150,7 +150,7 @@ contains all of the beacon parameters described above except for the `v`
 In all these howto documents, we use the following code in the
 `before_beacon` handler:
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.subscribe('before_beacon', function(o) {
         var html = "";
         if(o.t_done) { html += "This page took " + o.t_done + "ms to load<br>"; }
@@ -159,7 +159,7 @@ In all these howto documents, we use the following code in the
 
         document.getElementById('results').innerHTML = html;
     });
-{% endhighlight %}
+    {% endhighlight %}
 
 Back end script
 ---------------
@@ -170,7 +170,7 @@ assume you know how to do that. The following code assumes these
 parameters are in a variable named `params`. The code is in Javascript,
 but you can write it in any language that you like.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     function extract_boomerang_data(params)
     {
         var bw_buckets = [64, 256, 1024, 8192, 30720],
@@ -248,11 +248,11 @@ The latest code and docs is available on
 
 <div id="results"></div>
 
-<script src="/boomerang.js" type="text/javascript"></script>
-<script src="/plugins/bw.js" type="text/javascript"></script>
-<script src="/plugins/navtiming.js" type="text/javascript"></script>
-<script src="/plugins/rt.js" type="text/javascript"></script>
-<script src="howtos.js" type="text/javascript"></script>
+<script src="/boomerang/boomerang.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/rt.js" type="text/javascript"> </script>
+<script src="howtos.js" type="text/javascript"> </script>
 <script type="text/javascript">
 BOOMR.init({
 		user_ip: '10.0.0.1',
