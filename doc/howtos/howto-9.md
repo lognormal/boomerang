@@ -3,8 +3,9 @@ layout: default
 title: boomerang Howto 9
 ---
 
-Collect performance data from the Navigation Timing API
--------------------------------------------------------
+[All Docs](/) | [Index](index.html)
+
+# Collect performance data from the Navigation Timing API
 
 The W3C Navigation Timing API is an interface implemented by modern
 browsers that provides broad and deep data related to the performance of
@@ -35,35 +36,38 @@ shown below. More information about the definition of each attribute can
 be found in the [W3C Navigation Timing
 specification](http://www.w3.org/TR/navigation-timing/).
 
-  Boomerang beacon parameter   Navigation Timing attribute
-  ---------------------------- ---------------------------------------------------
-  `nt_red_cnt`                 `window.performance.navigation.redirectCount`
-  `nt_nav_type`                `window.performance.navigation.type`
-  `nt_nav_st`                  `window.performance.timing.navigationStart`
-  `nt_red_st`                  `window.performance.timing.redirectStart`
-  `nt_red_end`                 `window.performance.timing.redirectEnd`
-  `nt_fet_st`                  `window.performance.timing.fetchStart`
-  `nt_dns_st`                  `window.performance.timing.domainLookupStart`
-  `nt_dns_end`                 `window.performance.timing.domainLookupEnd`
-  `nt_con_st`                  `window.performance.timing.connectStart`
-  `nt_con_end`                 `window.performance.timing.connectEnd`
-  `nt_req_st`                  `window.performance.timing.requestStart`
-  `nt_res_st`                  `window.performance.timing.responseStart`
-  `nt_res_end`                 `window.performance.timing.responseEnd`
-  `nt_domloading`              `window.performance.timing.domLoading`
-  `nt_domint`                  `window.performance.timing.domInteractive`
-  `nt_domcontloaded_st`        `window.performance.timing.domContentLoadedStart`
-  `nt_domcontloaded_end`       `window.performance.timing.domContentLoadedEnd`
-  `nt_domcomp`                 `window.performance.timing.domComplete`
-  `nt_load_st`                 `window.performance.timing.loadEventStart`
-  `nt_load_end`                `window.performance.timing.loadEventEnd`
-  `nt_unload_st`               `window.performance.timing.unloadEventStart`
-  `nt_unload_end`              `window.performance.timing.unloadEventEnd`
+<table>
+<tr>
+  <th>Boomerang beacon parameter</th>
+    <th>Navigation Timing attribute</th>
+  </tr>
+<tr><td>nt_red_cnt</td><td>window.performance.navigation.redirectCount</td></tr>
+<tr><td>nt_nav_type</td><td>window.performance.navigation.type</td></tr>
+<tr><td>nt_nav_st</td><td>window.performance.timing.navigationStart</td></tr>
+<tr><td>nt_red_st</td><td>window.performance.timing.redirectStart</td></tr>
+<tr><td>nt_red_end</td><td>window.performance.timing.redirectEnd</td></tr>
+<tr><td>nt_fet_st</td><td>window.performance.timing.fetchStart</td></tr>
+<tr><td>nt_dns_st</td><td>window.performance.timing.domainLookupStart</td></tr>
+<tr><td>nt_dns_end</td><td>window.performance.timing.domainLookupEnd</td></tr>
+<tr><td>nt_con_st</td><td>window.performance.timing.connectStart</td></tr>
+<tr><td>nt_con_end</td><td>window.performance.timing.connectEnd</td></tr>
+<tr><td>nt_req_st</td><td>window.performance.timing.requestStart</td></tr>
+<tr><td>nt_res_st</td><td>window.performance.timing.responseStart</td></tr>
+<tr><td>nt_res_end</td><td>window.performance.timing.responseEnd</td></tr>
+<tr><td>nt_domloading</td><td>window.performance.timing.domLoading</td></tr>
+<tr><td>nt_domint</td><td>window.performance.timing.domInteractive</td></tr>
+<tr><td>nt_domcontloaded_st</td><td>window.performance.timing.domContentLoadedStart</td></tr>
+<tr><td>nt_domcontloaded_end</td><td>window.performance.timing.domContentLoadedEnd</td></tr>
+<tr><td>nt_domcomp</td><td>window.performance.timing.domComplete</td></tr>
+<tr><td>nt_load_st</td><td>window.performance.timing.loadEventStart</td></tr>
+<tr><td>nt_load_end</td><td>window.performance.timing.loadEventEnd</td></tr>
+<tr><td>nt_unload_st</td><td>window.performance.timing.unloadEventStart</td></tr>
+<tr><td>nt_unload_end</td><td>window.performance.timing.unloadEventEnd</td></tr>
+</table>
 
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -81,4 +85,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% enraw %}

@@ -3,6 +3,8 @@ layout: default
 title: boomerang Howto 8 
 ---
 
+[All Docs](/) | [Index](index.html)
+
 Measure a user's DNS latency
 ----------------------------
 
@@ -38,17 +40,17 @@ images from. Unlike the bandwidth plugin though, this URL needs a
 wildcard:
 
 {% highlight javascript %}
-    <script src="boomerang.js" type="text/javascript"></script>
-    <script src="dns.js" type="text/javascript"></script> <!-- concatenate with boomerang.js for better performance -->
-    <script type="text/javascript">
-    BOOMR.init({
-            user_ip: "<user's ip address>",
-            beacon_url: "http://yoursite.com/path/to/beacon.php",
-            DNS: {                                         
-                base_url: "http://*.yoursite.com/images/"  
-            }                                              
-        });
-    </script>
+<script src="boomerang.js" type="text/javascript"></script>
+<script src="dns.js" type="text/javascript"></script> <!-- concatenate with boomerang.js for better performance -->
+<script type="text/javascript">
+BOOMR.init({
+        user_ip: "<user's ip address>",
+        beacon_url: "http://yoursite.com/path/to/beacon.php",
+        DNS: {                                         
+            base_url: "http://*.yoursite.com/images/"  
+        }                                              
+    });
+</script>
 {% endhighlight %}
 
 If you've set things up correctly, this should measure your DNS latency
@@ -58,7 +60,6 @@ out what this error is, but for now we'll just do it once.
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -76,4 +77,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% endraw %}

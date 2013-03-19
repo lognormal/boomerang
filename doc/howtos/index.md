@@ -3,14 +3,12 @@ layout: default
 title: How to do stuff with boomerang
 ---
 
-How to do stuff with boomerang
-==============================
+[All Docs](/) | [Index](index.html)
+
+# How to do stuff with boomerang
 
 The following is a list of all items identified in the [use case
 document](../use-cases.html) and then some.
-
-HOWTO
------
 
 -   [Howto 0](howto-0.html) — How to get data out of a
     beacon/before\_beacon event handler
@@ -31,9 +29,3 @@ HOWTO
     Navigation Timing API
 -   [Howto 10](howto-10-page%231.html) — Load time of a page prerendered
     by Google Chrome
-
-TODO
-----
-
--   [TODO 1](../TODO.html) — Measure a random sample of users instead of
-    all users

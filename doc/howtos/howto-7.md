@@ -3,8 +3,7 @@ layout: default
 title: boomerang Howto 7
 ---
 
-Boomerang Howto \#7: Protecting the beacon from abuse
------------------------------------------------------
+# Boomerang Howto \#7: Protecting the beacon from abuse
 
 See [use case \#9](../use-cases.html#uc-9) for a description of this
 requirement.
@@ -14,8 +13,7 @@ There are two types of beacon abuse you may need to protect against:
 1.  Denial of service attacks
 2.  Fake beacons that do not originate from a page you own
 
-Denial of service
------------------
+## Denial of service
 
 There's nothing you can do in javascript to prevent denial of service
 attacks, but you can configure your server to rate limit beacons
@@ -55,8 +53,7 @@ There's
 [information](http://www.cert.org/tech_tips/denial_of_service.html)
 online about DoS attacks and how to protect yourself from them.
 
-Fake beacons that do not originate from a page you own
-------------------------------------------------------
+## Fake beacons that do not originate from a page you own
 
 The most common reason for this kind of abuse is that someone really
 liked your page design and copied it to their own server, including the
@@ -82,7 +79,7 @@ the timestamp of the request and not the time that you're running the
 batch job in order to validate the nonce.
 
 {% highlight javascript %}
-    BOOMR.addVar("nonce", "125a7b79de989876cce970f0768a07");    // your nonce will be different
+BOOMR.addVar("nonce", "125a7b79de989876cce970f0768a07");    // your nonce will be different
 {% endhighlight %}
 
 While the nonce can protect you from someone hitting your beacon URL
@@ -99,7 +96,6 @@ this problem.
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -117,4 +113,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% endraw %}

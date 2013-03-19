@@ -3,6 +3,8 @@ layout: default
 title: Boomerang Howto 3
 ---
 
+[All Docs](/) | [Index](index.html)
+
 Measure a user's bandwidth/latency along with page load time
 ------------------------------------------------------------
 
@@ -112,24 +114,31 @@ using the `BW.cookie_exp` parameter. The value is in seconds. During
 that time, you can also read the value of the cookie on the server side.
 Its format is as follows:
 
+    {% highlight javascript %}
     BA=ba=nnnnnnn&be=nnn.nn&l=nnnn&le=nn.nn&ip=iiiiii&t=sssssss;
+    {% endhighlight %}
 
 The parameters are defined as:
 
 ba
 :   [integer] [bytes/s] The user's bandwidth to your server
+
 be
 :   [float] [bytes/s] The 95% confidence interval margin of error in
     measuring the user's bandwidth
+
 l
 :   [float] [ms] The HTTP latency between the user's computer and your
     server
+
 le
 :   [float] [ms] The 95% confidence interval margin of error in
     measuring the user's latency
+
 ip
 :   [ip address] The user's IPv4 or IPv6 address that was passed as the
     `user_ip` parameter to the `init()` method
+
 t
 :   [timestamp] The browser time (in seconds since the epoch) when the
     cookie was set
@@ -139,8 +148,7 @@ These parameters are also sent in the beacon (See [HOWTO
 customise your users experience based on the bandwidth before you serve
 a request.
 
-Disabling the bandwidth check
------------------------------
+## Disabling the bandwidth check
 
 Finally, there may be cases when you want to completely disable the
 bandwidth test. Perhaps you know that your user is on a slow network, or
@@ -163,7 +171,6 @@ options.
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -181,4 +188,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% endraw %}

@@ -4,15 +4,13 @@ title: boomerang Howto 0
 ---
 [All Docs](/) | [Index](index.html)
 
-Boomerang Howto \#0: How to read data out of a beacon or before\_beacon event handler
-======================================================================================
+# How to read data out of a beacon or before\_beacon event handler
 
 For all subsequent examples, you'll need to pull performance data out of
 the beacon or out of a `before_beacon` event handler. This howto
 explains how to do that.
 
-Beacon results back to your server
-----------------------------------
+## Beacon results back to your server
 
 For most cases you'd want to send performance data back to your server
 so you can analyse it later and take action against it. The first thing
@@ -66,28 +64,28 @@ t\_other
     developer. Each timer is of the format `name|value`. The following
     timers may be included:
 
-    t\_load
-    :   **[optional]** If the page were prerendered, this is the time to
-        fetch and prerender the page.
+  t_load
+  :   **[optional]** If the page were prerendered, this is the time to
+      fetch and prerender the page.
 
-    t\_prerender
-    :   **[optional]** If the page were prerendered, this is the time
-        from start of prefetch to the actual page display. It may only
-        be useful for debugging.
+  t_prerender
+  :   **[optional]** If the page were prerendered, this is the time
+      from start of prefetch to the actual page display. It may only
+      be useful for debugging.
 
-    t\_postrender
-    :   **[optional]** If the page were prerendered, this is the time
-        from prerender finish to actual page display. It may only be
-        useful for debugging.
+  t_postrender
+  :   **[optional]** If the page were prerendered, this is the time
+      from prerender finish to actual page display. It may only be
+      useful for debugging.
 
-    boomerang
-    :   The time it took boomerang to load up from first byte to last
-        byte
+  boomerang
+  :   The time it took boomerang to load up from first byte to last
+      byte
 
-    boomr\_fb
-    :   **[optional** The time it took from the start of page load to
-        the first byte of boomerang. Only included if we know when page
-        load started.
+  boomr_fb
+  :   **[optional** The time it took from the start of page load to
+      the first byte of boomerang. Only included if we know when page
+      load started.
 
 r
 :   URL of page that set the start time of the beacon.
@@ -127,8 +125,7 @@ bw\_time
 :   Timestamp (seconds since the epoch) on the user's browser when the
     bandwidth and latency was measured
 
-Read results from javascript
-----------------------------
+## Read results from javascript
 
 There may be cases where rather than beacon results back to your server
 (or alongside beaconing), you may want to inspect performance numbers in
@@ -161,8 +158,7 @@ In all these howto documents, we use the following code in the
     });
     {% endhighlight %}
 
-Back end script
----------------
+## Back end script
 
 A simple back end script would look something like this. Note, I won't
 include the code that gets the URL parameters out of your environment. I
@@ -235,8 +231,7 @@ goes into how we handled a large number of beacon results with a single
 mysql instance. It may help you or you may come up with a better
 solution.
 
-Statistical analysis of the data
---------------------------------
+## Statistical analysis of the data
 
 Once you've got your data, it's useful to do a bunch of statistical
 analysis on it. We'll cover this in a future howto, but for now, have a

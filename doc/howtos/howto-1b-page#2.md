@@ -3,6 +3,8 @@ layout: default
 title: Boomerang Howto 1b 
 ---
 
+[All Docs](/) | [Index](index.html)
+
 User clicks a link on a page we control and page is usable at some developer determined point
 ---------------------------------------------------------------------------------------------
 
@@ -20,17 +22,14 @@ while if this is the first time you're doing the test since testing your
 bandwidth takes about 6 seconds. You can also click the link to Page \#1
 to see the same output on Page \#1.
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
 <div id="results">
 </div>
 
-<script src="http://{{site.url}}/boomerang/boomerang.js" type="text/javascript"></script>
-<script src="http://{{site.url}}/boomerang/plugins/bw.js" type="text/javascript"></script>
-<script src="http://{{site.url}}/boomerang/plugins/navtiming.js" type="text/javascript"></script>
-<script src="http://{{site.url}}/boomerang/plugins/rt.js" type="text/javascript"></script>
-<script src="howtos.js" type="text/javascript"></script>
+<script src="/boomerang/boomerang.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
+<script src="/boomerang/plugins/rt.js" type="text/javascript"> </script>
+<script src="howtos.js" type="text/javascript"> </script>
 <script type="text/javascript">
 BOOMR.init({
 		user_ip: '10.0.0.1',

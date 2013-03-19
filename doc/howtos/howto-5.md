@@ -3,8 +3,7 @@ layout: default
 title: Boomerang Howto 5
 ---
 
-Request/page tagging
---------------------
+# Request/page tagging
 
 See [use case \#5](../use-cases.html#uc-5) for a description of this
 requirement.
@@ -33,17 +32,16 @@ that you can put into a URL.
 If you need to set multiple parameters, you can pass in an object
 instead:
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.addVar({
             "bucket": "test#1",
             "page_id": 123
         });
-{% endhighlight %}
+    {% endhighlight %}
 
 Make sure you've included boomerang.js before calling `BOOMR.addVar()`.
 
-The beacon
-----------
+## The beacon
 
 The beacon will include all variables that you add in the URL. Both keys
 and values will be URI encoded. Your back end application will need to
@@ -51,26 +49,24 @@ understand the passed in parameters.
 
     http://yoursite.com/path/to/beacon.php?bucket=test%231&page_id=123&t_done=.....
 
-Removing variables
-------------------
+## Removing variables
 
 You can also remove a parameter that you've added (or that a plugin has
 added) from the beacon. To do this, call the `BOOMR.removeVar()` method.
 This method takes in a list of name, and removes all of them from the
 parameter list. Any name that isn't in the parameter list is ignored.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     // don't send the stooges to the server
     BOOMR.removeVar("larry", "moe", "curly");
-{% endhighlight %}
+    {% endhighlight %}
 
-Stopping the beacon
--------------------
+## Stopping the beacon
 
 You can also this as a crude way to prevent the beacon from firing.
 Inside your `before_beacon` event handler, simply remove all parameters.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.subscribe('before_beacon', function(o) {
         var p_names = [], k;
 
@@ -88,11 +84,10 @@ Inside your `before_beacon` event handler, simply remove all parameters.
         // removeVar accepts either a list or an array
         BOOMR.removeVar(p_names);
     });
-{% endhighlight %}
+    {% endhighlight %}
 
 <div id="results"></div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -114,4 +109,3 @@ BOOMR.init({
 		"page_id": "howto-5"
 	});
 </script>
-{% endraw %}

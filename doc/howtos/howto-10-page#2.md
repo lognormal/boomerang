@@ -3,8 +3,9 @@ layout: default
 title: boomerang Howto 10
 ---
 
-Load time of a page prerendered by Google Chrome
-------------------------------------------------
+[All Docs](/) | [Index](index.html)
+
+# Load time of a page prerendered by Google Chrome
 
 This use case is based on Google Chrome's
 [prerender](http://code.google.com/chrome/whitepapers/prerender.html)
@@ -31,13 +32,9 @@ If rt.start is set to navigation (or something else), then t\_done is
 the same as t\_prerender. If t\_prerender is not set, then this page
 wasn't prerendered, and t\_done is the actual perceived load time.
 
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -53,4 +50,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% endraw %}

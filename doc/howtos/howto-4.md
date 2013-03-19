@@ -3,7 +3,9 @@ layout: howto4
 title: Boomerang Howto 4
 ---
 
-## Measure more than just page load time
+[All Docs](/) | [Index](index.html)
+
+# Measure more than just page load time
 
 See [use case \#4](../use-cases.html#uc-4) for a description of this
 requirement.
@@ -30,7 +32,7 @@ are reserved: `t_done`, `t_page`, `t_resp`.
 
 Make sure you've included boomerang.js before starting the timers.
 
-{% highlight html %}
+    {% highlight html %}
     <html>
       <head>
         <script src="boomerang.js" type="text/javascript"></script>
@@ -54,7 +56,7 @@ Make sure you've included boomerang.js before starting the timers.
         </script>
       </body>
     </html>
-{% endhighlight %}
+    {% endhighlight %}
 
 Your timers will now be included in the beacon along with `t_done`.
 
@@ -64,8 +66,7 @@ return a reference to the object. Note that the timer methods are run on
 the `BOOMR.plugins.RT` object, so they return a reference to that object
 and not to the `BOOMR` object.
 
-Measuring time for content loaded before boomerang
---------------------------------------------------
+## Measuring time for content loaded before boomerang
 
 Now we've said for years that putting javascript at the bottom of your
 document is good for performance, so asking you to load boomerang at the
@@ -75,7 +76,7 @@ this using the `BOOMR.plugins.RT.setTimer()` method. This method takes
 two parameters — the timer name and its value in milliseconds. The code
 above will change to this:
 
-{% highlight html %}
+    {% highlight html %}
     <html>
       <head>
         <script type="text/javascript">
@@ -104,12 +105,11 @@ above will change to this:
         </script>
       </body>
     </html>
-{% endhighlight %}
+    {% endhighlight %}
 
 <div id="results">
 </div>
 
-{% raw %}
 <script type="text/javascript">
 BOOMR.plugins.RT.startTimer("t_howtojs");
 </script>
@@ -117,4 +117,3 @@ BOOMR.plugins.RT.startTimer("t_howtojs");
 <script type="text/javascript">
 BOOMR.plugins.RT.endTimer("t_howtojs").endTimer("t_body");
 </script>
-{% endraw %}

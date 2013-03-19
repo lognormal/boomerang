@@ -3,6 +3,8 @@ layout: default
 title: Boomerang Howto 1a 
 ---
 
+[All Docs](/) | [Index](index.html)
+
 User clicks a link on a page we control and page is usable when onload fires
 ----------------------------------------------------------------------------
 
@@ -65,8 +67,3 @@ left up to you. We recommend putting them on your own server.
 
 Go to [Page \#2](howto-1a-page%232.html) now to see the results of the
 page load test.
-
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
-

@@ -3,6 +3,8 @@ layout: default
 title: Boomerang Howto 1b 
 ---
 
+[All Docs](/) | [Index](index.html)
+
 User clicks a link on a page we control and page is usable at some developer determined point
 ---------------------------------------------------------------------------------------------
 
@@ -21,7 +23,7 @@ automatically.
 2.  Add the code below to all your pages. You may add it at any point
     before your page is considered complete.
 
-{% highlight javascript %}
+    {% highlight javascript %}
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -30,23 +32,18 @@ automatically.
             autorun: false
         });
     </script>
-{% endhighlight %}
+    {% endhighlight %}
 
 The rest of your page will load normally. When you determine (through
 javascript, perhaps) that your page is usable by a user browsing your
 website, you need to fire the `page_ready` event like this:
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.page_ready(); // Tell boomerang that the page is now usable
-{% endhighlight %}
+    {% endhighlight %}
 
 As in howto-1a, you need to populate the `user_ip` field using a back
 end programming language.
 
 Go to [Page \#2](howto-1b-page%232.html) now to see the results of the
 page load test.
-
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
-
-

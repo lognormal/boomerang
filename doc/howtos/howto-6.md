@@ -3,8 +3,9 @@ layout: default
 title: boomerang Howto 6
 ---
 
-Configuring boomerang
----------------------
+[All Docs](/) | [Index](index.html)
+
+# Configuring boomerang
 
 To use boomerang, you first include `boomerang.js` in your html file and
 then call the `BOOMR.init()` method. This should be sufficient to
@@ -17,17 +18,16 @@ to configure boomerang and its built in plugins. If you have additional
 plugins, consult their documentation for details on how to configure
 them.
 
-Configuring boomerang
----------------------
+## Configuring boomerang
 
 To configure boomerang and its plugins, you pass in a configuration
 object to the `init()` method:
 
 {% highlight javascript %}
-    BOOMR.init({
-            key: value,
-            ...
-        });
+BOOMR.init({
+  key: value,
+  // ...
+});
 {% endhighlight %}
 
 boomerang has the following configurable parameters:
@@ -68,7 +68,7 @@ logs messages.\
  The signature of this function is:
 
 {% highlight javascript %}
-    function log(oMessage, sLevel, sSource);
+function log(oMessage, sLevel, sSource);
 {% endhighlight %}
 
 Where:
@@ -98,16 +98,15 @@ key is the name of the plugin. In the following sections we'll see how
 to configure our built-in plugins.
 
 {% highlight javascript %}
-    BOOMR.init({
-            beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
-            site_domain: "yoursite.com",
-            user_ip: "202.54.1.18",
-            autorun: false
-        });
+BOOMR.init({
+        beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
+        site_domain: "yoursite.com",
+        user_ip: "202.54.1.18",
+        autorun: false
+    });
 {% endhighlight %}
 
-Roundtrip plugin
-----------------
+## Roundtrip plugin
 
 All roundtrip plugin configuration items are under the `RT` namespace.
 
@@ -117,6 +116,7 @@ cookie
     this to a falsy value like `null` or the empty string to ignore
     cookies and depend completely on the WebTiming API for the start
     time.
+
 cookie\_exp
 :   **[optional]** The lifetime in seconds of the roundtrip cookie. This
     only needs to live for as long as it takes for a single page to
@@ -124,6 +124,7 @@ cookie\_exp
     but to be safe, and to cover people with really slow connections, or
     users that are geographically far away from you, keep it to a few
     minutes. The default is set to 10 minutes.
+
 strict\_referrer
 :   **[optional]** By default, boomerang will not measure a page's
     roundtrip time if the URL in the `RT` cookie doesn't match the
@@ -135,7 +136,7 @@ strict\_referrer
     passed through. In this case, you'll want to set `strict_referrer`
     to `false`
 
-{% highlight javascript %}
+    {% highlight javascript %}
     BOOMR.init({
             beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
             site_domain: "yoursite.com",
@@ -146,10 +147,9 @@ strict\_referrer
                     cookie_exp: 120
             }
         });
-{% endhighlight %}
+    {% endhighlight %}
 
-Bandwidth plugin
-----------------
+## Bandwidth plugin
 
 All bandwidth plugin configuration items are under the `BW` namespace.
 
@@ -161,11 +161,13 @@ base\_url
     relative URL. If it's relative, remember that it's relative to the
     page that boomerang is included in and not to the javascript file.
     The trailing / is required.
+
 cookie
 :   **[optional]** The name of the cookie in which to store the measured
     bandwidth and latency of the user's network connection. The default
     name is `BA`. See [Howto \#3](howto-3.html) for more details on the
     bandwidth cookie.
+
 cookie\_exp
 :   **[optional]** The lifetime in seconds of the bandwidth cookie. The
     default is set to 7 days. This specifies how long it will be before
@@ -177,6 +179,7 @@ cookie\_exp
      Note that if you're doing some kind of real-time streaming, then
     chances are that this bandwidth test isn't right for you, so setting
     this cookie to a shorter value isn't the right solution.
+
 timeout
 :   **[optional]** The timeout in milliseconds for the entire bandwidth
     test. The default is set to 15 seconds. The bandwidth test can run
@@ -188,6 +191,7 @@ timeout
     get you more data and increase the accuracy of the test, but at the
     same time increases the risk of the test not completing before the
     user leaves the page.
+
 nruns
 :   **[optional]** The number of times the bandwidth test should run.
     The default is set to 5. The first test is always a pilot to figure
@@ -197,8 +201,7 @@ nruns
     2-4 seconds per run, so consider this value along with the `timeout`
     value above.
 
-All optional
-------------
+## All optional
 
 All configuration parameters are optional, but not setting some of them
 can lead to unexpected or incomplete results, so they should be set. It
@@ -209,7 +212,6 @@ and calling `init()`.
 <div id="results">
 </div>
 
-{% raw %}
 <script src="/boomerang/boomerang.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/bw.js" type="text/javascript"> </script>
 <script src="/boomerang/plugins/navtiming.js" type="text/javascript"> </script>
@@ -227,4 +229,3 @@ BOOMR.init({
 		}
 	});
 </script>
-{% endraw %}
