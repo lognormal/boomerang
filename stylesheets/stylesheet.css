@@ -402,6 +402,16 @@ Full-Width Styles
   width: 65%;
   overflow: hidden;
   white-space: pre;
+  margin-top: 10px;
+}
+
+#dynamic-content {
+  background-color: #98FB98;
+  border: solid 2px #525252;
+  padding: 1em;
+  width: 65%;
+  overflow: hidden;
+  margin-top: 10px;
 }
 
 /*******************************************************************************
