@@ -23,12 +23,12 @@ them.
 To configure boomerang and its plugins, you pass in a configuration
 object to the `init()` method:
 
-{% highlight javascript %}
+```javascript
 BOOMR.init({
   key: value,
   // ...
 });
-{% endhighlight %}
+```
 
 boomerang has the following configurable parameters:
 
@@ -67,17 +67,19 @@ define your own logger by setting the `log` parameter to a function that
 logs messages.\
  The signature of this function is:
 
-{% highlight javascript %}
+```javascript
 function log(oMessage, sLevel, sSource);
-{% endhighlight %}
+```
 
 Where:
 
 oMessage
 :   is the object/message to be logged. It is up to you to decide how to
     log objects.
+
 sLevel
 :   is the log level, with values of "error", "warn", "info" and "debug"
+
 sSource
 :   is the source of the log message. This will typically be the string
     "boomerang" followed by the name of a plugin
@@ -97,14 +99,14 @@ Each plugin is configured through a sub-object of the config object. The
 key is the name of the plugin. In the following sections we'll see how
 to configure our built-in plugins.
 
-{% highlight javascript %}
+```javascript
 BOOMR.init({
         beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
         site_domain: "yoursite.com",
         user_ip: "202.54.1.18",
         autorun: false
     });
-{% endhighlight %}
+```
 
 ## Roundtrip plugin
 
@@ -136,18 +138,18 @@ strict\_referrer
     passed through. In this case, you'll want to set `strict_referrer`
     to `false`
 
-    {% highlight javascript %}
-    BOOMR.init({
-            beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
-            site_domain: "yoursite.com",
-            user_ip: "202.54.1.18",
-            autorun: false,
-            RT: {
-                    cookie: "MyRT",
-                    cookie_exp: 120
-            }
-        });
-    {% endhighlight %}
+```javascript
+BOOMR.init({
+        beacon_url: "http://beacons.yoursite.com/path/to/beacon.php",
+        site_domain: "yoursite.com",
+        user_ip: "202.54.1.18",
+        autorun: false,
+        RT: {
+                cookie: "MyRT",
+                cookie_exp: 120
+        }
+    });
+```
 
 ## Bandwidth plugin
 

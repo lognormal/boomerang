@@ -18,16 +18,16 @@ it:
 1.  Copy boomerang.js and the images/ directory into your document root
 2.  Add the code below to your page, somewhere before your XHR calls.
 
-    {% highlight javascript %}
-    <script src="boomerang.js" type="text/javascript"></script>
-    <script type="text/javascript">
-    BOOMR.init({
-            user_ip: "<user's ip address>",
-            beacon_url: "http://yoursite.com/path/to/beacon.php",
-            auto_run: false
-        });
-    </script>
-    {% endhighlight %}
+```javascript
+<script src="boomerang.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.init({
+        user_ip: "<user's ip address>",
+        beacon_url: "http://yoursite.com/path/to/beacon.php",
+        auto_run: false
+    });
+</script>
+```
 
 Next fetch your content. Right before the call to fetch content, start
 the timer. The load time timer is called `t_done`. In the callback
@@ -35,22 +35,22 @@ function where the content has been fetched, call the `done()` method.
 This measures and beacons back the response time. I use YUI 3 in the
 code below, but you could use anything you like.
 
-    {% highlight javascript %}
-    YUI().use("io-base", function(Y) {
-        var uri = "dynamic-content.txt";
+```javascript
+YUI().use("io-base", function(Y) {
+    var uri = "dynamic-content.txt";
 
-        function complete(id, o) {
-            var html = o.responseText;
-            document.getElementById("dynamic-content").innerHTML = html;
-            BOOMR.plugins.RT.done();    // Tell boomerang to measure time and fire a beacon
-        };
+    function complete(id, o) {
+        var html = o.responseText;
+        document.getElementById("dynamic-content").innerHTML = html;
+        BOOMR.plugins.RT.done();    // Tell boomerang to measure time and fire a beacon
+    };
 
-        Y.on('io:complete', complete);
+    Y.on('io:complete', complete);
 
-        BOOMR.plugins.RT.startTimer("t_done");  // Start measuring download time
-        var request = Y.io(uri);
-    });
-    {% endhighlight %}
+    BOOMR.plugins.RT.startTimer("t_done");  // Start measuring download time
+    var request = Y.io(uri);
+});
+```
 
 <div id="results">
 </div>
