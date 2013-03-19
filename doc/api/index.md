@@ -5,18 +5,15 @@ title: The boomerang API
 
 [All Docs](../)
 
-The boomerang API
-=================
+# The boomerang API
 
-core
-----
+## core
 
 -   [BOOMR](BOOMR.html) — The basic beaconing object.
 -   [BOOMR.utils](BOOMR.utils.html) — Utility functions within the BOOMR
     object.
 
-plugins
--------
+## plugins
 
 -   [BOOMR.plugins.RT](RT.html) — The roundtrip plugin that measures
     page load time.
@@ -32,6 +29,3 @@ plugins
 -   [BOOMR.plugins.CACHE\_RELOAD](cache_reload.html) — The Cache Reload
     plugin that forces a browser to update its cached version of
     boomerang.
-
-The latest code and docs is available on
-[github.com/lognormal/boomerang](http://github.com/lognormal/boomerang/)
