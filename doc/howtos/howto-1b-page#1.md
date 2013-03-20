@@ -23,24 +23,24 @@ automatically.
 2.  Add the code below to all your pages. You may add it at any point
     before your page is considered complete.
 
-    ```javascript
-    <script src="boomerang.js" type="text/javascript"></script>
-    <script type="text/javascript">
-    BOOMR.init({
-            user_ip: "<user's ip address>",
-            beacon_url: "http://yoursite.com/path/to/beacon.php",
-            autorun: false
-        });
-    </script>
-    ```
+```javascript
+<script src="boomerang.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.init({
+        user_ip: "<user's ip address>",
+        beacon_url: "http://yoursite.com/path/to/beacon.php",
+        autorun: false
+    });
+</script>
+```
 
 The rest of your page will load normally. When you determine (through
 javascript, perhaps) that your page is usable by a user browsing your
 website, you need to fire the `page_ready` event like this:
 
-    ```javascript
-    BOOMR.page_ready(); // Tell boomerang that the page is now usable
-    ```
+```javascript
+BOOMR.page_ready(); // Tell boomerang that the page is now usable
+```
 
 As in howto-1a, you need to populate the `user_ip` field using a back
 end programming language.
