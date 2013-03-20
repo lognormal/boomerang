@@ -71,7 +71,7 @@ setCookie(sName, oSubCookies, nMaxAge, sPath, sDomain, bSecure)
 
     The `BOOMR.plugins.RT` plugin uses this function like this:
 
-{% highlight javascript %}
+        ```javascript
         if(!BOOMR.utils.setCookie(
                     impl.cookie,
                     { s: t_start, r: url },
@@ -82,7 +82,7 @@ setCookie(sName, oSubCookies, nMaxAge, sPath, sDomain, bSecure)
             BOOMR.error("cannot set start cookie", "rt");
             return this;
         }
-{% endhighlight %}
+        ```
 
     ### Returns
 
@@ -97,9 +97,9 @@ getSubCookies(sCookie)
 
     The `BOOMR.plugins.BW` plugin calls this function like this:
 
-{% highlight javascript %}
+        ```javascript
         var cookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
-{% endhighlight %}
+        ```
 
     ### Returns
 
@@ -140,9 +140,9 @@ pluginConfig(oImpl, oConfig, sName, aProperties)
 
     The `BOOMR.plugins.RT` plugin uses this method like this:
 
-{% highlight javascript %}
+        ```javascript
         BOOMR.utils.pluginConfig(impl, config, "RT", ["cookie", "cookie_exp", "strict_referrer"]);
-{% endhighlight %}
+        ```
 
     ### Returns
 

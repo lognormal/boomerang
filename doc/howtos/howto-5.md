@@ -20,9 +20,9 @@ parameters and you shouldn't overwrite these with your own values. See
 built-in plugins. Other plugins may add their own parameters, consult
 the documentation of the plugin to find out what these are.
 
-{% highlight javascript %}
+    ```javascript
     BOOMR.addVar("page_id", 123);
-{% endhighlight %}
+    ```
 
 The parameter name must be a string. We recommend only using
 alphanumeric characters and underscores, but you can really use anything
@@ -32,12 +32,12 @@ that you can put into a URL.
 If you need to set multiple parameters, you can pass in an object
 instead:
 
-    {% highlight javascript %}
+    ```javascript
     BOOMR.addVar({
             "bucket": "test#1",
             "page_id": 123
         });
-    {% endhighlight %}
+    ```
 
 Make sure you've included boomerang.js before calling `BOOMR.addVar()`.
 
@@ -56,17 +56,17 @@ added) from the beacon. To do this, call the `BOOMR.removeVar()` method.
 This method takes in a list of name, and removes all of them from the
 parameter list. Any name that isn't in the parameter list is ignored.
 
-    {% highlight javascript %}
+    ```javascript
     // don't send the stooges to the server
     BOOMR.removeVar("larry", "moe", "curly");
-    {% endhighlight %}
+    ```
 
 ## Stopping the beacon
 
 You can also this as a crude way to prevent the beacon from firing.
 Inside your `before_beacon` event handler, simply remove all parameters.
 
-    {% highlight javascript %}
+    ```javascript
     BOOMR.subscribe('before_beacon', function(o) {
         var p_names = [], k;
 
@@ -84,7 +84,7 @@ Inside your `before_beacon` event handler, simply remove all parameters.
         // removeVar accepts either a list or an array
         BOOMR.removeVar(p_names);
     });
-    {% endhighlight %}
+    ```
 
 <div id="results"></div>
 

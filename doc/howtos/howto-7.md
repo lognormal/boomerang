@@ -78,9 +78,9 @@ nonce before accepting the beacon. If you're batch processing, you'd use
 the timestamp of the request and not the time that you're running the
 batch job in order to validate the nonce.
 
-{% highlight javascript %}
+```javascript
 BOOMR.addVar("nonce", "125a7b79de989876cce970f0768a07");    // your nonce will be different
-{% endhighlight %}
+```
 
 While the nonce can protect you from someone hitting your beacon URL
 directly, it does mean that your main page cannot be cached, since the

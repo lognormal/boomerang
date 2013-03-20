@@ -54,14 +54,14 @@ init(oConfig)
     the DNS plugin. See the [Configuration section](#config) for
     details.
 
-{% highlight javascript %}
+    ```javascript
     BOOMR.init({
           IPv6: {
               ipv6_url: "http://fe80::1/images/image-i.png"
               host_url: "http://yoursite-6.com/images/image-i.png"
           }
         });
-{% endhighlight %}
+    ```
 
     ### Returns
 

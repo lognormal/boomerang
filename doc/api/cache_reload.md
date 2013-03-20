@@ -65,7 +65,7 @@ Example HTML document {#example}
 
 The cache reloading HTML document should look something like this:
 
-{% highlight html %}
+    ```html
     <!doctype html>
     <html>
     <head>
@@ -88,4 +88,4 @@ The cache reloading HTML document should look something like this:
     </script>
     </body>
     </html>
-{% endhighlight %}
+    ```

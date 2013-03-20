@@ -32,7 +32,7 @@ are reserved: `t_done`, `t_page`, `t_resp`.
 
 Make sure you've included boomerang.js before starting the timers.
 
-    {% highlight html %}
+    ```html
     <html>
       <head>
         <script src="boomerang.js" type="text/javascript"></script>
@@ -56,7 +56,7 @@ Make sure you've included boomerang.js before starting the timers.
         </script>
       </body>
     </html>
-    {% endhighlight %}
+    ```
 
 Your timers will now be included in the beacon along with `t_done`.
 
@@ -76,7 +76,7 @@ this using the `BOOMR.plugins.RT.setTimer()` method. This method takes
 two parameters — the timer name and its value in milliseconds. The code
 above will change to this:
 
-    {% highlight html %}
+    ```html
     <html>
       <head>
         <script type="text/javascript">
@@ -105,7 +105,7 @@ above will change to this:
         </script>
       </body>
     </html>
-    {% endhighlight %}
+    ```
 
 <div id="results">
 </div>

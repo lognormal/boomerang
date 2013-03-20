@@ -19,7 +19,7 @@ this is what you do:
 1.  Copy boomerang.js and the images/ directory into your document root
 2.  Add the code below to all your pages:
 
-{% highlight javascript %}
+    ```javascript
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -27,7 +27,7 @@ this is what you do:
             beacon_url: "http://yoursite.com/path/to/beacon.php"
         });
     </script>
-{% endhighlight %}
+    ```
 
 This should be sufficient to measure page load time on all but the very
 first page that a user visits on your site. You'll need to get the
@@ -48,7 +48,7 @@ to point to the absolute location of that file. You will also need to
 tell boomerang where to find its bandwidth testing images. Your `init()`
 call will then change to this:
 
-{% highlight javascript %}
+    ```javascript
     BOOMR.init({
             user_ip: "<user's ip address>",
             beacon_url: "http://yoursite.com/path/to/beacon.php",
@@ -56,7 +56,7 @@ call will then change to this:
                 base_url: "http://yoursite.com/path/to/bandwidth/images/"
             }
         });
-{% endhighlight %}
+    ```
 
 Note, that you point to the image directory. It is recommended that you
 put these images on a server that you want to measure the user's

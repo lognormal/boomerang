@@ -35,11 +35,11 @@ plugins
 :   An object containing all plugins that have been added to boomerang.
     If you build your own plugin, it should be added to this object:
 
-{% highlight javascript %}
+        ```javascript
         BOOMR.plugins.MyPlugin = {
             ...
         };
-{% endhighlight %}
+        ```
 
 Configuration {#config}
 -------------

@@ -30,7 +30,7 @@ Simply adding boomerang to a page and calling the `init()` method is
 sufficient to start the bandwidth test and beacon its results back to
 the server. This is the code you'd use:
 
-    {% highlight javascript %}
+    ```javascript
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -40,7 +40,7 @@ the server. This is the code you'd use:
         }
     });
     </script>
-    {% endhighlight %}
+    ```
 
 The default value of the `BW.base_url` parameter is `images/`, so if
 your bandwidth detection images are placed in a subdirectory of the
@@ -62,7 +62,7 @@ so in order to store the user's bandwidth in a cookie, you will need to
 tell boomerang what the user's IP address is. You do this through the
 `user_ip` parameter.
 
-    {% highlight javascript %}
+    ```javascript
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -73,7 +73,7 @@ tell boomerang what the user's IP address is. You do this through the
         }
     });
     </script>
-    {% endhighlight %}
+    ```
 
 As far as I know, there's no way in javascript to figure out the user's
 IP address. You'll have to do this server side and write the value into
@@ -95,7 +95,7 @@ You may want to customise the name of the cookie where the bandwidth
 will be stored. By default this is set to `BA`, but you can change it
 using the `BW.cookie` parameter.
 
-    {% highlight javascript %}
+    ```javascript
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
@@ -107,16 +107,16 @@ using the `BW.cookie` parameter.
         }
     });
     </script>
-    {% endhighlight %}
+    ```
 
 This cookie is set to expire in 7 days. You can change its lifetime
 using the `BW.cookie_exp` parameter. The value is in seconds. During
 that time, you can also read the value of the cookie on the server side.
 Its format is as follows:
 
-    {% highlight javascript %}
+    ```javascript
     BA=ba=nnnnnnn&be=nnn.nn&l=nnnn&le=nn.nn&ip=iiiiii&t=sssssss;
-    {% endhighlight %}
+    ```
 
 The parameters are defined as:
 
@@ -159,14 +159,14 @@ options.
 1.  Delete the bandwdith plugin from your copy of boomerang.js
 2.  Set the `BW.enabled` parameter to `false`:
 
-    {% highlight javascript %}
+    ```javascript
     <script src="boomerang.js" type="text/javascript"></script>
     <script type="text/javascript">
     BOOMR.init({
         BW: { enabled: false  }
     });
     </script>
-    {% endhighlight %}
+    ```
 
 <div id="results">
 </div>

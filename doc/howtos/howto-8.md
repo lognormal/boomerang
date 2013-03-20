@@ -39,7 +39,7 @@ To configure the plugin, you only need to tell it where to get its
 images from. Unlike the bandwidth plugin though, this URL needs a
 wildcard:
 
-{% highlight javascript %}
+```javascript
 <script src="boomerang.js" type="text/javascript"></script>
 <script src="dns.js" type="text/javascript"></script> <!-- concatenate with boomerang.js for better performance -->
 <script type="text/javascript">
@@ -51,7 +51,7 @@ BOOMR.init({
         }                                              
     });
 </script>
-{% endhighlight %}
+```
 
 If you've set things up correctly, this should measure your DNS latency
 within a margin of error. We could run the test multiple times to find
