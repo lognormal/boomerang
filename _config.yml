@@ -1,0 +1,5 @@
+safe: true
+lsi: false
+pygments: true
+permalink: /posts/:title
+markdown: redcarpet

@@ -1,3 +1,4 @@
 .gitignore
 *.gz
 boomerang-*.js
+_site
