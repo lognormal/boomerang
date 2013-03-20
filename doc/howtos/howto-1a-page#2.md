@@ -5,8 +5,7 @@ title: Boomerang Howto 1a
 
 [Index](index.html)
 
-User clicks a link on a page we control and page is usable when onload fires
-----------------------------------------------------------------------------
+## User clicks a link on a page we control and page is usable when onload fires
 
 See [use case \#1](../use-cases.html#uc-1) for a description of this
 requirement.

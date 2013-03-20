@@ -36,11 +36,13 @@ init(oConfig)
         HTTP. The protocol part of the URL will be automatically changed
         to fit the current document.
 
-        BOOMR.init({
-                DNS: {                                                  
-                            base_url: "http://*.yoursite.com/images/"   
-                }                                                       
-            });
+```javascript
+BOOMR.init({
+        DNS: {
+                    base_url: "http://*.yoursite.com/images/"
+        }
+    });
+```
 
     In the above code, \* will be replaced with a random string.
 

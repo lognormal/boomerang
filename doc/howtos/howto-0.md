@@ -19,14 +19,14 @@ We'll look at the back end details a little later. You tell boomerang
 about your beacon URL by passing the `beacon_url` parameter to the
 `BOOMR.init()` method:
 
-    ```javascript
-    <script src="boomerang.js" type="text/javascript"></script>
-    <script type="text/javascript">
-    BOOMR.init({
-            beacon_url: "http://yoursite.com/path/to/beacon.gif"
-        });
-    </script>
-    ```
+```javascript
+<script src="boomerang.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.init({
+        beacon_url: "http://yoursite.com/path/to/beacon.gif"
+    });
+</script>
+```
 
 I've used beacon.gif as an example, but it could really be any thing.
 You could write a script in PHP or C\# or JSP to handle the beacons as
@@ -133,11 +133,11 @@ javascript itself and perhaps make some decisions based on this data.
 You can get at this data before the beacon fires by subscribing to the
 `before_beacon` event.
 
-    ```javascript
-    BOOMR.subscribe('before_beacon', function(o) {
-        // Do something with o
-    });
-    ```
+```javascript
+BOOMR.subscribe('before_beacon', function(o) {
+    // Do something with o
+});
+```
 
 Your event handler is called with a single object parameter. This object
 contains all of the beacon parameters described above except for the `v`
@@ -147,16 +147,16 @@ contains all of the beacon parameters described above except for the `v`
 In all these howto documents, we use the following code in the
 `before_beacon` handler:
 
-    ```javascript
-    BOOMR.subscribe('before_beacon', function(o) {
-        var html = "";
-        if(o.t_done) { html += "This page took " + o.t_done + "ms to load<br>"; }
-        if(o.bw) { html += "Your bandwidth to this server is " + parseInt(o.bw/1024) + "kbps (&#x00b1;" + parseInt(o.bw_err*100/o.bw) + "%)<br>"; }
-        if(o.lat) { html += "Your latency to this server is " + parseInt(o.lat) + "&#x00b1;" + o.lat_err + "ms<br>"; }
+```javascript
+BOOMR.subscribe('before_beacon', function(o) {
+  var html = "";
+  if(o.t_done) { html += "This page took " + o.t_done + "ms to load<br>"; }
+  if(o.bw) { html += "Your bandwidth to this server is " + parseInt(o.bw/1024) + "kbps (&#x00b1;" + parseInt(o.bw_err*100/o.bw) + "%)<br>"; }
+  if(o.lat) { html += "Your latency to this server is " + parseInt(o.lat) + "&#x00b1;" + o.lat_err + "ms<br>"; }
 
-        document.getElementById('results').innerHTML = html;
-    });
-    ```
+  document.getElementById('results').innerHTML = html;
+});
+```
 
 ## Back end script
 
@@ -166,54 +166,54 @@ assume you know how to do that. The following code assumes these
 parameters are in a variable named `params`. The code is in Javascript,
 but you can write it in any language that you like.
 
-    ```javascript
-    function extract_boomerang_data(params)
-    {
-        var bw_buckets = [64, 256, 1024, 8192, 30720],
-            bw_bucket = bw_buckets.length,
-            i, url, page_id, ip, ua, woeid;
+```javascript
+function extract_boomerang_data(params)
+{
+  var bw_buckets = [64, 256, 1024, 8192, 30720],
+  bw_bucket = bw_buckets.length,
+  i, url, page_id, ip, ua, woeid;
 
 
-        // First validate your beacon, make sure all datatypes
-        // are correct and values within reasonable range
-        // We'll also want to detect fake beacons, but that's more complex
-        if(! validate_beacon(params)) {
-            return false;
-        }
+  // First validate your beacon, make sure all datatypes
+  // are correct and values within reasonable range
+  // We'll also want to detect fake beacons, but that's more complex
+  if(! validate_beacon(params)) {
+    return false;
+  }
 
-        // You may also want to do some kind of random sampling at this point
+  // You may also want to do some kind of random sampling at this point
 
-        // Figure out a bandwidth bucket.
-        // we could get more complex and consider bw_err as well,
-        // but for this example I'll ignore it
-        for(i=0; i<bw_buckets.length; i++) {
-            if(params.bw <= bw_buckets[i]) {
-                bw_bucket = i;
-                break;
-            }
-        }
-
-        // Now figure out a page id from the u parameter
-        // Since we might have a very large number of URLs that all
-        // map onto a very small number (possibly 1) of distinct page types
-        // It's good to create page groups to simplify performance analysis.
-
-        url = canonicalize_url(params.u); // get a canonical form for the URL
-        page_id = get_page_id(url);   // get a page id.  (many->1 map?)
-
-
-        // At this point we can extract other information from the request
-        // eg, the user's IP address (good for geo location) and user agent
-        ip = get_user_ip();              // get user's IP from request
-        woeid = ip_to_woeid(ip);         // convert IP to a Where on earth ID
-        ua = get_normalized_uastring();  // get a normalized useragent string
-
-        // Now insert the data into our database
-        insert_data(page_id, params.t_done, params.bw, params.bw_err, bw_bucket, params.lat, params.lat_err, ip, woeid, ua);
-
-        return true;
+  // Figure out a bandwidth bucket.
+  // we could get more complex and consider bw_err as well,
+  // but for this example I'll ignore it
+  for(i=0; i<bw_buckets.length; i++) {
+    if(params.bw <= bw_buckets[i]) {
+      bw_bucket = i;
+      break;
     }
-    ```
+  }
+
+  // Now figure out a page id from the u parameter
+  // Since we might have a very large number of URLs that all
+  // map onto a very small number (possibly 1) of distinct page types
+  // It's good to create page groups to simplify performance analysis.
+
+  url = canonicalize_url(params.u); // get a canonical form for the URL
+  page_id = get_page_id(url);   // get a page id.  (many->1 map?)
+
+
+  // At this point we can extract other information from the request
+  // eg, the user's IP address (good for geo location) and user agent
+  ip = get_user_ip();              // get user's IP from request
+  woeid = ip_to_woeid(ip);         // convert IP to a Where on earth ID
+  ua = get_normalized_uastring();  // get a normalized useragent string
+
+  // Now insert the data into our database
+  insert_data(page_id, params.t_done, params.bw, params.bw_err, bw_bucket, params.lat, params.lat_err, ip, woeid, ua);
+
+  return true;
+}
+```
 
 ### Scaling up
 

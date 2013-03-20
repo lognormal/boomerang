@@ -5,8 +5,7 @@ title: Boomerang Howto 1b
 
 [Index](index.html)
 
-User clicks a link on a page we control and page is usable at some developer determined point
----------------------------------------------------------------------------------------------
+## User clicks a link on a page we control and page is usable at some developer determined point
 
 See [use case \#1](../use-cases.html#uc-1) for a description of this
 requirement.

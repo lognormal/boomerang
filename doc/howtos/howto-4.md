@@ -32,31 +32,31 @@ are reserved: `t_done`, `t_page`, `t_resp`.
 
 Make sure you've included boomerang.js before starting the timers.
 
-    ```html
-    <html>
-      <head>
-        <script src="boomerang.js" type="text/javascript"></script>
-        <script type="text/javascript">
-          BOOMR.init({
-            beacon_url: "http://yoursite.com/path/to/beacon.php"
-          });
-          BOOMR.plugins.RT.startTimer("t_head");
-        </script>
-        <title>page title</title>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
-        <script type="text/javascript">
-          BOOMR.plugins.RT.endTimer("t_head").startTimer("t_body");
-        </script>
-      </head>
-      <body>
-        page body here
-        <script type="text/javascript">
-          BOOMR.plugins.RT.endTimer("t_body");
-        </script>
-      </body>
-    </html>
-    ```
+```html
+<html>
+  <head>
+    <script src="boomerang.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      BOOMR.init({
+        beacon_url: "http://yoursite.com/path/to/beacon.php"
+      });
+      BOOMR.plugins.RT.startTimer("t_head");
+    </script>
+    <title>page title</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
+    <script type="text/javascript">
+      BOOMR.plugins.RT.endTimer("t_head").startTimer("t_body");
+    </script>
+  </head>
+  <body>
+    page body here
+    <script type="text/javascript">
+      BOOMR.plugins.RT.endTimer("t_body");
+    </script>
+  </body>
+</html>
+```
 
 Your timers will now be included in the beacon along with `t_done`.
 
@@ -76,36 +76,36 @@ this using the `BOOMR.plugins.RT.setTimer()` method. This method takes
 two parameters — the timer name and its value in milliseconds. The code
 above will change to this:
 
-    ```html
-    <html>
-      <head>
-        <script type="text/javascript">
-          var t_pagestart=new Date().getTime();
-        </script>
-        <title>page title</title>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <script type="text/javascript">
-          var t_headend = new Date().getTime();
-        </script>
-      </head>
-      <body>
-        page body here
-        <script type="text/javascript">
-          var t_jsstart = new Date().getTime();
-        </script>
-        <script src="boomerang.js" type="text/javascript"></script>
-        <script type="text/javascript">
-          BOOMR.init({
-            beacon_url: "http://yoursite.com/path/to/beacon.php"
-          });
-          var t_bodyend = new Date().getTime();                        
-          BOOMR.plugins.RT.setTimer("t_head", t_headend - t_pagestart).
-                           setTimer("t_body", t_bodyend - t_headend).  
-                           setTimer("t_js", t_bodyend - t_jsstart);    
-        </script>
-      </body>
-    </html>
-    ```
+```html
+<html>
+  <head>
+    <script type="text/javascript">
+      var t_pagestart=new Date().getTime();
+    </script>
+    <title>page title</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <script type="text/javascript">
+      var t_headend = new Date().getTime();
+    </script>
+  </head>
+  <body>
+    page body here
+    <script type="text/javascript">
+      var t_jsstart = new Date().getTime();
+    </script>
+    <script src="boomerang.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      BOOMR.init({
+        beacon_url: "http://yoursite.com/path/to/beacon.php"
+      });
+      var t_bodyend = new Date().getTime();                        
+      BOOMR.plugins.RT.setTimer("t_head", t_headend - t_pagestart).
+                       setTimer("t_body", t_bodyend - t_headend).  
+                       setTimer("t_js", t_bodyend - t_jsstart);    
+    </script>
+  </body>
+</html>
+```
 
 <div id="results">
 </div>

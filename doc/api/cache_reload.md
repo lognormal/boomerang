@@ -65,27 +65,27 @@ Example HTML document {#example}
 
 The cache reloading HTML document should look something like this:
 
-    ```html
-    <!doctype html>
-    <html>
-    <head>
-    <script src="boomerang.js"></script>
-    </head>
-    <body>
-    <script>
-    // required version needs to be passed in as a query string parameter
-    // like v=0.9.123456789
+```html
+<!doctype html>
+<html>
+<head>
+<script src="boomerang.js"></script>
+</head>
+<body>
+<script>
+// required version needs to be passed in as a query string parameter
+// like v=0.9.123456789
 
-    var boom_ver = BOOMR.version.split('.'),
-        reqd_ver = location.search.replace(/.*v=([0-9\.]+).*/, '$1').split('.');
-    if (    (boom_ver[0] < reqd_ver[0])      // javascript will do type coercion
-         || (boom_ver[0] == reqd_ver[0] && boom_ver[1] < reqd_ver[1])
-         || (boom_ver[0] == reqd_ver[0] && boom_ver[1] == reqd_ver[1] && boom_ver[2] < reqd_ver[2])
-    )
-    {
-        location.reload(true);
-    }
-    </script>
-    </body>
-    </html>
-    ```
+var boom_ver = BOOMR.version.split('.'),
+    reqd_ver = location.search.replace(/.*v=([0-9\.]+).*/, '$1').split('.');
+if (    (boom_ver[0] < reqd_ver[0])      // javascript will do type coercion
+     || (boom_ver[0] == reqd_ver[0] && boom_ver[1] < reqd_ver[1])
+     || (boom_ver[0] == reqd_ver[0] && boom_ver[1] == reqd_ver[1] && boom_ver[2] < reqd_ver[2])
+)
+{
+    location.reload(true);
+}
+</script>
+</body>
+</html>
+```

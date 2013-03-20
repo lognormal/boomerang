@@ -35,11 +35,11 @@ plugins
 :   An object containing all plugins that have been added to boomerang.
     If you build your own plugin, it should be added to this object:
 
-        ```javascript
-        BOOMR.plugins.MyPlugin = {
-            ...
-        };
-        ```
+```javascript
+BOOMR.plugins.MyPlugin = {
+    ...
+};
+```
 
 Configuration {#config}
 -------------

@@ -22,9 +22,9 @@ parameters and you shouldn't overwrite these with your own values. See
 built-in plugins. Other plugins may add their own parameters, consult
 the documentation of the plugin to find out what these are.
 
-    ```javascript
-    BOOMR.addVar("page_id", 123);
-    ```
+```javascript
+BOOMR.addVar("page_id", 123);
+```
 
 The parameter name must be a string. We recommend only using
 alphanumeric characters and underscores, but you can really use anything
@@ -34,12 +34,12 @@ that you can put into a URL.
 If you need to set multiple parameters, you can pass in an object
 instead:
 
-    ```javascript
-    BOOMR.addVar({
-            "bucket": "test#1",
-            "page_id": 123
-        });
-    ```
+```javascript
+BOOMR.addVar({
+        "bucket": "test#1",
+        "page_id": 123
+    });
+```
 
 Make sure you've included boomerang.js before calling `BOOMR.addVar()`.
 
@@ -58,35 +58,35 @@ added) from the beacon. To do this, call the `BOOMR.removeVar()` method.
 This method takes in a list of name, and removes all of them from the
 parameter list. Any name that isn't in the parameter list is ignored.
 
-    ```javascript
-    // don't send the stooges to the server
-    BOOMR.removeVar("larry", "moe", "curly");
-    ```
+```javascript
+// don't send the stooges to the server
+BOOMR.removeVar("larry", "moe", "curly");
+```
 
 ## Stopping the beacon
 
 You can also this as a crude way to prevent the beacon from firing.
 Inside your `before_beacon` event handler, simply remove all parameters.
 
-    ```javascript
-    BOOMR.subscribe('before_beacon', function(o) {
-        var p_names = [], k;
+```javascript
+BOOMR.subscribe('before_beacon', function(o) {
+    var p_names = [], k;
 
-        if( "t_done" in o ) {
-            return;
+    if( "t_done" in o ) {
+        return;
+    }
+
+    // t_done is not set, so don't beacon
+    for(k in o) {
+        if(o.hasOwnProperty(k)) {
+            p_names.push(k);
         }
+    }
 
-        // t_done is not set, so don't beacon
-        for(k in o) {
-            if(o.hasOwnProperty(k)) {
-                p_names.push(k);
-            }
-        }
-
-        // removeVar accepts either a list or an array
-        BOOMR.removeVar(p_names);
-    });
-    ```
+    // removeVar accepts either a list or an array
+    BOOMR.removeVar(p_names);
+});
+```
 
 <div id="results"></div>
 
