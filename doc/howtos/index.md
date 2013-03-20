@@ -3,7 +3,7 @@ layout: default
 title: How to do stuff with boomerang
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # How to do stuff with boomerang
 
