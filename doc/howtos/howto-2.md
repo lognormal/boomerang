@@ -3,7 +3,7 @@ layout: default
 title: Boomerang Howto 2
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 Measure perceived performance of content loaded dynamically
 -----------------------------------------------------------

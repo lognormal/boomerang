@@ -3,6 +3,8 @@ layout: default
 title: Boomerang Howto 5
 ---
 
+[Index](index.html)
+
 # Request/page tagging
 
 See [use case \#5](../use-cases.html#uc-5) for a description of this

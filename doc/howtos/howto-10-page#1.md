@@ -3,7 +3,7 @@ layout: default
 title: Boomerang Howto 10
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # Load time of a page prerendered by Google Chrome
 

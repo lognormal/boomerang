@@ -3,7 +3,7 @@ layout: default
 title: Boomerang Howto 1a 
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 User clicks a link on a page we control and page is usable when onload fires
 ----------------------------------------------------------------------------

@@ -3,7 +3,7 @@ layout: default
 title: boomerang Howto 9
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # Collect performance data from the Navigation Timing API
 

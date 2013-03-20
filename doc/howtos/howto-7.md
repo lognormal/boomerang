@@ -3,6 +3,8 @@ layout: default
 title: boomerang Howto 7
 ---
 
+[Index](index.html)
+
 # Boomerang Howto \#7: Protecting the beacon from abuse
 
 See [use case \#9](../use-cases.html#uc-9) for a description of this

@@ -1,12 +1,11 @@
---- 
-layout: default 
-title: boomerang Howto 8 
+---
+layout: default
+title: boomerang Howto 8
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
-Measure a user's DNS latency
-----------------------------
+## Measure a user's DNS latency
 
 See [use case \#7](../use-cases.html#uc-7) for a description of this
 requirement.
@@ -46,9 +45,9 @@ wildcard:
 BOOMR.init({
         user_ip: "<user's ip address>",
         beacon_url: "http://yoursite.com/path/to/beacon.php",
-        DNS: {                                         
-            base_url: "http://*.yoursite.com/images/"  
-        }                                              
+        DNS: {
+            base_url: "http://*.yoursite.com/images/"
+        }
     });
 </script>
 ```

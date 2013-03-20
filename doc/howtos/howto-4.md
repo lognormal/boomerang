@@ -3,7 +3,7 @@ layout: howto4
 title: Boomerang Howto 4
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # Measure more than just page load time
 

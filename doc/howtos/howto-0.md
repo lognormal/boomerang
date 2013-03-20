@@ -2,7 +2,7 @@
 layout: default
 title: boomerang Howto 0
 ---
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # How to read data out of a beacon or before\_beacon event handler
 

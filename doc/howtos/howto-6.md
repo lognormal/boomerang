@@ -3,7 +3,7 @@ layout: default
 title: boomerang Howto 6
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 # Configuring boomerang
 

@@ -3,7 +3,7 @@ layout: default
 title: Boomerang Howto 3
 ---
 
-[All Docs](/) | [Index](index.html)
+[Index](index.html)
 
 Measure a user's bandwidth/latency along with page load time
 ------------------------------------------------------------
