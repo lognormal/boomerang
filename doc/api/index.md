@@ -3,8 +3,6 @@ layout: default
 title: The boomerang API
 ---
 
-[All Docs](../)
-
 # The boomerang API
 
 ## core
