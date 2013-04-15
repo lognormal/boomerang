@@ -10,6 +10,7 @@ DATE := $(shell date +%s)
 
 MINIFIER := cat
 HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9 bacon10 bacon13
+SOASTA_SOURCE := ~/src/soasta/trunk/source
 
 all: boomerang-$(VERSION).$(DATE).js
 
@@ -27,9 +28,9 @@ soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 
 soasta-push: soasta
 	git tag soasta.$(VERSION).$(DATE)
-	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
-	cp build/boomerang-$(VERSION).$(DATE).js ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
-	cp boomerang-reload.html ~/src/soasta/trunk/source/WebApplications/Concerto/WebContent/boomerang/
+	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
+	cp build/boomerang-$(VERSION).$(DATE).js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
+	cp boomerang-reload.html $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/boomerang/
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
