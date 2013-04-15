@@ -25,7 +25,7 @@ load=function() {
 	    s1=dc.createElement(s);
 
 	t_start=new Date().getTime();
-	s1.src="//%config_host%%config_path%?key=%client_apikey%&d=" + encodeURIComponent(dom)
+	s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
 		+ '&t=' + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 		+ '&v=' + BOOMR.version				// boomerang version so we can force a reload for old versions
 		+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
@@ -79,4 +79,9 @@ BOOMR.plugins.LOGN = {
 
 }(BOOMR.window));
 
-BOOMR.init({log:null,wait:true,site_domain:null});
+/*
+ log:null will disable logging, which is what we want for production minified boomerang,
+ but not for the debug version.  We use special comment tags to indicate that this code
+ block should be removed if the debug version is requested.
+*/
+BOOMR.init({/*BEGIN DEBUG TOKEN*/log:null,/*END DEBUG TOKEN*/wait:true,site_domain:null});
