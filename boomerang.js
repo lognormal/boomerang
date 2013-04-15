@@ -559,9 +559,13 @@ boomr = {
 };
 
 delete BOOMR_start;
+
 if(typeof BOOMR_lstart === 'number') {
 	boomr.t_lstart = BOOMR_lstart;
 	delete BOOMR_lstart;
+}
+else if(typeof BOOMR.window.BOOMR_lstart === 'number') {
+	boomr.t_lstart = BOOMR.window.BOOMR_lstart;
 }
 
 (function() {
