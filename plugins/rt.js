@@ -130,8 +130,13 @@ impl = {
 		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 		if(update_start && subcookies.s && subcookies.r) {
 			this.r = subcookies.r;
+
+			BOOMR.debug(this.r + " =?= " + this.r2, "rt");
+			BOOMR.debug(subcookies.s + " <? " + (+subcookies.cl+15), "rt");
+			BOOMR.debug(subcookies.nu + " =?= " + d.URL.replace(/#.*/, ''), "rt");
+
 			if(!this.strict_referrer || this.r === this.r2 ||
-					( subcookies.s === +subcookies.cl && subcookies.nu === d.URL.replace(/#.*/, '') )
+					( subcookies.s < +subcookies.cl + 15 && subcookies.nu === d.URL.replace(/#.*/, '') )
 			) {
 				this.t_start = subcookies.s;
 				if(+subcookies.hd > subcookies.s) {
