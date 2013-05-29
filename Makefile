@@ -12,11 +12,12 @@ MINIFIER := cat
 HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9 bacon10 bacon13
 SOASTA_SOURCE := ~/src/soasta/trunk/source
 
+tmpfile := boomerang.working
+
 all: boomerang-$(VERSION).$(DATE).js
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
-lognormal : tmpfile := boomerang.working
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
@@ -26,25 +27,45 @@ soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 	cat boomerang.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > build/boomerang-$(VERSION).$(DATE).js && echo "done"
 	echo
 
-soasta-push: soasta
+old-soasta-push: soasta
 	git tag soasta.$(VERSION).$(DATE)
 	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 	cp boomerang-reload.html $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/boomerang/
 
+soasta-push: old-soasta-push lognormal lognormal-debug
+	cat build/boomerang-$(VERSION).$(DATE).js | base64 --break 80 > $(tmpfile).min.b64
+	cat build/boomerang-$(VERSION).$(DATE)-debug.js | base64 --break 80 > $(tmpfile).dbg.b64
+	awk    '/<Minified><\/Minified>/ { \
+			printf("        <Minified>\n"); \
+			system("cat $(tmpfile).min.b64"); \
+			printf("        </Minified>\n"); \
+			next; \
+		} \
+		/<Debug><\/Debug>/ { \
+			printf("        <Debug>\n"); \
+			system("cat $(tmpfile).dbg.b64"); \
+			printf("        </Debug>\n"); \
+			next; \
+		} \
+		/<Value><\/Value>/ { \
+			printf("        <Value>$(VERSION).$(DATE)</Value>\n"); \
+			next; \
+		} \
+		{ print }' RepositoryImports.tmpl > $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
+	rm $(tmpfile).min.b64
+	rm $(tmpfile).dbg.b64
+
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
 	chmod a+r $(tmpfile)
-	mv $(tmpfile) boomerang-$(VERSION).$(DATE).js
-	mv boomerang-$(VERSION).$(DATE)* build/
+	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE).js
 
 lognormal-debug: lognormal-plugins
-	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=0dd7f79b667025afb483661b9200a30dc372d866296d4e032c3bc927/;s/BOOMR.init({log:null,/BOOMR.init({/;' > boomerang-debug-latest.js
-	rm boomerang-$(VERSION).$(DATE)*
-	for host in $(HOSTS); do \
-		scp -C boomerang-debug-latest.js $(STANDALONE_PLUGINS) $$host:boomerang/ 2>/dev/null; \
-		ssh $$host "sudo nginx -s reload" 2>/dev/null; \
-	done
+	set +x
+	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=%client_apikey%/;s/BOOMR.init({log:null,/BOOMR.init({/;' > $(tmpfile)
+	chmod a+r $(tmpfile)
+	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE)-debug.js
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
