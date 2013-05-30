@@ -21,19 +21,19 @@ lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
-soasta: boomerang.js $(LOGNORMAL_PLUGINS)
+old-soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 	echo
 	echo "Making boomerang-$(VERSION).$(DATE).js ..."
 	cat boomerang.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > build/boomerang-$(VERSION).$(DATE).js && echo "done"
 	echo
 
-old-soasta-push: soasta
+old-soasta-push: old-soasta
 	git tag soasta.$(VERSION).$(DATE)
 	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 	cp boomerang-reload.html $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/boomerang/
 
-soasta-push: old-soasta-push lognormal lognormal-debug
+Default_Boomerang.xml: lognormal lognormal-debug
 	cat build/boomerang-$(VERSION).$(DATE).js | base64 --break 80 > $(tmpfile).min.b64
 	cat build/boomerang-$(VERSION).$(DATE)-debug.js | base64 --break 80 > $(tmpfile).dbg.b64
 	awk    '/<Minified><\/Minified>/ { \
@@ -52,9 +52,16 @@ soasta-push: old-soasta-push lognormal lognormal-debug
 			printf("        <Value>$(VERSION).$(DATE)</Value>\n"); \
 			next; \
 		} \
-		{ print }' RepositoryImports.tmpl > $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
+		{ print }' RepositoryImports.tmpl > Default_Boomerang.xml
 	rm $(tmpfile).min.b64
 	rm $(tmpfile).dbg.b64
+
+soasta: Default_Boomerang.xml
+
+soasta-push: new-soasta-push old-soasta-push
+
+new-soasta-push: soasta
+	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
