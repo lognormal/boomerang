@@ -59,15 +59,15 @@ Default_Boomerang.xml: lognormal lognormal-debug
 soasta: Default_Boomerang.xml
 
 
-update_schema: SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null && cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
+update_schema: SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null && cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;/+1/; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java | bc -l )
 
 
 update_schema: soasta
 	echo "Updating schema version $(SCHEMA_VERSION)..."
-	perl -pi -e '/private static final int c_iCurrent =/ && s/= $(SCHEMA_VERSION);/sprintf("= %d;", $(SCHEMA_VERSION)+1)/e' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
+	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
 	echo "Updating lastModifiedVersion..."
-	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/sprintf("lastModifiedVersion=\"%d\"", $(SCHEMA_VERSION)+1)/e' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
-	perl -pi -e 's/%schema_version%/$(SCHEMA_VERSION)+1/e' Default_Boomerang.xml
+	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
+	perl -pi -e 's/%schema_version%/$(SCHEMA_VERSION)/' Default_Boomerang.xml
 
 
 
