@@ -82,12 +82,13 @@ new-soasta-push: update_schema
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
+	rm boomerang-$(VERSION).$(DATE)*.js
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE).js
 
 lognormal-debug: lognormal-plugins
-	set +x
 	cat boomerang-$(VERSION).$(DATE)-debug.js | sed -e 's/key=%client_apikey%/debug=\&key=%client_apikey%/;s/BOOMR.init({log:null,/BOOMR.init({/;' > $(tmpfile)
+	rm boomerang-$(VERSION).$(DATE)-debug.js
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE)-debug.js
 
