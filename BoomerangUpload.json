@@ -1,0 +1,11 @@
+{
+   "type":"boomerang",
+   "name":"%name%",
+   "attributes":[
+      {
+         "name":"version",
+         "value":"%version%"
+      }
+   ],
+   "body":"%xml%"
+}
