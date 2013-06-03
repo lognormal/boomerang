@@ -7,5 +7,5 @@
          "value":"%version%"
       }
    ],
-   "body":"%xml%"
+   "body":%xml%
 }
