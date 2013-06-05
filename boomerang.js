@@ -134,6 +134,12 @@ boomr = {
 	t_start: BOOMR_start,
 	t_end: null,
 
+	session: {
+		ID: Math.random().toString(36).replace(/^0\./, ''),
+		start: undefined,
+		length: 0
+	},
+
 	// Utility functions
 	utils: {
 		objectToString: function(o, separator) {

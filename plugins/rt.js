@@ -36,9 +36,6 @@ impl = {
 	navigationType: 0,
 	navigationStart: undefined,
 	responseStart: undefined,
-	sessionID: Math.floor(Math.random()*1048576).toString(36),
-	sessionStart: undefined,
-	sessionLength: 0,
 	loadTime: 0,
 	oboError: 0,
 	t_start: undefined,
@@ -75,9 +72,9 @@ impl = {
 			delete subcookies.nu;
 		}
 
-		subcookies.si = this.sessionID;
-		subcookies.ss = this.sessionStart;
-		subcookies.sl = this.sessionLength;
+		subcookies.si = BOOMR.session.ID;
+		subcookies.ss = BOOMR.session.start;
+		subcookies.sl = BOOMR.session.length;
 		subcookies.tt = this.loadTime;
 		subcookies.obo = this.oboError;
 		t_start = new Date().getTime();
@@ -148,13 +145,13 @@ impl = {
 			this.lastActionTime = subcookies.s;
 		}
 		if(subcookies.si) {
-			this.sessionID = subcookies.si;
+			BOOMR.session.ID = subcookies.si;
 		}
 		if(subcookies.ss) {
-			this.sessionStart = parseInt(subcookies.ss, 10);
+			BOOMR.session.start = parseInt(subcookies.ss, 10);
 		}
 		if(subcookies.sl) {
-			this.sessionLength = parseInt(subcookies.sl, 10);
+			BOOMR.session.length = parseInt(subcookies.sl, 10);
 		}
 		if(subcookies.tt && subcookies.tt.match(/\d/)) {
 			this.loadTime = parseInt(subcookies.tt, 10);
@@ -320,6 +317,11 @@ BOOMR.plugins.RT = {
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
 
+		if(impl.sessionID) {
+			BOOMR.session.ID = impl.sessionID;
+			delete impl.sessionID;
+		}
+
 		if(config && config.beacon_url) {
 			if(!impl.beacon_url) {
 				impl.beacon_url = config.beacon_url;
@@ -328,8 +330,8 @@ BOOMR.plugins.RT = {
 		}
 
 		impl.initFromCookie(true);
-		if(!impl.sessionStart) {
-			impl.sessionStart = BOOMR.t_lstart || BOOMR.t_start;
+		if(!BOOMR.session.start) {
+			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
 		}
 		impl.setCookie(null, false);
 
@@ -476,9 +478,9 @@ BOOMR.plugins.RT = {
 
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
-		if((t_start && impl.sessionStart > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
-			impl.sessionStart = t_start || BOOMR.t_lstart || BOOMR.t_start;
-			impl.sessionLength = 0;
+		if((t_start && BOOMR.session.start > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
+			BOOMR.session.start = t_start || BOOMR.t_lstart || BOOMR.t_start;
+			BOOMR.session.length = 0;
 			impl.loadTime = 0;
 			impl.oboError = 0;
 			impl.beacon_url = impl.next_beacon_url;
@@ -550,7 +552,7 @@ BOOMR.plugins.RT = {
 
 		// we're either in onload, or onunload fired before onload
 		if(ename === 'load' || ename === 'xhr' || !impl.onloadfired) {
-			impl.sessionLength++;
+			BOOMR.session.length++;
 			if(isNaN(impl.timers.t_done.delta)) {
 				impl.oboError++;
 			}
@@ -560,9 +562,9 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.addVar({
-			'rt.si': impl.sessionID + '-' + Math.round(impl.sessionStart/1000).toString(36),
-			'rt.ss': impl.sessionStart,
-			'rt.sl': impl.sessionLength,
+			'rt.si': BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36),
+			'rt.ss': BOOMR.session.start,
+			'rt.sl': BOOMR.session.length,
 			'rt.tt': impl.loadTime,
 			'rt.obo': impl.oboError
 		});
