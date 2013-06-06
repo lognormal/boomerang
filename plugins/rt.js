@@ -315,12 +315,7 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
-					["cookie", "cookie_exp", "session_exp", "strict_referrer", "sessionID"]);
-
-		if(impl.sessionID) {
-			BOOMR.session.ID = impl.sessionID;
-			delete impl.sessionID;
-		}
+					["cookie", "cookie_exp", "session_exp", "strict_referrer"]);
 
 		if(config && config.beacon_url) {
 			if(!impl.beacon_url) {
