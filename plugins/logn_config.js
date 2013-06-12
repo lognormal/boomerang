@@ -29,7 +29,8 @@ load=function() {
 		+ '&t=' + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 		+ '&v=' + BOOMR.version				// boomerang version so we can force a reload for old versions
 		+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
-		+ '&sl=' + BOOMR.session.length			// pass on the session length so we know if this is a first time user or not
+		+ '&sl=' + (BOOMR.session.length>0?1:0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
+								// We don't pass the session length so that the URL response can be cached
 		+ (complete?"&r=":"");				// if this is running after complete, then we're just refreshing the crumb
 
 	s0.parentNode.insertBefore(s1, s0);
