@@ -105,7 +105,7 @@ soasta-upload: soasta
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
 new-soasta-push: update_schema
 	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
-	perl -pi -e 's/oSiteConfiguration.setBoomerangDefaultVersion(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(VERSION).$(DATE)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
+	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(VERSION).$(DATE)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
 
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
