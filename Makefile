@@ -83,7 +83,7 @@ soasta-push: new-soasta-push old-soasta-push
 
 soasta-upload: soasta
 	echo "Uploading version $(VERSION).$(DATE) to $(SOASTA_REST_PREFIX)..."
-	php -r '$xml = json_encode(preg_replace("/^.*<Boomerang /s", "<Boomerang ", preg_replace("/<\/Boomerang>.*$/s", "</Boomerang>", file_get_contents("Default_Boomerang.xml")))); $json = file_get_contents("BoomerangUpload.json"); $json = preg_replace("/%name%/", "boomerang-$(VERSION).$(DATE)", preg_replace("/%version%/", "$(VERSION).$(DATE)", preg_replace("/%xml%/", $xml, $json))); print $json;' | curl -T - --user $(SOASTA_USER):$(SOASTA_PASSWORD) $(SOASTA_REST_PREFIX)
+	php generate-soasta-json.php $(VERSION).$(DATE) | curl -T - --user $(SOASTA_USER):$(SOASTA_PASSWORD) $(SOASTA_REST_PREFIX)
 
 
 new-soasta-push: update_schema
