@@ -22,20 +22,29 @@ SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/s
 
 tmpfile := boomerang.working
 
+
 all: boomerang-$(VERSION).$(DATE).js
 
+
+# This is the old soasta format where boomerang.js and its plugins were stored in svn
+# This rule puts the version number into boomerang.js and puts it in the build directory
 old-soasta: boomerang.js $(LOGNORMAL_PLUGINS)
 	echo
 	echo "Making boomerang-$(VERSION).$(DATE).js ..."
 	cat boomerang.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > build/boomerang-$(VERSION).$(DATE).js && echo "done"
 	echo
 
+# This is the old soasta format where boomerang.js and its plugins were stored in svn
+# This rule takes the output of the previous rule and moves it to svn.  It also creates a git tag.
 old-soasta-push: old-soasta
-	git tag soasta.$(VERSION).$(DATE)
 	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
 	cp build/boomerang-$(VERSION).$(DATE).js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
 	cp boomerang-reload.html $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/boomerang/
 
+
+# This rule creates the xml file that contains base64 encoded versions of debug and minified boomerang
+# This is the new format of storing boomerang in the repository
+# The SCHEMA_VERSION used here is the new one only if we're pushing to soasta svn, else it's the old one though we could just omit it
 Default_Boomerang.xml: lognormal lognormal-debug
 	cat build/boomerang-$(VERSION).$(DATE).js | base64 --break 80 > $(tmpfile).min.b64
 	cat build/boomerang-$(VERSION).$(DATE)-debug.js | base64 --break 80 > $(tmpfile).dbg.b64
@@ -60,6 +69,7 @@ Default_Boomerang.xml: lognormal lognormal-debug
 	rm $(tmpfile).min.b64
 	rm $(tmpfile).dbg.b64
 
+
 soasta: Default_Boomerang.xml
 
 
@@ -67,6 +77,9 @@ update_schema: OLD_SCHEMA_VERSION := $(SCHEMA_VERSION)
 update_schema: SCHEMA_VERSION := $(shell echo "$(OLD_SCHEMA_VERSION)+1" | bc -l )
 
 
+# This rule adds a migration to set the new version as default and updates the schema files with the new version of boomerang
+# Do not run this on its own since it will add a migration but won't add boomerang to the repository
+# This should be run via new-soasta-push or something else that puts boomerang into the repo
 update_schema: soasta
 	echo "Updating schema version $(OLD_SCHEMA_VERSION) -> $(SCHEMA_VERSION)..."
 	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(VERSION).$(DATE)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/Migration$(OLD_SCHEMA_VERSION)to$(NEW_SCHEMA_VERSION).java
@@ -77,15 +90,19 @@ update_schema: soasta
 
 
 
+# Pushes both old and new formats
 soasta-push: new-soasta-push old-soasta-push
+	git tag soasta.$(VERSION).$(DATE)
 
 
 
+# Upload new version of boomerang to a running mpulse, but don't make it default yet
 soasta-upload: soasta
 	echo "Uploading version $(VERSION).$(DATE) to $(SOASTA_REST_PREFIX)..."
 	php generate-soasta-json.php $(VERSION).$(DATE) | curl -T - --user $(SOASTA_USER):$(SOASTA_PASSWORD) $(SOASTA_REST_PREFIX)
 
 
+# Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
 new-soasta-push: update_schema
 	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
 	perl -pi -e 's/oSiteConfiguration.setBoomerangDefaultVersion(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(VERSION).$(DATE)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
@@ -128,6 +145,17 @@ usage:
 	echo ""
 	echo "Create a jsmin minified release version of boomerang:"
 	echo "	make MINIFIER=\"/path/to/jsmin\""
+	echo ""
+	echo ""
+	echo "FOR SOASTA Users:"
+	echo "Build the new xml file locally:"
+	echo "  make soasta"
+	echo ""
+	echo "Build old and new versions and put into svn along with migrations:"
+	echo "  make soasta-push"
+	echo ""
+	echo "Build new version and upload to a running mpulse instance"
+	echo "  make soasta-upload"
 	echo ""
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
