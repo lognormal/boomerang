@@ -18,7 +18,7 @@ public class Migration%from%to%to% extends MigrationBase
   @Override
   public void migrate() throws Exception
   {
-    getSQLHelper().executeSql("UPDATE SiteConfiguration SET BoomerangDefaultVersion='%version%'");
+    getSQLHelper().executeSql("UPDATE SiteConfiguration SET BoomerangDefaultVersion='%version%' Where BoomerangDefaultVersion IS NULL OR BoomerangDefaultVersion < '%version%'");
   }
 }
 
