@@ -13,7 +13,7 @@ HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9 bacon10 
 
 SOASTA_SOURCE := ~/src/soasta/trunk/source
 SOASTA_SERVER := http://localhost:8080
-SOASTA_USER := soasta
+SOASTA_USER := SOASTA
 SOASTA_PASSWORD := 
 # Note that there MUST BE NO trailing slash in the following
 SOASTA_REST_PREFIX := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1/Objects
@@ -22,6 +22,11 @@ SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/s
 
 tmpfile := boomerang.working
 
+ifeq ($(strip $(SOASTA_PASSWORD)),)
+soasta_user_password := $(SOASTA_USER)
+else
+soasta_user_password := $(SOASTA_USER):$(SOASTA_PASSWORD)
+endif
 
 all: boomerang-$(VERSION).$(DATE).js
 
@@ -99,7 +104,7 @@ soasta-push: new-soasta-push old-soasta-push
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
 soasta-upload: soasta
 	echo "Uploading version $(VERSION).$(DATE) to $(SOASTA_REST_PREFIX)..."
-	php generate-soasta-json.php $(VERSION).$(DATE) | curl -T - --user $(SOASTA_USER):$(SOASTA_PASSWORD) $(SOASTA_REST_PREFIX)
+	php generate-soasta-json.php $(VERSION).$(DATE) | curl -v -T - --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
