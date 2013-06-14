@@ -106,6 +106,12 @@ soasta-upload: soasta
 	echo "Uploading version $(VERSION).$(DATE) to $(SOASTA_REST_PREFIX)..."
 	php generate-soasta-json.php $(VERSION).$(DATE) | curl -v -T - --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 
+soasta-set-default:
+ifeq ($(strip $(DEFAULT_VERSION)),)
+	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
+else
+	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
+endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
 new-soasta-push: update_schema
