@@ -63,11 +63,14 @@ Default_Boomerang.xml: lognormal lognormal-debug
 soasta: Default_Boomerang.xml
 
 
-update_schema: SCHEMA_VERSION := $(shell echo "$(SCHEMA_VERSION)+1" | bc -l )
+update_schema: OLD_SCHEMA_VERSION := $(SCHEMA_VERSION)
+update_schema: SCHEMA_VERSION := $(shell echo "$(OLD_SCHEMA_VERSION)+1" | bc -l )
 
 
 update_schema: soasta
-	echo "Updating schema version $(SCHEMA_VERSION)..."
+	echo "Updating schema version $(OLD_SCHEMA_VERSION) -> $(SCHEMA_VERSION)..."
+	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(VERSION).$(DATE)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/Migration$(OLD_SCHEMA_VERSION)to$(NEW_SCHEMA_VERSION).java
+	cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/ && svn add Migration$(OLD_SCHEMA_VERSION)to$(NEW_SCHEMA_VERSION).java && cd - >/dev/null
 	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
 	echo "Updating lastModifiedVersion..."
 	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
