@@ -17,6 +17,7 @@ SOASTA_USER := SOASTA
 SOASTA_PASSWORD := 
 # Note that there MUST BE NO trailing slash in the following
 SOASTA_REST_PREFIX := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1/Objects
+INSECURE :=
 
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
 
@@ -104,13 +105,13 @@ soasta-push: new-soasta-push old-soasta-push
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
 soasta-upload:
 	echo "Uploading version `cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;'` to $(SOASTA_REST_PREFIX)..."
-	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
+	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 
 soasta-set-default:
 ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
 else
-	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
+	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
 endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
