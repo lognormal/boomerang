@@ -103,7 +103,7 @@ soasta-push: new-soasta-push old-soasta-push
 
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
 soasta-upload:
-	echo "Uploading version $(VERSION).$(DATE) to $(SOASTA_REST_PREFIX)..."
+	echo "Uploading version `cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;'` to $(SOASTA_REST_PREFIX)..."
 	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 
 soasta-set-default:
