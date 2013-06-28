@@ -28,8 +28,13 @@ isn't one of the default plugins. To do this, run <code>make</code> in the
 boomerang directory with the following option:</p>
 
 <pre>
-make PLUGINS=navtiming.js
+make PLUGINS=plugins/navtiming.js
+
+OR with the rt &amp; bw plugins:
+
+make PLUGINS="plugins/rt.js plugins/bw.js plugins/navtiming.js"
 </pre>
+
 
 <p>Then you can include the new boomerang file (don't forget to run it through
 your favorite Javascript minifier first) as you normally would.</p>
