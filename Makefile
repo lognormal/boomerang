@@ -3,7 +3,7 @@
 
 PLUGINS := plugins/rt.js plugins/bw.js
 STANDALONE_PLUGINS := 
-LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/logn_config.js
+LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
