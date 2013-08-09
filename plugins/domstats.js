@@ -19,16 +19,19 @@ Count specific dom nodes for Fasterize like how many images are really loaded?
   }
 
   function count() {
-    BOOMR.addVar('dom.optimized', !!window.fstrz);
-    BOOMR.addVar('dom.scripts', d.getElementsByTagName('script').length);
-    BOOMR.addVar('dom.scriptssrc', d.querySelectorAll('script[src]').length);
-    BOOMR.addVar('dom.stylesheets', d.querySelectorAll('link[rel=stylesheet]').length);
+    var tags = [];
+    tags.push('optimized|' + !!window.fstrz);
+    tags.push(('scripts|' + d.getElementsByTagName('script').length));
+    tags.push('scriptssrc|' + d.querySelectorAll('script[src]').length);
+    tags.push('stylesheets|' + d.querySelectorAll('link[rel=stylesheet]').length);
 
     // when images are lazyloaded using https://github.com/vvo/lazyload,
     // they have a data-src attribute, which is removed when img has loaded
     var imgsNumber = d.getElementsByTagName('img').length;
-    BOOMR.addVar('dom.imgs', imgsNumber);
-    BOOMR.addVar('dom.loadedimgs', imgsNumber - d.querySelectorAll('img[data-frz-src]').length);
+    tags.push('imgs|' + imgsNumber);
+    tags.push('loadedimgs|' + (imgsNumber - d.querySelectorAll('img[data-frz-src]').length));
+
+    BOOMR.addVar('domstats', tags.join(','));
 
     complete = true;
     BOOMR.sendBeacon();

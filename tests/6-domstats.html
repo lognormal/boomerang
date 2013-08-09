@@ -20,7 +20,7 @@ window.onerror = function() {
 <script src="../plugins/rt.js" type="text/javascript"></script>
 <script src="../plugins/domstats.js" type="text/javascript"></script>
 <script type="text/javascript">
-BOOMR.subscribe('before_beacon', function(o) { BOOMR.log(o, "debug", "test"); });
+BOOMR.subscribe('before_beacon', function(o) { console.log(o); });
 BOOMR.init();
 </script>
 </body>
