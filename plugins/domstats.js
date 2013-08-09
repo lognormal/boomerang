@@ -20,7 +20,6 @@ Count specific dom nodes for Fasterize like how many images are really loaded?
 
   function count() {
     var tags = [];
-    tags.push('optimized|' + !!window.fstrz);
     tags.push(('scripts|' + d.getElementsByTagName('script').length));
     tags.push('scriptssrc|' + d.querySelectorAll('script[src]').length);
     tags.push('stylesheets|' + d.querySelectorAll('link[rel=stylesheet]').length);
@@ -31,6 +30,8 @@ Count specific dom nodes for Fasterize like how many images are really loaded?
     tags.push('imgs|' + imgsNumber);
     tags.push('loadedimgs|' + (imgsNumber - d.querySelectorAll('img[data-frz-src]').length));
 
+
+    BOOMR.addVar('optimized', !!window.fstrz);
     BOOMR.addVar('domstats', tags.join(','));
 
     complete = true;
