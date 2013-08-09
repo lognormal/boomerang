@@ -1,0 +1,38 @@
+<html>
+<head>
+</head>
+<body>
+This page should load without javascript errors.<br>
+This page calls init() with no parameters, so onload should fire and try to measure page performance.
+If you click on `link` you will be redirected to the same page. And your click time will be recorded<br>
+Status: <span id="state" style="background-color:green;">PASS</span>
+<br/>Link: <a href="?page2">link</a>
+
+<script type="text/javascript">
+BOOMR_lstart = new Date().getTime();
+window.onerror = function() {
+  var st = document.getElementById("state");
+  st.style.backgroundColor="red";
+  st.innerHTML = "FAIL";
+}
+</script>
+<script src="../boomerang.js" type="text/javascript"></script>
+<script src="../plugins/rt.js" type="text/javascript"></script>
+<script src="../plugins/ttfc.js" type="text/javascript"></script>
+<script>
+if (!BOOMR.utils.getCookie('t_ttfc')) {
+  var st = document.getElementById("state");
+  st.style.backgroundColor="gray";
+  st.innerHTML = "WAITING FOR CLICK";
+}
+</script>
+<script type="text/javascript">
+BOOMR.subscribe('before_beacon', function(o) { BOOMR.log(o, "debug", "test"); });
+BOOMR.init();
+</script>
+</body>
+</html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+-->
