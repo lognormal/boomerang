@@ -18,6 +18,7 @@ Metric will be sent for every new page loaded.
 
   function done() {
     complete = true;
+    BOOMR.sendBeacon();
   }
 
   function iscomplete() {
