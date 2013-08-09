@@ -8,7 +8,7 @@ DATE := $(shell date +%s)
 
 MINIFIER := cat
 
-all: boomerang-$(VERSION).$(DATE).js
+all: dist/boomerang-$(VERSION).$(DATE).js
 
 usage:
 	echo "Create a release version of boomerang:"
@@ -24,16 +24,12 @@ usage:
 	echo "	make MINIFIER=\"/path/to/jsmin\""
 	echo ""
 
-boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
-	echo "Making $@ ..."
-	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
-	echo
-
-boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
+dist/boomerang-$(VERSION).$(DATE).js: boomerang.js $(PLUGINS)
 	echo
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
-	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > $@ && echo "done"
+	[ -d dist ] || mkdir dist
+	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g" > $@ && echo "done"
 	echo
 
 .PHONY: all
