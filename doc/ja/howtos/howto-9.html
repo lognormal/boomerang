@@ -25,7 +25,11 @@
 <p>でフォルトのプラグインではないため、あなた自身で boomerang.js をビルドする必要があります。これを行うには、次のオプションを指定して boomerang のディレクトリーで <code>make</code> を実行してください:</p>
 
 <pre>
-make PLUGINS=navtiming.js
+make PLUGINS=plugins/navtiming.js
+
+OR
+
+make PLUGINS="plugins/rt.js plugins/bw.js plugins/navtiming.js"
 </pre>
 
 <p>そうすると新しい boomerang のファイル（好きな JavaScript 圧縮ツールに通すことを忘れないでください）をあなたが通常使うものにできます。</p>

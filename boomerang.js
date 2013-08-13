@@ -113,15 +113,6 @@ impl = {
 		}
 
 		return true;
-	},
-
-	addListener: function(el, sType, fn) {
-		if(el.addEventListener) {
-			el.addEventListener(sType, fn, false);
-		}
-		else if(el.attachEvent) {
-			el.attachEvent("on" + sType, fn);
-		}
 	}
 };
 
@@ -249,6 +240,22 @@ boomr = {
 			}
 
 			return (props>0);
+		},
+
+		addListener: function(el, type, fn) {
+			if (el.addEventListener) {
+				el.addEventListener(type, fn, false);
+			} else {
+				el.attachEvent( 'on' + type, fn );
+			}
+		},
+
+		removeListener: function (el, type, fn) {
+			if (el.removeEventListener) {
+				el.removeEventListener(type, fn, false);
+			} else {
+				el.detachEvent('on' + type, fn);
+			}
 		}
 	},
 
@@ -305,15 +312,15 @@ boomr = {
 			}
 			else {
 				if(w.onpagehide || w.onpagehide === null) {
-					impl.addListener(w, "pageshow", BOOMR.page_ready);
+					boomr.utils.addListener(w, "pageshow", BOOMR.page_ready);
 				}
 				else {
-					impl.addListener(w, "load", BOOMR.page_ready);
+					boomr.utils.addListener(w, "load", BOOMR.page_ready);
 				}
 			}
 		}
 
-		impl.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
+		boomr.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		(function() {
 			// visibilitychange is useful to detect if the page loaded through prerender
@@ -322,23 +329,23 @@ boomr = {
 			// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
 			var fire_visible = function() { impl.fireEvent("visibility_changed"); };
 			if(d.webkitVisibilityState) {
-				impl.addListener(d, "webkitvisibilitychange", fire_visible);
+				boomr.utils.addListener(d, "webkitvisibilitychange", fire_visible);
 			}
 			else if(d.msVisibilityState) {
-				impl.addListener(d, "msvisibilitychange", fire_visible);
+				boomr.utils.addListener(d, "msvisibilitychange", fire_visible);
 			}
 			else if(d.visibilityState) {
-				impl.addListener(d, "visibilitychange", fire_visible);
+				boomr.utils.addListener(d, "visibilitychange", fire_visible);
 			}
 
-			impl.addListener(d, "mouseup", impl.onclick_handler);
+			boomr.utils.addListener(d, "mouseup", impl.onclick_handler);
 
 			if(!w.onpagehide && w.onpagehide !== null) {
 				// This must be the last one to fire
 				// We only clear w on browsers that don't support onpagehide because
 				// those that do are new enough to not have memory leak problems of
 				// some older browsers
-				impl.addListener(w, "unload", function() { BOOMR.window=w=null; });
+				boomr.utils.addListener(w, "unload", function() { BOOMR.window=w=null; });
 			}
 		}());
 
@@ -418,12 +425,12 @@ boomr = {
 			// pagehide is for iOS devices
 			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
 			if(w.onpagehide || w.onpagehide === null) {
-				impl.addListener(w, "pagehide", unload_handler);
+				boomr.utils.addListener(w, "pagehide", unload_handler);
 			}
 			else {
-				impl.addListener(w, "unload", unload_handler);
+				boomr.utils.addListener(w, "unload", unload_handler);
 			}
-			impl.addListener(w, "beforeunload", unload_handler);
+			boomr.utils.addListener(w, "beforeunload", unload_handler);
 		}
 
 		return this;
