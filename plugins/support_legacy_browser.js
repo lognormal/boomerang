@@ -20,7 +20,7 @@ Send the variable t_page for browsers that don't support navtiming.
     BOOMR.sendBeacon();
   }
 
-  BOOMR.plugins.Domstats = {
+  BOOMR.plugins.Legacy = {
     init: function() {
       BOOMR.subscribe("page_ready", ready);
       return this;

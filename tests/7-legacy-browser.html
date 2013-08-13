@@ -20,9 +20,10 @@ window.onerror = function() {
 <script src="../plugins/rt.js" type="text/javascript"></script>
 <script src="../plugins/legacy-browser.js" type="text/javascript"></script>
 <script type="text/javascript">
-BOOMR.subscribe('before_beacon', function(o) { console.log(o); });
+BOOMR.subscribe('before_beacon', function(o) { console.log(o); document.getElementById("text").innerHTML= o['t_page']});
 BOOMR.init();
 </script>
+<div id="text"></div>
 </body>
 </html>
 <!--
