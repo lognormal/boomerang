@@ -94,7 +94,12 @@ impl = {
 			sum=0, sumsq=0,
 			amean, median,
 			std_dev, std_err,
-			lat_filtered;
+			lat_filtered,
+			first;
+
+		// We ignore the first since it paid the price of DNS lookup, TCP connect
+		// and slow start
+		first = this.latencies.shift();
 
 		// We first do IQR filtering and use the resulting data set
 		// for all calculations
@@ -104,14 +109,10 @@ impl = {
 		BOOMR.debug(lat_filtered, "bw");
 
 		// First we get the arithmetic mean, standard deviation and standard error
-		// We ignore the first since it paid the price of DNS lookup, TCP connect
-		// and slow start
-		for(i=1; i<n; i++) {
+		for(i=0; i<n; i++) {
 			sum += lat_filtered[i];
 			sumsq += lat_filtered[i] * lat_filtered[i];
 		}
-
-		n--;	// Since we started the loop with 1 and not 0
 
 		amean = Math.round(sum / n);
 
@@ -122,8 +123,6 @@ impl = {
 
 		std_dev = std_dev.toFixed(2);
 
-
-		n = lat_filtered.length-1;
 
 		median = Math.round(
 				(lat_filtered[Math.floor(n/2)] + lat_filtered[Math.ceil(n/2)]) / 2
