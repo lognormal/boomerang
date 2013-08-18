@@ -26,7 +26,11 @@ You will have to build your own version of boomerang.js since it isn't
 one of the default plugins. To do this, run `make` in the boomerang
 directory with the following option:
 
-    make PLUGINS=navtiming.js
+    make PLUGINS=plugins/navtiming.js
+
+OR with the rt & bw plugins:
+
+    make PLUGINS="plugins/rt.js plugins/bw.js plugins/navtiming.js"
 
 Then you can include the new boomerang file (don't forget to run it
 through your favorite Javascript minifier first) as you normally would.
