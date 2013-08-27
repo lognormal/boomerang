@@ -25,7 +25,7 @@ BOOMR_start = new Date().getTime();
 
 // beaconing section
 // the parameter is the window
-(function(w) {
+(function(w) {          /*w就是window*/
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
