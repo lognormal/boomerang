@@ -30,6 +30,10 @@ var load=function() {
 
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
+
+	// this is a timeout so we don't wait forever to send the beacon
+	// if the server fails
+	setTimeout(loaded, 500);
 };
 
 BOOMR.plugins.CT = {
