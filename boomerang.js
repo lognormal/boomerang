@@ -921,7 +921,7 @@ else if(typeof BOOMR.window.BOOMR_lstart === "number") {
 	else if(w.Y && w.Y.log) {
 		boomr.log = w.Y.log;
 	}
-	else if(typeof console === "object" && console.log !== undefined) {
+	else if(typeof console === "object" && console.log !== undefined && w.debug) {
 		boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
 	}
 
