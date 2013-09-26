@@ -9,7 +9,7 @@ VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boom
 DATE := $(shell date +%s)
 
 MINIFIER := cat
-HOSTS := bacon1 bacon2 bacon3 bacon4 bacon5 bacon6 bacon7 bacon8 bacon9 bacon10 bacon13
+HOSTS := bacon1 bacon2 bacon3 bacon4 bacon7 bacon8 bacon10 bacon13
 
 SOASTA_SOURCE := ~/src/soasta/trunk/source
 SOASTA_SERVER := http://localhost:8080

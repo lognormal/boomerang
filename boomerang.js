@@ -174,6 +174,7 @@ boomr = {
 			var value, nameval, c, exp;
 
 			if(!name || !impl.site_domain) {
+				BOOMR.debug("No cookie name or site domain: " + name + "/" + impl.site_domain);
 				return false;
 			}
 
@@ -191,7 +192,14 @@ boomr = {
 			if ( nameval.length < 4000 ) {
 				d.cookie = c.join('; ');
 				// confirm cookie was set (could be blocked by user's settings, etc.)
-				return ( value === this.getCookie(name) );
+				var savedVal = this.getCookie(name);
+				if(value === savedVal) {
+					return true;
+				}
+				BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedVal);
+			}
+			else {
+				BOOMR.warn("Cookie too long: " + nameval.length);
 			}
 
 			return false;
@@ -511,6 +519,8 @@ boomr = {
 			impl.beacon_url = beacon_url_override;
 		}
 
+		BOOMR.debug("Checking if we can send beacon");
+
 		// At this point someone is ready to send the beacon.  We send
 		// the beacon only if all plugins have finished doing what they
 		// wanted to do
@@ -520,6 +530,7 @@ boomr = {
 					continue;
 				}
 				if(!this.plugins[k].is_complete()) {
+					BOOMR.debug("Plugin " + k + " is not complete, deferring beacon send");
 					return this;
 				}
 			}
