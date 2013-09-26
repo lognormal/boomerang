@@ -289,7 +289,7 @@ boomr = {
 
 		for(k in this.plugins) {
 			if(this.plugins.hasOwnProperty(k)) {
-				// config[pugin].enabled has been set to false
+				// config[plugin].enabled has been set to false
 				if( config[k]
 					&& config[k].hasOwnProperty("enabled")
 					&& config[k].enabled === false
@@ -297,7 +297,9 @@ boomr = {
 					impl.disabled_plugins[k] = 1;
 					continue;
 				}
-				else if(impl.disabled_plugins[k]) {
+
+				// plugin was previously disabled but is now enabled
+				if(impl.disabled_plugins[k]) {
 					delete impl.disabled_plugins[k];
 				}
 
