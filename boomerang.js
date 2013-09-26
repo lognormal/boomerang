@@ -34,7 +34,7 @@ if(w.parent !== w
 	w = w.parent;
 }
 
-var impl, boomr, k, d=w.document;
+var impl, boomr, ident, d=w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
 if(w.BOOMR === undefined) {
@@ -166,7 +166,7 @@ boomr = {
 		},
 
 		setCookie: function(name, subcookies, max_age) {
-			var value, nameval, c, exp;
+			var value, nameval, savedval, c, exp;
 
 			if(!name || !BOOMR.session.domain) {
 				BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
@@ -187,11 +187,11 @@ boomr = {
 			if ( nameval.length < 4000 ) {
 				d.cookie = c.join('; ');
 				// confirm cookie was set (could be blocked by user's settings, etc.)
-				var savedVal = this.getCookie(name);
-				if(value === savedVal) {
+				savedval = this.getCookie(name);
+				if(value === savedval) {
 					return true;
 				}
-				BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedVal);
+				BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedval);
 			}
 			else {
 				BOOMR.warn("Cookie too long: " + nameval.length);
@@ -616,9 +616,9 @@ if(typeof console === "object" && console.log !== undefined) {
 }
 
 
-for(k in boomr) {
-	if(boomr.hasOwnProperty(k)) {
-		BOOMR[k] = boomr[k];
+for(ident in boomr) {
+	if(boomr.hasOwnProperty(ident)) {
+		BOOMR[ident] = boomr[ident];
 	}
 }
 
