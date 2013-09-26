@@ -55,13 +55,6 @@ BOOMR.window = w;
 impl = {
 	// properties
 	beacon_url: location.protocol + "//204st.us/",
-	// strip out everything except last two parts of hostname.
-	// This doesn't work well for domains that end with a country tld,
-	// but we allow the developer to override site_domain for that.
-	// You can disable all cookies by setting site_domain to a falsy value
-	site_domain: w.location.hostname.
-				replace(/.*?([^.]+\.[^.]+)\.?$/, '$1').
-				toLowerCase(),
 	//! User's ip address determined on the server.  Used for the BA cookie
 	user_ip: '',
 
@@ -126,6 +119,8 @@ boomr = {
 	t_end: null,
 
 	session: {
+		// You can disable all cookies by setting site_domain to a falsy value
+		domain: null,
 		ID: Math.random().toString(36).replace(/^0\./, ''),
 		start: undefined,
 		length: 0
@@ -173,15 +168,15 @@ boomr = {
 		setCookie: function(name, subcookies, max_age) {
 			var value, nameval, c, exp;
 
-			if(!name || !impl.site_domain) {
-				BOOMR.debug("No cookie name or site domain: " + name + "/" + impl.site_domain);
+			if(!name || !BOOMR.session.domain) {
+				BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
 				return false;
 			}
 
 			value = this.objectToString(subcookies, "&");
 			nameval = name + '=' + value;
 
-			c = [nameval, "path=/", "domain=" + impl.site_domain];
+			c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
 			if(max_age) {
 				exp = new Date();
 				exp.setTime(exp.getTime() + max_age*1000);
@@ -269,7 +264,7 @@ boomr = {
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "site_domain", "user_ip"];
+		    properties = ["beacon_url", "user_ip"];
 
 		if(!config) {
 			config = {};
@@ -281,7 +276,11 @@ boomr = {
 			}
 		}
 
-		if(config.log  !== undefined) {
+		if(config.site_domain !== undefined) {
+			this.session.domain = config.site_domain;
+		}
+
+		if(config.log !== undefined) {
 			this.log = config.log;
 		}
 		if(!this.log) {
