@@ -72,6 +72,7 @@ impl = {
 			delete subcookies.nu;
 		}
 
+		subcookies.dm = BOOMR.session.domain;
 		subcookies.si = BOOMR.session.ID;
 		subcookies.ss = BOOMR.session.start;
 		subcookies.sl = BOOMR.session.length;
@@ -158,6 +159,9 @@ impl = {
 		}
 		if(subcookies.obo) {
 			this.oboError = parseInt(subcookies.obo, 10)||0;
+		}
+		if(subcookies.dm && !BOOMR.session.domain) {
+			BOOMR.session.domain = subcookies.dm;
 		}
 
 		if(subcookies.bcn) {
