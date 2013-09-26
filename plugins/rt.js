@@ -81,7 +81,7 @@ impl = {
 			subcookies[how] = t_start;
 		}
 
-		BOOMR.debug("Setting cookie " + BOOMR.utils.objectToString(subcookies), "rt");
+		BOOMR.debug("Setting cookie (how=" + how + ")\n" + BOOMR.utils.objectToString(subcookies), "rt");
 		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
 			return this;
@@ -450,6 +450,8 @@ BOOMR.plugins.RT = {
 			BOOMR.addVar("rt.start", "none");
 			t_start = undefined;			// force all timers to NaN state
 		}
+
+		BOOMR.debug("Got start time: " + t_start);
 
 		impl.initFromCookie(false);
 
