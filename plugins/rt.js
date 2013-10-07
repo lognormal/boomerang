@@ -138,7 +138,7 @@ impl = {
 		if(subcookies.s) {
 			this.lastActionTime = subcookies.s;
 		}
-		if(subcookies.si) {
+		if((!BOOMR.session.ID || !BOOMR.session.ID.match(/-/)) && subcookies.si) {
 			BOOMR.session.ID = subcookies.si;
 		}
 		if(subcookies.ss) {
