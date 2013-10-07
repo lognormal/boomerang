@@ -138,11 +138,12 @@ impl = {
 		if(subcookies.s) {
 			this.lastActionTime = subcookies.s;
 		}
-		if((!BOOMR.session.ID || !BOOMR.session.ID.match(/-/)) && subcookies.si) {
-			BOOMR.session.ID = subcookies.si;
-		}
 		if(subcookies.ss) {
 			BOOMR.session.start = parseInt(subcookies.ss, 10);
+		}
+		if((!BOOMR.session.ID || !BOOMR.session.ID.match(/-/)) && subcookies.si) {
+			BOOMR.session.ID = subcookies.si;
+			BOOMR.addVar('rt.si', BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36));
 		}
 		if(subcookies.sl) {
 			BOOMR.session.length = parseInt(subcookies.sl, 10);
