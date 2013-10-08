@@ -480,7 +480,9 @@ BOOMR.plugins.RT = {
 
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
+		BOOMR.removeVar("rt.srst");
 		if((t_start && BOOMR.session.start > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
+			BOOMR.addVar("rt.srst", BOOMR.session.ID + "-" + BOOMR.session.start + ":" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime);
 			BOOMR.session.start = t_start || BOOMR.t_lstart || BOOMR.t_start;
 			BOOMR.session.length = 0;
 			impl.loadTime = 0;
