@@ -52,8 +52,10 @@ old-soasta-push: old-soasta
 # This is the new format of storing boomerang in the repository
 # The SCHEMA_VERSION used here is the new one only if we're pushing to soasta svn, else it's the old one though we could just omit it
 Default_Boomerang.xml: lognormal lognormal-debug
-	cat build/boomerang-$(VERSION).$(DATE).js | base64 --break 80 > $(tmpfile).min.b64
-	cat build/boomerang-$(VERSION).$(DATE)-debug.js | base64 --break 80 > $(tmpfile).dbg.b64
+	echo "Making minified base64..."
+	base64 -i build/boomerang-$(VERSION).$(DATE).js -o $(tmpfile).min.b64
+	echo "Making debug base64..."
+	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 80 -o $(tmpfile).dbg.b64
 	awk    '/<Minified><\/Minified>/ { \
 			printf("        <Minified>\n"); \
 			system("cat $(tmpfile).min.b64"); \
