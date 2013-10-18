@@ -58,6 +58,8 @@ impl = {
 	//! User's ip address determined on the server.  Used for the BA cookie
 	user_ip: '',
 
+	strip_query_string: false,
+
 	onloadfired: false,
 
 	handlers_attached: false,
@@ -228,6 +230,13 @@ boomr = {
 			return this.setCookie(name, {}, 0);
 		},
 
+		cleanupURL: function(url) {
+			if(impl.strip_query_string) {
+				return url.replace(/\?.*/, '?qs-redacted');
+			}
+			return url;
+		},
+
 		pluginConfig: function(o, config, plugin_name, properties) {
 			var i, props=0;
 
@@ -264,7 +273,7 @@ boomr = {
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "user_ip"];
+		    properties = ["beacon_url", "user_ip", "strip_query_string"];
 
 		if(!config) {
 			config = {};
@@ -532,8 +541,8 @@ boomr = {
 		}
 
 		impl.vars.v = BOOMR.version;
-		impl.vars.u = d.URL.replace(/#.*/, '');
 		// use d.URL instead of location.href because of a safari bug
+		impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ''));
 		if(w !== window) {
 			impl.vars["if"] = "";
 		}
