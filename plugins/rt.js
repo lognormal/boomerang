@@ -542,10 +542,10 @@ BOOMR.plugins.RT = {
 
 		if(ntimers) {
 			if(ename !== "xhr") {
-				BOOMR.addVar("r", impl.r);
+				BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
 
 				if(impl.r2 !== impl.r) {
-					BOOMR.addVar("r2", impl.r2);
+					BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 				}
 			}
 
