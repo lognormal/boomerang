@@ -171,6 +171,9 @@ usage:
 	echo "Build new version and upload to a running mpulse instance"
 	echo "  make soasta-upload"
 	echo ""
+	echo "See https://dev2.soasta.com/twiki/bin/view/Development/ReleasingNewBoomerang"
+	echo "for more details"
+	echo ""
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
 	echo "Making $@ ..."
