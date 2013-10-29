@@ -482,7 +482,7 @@ BOOMR.plugins.RT = {
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 		BOOMR.removeVar("rt.srst");
 		if((t_start && BOOMR.session.start > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
-			BOOMR.addVar("rt.srst", BOOMR.session.ID + "-" + BOOMR.session.start + ":" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime);
+			BOOMR.addVar("rt.srst", BOOMR.session.ID + "-" + BOOMR.session.start + ":" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ":" + t_start + ":" + impl.lastActionTime + ":" + t_done);
 			BOOMR.session.start = t_start || BOOMR.t_lstart || BOOMR.t_start;
 			BOOMR.session.length = 0;
 			impl.loadTime = 0;
@@ -495,9 +495,12 @@ BOOMR.plugins.RT = {
 		this.endTimer("t_done", t_done);
 
 		// make sure old variables don't stick around
-		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt', 't_postrender', 't_prerender', 't_load');
+		BOOMR.removeVar('t_done', 't_page', 't_resp', 'r', 'r2', 'rt.tstart', 'rt.cstart', 'rt.bstart', 'rt.end', 'rt.abld', 'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt', 't_postrender', 't_prerender', 't_load');
 
 		BOOMR.addVar('rt.tstart', t_start);
+		if(typeof impl.t_start === 'number' && impl.t_start !== t_start) {
+			BOOMR.addVar('rt.cstart', impl.t_start);
+		}
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
 
@@ -555,7 +558,7 @@ BOOMR.plugins.RT = {
 		}
 
 		// we're either in onload, or onunload fired before onload
-		if(ename === 'load' || ename === 'xhr' || !impl.onloadfired) {
+		if(ename === 'load' || ename === 'visible' || ename === 'xhr' || !impl.onloadfired) {
 			BOOMR.session.length++;
 			if(isNaN(impl.timers.t_done.delta)) {
 				impl.oboError++;
