@@ -3,7 +3,7 @@
 
 PLUGINS := plugins/rt.js plugins/bw.js
 STANDALONE_PLUGINS := 
-LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/logn_config.js
+LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/md5.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
@@ -129,7 +129,7 @@ lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
-	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
+	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } /BOOMR\.utils\.MD5=[a-zA-Z]/ { system("cat md5-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
 	rm boomerang-$(VERSION).$(DATE).js
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE).js
@@ -177,7 +177,7 @@ usage:
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
 	echo "Making $@ ..."
-	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g;s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
+	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
 	echo
 
 boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
