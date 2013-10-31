@@ -1,0 +1,3 @@
+/*
+The md5 plugin for Boomerang is derived from JavaScript-MD5, Copyright 2011, Sebastian Tschan. https://blueimp.net.  Licensed under the MIT license: http://www.opensource.org/licenses/MIT
+*/
