@@ -237,6 +237,16 @@ boomr = {
 			return url;
 		},
 
+		hashQueryString: function(url, stripHash) {
+			if(stripHash) {
+				url = url.replace(/#.*/, '');
+			}
+			if(!BOOMR.utils.MD5) {
+				return url;
+			}
+			return url.replace(/\?(.*)/, function(m0, m1) { return '?' + BOOMR.utils.MD5(m1); });
+		},
+
 		pluginConfig: function(o, config, plugin_name, properties) {
 			var i, props=0;
 
