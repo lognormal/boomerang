@@ -12,14 +12,14 @@ HOSTS := bacon1 bacon2 bacon3 bacon4 bacon7 bacon8 bacon10 bacon13
 
 all: boomerang-$(VERSION).$(DATE).js
 
-lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/logn_config.js
+lognormal-plugins : override PLUGINS := plugins/rt.js plugins/bw.js plugins/ipv6.js plugins/dns.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/md5.js plugins/logn_config.js
 lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
 lognormal : tmpfile := boomerang.working
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
 lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
-	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
+	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } /BOOMR\.utils\.MD5=[a-zA-Z]/ { system("cat md5-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) boomerang-$(VERSION).$(DATE).js
 	mv boomerang-$(VERSION).$(DATE)* build/
@@ -55,7 +55,7 @@ usage:
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
 	echo "Making $@ ..."
-	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g;s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
+	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
 	echo
 
 boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
