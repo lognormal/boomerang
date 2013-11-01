@@ -116,6 +116,13 @@ else
 	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
 endif
 
+soasta-set-minimum:
+ifeq ($(strip $(MINIMUM_VERSION)),)
+	echo "Please specify a default version using \`make MINIMUM_VERSION=... $@'"
+else
+	echo '{"attributes":[{"name":"boomerangMinimumVersion","value":"$(MINIMUM_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
+endif
+
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
 new-soasta-push: update_schema
 	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
