@@ -548,7 +548,7 @@ BOOMR.plugins.RT = {
 			t_start = undefined;			// force all timers to NaN state
 		}
 
-		BOOMR.debug("Got start time: " + t_start);
+		BOOMR.debug("Got start time: " + t_start, "rt");
 
 		impl.refreshSession();
 
