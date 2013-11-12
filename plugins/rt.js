@@ -45,7 +45,7 @@ impl = {
 	beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
 	next_beacon_url: undefined,	// beacon_url to use when session expires
 
-	setCookie: function(how, url) {
+	updateCookie: function(timer, url) {
 		var t_end, t_start, subcookies;
 
 		// Disable use of RT cookie by setting its name to a falsy value
@@ -56,11 +56,11 @@ impl = {
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
-		if(how === "ul" || how === "hd") {
+		if(timer === "ul" || timer === "hd") {
 			subcookies.r = BOOMR.utils.hashQueryString(d.URL, true);
 		}
 
-		if(how === "cl") {
+		if(timer === "cl") {
 			if(url) {
 				subcookies.nu = BOOMR.utils.hashQueryString(url);
 			}
@@ -80,8 +80,8 @@ impl = {
 		subcookies.obo = this.oboError;
 		t_start = new Date().getTime();
 
-		if(how) {
-			subcookies[how] = t_start;
+		if(timer) {
+			subcookies[timer] = t_start;
 		}
 
 		// If we got a beacon_url from config, set it into the cookie
@@ -89,7 +89,7 @@ impl = {
 			subcookies.bcn = this.beacon_url;
 		}
 
-		BOOMR.debug("Setting cookie (how=" + how + ")\n" + BOOMR.utils.objectToString(subcookies), "rt");
+		BOOMR.debug("Setting cookie (timer=" + timer + ")\n" + BOOMR.utils.objectToString(subcookies), "rt");
 		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
 			return this;
@@ -317,7 +317,7 @@ impl = {
 		}
 
 		// set cookie for next page
-		this.setCookie(edata.type === 'beforeunload'?'ul':'hd');
+		this.updateCookie(edata.type === 'beforeunload'?'ul':'hd');
 
 		this.unloadfired = true;
 	},
@@ -337,7 +337,7 @@ impl = {
 			// our unload handler won't fire, so we need to set our
 			// cookie on click
 			this.initFromCookie(false);
-			this.setCookie('cl', etarget.href);
+			this.updateCookie('cl', etarget.href);
 		}
 	},
 
@@ -379,7 +379,7 @@ BOOMR.plugins.RT = {
 		if(!BOOMR.session.start) {
 			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
 		}
-		impl.setCookie(null, false);
+		impl.updateCookie(null, false);
 
 		// only initialize once.  we still collect config and check/set cookies
 		// every time init is called, but we attach event handlers only once
@@ -608,7 +608,7 @@ BOOMR.plugins.RT = {
 			'rt.obo': impl.oboError
 		});
 
-		impl.setCookie();
+		impl.updateCookie();
 
 		if(ename==='unload') {
 			BOOMR.addVar('rt.quit', '');
