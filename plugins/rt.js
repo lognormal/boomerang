@@ -45,32 +45,41 @@ impl = {
 	beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
 	next_beacon_url: undefined,	// beacon_url to use when session expires
 
-	updateCookie: function(timer, url) {
-		var t_end, t_start, subcookies;
+	updateCookie: function(timer, params) {
+		var t_end, t_start, subcookies, k;
 
 		// Disable use of RT cookie by setting its name to a falsy value
 		if(!this.cookie) {
 			return this;
 		}
 
-		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
-		// We use document.URL instead of location.href because of a bug in safari 4
-		// where location.href is URL decoded
-		if(timer === "ul" || timer === "hd") {
-			subcookies.r = BOOMR.utils.hashQueryString(d.URL, true);
+		if ( typeof timer === "object" && params === undefined ) {
+			params = timer;
+			timer = undefined;
 		}
 
-		if(timer === "cl") {
-			if(url) {
-				subcookies.nu = BOOMR.utils.hashQueryString(url);
-			}
-			else if(subcookies.nu) {
-				delete subcookies.nu;
+		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
+
+		for(k in params) {
+			if(params.hasOwnProperty(k)) {
+				if (params[k] === undefined ) {
+					if (subcookies.hasOwnProperty(k)) {
+						delete subcookies[k];
+					}
+				}
+				else {
+					if (k==="nu") {
+						params[k] = BOOMR.utils.hashQueryString(params[k], true);
+					}
+
+					subcookies[k] = params[k];
+				}
 			}
 		}
-		if(url === false) {
-			delete subcookies.nu;
-		}
+
+		// We use document.URL instead of location.href because of a bug in safari 4
+		// where location.href is URL decoded
+		subcookies.r = BOOMR.utils.hashQueryString(d.URL, true);
 
 		subcookies.dm = BOOMR.session.domain;
 		subcookies.si = BOOMR.session.ID;
@@ -203,6 +212,16 @@ impl = {
 		}
 
 		this.refreshSession(subcookies);
+
+		// Now that we've pulled out the timers, we'll clear them so they don't pollute future calls
+		this.updateCookie({
+			s: undefined,	// start timer
+			r: undefined,	// referrer
+			nu: undefined,	// clicked url
+			ul: undefined,	// onbeforeunload time
+			cl: undefined,	// onclick time
+			hd: undefined	// onunload or onpagehide time
+		});
 	},
 
 	getBoomerangTimings: function() {
@@ -402,10 +421,6 @@ BOOMR.plugins.RT = {
 		// We'll do this every time init is called, and every time we call it, it will
 		// overwrite values already set (provided there are values to read out)
 		impl.initFromCookie();
-		if(!BOOMR.session.start) {
-			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
-		}
-		impl.updateCookie(null, false);
 
 		// only initialize once.  we still collect config and check/set cookies
 		// every time init is called, but we attach event handlers only once
