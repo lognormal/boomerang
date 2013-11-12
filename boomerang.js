@@ -27,14 +27,17 @@ BOOMR_start = new Date().getTime();
 // the parameter is the window
 (function(w) {
 
+var impl, boomr, ident, d, myurl;
+
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
 		&& document.getElementById('boomr-if-as')
 		&& document.getElementById('boomr-if-as').nodeName.toLowerCase() === 'script') {
 	w = w.parent;
+	myurl = document.getElementById('boomr-if-as').src;
 }
 
-var impl, boomr, ident, d=w.document;
+d = w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
 if(w.BOOMR === undefined) {
@@ -119,6 +122,8 @@ boomr = {
 	t_lstart: null,
 	t_start: BOOMR_start,
 	t_end: null,
+
+	url: myurl,
 
 	session: {
 		// You can disable all cookies by setting site_domain to a falsy value
