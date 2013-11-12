@@ -111,12 +111,52 @@ impl = {
 		return this;
 	},
 
-	initFromCookie: function(update_start) {
-		var subcookies, url;
-		if(!this.cookie) {
+	refreshSession: function(subcookies) {
+		if(!subcookies) {
+			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
+		}
+
+		if(!subcookies) {
 			return;
 		}
 
+		if(subcookies.ss) {
+			BOOMR.session.start = parseInt(subcookies.ss, 10);
+		}
+		else {
+			// If the cookie didn't have a good session start time, we'll use the earliest
+			// time that we know about... either when the boomerang loader showed up on page
+			// or when the first bytes of boomerang loaded up.
+			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
+		}
+		if(subcookies.si && subcookies.si.match(/-/)) {
+			BOOMR.session.ID = subcookies.si;
+			BOOMR.addVar('rt.si', BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36));
+		}
+		if(subcookies.sl) {
+			BOOMR.session.length = parseInt(subcookies.sl, 10);
+		}
+		if(subcookies.tt && subcookies.tt.match(/\d/)) {
+			this.loadTime = parseInt(subcookies.tt, 10);
+		}
+		if(subcookies.obo) {
+			this.oboError = parseInt(subcookies.obo, 10)||0;
+		}
+		if(subcookies.dm && !BOOMR.session.domain) {
+			BOOMR.session.domain = subcookies.dm;
+		}
+
+		if(subcookies.bcn) {
+			this.beacon_url = subcookies.bcn;
+		}
+
+	},
+
+	// this should only be called from init, and may be called more than once
+	// it will clear out cookie values it cares about once it has read them.
+	// This makes sure that other pages do not get an invalid cookie time.
+	initFromCookie: function() {
+		var url, subcookies;
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
 
 		if(!subcookies) {
@@ -129,7 +169,7 @@ impl = {
 
 		// If we have a start time, and either a referrer, or a clicked on URL,
 		// we check if the start time is usable
-		if(update_start && subcookies.s && (subcookies.r || subcookies.nu)) {
+		if(subcookies.s && (subcookies.r || subcookies.nu)) {
 			this.r = subcookies.r;
 			url = BOOMR.utils.hashQueryString(d.URL, true);
 
@@ -161,29 +201,8 @@ impl = {
 		if(subcookies.s) {
 			this.lastActionTime = subcookies.s;
 		}
-		if(subcookies.ss) {
-			BOOMR.session.start = parseInt(subcookies.ss, 10);
-		}
-		if(subcookies.si && subcookies.si.match(/-/)) {
-			BOOMR.session.ID = subcookies.si;
-			BOOMR.addVar('rt.si', BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36));
-		}
-		if(subcookies.sl) {
-			BOOMR.session.length = parseInt(subcookies.sl, 10);
-		}
-		if(subcookies.tt && subcookies.tt.match(/\d/)) {
-			this.loadTime = parseInt(subcookies.tt, 10);
-		}
-		if(subcookies.obo) {
-			this.oboError = parseInt(subcookies.obo, 10)||0;
-		}
-		if(subcookies.dm && !BOOMR.session.domain) {
-			BOOMR.session.domain = subcookies.dm;
-		}
 
-		if(subcookies.bcn) {
-			this.beacon_url = subcookies.bcn;
-		}
+		this.refreshSession(subcookies);
 	},
 
 	getBoomerangTimings: function() {
@@ -375,7 +394,7 @@ BOOMR.plugins.RT = {
 		// Now pull out start time information and session information from the cookie
 		// We'll do this every time init is called, and every time we call it, it will
 		// overwrite values already set (provided there are values to read out)
-		impl.initFromCookie(true);
+		impl.initFromCookie();
 		if(!BOOMR.session.start) {
 			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
 		}
@@ -508,7 +527,7 @@ BOOMR.plugins.RT = {
 
 		BOOMR.debug("Got start time: " + t_start);
 
-		impl.initFromCookie(false);
+		impl.refreshSession();
 
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
