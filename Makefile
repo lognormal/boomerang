@@ -147,6 +147,12 @@ lognormal-debug: lognormal-plugins
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE)-debug.js
 
+mpulse-test: lognormal-debug
+	echo "building $(API_KEY).js"
+	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,mpstat.us/,; s,%config_host%%config_path%,o.go-mpulse.net/boomerang/config.js,; s,%client_apikey%%config_url_suffix%,$(API_KEY),; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
+	chmod a+r $(API_KEY).js
+	scp -C $(API_KEY).js $(STANDALONE_PLUGINS) bacon10:boomerang/ 2>/dev/null;
+
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
 	for host in $(HOSTS); do \
