@@ -256,6 +256,9 @@ boomr = {
 		},
 
 		hashQueryString: function(url, stripHash) {
+			if(!url) {
+				return url;
+			}
 			if(stripHash) {
 				url = url.replace(/#.*/, '');
 			}
