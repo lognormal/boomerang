@@ -341,23 +341,30 @@ impl = {
 		this.unloadfired = true;
 	},
 
-	onclick: function(etarget) {
+	_iterable_click: function(name, element, etarget, value_cb) {
 		if(!etarget) {
 			return;
 		}
-		BOOMR.debug("Click called with " + etarget.nodeName, "rt");
-		while(etarget && etarget.nodeName.toUpperCase() !== "A") {
+		BOOMR.debug(name + " called with " + etarget.nodeName, "rt");
+		while(etarget && etarget.nodeName.toUpperCase() !== element) {
 			etarget = etarget.parentNode;
 		}
-		if(etarget && etarget.nodeName.toUpperCase() === "A") {
+		if(etarget && etarget.nodeName.toUpperCase() === element) {
 			BOOMR.debug("passing through", "rt");
-			// user clicked a link, they may be going to another page
+			// user event, they may be going to another page
 			// if this page is being opened in a different tab, then
 			// our unload handler won't fire, so we need to set our
-			// cookie on click
-			this.initFromCookie(false);
-			this.updateCookie('cl', etarget.href);
+			// cookie on click or submit
+			this.updateCookie('cl', value_cb(etarget) );
 		}
+	},
+
+	onclick: function(etarget) {
+		impl._iterable_click("Click", "A", etarget, function(t) { return t.href });
+	},
+
+	onsubmit: function(etarget) {
+		impl._iterable_click("Submit", "FORM", etarget, function(t) { var v = t.action || d.URL; return v.match(/\?/) ? v : v + "?" });
 	},
 
 	domloaded: function() {
@@ -419,6 +426,7 @@ BOOMR.plugins.RT = {
 		BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 		BOOMR.subscribe("click", impl.onclick, null, impl);
+		BOOMR.subscribe("form_submit", impl.onsubmit, null, impl);
 
 
 		impl.getBoomerangTimings();
