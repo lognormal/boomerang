@@ -532,6 +532,9 @@ BOOMR.plugins.RT = {
 
 		impl.refreshSession();
 
+		BOOMR.debug("Current session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
+		BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError + ", lastAction=" + impl.lastActionTime, "rt");
+
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 		BOOMR.removeVar("rt.srst");
@@ -542,6 +545,9 @@ BOOMR.plugins.RT = {
 			impl.loadTime = 0;
 			impl.oboError = 0;
 		}
+
+		BOOMR.debug("New session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
+		BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError, "rt");
 
 		// If the dev has already called endTimer, then this call will do nothing
 		// else, it will stop the page load timer
