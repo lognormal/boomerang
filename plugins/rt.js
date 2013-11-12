@@ -176,6 +176,28 @@ impl = {
 
 	},
 
+	getBoomerangTimings: function() {
+		if(BOOMR.t_start) {
+			// How long does it take Boomerang to load up and execute (fb to lb)?
+			BOOMR.plugins.RT.startTimer('boomerang', BOOMR.t_start);
+			BOOMR.plugins.RT.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
+
+			// How long did it take from page request to boomerang fb?
+			BOOMR.plugins.RT.endTimer('boomr_fb', BOOMR.t_start);
+
+			if(BOOMR.t_lstart) {
+				// when did the boomerang loader start loading boomerang on the page?
+				BOOMR.plugins.RT.endTimer('boomr_ld', BOOMR.t_lstart);
+				// What was the network latency for boomerang (request to first byte)?
+				BOOMR.plugins.RT.setTimer('boomr_lat', BOOMR.t_start - BOOMR.t_lstart);
+			}
+		}
+
+		if (window.performance && window.performance.getEntriesByName) {
+			// TODO add data from resource timing here
+		}
+	},
+
 	page_ready: function() {
 		// we need onloadfired because it's possible to reset "impl.complete"
 		// if you're measuring multiple xhr loads, but not possible to reset
@@ -357,21 +379,7 @@ BOOMR.plugins.RT = {
 		BOOMR.subscribe("click", impl.onclick, null, impl);
 
 
-		if(BOOMR.t_start) {
-			// How long does it take Boomerang to load up and execute (fb to lb)
-			this.startTimer('boomerang', BOOMR.t_start);
-			this.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
-
-			// How long did it take from page request to boomerang fb
-			this.endTimer('boomr_fb', BOOMR.t_start);
-
-			if(BOOMR.t_lstart) {
-				// when did boomerang show up on the page
-				this.endTimer('boomr_ld', BOOMR.t_lstart);
-				// what was the network latency for boomerang
-				this.setTimer('boomr_lat', BOOMR.t_start - BOOMR.t_lstart);
-			}
-		}
+		impl.getBoomerangTimings();
 
 		// A beacon may be fired automatically on page load or if the page dev fires
 		// it manually with their own timers.  It may not always contain a referrer
