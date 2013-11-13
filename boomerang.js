@@ -265,7 +265,7 @@ boomr = {
 			if(!BOOMR.utils.MD5) {
 				return url;
 			}
-			return url.replace(/\?(.*)/, function(m0, m1) { return '?' + BOOMR.utils.MD5(m1); });
+			return url.replace(/\?(.*)/, function(m0, m1) { return '?' + (m1.length > 10 ? BOOMR.utils.MD5(m1) : m1); });
 		},
 
 		pluginConfig: function(o, config, plugin_name, properties) {
