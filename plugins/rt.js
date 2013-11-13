@@ -181,8 +181,9 @@ impl = {
 			BOOMR.debug(subcookies.s + " <? " + (+subcookies.cl+15), "rt");
 			BOOMR.debug(subcookies.nu + " =?= " + url, "rt");
 
-			if(!this.strict_referrer || this.r === this.r2 ||
-					( subcookies.s < +subcookies.cl + 15 && subcookies.nu === url )
+			if (!this.strict_referrer ||
+				(subcookies.nu && subcookies.nu === url && subcookies.s < +subcookies.cl + 15) ||
+				(!subcookies.nu && this.r === this.r2)
 			) {
 				this.t_start = subcookies.s;
 
