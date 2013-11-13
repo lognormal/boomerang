@@ -68,7 +68,7 @@ impl = {
 					}
 				}
 				else {
-					if (k==="nu") {
+					if (k==="nu" || k==="r") {
 						params[k] = BOOMR.utils.hashQueryString(params[k], true);
 					}
 
@@ -76,10 +76,6 @@ impl = {
 				}
 			}
 		}
-
-		// We use document.URL instead of location.href because of a bug in safari 4
-		// where location.href is URL decoded
-		subcookies.r = BOOMR.utils.hashQueryString(d.URL, true);
 
 		subcookies.dm = BOOMR.session.domain;
 		subcookies.si = BOOMR.session.ID;
@@ -355,7 +351,10 @@ impl = {
 		}
 
 		// set cookie for next page
-		this.updateCookie(edata.type === 'beforeunload'?'ul':'hd');
+		// We use document.URL instead of location.href because of a bug in safari 4
+		// where location.href is URL decoded
+		this.updateCookie(edata.type === 'beforeunload'?'ul':'hd', { 'r': d.URL } );
+
 
 		this.unloadfired = true;
 	},
