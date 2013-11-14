@@ -641,7 +641,13 @@ else if(typeof BOOMR.window.BOOMR_lstart === 'number') {
 }
 
 (function() {
-	var make_logger = function(l) {
+	var make_logger;
+
+	if(typeof console === "object" && console.log !== undefined) {
+		boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
+	}
+
+	make_logger = function(l) {
 		return function(m, s) {
 			this.log(m, l, "boomerang" + (s?"."+s:""));
 			return this;
@@ -654,9 +660,6 @@ else if(typeof BOOMR.window.BOOMR_lstart === 'number') {
 	boomr.error = make_logger("error");
 }());
 
-if(typeof console === "object" && console.log !== undefined) {
-	boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
-}
 
 
 for(ident in boomr) {
