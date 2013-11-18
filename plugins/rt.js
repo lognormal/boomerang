@@ -58,19 +58,21 @@ impl = {
 
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
 
-		for(k in params) {
-			if(params.hasOwnProperty(k)) {
-				if (params[k] === undefined ) {
-					if (subcookies.hasOwnProperty(k)) {
-						delete subcookies[k];
+		if (typeof params === "object") {
+			for(k in params) {
+				if(params.hasOwnProperty(k)) {
+					if (params[k] === undefined ) {
+						if (subcookies.hasOwnProperty(k)) {
+							delete subcookies[k];
+						}
 					}
-				}
-				else {
-					if (k==="nu" || k==="r") {
-						params[k] = BOOMR.utils.hashQueryString(params[k], true);
-					}
+					else {
+						if (k==="nu" || k==="r") {
+							params[k] = BOOMR.utils.hashQueryString(params[k], true);
+						}
 
-					subcookies[k] = params[k];
+						subcookies[k] = params[k];
+					}
 				}
 			}
 		}
