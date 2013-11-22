@@ -1,16 +1,14 @@
 (function() {
 var w = BOOMR.window,
-    CONFIG,
+    l = w.location,
     impl;
-
-CONFIG = w.mPulse || w.SOASTA || w.LOGN || w;
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
 impl = {
 	pageGroups: [],
-	abTest: [],
+	abTests: [],
 	customTimers: [],
 	customMetrics: [],
 
@@ -20,73 +18,43 @@ impl = {
 		return str.replace(/^ +/, '').replace(/ +$/, '');
 	},
 
-	runOn: function(method, variable) {
-		var i, o, components, kv, parts, parameter;
-
-		if(!variable) {
-			return;
-		}
-
-		components = variable.split(',');
-
-		for(i=0; i<components.length; i++) {
-			kv = impl.trim(components[i]).split(':');
-			parameter = impl.trim(kv[0]);
-			parts = impl.trim(kv[1]).split(/\./);
-
-			o = CONFIG;
-			while(o && parts.length > 0) {
-				o = o[parts.shift];
-			}
-			if(o) {
-				method(parameter, o);
-			}
-		}
-	},
-
-	run: function(variable) {
-		impl.runOn(BOOMR.addVar, variable);
-	},
-
-	runTimer: function(variable) {
-		if(BOOMR.plugins.RT) {
-			impl.runOn(BOOMR.plugins.RT.setTimer, variable);
-		}
-	},
-
-	pageGroupHandlers: {
+	varHandlers: {
 		cleanUp: function(s) {
 			return o.replace(/[^\w -]+/g, '');
 		},
 
-		checkURLPattern: function(u) {
-			// Massage pattern into a real regex
-			var re = u.replace(/[^\.]\*/g, '.*');
+		handleRegEx: function(re, extract, varname) {
+			var value, m;
+
 			try {
-				re = new RegExp("^" + re + "$", "i");
+				re = new RegExp(re, "i");
 			}
 			catch(err) {
-				BOOMR.debug("Bad pattern: " + re, "PageVars");
-				BOOMR.debug(err, "PageVars");
-				return false;
-			}
-
-
-			// Check if URL matches
-			if(!re.exec(w.location.href)) {
-				BOOMR.debug("No match on " + w.location.href, "PageVars");
-				return false;
-			}
-			return true;
-		},
-
-		Custom: function(o) {
-			var parts, pg;
-			if(!o.parameter1) {
+				BOOMR.debug("Error generating regex: " + err, "PageVars");
 				return;
 			}
 
-			BOOMR.debug("Got page group variable: " + o.parameter1, "PageVars");
+			m = re.exec(l.href);
+
+			if(!m || !m.length) {
+				return;
+			}
+
+			value = extract.replace(
+				/\$([1-9])/g,
+				function(m0, m1) {
+					return m[parseInt(m1, 10)];
+				});
+
+			value = this.cleanUp(value);
+
+			BOOMR.addVar(varname, value);
+		},
+
+		Custom: function(o, varname) {
+			var parts, value;
+
+			BOOMR.debug("Got variable: " + o.parameter1, "PageVars");
 
 			// Split variable into its parts
 			parts = o.parameter1.split(/\./);
@@ -96,45 +64,59 @@ impl = {
 			}
 
 			// Top part needs to be global in the primary window
-			pg = w[parts.shift()];
+			value = w[parts.shift()];
 
 			// Then we navigate down the object looking at each part
 			// until:
 			// - a part evaluates to null (we cannot proceed)
 			// - a part is not an object (might be a leaf but we cannot go further down)
 			// - there are no more parts left (so we can stop)
-			while(pg !== null && typeof pg === "object" && parts.length) {
+			while(value !== null && typeof value === "object" && parts.length) {
 				BOOMR.debug("looking at " + parts[0], "PageVars");
-				pg = pg[parts.shift()];
+				value = value[parts.shift()];
 			}
 
 			// parts.length !== 0 means we stopped before the end
 			// so skip
-			if(parts.length !== 0 || typeof pg === "object") {
+			if(parts.length !== 0 || typeof value === "object") {
 				return;
 			}
 
-			BOOMR.debug("final value: " + pg, "PageVars");
+			BOOMR.debug("final value: " + value, "PageVars");
 			// Now remove invalid characters
-			pg = this.cleanUp("" + pg);
+			value = this.cleanUp("" + value);
 
-			BOOMR.addVar("h.pg", pg);
+			BOOMR.addVar(varname, value);
 		},
 
-		URLPattern: function(o) {
-			var pg, params, i, kv;
-			if(!o.parameter1 || !o.parameter2) {
+		URLPattern: function(o, varname) {
+			var value, re, params, i, kv;
+			if(!o.parameter2) {
 				return;
 			}
 
-			BOOMR.debug("Got page group URL Pattern: " + o.parameter1 + ", " + o.parameter2, "PageVars");
+			BOOMR.debug("Got URL Pattern: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-			if(!this.checkURLPattern(o.parameter1)) {
+			// Massage pattern into a real regex
+			o.parameter1.replace(/[^\.]\*/g, '.*');
+			try {
+				re = new RegExp("^" + re + "$", "i");
+			}
+			catch(err) {
+				BOOMR.debug("Bad pattern: " + re, "PageVars");
+				BOOMR.debug(err, "PageVars");
+				return;
+			}
+
+
+			// Check if URL matches
+			if(!re.exec(l.href)) {
+				BOOMR.debug("No match on " + l.href, "PageVars");
 				return;
 			}
 
 			// Now that we match, pull out all query string parameters
-			params = w.location.search.split(/&/);
+			params = l.search.split(/&/);
 
 			BOOMR.debug("Got params: " + params, "PageVars");
 
@@ -143,79 +125,64 @@ impl = {
 					kv = params[i].split(/=/);
 					if(kv.length && kv[0] === o.parameter2) {
 						BOOMR.debug("final value: " + kv[1], "PageVars");
-						pg = this.cleanUp("" + kv[1]);
-						BOOMR.addVar("h.pg", pg);
+						value = this.cleanUp("" + kv[1]);
+						BOOMR.addVar(varname, value);
 						return;
 					}
 				}
 			}
 		},
 
-		URLSubstringEndOfText: function(o) {
-			return this.URLSubstringTrailingText(o);
+		URLSubstringEndOfText: function(o, varname) {
+			return this.URLSubstringTrailingText(o, varname);
 		},
 
-		URLSubstringTrailingText: function(o) {
-			var pg, re;
-			if(!o.parameter1) {
-				return;
-			}
+		URLSubstringTrailingText: function(o, varname) {
+			BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-			BOOMR.debug("Got page group URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
-
-			if(!this.checkURLPattern(o.parameter1)) {
-				return;
-			}
-
-			try {
-				re = new RegExp("^"
+			this.handleRegEx("^"
 						+ o.parameter1.replace(/[\W\S]/g, '\\$1')
 						+ "(.*)"
 						+ (o.parameter2 || "").replace(/[\W\S]/g, '\\$1')
 						+ "$",
-					"i")
-
-				pg = re.exec(w.location.href);
-				if(!pg || !pg.length) {
-					return;
-				}
-
-				pg = this.cleanUp(pg[1]);
-
-				BOOMR.addVar("h.pg", pg);
-				return;
-			}
-			catch(err) {
-				return;
-			}
-
+					"$1",
+					varname);
 		},
 
-		Regexp: function(o) {
+		Regexp: function(o, varname) {
+			if(!o.parameter2) {
+				return;
+			}
+
+			BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
+
+			this.handleRegEx(o.parameter1, o.parameter2, varname);
 		}
 	},
 
+	isValid: function(o, handlers) {
+		if(!o || typeof o !== "object" || !o.hasOwnProperty("definitionType")
+		      || typeof varHandlers[o.definitionType] !== "function" || !o.parameter1) {
+			return false;
+		}
+		return true;
+	},
+
 	done: function() {
-		var parts, i, o;
-		if(!CONFIG) {
-			impl.complete = true;
-			BOOMR.sendBeacon();
-			return;
-		}
+		var i, o, t, varTypes = {"pageGroups": "h.pg", "abTests": "h.ab"};
 
-		// Page Groups
-		for(i=0; i<impl.pageGroups; i++) {
-			var o = impl.pageGroups[i];
-			if(!o || typeof o !== "object" || !o.hasOwnProperty("definitionType")) {
-				continue;
+		// Page Groups & AB Tests
+		for(v in varTypes) {
+			if(varTypes.hasOwnProperty(v)) {
+				for(i=0; i<impl[v]; i++) {
+					o = impl[v][i];
+
+					if(isValid(o)) {
+						this.varHandlers[o.definitionType](o, varTypes[v]);
+					}
+				}
 			}
-
-			this[o.definitionType](o);
 		}
-
-
-		// AB Tests
-		impl.run(impl.abTest);
 
 		// Custom Metrics
 		impl.run(impl.customMetrics)
