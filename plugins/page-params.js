@@ -153,7 +153,7 @@ Handler.prototype = {
 
 		// parts.length !== 0 means we stopped before the end
 		// so skip
-		if(parts.length !== 0 || typeof value === "object") {
+		if(parts.length !== 0 || value === undefined || typeof value === "object") {
 			return;
 		}
 
