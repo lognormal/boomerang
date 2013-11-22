@@ -9,12 +9,16 @@ Handler = function(config) {
 	this.varname = config.varname;
 	this.method = config.method || BOOMR.addVar;
 	this.ctx = config.ctx || BOOMR;
+	this.preProcessor = config.preProcessor;
 
 	return this;
 };
 
 Handler.prototype = {
 	apply: function(value) {
+		if(this.preProcessor) {
+			value = this.preProcessor(value);
+		}
 		this.method.call(this.ctx, this.varname, value);
 	},
 
@@ -337,7 +341,10 @@ impl = {
 			pageGroups:    { varname: "h.pg" },
 			abTests:       { varname: "h.ab" },
 			customMetrics: { },
-			customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT }
+			customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
+								return typeof v === "number" ? v : Math.round(parseFloat(v, 10));
+							}
+					}
 		};
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
