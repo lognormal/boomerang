@@ -85,7 +85,7 @@ Handler.prototype = {
 
 	checkURLPattern: function(u) {
 		// Massage pattern into a real regex
-		var re = u.replace(/[^\.]\*/g, '.*');
+		var re = u.replace(/([^\.])\*/g, '$1.*');
 		try {
 			re = new RegExp("^" + re + "$", "i");
 		}
@@ -177,7 +177,7 @@ Handler.prototype = {
 		}
 
 		// Now that we match, pull out all query string parameters
-		params = l.search.split(/&/);
+		params = l.search.slice(1).split(/&/);
 
 		BOOMR.debug("Got params: " + params, "PageVars");
 
@@ -202,9 +202,9 @@ Handler.prototype = {
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		this.handleRegEx("^"
-					+ o.parameter1.replace(/[\W\S]/g, '\\$1')
+					+ o.parameter1.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
 					+ "(.*)"
-					+ (o.parameter2 || "").replace(/[\W\S]/g, '\\$1')
+					+ (o.parameter2 || "").replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
 					+ "$",
 				"$1");
 	},
