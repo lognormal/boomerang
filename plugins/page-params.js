@@ -10,6 +10,7 @@ Handler = function(config) {
 	this.method = config.method || BOOMR.addVar;
 	this.ctx = config.ctx || BOOMR;
 	this.preProcessor = config.preProcessor;
+	this.sanitizeRE = config.sanitizeRE || /[^\w \-]/g;
 
 	return this;
 };
@@ -56,7 +57,7 @@ Handler.prototype = {
 	},
 
 	cleanUp: function(s) {
-		return s.replace(/[^\w \-]+/g, '');
+		return s.replace(this.sanitizeRE, '');
 	},
 
 	handleRegEx: function(re, extract) {
@@ -357,8 +358,9 @@ impl = {
 		hconfig = {
 			pageGroups:    { varname: "h.pg" },
 			abTests:       { varname: "h.ab" },
-			customMetrics: { },
-			customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
+			customMetrics: { sanitizeRE: /[^\d\.\-]/g },
+			customTimers:  { sanitizeRE: /[^\d\.\-]/g,
+					 method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
 								return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
 							}
 					}
@@ -392,7 +394,9 @@ BOOMR.plugins.PageParams = {
 
 		BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 
+		// Fire on the first of load or unload
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
+		BOOMR.subscribe("page_unload", impl.done, null, impl);
 
 		return this;
 	},
