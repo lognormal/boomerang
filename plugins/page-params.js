@@ -55,7 +55,7 @@ Handler.prototype = {
 	},
 
 	cleanUp: function(s) {
-		return o.replace(/[^\w -]+/g, '');
+		return s.replace(/[^\w \-]+/g, '');
 	},
 
 	handleRegEx: function(re, extract) {
@@ -168,7 +168,7 @@ Handler.prototype = {
 	},
 
 	URLPattern: function(o) {
-		var value, re, params, i, kv;
+		var value, params, i, kv;
 		if(!o.parameter2) {
 			return;
 		}
@@ -186,10 +186,10 @@ Handler.prototype = {
 
 		for(i=0; i<params.length; i++) {
 			if(params[i]) {
-				kv = params[i].split(/=/);
+				kv = params[i].split("=");
 				if(kv.length && kv[0] === o.parameter2) {
 					BOOMR.debug("final value: " + kv[1], "PageVars");
-					value = this.cleanUp("" + kv[1]);
+					value = this.cleanUp(kv[1]);
 					this.apply(value);
 					return;
 				}
@@ -223,7 +223,7 @@ Handler.prototype = {
 	},
 
 	URLPatternType: function(o) {
-		var value, re, el;
+		var value;
 		if(!o.parameter2) {
 			return;
 		}
@@ -305,7 +305,7 @@ Handler.prototype = {
 		res = w.performance.getEntriesByType("mark");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(Math.round(res[i].startTime);
+				this.apply(Math.round(res[i].startTime));
 				return;
 			}
 		}
@@ -314,12 +314,12 @@ Handler.prototype = {
 		res = w.performance.getEntriesByType("measure");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(Math.round(res[i].duration);
+				this.apply(Math.round(res[i].duration));
 				return;
 			}
 		}
 	}
-}
+};
 
 hconfig = {
 	pageGroups:    { varname: "h.pg" },
@@ -338,17 +338,16 @@ impl = {
 	complete: false,
 
 	done: function() {
-		var i, handler
-		    		// Page Groups, AB Tests, Custom Metrics & Timers
+		var i, v, handler;
+
+		// Page Groups, AB Tests, Custom Metrics & Timers
 		for(v in hconfig) {
-			if(!hconfig.hasOwnProperty(v)) {
-				continue;
-			}
+			if(hconfig.hasOwnProperty(v)) {
+				handler = new Handler(hconfig[v]);
 
-			handler = new Handler(hconfig[v]);
-
-			for(i=0; i<impl[v]; i++) {
-				handler.handle(impl[v][i]);
+				for(i=0; i<impl[v]; i++) {
+					handler.handle(impl[v][i]);
+				}
 			}
 		}
 	}
@@ -369,4 +368,4 @@ BOOMR.plugins.PageParams = {
 	}
 };
 
-})();
+}());
