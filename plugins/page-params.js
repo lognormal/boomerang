@@ -301,7 +301,7 @@ Handler.prototype = {
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
-		this.apply(Math.round(en-st));
+		this.apply(en-st);
 	},
 
 	UserTiming: function(o) {
@@ -323,7 +323,7 @@ Handler.prototype = {
 		res = p.getEntriesByType("mark");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(Math.round(res[i].startTime));
+				this.apply(res[i].startTime);
 				return;
 			}
 		}
@@ -332,7 +332,7 @@ Handler.prototype = {
 		res = p.getEntriesByType("measure");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(Math.round(res[i].duration));
+				this.apply(res[i].duration);
 				return;
 			}
 		}
@@ -359,7 +359,7 @@ impl = {
 			abTests:       { varname: "h.ab" },
 			customMetrics: { },
 			customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
-								return typeof v === "number" ? v : Math.round(parseFloat(v, 10));
+								return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
 							}
 					}
 		};
