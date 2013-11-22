@@ -274,8 +274,8 @@ Handler.prototype = {
 			return;
 		}
 
-		st = parseFloat(res[0][o.start.charAt(0).toLowerCase() + o.start.slice(1)], 10);
-		en = parseFloat(res[0][o.end.charAt(0).toLowerCase() + o.end.slice(1)], 10);
+		st = parseFloat(res[0][o.start], 10);
+		en = parseFloat(res[0][o.end], 10);
 		
 		
 		if(isNaN(st) || isNaN(en)) {
