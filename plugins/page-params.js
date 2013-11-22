@@ -345,7 +345,7 @@ impl = {
 			if(hconfig.hasOwnProperty(v)) {
 				handler = new Handler(hconfig[v]);
 
-				for(i=0; i<impl[v]; i++) {
+				for(i=0; i<impl[v].length; i++) {
 					handler.handle(impl[v][i]);
 				}
 			}
