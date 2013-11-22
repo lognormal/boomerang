@@ -42,7 +42,7 @@ Handler.prototype = {
 		// or object's type is not a valid handler type
 		// or object does not have a first parameter
 		if(!o || typeof o !== "object" || !o.hasOwnProperty("type")
-		      || typeof this[o.type] !== "function" || !o.parameter1) {
+		      || typeof this[o.type] !== "function") {
 			return false;
 		}
 
@@ -88,8 +88,14 @@ Handler.prototype = {
 	},
 
 	checkURLPattern: function(u) {
+		var re;
+
+		// Empty pattern matches all URLs
+		if(!u) {
+			return true;
+		}
 		// Massage pattern into a real regex
-		var re = u.replace(/([^\.])\*/g, '$1.*');
+		re = u.replace(/([^\.])\*/g, '$1.*');
 		try {
 			re = new RegExp("^" + re + "$", "i");
 		}
@@ -132,6 +138,10 @@ Handler.prototype = {
 
 	Custom: function(o) {
 		var parts, value;
+
+		if(!o.parameter1) {
+			return;
+		}
 
 		BOOMR.debug("Got variable: " + o.parameter1, "PageVars");
 
@@ -203,6 +213,9 @@ Handler.prototype = {
 	},
 
 	URLSubstringTrailingText: function(o) {
+		if(!o.parameter1) {
+			return;
+		}
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		this.handleRegEx("^"
@@ -214,7 +227,7 @@ Handler.prototype = {
 	},
 
 	Regexp: function(o) {
-		if(!o.parameter2) {
+		if(!o.parameter1 || !o.parameter2) {
 			return;
 		}
 
@@ -299,6 +312,10 @@ Handler.prototype = {
 
 		if(!p || !p.getEntriesByType) {
 			BOOMR.debug("This browser does not support UserTiming", "PageVars");
+			return;
+		}
+
+		if(!this.checkURLPattern(o.parameter1)) {
 			return;
 		}
 
