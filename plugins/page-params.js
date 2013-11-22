@@ -24,7 +24,7 @@ impl = {
 			return o.replace(/[^\w -]+/g, '');
 		},
 
-		handleRegEx: function(re, extract, varname) {
+		handleRegEx: function(re, extract, varname, callback) {
 			var value, m;
 
 			try {
@@ -49,10 +49,10 @@ impl = {
 
 			value = this.cleanUp(value);
 
-			BOOMR.addVar(varname, value);
+			callback(varname, value);
 		},
 
-		Custom: function(o, varname) {
+		Custom: function(o, varname, callback) {
 			var parts, value;
 
 			BOOMR.debug("Got variable: " + o.parameter1, "PageVars");
@@ -87,10 +87,10 @@ impl = {
 			// Now remove invalid characters
 			value = this.cleanUp("" + value);
 
-			BOOMR.addVar(varname, value);
+			callback(varname, value);
 		},
 
-		URLPattern: function(o, varname) {
+		URLPattern: function(o, varname, callback) {
 			var value, re, params, i, kv;
 			if(!o.parameter2) {
 				return;
@@ -127,18 +127,18 @@ impl = {
 					if(kv.length && kv[0] === o.parameter2) {
 						BOOMR.debug("final value: " + kv[1], "PageVars");
 						value = this.cleanUp("" + kv[1]);
-						BOOMR.addVar(varname, value);
+						callback(varname, value);
 						return;
 					}
 				}
 			}
 		},
 
-		URLSubstringEndOfText: function(o, varname) {
-			return this.URLSubstringTrailingText(o, varname);
+		URLSubstringEndOfText: function(o, varname, callback) {
+			return this.URLSubstringTrailingText(o, varname, callback);
 		},
 
-		URLSubstringTrailingText: function(o, varname) {
+		URLSubstringTrailingText: function(o, varname, callback) {
 			BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 			this.handleRegEx("^"
@@ -147,20 +147,21 @@ impl = {
 						+ (o.parameter2 || "").replace(/[\W\S]/g, '\\$1')
 						+ "$",
 					"$1",
-					varname);
+					varname,
+					callback);
 		},
 
-		Regexp: function(o, varname) {
+		Regexp: function(o, varname, callback) {
 			if(!o.parameter2) {
 				return;
 			}
 
 			BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-			this.handleRegEx(o.parameter1, o.parameter2, varname);
+			this.handleRegEx(o.parameter1, o.parameter2, varname, callback);
 		},
 
-		URLPatternType: function(o, varname) {
+		URLPatternType: function(o, varname, callback) {
 			var value, re, el;
 			if(!o.parameter2) {
 				return;
@@ -206,7 +207,7 @@ impl = {
 
 			BOOMR.debug("Final value: " + value, "PageVars");
 
-			BOOMR.addVar(varname, value);
+			callback(varname, value);
 		}
 
 	},
@@ -220,7 +221,9 @@ impl = {
 	},
 
 	done: function() {
-		var i, o, t, varTypes = {"pageGroups": "h.pg", "abTests": "h.ab"};
+		var i, o, t,
+		    varTypes = {"pageGroups": "h.pg", "abTests": "h.ab"},
+		    cusTypes = {"customMetrics": BOOMR.addVar, "customTimers": BOOMR.plugins.RT.setTimer);
 
 		// Page Groups & AB Tests
 		for(v in varTypes) {
@@ -229,24 +232,24 @@ impl = {
 					o = impl[v][i];
 
 					if(isValid(o)) {
-						this.varHandlers[o.type](o, varTypes[v]);
+						this.varHandlers[o.type](o, varTypes[v], BOOMR.addVar);
 					}
 				}
 			}
 		}
 
-		// Custom Metrics
-		for(i=0; i<impl.customMetrics; i++) {
-			o = impl.customMetrics[i];
+		// Custom Metrics & Timers
+		for(v in cusTypes) {
+			if(cusTypes.hasOwnProperty(v)) {
+				for(i=0; i<impl[v]; i++) {
+					o = impl[v][i];
 
-			if(isValid(o) && o.label) {
-				this.varHandlers[o.type](o, o.label);
+					if(isValid(o) && o.label) {
+						this.varHandlers[o.type](o, o.label, cusTypes[v]);
+					}
+				}
 			}
 		}
-		impl.run(impl.customMetrics)
-
-		// Custom Time
-		impl.runTimer(impl.customTimers);
 	}
 };
 
