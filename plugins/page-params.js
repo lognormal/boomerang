@@ -1,6 +1,7 @@
 (function() {
 var w = BOOMR.window,
     l = w.location,
+    d = w.document,
     impl;
 
 BOOMR = BOOMR || {};
@@ -157,12 +158,62 @@ impl = {
 			BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 			this.handleRegEx(o.parameter1, o.parameter2, varname);
+		},
+
+		URLPatternType: function(o, varname) {
+			var value, re, el;
+			if(!o.parameter2) {
+				return;
+			}
+
+			BOOMR.debug("Got XPath: " + o.parameter1 + ", " + o.parameter2, "PageVars");
+
+			// Massage pattern into a real regex
+			o.parameter1.replace(/[^\.]\*/g, '.*');
+			try {
+				re = new RegExp("^" + re + "$", "i");
+			}
+			catch(err) {
+				BOOMR.debug("Bad pattern: " + re, "PageVars");
+				BOOMR.debug(err, "PageVars");
+				return;
+			}
+
+
+			// Check if URL matches
+			if(!re.exec(l.href)) {
+				BOOMR.debug("No match on " + l.href, "PageVars");
+				return;
+			}
+
+			if(d.evaluate) {
+				el = d.evaluate(o.parameter2, d, null, 9, null);
+			}
+			else if(d.selectNodes) {
+				el = d.selectNodes(o.parameter2);
+			}
+			else {
+				BOOMR.debug("Could not evaluate XPath", "PageVars");
+				return;
+			}
+
+			if(!el || el.resultType !== 9 || !el.singleNodeValue) {
+				BOOMR.debug("XPath did not return anything: " + BOOMR.utils.objectToString(el), "PageVars");
+				return;
+			}
+
+			value = this.cleanUp(el.singleNodeValue.textContent);
+
+			BOOMR.debug("Final value: " + value, "PageVars");
+
+			BOOMR.addVar(varname, value);
 		}
+
 	},
 
 	isValid: function(o, handlers) {
-		if(!o || typeof o !== "object" || !o.hasOwnProperty("definitionType")
-		      || typeof varHandlers[o.definitionType] !== "function" || !o.parameter1) {
+		if(!o || typeof o !== "object" || !o.hasOwnProperty("type")
+		      || typeof varHandlers[o.type] !== "function" || !o.parameter1) {
 			return false;
 		}
 		return true;
@@ -178,13 +229,20 @@ impl = {
 					o = impl[v][i];
 
 					if(isValid(o)) {
-						this.varHandlers[o.definitionType](o, varTypes[v]);
+						this.varHandlers[o.type](o, varTypes[v]);
 					}
 				}
 			}
 		}
 
 		// Custom Metrics
+		for(i=0; i<impl.customMetrics; i++) {
+			o = impl.customMetrics[i];
+
+			if(isValid(o) && o.label) {
+				this.varHandlers[o.type](o, o.label);
+			}
+		}
 		impl.run(impl.customMetrics)
 
 		// Custom Time
