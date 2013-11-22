@@ -350,6 +350,9 @@ impl = {
 				}
 			}
 		}
+
+		this.complete = true;
+		BOOMR.sendBeacon();
 	}
 };
 
@@ -364,6 +367,8 @@ BOOMR.plugins.PageParams = {
 		p = w.performance || null;
 
 		BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
+
+		BOOMR.subscribe("page_ready", impl.done, null, impl);
 
 		return this;
 	},
