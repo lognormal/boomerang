@@ -1,11 +1,8 @@
 (function() {
-var w = BOOMR.window,
-    l = w.location,
-    d = w.document,
-    impl, hconfig,
+var w, l, d, p, impl,
     Handler;
 
-BOOMR = BOOMR || {};
+BOOMR = window.BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 
 Handler = function(config) {
@@ -253,7 +250,7 @@ Handler.prototype = {
 			return;
 		}
 
-		if(!w.performance || !w.performance.getEntriesByName) {
+		if(!p || !p.getEntriesByName) {
 			BOOMR.debug("This browser does not support ResourceTiming", "PageVars");
 			return;
 		}
@@ -270,7 +267,7 @@ Handler.prototype = {
 			return;
 		}
 
-		res = w.performance.getEntriesByName(url);
+		res = p.getEntriesByName(url);
 
 		if(!res || !res.length) {
 			BOOMR.debug("No resource matched", "PageVars");
@@ -296,13 +293,13 @@ Handler.prototype = {
 			return;
 		}
 
-		if(!w.performance || !w.performance.getEntriesByType) {
+		if(!p || !p.getEntriesByType) {
 			BOOMR.debug("This browser does not support UserTiming", "PageVars");
 			return;
 		}
 
 		// Check performance.mark
-		res = w.performance.getEntriesByType("mark");
+		res = p.getEntriesByType("mark");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				this.apply(Math.round(res[i].startTime));
@@ -311,7 +308,7 @@ Handler.prototype = {
 		}
 
 		// Check performance.measure
-		res = w.performance.getEntriesByType("measure");
+		res = p.getEntriesByType("measure");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				this.apply(Math.round(res[i].duration));
@@ -320,14 +317,6 @@ Handler.prototype = {
 		}
 	}
 };
-
-hconfig = {
-	pageGroups:    { varname: "h.pg" },
-	abTests:       { varname: "h.ab" },
-	customMetrics: { },
-	customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT }
-};
-
 
 impl = {
 	pageGroups: [],
@@ -338,7 +327,18 @@ impl = {
 	complete: false,
 
 	done: function() {
-		var i, v, handler;
+		var i, v, hconfig, handler;
+
+		if(this.complete) {
+			return;
+		}
+
+		hconfig = {
+			pageGroups:    { varname: "h.pg" },
+			abTests:       { varname: "h.ab" },
+			customMetrics: { },
+			customTimers:  { method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT }
+		};
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
 		for(v in hconfig) {
@@ -357,6 +357,11 @@ impl = {
 BOOMR.plugins.PageParams = {
 	init: function(config) {
 		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics"];
+
+		w = BOOMR.window;
+		l = w.location;
+		d = w.document;
+		p = w.performance || null;
 
 		BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 
