@@ -278,6 +278,9 @@ Handler.prototype = {
 		}
 
 		el = this.runXPath(o.parameter2);
+		if(!el) {
+			return;
+		}
 
 		url = el.src || el.href;
 
