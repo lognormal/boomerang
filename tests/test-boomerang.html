@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+<title>Basic Boomerang Test</title>
+
+<link rel="stylesheet" href="test-helper.css" type="text/css">
+<script src="yui-test.js"></script>
+<script src="test-helper.js"></script>
+<script src="../boomerang.js"></script>
+
+<body class="yui3-skin-sam">
+<script>
+YUI({ useBrowserConsole: true }).use("console", function(Y) {
+	var Assert = YUITest.Assert;
+
+	var preMunge = new YUITest.TestCase({
+		name: "Boomerang Static Load",
+
+		testMethodsExist: function() {
+			Assert.isObject(BOOMR);
+			Assert.isString(BOOMR.version);
+			Assert.isObject(BOOMR.session);
+			Assert.isObject(BOOMR.utils);
+			Assert.isFunction(BOOMR.init);
+			Assert.isFunction(BOOMR.debug);
+			Assert.isFunction(BOOMR.warn);
+			Assert.isObject(BOOMR.plugins);
+		}
+	});
+
+	var mockLogger = new YUITest.TestCase({
+
+		name: "Boomerang Static Load: Logger Munged",
+
+		_should: {
+			ignore: {
+				testGetCookieExists: true,
+				testGetCookieNotExists: true,
+				testSetCookieValid: true
+			}
+		},
+
+		setUp: function() {
+			this.debug = BOOMR.debug;
+		},
+
+		tearDown: function() {
+			BOOMR.debug = this.debug;
+		},
+
+		testObjectToString: function() {
+			var o = { one: 1, two: 2, three: "3rd", four: null, five: undefined, six: 0, seven: 1.2, eight: "a=b", nine: [1, 2] };
+			var expected = "one=1&two=2&three=3rd&four=null&five=undefined&six=0&seven=1.2&eight=" + encodeURIComponent("a=b") + "&nine=" + encodeURIComponent("1,2");
+
+			Assert.areEqual(expected, BOOMR.utils.objectToString(o, "&"));
+			Assert.areEqual(expected.replace(/&/g, '\n\t'), BOOMR.utils.objectToString(o));
+		},
+
+		testGetCookieNull: function() {
+			Assert.isNull(BOOMR.utils.getCookie());
+			Assert.isNull(BOOMR.utils.getCookie(""));
+			Assert.isNull(BOOMR.utils.getCookie(null));
+		},
+
+		testGetCookieExists: function() {
+			// TODO
+		},
+
+		testGetCookieNotExists: function() {
+			// TODO
+		},
+
+		testSetCookieNoName: function() {
+			BOOMR.debug = function(msg, src) {
+				Assert.isNotNull(msg.match(/^No cookie name or site domain:/));
+				Assert.isInstanceOf(Array, msg.match(/^No cookie name or site domain:/));
+			};
+			Assert.isFalse(BOOMR.utils.setCookie(""));
+		},
+
+		testSetCookieNoDomain: function() {
+			BOOMR.debug = function(msg, src) {
+				Assert.isNotNull(msg.match(/^No cookie name or site domain:/));
+				Assert.isInstanceOf(Array, msg.match(/^No cookie name or site domain:/));
+			};
+			Assert.isFalse(BOOMR.utils.setCookie("myname"));
+		},
+
+		testSetCookieTooLong: function() {
+			BOOMR.debug = function(msg, src) {
+				Assert.isNotNull(msg.match(/^Cookie too long: /));
+				Assert.isInstanceOf(Array, msg.match(/^Cookie too long: /));
+			};
+			BOOMR.session.domain = "mydomain";
+			var value = "";
+			for(var i=0; i<400; i++) {
+				value += "1";
+			}
+			Assert.isFalse(BOOMR.utils.setCookie("myname", {a: value}));
+		},
+
+		testSetCookieValid: function() {
+			// TODO
+		}
+
+	});
+
+
+	var suite = new YUITest.TestSuite("Boomerang core tests");
+	suite.add(preMunge);
+	suite.add(mockLogger);
+
+	var TestRunner = getTestRunner(Y);
+
+	TestRunner.add(suite);
+
+	//run the tests
+	TestRunner.run();
+});
+</script>
+</body>
+</html>
