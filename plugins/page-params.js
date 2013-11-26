@@ -180,7 +180,7 @@ Handler.prototype = {
 	},
 
 	Custom: function(o) {
-		var parts, value;
+		var parts, value, ctx=w;
 
 		if(!o.parameter1) {
 			return;
@@ -205,12 +205,23 @@ Handler.prototype = {
 		// - there are no more parts left (so we can stop)
 		while(value !== null && typeof value === "object" && parts.length) {
 			BOOMR.debug("looking at " + parts[0], "PageVars");
+			ctx = value;
 			value = value[parts.shift()];
 		}
 
 		// parts.length !== 0 means we stopped before the end
 		// so skip
-		if(parts.length !== 0 || value === undefined || typeof value === "object") {
+		if(parts.length !== 0) {
+			return;
+		}
+
+		// Value evaluated to a function, so we execute it
+		// We don't have the ability to pass arguments to the function
+		if(typeof value === "function") {
+			value = value.call(ctx);
+		}
+
+		if(value === undefined || typeof value === "object") {
 			return;
 		}
 
