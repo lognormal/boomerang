@@ -1,0 +1,36 @@
+.yui3-skin-sam .yui3-console-entry-fail .yui3-console-entry-content {
+    padding-left: 24px;
+}
+.yui3-skin-sam .yui3-console-entry-fail .yui3-console-entry-cat {
+    background-color: #b00;
+    color: #fff;
+}
+.yui3-skin-sam .yui3-console-entry-ignore .yui3-console-entry-meta .yui3-console-entry-cat,.yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-meta .yui3-console-entry-cat,.yui3-skin-sam .yui3-console-entry-fail .yui3-console-entry-meta .yui3-console-entry-cat {
+    display: none;
+}
+.yui3-skin-sam .yui3-console-entry-ignore .yui3-console-entry-content:before {
+    content: "\2687";
+    background-color: #fea;
+    color: #000;
+    padding: 0px 4px;
+    margin-right: 2px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+.yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-content:before {
+    content: "\2713";
+    background-color: #090;
+    color: #fff;
+    padding: 2px 4px;
+    margin-right: 2px;
+    border-radius: 10px;
+    font-size: 8px;
+}
+.yui3-skin-sam .yui3-console-entry-fail {
+    background: #ffa url(http://yui.yahooapis.com/3.2.0/build/console/assets/skins/sam/warn_error.png) no-repeat 5px -24px;
+    color: #900;
+}
+.yui3-skin-sam .yui3-console-entry-fail .yui3-console-entry-content {
+    padding-left: 24px;
+}
+
