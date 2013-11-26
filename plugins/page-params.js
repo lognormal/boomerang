@@ -115,6 +115,44 @@ Handler.prototype = {
 		return true;
 	},
 
+	nodeWalk: function(root, xpath) {
+		var m, nodes, index, el;
+
+		if(!xpath) {
+			return root;
+		}
+
+		m = xpath.match(/^(\w+)(?:\[(\d+)\])?\/?(.*)/);
+
+		if(!m || !m.length) {
+			return null;
+		}
+
+		nodes = root.getElementsByTagName(m[1]);
+
+		if(m[2]) {
+			index = parseInt(m[2], 10);
+			if(isNaN(index)) {
+				return null;
+			}
+			index--;	// XPath indices start at 1
+			if(nodes.length <= index) {
+				return null;
+			}
+			nodes = [nodes[index]];
+		}
+
+		for(index=0; index<nodes.length; index++) {
+			el = this.nodeWalk(nodes[index], m[3]);
+
+			if(el) {
+				return el;
+			}
+		}
+
+		return null;
+	},
+
 	runXPath: function(xpath) {
 		var el;
 
@@ -123,6 +161,10 @@ Handler.prototype = {
 		}
 		else if(d.selectNodes) {
 			el = d.selectNodes(xpath);
+		}
+		else if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
+			xpath = xpath.slice(6);
+			return this.nodeWalk(d, xpath);
 		}
 		else {
 			BOOMR.debug("Could not evaluate XPath", "PageVars");
