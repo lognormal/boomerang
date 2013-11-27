@@ -172,7 +172,7 @@ Handler.prototype = {
 		}
 
 		if(!el || el.resultType !== 9 || !el.singleNodeValue) {
-			BOOMR.debug("XPath did not return anything: " + BOOMR.utils.objectToString(el), "PageVars");
+			BOOMR.debug("XPath did not return anything: " + el + ", " + el.resultType + ", " + el.singleNodeValue, "PageVars");
 			return null;
 		}
 
