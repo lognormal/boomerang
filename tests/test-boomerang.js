@@ -196,8 +196,70 @@ function getMockLoggerTests(Assert) {
 			Assert.isUndefined(o.three);
 			Assert.isNotUndefined(o.five);
 			Assert.isFalse(o.five);
-
 		}
+
+	});
+}
+
+function getInitTests(Assert) {
+	return new YUITest.TestCase({
+		name: "Boomerang Static Load: Init",
+
+		_should: {
+			ignore: {
+				testSetCookieNotOnline: !location.href.match(/^file:/),
+				testSetCookieOnline: !location.href.match(/^https?:/)
+			}
+		},
+
+		logger: {
+			matcher: undefined,
+			log: function(m, l, s) {
+				if(this.matcher === undefined) {
+					return;
+				}
+				if(this.matcher instanceof RegExp) {
+					Assert.isArray(m.match(this.matcher));
+				}
+				else {
+					Assert.areEqual(this.matcher, m);
+				}
+			}
+		},
+
+		testInit: function() {
+			var test = this;
+			var domain = "lognormal.github.io";
+			var o = BOOMR.init({
+				strip_query_string: true,
+				site_domain: domain,
+				log: function(m, l, s) {
+					test.logger.log(m, l, s);
+				}
+			});
+
+			Assert.areSame(BOOMR, o, "BOOMR.init did not return BOOMR");
+			Assert.areEqual(domain, BOOMR.session.domain);
+
+			this.logger.matcher = "--test init--";
+			BOOMR.log(this.logger.matcher);
+		},
+
+		testSetCookieNotOnline: function() {
+			this.logger.matcher = /^Saved cookie value doesn't match what we tried to set:/
+			Assert.isFalse(BOOMR.utils.setCookie("myname", {name: "value"}));
+		},
+
+		testSetCookieOnline: function() {
+			Assert.isTrue(BOOMR.utils.setCookie("myname", {name: "value"}));
+		},
+
+		testCleanupURLActualURLStrip: function() {
+			var url = "http://lognormal.github.io/?hello=world";
+			var expected = "http://lognormal.github.io/?qs-redacted";
+			Assert.areEqual(expected, BOOMR.utils.cleanupURL(url));
+		},
+
 
 	});
 }
