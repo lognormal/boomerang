@@ -223,25 +223,30 @@ boomr = {
 		getSubCookies: function(cookie) {
 			var cookies_a,
 			    i, l, kv,
+			    gotcookies=false,
 			    cookies={};
 
 			if(!cookie) {
 				return null;
 			}
 
-			cookies_a = cookie.split('&');
-
-			if(cookies_a.length === 0) {
+			if(typeof cookie !== "string") {
+				BOOMR.debug("TypeError: cookie is not a string: " + typeof cookie);
 				return null;
 			}
 
+			cookies_a = cookie.split('&');
+
 			for(i=0, l=cookies_a.length; i<l; i++) {
 				kv = cookies_a[i].split('=');
-				kv.push("");	// just in case there's no value
-				cookies[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+				if(kv[0]) {
+					kv.push("");	// just in case there's no value
+					cookies[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+					gotcookies=true;
+				}
 			}
 
-			return cookies;
+			return gotcookies ? cookies : null;
 		},
 
 		removeCookie: function(name) {
