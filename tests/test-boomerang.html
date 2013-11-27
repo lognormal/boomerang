@@ -182,6 +182,33 @@ YUI({ useBrowserConsole: true }).use("console", function(Y) {
 			Assert.areEqual(url, BOOMR.utils.hashQueryString(url), "With QS");
 			var expected = "http://lognormal.github.io/?hello=world";
 			Assert.areEqual(expected, BOOMR.utils.hashQueryString(url, true), "With QS strip Hash");
+		},
+
+		testPluginConfig: function() {
+			var o = {};
+			var config = { ABC: { one: 1, two: [2], three: "3rd", four: 4.1, five: false } };
+
+			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", []));
+			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "ABC", []));
+			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", ["one", "two"]));
+			Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["one", "two"]));
+
+			Assert.areSame(1, o.one);
+			Assert.isArray(o.two);
+			Assert.areEqual(1, o.two.length);
+			Assert.areEqual(2, o.two[0]);
+			Assert.isUndefined(o.three);
+
+			Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["five"]));
+
+			Assert.areSame(1, o.one);
+			Assert.isArray(o.two);
+			Assert.areEqual(1, o.two.length);
+			Assert.areEqual(2, o.two[0]);
+			Assert.isUndefined(o.three);
+			Assert.isNotUndefined(o.five);
+			Assert.isFalse(o.five);
+
 		}
 
 	});
