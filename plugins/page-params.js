@@ -96,7 +96,7 @@ Handler.prototype = {
 			return true;
 		}
 		// Massage pattern into a real regex
-		re = u.replace(/([^\.])\*/g, '$1.*');
+		re = u.replace(/([^\.])\*/g, '$1.*').replace(/^\*/, '.*');
 		try {
 			re = new RegExp("^" + re + "$", "i");
 		}
@@ -273,7 +273,7 @@ Handler.prototype = {
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		this.handleRegEx("^"
-					+ o.parameter1.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?')
+					+ o.parameter1.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?').replace(/^\*/, '.*')
 					+ "(.*)"
 					+ (o.parameter2 || "").replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*')
 					+ "$",
