@@ -11,7 +11,7 @@
 
 <body class="yui3-skin-sam">
 <script>
-YUI({ useBrowserConsole: true }).use(function(Y) {
+YUI({ useBrowserConsole: true, bootstrap: false }).use("console", function(Y) {
 
 	var suite = new YUITest.TestSuite("Boomerang core tests");
 	suite.add(getStaticTests(YUITest.Assert));
