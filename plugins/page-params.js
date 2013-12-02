@@ -21,18 +21,19 @@ Handler.prototype = {
 			value = this.preProcessor(value);
 		}
 		this.method.call(this.ctx, this.varname, value);
+		return true;
 	},
 
 	handle: function(o) {
 		var h = this;
 		if(!this.isValid(o)) {
-			return;
+			return false;
 		}
 		if(o.label) {
 			h = new Handler(this);
 			h.varname = o.label;
 		}
-		h[o.type](o);
+		return h[o.type](o);
 	},
 
 	isValid: function(o) {
@@ -68,13 +69,13 @@ Handler.prototype = {
 		}
 		catch(err) {
 			BOOMR.debug("Error generating regex: " + err, "PageVars");
-			return;
+			return false;
 		}
 
 		m = re.exec(l.href);
 
 		if(!m || !m.length) {
-			return;
+			return false;
 		}
 
 		value = extract.replace(
@@ -85,7 +86,7 @@ Handler.prototype = {
 
 		value = this.cleanUp(value);
 
-		this.apply(value);
+		return this.apply(value);
 	},
 
 	checkURLPattern: function(u) {
@@ -183,7 +184,7 @@ Handler.prototype = {
 		var parts, value, ctx=w;
 
 		if(!o.parameter1) {
-			return;
+			return false;
 		}
 
 		BOOMR.debug("Got variable: " + o.parameter1, "PageVars");
@@ -192,7 +193,7 @@ Handler.prototype = {
 		parts = o.parameter1.split(/\./);
 
 		if(!parts || parts.length === 0) {
-			return;
+			return false;
 		}
 
 		// Top part needs to be global in the primary window
@@ -212,7 +213,7 @@ Handler.prototype = {
 		// parts.length !== 0 means we stopped before the end
 		// so skip
 		if(parts.length !== 0) {
-			return;
+			return false;
 		}
 
 		// Value evaluated to a function, so we execute it
@@ -222,26 +223,26 @@ Handler.prototype = {
 		}
 
 		if(value === undefined || typeof value === "object") {
-			return;
+			return false;
 		}
 
 		BOOMR.debug("final value: " + value, "PageVars");
 		// Now remove invalid characters
 		value = this.cleanUp("" + value);
 
-		this.apply(value);
+		return this.apply(value);
 	},
 
 	URLPattern: function(o) {
 		var value, params, i, kv;
 		if(!o.parameter2) {
-			return;
+			return false;
 		}
 
 		BOOMR.debug("Got URL Pattern: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		if(!this.checkURLPattern(o.parameter1)) {
-			return;
+			return false;
 		}
 
 		// Now that we match, pull out all query string parameters
@@ -255,8 +256,7 @@ Handler.prototype = {
 				if(kv.length && kv[0] === o.parameter2) {
 					BOOMR.debug("final value: " + kv[1], "PageVars");
 					value = this.cleanUp(kv[1]);
-					this.apply(value);
-					return;
+					return this.apply(value);
 				}
 			}
 		}
@@ -268,7 +268,7 @@ Handler.prototype = {
 
 	URLSubstringTrailingText: function(o) {
 		if(!o.parameter1) {
-			return;
+			return false;
 		}
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
@@ -282,7 +282,7 @@ Handler.prototype = {
 
 	Regexp: function(o) {
 		if(!o.parameter1 || !o.parameter2) {
-			return;
+			return false;
 		}
 
 		BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
@@ -293,59 +293,59 @@ Handler.prototype = {
 	URLPatternType: function(o) {
 		var value;
 		if(!o.parameter2) {
-			return;
+			return false;
 		}
 
 		BOOMR.debug("Got XPath: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		if(!this.checkURLPattern(o.parameter1)) {
-			return;
+			return false;
 		}
 
 		value = this.runXPath(o.parameter2);
 
 		if(!value) {
-			return;
+			return false;
 		}
 
 		value = this.cleanUp(value.textContent);
 
 		BOOMR.debug("Final value: " + value, "PageVars");
 
-		this.apply(value);
+		return this.apply(value);
 	},
 
 	ResourceTiming: function(o) {
 		var el, url, res, st, en;
 		if(!o.parameter2 || !o.start || !o.end) {
-			return;
+			return false;
 		}
 
 		if(!p || !p.getEntriesByName) {
 			BOOMR.debug("This browser does not support ResourceTiming", "PageVars");
-			return;
+			return false;
 		}
 
 		if(!this.checkURLPattern(o.parameter1)) {
-			return;
+			return false;
 		}
 
 		el = this.runXPath(o.parameter2);
 		if(!el) {
-			return;
+			return false;
 		}
 
 		url = el.src || el.href;
 
 		if(!url) {
-			return;
+			return false;
 		}
 
 		res = p.getEntriesByName(url);
 
 		if(!res || !res.length) {
 			BOOMR.debug("No resource matched", "PageVars");
-			return;
+			return false;
 		}
 
 		st = parseFloat(res[0][o.start], 10);
@@ -354,34 +354,33 @@ Handler.prototype = {
 		
 		if(isNaN(st) || isNaN(en)) {
 			BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
-			return;
+			return false;
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
-		this.apply(en-st);
+		return this.apply(en-st);
 	},
 
 	UserTiming: function(o) {
 		var res, i;
 		if(!o.parameter2) {
-			return;
+			return false;
 		}
 
 		if(!p || !p.getEntriesByType) {
 			BOOMR.debug("This browser does not support UserTiming", "PageVars");
-			return;
+			return false;
 		}
 
 		if(!this.checkURLPattern(o.parameter1)) {
-			return;
+			return false;
 		}
 
 		// Check performance.mark
 		res = p.getEntriesByType("mark");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(res[i].startTime);
-				return;
+				return this.apply(res[i].startTime);
 			}
 		}
 
@@ -389,8 +388,7 @@ Handler.prototype = {
 		res = p.getEntriesByType("measure");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
-				this.apply(res[i].duration);
-				return;
+				return this.apply(res[i].duration);
 			}
 		}
 	}
@@ -412,8 +410,8 @@ impl = {
 		}
 
 		hconfig = {
-			pageGroups:    { varname: "h.pg" },
-			abTests:       { varname: "h.ab" },
+			pageGroups:    { varname: "h.pg", stopOnFirst: true },
+			abTests:       { varname: "h.ab", stopOnFirst: true },
 			customMetrics: { sanitizeRE: /[^\d\.\-]/g },
 			customTimers:  { sanitizeRE: /[^\d\.\-]/g,
 					 method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
@@ -428,7 +426,9 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<impl[v].length; i++) {
-					handler.handle(impl[v][i]);
+					if( handler.handle(impl[v][i]) && hconfig[v].stopOnFirst) {
+						break;
+					}
 				}
 			}
 		}
