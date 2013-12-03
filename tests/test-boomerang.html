@@ -4,19 +4,19 @@
 <title>Basic Boomerang Test</title>
 
 <link rel="stylesheet" href="test-helper.css" type="text/css">
-<script src="yui-test.js"></script>
+<script src="http://yui.yahooapis.com/3.14.0/build/yui/yui-min.js"></script>
 <script src="test-helper.js"></script>
 <script src="test-boomerang.js"></script>
-<script src="../boomerang.js"></script>
+<script src="../coverage/boomerang.js"></script>
 
 <body class="yui3-skin-sam">
 <script>
-YUI({ useBrowserConsole: true, bootstrap: false }).use("console", function(Y) {
+YUI().use("test", "console", function(Y) {
 
-	var suite = new YUITest.TestSuite("Boomerang core tests");
-	suite.add(getStaticTests(YUITest.Assert));
-	suite.add(getMockLoggerTests(YUITest.Assert));
-	suite.add(getInitTests(YUITest.Assert));
+	var suite = new Y.Test.Suite("Boomerang core tests");
+	suite.add(getStaticTests(Y));
+	suite.add(getMockLoggerTests(Y));
+	suite.add(getInitTests(Y));
 
 	var TestRunner = getTestRunner(Y);
 

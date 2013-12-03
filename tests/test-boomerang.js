@@ -1,22 +1,22 @@
-function getStaticTests(Assert) {
-	return new YUITest.TestCase({
+function getStaticTests(Y) {
+	return new Y.Test.Case({
 		name: "Boomerang Static Load",
 
 		testMethodsExist: function() {
-			Assert.isObject(BOOMR);
-			Assert.isString(BOOMR.version);
-			Assert.isObject(BOOMR.session);
-			Assert.isObject(BOOMR.utils);
-			Assert.isFunction(BOOMR.init);
-			Assert.isFunction(BOOMR.debug);
-			Assert.isFunction(BOOMR.warn);
-			Assert.isObject(BOOMR.plugins);
+			Y.Assert.isObject(BOOMR);
+			Y.Assert.isString(BOOMR.version);
+			Y.Assert.isObject(BOOMR.session);
+			Y.Assert.isObject(BOOMR.utils);
+			Y.Assert.isFunction(BOOMR.init);
+			Y.Assert.isFunction(BOOMR.debug);
+			Y.Assert.isFunction(BOOMR.warn);
+			Y.Assert.isObject(BOOMR.plugins);
 		}
 	});
 }
 
-function getMockLoggerTests(Assert) {
-	return new YUITest.TestCase({
+function getMockLoggerTests(Y) {
+	return new Y.Test.Case({
 
 		name: "Boomerang Static Load: Logger Munged",
 
@@ -44,14 +44,14 @@ function getMockLoggerTests(Assert) {
 			var o = { one: 1, two: 2, three: "3rd", four: null, five: undefined, six: 0, seven: 1.2, eight: "a=b", nine: [1, 2] };
 			var expected = "one=1&two=2&three=3rd&four=null&five=undefined&six=0&seven=1.2&eight=" + encodeURIComponent("a=b") + "&nine=" + encodeURIComponent("1,2");
 
-			Assert.areEqual(expected, BOOMR.utils.objectToString(o, "&"));
-			Assert.areEqual(expected.replace(/&/g, '\n\t'), BOOMR.utils.objectToString(o));
+			Y.Assert.areEqual(expected, BOOMR.utils.objectToString(o, "&"));
+			Y.Assert.areEqual(expected.replace(/&/g, '\n\t'), BOOMR.utils.objectToString(o));
 		},
 
 		testGetCookieNull: function() {
-			Assert.isNull(BOOMR.utils.getCookie());
-			Assert.isNull(BOOMR.utils.getCookie(""));
-			Assert.isNull(BOOMR.utils.getCookie(null));
+			Y.Assert.isNull(BOOMR.utils.getCookie());
+			Y.Assert.isNull(BOOMR.utils.getCookie(""));
+			Y.Assert.isNull(BOOMR.utils.getCookie(null));
 		},
 
 		testGetCookieExists: function() {
@@ -68,22 +68,22 @@ function getMockLoggerTests(Assert) {
 
 		testSetCookieNoNameOrDomain: function() {
 			BOOMR.debug = function(msg, src) {
-				Assert.isArray(msg.match(/^No cookie name or site domain:/));
+				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Assert.isFalse(BOOMR.utils.setCookie(""));
-			Assert.isFalse(BOOMR.utils.setCookie("myname"));
+			Y.Assert.isFalse(BOOMR.utils.setCookie(""));
+			Y.Assert.isFalse(BOOMR.utils.setCookie("myname"));
 		},
 
 		testSetCookieTooLong: function() {
 			BOOMR.debug = function(msg, src) {
-				Assert.isArray(msg.match(/^Cookie too long: /));
+				Y.Assert.isArray(msg.match(/^Cookie too long: /));
 			};
 			BOOMR.session.domain = "mydomain";
 			var value = "";
 			for(var i=0; i<400; i++) {
 				value += "1";
 			}
-			Assert.isFalse(BOOMR.utils.setCookie("myname", {a: value}));
+			Y.Assert.isFalse(BOOMR.utils.setCookie("myname", {a: value}));
 		},
 
 		testSetCookieValid: function() {
@@ -91,47 +91,47 @@ function getMockLoggerTests(Assert) {
 		},
 
 		testGetSubCookiesNull: function() {
-			Assert.isNull(BOOMR.utils.getSubCookies());
-			Assert.isNull(BOOMR.utils.getSubCookies(""));
-			Assert.isNull(BOOMR.utils.getSubCookies(null));
-			Assert.isNull(BOOMR.utils.getSubCookies(undefined));
-			Assert.isNull(BOOMR.utils.getSubCookies("&"), "Should be null with &");
-			Assert.isNull(BOOMR.utils.getSubCookies("="), "Should be null with =");
-			Assert.isNull(BOOMR.utils.getSubCookies("=&="), "Should be null with =&=");
-			Assert.isNull(BOOMR.utils.getSubCookies("=foo"), "Should be null with =foo");
+			Y.Assert.isNull(BOOMR.utils.getSubCookies());
+			Y.Assert.isNull(BOOMR.utils.getSubCookies(""));
+			Y.Assert.isNull(BOOMR.utils.getSubCookies(null));
+			Y.Assert.isNull(BOOMR.utils.getSubCookies(undefined));
+			Y.Assert.isNull(BOOMR.utils.getSubCookies("&"), "Should be null with &");
+			Y.Assert.isNull(BOOMR.utils.getSubCookies("="), "Should be null with =");
+			Y.Assert.isNull(BOOMR.utils.getSubCookies("=&="), "Should be null with =&=");
+			Y.Assert.isNull(BOOMR.utils.getSubCookies("=foo"), "Should be null with =foo");
 			BOOMR.debug = function(msg, src) {
-				Assert.areSame(msg, "TypeError: cookie is not a string: number");
+				Y.Assert.areSame(msg, "TypeError: cookie is not a string: number");
 			};
-			Assert.isNull(BOOMR.utils.getSubCookies(0));
+			Y.Assert.isNull(BOOMR.utils.getSubCookies(0));
 		},
 
 		testGetSubCookiesValid: function() {
 			var cookie = "one=1&two=2&three=3rd&four=null&five=undefined&six=0&seven=1.2&eight=" + encodeURIComponent("a=b") + "&nine=" + encodeURIComponent("1,2") + "&%3d=&10=11&11";
 
 			var o = BOOMR.utils.getSubCookies(cookie);
-			Assert.isNotNull(o);
-			Assert.isObject(o);
+			Y.Assert.isNotNull(o);
+			Y.Assert.isObject(o);
 
-			Assert.areSame(o.one, "1");
-			Assert.areSame(o.two, "2");
-			Assert.areSame(o.three, "3rd");
-			Assert.areSame(o.four, "null");
-			Assert.areSame(o.five, "undefined");
-			Assert.areSame(o.six, "0");
-			Assert.areSame(o.seven, "1.2");
-			Assert.areSame(o.eight, "a=b");
-			Assert.areSame(o.nine, "1,2");
-			Assert.areSame(o["="], "");
-			Assert.areSame(o["10"], "11");
-			Assert.areSame(o["11"], "");
+			Y.Assert.areSame(o.one, "1");
+			Y.Assert.areSame(o.two, "2");
+			Y.Assert.areSame(o.three, "3rd");
+			Y.Assert.areSame(o.four, "null");
+			Y.Assert.areSame(o.five, "undefined");
+			Y.Assert.areSame(o.six, "0");
+			Y.Assert.areSame(o.seven, "1.2");
+			Y.Assert.areSame(o.eight, "a=b");
+			Y.Assert.areSame(o.nine, "1,2");
+			Y.Assert.areSame(o["="], "");
+			Y.Assert.areSame(o["10"], "11");
+			Y.Assert.areSame(o["11"], "");
 		},
 
 		testRemoveCookieNoName: function() {
 			BOOMR.debug = function(msg, src) {
-				Assert.isArray(msg.match(/^No cookie name or site domain:/));
+				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Assert.isFalse(BOOMR.utils.removeCookie());
-			Assert.isFalse(BOOMR.utils.removeCookie("mycookie"));
+			Y.Assert.isFalse(BOOMR.utils.removeCookie());
+			Y.Assert.isFalse(BOOMR.utils.removeCookie("mycookie"));
 		},
 
 		testRemoveCookieExists: function() {
@@ -147,62 +147,62 @@ function getMockLoggerTests(Assert) {
 		},
 
 		testCleanupURLNull: function() {
-			Assert.isUndefined(BOOMR.utils.cleanupURL());
-			Assert.isNull(BOOMR.utils.cleanupURL(null));
-			Assert.areSame("", BOOMR.utils.cleanupURL(""));
+			Y.Assert.isUndefined(BOOMR.utils.cleanupURL());
+			Y.Assert.isNull(BOOMR.utils.cleanupURL(null));
+			Y.Assert.areSame("", BOOMR.utils.cleanupURL(""));
 		},
 
 		testCleanupURLActualURLNoStrip: function() {
 			var url = "http://lognormal.github.io/?hello=world";
-			Assert.areEqual(url, BOOMR.utils.cleanupURL(url));
+			Y.Assert.areEqual(url, BOOMR.utils.cleanupURL(url));
 		},
 
 		testHashQueryStringNoURL: function() {
-			Assert.isUndefined(BOOMR.utils.hashQueryString());
-			Assert.isNull(BOOMR.utils.hashQueryString(null));
-			Assert.areSame("", BOOMR.utils.hashQueryString(""));
+			Y.Assert.isUndefined(BOOMR.utils.hashQueryString());
+			Y.Assert.isNull(BOOMR.utils.hashQueryString(null));
+			Y.Assert.areSame("", BOOMR.utils.hashQueryString(""));
 		},
 
 		testHashQueryString: function() {
 			var url = "http://lognormal.github.io/#hello";
-			Assert.areEqual(url, BOOMR.utils.hashQueryString(url), "No QS");
+			Y.Assert.areEqual(url, BOOMR.utils.hashQueryString(url), "No QS");
 			url = "http://lognormal.github.io/?hello=world#hello";
-			Assert.areEqual(url, BOOMR.utils.hashQueryString(url), "With QS");
+			Y.Assert.areEqual(url, BOOMR.utils.hashQueryString(url), "With QS");
 			var expected = "http://lognormal.github.io/?hello=world";
-			Assert.areEqual(expected, BOOMR.utils.hashQueryString(url, true), "With QS strip Hash");
+			Y.Assert.areEqual(expected, BOOMR.utils.hashQueryString(url, true), "With QS strip Hash");
 		},
 
 		testPluginConfig: function() {
 			var o = {};
 			var config = { ABC: { one: 1, two: [2], three: "3rd", four: 4.1, five: false } };
 
-			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", []));
-			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "ABC", []));
-			Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", ["one", "two"]));
-			Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["one", "two"]));
+			Y.Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", []));
+			Y.Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "ABC", []));
+			Y.Assert.isFalse(BOOMR.utils.pluginConfig(o, config, "DEF", ["one", "two"]));
+			Y.Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["one", "two"]));
 
-			Assert.areSame(1, o.one);
-			Assert.isArray(o.two);
-			Assert.areEqual(1, o.two.length);
-			Assert.areEqual(2, o.two[0]);
-			Assert.isUndefined(o.three);
+			Y.Assert.areSame(1, o.one);
+			Y.Assert.isArray(o.two);
+			Y.Assert.areEqual(1, o.two.length);
+			Y.Assert.areEqual(2, o.two[0]);
+			Y.Assert.isUndefined(o.three);
 
-			Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["five"]));
+			Y.Assert.isTrue(BOOMR.utils.pluginConfig(o, config, "ABC", ["five"]));
 
-			Assert.areSame(1, o.one);
-			Assert.isArray(o.two);
-			Assert.areEqual(1, o.two.length);
-			Assert.areEqual(2, o.two[0]);
-			Assert.isUndefined(o.three);
-			Assert.isNotUndefined(o.five);
-			Assert.isFalse(o.five);
+			Y.Assert.areSame(1, o.one);
+			Y.Assert.isArray(o.two);
+			Y.Assert.areEqual(1, o.two.length);
+			Y.Assert.areEqual(2, o.two[0]);
+			Y.Assert.isUndefined(o.three);
+			Y.Assert.isNotUndefined(o.five);
+			Y.Assert.isFalse(o.five);
 		}
 
 	});
 }
 
-function getInitTests(Assert) {
-	return new YUITest.TestCase({
+function getInitTests(Y) {
+	return new Y.Test.Case({
 		name: "Boomerang Static Load: Init",
 
 		_should: {
@@ -219,10 +219,10 @@ function getInitTests(Assert) {
 					return;
 				}
 				if(this.matcher instanceof RegExp) {
-					Assert.isArray(m.match(this.matcher));
+					Y.Assert.isArray(m.match(this.matcher));
 				}
 				else {
-					Assert.areEqual(this.matcher, m);
+					Y.Assert.areEqual(this.matcher, m);
 				}
 			}
 		},
@@ -238,8 +238,8 @@ function getInitTests(Assert) {
 				}
 			});
 
-			Assert.areSame(BOOMR, o, "BOOMR.init did not return BOOMR");
-			Assert.areEqual(domain, BOOMR.session.domain);
+			Y.Assert.areSame(BOOMR, o, "BOOMR.init did not return BOOMR");
+			Y.Assert.areEqual(domain, BOOMR.session.domain);
 
 			this.logger.matcher = "--test init--";
 			BOOMR.log(this.logger.matcher);
@@ -247,19 +247,39 @@ function getInitTests(Assert) {
 
 		testSetCookieNotOnline: function() {
 			this.logger.matcher = /^Saved cookie value doesn't match what we tried to set:/
-			Assert.isFalse(BOOMR.utils.setCookie("myname", {name: "value"}));
+			Y.Assert.isFalse(BOOMR.utils.setCookie("myname", {name: "value"}));
 		},
 
 		testSetCookieOnline: function() {
-			Assert.isTrue(BOOMR.utils.setCookie("myname", {name: "value"}));
+			Y.Assert.isTrue(BOOMR.utils.setCookie("myname", {name: "value"}));
 		},
 
 		testCleanupURLActualURLStrip: function() {
 			var url = "http://lognormal.github.io/?hello=world";
 			var expected = "http://lognormal.github.io/?qs-redacted";
-			Assert.areEqual(expected, BOOMR.utils.cleanupURL(url));
+			Y.Assert.areEqual(expected, BOOMR.utils.cleanupURL(url));
 		},
 
+		testInitPlugin: function() {
+			var mockPlugin = Y.Mock();
+			var mockConfig = {
+				mockPlugin: {
+					test: "abc",
+					arr: []
+				}
+			};
+
+			Y.Mock.expect(mockPlugin, {
+				method: "init",
+				args: [mockConfig]
+			});
+
+			BOOMR.plugins.mockPlugin = mockPlugin;
+
+			BOOMR.init(mockConfig);
+
+			Y.Mock.verify(mockPlugin);
+		}
 
 	});
 }
