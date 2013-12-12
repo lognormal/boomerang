@@ -292,23 +292,26 @@ Handler.prototype = {
 
 	URLPatternType: function(o) {
 		var value;
-		if(!o.parameter2) {
-			return false;
-		}
 
-		BOOMR.debug("Got XPath: " + o.parameter1 + ", " + o.parameter2, "PageVars");
+		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		if(!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
-		value = this.runXPath(o.parameter2);
-
-		if(!value) {
-			return false;
+		if(!o.parameter2) {
+			value = "1";
 		}
+		else {
 
-		value = this.cleanUp(value.textContent);
+			value = this.runXPath(o.parameter2);
+
+			if(!value) {
+				return false;
+			}
+
+			value = this.cleanUp(value.textContent);
+		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
 
