@@ -21,6 +21,8 @@ INSECURE :=
 
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
 
+NEW_VERSION := $(shell cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
+
 tmpfile := boomerang.working
 
 ifeq ($(strip $(SOASTA_PASSWORD)),)
@@ -81,8 +83,8 @@ Default_Boomerang.xml: lognormal lognormal-debug
 soasta: Default_Boomerang.xml
 
 
-update_schema: OLD_SCHEMA_VERSION := $(SCHEMA_VERSION)
-update_schema: SCHEMA_VERSION := $(shell echo "$(OLD_SCHEMA_VERSION)+1" | bc -l )
+new-soasta-push create_migration update_schema: OLD_SCHEMA_VERSION := $(SCHEMA_VERSION)
+new-soasta-push create_migration update_schema: SCHEMA_VERSION := $(shell echo "$(OLD_SCHEMA_VERSION)+1" | bc -l )
 
 
 # This rule adds a migration to set the new version as default and updates the schema files with the new version of boomerang
@@ -90,24 +92,29 @@ update_schema: SCHEMA_VERSION := $(shell echo "$(OLD_SCHEMA_VERSION)+1" | bc -l 
 # This should be run via new-soasta-push or something else that puts boomerang into the repo
 update_schema: soasta
 	echo "Updating schema version $(OLD_SCHEMA_VERSION) -> $(SCHEMA_VERSION)..."
-	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(VERSION).$(DATE)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java
-	cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/ && svn add Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java && cd - >/dev/null
 	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
-	echo "Updating lastModifiedVersion..."
-	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
 
+
+create_migration: update_schema
+	echo "Creating migration..."
+	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(NEW_VERSION)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java
+	cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/ && svn add Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java && cd - >/dev/null
+	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(NEW_VERSION)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
 
 
 # Pushes both old and new formats
-soasta-push: new-soasta-push old-soasta-push
+soasta-push: new-soasta-push
 	git tag soasta.$(VERSION).$(DATE)
 
 
 
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
-soasta-upload:
-	echo "Uploading version `cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;'` to $(SOASTA_REST_PREFIX)..."
+soasta-upload: 
+	echo "Uploading version $(NEW_VERSION) to $(SOASTA_REST_PREFIX)..."
 	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
+	echo ""
+	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..."
+
 
 soasta-set-domain-boomerang:
 ifeq ($(strip $(DEFAULT_VERSION)),)
@@ -116,9 +123,10 @@ else
 ifeq ($(strip $(DOMAIN_ID)),)
 	echo "Please specify the domain ID \`make DOMAIN_ID=... $@'"
 else
-	curl $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) php generate-domain-references.php php://stdin | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
+	curl $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
 endif
 endif
+
 
 soasta-set-default:
 ifeq ($(strip $(DEFAULT_VERSION)),)
@@ -136,8 +144,9 @@ endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
 new-soasta-push: update_schema
+	echo "Updating lastModifiedVersion..."
+	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
 	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
-	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(VERSION).$(DATE)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
 
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)

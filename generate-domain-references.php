@@ -14,10 +14,12 @@ $boomerang_reference = array(
 );
 
 $set = false;
-foreach($references as &$reference) {
-	if($reference["type"] === "boomerang") {
-		$set = true;
-		$reference = $boomerang_reference;
+if($references) {
+	foreach($references as &$reference) {
+		if($reference["type"] === "boomerang") {
+			$set = true;
+			$reference = $boomerang_reference;
+		}
 	}
 }
 
