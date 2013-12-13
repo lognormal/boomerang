@@ -5,7 +5,7 @@
 //  Proprietary and confidential.
 //
 //  File:  Migration%from%to%to%.java
-//  Contains the Migration3557to3558 class.
+//  Contains the Migration%from%to%to% class.
 //
 //  This file contains the Migration%from%to%to% class.
 //

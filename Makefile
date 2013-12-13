@@ -3,7 +3,7 @@
 
 PLUGINS := plugins/rt.js plugins/bw.js
 STANDALONE_PLUGINS := 
-LOGNORMAL_PLUGINS := plugins/rt.js plugins/bw.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/md5.js plugins/logn_config.js
+LOGNORMAL_PLUGINS := plugins/page-params.js plugins/rt.js plugins/bw.js plugins/navtiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/md5.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
 DATE := $(shell date +%s)
@@ -109,6 +109,17 @@ soasta-upload:
 	echo "Uploading version `cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;'` to $(SOASTA_REST_PREFIX)..."
 	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 
+soasta-set-domain-boomerang:
+ifeq ($(strip $(DEFAULT_VERSION)),)
+	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
+else
+ifeq ($(strip $(DOMAIN_ID)),)
+	echo "Please specify the domain ID \`make DOMAIN_ID=... $@'"
+else
+	curl $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) php generate-domain-references.php php://stdin | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
+endif
+endif
+
 soasta-set-default:
 ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
@@ -149,7 +160,7 @@ lognormal-debug: lognormal-plugins
 
 mpulse-test: lognormal-debug
 	echo "building $(API_KEY).js"
-	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,mpstat.us/,; s,%config_host%%config_path%,o.go-mpulse.net/boomerang/config.js,; s,%client_apikey%%config_url_suffix%,$(API_KEY),; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
+	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,rum-dev.soasta.com/concerto/beacon/,; s,%config_host%%config_path%,rum-dev.soasta.com/concerto/boomerang/config.js,; s,%client_apikey%%config_url_suffix%,$(API_KEY),; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
 	chmod a+r $(API_KEY).js
 	scp -C $(API_KEY).js $(STANDALONE_PLUGINS) bacon10:boomerang/ 2>/dev/null;
 
