@@ -199,7 +199,7 @@ impl = {
 
 			if (!this.strict_referrer ||
 				(subcookies.nu && subcookies.nu === url && subcookies.s < +subcookies.cl + 15) ||
-				(!subcookies.nu && this.r === this.r2)
+				(subcookies.s === +subcookies.ul && this.r === this.r2)
 			) {
 				this.t_start = subcookies.s;
 
