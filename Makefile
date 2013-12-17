@@ -16,7 +16,9 @@ SOASTA_SERVER := http://localhost:8080
 SOASTA_USER := SOASTA
 SOASTA_PASSWORD := 
 # Note that there MUST BE NO trailing slash in the following
-SOASTA_REST_PREFIX := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1/Objects
+SOASTA_REST_BASE := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1
+SOASTA_REST_PREFIX := $(SOASTA_REST_BASE)/Objects
+SOASTA_TOKEN_PREFIX := $(SOASTA_REST_BASE)/Tokens
 INSECURE :=
 
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
@@ -33,6 +35,8 @@ endif
 
 all: boomerang-$(VERSION).$(DATE).js
 
+which-version:
+	echo "New version is $(NEW_VERSION)"
 
 # This is the old soasta format where boomerang.js and its plugins were stored in svn
 # This rule puts the version number into boomerang.js and puts it in the build directory
@@ -116,14 +120,20 @@ soasta-upload:
 	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..."
 
 
+soasta-set-domain-boomerang: TOKEN := $(shell curl $(INSECURE) --user $(soasta_user_password) -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"$(SOASTA_PASSWORD)","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | sed -e 's/{"token":"//;s/"}//;' )
+
 soasta-set-domain-boomerang:
 ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
 else
 ifeq ($(strip $(DOMAIN_ID)),)
-	echo "Please specify the domain ID \`make DOMAIN_ID=... $@'"
+	echo "Please specify the domain ID using \`make DOMAIN_ID=... $@'"
 else
-	curl $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
+ifeq ($(strip $(TENANT)),)
+	echo "Please specify the tenant name using \`make TENANT=... $@'"
+else
+	curl -v $(INSECURE) -H "X-Auth-Token: $(TOKEN)" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $(TOKEN)" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
+endif
 endif
 endif
 
