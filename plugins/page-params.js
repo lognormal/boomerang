@@ -272,7 +272,7 @@ Handler.prototype = {
 		}
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-		this.handleRegEx("^"
+		return this.handleRegEx("^"
 					+ o.parameter1.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?').replace(/^\*/, '.*')
 					+ "(.*)"
 					+ (o.parameter2 || "").replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*')
@@ -287,7 +287,7 @@ Handler.prototype = {
 
 		BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-		this.handleRegEx(o.parameter1, o.parameter2);
+		return this.handleRegEx(o.parameter1, o.parameter2);
 	},
 
 	URLPatternType: function(o) {
