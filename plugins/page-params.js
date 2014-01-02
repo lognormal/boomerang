@@ -81,7 +81,7 @@ Handler.prototype = {
 		value = extract.replace(
 			/\$([1-9])/g,
 			function(m0, m1) {
-				return m[parseInt(m1, 10)];
+				return decodeURIComponent(m[parseInt(m1, 10)]);
 			});
 
 		value = this.cleanUp(value);
@@ -255,7 +255,7 @@ Handler.prototype = {
 				kv = params[i].split("=");
 				if(kv.length && kv[0] === o.parameter2) {
 					BOOMR.debug("final value: " + kv[1], "PageVars");
-					value = this.cleanUp(kv[1]);
+					value = this.cleanUp(decodeURIComponent(kv[1]));
 					return this.apply(value);
 				}
 			}
