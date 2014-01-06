@@ -7,6 +7,8 @@ $data = json_decode($file, true);
 
 $references = $data["references"];
 
+$newreferences = array();
+
 $boomerang_reference = array(
 	"name" => "boomerang-$version",
 	"type" => "boomerang",
@@ -20,6 +22,9 @@ if($references) {
 			$set = true;
 			$reference = $boomerang_reference;
 		}
+		else {
+			$newreferences[] = $reference;
+		}
 	}
 }
 
@@ -27,5 +32,10 @@ if(!$set) {
 	$references[] = $boomerang_reference;
 }
 
-print json_encode(array("references" => $references));
+if($version === "remove") {
+	print json_encode(array("references" => $newreferences));
+}
+else {
+	print json_encode(array("references" => $references));
+}
 ?>

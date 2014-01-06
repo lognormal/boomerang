@@ -140,6 +140,20 @@ endif
 endif
 
 
+soasta-unset-domain-boomerang:
+ifeq ($(strip $(DOMAIN_ID)),)
+	echo "Please specify the domain ID using \`make DOMAIN_ID=... $@'"
+else
+ifeq ($(strip $(TENANT)),)
+	echo "Please specify the tenant name using \`make TENANT=... $@'"
+else
+	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
+	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
+	curl -v $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin remove | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
+endif
+endif
+
+
 soasta-set-default:
 ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
