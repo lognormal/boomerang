@@ -462,6 +462,10 @@ BOOMR.plugins.RT = {
 
 		impl.getBoomerangTimings();
 
+		// Override any getBeaconURL method to make sure we return the one from the
+		// cookie and not the one hardcoded into boomerang
+		BOOMR.getBeaconURL = function() { return impl.beacon_url; };
+
 		impl.initialized = true;
 		return this;
 	},

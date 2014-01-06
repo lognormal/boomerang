@@ -22,7 +22,8 @@ loaded=function() {
 
 load=function() {
 	var s0=dc.getElementsByTagName(s)[0],
-	    s1=dc.createElement(s);
+	    s1=dc.createElement(s),
+	    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "";
 
 	t_start=new Date().getTime();
 	s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
@@ -31,7 +32,9 @@ load=function() {
 		+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
 		+ '&sl=' + (BOOMR.session.length>0?1:0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
 								// We don't pass the session length so that the URL response can be cached
-		+ (complete?"&r=":"");				// if this is running after complete, then we're just refreshing the crumb
+		+ (complete?"&r=":"")				// if this is running after complete, then we're just refreshing the crumb
+		+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
+	;
 
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
