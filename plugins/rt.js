@@ -419,7 +419,7 @@ BOOMR.plugins.RT = {
 		// It's possible that a beacon collector dies while a session is active, and in that
 		// case we might end up sending beacons to a blackhole until the session expires.
 		if(config && config.beacon_url) {
-			if(!impl.beacon_url) {
+			if(!impl.beacon_url || config.force_beacon_url) {
 				impl.beacon_url = config.beacon_url;
 			}
 			impl.next_beacon_url = config.beacon_url;
