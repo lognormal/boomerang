@@ -250,7 +250,7 @@ boomr = {
 		},
 
 		removeCookie: function(name) {
-			return this.setCookie(name, {}, 0);
+			return this.setCookie(name, {}, -86400);
 		},
 
 		cleanupURL: function(url) {
