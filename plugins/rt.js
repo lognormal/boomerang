@@ -60,6 +60,7 @@ impl = {
 
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
 
+		// Numeric indices were a bug, we need to clean it up
 		for (k in subcookies) {
 			if(subcookies.hasOwnProperty(k)) {
 				if(!isNaN(parseInt(k, 10))) {
@@ -67,6 +68,7 @@ impl = {
 				}
 			}
 		}
+
 		if (typeof params === "object") {
 			for(k in params) {
 				if(params.hasOwnProperty(k)) {
