@@ -4,7 +4,8 @@ var dc=document,
     dom=w.location.hostname,
     complete=false, running=false,
     t_start,
-    load, loaded;
+    load, loaded,
+    errorTimeout;
 
 // Don't even bother creating the plugin if this is mhtml
 if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -12,6 +13,11 @@ if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || 
 }
 
 loaded=function() {
+	if(errorTimeout) {
+		cancelTimeout(errorTimeout);
+		errorTimeout=null;
+	}
+
 	if(complete) {
 		return;
 	}
@@ -19,6 +25,11 @@ loaded=function() {
 	running = false;
 	BOOMR.sendBeacon();
 };
+
+timedOut=function() {
+	// These are our failure settings, so be as careful as possible
+	BOOMR.addVar({"h.d": encodeURIComponent(dom), "config.timedout": "true"}).init({ strip_query_string: true, BW: { enabled: false } });
+}
 
 load=function() {
 	var s0=dc.getElementsByTagName(s)[0],
@@ -41,6 +52,10 @@ load=function() {
 
 	if(complete) {
 		setTimeout(load, 5.5*60*1000);
+	}
+
+	if(!complete) {
+		errorTimeout = setTimeout(timedOut, 3*60*1000);
 	}
 };
 
@@ -89,4 +104,4 @@ BOOMR.plugins.LOGN = {
  but not for the debug version.  We use special comment tags to indicate that this code
  block should be removed if the debug version is requested.
 */
-BOOMR.init({/*BEGIN DEBUG TOKEN*/log:null,/*END DEBUG TOKEN*/wait:true,site_domain:null});
+BOOMR.addVar({"h.key": "%client_apikey%"}).init({/*BEGIN DEBUG TOKEN*/log:null,/*END DEBUG TOKEN*/wait:true,site_domain:null});
