@@ -14,7 +14,7 @@ if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || 
 
 loaded=function() {
 	if(errorTimeout) {
-		cancelTimeout(errorTimeout);
+		clearTimeout(errorTimeout);
 		errorTimeout=null;
 	}
 
@@ -33,7 +33,7 @@ timedOut=function() {
 	BOOMR.addVar({"h.d": encodeURIComponent(dom), "config.timedout": "true"}).init({ strip_query_string: true, BW: { enabled: false } });
 
 	BOOMR.sendBeacon();
-}
+};
 
 load=function() {
 	var s0=dc.getElementsByTagName(s)[0],
