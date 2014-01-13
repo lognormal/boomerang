@@ -38,20 +38,6 @@ all: boomerang-$(VERSION).$(DATE).js
 which-version:
 	echo "New version is $(NEW_VERSION)"
 
-# This is the old soasta format where boomerang.js and its plugins were stored in svn
-# This rule puts the version number into boomerang.js and puts it in the build directory
-old-soasta: boomerang.js $(LOGNORMAL_PLUGINS)
-	echo
-	echo "Making boomerang-$(VERSION).$(DATE).js ..."
-	cat boomerang.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/' > build/boomerang-$(VERSION).$(DATE).js && echo "done"
-	echo
-
-# This is the old soasta format where boomerang.js and its plugins were stored in svn
-# This rule takes the output of the previous rule and moves it to svn.  It also creates a git tag.
-old-soasta-push: old-soasta
-	cp $(LOGNORMAL_PLUGINS) plugins/zzz_last_plugin.js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/plugins/
-	cp build/boomerang-$(VERSION).$(DATE).js $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/WEB-INF/boomerang/boomerang.js
-	cp boomerang-reload.html $(SOASTA_SOURCE)/WebApplications/Concerto/WebContent/boomerang/
 
 
 # This rule creates the xml file that contains base64 encoded versions of debug and minified boomerang
@@ -106,7 +92,7 @@ create_migration: update_schema
 	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(NEW_VERSION)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
 
 
-# Pushes both old and new formats
+# Pushes new format and tags git
 soasta-push: new-soasta-push
 	git tag soasta.$(VERSION).$(DATE)
 
@@ -193,11 +179,19 @@ lognormal-debug: lognormal-plugins
 	chmod a+r $(tmpfile)
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE)-debug.js
 
+
+
+###
+# Builds a test version of boomerang for a specific API KEY running on rum-dev.
+# MUST pass API_KEY as an environment variable
+###
 mpulse-test: lognormal-debug
 	echo "building $(API_KEY).js"
 	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,rum-dev.soasta.com/concerto/beacon/,; s,%config_host%%config_path%,rum-dev.soasta.com/concerto/boomerang/config.js,; s,%client_apikey%%config_url_suffix%,$(API_KEY),; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
 	chmod a+r $(API_KEY).js
 	scp -C $(API_KEY).js $(STANDALONE_PLUGINS) bacon10:boomerang/ 2>/dev/null;
+
+
 
 lognormal-push: lognormal
 	git tag v$(VERSION).$(DATE)
