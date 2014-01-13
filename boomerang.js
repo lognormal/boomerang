@@ -137,6 +137,7 @@ boomr = {
 	t_end: null,
 
 	url: myurl,
+	config_url: null,
 
 	session: {
 		// You can disable all cookies by setting site_domain to a falsy value

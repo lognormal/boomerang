@@ -51,6 +51,8 @@ load=function() {
 		+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 	;
 
+	BOOMR.config_url = s1.src;
+
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
 
