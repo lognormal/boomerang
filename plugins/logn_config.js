@@ -5,7 +5,7 @@ var dc=document,
     complete=false, running=false,
     t_start,
     load, loaded,
-    errorTimeout;
+    errorTimeout, timedOut;
 
 // Don't even bother creating the plugin if this is mhtml
 if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -28,7 +28,11 @@ loaded=function() {
 
 timedOut=function() {
 	// These are our failure settings, so be as careful as possible
+	complete = true;
+	running = false;
 	BOOMR.addVar({"h.d": encodeURIComponent(dom), "config.timedout": "true"}).init({ strip_query_string: true, BW: { enabled: false } });
+
+	BOOMR.sendBeacon();
 }
 
 load=function() {
