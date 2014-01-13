@@ -204,8 +204,10 @@ boomr = {
 				c.push("expires=" + exp);
 			}
 
+			nameval = c.join('; ');
+
 			if ( nameval.length < 400 ) {
-				d.cookie = c.join('; ');
+				d.cookie = nameval;
 				// confirm cookie was set (could be blocked by user's settings, etc.)
 				savedval = this.getCookie(name);
 				if(value === savedval) {
