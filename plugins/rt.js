@@ -390,11 +390,11 @@ impl = {
 	},
 
 	onclick: function(etarget) {
-		impl._iterable_click("Click", "A", etarget, function(t) { return t.href });
+		impl._iterable_click("Click", "A", etarget, function(t) { return t.href; });
 	},
 
 	onsubmit: function(etarget) {
-		impl._iterable_click("Submit", "FORM", etarget, function(t) { var v = t.action || d.URL; return v.match(/\?/) ? v : v + "?" });
+		impl._iterable_click("Submit", "FORM", etarget, function(t) { var v = t.action || d.URL; return v.match(/\?/) ? v : v + "?"; });
 	},
 
 	domloaded: function() {
