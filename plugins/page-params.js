@@ -333,12 +333,17 @@ Handler.prototype = {
 			return false;
 		}
 
-		el = this.runXPath(o.parameter2);
-		if(!el) {
-			return false;
+		if(o.parameter2.match(/^https?:\/\//)) {	// URL, so just use it, else use XPath
+			url = o.parameter2;
 		}
+		else {
+			el = this.runXPath(o.parameter2);
+			if(!el) {
+				return false;
+			}
 
-		url = el.src || el.href;
+			url = el.src || el.href;
+		}
 
 		if(!url) {
 			return false;
