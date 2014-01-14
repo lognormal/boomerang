@@ -498,7 +498,6 @@ BOOMR.plugins.RT = {
 				this.endTimer('t_resp', time_value);
 			}
 			impl.timers[timer_name] = {start: (typeof time_value === "number" ? time_value : new Date().getTime())};
-			impl.complete = false;
 		}
 
 		return this;
