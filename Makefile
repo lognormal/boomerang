@@ -20,6 +20,7 @@ SOASTA_REST_BASE := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1
 SOASTA_REST_PREFIX := $(SOASTA_REST_BASE)/Objects
 SOASTA_TOKEN_PREFIX := $(SOASTA_REST_BASE)/Tokens
 INSECURE :=
+SERVER ?= rum-dev.soasta.com
 
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
 
@@ -187,7 +188,7 @@ lognormal-debug: lognormal-plugins
 ###
 mpulse-test: lognormal-debug
 	echo "building $(API_KEY).js"
-	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,rum-dev.soasta.com/concerto/beacon/,; s,%config_host%%config_path%,rum-dev.soasta.com/concerto/boomerang/config.js,; s,%client_apikey%%config_url_suffix%,$(API_KEY),; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
+	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,$(SERVER)/concerto/beacon/,; s,%config_host%%config_path%,$(SERVER)/concerto/boomerang/config.js,; s,%client_apikey%,$(API_KEY),; s,%config_url_suffix%,,; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
 	chmod a+r $(API_KEY).js
 	scp -C $(API_KEY).js $(STANDALONE_PLUGINS) bacon10:boomerang/ 2>/dev/null;
 
