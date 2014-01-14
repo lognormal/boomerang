@@ -61,7 +61,7 @@ load=function() {
 	}
 
 	if(!complete) {
-		errorTimeout = setTimeout(timedOut, 3*60*1000);
+		errorTimeout = setTimeout(timedOut, 60*1000);
 	}
 };
 
