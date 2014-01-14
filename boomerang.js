@@ -217,7 +217,7 @@ boomr = {
 				BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedval);
 			}
 			else {
-				BOOMR.warn("Cookie too long: " + nameval.length);
+				BOOMR.warn("Cookie too long: " + nameval.length + " " + nameval);
 			}
 
 			return false;
