@@ -437,7 +437,8 @@ BOOMR.plugins.RT = {
 		// we already had a beacon URL, in which case we'll hold on to it until our session
 		// expires, and then use it.
 		// It's possible that a beacon collector dies while a session is active, and in that
-		// case we might end up sending beacons to a blackhole until the session expires.
+		// case we might end up sending beacons to a blackhole until the next config.js 
+		// request tells us to force the new beacon url
 		if(config && config.beacon_url) {
 			if(!impl.beacon_url || config.force_beacon_url) {
 				impl.beacon_url = config.beacon_url;
