@@ -107,8 +107,6 @@ soasta-upload:
 	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..."
 
 
-soasta-set-domain-boomerang: 
-
 soasta-set-domain-boomerang:
 ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
