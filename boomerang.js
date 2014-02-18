@@ -418,6 +418,7 @@ boomr = {
 	// Only call this if autorun is explicitly set to false
 	page_ready: function(ev) {
 		if (!ev) { ev = w.event; }
+		if (!ev) { ev = { name: "load" }; }
 		if(impl.onloadfired) {
 			return this;
 		}
