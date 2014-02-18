@@ -66,8 +66,14 @@ load=function() {
 };
 
 BOOMR.plugins.LOGN = {
-	init: function() {
+	init: function(config) {
 		if(complete) {
+			return this;
+		}
+
+		if(config && config.rate_limited) {
+			clearTimeout(errorTimeout);
+			errorTimeout=null;
 			return this;
 		}
 
