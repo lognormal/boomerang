@@ -27,6 +27,9 @@ loaded=function() {
 };
 
 timedOut=function() {
+	if(complete) {
+		return;
+	}
 	// These are our failure settings, so be as careful as possible
 	complete = true;
 	running = false;
