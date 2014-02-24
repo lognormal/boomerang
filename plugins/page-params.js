@@ -490,7 +490,7 @@ BOOMR.plugins.PageParams = {
 		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics"];
 
 		w = BOOMR.window;
-		l = w.location;
+		l = location;
 		d = w.document;
 		p = w.performance || null;
 
