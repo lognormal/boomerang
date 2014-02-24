@@ -77,6 +77,7 @@ BOOMR.plugins.LOGN = {
 		if(config && config.rate_limited) {
 			clearTimeout(errorTimeout);
 			errorTimeout=null;
+			BOOMR.session.rate_limited=true;
 			return this;
 		}
 
