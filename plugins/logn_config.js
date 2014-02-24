@@ -70,7 +70,7 @@ load=function() {
 
 BOOMR.plugins.LOGN = {
 	init: function(config) {
-		if(complete) {
+		if(complete || BOOMR.session.rate_limited) {
 			return this;
 		}
 
