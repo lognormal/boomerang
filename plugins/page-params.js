@@ -89,7 +89,7 @@ Handler.prototype = {
 		return this.apply(value);
 	},
 
-	checkURLPattern: function(u) {
+	checkURLPattern: function(u, urlToCheck) {
 		var re;
 
 		// Empty pattern matches all URLs
@@ -107,9 +107,13 @@ Handler.prototype = {
 			return false;
 		}
 
+		if(!urlToCheck) {
+			urlToCheck = l.href;
+		}
+
 		// Check if URL matches
-		if(!re.exec(l.href)) {
-			BOOMR.debug("No match on " + l.href, "PageVars");
+		if(!re.exec(urlToCheck)) {
+			BOOMR.debug("No match on " + urlToCheck, "PageVars");
 			return false;
 		}
 
@@ -319,7 +323,7 @@ Handler.prototype = {
 	},
 
 	ResourceTiming: function(o) {
-		var el, url, res, st, en;
+		var el, url, res, reslist, st, en, i;
 		if(!o.parameter2 || !o.start || !o.end) {
 			return false;
 		}
@@ -333,8 +337,11 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(o.parameter2.match(/^https?:\/\//)) {	// URL, so just use it, else use XPath
-			url = o.parameter2;
+		if(o.parameter2.match(/^url:/)) {	// URL, so just use it, else use XPath
+			url = o.parameter2.substr(4);
+		}
+		else if(o.parameter2 === "slowest") {
+			url="slowest";
 		}
 		else {
 			el = this.runXPath(o.parameter2);
@@ -349,20 +356,51 @@ Handler.prototype = {
 			return false;
 		}
 
-		res = p.getEntriesByName(url);
+		reslist = p.getEntriesByName(url);
 
-		if(!res || !res.length) {
+		if(reslist && reslist.length > 0) {
+			res = reslist[0];
+		}
+		else {
+			// no exact match, maybe it has wildcards
+			reslist = p.getEntries();
+			if(reslist && reslist.length > 0) {
+				for(i=0; i<reslist.length; i++) {
+					if(url === "slowest") {
+						if(!res || reslist[i].duration > res.duration) {
+							res = reslist[i];
+						}
+					}
+					else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
+						res = reslist[i];
+						url = res.name;
+						break;
+					}
+				}
+			}
+		}
+
+		if(!res) {
 			BOOMR.debug("No resource matched", "PageVars");
 			return false;
 		}
 
-		st = parseFloat(res[0][o.start], 10);
-		en = parseFloat(res[0][o.end], 10);
+		if(o.relative_to_nt) {
+			st = 0;
+		}
+		else {
+			st = parseFloat(res[o.start], 10);
+		}
+		en = parseFloat(res[o.end], 10);
 		
 		
 		if(isNaN(st) || isNaN(en)) {
 			BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
 			return false;
+		}
+
+		if(url === "slowest") {
+			BOOMR.addVar("dom.res.slowest", res.name);
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
