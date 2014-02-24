@@ -632,6 +632,12 @@ boomr = {
 
 		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
 
+		// Stop at this point if we are rate limited
+		if(BOOMR.session.rate_limited) {
+			BOOMR.debug("Skipping because we're rate limited");
+			return this;
+		}
+
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {
 			img = new Image();
