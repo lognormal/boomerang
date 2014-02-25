@@ -58,6 +58,9 @@ Handler.prototype = {
 	},
 
 	cleanUp: function(s) {
+		if(!s) {
+			return s;
+		}
 		return s.replace(this.sanitizeRE, '');
 	},
 
