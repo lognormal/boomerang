@@ -314,7 +314,10 @@ Handler.prototype = {
 				return false;
 			}
 
-			value = this.cleanUp(value.textContent);
+			// textContent is way faster than innerText in browsers that support
+			// both, but IE8 and lower only support innerText so, we test textContent
+			// first and fallback to innerText if that fails
+			value = this.cleanUp(value.textContent || value.innerText);
 		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
