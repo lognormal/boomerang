@@ -23,6 +23,57 @@ you, but we have a few ideas.
 // `delete` it.  This is the only way that works on Internet Explorer
 BOOMR_start = new Date().getTime();
 
+/**
+ Check the value of document.domain and fix it if incorrect.
+ This function is run at the top of boomerang, and then whenever
+ init() is called.  If boomerang is running within an iframe, this
+ function checks to see if it can access elements in the parent
+ iframe.  If not, it will fudge around with document.domain until
+ it finds a value that works.
+
+ This allows customers to change the value of document.domain at
+ any point within their page's load process, and we will adapt to
+ it.
+ */
+function BOOMR_check_doc_domain(domain) {
+	var test;
+	// If we're running in the main window, then we don't need this
+	if(window.parent === window) {
+		return true;
+	}
+
+	if(!domain) {
+		domain = document.domain;
+	}
+
+	if(domain.indexOf(".") === -1) {
+		return false;
+	}
+
+	// 1. Test without setting document.domain
+	try {
+		test = window.parent.document;
+		return true;	// all okay
+	}
+	// 2. Test with document.domain
+	catch(err) {
+		document.domain = domain;
+	}
+	try {
+		test = window.parent.document;
+		return true;	// all okay
+	}
+	// 3. Strip off leading part and try again
+	catch(err) {
+		domain = domain.replace(/^[\w-]+\./, '');
+	}
+
+	return BOOMR_check_doc_domain(domain);
+}
+
+BOOMR_check_doc_domain();
+
+
 // beaconing section
 // the parameter is the window
 (function(w) {
@@ -311,6 +362,8 @@ boomr = {
 	init: function(config) {
 		var i, k,
 		    properties = ["beacon_url", "user_ip", "strip_query_string"];
+
+		BOOMR_check_doc_domain();
 
 		if(!config) {
 			config = {};
