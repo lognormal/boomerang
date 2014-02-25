@@ -501,6 +501,7 @@ BOOMR.plugins.PageParams = {
 		p = w.performance || null;
 
 		BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
+		impl.complete = false;
 
 		// Fire on the first of load or unload
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
