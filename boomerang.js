@@ -37,12 +37,16 @@ BOOMR_start = new Date().getTime();
  */
 function BOOMR_check_doc_domain(domain) {
 	var test;
-	// If we're running in the main window, then we don't need this
-	if(window.parent === window) {
-		return true;
-	}
 
+	// If domain is not passed in, then this is a global call
+	// domain is only passed in if we call ourselves, so we
+	// skip the frame check at that point
 	if(!domain) {
+		// If we're running in the main window, then we don't need this
+		if(window.parent === window || !document.getElementById('boomr-if-as')) {
+			return true;
+		}
+
 		domain = document.domain;
 	}
 
