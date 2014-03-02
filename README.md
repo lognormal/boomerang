@@ -16,15 +16,23 @@ init() method.
 usage
 ---
 
-The simple synchronous way to include boomerang on your page:
+## The simple synchronous way
+
 ```html
-<script src="http://your-cdn.host.com/path/to/boomerang-version.js"></script>
+<script src="boomerang/boomerang.js"></script>
+<script src="boomerang/plugins/rt.js"></script>
 <script>
-   BOOMR.init();
+   BOOMR.init({
+       beacon_url: "/boomerang_handler"
+   });
 </script>
 ```
 
-The faster, more involved, asynchronous way (and what I do for sites I control):
+**Note** - you must include at least one plugin (it doesn't have to be rt) or else the beacon will never actually be called.
+
+## The faster, more involved, asynchronous way
+
+This is what I like to do for sites I control.
 
 ### 1. Add a plugin to init your code
 
