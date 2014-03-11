@@ -351,7 +351,7 @@ impl = {
 		// we terminate if an image timed out because that means the connection is
 		// too slow to go to the next image
 		if(i >= images.end-1 || this.results[this.nruns-run].r[i+1] !== undefined) {
-			BOOMR.debug(this.results[this.nruns-run], "bw");
+			BOOMR.debug(BOOMR.utils.objectToString(this.results[this.nruns-run]), "bw");
 			// First run is a pilot test to decide what the largest image
 			// that we can download is. All following runs only try to
 			// download this image
