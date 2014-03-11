@@ -669,6 +669,7 @@ boomr = {
 		// you would do this if you want to do some fancy beacon handling
 		// in the `before_beacon` event instead of a simple GET request
 		if(!impl.beacon_url) {
+			BOOMR.debug("No beacon_url, but would have sent: " + BOOMR.utils.objectToString(impl.vars));
 			return this;
 		}
 
