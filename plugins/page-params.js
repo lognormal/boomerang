@@ -453,6 +453,7 @@ impl = {
 	customMetrics: [],
 
 	complete: false,
+	initialized: false,
 
 	done: function() {
 		var i, v, hconfig, handler;
@@ -504,8 +505,19 @@ BOOMR.plugins.PageParams = {
 		impl.complete = false;
 
 		// Fire on the first of load or unload
+
+		// We need to subscribe to page ready every time init is called
+		// because it's possible that the onload event fired before config.js
+		// loaded, and so our config will only be available after onload.
+		// If page_ready is subscribed to after onload, it fires immediately
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
-		BOOMR.subscribe("page_unload", impl.done, null, impl);
+
+		if(!impl.initialized) {
+			// We do not want to subscribe to unload more than once
+			// because this will just create too many references
+			BOOMR.subscribe("page_unload", impl.done, null, impl);
+			impl.initialized = true;
+		}
 
 		return this;
 	},
