@@ -391,7 +391,7 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(o.relative_to_nt) {
+		if(o.relative_to_nt || o.start === "navigationStart") {
 			st = 0;
 		}
 		else {
