@@ -164,18 +164,24 @@ Handler.prototype = {
 	runXPath: function(xpath) {
 		var el;
 
-		if(d.evaluate) {
-			el = d.evaluate(xpath, d, null, 9, null);
+		try {
+			if(d.evaluate) {
+				el = d.evaluate(xpath, d, null, 9, null);
+			}
+			else if(d.selectNodes) {
+				el = d.selectNodes(xpath);
+			}
+			else if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
+				xpath = xpath.slice(6);
+				return this.nodeWalk(d, xpath);
+			}
+			else {
+				BOOMR.debug("Could not evaluate XPath", "PageVars");
+				return null;
+			}
 		}
-		else if(d.selectNodes) {
-			el = d.selectNodes(xpath);
-		}
-		else if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
-			xpath = xpath.slice(6);
-			return this.nodeWalk(d, xpath);
-		}
-		else {
-			BOOMR.debug("Could not evaluate XPath", "PageVars");
+		catch(xpath_err) {
+			BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
 			return null;
 		}
 
