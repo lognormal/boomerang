@@ -336,7 +336,14 @@ Handler.prototype = {
 
 	ResourceTiming: function(o) {
 		var el, url, res, reslist, st, en, i;
-		if(!o.parameter2 || !o.start || !o.end) {
+
+		// Require at least xpath or url
+		if(!o.parameter2 && !o.url) {
+			return false;
+		}
+
+		// Require start and end"
+		if(!o.start || !o.end) {
 			return false;
 		}
 
@@ -351,13 +358,16 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(o.parameter2.match(/^url:/)) {	// URL, so just use it, else use XPath
+		if(o.parameter2 && o.parameter2.match(/^url:/)) {	// URL, so just use it, else use XPath
 			url = o.parameter2.substr(4);
 		}
-		else if(o.parameter2 === "slowest") {
-			url="slowest";
+		else if(o.parameter2 === "slowest" || o.url === "slowest") {
+			url = "slowest";
 		}
-		else {
+		else if(o.url) {
+			url = o.url;
+		}
+		else if(o.parameter2) {
 			el = this.runXPath(o.parameter2);
 			if(!el) {
 				return false;
