@@ -340,11 +340,13 @@ Handler.prototype = {
 			return false;
 		}
 
+		// Require browser that supports ResourceTiming
 		if(!p || !p.getEntriesByName) {
 			BOOMR.debug("This browser does not support ResourceTiming", "PageVars");
 			return false;
 		}
 
+		// Require page URL to match
 		if(!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
@@ -378,11 +380,15 @@ Handler.prototype = {
 			reslist = p.getEntries();
 			if(reslist && reslist.length > 0) {
 				for(i=0; i<reslist.length; i++) {
+
+					// if we want the slowest url, then iterate through all till we find it
 					if(url === "slowest") {
 						if(!res || reslist[i].duration > res.duration) {
 							res = reslist[i];
 						}
 					}
+
+					// else stop at the first that matches the pattern
 					else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
 						res = reslist[i];
 						url = res.name;
