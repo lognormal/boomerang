@@ -342,8 +342,8 @@ Handler.prototype = {
 			return false;
 		}
 
-		// Require start and end"
-		if(!o.start || !o.end) {
+		// Require start and end or start==="*"
+		if(!o.start || (!o.end && o.start !== "*")) {
 			return false;
 		}
 
@@ -411,6 +411,17 @@ Handler.prototype = {
 		if(!res) {
 			BOOMR.debug("No resource matched", "PageVars");
 			return false;
+		}
+
+		// If start === "*" then we want all resource timing fields for this resource
+		if(o.start === "*") {
+			for(k in res) {
+				if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
+					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, '$1$2'), res[k]);
+				}
+			}
+
+			return this.apply(res.duration);
 		}
 
 		if(o.relative_to_nt || o.start === "navigationStart") {
