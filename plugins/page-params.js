@@ -479,9 +479,11 @@ impl = {
 			abTests:       { varname: "h.ab", stopOnFirst: true },
 			customMetrics: { sanitizeRE: /[^\d\.\-]/g },
 			customTimers:  { sanitizeRE: /[^\d\.\-]/g,
-					 method: BOOMR.plugins.RT.setTimer, ctx: BOOMR.plugins.RT, preProcessor: function(v) {
-								return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
-							}
+					 method: BOOMR.plugins.RT.setTimer,
+					 ctx: BOOMR.plugins.RT,
+					 preProcessor: function(v) {
+							return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
+						}
 					}
 		};
 
