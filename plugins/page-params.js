@@ -358,10 +358,7 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(o.parameter2 && o.parameter2.match(/^url:/)) {	// URL, so just use it, else use XPath
-			url = o.parameter2.substr(4);
-		}
-		else if(o.parameter2 === "slowest" || o.url === "slowest") {
+		if(o.parameter2 === "slowest" || o.url === "slowest") {
 			url = "slowest";
 		}
 		else if(o.url) {
@@ -421,6 +418,7 @@ Handler.prototype = {
 				}
 			}
 
+			// but we set the timer to the duration
 			return this.apply(res.duration);
 		}
 
