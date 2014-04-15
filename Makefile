@@ -106,7 +106,7 @@ soasta-upload:
 	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 	echo ""
 	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..."
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$SOASTA_USER\", \"text\":\"Uploaded boomerang version $(NEW_VERSION) to $(SOASTA_SERVER)\",\"icon_emoji\":\":shipit:\"}"
+	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Uploaded boomerang version $(NEW_VERSION) to $(SOASTA_SERVER)\",\"icon_emoji\":\":shipit:\"}"
 
 
 soasta-set-domain-boomerang:
@@ -122,7 +122,7 @@ else
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
 	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	curl -v $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$SOASTA_USER\", \"text\":\"Set default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
 endif
 endif
 endif
@@ -138,7 +138,7 @@ else
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
 	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	curl -v $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin remove | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$SOASTA_USER\", \"text\":\"Unset default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Unset default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
 endif
 endif
 
@@ -148,7 +148,7 @@ ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
 else
 	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$SOASTA_USER\", \"text\":\"Set default boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
 endif
 
 soasta-set-minimum:
@@ -156,7 +156,7 @@ ifeq ($(strip $(MINIMUM_VERSION)),)
 	echo "Please specify a minimum version using \`make MINIMUM_VERSION=... $@'"
 else
 	echo '{"attributes":[{"name":"boomerangMinimumVersion","value":"$(MINIMUM_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$SOASTA_USER\", \"text\":\"Set minimum boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set minimum boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
 endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
