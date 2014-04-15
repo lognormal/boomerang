@@ -320,6 +320,13 @@ boomr = {
 			if(!url) {
 				return url;
 			}
+			if(url.match(/^\/\//)) {
+				url = location.protocol + url;
+			}
+			if(!url.match(/^(https?|file):/)) {
+				BOOMR.error("Passed in URL is invalid: " + url);
+				return "";
+			}
 			if(stripHash) {
 				url = url.replace(/#.*/, '');
 			}
