@@ -22,6 +22,18 @@ SOASTA_TOKEN_PREFIX := $(SOASTA_REST_BASE)/Tokens
 INSECURE :=
 SERVER ?= rum-dev.soasta.com
 
+SLACK_CHANNELS := "boomerang_commits "
+
+ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com)
+SLACK_CHANNELS += "ops "
+else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com/)
+SLACK_CHANNELS += "ops "
+else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com)
+SLACK_CHANNELS += "mpulse-loadtest "
+else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com/)
+SLACK_CHANNELS += "mpulse-loadtest "
+endif
+
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
 
 NEW_VERSION := $(shell cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
@@ -96,7 +108,7 @@ create_migration: update_schema
 # Pushes new format and tags git
 soasta-push: new-soasta-push
 	git tag soasta.$(VERSION).$(DATE)
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$$USER\", \"text\":\"Pushed boomerang tag soasta.$(VERSION).$(DATE) to $(SOASTA_SOURCE) (uncommitted)\"}"
+	for channel in $(SLACK_CHANNELS); do curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$$USER\", \"text\":\"Pushed boomerang tag soasta.$(VERSION).$(DATE) to $(SOASTA_SOURCE) (uncommitted)\"}"; done
 
 
 
@@ -106,7 +118,7 @@ soasta-upload:
 	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | curl -v -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 	echo ""
 	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..."
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Uploaded boomerang version $(NEW_VERSION) to $(SOASTA_SERVER)\",\"icon_emoji\":\":shipit:\"}"
+	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Uploaded boomerang version $(NEW_VERSION) to $(SOASTA_SERVER)\",\"icon_emoji\":\":shipit:\"}"; echo ""; done
 
 
 soasta-set-domain-boomerang:
@@ -122,7 +134,7 @@ else
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
 	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	curl -v $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) to $(DEFAULT_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":thumbsup:\"}"; echo ""; done
 endif
 endif
 endif
@@ -138,7 +150,7 @@ else
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
 	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	curl -v $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>/dev/null | php generate-domain-references.php php://stdin remove | curl -v $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID)
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Unset default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Unset default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) on $(SOASTA_SERVER)\",\"icon_emoji\":\":thumbsup:\"}"; echo ""; done
 endif
 endif
 
@@ -148,7 +160,7 @@ ifeq ($(strip $(DEFAULT_VERSION)),)
 	echo "Please specify a default version using \`make DEFAULT_VERSION=... $@'"
 else
 	echo '{"attributes":[{"name":"boomerangDefaultVersion","value":"$(DEFAULT_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for all domains to $(DEFAULT_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray:\"}"; echo ""; done
 endif
 
 soasta-set-minimum:
@@ -156,7 +168,7 @@ ifeq ($(strip $(MINIMUM_VERSION)),)
 	echo "Please specify a minimum version using \`make MINIMUM_VERSION=... $@'"
 else
 	echo '{"attributes":[{"name":"boomerangMinimumVersion","value":"$(MINIMUM_VERSION)"}]}' | curl -v $(INSECURE) --data-binary @- --user $(soasta_user_password) $(SOASTA_REST_PREFIX)/siteconfiguration/1
-	curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#boomerang_commits\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set minimum boomerang version for all domains to $(NEW_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":pray\"}"
+	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set minimum boomerang version for all domains to $(MINIMUM_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":thumbsup:\"}"; echo ""; done
 endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
