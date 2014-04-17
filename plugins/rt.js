@@ -612,6 +612,8 @@ BOOMR.plugins.RT = {
 		}
 
 		if(ename==="xhr" && edata.name && impl.timers[edata.name]) {
+			// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
+			// and xhr.pg is set to {page group name}
 			t_start = impl.timers[edata.name].start;
 			BOOMR.addVar("rt.start", "manual");
 		}
