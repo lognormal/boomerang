@@ -27,7 +27,7 @@ loaded=function() {
 };
 
 timedOut=function() {
-	if(complete) {
+	if(complete || BOOMR.session.rate_limited) {
 		return;
 	}
 	// These are our failure settings, so be as careful as possible
@@ -65,7 +65,7 @@ load=function() {
 	}
 
 	if(!complete) {
-		errorTimeout = setTimeout(timedOut, 60*1000);
+		errorTimeout = setTimeout(timedOut, 2*60*1000);
 	}
 };
 
