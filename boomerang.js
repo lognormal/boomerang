@@ -168,6 +168,9 @@ impl = {
 
 	fireEvent: function(e_name, data) {
 		var i, h, e;
+
+		e_name = e_name.toLowerCase();
+
 		if(!this.events.hasOwnProperty(e_name)) {
 			return false;
 		}
@@ -517,6 +520,8 @@ boomr = {
 
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
 		var i, h, e, unload_handler;
+
+		e_name = e_name.toLowerCase();
 
 		if(!impl.events.hasOwnProperty(e_name)) {
 			return this;
