@@ -127,6 +127,7 @@ impl = {
 		"dom_loaded": [],
 		"visibility_changed": [],
 		"before_beacon": [],
+		"onbeacon": [],
 		"xhr_load": [],
 		"click": [],
 		"form_submit": []
@@ -696,6 +697,10 @@ boomr = {
 		url = impl.beacon_url + ((impl.beacon_url.indexOf('?') > -1)?'&':'?') + url.join('&');
 
 		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
+
+		// If we reach here, we've transferred all vars to the beacon URL.
+		// The only thing that can stop it now is if we're rate limited
+		this.setImmediate(impl.fireEvent, "onbeacon", impl.vars, impl);
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
