@@ -57,7 +57,7 @@ function BOOMR_check_doc_domain(domain) {
 	// 1. Test without setting document.domain
 	try {
 		test = window.parent.document;
-		return true;	// all okay
+		return test !== undefined;	// all okay
 	}
 	// 2. Test with document.domain
 	catch(err) {
@@ -65,7 +65,7 @@ function BOOMR_check_doc_domain(domain) {
 	}
 	try {
 		test = window.parent.document;
-		return true;	// all okay
+		return test !== undefined;	// all okay
 	}
 	// 3. Strip off leading part and try again
 	catch(err) {
@@ -434,7 +434,7 @@ boomr = {
 			this.log = config.log;
 		}
 		if(!this.log) {
-			this.log = function(/* m,l,s */) { };
+			this.log = function(/* m,l,s */) { return; };
 		}
 
 		for(k in this.plugins) {
