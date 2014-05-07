@@ -44,14 +44,14 @@ function BOOMR_check_doc_domain(domain) {
 	if(!domain) {
 		// If we're running in the main window, then we don't need this
 		if(window.parent === window || !document.getElementById('boomr-if-as')) {
-			return true;
+			return true;	// nothing to do
 		}
 
 		domain = document.domain;
 	}
 
 	if(domain.indexOf(".") === -1) {
-		return false;
+		return false;	// not okay, but we did our best
 	}
 
 	// 1. Test without setting document.domain
@@ -69,7 +69,7 @@ function BOOMR_check_doc_domain(domain) {
 	}
 	// 3. Strip off leading part and try again
 	catch(err) {
-		domain = domain.replace(/^[\w-]+\./, '');
+		domain = domain.replace(/^[\w\-]+\./, '');
 	}
 
 	return BOOMR_check_doc_domain(domain);
