@@ -119,6 +119,17 @@ The `id` of the script node created by this code MUST be `boomr-if-as` as boomer
 
 Boomerang will still export the `BOOMR` object to the parent window if running inside an iframe, so the rest of your code should remain unchanged.
 
+#### 3.3. Identifying when boomerang has loaded
+
+If you load boomerang asynchronously, there's some uncertainty in when boomerang has completed loading.  To get around this, you can subscribe to the
+`onBoomerangLoaded` Custom Event on the `document` object:
+
+```javascript
+   document.addEventListener("onBoomerangLoaded", function(e) {
+	// e.detail.BOOMR is a reference to the BOOMR global object
+   });
+```
+
 docs
 ---
 Documentation is in the docs/ sub directory, and is written in HTML.  Your best bet is to check it out and view it locally, though it works best through a web server (you'll need cookies).
