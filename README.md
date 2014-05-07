@@ -130,6 +130,11 @@ If you load boomerang asynchronously, there's some uncertainty in when boomerang
    });
 ```
 
+Note that this only works on browsers that support the CustomEvent interface, which at this time is Chrome (including Android), Firefox 6+ (including Android),
+Opera (including Android, but not Opera Mini), Safari (including iOS), IE 9+.
+
+Boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon` events just before and during beaconing.
+
 docs
 ---
 Documentation is in the docs/ sub directory, and is written in HTML.  Your best bet is to check it out and view it locally, though it works best through a web server (you'll need cookies).
