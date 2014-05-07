@@ -129,8 +129,7 @@ function dispatchEvent(e_name, e_data) {
 	}
 
 	BOOMR.setImmediate(function() {
-		var ev;
-		ev = new w.CustomEvent(e_name, {"detail": e_data});
+		var ev = new w.CustomEvent(e_name, {"detail": e_data});
 		d.dispatchEvent(ev);
 	});
 }
