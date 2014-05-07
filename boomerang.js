@@ -107,6 +107,33 @@ if(BOOMR.version) {
 BOOMR.version = "0.9";
 BOOMR.window = w;
 
+// CustomEvent polyfill for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
+if (!w.CustomEvent && d.createEvent) {
+	(function () {
+		function CustomEvent ( event, params ) {
+			params = params || { bubbles: false, cancelable: false, detail: undefined };
+			var evt = d.createEvent( 'CustomEvent' );
+			evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+			return evt;
+		}
+
+		CustomEvent.prototype = w.Event.prototype;
+
+		w.CustomEvent = CustomEvent;
+	}());
+}
+
+function dispatchEvent(e_name, e_data) {
+	if (!w.CustomEvent) {
+		return;
+	}
+
+	BOOMR.setImmediate(function() {
+		var ev;
+		ev = new w.CustomEvent(e_name, {"detail": e_data});
+		d.dispatchEvent(ev);
+	});
+}
 
 // impl is a private object not reachable from outside the BOOMR object
 // users can set properties by passing in to the init() method
@@ -131,6 +158,12 @@ impl = {
 		"xhr_load": [],
 		"click": [],
 		"form_submit": []
+	},
+
+	public_events: {
+		"before_beacon": "onBeforeBoomerangBeacon",
+		"onbeacon": "onBoomerangBeacon",
+		"onboomerangloaded": "onBoomerangLoaded"
 	},
 
 	vars: {},
@@ -180,6 +213,10 @@ impl = {
 		for(i=0; i<e.length; i++) {
 			h = e[i];
 			h[0].call(h[2], data, h[1]);
+		}
+
+		if (this.public_events.hasOwnProperty(e_name)) {
+			dispatchEvent(this.public_events[e_name], data);
 		}
 
 		return true;
@@ -766,6 +803,8 @@ for(ident in boomr) {
 }());
 
 BOOMR.plugins = BOOMR.plugins || {};
+
+dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
 
 }(window));
 
