@@ -82,7 +82,7 @@ BOOMR_check_doc_domain();
 // the parameter is the window
 (function(w) {
 
-var impl, boomr, d, myurl;
+var impl, boomr, d, myurl, createCustomEvent;
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
@@ -107,29 +107,38 @@ if(BOOMR.version) {
 BOOMR.version = "0.9";
 BOOMR.window = w;
 
-// CustomEvent polyfill for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
-if (!w.CustomEvent && d.createEvent) {
-	(function () {
-		function CustomEvent ( event, params ) {
-			params = params || { bubbles: false, cancelable: false, detail: undefined };
-			var evt = d.createEvent( 'CustomEvent' );
-			evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-			return evt;
+// CustomEvent proxy for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
+(function() {
+	try {
+		if (new w.CustomEvent("CustomEvent") !== undefined) {
+			createCustomEvent = function (e_name, params) {
+				return new w.CustomEvent(e_name, params);
+			};
 		}
+	}
+	catch(e) {
+		if (d.createEvent) {
+			createCustomEvent = function (e_name, params) {
+				var evt = d.createEvent( 'CustomEvent' );
+				params = params || { cancelable: false, bubbles: false };
+				evt.initCustomEvent( e_name, params.bubbles, params.cancelable, params.detail );
 
-		CustomEvent.prototype = w.Event.prototype;
-
-		w.CustomEvent = CustomEvent;
-	}());
-}
+				return evt;
+			};
+		}
+	}
+	if(!createCustomEvent) {
+		createCustomEvent = function() { return undefined; };
+	}
+}());
 
 function dispatchEvent(e_name, e_data) {
-	if (!w.CustomEvent) {
+	var ev = createCustomEvent(e_name, {"detail": e_data});
+	if (!ev) {
 		return;
 	}
 
 	BOOMR.setImmediate(function() {
-		var ev = new w.CustomEvent(e_name, {"detail": e_data});
 		d.dispatchEvent(ev);
 	});
 }
