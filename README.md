@@ -125,13 +125,26 @@ If you load boomerang asynchronously, there's some uncertainty in when boomerang
 `onBoomerangLoaded` Custom Event on the `document` object:
 
 ```javascript
-   document.addEventListener("onBoomerangLoaded", function(e) {
-	// e.detail.BOOMR is a reference to the BOOMR global object
-   });
+   // Modern browsers
+   if (document.addEventListener) {
+      document.addEventListener("onBoomerangLoaded", function(e) {
+         // e.detail.BOOMR is a reference to the BOOMR global object
+      });
+   }
+   // IE 6, 7, 8 we use onPropertyChange and look for propertyName === "onBoomerangLoaded"
+   else if (document.attachEvent) {
+      document.attachEvent("onpropertychange", function(e) {
+         if (!e) e=event;
+         if (e.propertyName === "onBoomerangLoaded") {
+            // e.detail.BOOMR is a reference to the BOOMR global object
+         }
+      });
+   }
+
 ```
 
 Note that this only works on browsers that support the CustomEvent interface, which at this time is Chrome (including Android), Firefox 6+ (including Android),
-Opera (including Android, but not Opera Mini), Safari (including iOS), IE 9+.
+Opera (including Android, but not Opera Mini), Safari (including iOS), IE 6+ (but see the code above for the special way to listen for the event on IE6, 7 & 8).
 
 Boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon` events just before and during beaconing.
 
