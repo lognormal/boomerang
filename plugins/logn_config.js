@@ -4,8 +4,7 @@ var dc=document,
     dom=w.location.hostname,
     complete=false, running=false,
     t_start,
-    load, loaded,
-    errorTimeout, timedOut;
+    load, loaded;
 
 // Don't even bother creating the plugin if this is mhtml
 if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -13,28 +12,11 @@ if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || 
 }
 
 loaded=function() {
-	if(errorTimeout) {
-		clearTimeout(errorTimeout);
-		errorTimeout=null;
-	}
-
 	if(complete) {
 		return;
 	}
 	complete = true;
 	running = false;
-	BOOMR.sendBeacon();
-};
-
-timedOut=function() {
-	if(complete || BOOMR.session.rate_limited) {
-		return;
-	}
-	// These are our failure settings, so be as careful as possible
-	complete = true;
-	running = false;
-	BOOMR.addVar({"h.d": encodeURIComponent(dom), "config.timedout": "true"}).init({ strip_query_string: true, BW: { enabled: false } });
-
 	BOOMR.sendBeacon();
 };
 
@@ -63,10 +45,6 @@ load=function() {
 	if(complete) {
 		setTimeout(load, 5.5*60*1000);
 	}
-
-	if(!complete) {
-		errorTimeout = setTimeout(timedOut, 2*60*1000);
-	}
 };
 
 BOOMR.plugins.LOGN = {
@@ -76,8 +54,6 @@ BOOMR.plugins.LOGN = {
 		}
 
 		if(config && config.rate_limited) {
-			clearTimeout(errorTimeout);
-			errorTimeout=null;
 			BOOMR.session.rate_limited=true;
 			return this;
 		}
