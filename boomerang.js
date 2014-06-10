@@ -373,6 +373,9 @@ boomr = {
 		},
 
 		cleanupURL: function(url) {
+			if (!url) {
+				return "";
+			}
 			if(impl.strip_query_string) {
 				return url.replace(/\?.*/, '?qs-redacted');
 			}
