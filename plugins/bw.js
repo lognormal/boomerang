@@ -77,6 +77,11 @@ impl = {
 
 		fw = (q3-q1)*1.5;
 
+		// fw === 0 => all items are identical, so no need to filter
+		if (fw === 0) {
+			return a;
+		}
+
 		l++;
 
 		for(i=0; i<l && a[i] < q3+fw; i++) {
