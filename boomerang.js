@@ -267,7 +267,7 @@ boomr = {
 
 	// Utility functions
 	utils: {
-		objectToString: function(o, separator) {
+		objectToString: function(o, separator, nest_level) {
 			var value = [], k;
 
 			if(!o || typeof o !== "object") {
@@ -276,10 +276,43 @@ boomr = {
 			if(separator === undefined) {
 				separator="\n\t";
 			}
+			if(!nest_level) {
+				nest_level=0;
+			}
 
-			for(k in o) {
-				if(Object.prototype.hasOwnProperty.call(o, k)) {
-					value.push(encodeURIComponent(k) + '=' + encodeURIComponent(o[k]));
+			if (Object.prototype.toString.call(o) === "[object Array]") {
+				for(k=0; k<o.length; k++) {
+					if (nest_level > 0 && o[k] !== null && typeof o[k] === "object") {
+						value.push(
+							this.objectToString(
+								o[k],
+								separator + (separator === "\n\t" ? "\t" : ""),
+								nest_level-1
+							)
+						);
+					}
+					else {
+						value.push(encodeURIComponent(o[k]));
+					}
+				}
+				separator = ",";
+			}
+			else {
+				for(k in o) {
+					if(Object.prototype.hasOwnProperty.call(o, k)) {
+						if (nest_level > 0 && o[k] !== null && typeof o[k] === "object") {
+							value.push(encodeURIComponent(k) + '=' +
+								this.objectToString(
+									o[k],
+									separator + (separator === "\n\t" ? "\t" : ""),
+									nest_level-1
+								)
+							);
+						}
+						else {
+							value.push(encodeURIComponent(k) + '=' + encodeURIComponent(o[k]));
+						}
+					}
 				}
 			}
 
