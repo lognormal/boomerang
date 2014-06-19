@@ -740,6 +740,7 @@ BOOMR.plugins.RT = {
 		BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 		BOOMR.subscribe("click", impl.onclick, null, impl);
 		BOOMR.subscribe("form_submit", impl.onsubmit, null, impl);
+		BOOMR.subscribe("before_beacon", this.addTimersToBeacon, "beacon", this);
 
 
 		// Override any getBeaconURL method to make sure we return the one from the
@@ -818,6 +819,9 @@ BOOMR.plugins.RT = {
 			BOOMR.addVar("t_other", t_other.join(','));
 		}
 
+		if (source === "beacon") {
+			impl.timers = {};
+		}
 	},
 
 	// Called when the page has reached a "usable" state.  This may be when the
@@ -891,7 +895,7 @@ BOOMR.plugins.RT = {
 				BOOMR.addVar('rt.ntvu', '');
 			}
 		}
-		impl.timers = {};
+
 		impl.complete = true;
 
 		BOOMR.sendBeacon(impl.beacon_url);
