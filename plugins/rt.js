@@ -214,11 +214,29 @@ impl = {
 		BOOMR.debug("Current session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
 		BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError + ", lastAction=" + impl.lastActionTime, "rt");
 
+		BOOMR.removeVar("rt.srst");
+
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
-		BOOMR.removeVar("rt.srst");
-		if(!BOOMR.session.start || (t_start && BOOMR.session.start > t_start) || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000) {
-			BOOMR.addVar("rt.srst", BOOMR.session.ID + "-" + BOOMR.session.start + ":" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ":" + t_start + ":" + impl.lastActionTime + ":" + t_done);
+
+		if(!BOOMR.session.start									// no start time
+		   || (t_start && BOOMR.session.start > t_start)					// or we have a better start time
+		   || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000		// or it's been more than session_exp since the last action
+		) {
+
+			// First we write the old session values to the beacon to help debug session resets on the server-side
+			BOOMR.addVar("rt.srst",
+					BOOMR.session.ID + "-" + BOOMR.session.start
+					+ ":" + BOOMR.session.length
+					+ ":" + impl.oboError
+					+ ":" + impl.loadTime
+					+ ":" + t_start
+					+ ":" + impl.lastActionTime
+					+ ":" + t_done
+			);
+
+
+			// Now we reset the session
 			BOOMR.session.start = t_start || BOOMR.t_lstart || BOOMR.t_start;
 			BOOMR.session.length = 0;
 			BOOMR.session.rate_limited = false;
