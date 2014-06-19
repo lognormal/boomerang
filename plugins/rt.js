@@ -518,6 +518,7 @@ impl = {
 	},
 
 	_iterable_click: function(name, element, etarget, value_cb) {
+		var value;
 		if(!etarget) {
 			return;
 		}
@@ -531,7 +532,9 @@ impl = {
 			// if this page is being opened in a different tab, then
 			// our unload handler won't fire, so we need to set our
 			// cookie on click or submit
-			this.updateCookie({ "nu": value_cb(etarget) }, 'cl' );
+			value = value_cb(etarget);
+			this.updateCookie({ "nu": value }, 'cl' );
+			BOOMR.addVar("nu", BOOMR.utils.cleanupURL(value));
 		}
 	},
 
