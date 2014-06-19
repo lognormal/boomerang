@@ -286,9 +286,9 @@ Handler.prototype = {
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		return this.handleRegEx("^"
-					+ o.parameter1.replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?').replace(/^\*/, '.*')
+					+ o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?').replace(/^\*/, '.*')
 					+ "(.*)"
-					+ (o.parameter2 || "").replace(/([.+?^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*')
+					+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*')
 					+ "$",
 				"$1");
 	},
