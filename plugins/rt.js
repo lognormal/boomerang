@@ -384,20 +384,6 @@ impl = {
 		}
 	},
 
-	page_ready: function() {
-		// we need onloadfired because it's possible to reset "impl.complete"
-		// if you're measuring multiple xhr loads, but not possible to reset
-		// impl.onloadfired
-		this.onloadfired = true;
-	},
-
-	visibility_changed: function() {
-		// we care if the page became visible at some point
-		if(!(d.hidden || d.msHidden || d.webkitHidden)) {
-			impl.visiblefired = true;
-		}
-	},
-
 	/**
 	 * Check if we're in a prerender state, and if we are, set additional timers.
 	 * In Chrome/IE, a prerender state is when a page is completely rendered in an in-memory buffer, before
@@ -499,6 +485,20 @@ impl = {
 		}
 
 		return;
+	},
+
+	page_ready: function() {
+		// we need onloadfired because it's possible to reset "impl.complete"
+		// if you're measuring multiple xhr loads, but not possible to reset
+		// impl.onloadfired
+		this.onloadfired = true;
+	},
+
+	visibility_changed: function() {
+		// we care if the page became visible at some point
+		if(!(d.hidden || d.msHidden || d.webkitHidden)) {
+			impl.visiblefired = true;
+		}
 	},
 
 	page_unload: function(edata) {
