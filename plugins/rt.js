@@ -35,18 +35,27 @@ impl = {
 				// If set to false, beacon both referrer values and let
 				// the back end decide
 
-	navigationType: 0,
+	navigationType: 0,	// Navigation Type from the NavTiming API.  We mainly care if this was BACK_FORWARD
+				// since cookie time will be incorrect in that case
 	navigationStart: undefined,
 	responseStart: undefined,
-	loadTime: 0,
-	oboError: 0,
-	t_start: undefined,
-	t_fb_approx: undefined,
-	r: undefined,
-	r2: undefined,
+	loadTime: 0,		// Total load time for the user session
+	oboError: 0,		// Number of pages in the session that had no load time
+	t_start: undefined,	// t_start that came off the cookie
+	t_fb_approx: undefined,	// approximate first byte time for browsers that don't support navtiming
+	r: undefined,		// referrer from the cookie
+	r2: undefined,		// referrer from document.referer
 	beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
 	next_beacon_url: undefined,	// beacon_url to use when session expires
 
+	/**
+	 * Merge new cookie `params` onto current cookie, and set `timer` param on cookie to current timestamp
+	 * @param params object containing keys & values to merge onto current cookie.  A value of `undefined`
+	 *		 will remove the key from the cookie
+	 * @param timer  string key name that will be set to the current timestamp on the cookie
+	 *
+	 * @returns true if the cookie was updated, false if the cookie could not be set for any reason
+	 */
 	updateCookie: function(params, timer) {
 		var t_end, t_start, subcookies, k;
 
@@ -130,6 +139,23 @@ impl = {
 		return this;
 	},
 
+	/**
+	 * Update in memory session with values from the cookie.  Many of these values might come through
+	 * on config.js, but we need them before config.js comes through, or in cases where we're rate
+	 * limited, or the collector is down, config.js may never come through, so we hold them in a cookie.
+	 *
+	 * @param subcookies  [optional] object containing cookie keys & values. If not set, will use current cookie value.
+	 *			Recognised keys:
+	 *			- ss: sesion start
+	 *			- si: session ID
+	 *			- sl: session length
+	 *			- tt: sum of load times across session
+	 *			- obo: pages in session that did not have a load time
+	 *			- dm: domain to use when setting cookies
+	 *			- se: session expiry time
+	 *			- bcn: URL that beacons should be sent to
+	 *			- rl: rate limited flag. 1 if rate limited
+	 */
 	refreshSession: function(subcookies) {
 		if(!subcookies) {
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
@@ -177,6 +203,13 @@ impl = {
 		}
 	},
 
+	/**
+	 * Determine if session has expired or not, and if so, reset session values to a new session.
+	 *
+	 * @param t_done  The timestamp right now.  Used to determine if the session is too old
+	 * @param t_start The timestamp when this page was requested (or undefined if unknown).  Used to reset session start time
+	 *
+	 */
 	maybeResetSession: function(t_done, t_start) {
 		BOOMR.debug("Current session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
 		BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError + ", lastAction=" + impl.lastActionTime, "rt");
@@ -193,6 +226,10 @@ impl = {
 			impl.oboError = 0;
 			impl.beacon_url = impl.next_beacon_url;
 
+			// Update the cookie with these new values
+			// we also reset the rate limited flag since
+			// new sessions do not inherit the rate limited
+			// state of old sessions
 			impl.updateCookie({
 				"rl": undefined,
 				"sl": BOOMR.session.length,
@@ -207,9 +244,18 @@ impl = {
 		BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError, "rt");
 	},
 
-	// this should only be called from init, and may be called more than once
-	// it will clear out cookie values it cares about once it has read them.
-	// This makes sure that other pages do not get an invalid cookie time.
+	/**
+	 * Read initial values from cookie and clear out cookie values it cares about after reading.
+	 * This makes sure that other pages (eg: loaded in new tabs) do not get an invalid cookie time.
+	 * This method should only be called from init, and may be called more than once.
+	 *
+	 * Request start time is the greater of last page beforeunload or last click time
+	 * If start time came from a click, we check that the clicked URL matches the current URL
+	 * If it came from a beforeunload, we check that cookie referrer matches document.referrer
+	 *
+	 * If we had a pageHide time or unload time, we use that as a proxy for first byte on non-navtiming
+	 * browsers.
+	 */
 	initFromCookie: function() {
 		var url, subcookies;
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
@@ -277,6 +323,9 @@ impl = {
 		this.maybeResetSession(new Date().getTime());
 	},
 
+	/**
+	 * Figure out how long boomerang and config.js took to load using resource timing if available, or built in timestamps
+	 */
 	getBoomerangTimings: function() {
 		var res, k, urls, url;
 		if(BOOMR.t_start) {
@@ -331,6 +380,17 @@ impl = {
 		}
 	},
 
+	/**
+	 * Check if we're in a prerender state, and if we are, set additional timers.
+	 * In Chrome/IE, a prerender state is when a page is completely rendered in an in-memory buffer, before
+	 * a user requests that page.  We do not beacon at this point because the user has not shown intent
+	 * to view the page.  If the user opens the page, the visibility state changes to visible, and we
+	 * fire the beacon at that point, including any timing details for prerendering.
+	 *
+	 * Sets the `t_load` timer to the actual value of page load time (request initiated by browser to onload)
+	 *
+	 * @returns true if this is a prerender state, false if not (or not supported)
+	 */
 	checkPreRender: function() {
 		if(
 			!(d.webkitVisibilityState && d.webkitVisibilityState === "prerender")
@@ -357,6 +417,11 @@ impl = {
 		return true;
 	},
 
+	/**
+	 * Initialise timers from the NavigationTiming API.  This method looks at various sources for
+	 * Navigation Timing, and also patches around bugs in various browser implementations.
+	 * It sets the beacon parameter `rt.start` to the source of the timer
+	 */
 	initNavTiming: function() {
 		var ti, p, source;
 
