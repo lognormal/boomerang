@@ -751,7 +751,7 @@ boomr = {
 				}
 				if(!this.plugins[k].is_complete()) {
 					BOOMR.debug("Plugin " + k + " is not complete, deferring beacon send");
-					return this;
+					return false;
 				}
 			}
 		}
@@ -771,7 +771,7 @@ boomr = {
 		// in the `before_beacon` event instead of a simple GET request
 		if(!impl.beacon_url) {
 			BOOMR.debug("No beacon_url, but would have sent: " + BOOMR.utils.objectToString(impl.vars));
-			return this;
+			return true;
 		}
 
 		// if there are already url parameters in the beacon url,
@@ -814,7 +814,7 @@ boomr = {
 			img.src=url;
 		}
 
-		return this;
+		return true;
 	}
 
 };
