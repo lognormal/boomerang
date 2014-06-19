@@ -829,8 +829,7 @@ BOOMR.plugins.RT = {
 	// load when the page is usable by the user
 	done: function(edata, ename) {
 		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata) + ", " + ename, "rt");
-		var t_start, t_done=new Date().getTime(),
-		    t_name, timer, t_other=[];
+		var t_start, t_done=new Date().getTime();
 
 		impl.complete = false;
 
