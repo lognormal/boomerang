@@ -895,8 +895,7 @@ BOOMR.plugins.RT = {
 		impl.complete = true;
 
 		BOOMR.sendBeacon(impl.beacon_url);
-					// we call sendBeacon() anyway because some other plugin
-					// may have blocked waiting for RT to complete
+
 		return this;
 	},
 
