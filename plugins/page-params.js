@@ -241,7 +241,7 @@ Handler.prototype = {
 
 		BOOMR.debug("final value: " + value, "PageVars");
 		// Now remove invalid characters
-		value = this.cleanUp("" + value);
+		value = this.cleanUp(String(value));
 
 		return this.apply(value);
 	},
