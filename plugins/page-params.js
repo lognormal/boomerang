@@ -512,7 +512,7 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<impl[v].length; i++) {
-					if( handler.handle(impl[v][i]) && hconfig[v].stopOnFirst) {
+					if( handler.handle(impl[v][i]) && hconfig[v].stopOnFirst ) {
 						break;
 					}
 				}
