@@ -521,6 +521,17 @@ impl = {
 
 		this.complete = true;
 		BOOMR.sendBeacon();
+	},
+
+	clearMetrics: function(vars) {
+		var i, label;
+		for(i=0; i<impl.customMetrics.length; i++) {
+			label = impl.customMetrics[i].label;
+
+			if(vars.hasOwnProperty(label)) {
+				BOOMR.removeVar(label);
+			}
+		}
 	}
 };
 
@@ -546,9 +557,10 @@ BOOMR.plugins.PageParams = {
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
 
 		if(!impl.initialized) {
-			// We do not want to subscribe to unload more than once
+			// We do not want to subscribe to unload or onbeacon more than once
 			// because this will just create too many references
 			BOOMR.subscribe("page_unload", impl.done, null, impl);
+			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			impl.initialized = true;
 		}
 
