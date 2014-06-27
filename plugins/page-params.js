@@ -377,33 +377,7 @@ Handler.prototype = {
 			return false;
 		}
 
-		reslist = p.getEntriesByName(url);
-
-		if(reslist && reslist.length > 0) {
-			res = reslist[0];
-		}
-		else {
-			// no exact match, maybe it has wildcards
-			reslist = p.getEntries();
-			if(reslist && reslist.length > 0) {
-				for(i=0; i<reslist.length; i++) {
-
-					// if we want the slowest url, then iterate through all till we find it
-					if(url === "slowest") {
-						if(!res || reslist[i].duration > res.duration) {
-							res = reslist[i];
-						}
-					}
-
-					// else stop at the first that matches the pattern
-					else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
-						res = reslist[i];
-						url = res.name;
-						break;
-					}
-				}
-			}
-		}
+		res = this.findResource(url);
 
 		if(!res) {
 			BOOMR.debug("No resource matched", "PageVars");
@@ -442,6 +416,60 @@ Handler.prototype = {
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
 		return this.apply(en-st);
+	},
+
+	findResource: function(url, frame) {
+		var i, res, reslist;
+
+		if (!frame) {
+			frame = w;
+		}
+
+		try {
+			reslist = w.performance.getEntriesByName(url);
+		}
+		catch(e) {
+			return null;
+		}
+
+		if(reslist && reslist.length > 0) {
+			return reslist[0];
+		}
+		else {
+			// no exact match, maybe it has wildcards
+			reslist = w.performance.getEntries();
+			if(reslist && reslist.length > 0) {
+				for(i=0; i<reslist.length; i++) {
+
+					// if we want the slowest url, then iterate through all till we find it
+					if(url === "slowest") {
+						if(!res || reslist[i].duration > res.duration) {
+							res = reslist[i];
+						}
+					}
+
+					// else stop at the first that matches the pattern
+					else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
+						res = reslist[i];
+						url = res.name;
+						break;
+					}
+				}
+			}
+		}
+
+		if(res) {
+			return res;
+		}
+
+		if (w.frames) {
+			for(i=0; i<w.frames.length; i++) {
+				res = this.findResource(url, w.frames[i]);
+				if (res) {
+					return res;
+				}
+			}
+		}
 	},
 
 	UserTiming: function(o) {
