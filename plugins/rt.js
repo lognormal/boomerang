@@ -821,6 +821,7 @@ BOOMR.plugins.RT = {
 
 		if (source === "beacon") {
 			impl.timers = {};
+			impl.complete = false;	// reset this state for the next call
 		}
 	},
 

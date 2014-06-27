@@ -486,11 +486,56 @@ impl = {
 	complete: false,
 	initialized: false,
 
-	done: function() {
-		var i, v, hconfig, handler;
+	done: function(edata, ename) {
+		var i, j, v, hconfig, handler, limpl=impl;
 
-		if(this.complete) {
+		if(ename !== "xhr"  && this.complete) {
 			return;
+		}
+
+		if(ename === "xhr") {
+			if (!edata || !edata.data) {
+				return;
+			}
+			edata = edata.data;
+			if((!edata.timers || !edata.timers.length) && (!edata.metrics || !edata.metrics.length)) {
+				return;
+			}
+
+			impl.complete = false;
+
+			limpl = {
+				pageGroups: [],
+				abTests: impl.abTests,
+				customTimers: [],
+				customMetrics: []
+			};
+
+			if (edata.timers && edata.timers.length) {
+				for(i=0; i<impl.customTimers.length; i++) {
+					for(j=0; j<edata.timers.length; j++) {
+						if(impl.customTimers[i].name === edata.timers[j]) {
+							limpl.customTimers.push(impl.customTimers[i]);
+						}
+					}
+				}
+			}
+
+			if (edata.metrics && edata.metrics.length) {
+				for(i=0; i<impl.customMetrics.length; i++) {
+					for(j=0; j<edata.metrics.length; j++) {
+						if(impl.customMetrics[i].label === "cmet." + edata.metrics[j]) {
+							limpl.customMetrics.push(impl.customMetrics[i]);
+						}
+					}
+				}
+			}
+
+			// Override the URL we check metrics against
+			if(edata.url) {
+				l = d.createElement("a");
+				l.href = edata.url;
+			}
 		}
 
 		hconfig = {
@@ -511,8 +556,8 @@ impl = {
 			if(hconfig.hasOwnProperty(v)) {
 				handler = new Handler(hconfig[v]);
 
-				for(i=0; i<impl[v].length; i++) {
-					if( handler.handle(impl[v][i]) && hconfig[v].stopOnFirst ) {
+				for(i=0; i<limpl[v].length; i++) {
+					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
 						break;
 					}
 				}
@@ -521,6 +566,8 @@ impl = {
 
 		this.complete = true;
 		BOOMR.sendBeacon();
+
+		l = location;
 	},
 
 	clearMetrics: function(vars) {
@@ -554,13 +601,14 @@ BOOMR.plugins.PageParams = {
 		// because it's possible that the onload event fired before config.js
 		// loaded, and so our config will only be available after onload.
 		// If page_ready is subscribed to after onload, it fires immediately
-		BOOMR.subscribe("page_ready", impl.done, null, impl);
+		BOOMR.subscribe("page_ready", impl.done, "load", impl);
 
 		if(!impl.initialized) {
 			// We do not want to subscribe to unload or onbeacon more than once
 			// because this will just create too many references
-			BOOMR.subscribe("page_unload", impl.done, null, impl);
+			BOOMR.subscribe("page_unload", impl.done, "unload", impl);
 			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
+			BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 			impl.initialized = true;
 		}
 

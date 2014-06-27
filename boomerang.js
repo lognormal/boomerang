@@ -707,17 +707,20 @@ boomr = {
 		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
 
 		return {
-			loaded: function() {
-				BOOMR.responseEnd(name, t_start);
+			loaded: function(data) {
+				BOOMR.responseEnd(name, t_start, data);
 			}
 		};
 	},
 
-	responseEnd: function(name, t_start) {
+	responseEnd: function(name, t_start, data) {
 		if(impl.vars['h.cr']) {
 			BOOMR.addVar('xhr.pg', name);
 			BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
-			impl.fireEvent("xhr_load", { "name": "xhr_" + name });
+			impl.fireEvent("xhr_load", {
+				"name": "xhr_" + name,
+				"data": data
+			});
 		}
 		else {
 			var timer = name + "|" + (new Date().getTime()-t_start);
