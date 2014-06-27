@@ -568,6 +568,9 @@ impl = {
 			BOOMR.addVar('rt.cstart', impl.t_start);
 		}
 		BOOMR.addVar('rt.bstart', BOOMR.t_start);
+		if (BOOMR.t_lstart) {
+			BOOMR.addVar('rt.blstart', BOOMR.t_lstart);
+		}
 		BOOMR.addVar('rt.end', impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
 	},
 
