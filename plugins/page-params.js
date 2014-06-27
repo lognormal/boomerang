@@ -426,7 +426,7 @@ Handler.prototype = {
 		}
 
 		try {
-			reslist = w.performance.getEntriesByName(url);
+			reslist = frame.performance.getEntriesByName(url);
 		}
 		catch(e) {
 			return null;
@@ -437,7 +437,7 @@ Handler.prototype = {
 		}
 		else {
 			// no exact match, maybe it has wildcards
-			reslist = w.performance.getEntries();
+			reslist = frame.performance.getEntriesByType("resource");
 			if(reslist && reslist.length > 0) {
 				for(i=0; i<reslist.length; i++) {
 
@@ -462,9 +462,9 @@ Handler.prototype = {
 			return res;
 		}
 
-		if (w.frames) {
-			for(i=0; i<w.frames.length; i++) {
-				res = this.findResource(url, w.frames[i]);
+		if (frame.frames) {
+			for(i=0; i<frame.frames.length; i++) {
+				res = this.findResource(url, frame.frames[i]);
 				if (res) {
 					return res;
 				}
