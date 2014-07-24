@@ -435,25 +435,24 @@ Handler.prototype = {
 		if(reslist && reslist.length > 0) {
 			return reslist[0];
 		}
-		else {
-			// no exact match, maybe it has wildcards
-			reslist = frame.performance.getEntriesByType("resource");
-			if(reslist && reslist.length > 0) {
-				for(i=0; i<reslist.length; i++) {
 
-					// if we want the slowest url, then iterate through all till we find it
-					if(url === "slowest") {
-						if(!res || reslist[i].duration > res.duration) {
-							res = reslist[i];
-						}
-					}
+		// no exact match, maybe it has wildcards
+		reslist = frame.performance.getEntriesByType("resource");
+		if(reslist && reslist.length > 0) {
+			for(i=0; i<reslist.length; i++) {
 
-					// else stop at the first that matches the pattern
-					else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
+				// if we want the slowest url, then iterate through all till we find it
+				if(url === "slowest") {
+					if(!res || reslist[i].duration > res.duration) {
 						res = reslist[i];
-						url = res.name;
-						break;
 					}
+				}
+
+				// else stop at the first that matches the pattern
+				else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
+					res = reslist[i];
+					url = res.name;
+					break;
 				}
 			}
 		}
