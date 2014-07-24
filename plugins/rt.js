@@ -114,6 +114,7 @@ impl = {
 
 		if(timer) {
 			subcookies[timer] = t_start;
+			impl.lastActionTime = t_start;
 		}
 
 		// If we got a beacon_url from config, set it into the cookie
@@ -247,6 +248,7 @@ impl = {
 			impl.loadTime = 0;
 			impl.oboError = 0;
 			impl.beacon_url = impl.next_beacon_url;
+			impl.lastActionTime = t_done;
 
 			// Update the cookie with these new values
 			// we also reset the rate limited flag since
