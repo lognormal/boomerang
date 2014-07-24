@@ -31,7 +31,7 @@ Count specific dom nodes for Fasterize like how many images are really loaded?
     tags.push('loadedimgs|' + (imgsNumber - d.querySelectorAll('img[data-frz-src]').length));
 
 
-    BOOMR.addVar('optimized', !!window.fstrz);
+    BOOMR.addVar('optimized', !!BOOMR.window.fstrz);
     BOOMR.addVar('domstats', tags.join(','));
 
     complete = true;

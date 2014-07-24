@@ -22,7 +22,7 @@
 
   function isSessionStorageSupported() {
     try {
-      return 'sessionStorage' in window && window['sessionStorage'] !== null;
+      return 'sessionStorage' in BOOMR.window && BOOMR.window['sessionStorage'] !== null;
     } catch (e) {
       return false;
     }
@@ -56,7 +56,7 @@
                         '&p_status=preload' +
                         '&u=' + location.href +
                         '&r=' + preloadItem.referer +
-                        '&cust=' + FRZ_GLOBAL_CUSTOMER_KEY;
+                        '&cust=' + BOOMR.window.FRZ_GLOBAL_CUSTOMER_KEY;
 
         preloadItem.status = 'preloaded';
         sessionStorage.setItem('preload-' + location.href, JSON.stringify(preloadItem));

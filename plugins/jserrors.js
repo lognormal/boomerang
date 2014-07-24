@@ -35,4 +35,4 @@ Count js errors for current page
     is_complete: iscomplete
   };
 
-}(window));
+}(BOOMR.window));
