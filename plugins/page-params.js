@@ -335,7 +335,7 @@ Handler.prototype = {
 	},
 
 	ResourceTiming: function(o) {
-		var el, url, res, reslist, st, en, i, k;
+		var el, url, res, st, en, k;
 
 		// Require at least xpath or url
 		if(!o.parameter2 && !o.url) {
