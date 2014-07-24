@@ -513,6 +513,7 @@ impl = {
 
 	complete: false,
 	initialized: false,
+	onloadfired: false,
 
 	done: function(edata, ename) {
 		var i, j, v, hconfig, handler, limpl=impl;
@@ -607,6 +608,10 @@ impl = {
 				BOOMR.removeVar(label);
 			}
 		}
+	},
+
+	onload: function() {
+		this.onloadfired=true;
 	}
 };
 
@@ -625,11 +630,15 @@ BOOMR.plugins.PageParams = {
 
 		// Fire on the first of load or unload
 
-		// We need to subscribe to page ready every time init is called
-		// because it's possible that the onload event fired before config.js
-		// loaded, and so our config will only be available after onload.
-		// If page_ready is subscribed to after onload, it fires immediately
-		BOOMR.subscribe("page_ready", impl.done, "load", impl);
+		if (!impl.onloadfired) {
+			BOOMR.subscribe("page_ready", impl.onload, "load", impl);
+			BOOMR.subscribe("page_ready", impl.done, "load", impl);
+		}
+		else {
+			// If the page has already loaded by the time we get here,
+			// then we just run immediately
+			BOOMR.setImmediate(impl.done, {}, "load", impl);
+		}
 
 		if(!impl.initialized) {
 			// We do not want to subscribe to unload or onbeacon more than once
