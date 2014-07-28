@@ -190,6 +190,8 @@ impl = {
 
 	vars: {},
 
+	errors: [],
+
 	disabled_plugins: {},
 
 	onclick_handler: function(ev) {
@@ -664,6 +666,17 @@ boomr = {
 		return this;
 	},
 
+	addError: function(err, src) {
+		if (typeof err !== "string") {
+			err = String(err);
+		}
+		if (src !== undefined) {
+			err = "[" + src + "] " + err;
+		}
+
+		impl.errors.push(err);
+	},
+
 	addVar: function(name, value) {
 		if(typeof name === "string") {
 			impl.vars[name] = value;
@@ -764,6 +777,10 @@ boomr = {
 		impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ''));
 		if(w !== window) {
 			impl.vars["if"] = "";
+		}
+
+		if(impl.errors.length > 0) {
+			impl.vars.errors = impl.errors.join("\n");
 		}
 
 		// If we reach here, all plugins have completed
