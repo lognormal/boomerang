@@ -72,6 +72,7 @@ Handler.prototype = {
 		}
 		catch(err) {
 			BOOMR.debug("Error generating regex: " + err, "PageVars");
+			BOOMR.addError(err, "PageVars.handleRegEx");
 			return false;
 		}
 
@@ -107,6 +108,7 @@ Handler.prototype = {
 		catch(err) {
 			BOOMR.debug("Bad pattern: " + re, "PageVars");
 			BOOMR.debug(err, "PageVars");
+			BOOMR.addError(err, "PageVars.checkURLPattern");
 			return false;
 		}
 
@@ -182,6 +184,7 @@ Handler.prototype = {
 		}
 		catch(xpath_err) {
 			BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
+			BOOMR.addError(xpath_err, "PageVars.runXPath");
 			return null;
 		}
 
@@ -429,6 +432,7 @@ Handler.prototype = {
 			reslist = frame.performance.getEntriesByName(url);
 		}
 		catch(e) {
+			BOOMR.addError(e, "PageVars.findResource");
 			return null;
 		}
 
