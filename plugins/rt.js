@@ -382,24 +382,31 @@ impl = {
 		}
 
 		// use window and not w because we want the inner iframe
-		if (window.performance && window.performance.getEntriesByName) {
-			urls = { "rt.bmr." : BOOMR.url, "rt.cnf." : BOOMR.config_url };
+		try
+		{
+			if (window.performance && window.performance.getEntriesByName) {
+				urls = { "rt.bmr." : BOOMR.url, "rt.cnf." : BOOMR.config_url };
 
-			for(url in urls) {
-				if(urls.hasOwnProperty(url) && urls[url]) {
-					res = window.performance.getEntriesByName(urls[url]);
-					if(!res || res.length === 0) {
-						continue;
-					}
-					res = res[0];
+				for(url in urls) {
+					if(urls.hasOwnProperty(url) && urls[url]) {
+						res = window.performance.getEntriesByName(urls[url]);
+						if(!res || res.length === 0) {
+							continue;
+						}
+						res = res[0];
 
-					for(k in res) {
-						if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-							BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, '$1$2'), res[k]);
+						for(k in res) {
+							if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
+								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, '$1$2'), res[k]);
+							}
 						}
 					}
 				}
 			}
+		}
+		catch(e)
+		{
+			BOOMR.addError(e, 'rt.getBoomerangTimings');
 		}
 	},
 
