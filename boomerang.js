@@ -190,7 +190,7 @@ impl = {
 
 	vars: {},
 
-	errors: [],
+	errors: {},
 
 	disabled_plugins: {},
 
@@ -684,7 +684,12 @@ boomr = {
 			err = "[" + src + "] " + err;
 		}
 
-		impl.errors.push(err);
+		if (impl.errors[err]) {
+			impl.errors[err]++;
+		}
+		else {
+			impl.errors[err] = 1;
+		}
 	},
 
 	addVar: function(name, value) {
@@ -757,7 +762,7 @@ boomr = {
 	},
 
 	sendBeacon: function(beacon_url_override) {
-		var k, url, img, nparams=0;
+		var k, url, img, nparams=0, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -789,9 +794,17 @@ boomr = {
 			impl.vars["if"] = "";
 		}
 
-		if(impl.errors.length > 0) {
-			impl.vars.errors = impl.errors.join("\n");
+		for (k in impl.errors) {
+			if (impl.errors.hasOwnProperty(k)) {
+				errors.push(k + (impl.errors[k] > 1 ? " (*" + impl.errors[k] + ")" : ""));
+			}
 		}
+
+		if(errors.length > 0) {
+			impl.vars.errors = errors.join("\n");
+		}
+
+		impl.errors = {};
 
 		// If we reach here, all plugins have completed
 		impl.fireEvent("before_beacon", impl.vars);
