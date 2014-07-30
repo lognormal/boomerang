@@ -27,6 +27,7 @@ fi
 export tmpfile1=$WORKING_DIR/boomerang-update-step1.tmp.$$
 export tmpfile2=$WORKING_DIR/boomerang-update-step2.tmp.$$
 export baddomains=$WORKING_DIR/ErrorDomains.tsv
+rm -f $baddomains
 
 if [ ! -d ${WORKING_DIR} ]
 then
