@@ -3,6 +3,8 @@ $filename = $argv[1];
 $version = $argv[2];
 $file = file_get_contents($filename);
 
+$file = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $file);
+
 $data = json_decode($file, true);
 
 $references = $data["references"];
