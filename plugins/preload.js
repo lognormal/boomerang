@@ -51,7 +51,7 @@
       if (preloadItem && preloadItem.status === 'preloading') {
         // send custom beacon to count page preload
         var img = new Image();
-        img.src = BOOMR_GLOBAL_CONFIG.beacon_url + '?p_id=' + preloadItem.uuid +
+        img.src = BOOMR.window.BOOMR_GLOBAL_CONFIG.beacon_url + '?p_id=' + preloadItem.uuid +
                         '&p_method=' + preloadItem.method +
                         '&p_status=preload' +
                         '&u=' + location.href +
