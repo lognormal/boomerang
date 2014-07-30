@@ -105,7 +105,7 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 
 rm -f $tmpfile2
 
-if [ $( grep -c 'HTTP/1.1 204' $LOG ) -eq $total] ; then
+if [ $( grep -c 'HTTP/1.1 204' $LOG ) -eq $total ] ; then
 	echo "Update was successful."
 else
 	echo "Update failed. Check $LOG for errors."
