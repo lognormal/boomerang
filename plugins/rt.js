@@ -709,7 +709,7 @@ BOOMR.plugins.RT = {
 
 };
 
-}(window));
+}(BOOMR.window));
 // End of RT plugin
 
 

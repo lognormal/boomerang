@@ -24,4 +24,4 @@ Send the variable t_page for browsers that don't support navtiming.
     is_complete: iscomplete
   };
 
-}(this, document));
+}(BOOMR.window, BOOMR.window.document));

@@ -56,4 +56,4 @@ Metric will be sent for every new page loaded.
     is_complete: iscomplete
   };
 
-}(this, document));
+}(BOOMR.window, BOOMR.window.document));

@@ -48,5 +48,5 @@ BOOMR.plugins.MyPlugin = {
 	}
 };
 
-}(window));
+}(BOOMR.window));
 

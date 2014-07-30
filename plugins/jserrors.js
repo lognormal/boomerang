@@ -26,7 +26,7 @@ Count js errors for current page
 
   BOOMR.plugins.JsErrors = {
     init: function() {
-      BOOMR.utils.addListener(window, 'error', newError);
+      BOOMR.utils.addListener(w, 'error', newError);
       BOOMR.subscribe("page_ready", done);
 
       return this;

@@ -52,4 +52,4 @@ Count specific dom nodes for Fasterize like how many images are really loaded?
     is_complete: iscomplete
   };
 
-}(document));
+}(BOOMR.window.document));

@@ -79,4 +79,4 @@
     is_complete: iscomplete
   };
 
-}(document));
+}(BOOMR.window.document));
