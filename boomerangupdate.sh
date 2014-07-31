@@ -1,10 +1,15 @@
 #!/bin/bash
-#Usage: <Server> <Boomerang New Version> <mPulse Username> <mPulse Password>
+#Usage: <Server> <Boomerang New Version> <Bucket File> <mPulse Username> <mPulse Password>
 
 export WORKING_DIR=./BoomerangUpdate
 export LOG=$WORKING_DIR/update-log.`date +%Y-%m-%d-%H%M%S`.log
-export BUCKET=$WORKING_DIR/Bucket100.tsv
+export BUCKET=$3
 export VERSION=$2
+
+if [ $# -lt 5 ]; then
+	echo "Usage: <Server> <New Boomerang Version> <Bucket File> <mPulse Username> <mPulse Password>"
+	exit
+fi
 
 cf_collector=http://localhost:8080/concerto
 og_collector=http://localhost:8080/concerto
@@ -22,6 +27,17 @@ elif [ "$1" = "rum-dev" ]; then
 	cf_collector=http://rum-dev-collector.soasta.com
 	og_collector=http://rum-dev-collector.soasta.com
 	cf_main=https://rum-dev.soasta.com
+elif [ "$1" != "localhost" -a "$1" != "default" -a "$1" != "local" ]; then
+	echo ""
+	echo "\`$1' is not a valid Server identifier"
+	echo ""
+	echo "<Server> should be one of:"
+	echo "	default (localhost)"
+	echo "	lt2"
+	echo "	rum-dev"
+	echo "	mpulse-production"
+	echo ""
+	exit
 fi
 
 export tmpfile1=$WORKING_DIR/boomerang-update-step1.tmp.$$
@@ -100,7 +116,7 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 	while read DomainId TenantName; do
 		echo "Updating $TenantName/$DomainId... ($current/$total)" | tee -a $LOG
 		current=$(( $current+1 ))
- 		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$3" SOASTA_PASSWORD="$4" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
+ 		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$4" SOASTA_PASSWORD="$5" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
 		if ! echo "$result" | grep -q "^< HTTP/1\.1 204" &>/dev/null; then
 			echo -n "$DomainId | $TenantName | " >> $baddomains
 			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG | tee -a $baddomains
