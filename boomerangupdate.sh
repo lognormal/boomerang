@@ -102,8 +102,8 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 		current=$(( $current+1 ))
  		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$3" SOASTA_PASSWORD="$4" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
 		if ! echo "$result" | grep -q "^< HTTP/1\.1 204" &>/dev/null; then
-			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG
-			echo "$DomainId | $TenantName" >> $baddomains
+			echo -n "$DomainId | $TenantName | " >> $baddomains
+			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG | tee -a $baddomains
 		fi
 			
 	done
