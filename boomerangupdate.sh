@@ -3,7 +3,7 @@
 
 export WORKING_DIR=./BoomerangUpdate
 export LOG=$WORKING_DIR/update-log.`date +%Y-%m-%d-%H%M%S`.log
-export BUCKET=$WORKING_DIR/Bucket1.tsv
+export BUCKET=$WORKING_DIR/Bucket100.tsv
 export VERSION=$2
 
 cf_collector=http://localhost:8080/concerto
@@ -100,14 +100,24 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 	while read DomainId TenantName; do
 		echo "Updating $TenantName/$DomainId... ($current/$total)" | tee -a $LOG
 		current=$(( $current+1 ))
- 		make SOASTA_SERVER=${cf_main} SOASTA_USER="$3" SOASTA_PASSWORD="$4" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG
+ 		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$3" SOASTA_PASSWORD="$4" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
+		if ! echo "$result" | grep -q "^< HTTP/1\.1 204" &>/dev/null; then
+			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG
+			echo "$DomainId | $TenantName" >> $baddomains
+		fi
+			
 	done
 
 rm -f $tmpfile2
 
-if [ $( grep -c 'HTTP/1.1 204' $LOG ) -eq $total ] ; then
+passed=$( grep -c 'HTTP/1.1 204' $LOG )
+if [ $passed -eq $total ] ; then
 	echo "Update was successful."
 else
-	echo "Update failed. Check $LOG for errors."
+	echo "Update failed ($passed/$total complete). Check $LOG for errors."
+	grep '^< HTTP/1.1 ' $LOG | grep -v 204 | sed -e 's/^< HTTP\/1\.1 //' | sort -n | uniq -c
+
+	echo "Bad Domains:"
+	cat $baddomains
 fi
 
