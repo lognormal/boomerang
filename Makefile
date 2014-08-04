@@ -22,20 +22,20 @@ SOASTA_TOKEN_PREFIX := $(SOASTA_REST_BASE)/Tokens
 INSECURE :=
 SERVER ?= rum-dev.soasta.com/concerto
 
-SLACK_CHANNELS := "boomerang_commits "
+SLACK_CHANNELS := "boomerang_announce "
 
 LOG_FILE := boomerang-build.$(DATE).log
 LOGIT := tee -a $(LOG_FILE)
 
-ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com)
-SLACK_CHANNELS += "ops "
-else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com/)
-SLACK_CHANNELS += "ops "
-else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com)
-SLACK_CHANNELS += "mpulse-loadtest "
-else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com/)
-SLACK_CHANNELS += "mpulse-loadtest "
-endif
+#ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com)
+#SLACK_CHANNELS += "ops "
+#else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse.soasta.com/)
+#SLACK_CHANNELS += "ops "
+#else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com)
+#SLACK_CHANNELS += "mpulse-loadtest "
+#else ifeq ($(strip $(SOASTA_SERVER)),https://mpulse-lt2.soasta.com/)
+#SLACK_CHANNELS += "mpulse-loadtest "
+#endif
 
 SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
 
