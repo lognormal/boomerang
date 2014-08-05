@@ -50,13 +50,13 @@ then
         mkdir ${WORKING_DIR}
 fi
 
-total=$( wc -l $BUCKET | awk '{print $1}' )
+total=$( cat $BUCKET | sort -n | uniq | wc -l | sed -e 's/  *//' )
 current=1
 
 echo "$1 on $cf_collector      $VERSION" | tee $LOG
 echo "5.1) Finding out the current version of boomerang..." | tee -a $LOG
 
-for i in $(cat $BUCKET | awk -F "|" '{print $NF}'); do
+for i in $(cat $BUCKET | sort -n | uniq | awk -F "|" '{print $NF}'); do
 	echo "Checking $i... ($current/$total)" | tee -a $LOG
 	current=$(( $current+1 ))
 	result=$( curl -A 'Mozilla/5.0' ${cf_collector}/boomerang/$i 2>/dev/null | \
@@ -64,10 +64,10 @@ for i in $(cat $BUCKET | awk -F "|" '{print $NF}'); do
 
 	if [ -z "$result" ]; then
 		echo "Not found" | tee -a $LOG
-		grep " $i\$" $BUCKET >> $baddomains
+		grep " $i\$" $BUCKET | head -1 >> $baddomains
 	else
 		echo $result | tee -a $LOG
-		grep " $i\$" $BUCKET >> $tmpfile1
+		grep " $i\$" $BUCKET | head -1 >> $tmpfile1
 	fi
 done
 
