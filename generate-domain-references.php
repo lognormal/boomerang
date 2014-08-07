@@ -3,6 +3,11 @@ $filename = $argv[1];
 $version = $argv[2];
 $file = file_get_contents($filename);
 
+if (empty($file)) {
+	error_log("No input, bailing");
+	exit(-1);
+}
+
 $file = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $file);
 
 $data = json_decode($file, true);
