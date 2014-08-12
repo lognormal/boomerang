@@ -27,7 +27,7 @@ var impl = {
 		    p  = w.performance,
 		    c  = w.console,
 		    d  = w.document,
-		    fn = (({}).toString.call(w.opera) === '[object Opera]' ? d.querySelectorAll : d.getElementsByTagName),
+		    fn = d.getElementsByTagName,
 		    m, f;
 
 		// handle IE6/7 weirdness regarding host objects
