@@ -184,7 +184,7 @@ Handler.prototype = {
 		}
 		catch(xpath_err) {
 			BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
-			BOOMR.addError(xpath_err, "PageVars.runXPath");
+			BOOMR.addError(xpath_err, "PageVars.runXPath." + xpath);
 			return null;
 		}
 
