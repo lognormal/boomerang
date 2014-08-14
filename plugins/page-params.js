@@ -429,6 +429,10 @@ Handler.prototype = {
 		}
 
 		try {
+			if (!frame.hasOwnProperty("performance") || !frame.performance) {
+				return null;
+			}
+
 			reslist = frame.performance.getEntriesByName(url);
 		}
 		catch(e) {
