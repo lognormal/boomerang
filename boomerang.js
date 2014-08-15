@@ -239,6 +239,10 @@ impl = {
 			return false;
 		}
 
+		if (this.public_events.hasOwnProperty(e_name)) {
+			dispatchEvent(this.public_events[e_name], data);
+		}
+
 		ev = this.events[e_name];
 
 		for(i=0; i<ev.length; i++) {
@@ -249,10 +253,6 @@ impl = {
 			catch(err) {
 				BOOMR.addError(err, 'fireEvent');
 			}
-		}
-
-		if (this.public_events.hasOwnProperty(e_name)) {
-			dispatchEvent(this.public_events[e_name], data);
 		}
 
 		return true;
