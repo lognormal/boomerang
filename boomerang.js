@@ -688,7 +688,7 @@ boomr = {
 			err = String(err);
 		}
 		if (src !== undefined) {
-			err = "[" + src + "] " + err;
+			err = "[" + src + ":" + (new Date().getTime()) + "] " + err;
 		}
 
 		if (impl.errors[err]) {
