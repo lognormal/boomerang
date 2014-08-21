@@ -229,7 +229,7 @@ function getInitTests(Y) {
 
 		testInit: function() {
 			var test = this;
-			var domain = "lognormal.github.io";
+			var domain = document.domain;
 			var o = BOOMR.init({
 				strip_query_string: true,
 				site_domain: domain,
