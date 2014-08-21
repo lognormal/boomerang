@@ -96,7 +96,7 @@ new-soasta-push create_migration update_schema: SCHEMA_VERSION := $(shell echo "
 # This rule adds a migration to set the new version as default and updates the schema files with the new version of boomerang
 # Do not run this on its own since it will add a migration but won't add boomerang to the repository
 # This should be run via new-soasta-push or something else that puts boomerang into the repo
-update_schema: soasta
+update_schema:
 	echo "Updating schema version $(OLD_SCHEMA_VERSION) -> $(SCHEMA_VERSION)..."
 	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
 
@@ -179,7 +179,7 @@ else
 endif
 
 # Put new version of boomerang into repository on svn, and add all necessary migrations.  You still need to commit
-new-soasta-push: update_schema
+new-soasta-push: soasta
 	echo "Updating lastModifiedVersion..."
 	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
 	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
