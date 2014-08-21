@@ -404,12 +404,22 @@ Handler.prototype = {
 		}
 		else {
 			st = parseFloat(res[o.start], 10);
+
+			if (!isNaN(st) && st === 0) {
+				BOOMR.debug("Start was 0 (not supported on this resource)", "PageVars");
+				return false;
+			}
 		}
-		en = parseFloat(res[o.end], 10);
 		
+		en = parseFloat(res[o.end], 10);
 		
 		if(isNaN(st) || isNaN(en)) {
 			BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
+			return false;
+		}
+
+		if (en === 0) {
+			BOOMR.debug("End was 0 (not supported on this resource)", "PageVars");
 			return false;
 		}
 
