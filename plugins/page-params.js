@@ -164,7 +164,7 @@ Handler.prototype = {
 	},
 
 	runXPath: function(xpath) {
-		var el;
+		var el, m;
 
 		try {
 			if(d.evaluate) {
@@ -176,6 +176,13 @@ Handler.prototype = {
 			else if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
 				xpath = xpath.slice(6);
 				return this.nodeWalk(d, xpath);
+			}
+			else if((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+				el = d.getElementById(m[1]);
+				if(!el || !m[2]) {
+					return el;
+				}
+				return this.nodeWalk(el, m[2].slice(1));
 			}
 			else {
 				BOOMR.debug("Could not evaluate XPath", "PageVars");
