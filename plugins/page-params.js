@@ -441,7 +441,7 @@ Handler.prototype = {
 		}
 
 		try {
-			if (!frame.hasOwnProperty("performance") || !frame.performance) {
+			if (!("performance" in frame) || !frame.performance) {
 				return null;
 			}
 
