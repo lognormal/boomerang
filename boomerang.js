@@ -251,7 +251,7 @@ impl = {
 				handler.fn.call(handler.scope, data, handler.cb_data);
 			}
 			catch(err) {
-				BOOMR.addError(err, 'fireEvent.' + e_name + "." + handler.source);
+				BOOMR.addError(err, 'fireEvent.' + e_name);
 			}
 		}
 
@@ -633,7 +633,7 @@ boomr = {
 	},
 
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
-		var i, handler, ev, unload_handler, source="?";
+		var i, handler, ev, unload_handler;
 
 		e_name = e_name.toLowerCase();
 
@@ -650,15 +650,7 @@ boomr = {
 				return this;
 			}
 		}
-
-		try {
-			if (arguments && arguments.callee && arguments.callee.caller && arguments.callee.caller.toString().match(/pluginConfig/)) {
-				source = arguments.callee.caller.toString().replace(/[\s\S]*pluginConfig.+?"(\w+)"[\s\S]*/, "$1");
-			}
-		}
-		catch(ignore) {
-		}
-		ev.push({ "fn": fn, "cb_data": cb_data || {}, "scope": cb_scope || null, "source": source });
+		ev.push({ "fn": fn, "cb_data": cb_data || {}, "scope": cb_scope || null });
 
 		// attaching to page_ready after onload fires, so call soon
 		if(e_name === 'page_ready' && impl.onloadfired) {
