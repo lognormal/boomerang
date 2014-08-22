@@ -118,7 +118,7 @@ Handler.prototype = {
 
 		// Check if URL matches
 		if(!re.exec(urlToCheck)) {
-			BOOMR.debug("No match on " + urlToCheck, "PageVars");
+			BOOMR.debug("No match " + re + " on " + urlToCheck, "PageVars");
 			return false;
 		}
 
@@ -355,6 +355,8 @@ Handler.prototype = {
 			BOOMR.debug("This browser does not support ResourceTiming", "PageVars");
 			return false;
 		}
+
+		BOOMR.debug("Got ResourceTiming: " + o.parameter1 + ", " + o.parameter2 + ", " + o.url, "PageVars");
 
 		// Require page URL to match
 		if(!this.checkURLPattern(o.parameter1)) {
