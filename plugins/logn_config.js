@@ -72,7 +72,7 @@ BOOMR.plugins.LOGN = {
 				BOOMR.addVar("t_configfb", BOOMR_configt-t_start);
 				delete BOOMR_configt;
 			}
-			return;
+			return this;
 		}
 
 		running=true;
