@@ -99,12 +99,11 @@ impl = {
 			sum=0, sumsq=0,
 			amean, median,
 			std_dev, std_err,
-			lat_filtered,
-			first;
+			lat_filtered;
 
 		// We ignore the first since it paid the price of DNS lookup, TCP connect
 		// and slow start
-		first = this.latencies.shift();
+		this.latencies.shift();
 
 		// We first do IQR filtering and use the resulting data set
 		// for all calculations
@@ -273,7 +272,7 @@ impl = {
 			+ "?t=" + (new Date().getTime()) + Math.random(),	// Math.random() is slow, but we get it before we start the timer
 		    timer=0, tstart=0,
 		    img = new Image(),
-		    that=this, handler;
+		    that=this;
 
 		function handler(value) {
 			return function() {
