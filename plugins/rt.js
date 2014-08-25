@@ -30,7 +30,7 @@ impl = {
 
 	timers: {},		//! Custom timers that the developer can use
 				// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
-	cookie: 'RT',		//! Name of the cookie that stores the start time and referrer
+	cookie: "RT",		//! Name of the cookie that stores the start time and referrer
 	cookie_exp:COOKIE_EXP,	//! Cookie expiry in seconds (7 days)
 	session_exp:SESSION_EXP,//! Session expiry in seconds (30 minutes)
 	strict_referrer: true,	//! By default, don't beacon if referrers don't match.
@@ -183,7 +183,7 @@ impl = {
 		}
 		if(subcookies.si && subcookies.si.match(/-/)) {
 			BOOMR.session.ID = subcookies.si;
-			BOOMR.addVar('rt.si', BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36));
+			BOOMR.addVar("rt.si", BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36));
 		}
 		if(subcookies.sl) {
 			BOOMR.session.length = parseInt(subcookies.sl, 10);
@@ -369,17 +369,17 @@ impl = {
 		var res, k, urls, url;
 		if(BOOMR.t_start) {
 			// How long does it take Boomerang to load up and execute (fb to lb)?
-			BOOMR.plugins.RT.startTimer('boomerang', BOOMR.t_start);
-			BOOMR.plugins.RT.endTimer('boomerang', BOOMR.t_end);	// t_end === null defaults to current time
+			BOOMR.plugins.RT.startTimer("boomerang", BOOMR.t_start);
+			BOOMR.plugins.RT.endTimer("boomerang", BOOMR.t_end);	// t_end === null defaults to current time
 
 			// How long did it take from page request to boomerang fb?
-			BOOMR.plugins.RT.endTimer('boomr_fb', BOOMR.t_start);
+			BOOMR.plugins.RT.endTimer("boomr_fb", BOOMR.t_start);
 
 			if(BOOMR.t_lstart) {
 				// when did the boomerang loader start loading boomerang on the page?
-				BOOMR.plugins.RT.endTimer('boomr_ld', BOOMR.t_lstart);
+				BOOMR.plugins.RT.endTimer("boomr_ld", BOOMR.t_lstart);
 				// What was the network latency for boomerang (request to first byte)?
-				BOOMR.plugins.RT.setTimer('boomr_lat', BOOMR.t_start - BOOMR.t_lstart);
+				BOOMR.plugins.RT.setTimer("boomr_lat", BOOMR.t_start - BOOMR.t_lstart);
 			}
 		}
 
@@ -399,7 +399,7 @@ impl = {
 
 						for(k in res) {
 							if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, '$1$2'), res[k]);
+								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, "$1$2"), res[k]);
 							}
 						}
 					}
@@ -408,7 +408,7 @@ impl = {
 		}
 		catch(e)
 		{
-			BOOMR.addError(e, 'rt.getBoomerangTimings');
+			BOOMR.addError(e, "rt.getBoomerangTimings");
 		}
 	},
 
@@ -490,7 +490,7 @@ impl = {
 			ti = {
 				navigationStart: w.gtbExternal.startE()
 			};
-			source = 'gtb';
+			source = "gtb";
 		}
 
 		if(ti) {
@@ -574,15 +574,15 @@ impl = {
 	 * @param t_start The value of t_start that we plan to use
 	 */
 	setSupportingTimestamps: function(t_start) {
-		BOOMR.addVar('rt.tstart', t_start);
-		if(typeof impl.t_start === 'number' && impl.t_start !== t_start) {
-			BOOMR.addVar('rt.cstart', impl.t_start);
+		BOOMR.addVar("rt.tstart", t_start);
+		if(typeof impl.t_start === "number" && impl.t_start !== t_start) {
+			BOOMR.addVar("rt.cstart", impl.t_start);
 		}
-		BOOMR.addVar('rt.bstart', BOOMR.t_start);
+		BOOMR.addVar("rt.bstart", BOOMR.t_start);
 		if (BOOMR.t_lstart) {
-			BOOMR.addVar('rt.blstart', BOOMR.t_lstart);
+			BOOMR.addVar("rt.blstart", BOOMR.t_lstart);
 		}
-		BOOMR.addVar('rt.end', impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
+		BOOMR.addVar("rt.end", impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
 	},
 
 	/**
@@ -651,7 +651,7 @@ impl = {
 		// set cookie for next page
 		// We use document.URL instead of location.href because of a bug in safari 4
 		// where location.href is URL decoded
-		this.updateCookie({ 'r': d.URL }, edata.type === 'beforeunload'?'ul':'hd');
+		this.updateCookie({ "r": d.URL }, edata.type === "beforeunload"?"ul":"hd");
 
 
 		this.unloadfired = true;
@@ -673,7 +673,7 @@ impl = {
 			// our unload handler won't fire, so we need to set our
 			// cookie on click or submit
 			value = value_cb(etarget);
-			this.updateCookie({ "nu": value }, 'cl' );
+			this.updateCookie({ "nu": value }, "cl" );
 			BOOMR.addVar("nu", BOOMR.utils.cleanupURL(value));
 		}
 	},
@@ -767,8 +767,8 @@ BOOMR.plugins.RT = {
 
 	startTimer: function(timer_name, time_value) {
 		if(timer_name) {
-			if (timer_name === 't_page') {
-				this.endTimer('t_resp', time_value);
+			if (timer_name === "t_page") {
+				this.endTimer("t_resp", time_value);
 			}
 			impl.timers[timer_name] = {start: (typeof time_value === "number" ? time_value : new Date().getTime())};
 		}
@@ -824,13 +824,13 @@ BOOMR.plugins.RT = {
 					BOOMR.addVar(t_name, timer.delta);
 				}
 				else {
-					t_other.push(t_name + '|' + timer.delta);
+					t_other.push(t_name + "|" + timer.delta);
 				}
 			}
 		}
 
 		if (t_other.length) {
-			BOOMR.addVar("t_other", t_other.join(','));
+			BOOMR.addVar("t_other", t_other.join(","));
 		}
 
 		if (source === "beacon") {
@@ -871,9 +871,9 @@ BOOMR.plugins.RT = {
 
 		// make sure old variables don't stick around
 		BOOMR.removeVar(
-			't_done', 't_page', 't_resp', 't_postrender', 't_prerender', 't_load', 't_other',
-			'r', 'r2', 'rt.tstart', 'rt.cstart', 'rt.bstart', 'rt.end', 'rt.subres', 'rt.abld',
-			'rt.ss', 'rt.sl', 'rt.tt', 'rt.lt'
+			"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
+			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+			"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 		);
 
 		impl.setSupportingTimestamps(t_start);
@@ -892,31 +892,31 @@ BOOMR.plugins.RT = {
 			BOOMR.addVar("rt.subres", 1);
 		}
 
-		if(ename === 'load' || ename === 'visible'	// we're in onload
-		   || (ename === 'xhr' && !subresource)		// xhr beacon and this is not a subresource
+		if(ename === "load" || ename === "visible"	// we're in onload
+		   || (ename === "xhr" && !subresource)		// xhr beacon and this is not a subresource
 		   || !impl.onloadfired) {			// unload fired before onload
 			impl.incrementSessionDetails();
 		}
 
 		BOOMR.addVar({
-			'rt.si': BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36),
-			'rt.ss': BOOMR.session.start,
-			'rt.sl': BOOMR.session.length,
-			'rt.tt': impl.loadTime,
-			'rt.obo': impl.oboError
+			"rt.si": BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36),
+			"rt.ss": BOOMR.session.start,
+			"rt.sl": BOOMR.session.length,
+			"rt.tt": impl.loadTime,
+			"rt.obo": impl.oboError
 		});
 
 		impl.updateCookie();
 
-		if(ename==='unload') {
-			BOOMR.addVar('rt.quit', '');
+		if(ename==="unload") {
+			BOOMR.addVar("rt.quit", "");
 
 			if(!impl.onloadfired) {
-				BOOMR.addVar('rt.abld', '');
+				BOOMR.addVar("rt.abld", "");
 			}
 
 			if(!impl.visiblefired) {
-				BOOMR.addVar('rt.ntvu', '');
+				BOOMR.addVar("rt.ntvu", "");
 			}
 		}
 

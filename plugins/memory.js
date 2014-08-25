@@ -43,16 +43,16 @@ var impl = {
 
 		if(m) {
 			BOOMR.addVar({
-				'mem.total': m.totalJSHeapSize,
-				'mem.used' : m.usedJSHeapSize
+				"mem.total": m.totalJSHeapSize,
+				"mem.used" : m.usedJSHeapSize
 			});
 		}
 
 		BOOMR.addVar({
-			'dom.ln': f.call(d, '*').length,
-			'dom.sz': f.call(d, 'html')[0].innerHTML.length,
-			'dom.img': f.call(d, 'img').length,
-			'dom.script': f.call(d, 'script').length
+			"dom.ln": f.call(d, "*").length,
+			"dom.sz": f.call(d, "html")[0].innerHTML.length,
+			"dom.img": f.call(d, "img").length,
+			"dom.script": f.call(d, "script").length
 		});
 
 		this.complete = true;

@@ -8,7 +8,7 @@ var dc=document,
     load, loaded;
 
 // Don't even bother creating the plugin if this is mhtml
-if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if(!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
@@ -28,12 +28,12 @@ load=function() {
 
 	t_start=new Date().getTime();
 	s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
-		+ '&t=' + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
-		+ '&v=' + BOOMR.version				// boomerang version so we can force a reload for old versions
+		+ "&t=" + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
+		+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
 		+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
-		+ '&sl=' + (BOOMR.session.length>0?1:0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
+		+ "&sl=" + (BOOMR.session.length>0?1:0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
 								// We don't pass the actual session length so that the URL response can be cached
-		+ '&si=' + BOOMR.session.ID + '-' + Math.round(BOOMR.session.start/1000).toString(36)
+		+ "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36)
 		+ (complete?"&r=":"")				// if this is running after complete, then we're just refreshing the crumb
 		+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 	;
@@ -67,9 +67,9 @@ BOOMR.plugins.LOGN = {
 			BOOMR.setImmediate(loaded);
 			setTimeout(load, 5.5*60*1000);
 
-			BOOMR.addVar('t_configjs', new Date().getTime()-t_start);
+			BOOMR.addVar("t_configjs", new Date().getTime()-t_start);
 			if(typeof BOOMR_configt === "number") {
-				BOOMR.addVar('t_configfb', BOOMR_configt-t_start);
+				BOOMR.addVar("t_configfb", BOOMR_configt-t_start);
 				delete BOOMR_configt;
 			}
 			return;

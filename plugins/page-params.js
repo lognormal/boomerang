@@ -61,7 +61,7 @@ Handler.prototype = {
 		if(!s) {
 			return s;
 		}
-		return s.replace(this.sanitizeRE, '');
+		return s.replace(this.sanitizeRE, "");
 	},
 
 	handleRegEx: function(re, extract) {
@@ -101,7 +101,7 @@ Handler.prototype = {
 			return true;
 		}
 		// Massage pattern into a real regex
-		re = u.replace(/([^\.])\*/g, '$1.*').replace(/^\*/, '.*');
+		re = u.replace(/([^\.])\*/g, "$1.*").replace(/^\*/, ".*");
 		try {
 			re = new RegExp("^" + re + "$", "i");
 		}
@@ -296,9 +296,9 @@ Handler.prototype = {
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
 		return this.handleRegEx("^"
-					+ o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*?').replace(/^\*/, '.*')
+					+ o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*?").replace(/^\*/, ".*")
 					+ "(.*)"
-					+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, '$1.*')
+					+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*")
 					+ "$",
 				"$1");
 	},
@@ -400,7 +400,7 @@ Handler.prototype = {
 		if(o.start === "*") {
 			for(k in res) {
 				if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, '$1$2'), res[k]);
+					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"), res[k]);
 				}
 			}
 
