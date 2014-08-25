@@ -8,6 +8,8 @@
 // the parameter is the window
 (function(w) {
 
+/*eslint no-underscore-dangle:0*/
+
 var d=w.document, impl,
     SESSION_EXP=60*30,
     COOKIE_EXP=60*60*24*7;

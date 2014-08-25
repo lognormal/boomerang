@@ -1,3 +1,4 @@
+/*global BOOMR_configt:true*/
 (function(w) {
 var dc=document,
     s="script",

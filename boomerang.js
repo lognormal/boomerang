@@ -16,6 +16,11 @@ something with the data you collect.  How you collect the data is up to
 you, but we have a few ideas.
 */
 
+/*eslint-env browser*/
+/*global BOOMR:true, BOOMR_start:true, BOOMR_lstart:true, console:false*/
+/*eslint no-mixed-spaces-and-tabs:[2, true], console:0, camelcase:0, strict:0, quotes:[2, "double", "avoid-escape"], new-cap:0*/
+/*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0*/
+
 // Measure the time the script started
 // This has to be global so that we don't wait for the entire
 // BOOMR function to download and execute before measuring the

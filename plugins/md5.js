@@ -18,17 +18,16 @@
  */
 
 (function() {
+/*jslint bitwise: true */
+/*global unescape*/
+
+    "use strict";
+
 BOOMR = BOOMR || {};
 if(BOOMR.utils && BOOMR.utils.md5) {
 	return;
 }
 BOOMR.utils = BOOMR.utils || {};
-
-
-/*jslint bitwise: true */
-/*global unescape, define */
-
-    'use strict';
 
     /*
     * Add integers, wrapping at 2^32. This uses 16-bit operations internally
