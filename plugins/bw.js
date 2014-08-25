@@ -173,10 +173,11 @@ impl = {
 				bw = images[j].size*1000/r[j].t;
 				bandwidths.push(bw);
 
-				bw_c = images[j].size*1000/(r[j].t - this.latency.mean);
-				bandwidths_corrected.push(bw_c);
-
-				if(r[j].t < this.latency.mean) {
+				if(r[j].t > this.latency.mean) {
+					bw_c = images[j].size*1000/(r[j].t - this.latency.mean);
+					bandwidths_corrected.push(bw_c);
+				}
+				else {
 					debug_info.push(j + "_" + r[j].t);
 				}
 			}
@@ -225,23 +226,33 @@ impl = {
 				(bandwidths[Math.floor(n/2)] + bandwidths[Math.ceil(n/2)]) / 2
 			);
 
-		n = bandwidths_corrected.length;
-		amean_corrected = Math.round(sum_corrected/n);
-		std_dev_corrected = Math.sqrt(sumsq_corrected/n - Math.pow(sum_corrected/n, 2));
-		std_err_corrected = (1.96 * std_dev_corrected/Math.sqrt(n)).toFixed(2);
-		std_dev_corrected = std_dev_corrected.toFixed(2);
+		if (bandwidths_corrected.length < 1) {
+			BOOMR.debug('not enough valid corrected datapoints, falling back to uncorrected', 'bw');
+			debug_info.push('l==' + bandwidths_corrected.length);
 
-		n = bandwidths_corrected.length-1;
-		median_corrected = Math.round(
-					(
-						bandwidths_corrected[Math.floor(n/2)]
-						+ bandwidths_corrected[Math.ceil(n/2)]
-					) / 2
-				);
+			amean_corrected = amean;
+			std_dev_corrected = std_dev;
+			std_err_corrected = std_err;
+			median_corrected = median;
+		}
+		else {
+			n = bandwidths_corrected.length;
+			amean_corrected = Math.round(sum_corrected/n);
+			std_dev_corrected = Math.sqrt(sumsq_corrected/n - Math.pow(sum_corrected/n, 2));
+			std_err_corrected = (1.96 * std_dev_corrected/Math.sqrt(n)).toFixed(2);
+			std_dev_corrected = std_dev_corrected.toFixed(2);
+
+			n = bandwidths_corrected.length-1;
+			median_corrected = Math.round(
+						(
+							bandwidths_corrected[Math.floor(n/2)]
+							+ bandwidths_corrected[Math.ceil(n/2)]
+						) / 2
+					);
+		}
 
 		BOOMR.debug('amean: ' + amean + ', median: ' + median, "bw");
-		BOOMR.debug('corrected amean: ' + amean_corrected + ', '
-				+ 'median: ' + median_corrected, "bw");
+		BOOMR.debug('corrected amean: ' + amean_corrected + ', ' + 'median: ' + median_corrected, "bw");
 
 		return {
 			mean: amean,
