@@ -41,6 +41,8 @@ SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/s
 
 NEW_VERSION := $(shell cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
 
+JS_CALLS_REMOVE := 'BOOMR\.(debug|info|warn|error)\s*\(.*?\)\s*;'
+
 tmpfile := boomerang.working
 
 ifeq ($(strip $(SOASTA_PASSWORD)),)
@@ -254,8 +256,8 @@ usage:
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
 	echo "Making $@ ..."
-	cat boomerang-$(VERSION).$(DATE)-debug.js | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
-	boomerang_size=$$( cat $@ | gzip -c | wc -c | sed -e 's/^ *//' ); if [ $$boomerang_size -gt 14200 ]; then echo "\n***** WARNING: gzipped boomerang is now $$boomerang_size bytes, which is > 15K *****"; else echo "gzipped boomerang is $$boomerang_size bytes"; fi
+	cat boomerang-$(VERSION).$(DATE)-debug.js | perl -pe 's/$(JS_CALLS_REMOVE)//' | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
+	boomerang_size=$$( cat $@ | gzip -c | wc -c | sed -e 's/^ *//' ); if [ $$boomerang_size -gt 14200 ]; then echo "\n***** WARNING: gzipped boomerang is now $$boomerang_size bytes, which is > 14200 bytes *****"; else echo "gzipped boomerang is $$boomerang_size bytes"; fi
 	echo
 
 boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
