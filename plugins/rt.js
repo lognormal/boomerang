@@ -183,7 +183,6 @@ impl = {
 		}
 		if(subcookies.si && subcookies.si.match(/-/)) {
 			BOOMR.session.ID = subcookies.si;
-			BOOMR.addVar("rt.si", BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36));
 		}
 		if(subcookies.sl) {
 			BOOMR.session.length = parseInt(subcookies.sl, 10);
@@ -899,9 +898,6 @@ BOOMR.plugins.RT = {
 		}
 
 		BOOMR.addVar({
-			"rt.si": BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36),
-			"rt.ss": BOOMR.session.start,
-			"rt.sl": BOOMR.session.length,
 			"rt.tt": impl.loadTime,
 			"rt.obo": impl.oboError
 		});

@@ -799,9 +799,14 @@ boomr = {
 			}
 		}
 
-		impl.vars.v = BOOMR.version;
 		// use d.URL instead of location.href because of a safari bug
 		impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
+		impl.vars.v = BOOMR.version;
+
+		impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36);
+		impl.vars["rt.ss"] = BOOMR.session.start;
+		impl.vars["rt.sl"] = BOOMR.session.length;
+
 		if(w !== window) {
 			impl.vars["if"] = "";
 		}
