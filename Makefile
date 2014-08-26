@@ -41,7 +41,7 @@ SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/s
 
 NEW_VERSION := $(shell cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
 
-JS_CALLS_REMOVE := 'BOOMR\.(debug|info|warn|error)\s*\(.*?\)\s*;'
+JS_CALLS_REMOVE := BOOMR\.(debug|info|warn|error)\s*\(.*?\)\s*;
 
 tmpfile := boomerang.working
 
