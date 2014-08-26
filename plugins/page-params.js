@@ -455,7 +455,11 @@ Handler.prototype = {
 			reslist = frame.performance.getEntriesByName(url);
 		}
 		catch(e) {
-			BOOMR.addError(e, "PageVars.findResource");
+			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
+			// work for browsers using English.
+			if ( !(e.name === "SecurityError" || (e.name === "TypeError" && e.message === "Permission denied")) ) {
+				BOOMR.addError(e, "PageVars.findResource");
+			}
 			return null;
 		}
 
