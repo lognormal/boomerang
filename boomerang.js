@@ -206,33 +206,23 @@ impl = {
 
 	disabled_plugins: {},
 
-	onclick_handler: function(ev) {
-		var target;
-		if (!ev) { ev = w.event; }
-		if (ev.target) { target = ev.target; }
-		else if (ev.srcElement) { target = ev.srcElement; }
-		if (target.nodeType === 3) {// defeat Safari bug
-			target = target.parentNode;
-		}
+	xb_handler: function(type) {
+		return function(ev) {
+			var target;
+			if (!ev) { ev = w.event; }
+			if (ev.target) { target = ev.target; }
+			else if (ev.srcElement) { target = ev.srcElement; }
+			if (target.nodeType === 3) {// defeat Safari bug
+				target = target.parentNode;
+			}
 
-		// don't capture clicks on flash objects
-		// because of context slowdowns in PepperFlash
-		if(target && target.nodeName.toUpperCase() === "OBJECT" && target.type === "application/x-shockwave-flash") {
-			return;
-		}
-		impl.fireEvent("click", target);
-	},
-
-	onsubmit_handler: function(ev) {
-		var target;
-		if (!ev) { ev = w.event; }
-		if (ev.target) { target = ev.target; }
-		else if (ev.srcElement) { target = ev.srcElement; }
-		if (target.nodeType === 3) {// defeat Safari bug
-			target = target.parentNode;
-		}
-
-		impl.fireEvent("form_submit", target);
+			// don't capture events on flash objects
+			// because of context slowdowns in PepperFlash
+			if(target && target.nodeName.toUpperCase() === "OBJECT" && target.type === "application/x-shockwave-flash") {
+				return;
+			}
+			impl.fireEvent(type, target);
+		};
 	},
 
 	fireEvent: function(e_name, data) {
@@ -581,11 +571,11 @@ boomr = {
 				boomr.utils.addListener(d, "visibilitychange", fire_visible);
 			}
 
-			boomr.utils.addListener(d, "mouseup", impl.onclick_handler);
+			boomr.utils.addListener(d, "mouseup", impl.xb_handler("click"));
 
 			forms = d.getElementsByTagName("form");
 			for(iterator = 0; iterator < forms.length; iterator++) {
-				boomr.utils.addListener(forms[iterator], "submit", impl.onsubmit_handler);
+				boomr.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
 			}
 
 			if(!w.onpagehide && w.onpagehide !== null) {
