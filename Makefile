@@ -198,6 +198,7 @@ lognormal: lognormal-plugins boomerang-$(VERSION).$(DATE).js
 	awk '/BOOMR\.plugins\.NavigationTiming/ { system("cat ln-copyright.txt"); } /BOOMR\.utils\.MD5=[a-zA-Z]/ { system("cat md5-copyright.txt"); } { print }' y-copyright.txt boomerang-$(VERSION).$(DATE).js > $(tmpfile)
 	rm boomerang-$(VERSION).$(DATE).js
 	chmod a+r $(tmpfile)
+	boomerang_size=$$( cat $(tmpfile) | gzip -c | wc -c | sed -e 's/^ *//' ); if [ $$boomerang_size -gt 14200 ]; then echo "\n***** WARNING: gzipped boomerang is now $$boomerang_size bytes, which is > 14200 bytes *****"; else echo "gzipped boomerang is $$boomerang_size bytes"; fi
 	mv $(tmpfile) build/boomerang-$(VERSION).$(DATE).js
 
 lognormal-debug: lognormal-plugins
