@@ -269,9 +269,9 @@ impl = {
 // we don't overwrite anything additional that was added to BOOMR before this
 // was called... for example, a plugin.
 boomr = {
-	t_lstart: null,
+	//! t_lstart: value of BOOMR_lstart set in host page
 	t_start: BOOMR_start,
-	t_end: null,
+	//! t_end: value set in zzz_last_plugin.js
 
 	url: myurl,
 	config_url: null,
