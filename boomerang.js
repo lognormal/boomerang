@@ -236,7 +236,7 @@ impl = {
 	},
 
 	fireEvent: function(e_name, data) {
-		var i, handler, ev;
+		var i, handler, handlers;
 
 		e_name = e_name.toLowerCase();
 
@@ -248,11 +248,11 @@ impl = {
 			dispatchEvent(this.public_events[e_name], data);
 		}
 
-		ev = this.events[e_name];
+		handlers = this.events[e_name];
 
-		for(i=0; i<ev.length; i++) {
+		for(i=0; i<handlers.length; i++) {
 			try {
-				handler = ev[i];
+				handler = handlers[i];
 				handler.fn.call(handler.scope, data, handler.cb_data);
 			}
 			catch(err) {
