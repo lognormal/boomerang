@@ -256,7 +256,7 @@ usage:
 
 boomerang-$(VERSION).$(DATE).js: boomerang-$(VERSION).$(DATE)-debug.js
 	echo "Making $@ ..."
-	cat boomerang-$(VERSION).$(DATE)-debug.js | perl -pe 's/$(JS_CALLS_REMOVE)//' | $(MINIFIER) | perl -pe "s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
+	cat boomerang-$(VERSION).$(DATE)-debug.js | perl -pe 's/$(JS_CALLS_REMOVE)//' | $(MINIFIER) | perl -pe "s/else{}//g; s/\(window\)\);/\(window\)\);\n/g; s/\(\)\);\(function\(/\(\)\);\n\(function\(/g;" > $@ && echo "done"
 	boomerang_size=$$( cat $@ | gzip -c | wc -c | sed -e 's/^ *//' ); if [ $$boomerang_size -gt 14200 ]; then echo "\n***** WARNING: gzipped boomerang is now $$boomerang_size bytes, which is > 14200 bytes *****"; else echo "gzipped boomerang is $$boomerang_size bytes"; fi
 	echo
 
