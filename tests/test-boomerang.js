@@ -147,8 +147,8 @@ function getMockLoggerTests(Y) {
 		},
 
 		testCleanupURLNull: function() {
-			Y.Assert.isUndefined(BOOMR.utils.cleanupURL());
-			Y.Assert.isNull(BOOMR.utils.cleanupURL(null));
+			Y.Assert.areSame("", BOOMR.utils.cleanupURL());
+			Y.Assert.areSame("", BOOMR.utils.cleanupURL(null));
 			Y.Assert.areSame("", BOOMR.utils.cleanupURL(""));
 		},
 
@@ -246,6 +246,7 @@ function getInitTests(Y) {
 		},
 
 		testSetCookieNotOnline: function() {
+			BOOMR.session.domain = "mydomain";
 			this.logger.matcher = /^Saved cookie value doesn't match what we tried to set:/
 			Y.Assert.isFalse(BOOMR.utils.setCookie("myname", {name: "value"}));
 		},
