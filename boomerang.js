@@ -537,7 +537,7 @@ boomr = {
 						this.plugins[k].init(config);
 					}
 					catch(err) {
-						BOOMR.addError(err, this.plugins[k] + ".init");
+						BOOMR.addError(err, k + ".init");
 					}
 				}
 			}
