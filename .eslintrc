@@ -1,0 +1,26 @@
+{
+	"env": {
+		"browser": true
+	},
+	"globals": {
+		"BOOMR":true,
+		"BOOMR_start":true,
+		"BOOMR_lstart":true,
+		"console":false,
+		"unescape":false,
+		"BOOMR_configt":true
+	},
+	"rules": {
+		"no-mixed-spaces-and-tabs":[2, true],
+		"console":0,
+		"camelcase":0,
+		"strict":0,
+		"quotes":[2, "double", "avoid-escape"],
+		"new-cap":0,
+		"space-infix-ops":0,
+		"no-console":0,
+		"no-delete-var":0,
+		"no-space-before-semi":0,
+		"no-underscore-dangle":0
+	}
+}
