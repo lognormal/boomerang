@@ -488,6 +488,14 @@ boomr = {
 			config = {};
 		}
 
+		if(config.primary) {
+			if(this.primaryInit) {
+				return this;
+			}
+
+			this.primaryInit = true;
+		}
+
 		for(i=0; i<properties.length; i++) {
 			if(config[properties[i]] !== undefined) {
 				impl[properties[i]] = config[properties[i]];
@@ -917,6 +925,3 @@ dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
 }(window));
 
 // end of boomerang beaconing section
-
-
-
