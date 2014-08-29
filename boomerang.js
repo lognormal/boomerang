@@ -488,12 +488,8 @@ boomr = {
 			config = {};
 		}
 
-		if(config.primary) {
-			if(this.primaryInit) {
-				return this;
-			}
-
-			this.primaryInit = true;
+		if(config.primary && impl.handlers_attached) {
+			return this;
 		}
 
 		for(i=0; i<properties.length; i++) {
