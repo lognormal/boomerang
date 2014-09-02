@@ -3,14 +3,16 @@
 var dc=document,
     s="script",
     dom=w.location.hostname,
-    complete=false, running=false,
+    complete, running,
     t_start,
     load, loaded;
 
 // Don't even bother creating the plugin if this is mhtml
-if(!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if(BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
+
+running = complete = false;
 
 loaded=function() {
 	if(complete) {

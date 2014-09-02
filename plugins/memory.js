@@ -14,6 +14,9 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 // you'll need this.
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if (BOOMR.plugins.Memory) {
+	return;
+}
 
 // A private object to encapsulate all your implementation details
 var impl = {

@@ -33,6 +33,9 @@ Beacon parameters:
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if(BOOMR.plugins.IPv6) {
+	return;
+}
 
 /*
 Algorithm:
