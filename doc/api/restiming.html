@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Resource Timing plugin API</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
+</head>
+<body>
+<span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
+<h1>Resource Timing plugin API</h1>
+<p>
+The Resource Timing plugin collects metrics
+from modern user agents that support the W3C
+<a href="http://w3c-test.org/webperf/specs/ResourceTiming/">Resource Timing specification</a>.
+The Resource Timing API is encapsulated
+within the <code>BOOMR.plugins.ResourceTiming</code> namespace.
+</p>
+
+<p>
+<strong>Note</strong> that the Resource Timing plugin isn't included by default in boomerang.js.
+See <a href="../howtos/howto-9.html">Howto #9</a>
+for details on how to include the plugin in your boomerang deployment.
+</p>
+
+<h2 id="methods">Methods</h2>
+
+<dl class="api">
+
+<dt>init()</dt>
+<dd>
+<p>
+Called by <a href="BOOMR.html#init">BOOMR.init()</a>
+to configure the Resource Timing plugin.
+The Resource Timing plugin doesn't require any configuration parameters,
+since it simply reads values from
+the browser's <code>window.performance</code> object (if available)
+and adds them to the beacon request data.
+</p>
+
+<h3>Returns</h3>
+<p>
+a reference to the <code>BOOMR.plugins.ResourceTiming</code> object.
+</p>
+<h3>Note</h3>
+<p>
+If the executing user agent
+doesn't implement the Resource Timing specification,
+the plugin won't add any data to the beacon.
+</p>
+</dd>
+
+<dt>is_complete()</dt>
+<dd>
+<p>
+Called by <a href="BOOMR.html#sendBeacon">BOOMR.sendBeacon()</a>
+to determine if the Resource Timing plugin has finished.
+</p>
+<h3>Returns</h3>
+<ul>
+<li><code>true</code> if the plugin has completed.</li>
+<li><code>false</code> if the plugin has not completed.</li>
+</ul>
+</dd>
+
+</dl>
+
+<h2 id="beacon">Beacon Parameters</h2>
+<p>
+The ResourceTiming plugin adds an array named <code>restiming</code> to the beacon data,
+items in the array representing resources on the page in the order that they were loaded.
+Each item contains properties that correspond to attributes from the
+<a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming">PerformanceResourceTiming interface</a>.
+Note that some of the metrics are restricted and will not be provided cross-origin
+unless the <a href="http://www.w3.org/TR/resource-timing/#timing-allow-origin">Timing-Allow-Origin header</a> permits.
+</p>
+<table>
+<tr>
+  <th><code>restiming</code> array item property</th>
+  <th>Resource Timing attribute</th>
+</tr>
+<tr><td><code>rt_name</code></td><td><code>name</code></td></tr>
+<tr><td><code>rt_in_type</code></td><td><code>initiatorType</code></td></tr>
+<tr><td><code>rt_st</code></td><td><code>startTime</code></td></tr>
+<tr><td><code>rt_dur</code></td><td><code>duration</code></td></tr>
+<tr><td><code>rt_red_st</code></td><td><code>redirectStart</code></td></tr>
+<tr><td><code>rt_red_end</code></td><td><code>redirectEnd</code></td></tr>
+<tr><td><code>rt_fet_st</code></td><td><code>fetchStart</code></td></tr>
+<tr><td><code>rt_dns_st</code></td><td><code>domainLookupStart</code></td></tr>
+<tr><td><code>rt_dns_end</code></td><td><code>domainLookupEnd</code></td></tr>
+<tr><td><code>rt_con_st</code></td><td><code>connectStart</code></td></tr>
+<tr><td><code>rt_con_end</code></td><td><code>connectEnd</code></td></tr>
+<tr><td><code>rt_scon_st</code></td><td><code>secureConnectionStart</code></td></tr>
+<tr><td><code>rt_req_st</code></td><td><code>requestStart</code></td></tr>
+<tr><td><code>rt_res_st</code></td><td><code>responseStart</code></td></tr>
+<tr><td><code>rt_res_end</code></td><td><code>responseEnd</code></td></tr>
+</table>
+
+<p class="perma-link">
+The latest code and docs are available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
+</p>
+
+</body>
+</html>

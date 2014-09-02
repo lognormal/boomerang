@@ -174,6 +174,10 @@ function dispatchEvent(e_name, e_data) {
 impl = {
 	// properties
 	beacon_url: location.protocol + "//%beacon_dest_host%%beacon_dest_path%",
+	// beacon request method, either GET, POST or AUTO. AUTO will check the
+	// request size then use GET if the request URL is less than 2000 chars
+	// otherwise it will fall back to a POST request.
+	beacon_type: "AUTO",
 	//! User's ip address determined on the server.  Used for the BA cookie
 	user_ip: "",
 
@@ -475,12 +479,69 @@ boomr = {
 			} else if (el.detachEvent) {
 				el.detachEvent("on" + type, fn);
 			}
+		},
+
+		pushVars: function (arr, vars, prefix) {
+			var k, i, n=0;
+
+			for(k in vars) {
+				if(vars.hasOwnProperty(k)) {
+					if(Object.prototype.toString.call(vars[k]) === "[object Array]") {
+						for(i = 0; i < vars[k].length; ++i) {
+							n += BOOMR.utils.pushVars(arr, vars[k][i], k + "[" + i + "]");
+						}
+					} else {
+						++n;
+						arr.push(
+							encodeURIComponent(prefix ? (prefix + "[" + k + "]") : k)
+							+ "="
+							+ (vars[k]===undefined || vars[k]===null ? "" : encodeURIComponent(vars[k]))
+						);
+					}
+				}
+			}
+
+			return n;
+		},
+
+		postData: function (urlenc) {
+			var iframe = document.createElement("iframe"),
+				form = document.createElement("form"),
+				input = document.createElement("input");
+
+			iframe.name = "boomerang_post";
+			iframe.style.display = form.style.display = "none";
+
+			form.method = "POST";
+			form.action = impl.beacon_url;
+			form.target = iframe.name;
+
+			input.name = "data";
+
+			if (window.JSON) {
+				form.enctype = "text/plain";
+				input.value = JSON.stringify(impl.vars);
+			} else {
+				form.enctype = "application/x-www-form-urlencoded";
+				input.value = urlenc;
+			}
+
+			document.body.appendChild(iframe);
+			form.appendChild(input);
+			document.body.appendChild(form);
+
+			BOOMR.utils.addListener(iframe, "load", function() {
+				document.body.removeChild(form);
+				document.body.removeChild(iframe);
+			});
+
+			form.submit();
 		}
 	},
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "user_ip", "strip_query_string"];
+		    properties = ["beacon_url", "beacon_type", "user_ip", "strip_query_string"];
 
 		BOOMR_check_doc_domain();
 
@@ -768,7 +829,7 @@ boomr = {
 	},
 
 	sendBeacon: function(beacon_url_override) {
-		var k, url, img, nparams=0, errors=[];
+		var k, data, url, img, nparams, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -828,33 +889,21 @@ boomr = {
 			return true;
 		}
 
-		// if there are already url parameters in the beacon url,
-		// change the first parameter prefix for the boomerang url parameters to &
+		data = [];
+		nparams = BOOMR.utils.pushVars(data, impl.vars);
 
-		url = [];
-
-		for(k in impl.vars) {
-			if(impl.vars.hasOwnProperty(k)) {
-				nparams++;
-				url.push(encodeURIComponent(k)
-					+ "="
-					+ (
-						impl.vars[k]===undefined || impl.vars[k]===null
-						? ""
-						: encodeURIComponent(impl.vars[k])
-					)
-				);
-			}
-		}
 		BOOMR.removeVar("qt");
-
-		url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
-
-		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
 		this.setImmediate(impl.fireEvent, "onbeacon", impl.vars, impl);
+
+		if(!nparams) {
+			// do not make the request if there is no data
+			return this;
+		}
+
+		data = data.join("&");
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
@@ -862,10 +911,22 @@ boomr = {
 			return this;
 		}
 
-		// only send beacon if we actually have something to beacon back
-		if(nparams) {
-			img = new Image();
-			img.src=url;
+		if(impl.beacon_type === "POST") {
+			BOOMR.utils.postData(data);
+		} else {
+			// if there are already url parameters in the beacon url,
+			// change the first parameter prefix for the boomerang url parameters to &
+			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + data;
+
+			// using 2000 here as a de facto maximum URL length based on:
+			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+			if(url.length > 2000 && impl.beacon_type === "AUTO") {
+				BOOMR.utils.postData(data);
+			} else {
+				BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
+				img = new Image();
+				img.src=url;
+			}
 		}
 
 		return true;
