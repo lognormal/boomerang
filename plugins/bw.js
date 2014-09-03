@@ -48,21 +48,21 @@ impl = {
 	base_url: "",
 	timeout: 15000,
 	nruns: 5,
-	latency_runs: 10,
+	//!latency_runs: 10,
 	user_ip: "",
 	cookie_exp: 7*86400,
 	cookie: "BA",
 
 	// state
-	results: [],
-	latencies: [],
-	latency: null,
-	runs_left: 0,
-	aborted: false,
+	//!results: [],
+	//!latencies: [],
+	//!latency: null,
+	//!runs_left: 0,
+	//!aborted: false,
 	complete: true,		// defaults to true so we don't block other plugins if this cannot start.
 				// init sets it to false
-	running: false,
-	initialized: false,
+	//!running: false,
+	//!initialized: false,
 
 	// methods
 
@@ -411,60 +411,64 @@ impl = {
 
 	iterate: function()
 	{
-		if(this.aborted) {
-			return false;
-		}
-
-		if(!this.runs_left) {
-			this.finish();
-		}
-		else if(this.latency_runs) {
-			this.load_img("l", this.latency_runs--, this.lat_loaded);
-		}
-		else {
-			this.results.push({r:[]});
-			this.load_img(images.start, this.runs_left--, this.img_loaded);
+		if(!this.aborted) {
+			if(!this.runs_left) {
+				this.finish();
+			}
+			else if(this.latency_runs) {
+				this.load_img("l", this.latency_runs--, this.lat_loaded);
+			}
+			else {
+				this.results.push({r:[]});
+				this.load_img(images.start, this.runs_left--, this.img_loaded);
+			}
 		}
 	},
 
-	setVarsFromCookie: function(cookies) {
-		var ba = parseInt(cookies.ba, 10),
-		    bw_e = parseFloat(cookies.be, 10),
-		    lat = parseInt(cookies.l, 10) || 0,
-		    lat_e = parseFloat(cookies.le, 10) || 0,
-		    c_sn = cookies.ip.replace(/\.\d+$/, "0"),	// Note this is IPv4 only
-		    t = parseInt(cookies.t, 10),
-		    p_sn = this.user_ip.replace(/\.\d+$/, "0"),
+	setVarsFromCookie: function() {
+		var cookies, ba, bw_e, lat, lat_e, c_sn, t, p_sn, t_now;
 
-		// We use the subnet instead of the IP address because some people
-		// on DHCP with the same ISP may get different IPs on the same subnet
-		// every time they log in
+		cookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
 
-		    t_now = Math.round((new Date().getTime())/1000);	// seconds
+		if (cookies && cookies.ba) {
 
-		// If the subnet changes or the cookie is more than 7 days old,
-		// then we recheck the bandwidth, else we just use what's in the cookie
-		if(c_sn === p_sn && t >= t_now - this.cookie_exp && ba > 0) {
-			this.complete = true;
-			BOOMR.addVar({
-				"bw": ba,
-				"lat": lat,
-				"bw_err": bw_e,
-				"lat_err": lat_e
-			});
+			ba = parseInt(cookies.ba, 10);
+			bw_e = parseFloat(cookies.be, 10);
+			lat = parseInt(cookies.l, 10) || 0;
+			lat_e = parseFloat(cookies.le, 10) || 0;
+			c_sn = cookies.ip.replace(/\.\d+$/, "0");	// Note this is IPv4 only
+			t = parseInt(cookies.t, 10);
+			p_sn = this.user_ip.replace(/\.\d+$/, "0");
 
-			return true;
+			// We use the subnet instead of the IP address because some people
+			// on DHCP with the same ISP may get different IPs on the same subnet
+			// every time they log in
+
+			t_now = Math.round((new Date().getTime())/1000);	// seconds
+
+			// If the subnet changes or the cookie is more than 7 days old,
+			// then we recheck the bandwidth, else we just use what's in the cookie
+			if(c_sn === p_sn && t >= t_now - this.cookie_exp && ba > 0) {
+				this.complete = true;
+				BOOMR.addVar({
+					bw:      ba,
+					lat:     lat,
+					bw_err:  bw_e,
+					lat_err: lat_e,
+					bw_time: t
+				});
+
+				return 1;
+			}
 		}
 
-		return false;
+		return 0;
 	}
 
 };
 
 BOOMR.plugins.BW = {
 	init: function(config) {
-		var cookies;
-
 		if(impl.initialized) {
 			return this;
 		}
@@ -486,14 +490,11 @@ BOOMR.plugins.BW = {
 		impl.results = [];
 		impl.latencies = [];
 		impl.latency = null;
-		impl.complete = false;
-		impl.aborted = false;
+		impl.complete = impl.aborted = false;
 
 		BOOMR.removeVar("ba", "ba_err", "lat", "lat_err");
 
-		cookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
-
-		if(!cookies || !cookies.ba || !impl.setVarsFromCookie(cookies)) {
+		if(!impl.setVarsFromCookie()) {
 			BOOMR.subscribe("page_ready", this.run, null, this);
 			BOOMR.subscribe("page_unload", this.skip, null, this);
 		}
@@ -524,7 +525,7 @@ BOOMR.plugins.BW = {
 
 		setTimeout(this.abort, impl.timeout);
 
-		BOOMR.setImmediate(impl.iterate, null, null, impl);
+		impl.iterate();
 
 		return this;
 	},
@@ -536,7 +537,6 @@ BOOMR.plugins.BW = {
 					// onunload and we want the entire chain to complete
 					// before we return
 		}
-		return this;
 	},
 
 	skip: function() {
@@ -550,8 +550,6 @@ BOOMR.plugins.BW = {
 			impl.complete = true;
 			BOOMR.sendBeacon();
 		}
-
-		return this;
 	},
 
 	is_complete: function() { return impl.complete; }

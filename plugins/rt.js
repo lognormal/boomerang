@@ -22,14 +22,14 @@ if (BOOMR.plugins.RT) {
 
 // private object
 impl = {
-	onloadfired: false,	//! Set when the page_ready event fires
+	//!onloadfired: false,	//! Set when the page_ready event fires
 				//  Use this to determine if unload fires before onload
-	unloadfired: false,	//! Set when the first unload event fires
+	//!unloadfired: false,	//! Set when the first unload event fires
 				//  Use this to make sure we don't beacon twice for beforeunload and unload
-	visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
+	//!visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
 				//  Use this to determine if user bailed without opening the tab
-	initialized: false,	//! Set when init has completed to prevent double initialization
-	complete: false,	//! Set when this plugin has completed
+	//!initialized: false,	//! Set when init has completed to prevent double initialization
+	//!complete: false,	//! Set when this plugin has completed
 
 	timers: {},		//! Custom timers that the developer can use
 				// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
@@ -926,7 +926,7 @@ BOOMR.plugins.RT = {
 		return this;
 	},
 
-	is_complete: function() { return impl.complete; }
+	is_complete: function() { return !!impl.complete; }
 
 };
 

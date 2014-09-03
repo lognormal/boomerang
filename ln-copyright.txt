@@ -1,4 +1,1 @@
-/*
-The navtiming, mobile and lognormal configurator plugins for Boomerang are Copyright (c) 2011-2014 SOASTA, Inc. All rights reserved.
-Code licensed and distributed under the BSD License.
-*/
+/*Copyright (c) 2011-2014 SOASTA, Inc. All rights reserved.  Distributed under the BSD License.*/
