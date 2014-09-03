@@ -4,6 +4,9 @@ var w, l, d, p, impl,
 
 BOOMR = window.BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if (BOOMR.plugins.PageParams) {
+	return;
+}
 
 Handler = function(config) {
 	this.varname = config.varname;

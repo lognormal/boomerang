@@ -9,6 +9,9 @@
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if(BOOMR.plugins.CACHE_RELOAD) {
+	return;
+}
 
 var impl = {
 	url: ""

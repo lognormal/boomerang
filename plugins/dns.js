@@ -14,6 +14,9 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if(BOOMR.plugins.DNS) {
+	return;
+}
 
 var impl = {
 	complete: false,

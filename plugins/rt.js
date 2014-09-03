@@ -10,12 +10,15 @@
 
 /*eslint no-underscore-dangle:0*/
 
-var d=w.document, impl,
+var d, impl,
     SESSION_EXP=60*30,
     COOKIE_EXP=60*60*24*7;
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if (BOOMR.plugins.RT) {
+	return;
+}
 
 // private object
 impl = {
@@ -697,8 +700,8 @@ BOOMR.plugins.RT = {
 		BOOMR.debug("init RT", "rt");
 		if(w !== BOOMR.window) {
 			w = BOOMR.window;
-			d = w.document;
 		}
+		d = w.document;
 
 		BOOMR.utils.pluginConfig(impl, config, "RT",
 					["cookie", "cookie_exp", "session_exp", "strict_referrer"]);

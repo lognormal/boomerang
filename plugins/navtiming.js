@@ -14,6 +14,9 @@ see: http://www.w3.org/TR/navigation-timing/
 // you'll need this.
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if (BOOMR.plugins.NavigationTiming) {
+	return;
+}
 
 // A private object to encapsulate all your implementation details
 var impl = {

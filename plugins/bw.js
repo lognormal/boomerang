@@ -10,6 +10,9 @@ var impl, images;
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
+if(BOOMR.plugins.BW) {
+	return;
+}
 
 // We choose image sizes so that we can narrow down on a bandwidth range as
 // soon as possible the sizes chosen correspond to bandwidth values of
