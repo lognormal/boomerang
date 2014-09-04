@@ -70,8 +70,8 @@ function getMockLoggerTests(Y) {
 			BOOMR.debug = function(msg, src) {
 				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Y.Assert.isFalse(BOOMR.utils.setCookie(""));
-			Y.Assert.isFalse(BOOMR.utils.setCookie("myname"));
+			Y.Assert.isNull(BOOMR.utils.setCookie(""));
+			Y.Assert.isNull(BOOMR.utils.setCookie("myname"));
 		},
 
 		testSetCookieTooLong: function() {
@@ -130,7 +130,7 @@ function getMockLoggerTests(Y) {
 			BOOMR.debug = function(msg, src) {
 				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Y.Assert.isFalse(BOOMR.utils.removeCookie());
+			Y.Assert.isNull(BOOMR.utils.removeCookie());
 			Y.Assert.isFalse(BOOMR.utils.removeCookie("mycookie"));
 		},
 
@@ -282,5 +282,159 @@ function getInitTests(Y) {
 			Y.Mock.verify(mockPlugin);
 		}
 
+	});
+}
+
+function getResTimingTests(Y) {
+	return new Y.Test.Case({
+		name: "Boomerang ResTiming Tests",
+
+		logger: {
+			matcher: undefined,
+			log: function(m, l, s) {
+				if(this.matcher === undefined) {
+					return;
+				}
+				if(this.matcher instanceof RegExp) {
+					Y.Assert.isArray(m.match(this.matcher));
+				}
+				else {
+					Y.Assert.areEqual(this.matcher, m);
+				}
+			}
+		},
+
+		testTrimTimingRounding: function() {
+			Y.Assert.areEqual(0, BOOMR.plugins.ResourceTiming.trimTiming(0, 0), "0 -> 0");
+			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100, 0), "100 -> 100");
+			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0), "100.5 -> 100");
+			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.01, 0), "100.01 -> 100");
+			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0), "100.99 -> 100");
+		},
+
+		testTrimTimingOffset: function() {
+			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100), "100 no offset specified -> 100");
+			Y.Assert.areEqual(99, BOOMR.plugins.ResourceTiming.trimTiming(100, 1), "100 offset 1 -> 99");
+			Y.Assert.areEqual(99, BOOMR.plugins.ResourceTiming.trimTiming(100.12, 1.12), "100.12 offset 1.12 -> 99");
+			Y.Assert.areEqual(0, BOOMR.plugins.ResourceTiming.trimTiming(100, 100), "100 offset 100 -> 0");
+			Y.Assert.areEqual(-1, BOOMR.plugins.ResourceTiming.trimTiming(100, 101), "100 offset 101 -> -1");
+		},
+
+		testConvertToTrieOneNode: function() {
+			var data = {"abc": "abc"};
+			var expected = {
+				"a": {
+					"b": {
+						"c": "abc"
+					}
+				}
+			};
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.convertToTrie(data)), "Trie with one node");
+		},
+
+		testConvertToTrieSimple: function() {
+			var data = {"abc": "abc", "xyz": "xyz"};
+			var expected = {
+				"a": {
+					"b": {
+						"c" : "abc"
+					}
+				},
+				"x": {
+					"y": {
+						"z": "xyz"
+					}
+				}
+			};
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.convertToTrie(data)), "Simple Trie");
+		},
+
+		testConvertToTrieComplex: function() {
+			var data = {"abc": "abc", "abcd": "abcd", "ab": "ab"};
+			var expected = {
+				"a": {
+					"b": {
+						"|": "ab",
+						"c" : {
+							"|" : "abc",
+							"d" : "abcd"
+						}
+					}
+				}
+			};
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.convertToTrie(data)), "Trie with node suffixes");
+		},
+
+		testOptimizeTrieOneNode: function() {
+			var data = {"abc": "abc"};
+			var expected = {
+				"abc": "abc"
+			};
+
+			var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)), "Optimized one node Trie");
+		},
+
+		testOptimizeTrieSimple: function() {
+			var data = {"abc": "abc", "xyz": "xyz"};
+			var expected = {
+				"abc": "abc",
+				"xyz": "xyz"
+			};
+
+			var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)), "Optimized simple Trie");
+		},
+
+		testOptimizeTrieComplex: function() {
+			var data = {"abc": "abc", "abcd": "abcd", "ab": "ab"};
+			var expected = {
+				"ab":
+				{
+					"|": "ab",
+					"c" : {
+						"|" : "abc",
+						"d" : "abcd"
+					}
+				}
+			};
+			var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+			Y.Assert.isTrue(_.isEqual(expected, BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)), "Optimized complex Trie");
+		},
+
+		testFindPerformanceEntriesForFrame: function() {
+			// NOTE: If you change the resources for this test suite (test-boomerang.html), this test will
+			// need to be updated.
+
+			var entries = BOOMR.plugins.ResourceTiming.findPerformanceEntriesForFrame(window);
+			Y.Assert.areEqual(6, entries.length);
+
+			// first entry is faked navigationTiming data
+			Y.Assert.areEqual(0, entries[0].startTime);
+			Y.Assert.areEqual(BOOMR.utils.cleanupURL(document.URL), entries[0].name);
+
+			// second should be YUI script
+			Y.Assert.areEqual("http://yui.yahooapis.com/3.14.0/build/yui/yui-min.js", entries[1].name);
+			Y.Assert.areEqual("script", entries[1].initiatorType);
+		},
+
+		testGetResourceTiming: function() {
+			// NOTE: If you change the resources for this test suite (test-boomerang.html), this test will
+			// need to be updated.
+
+			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming(window);
+
+			// first entry is faked navigationTiming data
+			Y.Assert.areEqual("0", trie[document.URL][0], "other initiator type");
+			Y.Assert.areEqual("0", trie[document.URL][1], "start time 0");
+
+			// other entries should start at YUI CDN
+			Y.Assert.areEqual("object", typeof trie["http://yui.yahooapis.com/"], "YUI trie");
+			Y.Assert.areEqual("3", trie["http://yui.yahooapis.com/"]["3.14.0/build/"]["yui/yui-min.js"][0], "YUI-min.js is script");
+			Y.Assert.areNotEqual("0", trie["http://yui.yahooapis.com/"]["3.14.0/build/"]["yui/yui-min.js"][1], "YUI-min.js started after 0ms");
+		},
 	});
 }

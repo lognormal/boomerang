@@ -26,9 +26,7 @@ you, but we have a few ideas.
 // BOOMR function to download and execute before measuring the
 // time.  We also declare it without `var` so that we can later
 // `delete` it.  This is the only way that works on Internet Explorer
-if (!BOOMR_start) {
-	BOOMR_start = new Date().getTime();
-}
+BOOMR_start = new Date().getTime();
 
 /**
  Check the value of document.domain and fix it if incorrect.
@@ -129,7 +127,7 @@ BOOMR.window = w;
 		if (!createCustomEvent && d.createEvent && d.createEvent( "CustomEvent" )) {
 			createCustomEvent = function (e_name, params) {
 				var evt = d.createEvent( "CustomEvent" );
-				params = params || { cancelable: !1, bubbles: !1 };
+				params = params || { cancelable: false, bubbles: false };
 				evt.initCustomEvent( e_name, params.bubbles, params.cancelable, params.detail );
 
 				return evt;
@@ -150,7 +148,7 @@ BOOMR.window = w;
 	}
 
 	if(!createCustomEvent) {
-		createCustomEvent = function() { return 0; };
+		createCustomEvent = function() { return undefined; };
 	}
 }());
 
@@ -373,7 +371,7 @@ boomr = {
 				// confirm cookie was set (could be blocked by user's settings, etc.)
 				savedval = this.getCookie(name);
 				if(value === savedval) {
-					return 1;
+					return true;
 				}
 				BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedval);
 			}
@@ -381,22 +379,22 @@ boomr = {
 				BOOMR.warn("Cookie too long: " + nameval.length + " " + nameval);
 			}
 
-			return 0;
+			return false;
 		},
 
 		getSubCookies: function(cookie) {
 			var cookies_a,
 			    i, l, kv,
-			    gotcookies=0,
+			    gotcookies=false,
 			    cookies={};
 
 			if(!cookie) {
-				return 0;
+				return null;
 			}
 
 			if(typeof cookie !== "string") {
 				BOOMR.debug("TypeError: cookie is not a string: " + typeof cookie);
-				return 0;
+				return null;
 			}
 
 			cookies_a = cookie.split("&");
@@ -406,15 +404,15 @@ boomr = {
 				if(kv[0]) {
 					kv.push("");	// just in case there's no value
 					cookies[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
-					gotcookies=1;
+					gotcookies=true;
 				}
 			}
 
-			return gotcookies ? cookies : 0;
+			return gotcookies ? cookies : null;
 		},
 
 		removeCookie: function(name) {
-			this.setCookie(name, {}, -86400);
+			return this.setCookie(name, {}, -86400);
 		},
 
 		cleanupURL: function(url) {
@@ -431,8 +429,9 @@ boomr = {
 			if(!url) {
 				return url;
 			}
-			if(url.match(/^\/\//)) { url = location.protocol + url; }
-
+			if(url.match(/^\/\//)) {
+				url = location.protocol + url;
+			}
 			if(!url.match(/^(https?|file):/)) {
 				BOOMR.error("Passed in URL is invalid: " + url);
 				return "";
@@ -450,7 +449,7 @@ boomr = {
 			var i, props=0;
 
 			if(!config || !config[plugin_name]) {
-				return;
+				return false;
 			}
 
 			for(i=0; i<properties.length; i++) {
@@ -460,12 +459,12 @@ boomr = {
 				}
 			}
 
-			return;
+			return (props>0);
 		},
 
 		addListener: function(el, type, fn) {
 			if (el.addEventListener) {
-				el.addEventListener(type, fn, !1);
+				el.addEventListener(type, fn, false);
 			} else if (el.attachEvent) {
 				el.attachEvent( "on" + type, fn );
 			}
@@ -473,7 +472,7 @@ boomr = {
 
 		removeListener: function (el, type, fn) {
 			if (el.removeEventListener) {
-				el.removeEventListener(type, fn, !1);
+				el.removeEventListener(type, fn, false);
 			} else if (el.detachEvent) {
 				el.detachEvent("on" + type, fn);
 			}
@@ -543,7 +542,9 @@ boomr = {
 
 		BOOMR_check_doc_domain();
 
-		if(!config) { config = {}; }
+		if(!config) {
+			config = {};
+		}
 
 		if(config.primary && impl.handlers_attached) {
 			return this;
@@ -571,7 +572,7 @@ boomr = {
 				// config[plugin].enabled has been set to false
 				if( config[k]
 					&& config[k].hasOwnProperty("enabled")
-					&& config[k].enabled === !1
+					&& config[k].enabled === false
 				) {
 					impl.disabled_plugins[k] = 1;
 					continue;
@@ -648,7 +649,7 @@ boomr = {
 			}
 		}());
 
-		impl.handlers_attached = 1;
+		impl.handlers_attached = true;
 		return this;
 	},
 
@@ -661,7 +662,7 @@ boomr = {
 			return this;
 		}
 		impl.fireEvent("page_ready", ev);
-		impl.onloadfired = 1;
+		impl.onloadfired = true;
 		return this;
 	},
 
@@ -845,7 +846,7 @@ boomr = {
 				}
 				if(!this.plugins[k].is_complete()) {
 					BOOMR.debug("Plugin " + k + " is not complete, deferring beacon send");
-					return 0;
+					return false;
 				}
 			}
 		}
@@ -882,7 +883,7 @@ boomr = {
 		// in the `before_beacon` event instead of a simple GET request
 		if(!impl.beacon_url) {
 			BOOMR.debug("No beacon_url, but would have sent: " + BOOMR.utils.objectToString(impl.vars));
-			return 1;
+			return true;
 		}
 
 		data = [];
@@ -904,7 +905,7 @@ boomr = {
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
 			BOOMR.debug("Skipping because we're rate limited");
-			return 1;
+			return this;
 		}
 
 		if(impl.beacon_type === "POST") {
@@ -925,7 +926,7 @@ boomr = {
 			}
 		}
 
-		return 1;
+		return true;
 	}
 
 };

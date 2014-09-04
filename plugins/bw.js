@@ -48,21 +48,21 @@ impl = {
 	base_url: "",
 	timeout: 15000,
 	nruns: 5,
-	//!latency_runs: 10,
+	latency_runs: 10,
 	user_ip: "",
 	cookie_exp: 7*86400,
 	cookie: "BA",
 
 	// state
-	//!results: [],
-	//!latencies: [],
-	//!latency: null,
-	//!runs_left: 0,
-	//!aborted: false,
+	results: [],
+	latencies: [],
+	latency: null,
+	runs_left: 0,
+	aborted: false,
 	complete: true,		// defaults to true so we don't block other plugins if this cannot start.
 				// init sets it to false
-	//!running: false,
-	//!initialized: false,
+	running: false,
+	initialized: false,
 
 	// methods
 
@@ -458,11 +458,11 @@ impl = {
 					bw_time: t
 				});
 
-				return 1;
+				return true;
 			}
 		}
 
-		return 0;
+		return false;
 	}
 
 };
