@@ -61,7 +61,7 @@ function convertToTrie(entries) {
 				// this is a leaf, but we need to go further, so convert it into a branch
 				cur = cur[letter] = { "|": node };
 			} else {
-				if(i == (letters.length - 1)) {
+				if(i === (letters.length - 1)) {
 					// this is the end of our key, and we've hit an existing node.  Add our timings.
 					cur[letter]["|"] = value;
 				} else {
