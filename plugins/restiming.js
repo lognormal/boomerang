@@ -42,7 +42,7 @@ function convertToTrie(entries) {
 	var trie = {};
 
 	for(var url in entries) {
-		if (!entries.hasOwnProperty(url)) {
+		if(!entries.hasOwnProperty(url)) {
 			continue;
 		}
 
@@ -61,7 +61,7 @@ function convertToTrie(entries) {
 				// this is a leaf, but we need to go further, so convert it into a branch
 				cur = cur[letter] = { "|": node };
 			} else {
-				if(i === (letters.length - 1)) {
+				if(i == (letters.length - 1)) {
 					// this is the end of our key, and we've hit an existing node.  Add our timings.
 					cur[letter]["|"] = value;
 				} else {
@@ -139,23 +139,21 @@ function trimTiming(time, startTime) {
  * @param [Frame] frame Frame
  * @return [PerformanceEntry[]] Performance entries
  */
-function gatherPerformanceEntriesForFrame(frame) {
+function findPerformanceEntriesForFrame(frame) {
 	var entries = [];
 
-	// TODO: Get root resource (eg NavTiming)
-	// TODO: Strip out query strings if user asks BOOMR.util.hashQueryString
 	// TODO: Run this onBeacon instead of onLoad?
 	// TODO: Remove page-params ResourceTiming part
 
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(var i = 0; i < frame.frames.length; i++) {
-			var subFrameEntries = gatherPerformanceEntriesForFrame(frame.frames[i]);
+			var subFrameEntries = findPerformanceEntriesForFrame(frame.frames[i]);
 			if(subFrameEntries.length) {
 				// TODO validate this is working
 				console.log(subFrameEntries.lenth + "subframe entries");
 			}
-			entries = entries.concat(gatherPerformanceEntriesForFrame(frame.frames[i]));
+			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i]));
 		}
 	}
 
@@ -166,7 +164,47 @@ function gatherPerformanceEntriesForFrame(frame) {
 			return entries;
 		}
 
-		entries = entries.concat(frame.performance.getEntries("resource"));
+		var navEntries = frame.performance.getEntriesByType("navigation");
+		if(navEntries && navEntries.length == 1) {
+			var navEntry = navEntries[0];
+
+			// replace document with the actual URL
+			entries.push({
+				name: document.URL,
+				startTime: 0,
+				redirectStart: navEntry.redirectStart,
+				redirectEnd: navEntry.redirectEnd,
+				fetchStart: navEntry.fetchStart,
+				domainLookupStart: navEntry.domainLookupStart,
+				domainLookupEnd: navEntry.domainLookupEnd,
+				connectStart: navEntry.connectStart,
+				secureConnectionStart: navEntry.secureConnectionStart,
+				connectEnd: navEntry.connectEnd,
+				requestStart: navEntry.requestStart,
+				responseStart: navEntry.responseStart,
+				responseEnd: navEntry.responseEnd,
+			});
+		} else if(frame.performance.timing){
+			// add a fake entry from the timing object
+			var t = frame.performance.timing;
+			entries.push({
+				name: document.URL,
+				startTime: 0,
+				redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
+				redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
+				fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
+				domainLookupStart: t.domainLookupStart ? (t.domainLookupStart - t.navigationStart) : 0,
+				domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd - t.navigationStart) : 0,
+				connectStart: t.connectStart ? (t.connectStart - t.navigationStart) : 0,
+				secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart - t.navigationStart) : 0,
+				connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
+				requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
+				responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
+				responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0,
+			});
+		}
+
+		entries = entries.concat(frame.performance.getEntriesByType("resource"));
 	}
 	catch(e) {
 		return entries;
@@ -179,8 +217,8 @@ function gatherPerformanceEntriesForFrame(frame) {
  * Gathers performance entries and optimizes the result.
  * @return Optimized performance entries trie
  */
-function gatherPerformanceEntries() {
-	var entries = gatherPerformanceEntriesForFrame(window);
+function getResourceTiming() {
+	var entries = findPerformanceEntriesForFrame(window);
 
 	if(!entries || !entries.length) {
 		return [];
@@ -316,11 +354,13 @@ function gatherPerformanceEntries() {
 
 		data = initiatorType + data;
 
+		var url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
+
 		// if this entry already exists, add a pipe as a separator
-		if(typeof results[e.name] !== "undefined") {
-			results[e.name] += "|" + data;
+		if(typeof results[url] !== "undefined") {
+			results[url] += "|" + data;
 		} else {
-			results[e.name] = data;
+			results[url] = data;
 		}
 	}
 
@@ -336,7 +376,7 @@ var impl = {
 		}
 		BOOMR.removeVar("restiming");
 		if(p && typeof p.getEntriesByType === "function") {
-			r = gatherPerformanceEntries();
+			r = getResourceTiming();
 			if(r) {
 				BOOMR.info("Client supports Resource Timing API", "restiming");
 				BOOMR.addVar({
@@ -361,8 +401,8 @@ BOOMR.plugins.ResourceTiming = {
 	trimTiming: trimTiming,
 	convertToTrie: convertToTrie,
 	optimizeTrie: optimizeTrie,
-	gatherPerformanceEntriesForFrame: gatherPerformanceEntriesForFrame,
-	gatherPerformanceEntries: gatherPerformanceEntries
+	findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
+	getResourceTiming: getResourceTiming
 };
 
 }());
