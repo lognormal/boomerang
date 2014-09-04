@@ -382,6 +382,11 @@ Handler.prototype = {
 
 		if(!res) {
 			BOOMR.debug("No resource matched", "PageVars");
+
+			// If we reach here, that means the url wasn't found.  We'll save it for retrying because it's
+			// possible that it will be added later in the page, but before we beacon
+			impl.mayRetry.push({ handler: this, data: o });
+
 			return false;
 		}
 
@@ -524,6 +529,10 @@ Handler.prototype = {
 				return this.apply(res[i].duration);
 			}
 		}
+
+		// If we reach here, that means the mark/measure wasn't found.  We'll save it for retrying because it's
+		// possible that it will be added later in the page, but before we beacon
+		impl.mayRetry.push({ handler: this, data: o });
 	}
 };
 
@@ -536,6 +545,8 @@ impl = {
 	complete: false,
 	initialized: false,
 	onloadfired: false,
+
+	mayRetry: [],
 
 	done: function(edata, ename) {
 		var i, j, v, hconfig, handler, limpl=impl;
@@ -602,6 +613,8 @@ impl = {
 					}
 		};
 
+		impl.mayRetry = [];
+
 		// Page Groups, AB Tests, Custom Metrics & Timers
 		for(v in hconfig) {
 			if(hconfig.hasOwnProperty(v)) {
@@ -619,6 +632,28 @@ impl = {
 		BOOMR.sendBeacon();
 
 		l = location;
+	},
+
+	retry: function() {
+		var i, handler, o, retries = impl.mayRetry;
+
+		// We can clear out this array now and work off a copy because anything that doesn't
+		// go through on the retry will just re-add itself to the array
+		impl.mayRetry = [];
+
+		for (i=0; i<retries.length; i++) {
+			if (retries[i]) {
+				o = handler = null;
+				try {
+					handler = retries[i].handler;
+					o = retries[i].data;
+					handler[o.type](o);
+				}
+				catch(e) {
+					BOOMR.addError(e, "PageVars.retry." + (o ? o.type : "?") + "." + (handler ? handler.varname : "?"));
+				}
+			}
+		}
 	},
 
 	clearMetrics: function(vars) {
@@ -675,6 +710,10 @@ BOOMR.plugins.PageParams = {
 	},
 
 	is_complete: function() {
+		// We'll run retry() here because it must run before RT's before_beacon handler
+		if (impl.mayRetry.length > 0) {
+			impl.retry();
+		}
 		return impl.complete;
 	}
 };
