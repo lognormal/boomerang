@@ -518,6 +518,9 @@ Handler.prototype = {
 		res = p.getEntriesByType("measure");
 		for(i=0; i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
+				if (res[i].startTime) {
+					BOOMR.addVar(this.varname + "_st", res[i].startTime);
+				}
 				return this.apply(res[i].duration);
 			}
 		}
