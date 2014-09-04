@@ -40,31 +40,17 @@ Handler.prototype = {
 	},
 
 	isValid: function(o) {
-		// Invalid if
-		// object is falsy
-		// or object is not an object
-		// or object does not have a type
-		// or object's type is not a valid handler type
-		// or object does not have a first parameter
-		if(!o || typeof o !== "object" || !o.hasOwnProperty("type")
-		      || typeof this[o.type] !== "function") {
-			return false;
-		}
-
-		// Also invalid if
-		// handler does not have a varname and object does not have a label
-		if(!this.varname && !o.label) {
-			return false;
-		}
-
-		return true;
+		return (						// Valid iff
+			o						// object is non-falsy
+			&& typeof o === "object"			// and object is an object
+			&& o.hasOwnProperty("type")			// and object has a type attribute
+			&& typeof this[o.type] === "function"		// and object's type attribute is a valid handler type
+			&& (this.varname || o.label)			// and handler has a varname or object has a label
+		);
 	},
 
 	cleanUp: function(s) {
-		if(!s) {
-			return s;
-		}
-		return s.replace(this.sanitizeRE, "");
+		return s ? s.replace(this.sanitizeRE, "") : s;
 	},
 
 	handleRegEx: function(re, extract) {
