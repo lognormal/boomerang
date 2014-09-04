@@ -26,9 +26,7 @@ you, but we have a few ideas.
 // BOOMR function to download and execute before measuring the
 // time.  We also declare it without `var` so that we can later
 // `delete` it.  This is the only way that works on Internet Explorer
-if (!BOOMR_start) {
-	BOOMR_start = new Date().getTime();
-}
+BOOMR_start = new Date().getTime();
 
 /**
  Check the value of document.domain and fix it if incorrect.
