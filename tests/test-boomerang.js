@@ -307,9 +307,9 @@ function getResTimingTests(Y) {
 		testTrimTimingRounding: function() {
 			Y.Assert.areEqual(0, BOOMR.plugins.ResourceTiming.trimTiming(0, 0), "0 -> 0");
 			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100, 0), "100 -> 100");
-			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0), "100.5 -> 100");
+			Y.Assert.areEqual(101, BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0), "100.5 -> 101");
 			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.01, 0), "100.01 -> 100");
-			Y.Assert.areEqual(100, BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0), "100.99 -> 100");
+			Y.Assert.areEqual(101, BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0), "100.99 -> 101");
 		},
 
 		testTrimTimingOffset: function() {
