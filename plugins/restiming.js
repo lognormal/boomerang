@@ -39,19 +39,20 @@ var initiatorTypes = {
  * @return A trie
  */
 function convertToTrie(entries) {
-	var trie = {};
+	var trie = {}, url, i, value, letters, letter, cur, node;
 
-	for(var url in entries) {
+	for(url in entries) {
 		if(!entries.hasOwnProperty(url)) {
 			continue;
 		}
 
-		var value = entries[url],
-			letters = url.split(""),
-			cur = trie;
+		value = entries[url];
+		letters = url.split("");
+		cur = trie;
 
-		for(var i = 0; i < letters.length; i++) {
-			var letter = letters[i], node = cur[letter];
+		for(i = 0; i < letters.length; i++) {
+			letter = letters[i];
+			node = cur[letter];
 
 			if(typeof node === "undefined") {
 				// nothing exists yet, create either a leaf if this is the end of the word,
@@ -61,7 +62,7 @@ function convertToTrie(entries) {
 				// this is a leaf, but we need to go further, so convert it into a branch
 				cur = cur[letter] = { "|": node };
 			} else {
-				if(i == (letters.length - 1)) {
+				if(i === (letters.length - 1)) {
 					// this is the end of our key, and we've hit an existing node.  Add our timings.
 					cur[letter]["|"] = value;
 				} else {
@@ -82,12 +83,12 @@ function convertToTrie(entries) {
  * @param [boolean] top Whether or not this is the root node
  */
 function optimizeTrie(cur, top) {
-	var num = 0;
+	var num = 0, node, ret, topNode;
 
-	for(var node in cur) {
+	for(node in cur) {
 		if(typeof cur[node] === "object") {
 			// optimize children
-			var ret = optimizeTrie(cur[node], false);
+			ret = optimizeTrie(cur[node], false);
 			if(ret) {
 				// swap the current leaf with compressed one
 				delete cur[node];
@@ -102,7 +103,7 @@ function optimizeTrie(cur, top) {
 		// compress single leafs
 		if(top) {
 			// top node gets special treatment so we're not left with a {node:,value:} at top
-			var topNode = {};
+			topNode = {};
 			topNode[node] = cur[node];
 			return topNode;
 		} else {
@@ -127,32 +128,27 @@ function optimizeTrie(cur, top) {
  */
 function trimTiming(time, startTime) {
 	// strip from microseconds to milliseconds only
-	var timeMs = Math.floor(time ? time : 0);
-	var startTimeMs = Math.floor(startTime ? startTime : 0);
+	var timeMs = Math.round(time ? time : 0),
+	    startTimeMs = Math.round(startTime ? startTime : 0);
 
 	return timeMs === 0 ? 0 : (timeMs - startTimeMs);
 }
 
 /**
- * Gets all of the performance entries for a frame and its' subframes
+ * Gets all of the performance entries for a frame and its subframes
  *
  * @param [Frame] frame Frame
  * @return [PerformanceEntry[]] Performance entries
  */
 function findPerformanceEntriesForFrame(frame) {
-	var entries = [];
+	var entries = [], i, navEntries, navEntry, t;
 
 	// TODO: Run this onBeacon instead of onLoad?
 	// TODO: Remove page-params ResourceTiming part
 
 	// get sub-frames' entries first
 	if(frame.frames) {
-		for(var i = 0; i < frame.frames.length; i++) {
-			var subFrameEntries = findPerformanceEntriesForFrame(frame.frames[i]);
-			if(subFrameEntries.length) {
-				// TODO validate this is working
-				console.log(subFrameEntries.lenth + "subframe entries");
-			}
+		for(i = 0; i < frame.frames.length; i++) {
 			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i]));
 		}
 	}
@@ -164,9 +160,9 @@ function findPerformanceEntriesForFrame(frame) {
 			return entries;
 		}
 
-		var navEntries = frame.performance.getEntriesByType("navigation");
-		if(navEntries && navEntries.length == 1) {
-			var navEntry = navEntries[0];
+		navEntries = frame.performance.getEntriesByType("navigation");
+		if(navEntries && navEntries.length === 1) {
+			navEntry = navEntries[0];
 
 			// replace document with the actual URL
 			entries.push({
@@ -182,11 +178,11 @@ function findPerformanceEntriesForFrame(frame) {
 				connectEnd: navEntry.connectEnd,
 				requestStart: navEntry.requestStart,
 				responseStart: navEntry.responseStart,
-				responseEnd: navEntry.responseEnd,
+				responseEnd: navEntry.responseEnd
 			});
 		} else if(frame.performance.timing){
 			// add a fake entry from the timing object
-			var t = frame.performance.timing;
+			t = frame.performance.timing;
 			entries.push({
 				name: document.URL,
 				startTime: 0,
@@ -200,7 +196,7 @@ function findPerformanceEntriesForFrame(frame) {
 				connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
 				requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
 				responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
-				responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0,
+				responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0
 			});
 		}
 
@@ -218,31 +214,29 @@ function findPerformanceEntriesForFrame(frame) {
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
-	var entries = findPerformanceEntriesForFrame(window);
+	var entries = findPerformanceEntriesForFrame(window),
+	    i, e, j, results = {}, initiatorType, url;
 
 	if(!entries || !entries.length) {
 		return [];
 	}
 
-	var results = {};
+	for(i = 0; i < entries.length; i++) {
+		e = entries[i];
 
-	for(var i = 0; i < entries.length; i++) {
-		var e = entries[i];
-
-		var startTime = trimTiming(e.startTime, 0);
-		var redirectStart = trimTiming(e.redirectStart, e.startTime);
-		var redirectEnd = trimTiming(e.redirectEnd, e.startTime);
-		var fetchStart = trimTiming(e.fetchStart, e.startTime);
-		var domainLookupStart = trimTiming(e.domainLookupStart, e.startTime);
-		var domainLookupEnd = trimTiming(e.domainLookupEnd, e.startTime);
-		var connectStart = trimTiming(e.connectStart, e.startTime);
-		var secureConnectionStart = trimTiming(e.secureConnectionStart, e.startTime);
-		var connectEnd = trimTiming(e.connectEnd, e.startTime);
-		var requestStart = trimTiming(e.requestStart, e.startTime);
-		var responseStart = trimTiming(e.responseStart, e.startTime);
-		var responseEnd = trimTiming(e.responseEnd, e.startTime);
-
-		var data;
+		var startTime = trimTiming(e.startTime, 0),
+		    redirectStart = trimTiming(e.redirectStart, e.startTime),
+		    redirectEnd = trimTiming(e.redirectEnd, e.startTime),
+		    fetchStart = trimTiming(e.fetchStart, e.startTime),
+		    domainLookupStart = trimTiming(e.domainLookupStart, e.startTime),
+		    domainLookupEnd = trimTiming(e.domainLookupEnd, e.startTime),
+		    connectStart = trimTiming(e.connectStart, e.startTime),
+		    secureConnectionStart = trimTiming(e.secureConnectionStart, e.startTime),
+		    connectEnd = trimTiming(e.connectEnd, e.startTime),
+		    requestStart = trimTiming(e.requestStart, e.startTime),
+		    responseStart = trimTiming(e.responseStart, e.startTime),
+		    responseEnd = trimTiming(e.responseEnd, e.startTime),
+		    data;
 
 		if(redirectStart || redirectEnd) {
 			// redirects
@@ -338,7 +332,7 @@ function getResourceTiming() {
 		}
 
 		// convert all to base 36
-		for(var j = 0; j < data.length; j++) {
+		for(j = 0; j < data.length; j++) {
 			data[j] = data[j].toString(36);
 		}
 
@@ -346,15 +340,14 @@ function getResourceTiming() {
 		data = data.join(",");
 
 		// prefix initiatorType to the string
-		var initiatorType = initiatorTypes[e.initiatorType];
+		initiatorType = initiatorTypes[e.initiatorType];
 		if(typeof initiatorType === "undefined") {
 			initiatorType = 0;
 		}
-		initiatorType = initiatorType.toString(36);
 
 		data = initiatorType + data;
 
-		var url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
+		url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
 
 		// if this entry already exists, add a pipe as a separator
 		if(typeof results[url] !== "undefined") {
