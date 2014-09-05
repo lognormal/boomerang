@@ -156,7 +156,7 @@ function findPerformanceEntriesForFrame(frame) {
 	try {
 		if(!("performance" in frame) ||
 			!frame.performance ||
-			!frame.performance.getEntries) {
+			!frame.performance.getEntriesByType) {
 			return entries;
 		}
 
