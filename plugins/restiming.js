@@ -385,6 +385,7 @@ var impl = {
 BOOMR.plugins.ResourceTiming = {
 	init: function() {
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
+		BOOMR.subscribe("page_unload", impl.done, null, impl);
 		return this;
 	},
 	is_complete: function() {
