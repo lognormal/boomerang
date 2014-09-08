@@ -311,9 +311,11 @@ BOOMR.plugins.ResourceTiming = {
 		if(p && typeof p.getEntriesByType === "function") {
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
 			BOOMR.subscribe("page_unload", impl.done, null, impl);
+		} else {
+			impl.complete = true;
 		}
 
-		impl.initialized = this.complete = true;
+		impl.initialized = true;
 
 		return this;
 	},
