@@ -234,6 +234,18 @@ function getResourceTiming() {
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
 
+		//
+		// Compress the RT data into a string:
+		//
+		// 1. Start with the initiator type, which is mapped to a number.
+		// 2. Put the timestamps into an array in a set order (reverse chronological order),
+		//    which pushes timestamps that are more likely to be zero (duration since
+		//    startTime) towards the end of the array (eg redirect* and domainLookup*).
+		// 3. Convert these timestamps to Base36, with empty or zero times being an empty string
+		// 4. Join the array on commas
+		// 5. Trim all trailing empty commas (eg ",,,")
+		//
+
 		// prefix initiatorType to the string
 		initiatorType = initiatorTypes[e.initiatorType];
 		if(typeof initiatorType === "undefined") {
@@ -254,10 +266,10 @@ function getResourceTiming() {
 			trimTiming(e.redirectStart, e.startTime)
 		].map(toBase36).join(",").replace(/,+$/, "");
 
-		url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
+		url = BOOMR.utils.cleanupURL(e.name);
 
 		// if this entry already exists, add a pipe as a separator
-		if(typeof results[url] !== "undefined") {
+		if(results[url] !== undefined) {
 			results[url] += "|" + data;
 		} else {
 			results[url] = data;
@@ -271,19 +283,17 @@ var impl = {
 	complete: false,
 	initialized: false,
 	done: function() {
-		var p = BOOMR.window.performance, r;
-		if(impl.complete) {
+		var r;
+		if(this.complete) {
 			return;
 		}
 		BOOMR.removeVar("restiming");
-		if(p && typeof p.getEntriesByType === "function") {
-			r = getResourceTiming();
-			if(r) {
-				BOOMR.info("Client supports Resource Timing API", "restiming");
-				BOOMR.addVar({
-					restiming: r
-				});
-			}
+		r = getResourceTiming();
+		if(r) {
+			BOOMR.info("Client supports Resource Timing API", "restiming");
+			BOOMR.addVar({
+				restiming: r
+			});
 		}
 		this.complete = true;
 		BOOMR.sendBeacon();
@@ -303,7 +313,7 @@ BOOMR.plugins.ResourceTiming = {
 			BOOMR.subscribe("page_unload", impl.done, null, impl);
 		}
 
-		impl.initialized = true;
+		impl.initialized = this.complete = true;
 
 		return this;
 	},
