@@ -282,6 +282,7 @@ function getResourceTiming() {
 
 var impl = {
 	complete: false,
+	initialized: false,
 	done: function() {
 		var p = BOOMR.window.performance, r;
 		if(impl.complete) {
@@ -304,8 +305,19 @@ var impl = {
 
 BOOMR.plugins.ResourceTiming = {
 	init: function() {
-		BOOMR.subscribe("page_ready", impl.done, null, impl);
-		BOOMR.subscribe("page_unload", impl.done, null, impl);
+		var p = BOOMR.window.performance;
+
+		if(impl.initialized) {
+			return this;
+		}
+
+		if(p && typeof p.getEntriesByType === "function") {
+			BOOMR.subscribe("page_ready", impl.done, null, impl);
+			BOOMR.subscribe("page_unload", impl.done, null, impl);
+		}
+
+		impl.initialized = true;
+
 		return this;
 	},
 	is_complete: function() {
