@@ -234,19 +234,6 @@ function getResourceTiming() {
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
 
-		var startTime = trimTiming(e.startTime, 0),
-		    redirectStart = trimTiming(e.redirectStart, e.startTime),
-		    redirectEnd = trimTiming(e.redirectEnd, e.startTime),
-		    fetchStart = trimTiming(e.fetchStart, e.startTime),
-		    domainLookupStart = trimTiming(e.domainLookupStart, e.startTime),
-		    domainLookupEnd = trimTiming(e.domainLookupEnd, e.startTime),
-		    connectStart = trimTiming(e.connectStart, e.startTime),
-		    secureConnectionStart = trimTiming(e.secureConnectionStart, e.startTime),
-		    connectEnd = trimTiming(e.connectEnd, e.startTime),
-		    requestStart = trimTiming(e.requestStart, e.startTime),
-		    responseStart = trimTiming(e.responseStart, e.startTime),
-		    responseEnd = trimTiming(e.responseEnd, e.startTime);
-
 		// prefix initiatorType to the string
 		initiatorType = initiatorTypes[e.initiatorType];
 		if(typeof initiatorType === "undefined") {
@@ -254,17 +241,17 @@ function getResourceTiming() {
 		}
 
 		data = initiatorType + [
-			startTime,
-			responseEnd,
-			responseStart,
-			requestStart,
-			connectEnd,
-			secureConnectionStart,
-			connectStart,
-			domainLookupEnd,
-			domainLookupStart,
-			redirectEnd,
-			redirectStart
+			trimTiming(e.startTime, 0),
+			trimTiming(e.responseEnd, e.startTime),
+			trimTiming(e.responseStart, e.startTime),
+			trimTiming(e.requestStart, e.startTime),
+			trimTiming(e.connectEnd, e.startTime),
+			trimTiming(e.secureConnectionStart, e.startTime),
+			trimTiming(e.connectStart, e.startTime),
+			trimTiming(e.domainLookupEnd, e.startTime),
+			trimTiming(e.domainLookupStart, e.startTime),
+			trimTiming(e.redirectEnd, e.startTime),
+			trimTiming(e.redirectStart, e.startTime)
 		].map(toBase36).join(",").replace(/,+$/, "");
 
 		url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
