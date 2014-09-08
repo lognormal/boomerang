@@ -428,8 +428,8 @@ function getResTimingTests(Y) {
 			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming(window);
 
 			// first entry is faked navigationTiming data
+			Y.Assert.areEqual("string", typeof trie[document.URL][0], "document URL exists");
 			Y.Assert.areEqual("0", trie[document.URL][0], "other initiator type");
-			Y.Assert.areEqual("0", trie[document.URL][1], "start time 0");
 
 			// other entries should start at YUI CDN
 			Y.Assert.areEqual("object", typeof trie["http://yui.yahooapis.com/"], "YUI trie");

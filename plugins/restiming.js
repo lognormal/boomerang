@@ -210,12 +210,22 @@ function findPerformanceEntriesForFrame(frame) {
 }
 
 /**
+ * Converts a number to base-36
+ *
+ * @param [number] n Number
+ * @return Base-36 number, or empty string if undefined.
+ */
+function toBase36(n) {
+	return n ? n.toString(36) : "";
+}
+
+/**
  * Gathers performance entries and optimizes the result.
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
 	var entries = findPerformanceEntriesForFrame(window),
-	    i, e, j, results = {}, initiatorType, url;
+	    i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
 		return [];
@@ -235,109 +245,7 @@ function getResourceTiming() {
 		    connectEnd = trimTiming(e.connectEnd, e.startTime),
 		    requestStart = trimTiming(e.requestStart, e.startTime),
 		    responseStart = trimTiming(e.responseStart, e.startTime),
-		    responseEnd = trimTiming(e.responseEnd, e.startTime),
-		    data;
-
-		if(redirectStart || redirectEnd) {
-			// redirects
-			data = [
-				startTime,
-				redirectStart,
-				redirectEnd,
-				fetchStart,
-				domainLookupStart,
-				domainLookupEnd,
-				connectStart,
-				secureConnectionStart,
-				connectEnd,
-				requestStart,
-				responseStart,
-				responseEnd
-			];
-		} else {
-			// no redirects
-			if(secureConnectionStart ||
-				(fetchStart && (domainLookupStart || domainLookupEnd || connectStart || connectEnd))) {
-				// secure connection or [fetch start and DNS/TCP]
-				data = [
-					startTime,
-					fetchStart,
-					domainLookupStart,
-					domainLookupEnd,
-					connectStart,
-					secureConnectionStart,
-					connectEnd,
-					requestStart,
-					responseStart,
-					responseEnd
-				];
-			} else {
-				if(domainLookupStart || domainLookupEnd || connectStart || connectEnd) {
-					// DNS or TCP
-					data = [
-						startTime,
-						domainLookupStart,
-						domainLookupEnd,
-						connectStart,
-						connectEnd,
-						requestStart,
-						responseStart,
-						responseEnd
-					];
-				} else {
-					// no DNS or TCP
-					if(requestStart) {
-						// request start
-						data = [
-							startTime,
-							fetchStart,
-							requestStart,
-							responseStart,
-							responseEnd
-						];
-					} else {
-						// no request start
-						if(responseStart) {
-							// response start
-							data = [
-								startTime,
-								fetchStart,
-								responseStart,
-								responseEnd
-							];
-						} else {
-							// no response
-							if(fetchStart) {
-								// includes fetch
-								data = [
-									startTime,
-									fetchStart,
-									responseEnd
-								];
-							} else {
-								// no fetch diff
-								if(responseEnd) {
-									data = [
-										startTime,
-										responseEnd
-									];
-								} else {
-									data = [startTime];
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// convert all to base 36
-		for(j = 0; j < data.length; j++) {
-			data[j] = data[j].toString(36);
-		}
-
-		// join via commas into a string
-		data = data.join(",");
+		    responseEnd = trimTiming(e.responseEnd, e.startTime);
 
 		// prefix initiatorType to the string
 		initiatorType = initiatorTypes[e.initiatorType];
@@ -345,7 +253,19 @@ function getResourceTiming() {
 			initiatorType = 0;
 		}
 
-		data = initiatorType + data;
+		data = initiatorType + [
+			startTime,
+			responseEnd,
+			responseStart,
+			requestStart,
+			connectEnd,
+			secureConnectionStart,
+			connectStart,
+			domainLookupEnd,
+			domainLookupStart,
+			redirectEnd,
+			redirectStart
+		].map(toBase36).join(",").replace(/,+$/, "");
 
 		url = BOOMR.utils.cleanupURL(e.name.replace(/#.*/, ""));
 
