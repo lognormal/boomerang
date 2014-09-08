@@ -477,7 +477,7 @@ boomr = {
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "user_ip", "strip_query_string"];
+		    properties = ["beacon_url", "user_ip", "strip_query_string", "secondary_beacons"];
 
 		BOOMR_check_doc_domain();
 
@@ -765,7 +765,7 @@ boomr = {
 	},
 
 	sendBeacon: function(beacon_url_override) {
-		var k, url, img, nparams=0, errors=[];
+		var k, url, furl, img, nparams=0, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -845,9 +845,9 @@ boomr = {
 		}
 		BOOMR.removeVar("qt");
 
-		url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
+		furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
 
-		BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
+		BOOMR.debug("Sending url: " + furl.replace(/&/g, "\n\t"));
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
@@ -862,7 +862,15 @@ boomr = {
 		// only send beacon if we actually have something to beacon back
 		if(nparams) {
 			img = new Image();
-			img.src=url;
+			img.src=furl;
+		}
+
+		if (impl.secondary_beacons) {
+			for(k = 0; k<impl.secondary_beacons.length; k++) {
+				furl = impl.secondary_beacons[k] + "?" + url.join("&");
+				img = new Image();
+				img.src=furl;
+			}
 		}
 
 		return true;
