@@ -66,35 +66,146 @@ to determine if the Resource Timing plugin has finished.
 
 <h2 id="beacon">Beacon Parameters</h2>
 <p>
-The ResourceTiming plugin adds an array named <code>restiming</code> to the beacon data,
-items in the array representing resources on the page in the order that they were loaded.
-Each item contains properties that correspond to attributes from the
-<a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming">PerformanceResourceTiming interface</a>.
+The ResourceTiming plugin adds an object named <code>restiming</code> to the beacon data.
+</p>
+<p>
+<code>restiming</code> is an optimized <a href="http://en.wikipedia.org/wiki/Trie">Trie</a> structure, where the
+keys are the ResourceTiming URLs, and the values correspond to those URLs'
+<a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming">PerformanceResourceTiming timestamps</a>:
+</p>
+<code>
+<pre>
+{ "[url]": "[data]"}
+</pre>
+</code>
+<p>
+The Trie structure is used to minimize the data transmitted from the ResourceTimings.
+</p>
+<p>
+Keys in the Trie are the ResourceTiming URLs.  For example, with a root page and three resources:
+</p>
+<ul>
+    <li><code>http://abc.com/</code></li>
+    <li><code>http://abc.com/js/foo.js</code></li>
+    <li><code>http://abc.com/css/foo.css</code></li>
+    <li><code>http://abc.com/css/foo.png</code> (downloaded twice)</li>
+</ul>
+<p>
+Then the Trie might look like this:
+</p>
+<code>
+<pre>
+// Example 1
+{
+    "http://abc.com/":
+    {
+        "|": "0,2",
+        "js/foo.js": "3a,1",
+        "css/": {
+            "foo.css": "2b,2",
+            "foo.png": "1c,3|1d,a"
+        }
+    }
+}
+</pre>
+</code>
+<p>
+If a resource's URL is a prefix of another resource, then it terminates with a pipe symbol (<code>|</code>). 
+In Example 1, <code>http://abc.com</code> (the root page) is a prefix of <code>http://abc.com/js/foo.js</code>,
+so it is listed as <code>http://abc.com|</code> in the Trie.
+</p>
+<p>
+If there is more than one ResourceTiming entry for a URL, each entry is separated by a pipe symbol (<code>|</code>)
+in the <code>data</code>. In Example 1 above, <code>foo.png</code> has been downloaded twice, so it is listed with two separate page loads,
+<code>1c,3</code> and <code>1d,a</code>.
+</p>
+<p>
+The value of each key is a string, which contains the following components:
+<code>
+<pre>
+data = "[initiatorType][timings]"
+</pre>
+</code>
+<p>
+<code>initiatorType</code> is a simple map from the 
+<a href="http://www.w3.org/TR/resource-timing/#dom-performanceresourcetiming-initiatortype">PerformanceResourceTiming initiatorType</a> 
+(which is a string) to an integer, according to the following table:
+</p>
+<table>
+    <tr><th><code>initiatorType</code></th><th><code>mapped value</code></th></tr>
+    <tr><td><code>other</code></td><td><code>0</code></td></tr>
+    <tr><td><code>img</code></td><td><code>1</code></td></tr>
+    <tr><td><code>link</code></td><td><code>2</code></td></tr>
+    <tr><td><code>script</code></td><td><code>3</code></td></tr>
+    <tr><td><code>css</code></td><td><code>4</code></td></tr>
+    <tr><td><code>xmlhttprequest</code></td><td><code>5</code></td></tr>
+</table>
+<p>
+<code>timings</code> is a string of <a href="http://en.wikipedia.org/wiki/Base_36">Base-36</a> encoded timestamps from
+the <a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming">PerformanceResourceTiming</a> interface.  The values in the string
+are separated by commas:
+</p>
+<code>
+<pre>
+timings = "[startTime],[responseEnd],[responseStart],[requestStart],[connectEnd],[secureConnectionStart],[connectStart],[domainLookupEnd],[domainLookupStart],[redirectEnd],[redirectStart]"
+</pre>
+</code>
+<p>
+<a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming"><code>startTime</code></a> is a 
+<a href="http://www.w3.org/TR/hr-time/#domhighrestimestamp">DOMHighResTimeStamp</a> from when the resource started (Base 36).
+</p>
+<p>
+<a href="http://www.w3.org/TR/resource-timing/#performanceresourcetiming">All other timestamps</a> are offsets (rounded to milliseconds) 
+from <code>startTime</code> (Base 36).  For example, <code>responseEnd</code> is calculated as:
+</p>
+<code>
+<pre>
+responseEnd: base36(round(responseEnd - startTime))
+</pre>
+</code>
+<p>
+If the resulting timestamp is 0, it is replaced with an empty string (<code>""</code>).
+</p>
+<p>
+All trailing commas are removed from the final string.  This compresses the timing string from timestamps
+that are often <code>0</code>.  For example, here is what a fully-redirected resource might look like:
+</p>
+<code>
+<pre>
+{ "http://abc.com/this-resource-was-redirected": "01,1,1,1,1,1,1,1,1,1,1" }
+</pre>
+</code>
+<p>
+While a resource that was loaded from the cache (and thus only has <code>startTime</code> and <code>responseEnd</code>
+timestamps) might look like this:
+</p>
+<code>
+<pre>
+{ "http://abc.com/this-resource-was-redirected": "01,1" }
+</pre>
+</code>
+<p>
 Note that some of the metrics are restricted and will not be provided cross-origin
 unless the <a href="http://www.w3.org/TR/resource-timing/#timing-allow-origin">Timing-Allow-Origin header</a> permits.
 </p>
-<table>
-<tr>
-  <th><code>restiming</code> array item property</th>
-  <th>Resource Timing attribute</th>
-</tr>
-<tr><td><code>rt_name</code></td><td><code>name</code></td></tr>
-<tr><td><code>rt_in_type</code></td><td><code>initiatorType</code></td></tr>
-<tr><td><code>rt_st</code></td><td><code>startTime</code></td></tr>
-<tr><td><code>rt_dur</code></td><td><code>duration</code></td></tr>
-<tr><td><code>rt_red_st</code></td><td><code>redirectStart</code></td></tr>
-<tr><td><code>rt_red_end</code></td><td><code>redirectEnd</code></td></tr>
-<tr><td><code>rt_fet_st</code></td><td><code>fetchStart</code></td></tr>
-<tr><td><code>rt_dns_st</code></td><td><code>domainLookupStart</code></td></tr>
-<tr><td><code>rt_dns_end</code></td><td><code>domainLookupEnd</code></td></tr>
-<tr><td><code>rt_con_st</code></td><td><code>connectStart</code></td></tr>
-<tr><td><code>rt_con_end</code></td><td><code>connectEnd</code></td></tr>
-<tr><td><code>rt_scon_st</code></td><td><code>secureConnectionStart</code></td></tr>
-<tr><td><code>rt_req_st</code></td><td><code>requestStart</code></td></tr>
-<tr><td><code>rt_res_st</code></td><td><code>responseStart</code></td></tr>
-<tr><td><code>rt_res_end</code></td><td><code>responseEnd</code></td></tr>
-</table>
-
+<p>
+Putting this all together, let's look at <code>http://abc.com/css/foo.png</code> in Example 1.  We find it was downloaded twice <code>"1c,3|1d,a"</code>:
+</p>
+<ol>
+    <li><code>1c,3</code>:
+    <ul>
+        <li><code>1</code>: <code>initiatorType = 1</code> (IMG)</li>
+        <li><code>c</code>: <code>startTime = c</code> (12ms)</li>
+        <li><code>3</code>: <code>responseEnd = 3</code> (3ms from <code>startTime</code>, or at 15ms)</li>
+    </ul>
+    <li><code>1d,a</code>:
+    <ul>
+        <li><code>1</code>: <code>initiatorType = 1</code> (IMG)</li>
+        <li><code>d</code>: <code>startTime = d</code> (13ms)</li>
+        <li><code>2</code>: <code>responseEnd = a</code> (10ms from <code>startTime</code>, or at 23ms)</li>
+    </ul>
+</ol>
+<p>
 <p class="perma-link">
 The latest code and docs are available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
 </p>
