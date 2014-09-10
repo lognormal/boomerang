@@ -143,9 +143,6 @@ function trimTiming(time, startTime) {
 function findPerformanceEntriesForFrame(frame) {
 	var entries = [], i, navEntries, navEntry, t;
 
-	// TODO: Run this onBeacon instead of onLoad?
-	// TODO: Remove page-params ResourceTiming part
-
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(i = 0; i < frame.frames.length; i++) {
