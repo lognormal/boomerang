@@ -2,8 +2,8 @@
 
 for i in boomerang.js plugins/*.js; do
 	before=$(cat $i | wc -c)
-	int=$(cat $i | java -jar ~/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js | wc -c)
-	after=$(cat $i | java -jar ~/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js | gzip -c | wc -c)
+	int=$(cat $i | java -jar ./lib/yuicompressor-2.4.8.jar --type js | wc -c)
+	after=$(cat $i | java -jar ./lib/yuicompressor-2.4.8.jar --type js | gzip -c | wc -c)
 	echo "$after <= $int <= $before : $i"
 done | sort -n
 
