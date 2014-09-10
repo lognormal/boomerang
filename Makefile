@@ -215,7 +215,7 @@ lognormal-debug: lognormal-plugins
 ###
 mpulse-test: lognormal-debug
 	echo "building $(API_KEY).js"
-	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,$(SERVER)/,; s,%config_host%%config_path%,$(SERVER)/boomerang/config.js,; s,%client_apikey%,$(API_KEY),; s,%config_url_suffix%,,; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,,;" > $(API_KEY).js
+	cat build/boomerang-$(VERSION).$(DATE)-debug.js | sed -e "s,%beacon_dest_host%%beacon_dest_path%,$(SERVER)/,; s,%config_host%%config_path%,$(SERVER)/boomerang/config.js,; s,%client_apikey%,$(API_KEY),; s,%config_url_suffix%,,; s,/\*BEGIN DEBUG TOKEN\*/log:null\,/\*END DEBUG TOKEN\*/,secondary_beacons:[$(SECONDARY_BEACONS)]\,,;" > $(API_KEY).js
 	chmod a+r $(API_KEY).js
 	scp -C $(API_KEY).js $(STANDALONE_PLUGINS) bacon10:/var/www/lognormal-static/boomerang/ 2>/dev/null;
 

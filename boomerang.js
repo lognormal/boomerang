@@ -538,7 +538,7 @@ boomr = {
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "beacon_type", "user_ip", "strip_query_string"];
+		    properties = ["beacon_url", "beacon_type", "user_ip", "strip_query_string", "secondary_beacons"];
 
 		BOOMR_check_doc_domain();
 
@@ -826,7 +826,7 @@ boomr = {
 	},
 
 	sendBeacon: function(beacon_url_override) {
-		var k, data, url, img, nparams, errors=[];
+		var k, data, url, furl, img, nparams, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -913,16 +913,16 @@ boomr = {
 		} else {
 			// if there are already url parameters in the beacon url,
 			// change the first parameter prefix for the boomerang url parameters to &
-			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + data;
+			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
 
 			// using 2000 here as a de facto maximum URL length based on:
 			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
-			if(url.length > 2000 && impl.beacon_type === "AUTO") {
+			if(furl.length > 2000 && impl.beacon_type === "AUTO") {
 				BOOMR.utils.postData(data);
 			} else {
-				BOOMR.debug("Sending url: " + url.replace(/&/g, "\n\t"));
+				BOOMR.debug("Sending url: " + furl.replace(/&/g, "\n\t"));
 				img = new Image();
-				img.src=url;
+				img.src=furl;
 			}
 		}
 
