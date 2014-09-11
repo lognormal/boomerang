@@ -913,7 +913,7 @@ boomr = {
 		} else {
 			// if there are already url parameters in the beacon url,
 			// change the first parameter prefix for the boomerang url parameters to &
-			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + data.join("&");
+			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + data;
 
 			// using 2000 here as a de facto maximum URL length based on:
 			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
