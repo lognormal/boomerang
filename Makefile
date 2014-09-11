@@ -189,7 +189,7 @@ new-soasta-push: soasta
 
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
-lognormal : MINIFIER := java -jar /Users/philip/src/3rd-party/yui/yuicompressor/build/yuicompressor-2.4.8pre.jar --type js
+lognormal : MINIFIER := java -jar ./lib/yuicompressor-2.4.8.jar --type js
 
 lognormal-plugins: boomerang-$(VERSION).$(DATE)-debug.js
 
