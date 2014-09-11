@@ -517,13 +517,14 @@ boomr = {
 
 			input.name = "data";
 
-			if (window.JSON) {
-				form.enctype = "text/plain";
-				input.value = JSON.stringify(impl.vars);
-			} else {
+			// TODO: Determine if we want to send as JSON
+			//if (window.JSON) {
+			//	form.enctype = "text/plain";
+			//	input.value = JSON.stringify(impl.vars);
+			//} else {
 				form.enctype = "application/x-www-form-urlencoded";
 				input.value = urlenc;
-			}
+			//}
 
 			document.body.appendChild(iframe);
 			form.appendChild(input);
