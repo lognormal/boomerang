@@ -289,7 +289,7 @@ var impl = {
 		if(r) {
 			BOOMR.info("Client supports Resource Timing API", "restiming");
 			BOOMR.addVar({
-				restiming: r
+				restiming: JSON.stringify(r)
 			});
 		}
 		this.complete = true;
