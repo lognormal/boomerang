@@ -111,7 +111,7 @@ if(BOOMR.version) {
 BOOMR.version = "0.9";
 BOOMR.window = w;
 
-BOOMR.plugins = BOOMR.plugins || {};
+if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 
 // CustomEvent proxy for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
 (function() {
@@ -956,8 +956,6 @@ for(ident in boomr) {
 	}
 }
 }());
-
-BOOMR.plugins = BOOMR.plugins || {};
 
 dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
 
