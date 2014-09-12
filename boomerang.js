@@ -480,54 +480,52 @@ boomr = {
 			}
 		},
 
-		pushVars: function (arr, vars, prefix) {
-			var k, i, n=0;
+		pushVars: function (form, vars, prefix) {
+			var k, i, l=0, input;
 
 			for(k in vars) {
 				if(vars.hasOwnProperty(k)) {
 					if(Object.prototype.toString.call(vars[k]) === "[object Array]") {
 						for(i = 0; i < vars[k].length; ++i) {
-							n += BOOMR.utils.pushVars(arr, vars[k][i], k + "[" + i + "]");
+							l += BOOMR.utils.pushVars(form, vars[k][i], k + "[" + i + "]");
 						}
 					} else {
-						++n;
-						arr.push(
-							encodeURIComponent(prefix ? (prefix + "[" + k + "]") : k)
-							+ "="
-							+ (vars[k]===undefined || vars[k]===null ? "" : encodeURIComponent(vars[k]))
-						);
+						input = document.createElement("input");
+						input.name = (prefix ? (prefix + "[" + k + "]") : k);
+						input.value = (vars[k]===undefined || vars[k]===null ? "" : vars[k]);
+
+						form.appendChild(input);
+
+						l += encodeURIComponent(input.name).length + encodeURIComponent(input.value).length + 2;
 					}
 				}
 			}
 
-			return n;
+			return l;
 		},
 
-		postData: function (urlenc) {
+		sendData: function (form, method) {
 			var iframe = document.createElement("iframe"),
-				form = document.createElement("form"),
-				input = document.createElement("input");
+			    input  = document.createElement("input");
 
 			iframe.name = "boomerang_post";
 			iframe.style.display = form.style.display = "none";
 
-			form.method = "POST";
+			form.method = method;
 			form.action = impl.beacon_url;
 			form.target = iframe.name;
 
-			input.name = "data";
-
 			// TODO: Determine if we want to send as JSON
 			//if (window.JSON) {
+			//	form.innerHTML = "";
 			//	form.enctype = "text/plain";
 			//	input.value = JSON.stringify(impl.vars);
+			//	form.appendChild(input);
 			//} else {
 				form.enctype = "application/x-www-form-urlencoded";
-				input.value = urlenc;
 			//}
 
 			document.body.appendChild(iframe);
-			form.appendChild(input);
 			document.body.appendChild(form);
 
 			BOOMR.utils.addListener(iframe, "load", function() {
@@ -829,7 +827,7 @@ boomr = {
 	},
 
 	sendBeacon: function(beacon_url_override) {
-		var k, data, furl, img, nparams, errors=[];
+		var k, form, furl, img, length, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -889,8 +887,8 @@ boomr = {
 			return true;
 		}
 
-		data = [];
-		nparams = BOOMR.utils.pushVars(data, impl.vars);
+		form = document.createElement("form");
+		length = BOOMR.utils.pushVars(form, impl.vars);
 
 		BOOMR.removeVar("qt");
 
@@ -898,12 +896,10 @@ boomr = {
 		// The only thing that can stop it now is if we're rate limited
 		this.setImmediate(impl.fireEvent, "onbeacon", impl.vars, impl);
 
-		if(!nparams) {
+		if(!length) {
 			// do not make the request if there is no data
 			return this;
 		}
-
-		data = data.join("&");
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
@@ -911,23 +907,9 @@ boomr = {
 			return this;
 		}
 
-		if(impl.beacon_type === "POST") {
-			BOOMR.utils.postData(data);
-		} else {
-			// if there are already url parameters in the beacon url,
-			// change the first parameter prefix for the boomerang url parameters to &
-			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + data;
-
-			// using 2000 here as a de facto maximum URL length based on:
-			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
-			if(furl.length > 2000 && impl.beacon_type === "AUTO") {
-				BOOMR.utils.postData(data);
-			} else {
-				BOOMR.debug("Sending url: " + furl.replace(/&/g, "\n\t"));
-				img = new Image();
-				img.src=furl;
-			}
-		}
+		// using 2000 here as a de facto maximum URL length based on:
+		// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+		BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > 2000 ? "POST" : "GET") : "POST");
 
 		return true;
 	}
