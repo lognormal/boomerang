@@ -101,12 +101,7 @@ if(w.parent !== w
 d = w.document;
 
 // Short namespace because I don't want to keep typing BOOMERANG
-if(!w.BOOMR) { 
-	w.BOOMR = {
-		window: w,
-		plugins: {}
-	}; 
-}
+if(!w.BOOMR) { w.BOOMR = {}; }
 BOOMR = w.BOOMR;
 // don't allow this code to be included twice
 if(BOOMR.version) {
@@ -114,6 +109,9 @@ if(BOOMR.version) {
 }
 
 BOOMR.version = "0.9";
+BOOMR.window = w;
+
+if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 
 // CustomEvent proxy for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
 (function() {
