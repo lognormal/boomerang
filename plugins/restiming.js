@@ -138,15 +138,16 @@ function trimTiming(time, startTime) {
  * Gets all of the performance entries for a frame and its subframes
  *
  * @param [Frame] frame Frame
+ * @param [boolean] top This is the top window
  * @return [PerformanceEntry[]] Performance entries
  */
-function findPerformanceEntriesForFrame(frame) {
+function findPerformanceEntriesForFrame(frame, isTopWindow) {
 	var entries = [], i, navEntries, navEntry, t;
 
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(i = 0; i < frame.frames.length; i++) {
-			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i]));
+			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false));
 		}
 	}
 
@@ -157,44 +158,47 @@ function findPerformanceEntriesForFrame(frame) {
 			return entries;
 		}
 
-		navEntries = frame.performance.getEntriesByType("navigation");
-		if(navEntries && navEntries.length === 1) {
-			navEntry = navEntries[0];
+		// add an entry for the top page
+		if(isTopWindow) {
+			navEntries = frame.performance.getEntriesByType("navigation");
+			if(navEntries && navEntries.length === 1) {
+				navEntry = navEntries[0];
 
-			// replace document with the actual URL
-			entries.push({
-				name: document.URL,
-				startTime: 0,
-				redirectStart: navEntry.redirectStart,
-				redirectEnd: navEntry.redirectEnd,
-				fetchStart: navEntry.fetchStart,
-				domainLookupStart: navEntry.domainLookupStart,
-				domainLookupEnd: navEntry.domainLookupEnd,
-				connectStart: navEntry.connectStart,
-				secureConnectionStart: navEntry.secureConnectionStart,
-				connectEnd: navEntry.connectEnd,
-				requestStart: navEntry.requestStart,
-				responseStart: navEntry.responseStart,
-				responseEnd: navEntry.responseEnd
-			});
-		} else if(frame.performance.timing){
-			// add a fake entry from the timing object
-			t = frame.performance.timing;
-			entries.push({
-				name: document.URL,
-				startTime: 0,
-				redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
-				redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
-				fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
-				domainLookupStart: t.domainLookupStart ? (t.domainLookupStart - t.navigationStart) : 0,
-				domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd - t.navigationStart) : 0,
-				connectStart: t.connectStart ? (t.connectStart - t.navigationStart) : 0,
-				secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart - t.navigationStart) : 0,
-				connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
-				requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
-				responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
-				responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0
-			});
+				// replace document with the actual URL
+				entries.push({
+					name: frame.location.href,
+					startTime: 0,
+					redirectStart: navEntry.redirectStart,
+					redirectEnd: navEntry.redirectEnd,
+					fetchStart: navEntry.fetchStart,
+					domainLookupStart: navEntry.domainLookupStart,
+					domainLookupEnd: navEntry.domainLookupEnd,
+					connectStart: navEntry.connectStart,
+					secureConnectionStart: navEntry.secureConnectionStart,
+					connectEnd: navEntry.connectEnd,
+					requestStart: navEntry.requestStart,
+					responseStart: navEntry.responseStart,
+					responseEnd: navEntry.responseEnd
+				});
+			} else if(frame.performance.timing){
+				// add a fake entry from the timing object
+				t = frame.performance.timing;
+				entries.push({
+					name: frame.location.href,
+					startTime: 0,
+					redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
+					redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
+					fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
+					domainLookupStart: t.domainLookupStart ? (t.domainLookupStart - t.navigationStart) : 0,
+					domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd - t.navigationStart) : 0,
+					connectStart: t.connectStart ? (t.connectStart - t.navigationStart) : 0,
+					secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart - t.navigationStart) : 0,
+					connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
+					requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
+					responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
+					responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0
+				});
+			}
 		}
 
 		entries = entries.concat(frame.performance.getEntriesByType("resource"));
@@ -221,7 +225,7 @@ function toBase36(n) {
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
-	var entries = findPerformanceEntriesForFrame(BOOMR.window),
+	var entries = findPerformanceEntriesForFrame(BOOMR.window, true),
 	    i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
