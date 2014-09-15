@@ -221,7 +221,7 @@ function toBase36(n) {
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
-	var entries = findPerformanceEntriesForFrame(window),
+	var entries = findPerformanceEntriesForFrame(BOOMR.window),
 	    i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
