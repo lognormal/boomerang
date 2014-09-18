@@ -278,6 +278,8 @@ clean:
 	rm -f *.dbg.b64
 	rm -f $(tmpfile)
 	rm -f $(tmpfile)*
+	
+clean-builds:
 	rm -f build/*
 
 .PHONY: all lognormal lognormal-plugins lognormal-debug Makefile
