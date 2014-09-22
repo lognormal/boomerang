@@ -270,5 +270,17 @@ boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
 	if [ -n "$(ESLINT)" ]; then echo "Linting..."; $(ESLINT) $@ && echo "OK"; else echo "Install eslint to check syntax"; fi
 	echo
 
+clean:
+	rm -f boomerang-*.js
+	rm -f Default_Boomerang.xml
+	rm -f boomerang-build.*
+	rm -f *.min.b64
+	rm -f *.dbg.b64
+	rm -f $(tmpfile)
+	rm -f $(tmpfile)*
+	
+build-clean:
+	rm -f build/*
+
 .PHONY: all lognormal lognormal-plugins lognormal-debug Makefile
 .SILENT:
