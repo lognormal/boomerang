@@ -279,7 +279,7 @@ clean:
 	rm -f $(tmpfile)
 	rm -f $(tmpfile)*
 	
-clean-builds:
+build-clean:
 	rm -f build/*
 
 .PHONY: all lognormal lognormal-plugins lognormal-debug Makefile
