@@ -111,6 +111,8 @@ if(BOOMR.version) {
 BOOMR.version = "0.9";
 BOOMR.window = w;
 
+if (!BOOMR.plugins) { BOOMR.plugins = {}; }
+
 // CustomEvent proxy for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
 (function() {
 	try {
