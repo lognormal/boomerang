@@ -515,15 +515,11 @@ boomr = {
 		},
 
 		sendData: function (form, method) {
-			var iframe = document.createElement("iframe"),
-			    input  = document.createElement("input");
-
-			iframe.name = "boomerang_post";
-			iframe.style.display = form.style.display = "none";
+			var input  = document.createElement("input"),
+			    urls = [ impl.beacon_url ];
 
 			form.method = method;
-			form.action = impl.beacon_url;
-			form.target = iframe.name;
+			form.id = "beacon_form";
 
 			// TODO: Determine if we want to send as JSON
 			//if (window.JSON) {
@@ -535,15 +531,35 @@ boomr = {
 				form.enctype = "application/x-www-form-urlencoded";
 			//}
 
-			document.body.appendChild(iframe);
-			document.body.appendChild(form);
+			if(impl.secondary_beacons && impl.secondary_beacons.length) {
+				urls.push.apply(urls, impl.secondary_beacons);
+			}
 
-			BOOMR.utils.addListener(iframe, "load", function() {
-				document.body.removeChild(form);
-				document.body.removeChild(iframe);
-			});
 
-			form.submit();
+			function submit() {
+				var iframe = document.createElement("iframe"), if2;
+
+				form.action = urls.shift();
+				form.target = iframe.name = iframe.id = "boomerang_post-" + encodeURIComponent(form.action);
+				iframe.style.display = form.style.display = "none";
+
+				if2 = document.getElementById(iframe.id);
+				if (if2) { if2.parentNode.removeChild(if2); }
+
+				if2 = document.getElementById(form.id);
+				if (if2) { if2.parentNode.removeChild(if2); }
+
+				document.body.appendChild(iframe);
+				document.body.appendChild(form);
+
+				form.submit();
+
+				if (urls.length) {
+					BOOMR.setImmediate(submit);
+				}
+			}
+
+			submit();
 		}
 	},
 
