@@ -302,7 +302,12 @@ boomr = {
 						);
 					}
 					else {
-						value.push(encodeURIComponent(o[k]));
+						if (separator === "&") {
+							value.push(encodeURIComponent(o[k]));
+						}
+						else {
+							value.push(o[k]);
+						}
 					}
 				}
 				separator = ",";
@@ -320,7 +325,12 @@ boomr = {
 							);
 						}
 						else {
-							value.push(encodeURIComponent(k) + "=" + encodeURIComponent(o[k]));
+							if (separator === "&") {
+								value.push(encodeURIComponent(k) + "=" + encodeURIComponent(o[k]));
+							}
+							else {
+								value.push(k + "=" + o[k]);
+							}
 						}
 					}
 				}
@@ -822,8 +832,9 @@ boomr = {
 		// Don't send a beacon if no beacon_url has been set
 		// you would do this if you want to do some fancy beacon handling
 		// in the `before_beacon` event instead of a simple GET request
+		BOOMR.debug("Ready to send beacon: " + BOOMR.utils.objectToString(impl.vars));
 		if(!impl.beacon_url) {
-			BOOMR.debug("No beacon_url, but would have sent: " + BOOMR.utils.objectToString(impl.vars));
+			BOOMR.debug("No beacon URL, so skipping.");
 			return true;
 		}
 
@@ -848,8 +859,6 @@ boomr = {
 		BOOMR.removeVar("qt");
 
 		furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
-
-		BOOMR.debug("Sending url: " + furl.replace(/&/g, "\n\t"));
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
