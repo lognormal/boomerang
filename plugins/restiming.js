@@ -135,19 +135,52 @@ function trimTiming(time, startTime) {
 }
 
 /**
+ * Attempts to get the navigationStart time for a frame.
+ * @returns navigationStart time, or 0 if not accessible
+ */
+function getNavStartTime(frame) {
+	var navStart = 0;
+	
+	try
+	{
+		if(("performance" in frame) &&
+		frame.performance && 
+		frame.performance.timing &&
+		frame.performance.timing.navigationStart) {
+			navStart = frame.performance.timing.navigationStart;
+		}
+	}
+	catch(e)
+	{
+		// swallow all access exceptions
+	}
+	
+	return navStart;
+}
+
+/**
  * Gets all of the performance entries for a frame and its subframes
  *
  * @param [Frame] frame Frame
  * @param [boolean] top This is the top window
+ * @param [string] offset Offset in timing from root IFRA
  * @return [PerformanceEntry[]] Performance entries
  */
-function findPerformanceEntriesForFrame(frame, isTopWindow) {
-	var entries = [], i, navEntries, navEntry, t;
+function findPerformanceEntriesForFrame(frame, isTopWindow, offset) {
+	var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, navEntry, t;
 
+	navStart = getNavStartTime(frame);
+	
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(i = 0; i < frame.frames.length; i++) {
-			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false));
+			frameNavStart = getNavStartTime(frame.frames[i]);
+			frameOffset = 0;
+			if(frameNavStart > navStart) {
+				frameOffset = offset + (frameNavStart - navStart);
+			}
+			
+			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset));
 		}
 	}
 
@@ -201,7 +234,31 @@ function findPerformanceEntriesForFrame(frame, isTopWindow) {
 			}
 		}
 
-		entries = entries.concat(frame.performance.getEntriesByType("resource"));
+		// offset all of the entries by the specified offset for this frame
+		var frameEntries = frame.performance.getEntriesByType("resource");
+		var frameFixedEntries = [];
+		
+		for(i = 0; i < frameEntries.length; i++) {
+			t = frameEntries[i];
+			frameFixedEntries.push({
+				name: t.name,
+				initiatorType: t.initiatorType,
+				startTime: t.startTime + offset,
+				redirectStart: t.redirectStart ? (t.redirectStart + offset) : 0,
+				redirectEnd: t.redirectEnd ? (t.redirectEnd + offset) : 0,
+				fetchStart: t.fetchStart ? (t.fetchStart + offset) : 0,
+				domainLookupStart: t.domainLookupStart ? (t.domainLookupStart + offset) : 0,
+				domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd + offset) : 0,
+				connectStart: t.connectStart ? (t.connectStart + offset) : 0,
+				secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart + offset) : 0,
+				connectEnd: t.connectEnd ? (t.connectEnd + offset) : 0,
+				requestStart: t.requestStart ? (t.requestStart + offset) : 0,
+				responseStart: t.responseStart ? (t.responseStart + offset) : 0,
+				responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0
+			});
+		}
+		
+		entries = entries.concat(frameFixedEntries);
 	}
 	catch(e) {
 		return entries;
@@ -225,8 +282,8 @@ function toBase36(n) {
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
-	var entries = findPerformanceEntriesForFrame(BOOMR.window, true),
-	    i, e, j, results = {}, initiatorType, url, data;
+	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0),
+		i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
 		return [];
