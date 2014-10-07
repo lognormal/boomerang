@@ -26,7 +26,15 @@ loaded=function() {
 load=function() {
 	var s0=dc.getElementsByTagName(s)[0],
 	    s1=dc.createElement(s),
-	    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "";
+	    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
+	    plugins = [],
+	    pluginName;
+
+	for(pluginName in BOOMR.plugins) {
+		if (BOOMR.plugins.hasOwnProperty(pluginName)) {
+			plugins.push(encodeURIComponent(pluginName));
+		}
+	}
 
 	t_start=new Date().getTime();
 	s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
@@ -38,6 +46,7 @@ load=function() {
 		+ "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36)
 		+ (complete?"&r=":"")				// if this is running after complete, then we're just refreshing the crumb
 		+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
+		+ (complete?"":"&plugins=" + plugins.join(","))
 	;
 
 	BOOMR.config_url = s1.src;
