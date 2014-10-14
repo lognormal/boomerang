@@ -49,6 +49,13 @@ If we're still going, we pull the time out of the cookie and remove the cookie. 
 measure the difference in the two times (<code>rt.end - rt.tstart</code>) and this is
 the round trip time for the page.
 
+If the WebTiming API is supported, we check the value of <code>responseStart</code>. If not, we use the time of the
+<code>onunload</code> or <code>onpagehide</code> events stored in the cookie, and use this as a proxy for first byte
+time (<code>t_fb_approx</code>). With this, we can calculate the following entities:
+
+<code>t_done</code> Roundtrip time: <code>rt.end - rt.tstart</code>
+<code>t_resp</code> Backend time: <code>(responseStart || t_fb_approx) - rt.tstart</code>
+<code>t_page</code> Frontend time: <code>rt.end - (responseStart || t_fb_approx)</code>
 
 ## 2. Bandwidth &amp; Latency measurements
 
@@ -71,7 +78,7 @@ that we beacon back to our server.
 ### 2.2 Next download images of increasing size until one of the times out
 
 We choose image sizes so that we can narrow down on a bandwidth range as soon as
-possible.  See the code comments in <a href="../boomerang.js">boomerang.js</a> for
+possible.  See the code comments in <a href="../plugins/bw.js">plugins/bw.js</a> for
 full details.
 
 Image timeouts are set at between 1.2 and 1.5 seconds.  If an image times out, we
