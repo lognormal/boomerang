@@ -19,28 +19,35 @@ developer determine those events.
 
 This is how we measure.
 
-### 1.1 attach a function to the <code>window.onbeforeunload</code> event.
+### 1.1 attach a function to the <code>window.onbeforeunload, document.onmouseup</code> (only activated for links) and <code>form.onsubmit</code> (for all forms on the page) events.
 
-Inside this function, we take a time reading (in milliseconds) and store it into a
-session cookie along with the URL of the current page.
+Inside the last invocation of this function, we take a time reading (in milliseconds) and store it
+into a session cookie along with the URL of the current page or the URL of any clicked link or submitted form.
+
+### 1.2 attach a function to the window.onunload (non-Safari) and window.onpagehide (Safari) events.
+
+We take a time reading in this function as well, and store it in the session cookie.
 
 ### 1.2 attach a function to the <code>window.onload</code> event.
 
-Inside this function, we take a time reading (in milliseconds).  If the browser has implemented the
-<a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a> API, we
-pull out <code>navigationStart</code> (or <code>fetchStart</code> if <code>navigationStart</code>
+Inside this function, we take a time reading (in milliseconds) and call this <code>rt.end</code>
+
+If the browser has implemented the <a href="http://dev.w3.org/2006/webapi/WebTiming/">WebTiming</a> API,
+we pull out <code>navigationStart</code> (or <code>fetchStart</code> if <code>navigationStart</code>
 is unset).  To get around a bug in Firefox 7 and 8, we use <code>unloadEventStart</code> instead.
 
-If the WebTiming API is not supported, we look for the cookie where we set the start time, and if found,
-use that.  If we find neither, we abort <a href="#fn-1" class="fn">[1]</a>.
+If the WebTiming API is not supported, we look for the cookie where we wrote the start time, and if found,
+use that. This time is set to <code>rt.tstart</code>. If we find neither, we abort <a href="#fn-1" class="fn">[1]</a>.
 
 If we find a cookie, we check the URL stored in the cookie with the <code>document.referrer</code>
-of the current document.  If these two differ, it means that the user possibly
-visited a third party page in between the two pages from our site and the measurement
+of the current document if it was set via <code>onbeforeunload</code> or the URL of the current page if
+the cookie was set via <code>onmouseup</code> or <code>onsubmit</code>. If these two differ, it means that
+the user possibly visited a third party page in between the two pages from our site and the measurement
 is invalid, so we abort <a href="#fn-2" class="fn">[2]</a>.
 
 If we're still going, we pull the time out of the cookie and remove the cookie.  We
-measure the difference in the two times and this is the round trip time for the page.
+measure the difference in the two times (<code>rt.end - rt.tstart</code>) and this is
+the round trip time for the page.
 
 
 ## 2. Bandwidth &amp; Latency measurements
