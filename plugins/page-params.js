@@ -431,6 +431,8 @@ Handler.prototype = {
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
+
+		BOOMR.addVar(this.varname + "_st", st);
 		return this.apply(en-st);
 	},
 
