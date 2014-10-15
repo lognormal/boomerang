@@ -515,7 +515,7 @@ Handler.prototype = {
 
 		// Check performance.mark
 		res = p.getEntriesByType("mark");
-		for(i=0; i<res.length; i++) {
+		for(i=0; res && i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				return this.apply(res[i].startTime);
 			}
@@ -523,7 +523,7 @@ Handler.prototype = {
 
 		// Check performance.measure
 		res = p.getEntriesByType("measure");
-		for(i=0; i<res.length; i++) {
+		for(i=0; res && i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				if (res[i].startTime) {
 					BOOMR.addVar(this.varname + "_st", res[i].startTime);
