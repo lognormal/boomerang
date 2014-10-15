@@ -238,7 +238,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset) {
 		var frameEntries = frame.performance.getEntriesByType("resource");
 		var frameFixedEntries = [];
 		
-		for(i = 0; i < frameEntries.length; i++) {
+		for(i = 0; frameEntries && i < frameEntries.length; i++) {
 			t = frameEntries[i];
 			frameFixedEntries.push({
 				name: t.name,
