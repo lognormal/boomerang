@@ -541,6 +541,7 @@ impl = {
 	abTests: [],
 	customTimers: [],
 	customMetrics: [],
+	customDimensions: [],
 
 	complete: false,
 	initialized: false,
@@ -549,49 +550,34 @@ impl = {
 	mayRetry: [],
 
 	done: function(edata, ename) {
-		var i, j, v, hconfig, handler, limpl=impl;
+		var i, v, hconfig, handler, limpl=impl;
+
+		hconfig = {
+			pageGroups:       { varname: "h.pg", stopOnFirst: true },
+			abTests:          { varname: "h.ab", stopOnFirst: true },
+			customMetrics:    { sanitizeRE: /[^\d\.\-]/g },
+			customDimensions: { sanitizeRE: /[^\w\. \-]/g },
+			customTimers:     { sanitizeRE: /[^\d\.\-]/g,
+					    method: BOOMR.plugins.RT.setTimer,
+					    ctx: BOOMR.plugins.RT,
+					    preProcessor: function(v) {
+							return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
+						}
+					  }
+		};
 
 		if(ename !== "xhr"  && this.complete) {
 			return;
 		}
 
 		if(ename === "xhr") {
-			if (!edata || !edata.data) {
-				return;
-			}
-			edata = edata.data;
-			if((!edata.timers || !edata.timers.length) && (!edata.metrics || !edata.metrics.length)) {
+			limpl = impl.extractXHRParams(edata, hconfig);
+
+			if (limpl === null) {
 				return;
 			}
 
 			impl.complete = false;
-
-			limpl = {
-				pageGroups: [],
-				abTests: impl.abTests,
-				customTimers: [],
-				customMetrics: []
-			};
-
-			if (edata.timers && edata.timers.length) {
-				for(i=0; i<impl.customTimers.length; i++) {
-					for(j=0; j<edata.timers.length; j++) {
-						if(impl.customTimers[i].name === edata.timers[j]) {
-							limpl.customTimers.push(impl.customTimers[i]);
-						}
-					}
-				}
-			}
-
-			if (edata.metrics && edata.metrics.length) {
-				for(i=0; i<impl.customMetrics.length; i++) {
-					for(j=0; j<edata.metrics.length; j++) {
-						if(impl.customMetrics[i].label === "cmet." + edata.metrics[j]) {
-							limpl.customMetrics.push(impl.customMetrics[i]);
-						}
-					}
-				}
-			}
 
 			// Override the URL we check metrics against
 			if(edata.url) {
@@ -599,19 +585,6 @@ impl = {
 				l.href = edata.url;
 			}
 		}
-
-		hconfig = {
-			pageGroups:    { varname: "h.pg", stopOnFirst: true },
-			abTests:       { varname: "h.ab", stopOnFirst: true },
-			customMetrics: { sanitizeRE: /[^\d\.\-]/g },
-			customTimers:  { sanitizeRE: /[^\d\.\-]/g,
-					 method: BOOMR.plugins.RT.setTimer,
-					 ctx: BOOMR.plugins.RT,
-					 preProcessor: function(v) {
-							return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
-						}
-					}
-		};
 
 		impl.mayRetry = [];
 
@@ -669,6 +642,76 @@ impl = {
 
 	onload: function() {
 		this.onloadfired=true;
+	},
+
+	extractXHRParams: function(edata, hconfig) {
+		var limpl, sections, k, section, itemName, value, m, i, j, handler;
+
+		if (!edata || !edata.data) {
+			return null;
+		}
+
+		edata = edata.data;
+
+		if(  (!edata.timers     || !edata.timers.length)
+		  && (!edata.metrics    || !edata.metrics.length)
+		  && (!edata.dimensions || !edata.dimensions.length)
+		) {
+			return null;
+		}
+
+		limpl = {
+			pageGroups: [],
+			abTests: impl.abTests,
+			customTimers: [],
+			customMetrics: [],
+			customDimensions: []
+		};
+
+		sections = {
+			"timers":     { impl: "customTimers",     name: "name",  prefix: "",      data: edata.timers },
+			"metrics":    { impl: "customMetrics",    name: "label", prefix: "cmet.", data: edata.metrics },
+			"dimensions": { impl: "customDimensions", name: "label", prefix: "cdim.", data: edata.dimensions }
+		};
+
+		for (k in sections) {
+			if (!sections.hasOwnProperty(k)) {
+				continue;
+			}
+
+			section = sections[k];
+
+			if (!section.data || !section.data.length) {
+				continue;
+			}
+
+			for(j=0; j<section.data.length; j++)
+			{
+				m = section.data[j].split(/\s*=\s*/);
+				itemName = section.prefix + m[0];
+				value = m[1];	// undefined if no =, empty string if set to empty
+
+				for(i=0; i<impl[section.impl].length; i++)
+				{
+					if(impl[section.impl][i][section.name] === itemName)
+					{
+						if (value === undefined) {
+							// If no predefined value, then go through the flow
+							limpl[section.impl].push(impl[section.impl][i]);
+						}
+						else {
+							// If we have a predefined value, then use it
+							handler = new Handler(hconfig[section.impl]);
+							handler.varname = impl[section.impl].label;
+							handler.apply(handler.cleanUp(value));
+							handler = null;
+						}
+					}
+				}
+			}
+		}
+
+		return limpl;
 	}
 };
 
