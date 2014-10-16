@@ -45,7 +45,7 @@ function getMockLoggerTests(Y) {
 			var expected = "one=1&two=2&three=3rd&four=null&five=undefined&six=0&seven=1.2&eight=" + encodeURIComponent("a=b") + "&nine=" + encodeURIComponent("1,2");
 
 			Y.Assert.areEqual(expected, BOOMR.utils.objectToString(o, "&"));
-			Y.Assert.areEqual(expected.replace(/&/g, '\n\t'), BOOMR.utils.objectToString(o));
+			Y.Assert.areEqual(decodeURIComponent(expected.replace(/&/g, '\n\t')), BOOMR.utils.objectToString(o));
 		},
 
 		testGetCookieNull: function() {
@@ -70,8 +70,8 @@ function getMockLoggerTests(Y) {
 			BOOMR.debug = function(msg, src) {
 				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Y.Assert.isFalse(BOOMR.utils.setCookie(""));
-			Y.Assert.isFalse(BOOMR.utils.setCookie("myname"));
+			Y.Assert.isNull(BOOMR.utils.setCookie(""));
+			Y.Assert.isNull(BOOMR.utils.setCookie("myname"));
 		},
 
 		testSetCookieTooLong: function() {
@@ -130,7 +130,7 @@ function getMockLoggerTests(Y) {
 			BOOMR.debug = function(msg, src) {
 				Y.Assert.isArray(msg.match(/^No cookie name or site domain:/));
 			};
-			Y.Assert.isFalse(BOOMR.utils.removeCookie());
+			Y.Assert.isNull(BOOMR.utils.removeCookie());
 			Y.Assert.isFalse(BOOMR.utils.removeCookie("mycookie"));
 		},
 

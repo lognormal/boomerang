@@ -1,3 +1,19 @@
+YUI = window.YUI || function() {
+	var Y = {};
+	Y.Test = YUITest;
+	Y.Test.Suite = YUITest.TestSuite;
+	Y.Test.Case = YUITest.TestCase;
+	Y.Assert = YUITest.Assert;
+	Y.Mock = YUITest.Mock
+
+	return {
+		use: function() {
+			var callback = arguments[arguments.length - 1];
+			callback(Y);
+		}
+	};
+};
+
 function getTestRunner(Y) {
 
 	if(!Y.substitute) {
@@ -24,13 +40,18 @@ function getTestRunner(Y) {
 		
 		//data variables
 		var message = "",
-		    messageType = "";
+		    messageType = "",
+		    groupStart = false,
+		    groupEnd = false,
+		    consoleType = { "info": "log", "fail": "error", "ignore": "log", "pass": "info" };
 		
 		switch(event.type){
 			case TestRunner.BEGIN_EVENT:
 				message = "Testing began at " + (new Date()).toString() + ".";
 				messageType = "info";
 				label = "TestRunner";
+				groupStart = true;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.COMPLETE_EVENT:
@@ -41,27 +62,37 @@ function getTestRunner(Y) {
 					event.results);
 				messageType = "info";
 				label = "TestRunner";
+				groupStart = false;
+				groupEnd = true;
 				break;
 				
 			case TestRunner.TEST_FAIL_EVENT:
 				message = event.testName + ": failed.\n" + event.error.getMessage();
 				messageType = "fail";
+				groupStart = false;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.TEST_IGNORE_EVENT:
 				message = event.testName + ": ignored.";
 				messageType = "ignore";
+				groupStart = false;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.TEST_PASS_EVENT:
 				message = event.testName + ": passed.";
 				messageType = "pass";
+				groupStart = false;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.TEST_SUITE_BEGIN_EVENT:
 				message = "Test suite \"" + event.testSuite.name + "\" started.";
 				messageType = "info";
 				label = event.testSuite.name;
+				groupStart = true;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.TEST_SUITE_COMPLETE_EVENT:
@@ -72,12 +103,16 @@ function getTestRunner(Y) {
 					event.results);
 				messageType = "info";
 				label = event.testSuite.name;
+				groupStart = false;
+				groupEnd = true;
 				break;
 				
 			case TestRunner.TEST_CASE_BEGIN_EVENT:
 				message = "Test case \"" + event.testCase.name + "\" started.";
 				messageType = "info";
 				label = event.testCase.name;
+				groupStart = true;
+				groupEnd = false;
 				break;
 				
 			case TestRunner.TEST_CASE_COMPLETE_EVENT:
@@ -88,10 +123,14 @@ function getTestRunner(Y) {
 					event.results);
 				messageType = "info";
 				label = event.testCase.name;
+				groupStart = false;
+				groupEnd = true;
 				break;
 			default:
 				message = "Unexpected event " + event.type;
 				message = "info";
+				groupStart = false;
+				groupEnd = false;
 		}
 	
 		//only log if required
@@ -99,7 +138,15 @@ function getTestRunner(Y) {
 			Y.log(message, messageType, label);
 		}
 		else {
-			console.log(message, messageType, label);
+			if (groupStart) {
+				console.group(label);
+			}
+
+			console[consoleType[messageType]](message);
+
+			if (groupEnd) {
+				console.groupEnd();
+			}
 		}
 	}
 	
