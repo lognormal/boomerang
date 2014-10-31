@@ -291,6 +291,11 @@ function getResourceTiming() {
 
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
+		
+		if(e.name.indexOf('about:') === 0 ||
+		   e.name.indexOf('javascript:') === 0) {
+			continue;
+		}
 
 		//
 		// Compress the RT data into a string:
