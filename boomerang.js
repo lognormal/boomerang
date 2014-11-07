@@ -629,6 +629,7 @@ boomr = {
 		// The developer can override onload by setting autorun to false
 		if(!impl.onloadfired && (config.autorun === undefined || config.autorun !== false)) {
 			if(d.readyState && d.readyState === "complete") {
+				BOOMR.loadedLate = true;
 				this.setImmediate(BOOMR.page_ready, null, null, BOOMR);
 			}
 			else {
