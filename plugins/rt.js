@@ -518,6 +518,33 @@ impl = {
 	},
 
 	/**
+	 * Validate that the time we think is the load time is correct.  This can be wrong if boomerang was loaded
+	 * after onload, so in that case, if navigation timing is available, we use that instead.
+	 */
+	validateLoadTimestamp: function(t_now) {
+		var t_done = t_now;
+
+		// Boomerang loaded late and...
+		if (BOOMR.loadedLate) {
+			// We have navigation timing,
+			if(w.performance) {
+				// and boomerang loaded after onload fired
+				if(w.performance.loadEventStart && w.performance.loadEventStart < BOOMR.t_end) {
+					t_done = w.performance.loadEventStart;
+				}
+			}
+			// We don't have navigation timing,
+			else {
+				// So we'll just use the time when boomerang was added to the page
+				// Assuming that this means boomerang was added in onload
+				t_done = BOOMR.t_lstart || BOOMR.t_start || t_now;
+			}
+		}
+
+		return t_done;
+	},
+
+	/**
 	 * Set timers appropriate at page load time.  This method should be called from done() only when
 	 * the page_ready event fires.  It sets the following timer values:
 	 *		- t_resp:	time from request start to first byte
@@ -846,10 +873,12 @@ BOOMR.plugins.RT = {
 	// load when the page is usable by the user
 	done: function(edata, ename) {
 		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata) + ", " + ename, "rt");
-		var t_start, t_done=new Date().getTime(),
+		var t_start, t_done, t_now=new Date().getTime(),
 		    subresource = false;
 
 		impl.complete = false;
+
+		t_done = impl.validateLoadTimestamp(t_now);
 
 		if(ename==="load" || ename==="visible") {
 			if (!impl.setPageLoadTimers(t_done)) {
