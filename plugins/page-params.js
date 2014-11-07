@@ -693,9 +693,9 @@ impl = {
 		};
 
 		sections = {
-			"timers":     { impl: "customTimers",     name: "name",  prefix: "",      data: edata.timers },
-			"metrics":    { impl: "customMetrics",    name: "label", prefix: "cmet.", data: edata.metrics },
-			"dimensions": { impl: "customDimensions", name: "label", prefix: "cdim.", data: edata.dimensions }
+			"timers":     { impl: "customTimers",     data: edata.timers },
+			"metrics":    { impl: "customMetrics",    data: edata.metrics },
+			"dimensions": { impl: "customDimensions", data: edata.dimensions }
 		};
 
 		for (k in sections) {
@@ -712,12 +712,12 @@ impl = {
 			for(j=0; j<section.data.length; j++)
 			{
 				m = section.data[j].split(/\s*=\s*/);
-				itemName = section.prefix + m[0];
+				itemName = m[0];
 				value = m[1];	// undefined if no =, empty string if set to empty
 
 				for(i=0; i<impl[section.impl].length; i++)
 				{
-					if(impl[section.impl][i][section.name] === itemName)
+					if(impl[section.impl][i].name === itemName)
 					{
 						if (value === undefined) {
 							// If no predefined value, then go through the flow
