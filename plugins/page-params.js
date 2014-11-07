@@ -599,6 +599,8 @@ impl = {
 			if(edata.url) {
 				l = d.createElement("a");
 				l.href = edata.url;
+
+				limpl.pageGroups = impl.pageGroups;
 			}
 		}
 
