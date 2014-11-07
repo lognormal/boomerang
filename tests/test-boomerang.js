@@ -45,7 +45,7 @@ function getMockLoggerTests(Y) {
 			var expected = "one=1&two=2&three=3rd&four=null&five=undefined&six=0&seven=1.2&eight=" + encodeURIComponent("a=b") + "&nine=" + encodeURIComponent("1,2");
 
 			Y.Assert.areEqual(expected, BOOMR.utils.objectToString(o, "&"));
-			Y.Assert.areEqual(expected.replace(/&/g, '\n\t'), BOOMR.utils.objectToString(o));
+			Y.Assert.areEqual(decodeURIComponent(expected.replace(/&/g, '\n\t')), BOOMR.utils.objectToString(o));
 		},
 
 		testGetCookieNull: function() {

@@ -431,6 +431,8 @@ Handler.prototype = {
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
+
+		BOOMR.addVar(this.varname + "_st", st);
 		return this.apply(en-st);
 	},
 
@@ -513,7 +515,7 @@ Handler.prototype = {
 
 		// Check performance.mark
 		res = p.getEntriesByType("mark");
-		for(i=0; i<res.length; i++) {
+		for(i=0; res && i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				return this.apply(res[i].startTime);
 			}
@@ -521,7 +523,7 @@ Handler.prototype = {
 
 		// Check performance.measure
 		res = p.getEntriesByType("measure");
-		for(i=0; i<res.length; i++) {
+		for(i=0; res && i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				if (res[i].startTime) {
 					BOOMR.addVar(this.varname + "_st", res[i].startTime);
@@ -597,6 +599,8 @@ impl = {
 			if(edata.url) {
 				l = d.createElement("a");
 				l.href = edata.url;
+
+				limpl.pageGroups = impl.pageGroups;
 			}
 		}
 
@@ -658,6 +662,8 @@ impl = {
 
 	clearMetrics: function(vars) {
 		var i, label;
+
+		// Remove custom metrics
 		for(i=0; i<impl.customMetrics.length; i++) {
 			label = impl.customMetrics[i].label;
 
@@ -665,6 +671,22 @@ impl = {
 				BOOMR.removeVar(label);
 			}
 		}
+
+		// Remove slowest url
+		if (vars.hasOwnProperty("dom.res.slowest")) {
+			BOOMR.removeVar("dom.res.slowest");
+		}
+
+		// Remove start time for custom timers
+		for(i=0; i<impl.customTimers.length; i++) {
+			label = impl.customTimers[i].label + "_st";
+
+			if(vars.hasOwnProperty(label)) {
+				BOOMR.removeVar(label);
+			}
+		}
+
+		// TODO remove all resource timing components when start==="*"
 	},
 
 	onload: function() {
