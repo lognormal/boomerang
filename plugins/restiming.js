@@ -282,6 +282,7 @@ function toBase36(n) {
  * @return Optimized performance entries trie
  */
 function getResourceTiming() {
+/*eslint no-script-url:0*/
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0),
 		i, e, j, results = {}, initiatorType, url, data;
 
