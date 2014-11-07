@@ -587,6 +587,8 @@ impl = {
 				l.href = edata.url;
 
 				limpl.pageGroups = impl.pageGroups;
+
+				hconfig.pageGroups.varname = "xhr.pg";
 			}
 		}
 

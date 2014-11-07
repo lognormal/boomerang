@@ -22,10 +22,6 @@ if (BOOMR.plugins.Memory) {
 var impl = {
 	complete: false,
 	done: function() {
-		if(this.complete) {
-			return this;
-		}
-
 		var w  = BOOMR.window,
 		    p  = w.performance,
 		    c  = w.console,
@@ -67,6 +63,7 @@ BOOMR.plugins.Memory = {
 	init: function() {
 		// we do this on onload so that we take a memory and dom snapshot after most things have run
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
+		BOOMR.subscribe("xhr_load", impl.done, null, impl);
 		BOOMR.subscribe("page_unload", impl.done, null, impl);
 		return this;
 	},
