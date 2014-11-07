@@ -588,7 +588,7 @@ impl = {
 			if (edata.metrics && edata.metrics.length) {
 				for(i=0; i<impl.customMetrics.length; i++) {
 					for(j=0; j<edata.metrics.length; j++) {
-						if(impl.customMetrics[i].label === "cmet." + edata.metrics[j]) {
+						if(impl.customMetrics[i].label === "cmet." + edata.metrics[j] || impl.customMetrics[i].name === edata.metrics[j]) {
 							limpl.customMetrics.push(impl.customMetrics[i]);
 						}
 					}
