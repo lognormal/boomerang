@@ -27,6 +27,8 @@ var impl = {
 			return this;
 		}
 
+		impl.addedVars = [];
+
 		p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
 		if(p && p.timing && p.navigation) {
 			BOOMR.info("This user agent supports NavigationTiming.", "nt");
@@ -66,6 +68,8 @@ var impl = {
 			}
 
 			BOOMR.addVar(data);
+
+			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
 		}
 
 		// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
@@ -81,11 +85,20 @@ var impl = {
 				};
 
 				BOOMR.addVar(data);
+
+				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
 			}
 		}
 
 		this.complete = true;
 		BOOMR.sendBeacon();
+	},
+
+	clear: function(vars) {
+		if (impl.addedVars && impl.addedVars.length > 0) {
+			BOOMR.removeVar(impl.addedVars);
+			impl.addedVars = [];
+		}
 	}
 };
 
@@ -94,6 +107,7 @@ BOOMR.plugins.NavigationTiming = {
 		// we'll fire on whichever happens first
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
 		BOOMR.subscribe("page_unload", impl.done, null, impl);
+		BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 		return this;
 	},
 
