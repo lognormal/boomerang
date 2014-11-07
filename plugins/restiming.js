@@ -292,8 +292,8 @@ function getResourceTiming() {
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
 		
-		if(e.name.indexOf('about:') === 0 ||
-		   e.name.indexOf('javascript:') === 0) {
+		if(e.name.indexOf("about:") === 0 ||
+		   e.name.indexOf("javascript:") === 0) {
 			continue;
 		}
 
@@ -366,7 +366,7 @@ var impl = {
 		if(vars.hasOwnProperty("restiming")) {
 			BOOMR.removeVar("restiming");
 		}
-	},
+	}
 };
 
 BOOMR.plugins.ResourceTiming = {
