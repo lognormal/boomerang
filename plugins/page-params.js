@@ -551,7 +551,7 @@ impl = {
 	mayRetry: [],
 
 	done: function(edata, ename) {
-		var i, j, v, hconfig, handler, limpl=impl;
+		var i, j, v, hconfig, handler, limpl=impl, pg="h.pg";
 
 		if(ename !== "xhr"  && this.complete) {
 			return;
@@ -601,11 +601,13 @@ impl = {
 				l.href = edata.url;
 
 				limpl.pageGroups = impl.pageGroups;
+
+				pg = "xhr.pg";
 			}
 		}
 
 		hconfig = {
-			pageGroups:    { varname: "h.pg", stopOnFirst: true },
+			pageGroups:    { varname: pg, stopOnFirst: true },
 			abTests:       { varname: "h.ab", stopOnFirst: true },
 			customMetrics: { sanitizeRE: /[^\d\.\-]/g },
 			customTimers:  { sanitizeRE: /[^\d\.\-]/g,
