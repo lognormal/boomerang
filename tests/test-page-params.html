@@ -1,21 +1,22 @@
 <!doctype html>
 <html>
 <head>
-<title>Basic Boomerang Test</title>
+<title>Page Params Plugin Test</title>
 
 <link rel="stylesheet" href="test-helper.css" type="text/css">
 <script src="yuitest.js"></script>
 <script src="test-helper.js"></script>
-<script src="test-boomerang.js"></script>
+<script src="test-page-params.js"></script>
 <script src="../boomerang.js"></script>
+<script src="../plugins/rt.js"></script>
+<script src="../plugins/page-params.js"></script>
 
 <body class="yui3-skin-sam">
 <script>
 YUI().use("test", "console", function(Y) {
 
-	var suite = new Y.Test.Suite("Boomerang core tests");
+	var suite = new Y.Test.Suite("Page Params tests");
 	suite.add(getStaticTests(Y));
-	suite.add(getMockLoggerTests(Y));
 	suite.add(getInitTests(Y));
 
 	var TestRunner = getTestRunner(Y);
