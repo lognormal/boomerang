@@ -360,7 +360,13 @@ var impl = {
 		}
 		this.complete = true;
 		BOOMR.sendBeacon();
-	}
+	},
+    
+	clearMetrics: function(vars) {
+		if(vars.hasOwnProperty("restiming")) {
+			BOOMR.removeVar("restiming");
+		}
+	},
 };
 
 BOOMR.plugins.ResourceTiming = {
@@ -373,6 +379,7 @@ BOOMR.plugins.ResourceTiming = {
 
 		if(p && typeof p.getEntriesByType === "function") {
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
+			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			BOOMR.subscribe("page_unload", impl.done, null, impl);
 		} else {
 			impl.complete = true;
