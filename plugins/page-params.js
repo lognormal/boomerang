@@ -567,7 +567,7 @@ impl = {
 			else {
 				data = edata;
 			}
-			if((!data.timers || !data.timers.length) && (!data.metrics || !data.metrics.length)) {
+			if(!data.url && (!data.timers || !data.timers.length) && (!data.metrics || !data.metrics.length)) {
 				return;
 			}
 
