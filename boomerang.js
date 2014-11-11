@@ -911,7 +911,7 @@ boomr = {
 				req.addEventListener("load", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
 					resource.status = req.status;
-					resource.headers = req.getAllResponseHeaders();
+					// TODO add headers in a sane way
 				}, false);
 				req.addEventListener("timeout", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
