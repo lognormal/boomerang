@@ -568,10 +568,12 @@ impl = {
 	 * @returns true if timers were set, false if we're in a prerender state, caller should abort on false.
 	 */
 	setPageLoadTimers: function(ename, t_done, data) {
+		var t_resp_start;
+
 		impl.initFromCookie();
 		impl.initFromNavTiming();
 
-		if(ename!=="xhr") {
+		if(ename !== "xhr") {
 			if(impl.checkPreRender()) {
 				return false;
 			}
@@ -580,32 +582,31 @@ impl = {
 		if(data && data.timing) {
 			// Use details from xhr object to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
-			BOOMR.plugins.RT.endTimer("t_resp", data.timing.responseStart);
-			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
-				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - data.timing.responseStart);
-			}
-			else {
-				BOOMR.plugins.RT.setTimer("t_page", t_done - data.timing.responseStart);
-			}
+			t_resp_start = data.timing.responseStart;
 		}
 		else if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
-			BOOMR.plugins.RT.endTimer("t_resp", impl.responseStart);
-			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
-				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - impl.responseStart);
-			}
-			else {
-				BOOMR.plugins.RT.setTimer("t_page", t_done - impl.responseStart);
-			}
+			t_resp_start = impl.responseStart;
 		}
 		else if(impl.timers.hasOwnProperty("t_page")) {
 			// If the dev has already started t_page timer, we can end it now as well
 			BOOMR.plugins.RT.endTimer("t_page");
 		}
 		else if(impl.t_fb_approx) {
-			BOOMR.plugins.RT.endTimer("t_resp", impl.t_fb_approx);
-			BOOMR.plugins.RT.setTimer("t_page", t_done - impl.t_fb_approx);
+			// If we have an approximate first byte time from the cookie, use it
+			t_resp_start = impl.t_fb_approx;
+		}
+
+		if (t_resp_start) {
+			BOOMR.plugins.RT.endTimer("t_resp", t_resp_start);
+
+			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
+				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
+			}
+			else {
+				BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+			}
 		}
 
 		// If a prerender timer was started, we can end it now as well
