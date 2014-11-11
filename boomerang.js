@@ -271,9 +271,6 @@ boomr = {
 	url: myurl,
 	config_url: null,
 
-	//! URLs to exclude from automatic XHR instrumentation
-	xhr_excludes: {},
-
 	session: {
 		// You can disable all cookies by setting site_domain to a falsy value
 		domain: null,
@@ -1097,6 +1094,11 @@ for(ident in boomr) {
 		BOOMR[ident] = boomr[ident];
 	}
 }
+if (!BOOMR.xhr_excludes) {
+	//! URLs to exclude from automatic XHR instrumentation
+	BOOMR.xhr_excludes={};
+}
+
 }());
 
 dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
