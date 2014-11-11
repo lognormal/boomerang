@@ -47,7 +47,7 @@ var impl = {
 					nt_con_end: res.connectEnd,
 					nt_req_st: res.requestStart,
 					nt_res_st: res.responseStart,
-					nt_res_end: res.responseEnd,
+					nt_res_end: res.responseEnd
 				};
 				if (res.secureConnectionStart) {
 					// secureConnectionStart is OPTIONAL in the spec

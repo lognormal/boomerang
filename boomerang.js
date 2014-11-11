@@ -799,7 +799,7 @@ boomr = {
 		proxy_XMLHttpRequest = function() {
 			var req, resource = { timing: {} }, orig_open, orig_send;
 
-			req = new orig_XMLHttpRequest;
+			req = new orig_XMLHttpRequest();
 
 			orig_open = req.open;
 			orig_send = req.send;
