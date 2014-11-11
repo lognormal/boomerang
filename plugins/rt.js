@@ -985,6 +985,11 @@ BOOMR.plugins.RT = {
 				BOOMR.addVar("http.method", edata.method);
 				impl.addedVars.push("http.method");
 			}
+
+			if(edata.headers) {
+				BOOMR.addVar("http.hdr", edata.headers);
+				impl.addedVars.push("http.hdr");
+			}
 		}
 
 		if(subresource) {
