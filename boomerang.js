@@ -806,21 +806,21 @@ boomr = {
 
 			req.open = function(method, url, async) {
 				if (async) {
-					req.addEventListener('readystatechange', function() {
+					req.addEventListener("readystatechange", function() {
 						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
 					}, false);
 				}
 
-				req.addEventListener('load', function() {
-					resource.timing["loadEventEnd"] = new Date().getTime();
+				req.addEventListener("load", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
 					resource.status = req.status;
 					// TODO add response headers
 				}, false);
-				req.addEventListener('timeout', function() { resource.timing["timeout"] = new Date().getTime(); }, false);
-				req.addEventListener('error', function() { resource.timing["error"] = new Date().getTime(); }, false);
-				req.addEventListener('abort', function() { resource.timing["abort"] = new Date().getTime(); }, false);
+				req.addEventListener("timeout", function() { resource.timing.timeout = new Date().getTime(); }, false);
+				req.addEventListener("error", function() { resource.timing.error = new Date().getTime(); }, false);
+				req.addEventListener("abort", function() { resource.timing.abort = new Date().getTime(); }, false);
 
-				req.addEventListener('loadend', function() { impl.fireEvent("xhr_load", resource); }, false);
+				req.addEventListener("loadend", function() { impl.fireEvent("xhr_load", resource); }, false);
 
 				resource.url = url;
 				resource.method = method;
@@ -830,7 +830,7 @@ boomr = {
 			};
 
 			req.send = function() {
-				resource.timing["requestStart"] = new Date().getTime();
+				resource.timing.requestStart = new Date().getTime();
 
 				// call the original send method
 				return orig_send.apply(req, arguments);
