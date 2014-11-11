@@ -828,6 +828,11 @@ boomr = {
 					return orig_open.apply(req, arguments);
 				}
 
+				// Default value of async is true
+				if (async === undefined) {
+					async = true;
+				}
+
 				if (async) {
 					req.addEventListener("readystatechange", function() {
 						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
