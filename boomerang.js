@@ -511,6 +511,10 @@ boomr = {
 			this.session.domain = config.site_domain;
 		}
 
+		if(config.instrument_xhr) {
+			BOOMR.instrumentXHR();
+		}
+
 		if(config.log !== undefined) {
 			this.log = config.log;
 		}
