@@ -936,7 +936,7 @@ BOOMR.plugins.RT = {
 		// make sure old variables don't stick around
 		BOOMR.removeVar(
 			"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
-			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld", "http.errno",
 			"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 		);
 
@@ -950,6 +950,11 @@ BOOMR.plugins.RT = {
 			if(impl.r2 !== impl.r) {
 				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 			}
+		}
+
+		if(edata && edata.status && edata.status !== "200") {
+			BOOMR.addVar("http.errno", edata.status);
+			impl.addedVars.push("http.errno");
 		}
 
 		if(subresource) {
