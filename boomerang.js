@@ -536,18 +536,22 @@ boomr = {
 			}
 
 
+			function remove(id) {
+				var el = document.getElementById(id);
+				if (el) {
+					el.parentNode.removeChild(el);
+				}
+			}
+
 			function submit() {
-				var iframe = document.createElement("iframe"), if2;
+				var iframe = document.createElement("iframe");
 
 				form.action = urls.shift();
-				form.target = iframe.name = iframe.id = "boomerang_post-" + encodeURIComponent(form.action);
+				form.target = iframe.name = iframe.id = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
 				iframe.style.display = form.style.display = "none";
 
-				if2 = document.getElementById(iframe.id);
-				if (if2) { if2.parentNode.removeChild(if2); }
-
-				if2 = document.getElementById(form.id);
-				if (if2) { if2.parentNode.removeChild(if2); }
+				remove(iframe.id);
+				remove(form.id);
 
 				document.body.appendChild(iframe);
 				document.body.appendChild(form);
@@ -557,6 +561,8 @@ boomr = {
 				if (urls.length) {
 					BOOMR.setImmediate(submit);
 				}
+
+				setTimeout(function() { remove(iframe.id); }, 10000);
 			}
 
 			submit();
