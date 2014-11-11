@@ -570,19 +570,21 @@ impl = {
 	setPageLoadTimers: function(ename, t_done, data) {
 		var t_resp_start;
 
-		impl.initFromCookie();
-		impl.initFromNavTiming();
-
 		if(ename !== "xhr") {
+			impl.initFromCookie();
+			impl.initFromNavTiming();
+
 			if(impl.checkPreRender()) {
 				return false;
 			}
 		}
 
-		if(data && data.timing) {
-			// Use details from xhr object to figure out resp latency and page time
-			// t_resp will use the cookie if available or fallback to NavTiming
-			t_resp_start = data.timing.responseStart;
+		if(ename === "xhr") {
+			if(data && data.timing) {
+				// Use details from xhr object to figure out resp latency and page time
+				// t_resp will use the cookie if available or fallback to NavTiming
+				t_resp_start = data.timing.responseStart;
+			}
 		}
 		else if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
