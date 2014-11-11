@@ -514,6 +514,9 @@ boomr = {
 		if(config.instrument_xhr) {
 			BOOMR.instrumentXHR();
 		}
+		else if (config.instrument_xhr === false) {
+			BOOMR.uninstrumentXHR();
+		}
 
 		if(config.log !== undefined) {
 			this.log = config.log;
@@ -782,6 +785,14 @@ boomr = {
 	},
 
 	/**
+	 * Undo XMLHttpRequest instrumentation and reset the original
+	 */
+	uninstrumentXHR: function() {
+		if (BOOMR.XMLHttpRequest && BOOMR.XMLHttpRequest !== BOOMR.window.XMLHttpRequest) {
+			BOOMR.window.XMLHttpRequest = BOOMR.XMLHttpRequest;
+		}
+	},
+	/**
 	 * Instrument all requests made via XMLHttpRequest to send beacons
 	 */
 	instrumentXHR: function() {
@@ -818,7 +829,7 @@ boomr = {
 				req.addEventListener("load", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
 					resource.status = req.status;
-					// TODO add response headers
+					resource.headers = req.getAllResponseHeaders();
 				}, false);
 				req.addEventListener("timeout", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
