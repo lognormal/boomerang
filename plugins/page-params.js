@@ -582,13 +582,23 @@ impl = {
 			impl.complete = false;
 
 			// Override the URL we check metrics against
-			if(edata.url) {
+			if(data.url) {
 				l = d.createElement("a");
-				l.href = edata.url;
+				l.href = data.url;
 
 				limpl.pageGroups = impl.pageGroups;
 
 				hconfig.pageGroups.varname = "xhr.pg";
+
+				// Page Group name for an XHR resource can specify if this is a subresource or not
+				hconfig.pageGroups.preProcessor = function(v) {
+					if(v && v.match(/_subresource$/)) {
+						v = v.replace(/_subresource$/, "");
+						edata.subresource = 1;
+					}
+
+					return v;
+				};
 			}
 		}
 
@@ -669,17 +679,21 @@ impl = {
 	},
 
 	extractXHRParams: function(edata, hconfig) {
-		var limpl, sections, k, section, itemName, value, m, i, j, handler;
+		var limpl, sections, k, section, itemName, value, m, i, j, handler, data;
 
-		if (!edata || !edata.data) {
+		if (!edata) {
 			return null;
 		}
+		if (edata.data) {
+			data = edata.data;
+		}
+		else {
+			data = edata;
+		}
 
-		edata = edata.data;
-
-		if(  (!edata.timers     || !edata.timers.length)
-		  && (!edata.metrics    || !edata.metrics.length)
-		  && (!edata.dimensions || !edata.dimensions.length)
+		if(  (!data.timers     || !data.timers.length)
+		  && (!data.metrics    || !data.metrics.length)
+		  && (!data.dimensions || !data.dimensions.length)
 		) {
 			return null;
 		}
@@ -693,9 +707,9 @@ impl = {
 		};
 
 		sections = {
-			"timers":     { impl: "customTimers",     data: edata.timers },
-			"metrics":    { impl: "customMetrics",    data: edata.metrics },
-			"dimensions": { impl: "customDimensions", data: edata.dimensions }
+			"timers":     { impl: "customTimers",     data: data.timers },
+			"metrics":    { impl: "customMetrics",    data: data.metrics },
+			"dimensions": { impl: "customDimensions", data: data.dimensions }
 		};
 
 		for (k in sections) {

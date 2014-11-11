@@ -526,11 +526,15 @@ impl = {
 	 * Validate that the time we think is the load time is correct.  This can be wrong if boomerang was loaded
 	 * after onload, so in that case, if navigation timing is available, we use that instead.
 	 */
-	validateLoadTimestamp: function(t_now) {
+	validateLoadTimestamp: function(t_now, data) {
 		var t_done = t_now;
 
+		// xhr beacon with detailed timing information
+		if (data && data.timing && data.timing.loadEventEnd) {
+			t_done = data.timing.loadEventEnd;
+		}
 		// Boomerang loaded late and...
-		if (BOOMR.loadedLate) {
+		else if (BOOMR.loadedLate) {
 			// We have navigation timing,
 			if(w.performance) {
 				// and boomerang loaded after onload fired
@@ -557,36 +561,52 @@ impl = {
 	 *		- t_postrender	time from prerender state to visible state
 	 *		- t_prerender	time from navigation start to visible state
 	 *
+	 * @param ename  The Event name that initiated this control flow
 	 * @param t_done The timestamp when the done() method was called
+	 * @param data   Event data passed in from the caller.  For xhr beacons, this may contain detailed timing information
 	 *
 	 * @returns true if timers were set, false if we're in a prerender state, caller should abort on false.
 	 */
-	setPageLoadTimers: function(t_done) {
+	setPageLoadTimers: function(ename, t_done, data) {
+		var t_resp_start;
+
 		impl.initFromCookie();
 		impl.initFromNavTiming();
 
-		if(impl.checkPreRender()) {
-			return false;
+		if(ename !== "xhr") {
+			if(impl.checkPreRender()) {
+				return false;
+			}
 		}
 
-		if(impl.responseStart) {
+		if(data && data.timing) {
+			// Use details from xhr object to figure out resp latency and page time
+			// t_resp will use the cookie if available or fallback to NavTiming
+			t_resp_start = data.timing.responseStart;
+		}
+		else if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
-			BOOMR.plugins.RT.endTimer("t_resp", impl.responseStart);
-			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
-				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - impl.responseStart);
-			}
-			else {
-				BOOMR.plugins.RT.setTimer("t_page", t_done - impl.responseStart);
-			}
+			t_resp_start = impl.responseStart;
 		}
 		else if(impl.timers.hasOwnProperty("t_page")) {
 			// If the dev has already started t_page timer, we can end it now as well
 			BOOMR.plugins.RT.endTimer("t_page");
 		}
 		else if(impl.t_fb_approx) {
-			BOOMR.plugins.RT.endTimer("t_resp", impl.t_fb_approx);
-			BOOMR.plugins.RT.setTimer("t_page", t_done - impl.t_fb_approx);
+			// If we have an approximate first byte time from the cookie, use it
+			t_resp_start = impl.t_fb_approx;
+		}
+
+		if (t_resp_start) {
+			BOOMR.plugins.RT.endTimer("t_resp", t_resp_start);
+
+			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
+				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
+			}
+			else {
+				BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+			}
 		}
 
 		// If a prerender timer was started, we can end it now as well
@@ -627,17 +647,26 @@ impl = {
 	 * Else, if we have a cached timestamp from an earlier call, use that
 	 * Else, give up
 	 *
-	 * @param ename	 The event name that resulted in this call. Special consideration for "xhr"
-	 * @param pgname If the event name is "xhr", this should be the page group name for the xhr call
+	 * @param ename	The event name that resulted in this call. Special consideration for "xhr"
+	 * @param data  Data passed in from the event caller. If the event name is "xhr",
+	 *              this should contain the page group name for the xhr call in an attribute called `name`
+	 *		and optionally, detailed timing information in a sub-object called `timing`
+	 *              and resource information in a sub-object called `resource`
 	 *
 	 * @returns the determined value of t_start or undefined if unknown
 	 */
-	determineTStart: function(ename, pgname) {
+	determineTStart: function(ename, data) {
 		var t_start;
-		if(ename==="xhr" && pgname && impl.timers[pgname]) {
-			// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
-			// and xhr.pg is set to {page group name}
-			t_start = impl.timers[pgname].start;
+		if(ename==="xhr") {
+			if(data && data.name && impl.timers[data.name]) {
+				// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
+				// and xhr.pg is set to {page group name}
+				t_start = impl.timers[pgname].start;
+			}
+			else if(data && data.timing && data.timing.requestStart) {
+				// For automatically instrumented xhr timers, we have detailed timing information
+				t_start = data.timing.requestStart;
+			}
 			BOOMR.addVar("rt.start", "manual");
 		}
 		else if(impl.navigationStart) {
@@ -894,19 +923,23 @@ BOOMR.plugins.RT = {
 
 		impl.complete = false;
 
-		t_done = impl.validateLoadTimestamp(t_now);
+		t_done = impl.validateLoadTimestamp(t_now, edata);
 
-		if(ename==="load" || ename==="visible") {
+		if(ename==="load" || ename==="visible" || ename==="xhr") {
 			if (!impl.setPageLoadTimers(t_done)) {
 				return this;
 			}
 		}
 
-		if(ename === "xhr" && edata && edata.data) {
-			subresource = edata.data.subresource;
+		t_start = impl.determineTStart(ename, edata);
+
+		if(edata && edata.data) {
+			edata = edata.data;
 		}
 
-		t_start = impl.determineTStart(ename, edata ? edata.name : null);
+		if(ename === "xhr" && edata) {
+			subresource = edata.subresource;
+		}
 
 		impl.refreshSession();
 
@@ -920,6 +953,7 @@ BOOMR.plugins.RT = {
 		BOOMR.removeVar(
 			"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
 			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+			"http.errno", "http.method",
 			"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 		);
 
@@ -932,6 +966,29 @@ BOOMR.plugins.RT = {
 
 			if(impl.r2 !== impl.r) {
 				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
+			}
+		}
+
+		if(edata) {
+			if(edata.status && edata.status !== "200") {
+				BOOMR.addVar("http.errno", edata.status);
+			}
+			else if(edata.timing) {
+				if(edata.timing.timeout) {
+					BOOMR.addVar("http.errno", 10503);
+				}
+				else if(edata.timing.error) {
+					BOOMR.addVar("http.errno", 10500);
+				}
+				else if(edata.timing.abort) {
+					BOOMR.addVar("http.errno", 10501);
+				}
+			}
+			impl.addedVars.push("http.errno");
+
+			if(edata.method && edata.method !== "GET") {
+				BOOMR.addVar("http.method", edata.method);
+				impl.addedVars.push("http.method");
 			}
 		}
 
