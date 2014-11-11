@@ -526,11 +526,15 @@ impl = {
 	 * Validate that the time we think is the load time is correct.  This can be wrong if boomerang was loaded
 	 * after onload, so in that case, if navigation timing is available, we use that instead.
 	 */
-	validateLoadTimestamp: function(t_now) {
+	validateLoadTimestamp: function(t_now, data) {
 		var t_done = t_now;
 
+		// xhr beacon with detailed timing information
+		if (data && data.timing && data.timing.loadEventEnd) {
+			t_done = data.timing.loadEventEnd;
+		}
 		// Boomerang loaded late and...
-		if (BOOMR.loadedLate) {
+		else if (BOOMR.loadedLate) {
 			// We have navigation timing,
 			if(w.performance) {
 				// and boomerang loaded after onload fired
@@ -627,17 +631,26 @@ impl = {
 	 * Else, if we have a cached timestamp from an earlier call, use that
 	 * Else, give up
 	 *
-	 * @param ename	 The event name that resulted in this call. Special consideration for "xhr"
-	 * @param pgname If the event name is "xhr", this should be the page group name for the xhr call
+	 * @param ename	The event name that resulted in this call. Special consideration for "xhr"
+	 * @param data  Data passed in from the event caller. If the event name is "xhr",
+	 *              this should contain the page group name for the xhr call in an attribute called `name`
+	 *		and optionally, detailed timing information in a sub-object called `timing`
+	 *              and resource information in a sub-object called `resource`
 	 *
 	 * @returns the determined value of t_start or undefined if unknown
 	 */
-	determineTStart: function(ename, pgname) {
+	determineTStart: function(ename, data) {
 		var t_start;
-		if(ename==="xhr" && pgname && impl.timers[pgname]) {
-			// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
-			// and xhr.pg is set to {page group name}
-			t_start = impl.timers[pgname].start;
+		if(ename==="xhr") {
+			if(data && data.name && impl.timers[data.name]) {
+				// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
+				// and xhr.pg is set to {page group name}
+				t_start = impl.timers[pgname].start;
+			}
+			else if(data && data.timing && data.timing.requestStart) {
+				// For automatically instrumented xhr timers, we have detailed timing information
+				t_start = data.timing.requestStart;
+			}
 			BOOMR.addVar("rt.start", "manual");
 		}
 		else if(impl.navigationStart) {
@@ -894,7 +907,7 @@ BOOMR.plugins.RT = {
 
 		impl.complete = false;
 
-		t_done = impl.validateLoadTimestamp(t_now);
+		t_done = impl.validateLoadTimestamp(t_now, edata);
 
 		if(ename==="load" || ename==="visible") {
 			if (!impl.setPageLoadTimers(t_done)) {
@@ -902,11 +915,15 @@ BOOMR.plugins.RT = {
 			}
 		}
 
-		if(ename === "xhr" && edata && edata.data) {
-			subresource = edata.data.subresource;
+		t_start = impl.determineTStart(ename, edata);
+
+		if(edata && edata.data) {
+			edata = edata.data;
 		}
 
-		t_start = impl.determineTStart(ename, edata ? edata.name : null);
+		if(ename === "xhr" && edata) {
+			subresource = edata.subresource;
+		}
 
 		impl.refreshSession();
 
