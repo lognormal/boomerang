@@ -511,6 +511,10 @@ boomr = {
 			this.session.domain = config.site_domain;
 		}
 
+		if(config.instrument_xhr) {
+			BOOMR.instrumentXHR();
+		}
+
 		if(config.log !== undefined) {
 			this.log = config.log;
 		}
@@ -816,11 +820,22 @@ boomr = {
 					resource.status = req.status;
 					// TODO add response headers
 				}, false);
-				req.addEventListener("timeout", function() { resource.timing.timeout = new Date().getTime(); }, false);
-				req.addEventListener("error", function() { resource.timing.error = new Date().getTime(); }, false);
-				req.addEventListener("abort", function() { resource.timing.abort = new Date().getTime(); }, false);
+				req.addEventListener("timeout", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10503;
+				}, false);
+				req.addEventListener("error", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10500;
+				}, false);
+				req.addEventListener("abort", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10501;
+				}, false);
 
-				req.addEventListener("loadend", function() { impl.fireEvent("xhr_load", resource); }, false);
+				req.addEventListener("loadend", function() {
+					impl.fireEvent("xhr_load", resource);
+				}, false);
 
 				resource.url = url;
 				resource.method = method;
@@ -871,7 +886,9 @@ boomr = {
 		}
 
 		// use d.URL instead of location.href because of a safari bug
-		impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
+		if(!impl.vars.u) {
+			impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
+		}
 		impl.vars.v = BOOMR.version;
 
 		impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36);
@@ -930,7 +947,7 @@ boomr = {
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
-		this.setImmediate(impl.fireEvent, "onbeacon", impl.vars, impl);
+		impl.fireEvent("onbeacon", impl.vars);
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {

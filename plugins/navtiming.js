@@ -22,7 +22,7 @@ if (BOOMR.plugins.NavigationTiming) {
 var impl = {
 	complete: false,
 	xhr_done: function(edata) {
-		var w = BOOMR.window, res, data = {};
+		var w = BOOMR.window, res, data = {}, k;
 
 		if (!edata) {
 			return;
@@ -70,21 +70,20 @@ var impl = {
 			data.nt_domint = res.domInteractive;
 			data.nt_load_st = res.loadEventEnd;
 			data.nt_load_end = res.loadEventEnd;
+		}
 
-			if (res.timeout) {
-				data.nt_timeout = res.timeout;
-			}
-			if (res.error) {
-				data.nt_error = res.error;
-			}
-			if (res.abort) {
-				data.nt_abort = res.abort;
+		for(k in data) {
+			if (data.hasOwnProperty(k) && !data[k]) {
+				delete data[k];
 			}
 		}
 
 		BOOMR.addVar(data);
 
 		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
+
+		this.complete = true;
+		BOOMR.sendBeacon();
 	},
 
 	done: function() {
@@ -165,16 +164,21 @@ var impl = {
 			BOOMR.removeVar(impl.addedVars);
 			impl.addedVars = [];
 		}
+		this.complete = false;
 	}
 };
 
 BOOMR.plugins.NavigationTiming = {
 	init: function() {
-		// we'll fire on whichever happens first
-		BOOMR.subscribe("page_ready", impl.done, null, impl);
-		BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
-		BOOMR.subscribe("page_unload", impl.done, null, impl);
-		BOOMR.subscribe("onbeacon", impl.clear, null, impl);
+		if (!impl.initialized) {
+			// we'll fire on whichever happens first
+			BOOMR.subscribe("page_ready", impl.done, null, impl);
+			BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
+			BOOMR.subscribe("page_unload", impl.done, null, impl);
+			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
+
+			impl.initialized = true;
+		}
 		return this;
 	},
 
