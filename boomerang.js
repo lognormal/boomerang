@@ -820,11 +820,22 @@ boomr = {
 					resource.status = req.status;
 					// TODO add response headers
 				}, false);
-				req.addEventListener("timeout", function() { resource.timing.timeout = new Date().getTime(); }, false);
-				req.addEventListener("error", function() { resource.timing.error = new Date().getTime(); }, false);
-				req.addEventListener("abort", function() { resource.timing.abort = new Date().getTime(); }, false);
+				req.addEventListener("timeout", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10503;
+				}, false);
+				req.addEventListener("error", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10500;
+				}, false);
+				req.addEventListener("abort", function() {
+					resource.timing.loadEventEnd = new Date().getTime();
+					resource.status = 10501;
+				}, false);
 
-				req.addEventListener("loadend", function() { impl.fireEvent("xhr_load", resource); }, false);
+				req.addEventListener("loadend", function() {
+					impl.fireEvent("xhr_load", resource);
+				}, false);
 
 				resource.url = url;
 				resource.method = method;

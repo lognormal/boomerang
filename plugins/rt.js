@@ -970,21 +970,10 @@ BOOMR.plugins.RT = {
 		}
 
 		if(edata) {
-			if(edata.status && edata.status !== "200") {
+			if(edata.status && edata.status !== 200) {
 				BOOMR.addVar("http.errno", edata.status);
+				impl.addedVars.push("http.errno");
 			}
-			else if(edata.timing) {
-				if(edata.timing.timeout) {
-					BOOMR.addVar("http.errno", 10503);
-				}
-				else if(edata.timing.error) {
-					BOOMR.addVar("http.errno", 10500);
-				}
-				else if(edata.timing.abort) {
-					BOOMR.addVar("http.errno", 10501);
-				}
-			}
-			impl.addedVars.push("http.errno");
 
 			if(edata.method && edata.method !== "GET") {
 				BOOMR.addVar("http.method", edata.method);

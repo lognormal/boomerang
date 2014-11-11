@@ -70,15 +70,8 @@ var impl = {
 			data.nt_domint = res.domInteractive;
 			data.nt_load_st = res.loadEventEnd;
 			data.nt_load_end = res.loadEventEnd;
+		}
 
-			if (res.timeout) {
-				data.nt_timeout = res.timeout;
-			}
-			if (res.error) {
-				data.nt_error = res.error;
-			}
-			if (res.abort) {
-				data.nt_abort = res.abort;
 			}
 		}
 
