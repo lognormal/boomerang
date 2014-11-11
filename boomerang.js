@@ -853,6 +853,73 @@ boomr = {
 		}
 	},
 
+	/**
+	 * Instrument all requests made via XMLHttpRequest to send beacons
+	 */
+	instrumentXHR: function() {
+		var proxy_XMLHttpRequest,
+		    orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest,
+		    readyStateMap;
+
+		if (!orig_XMLHttpRequest) {
+			// Nothing to instrument
+			return;
+		}
+
+		BOOMR.XMLHttpRequest = orig_XMLHttpRequest;
+
+		readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
+
+		// We could also inherit from window.XMLHttpRequest, but for this implementation,
+		// we'll use composition
+		proxy_XMLHttpRequest = function() {
+			var req, resource = { timing: {} }, orig_open, orig_send;
+
+			req = new orig_XMLHttpRequest;
+
+			orig_open = req.open;
+			orig_send = req.send;
+
+			req.open = function(method, url, async) {
+				if (async) {
+					req.addEventListener('readystatechange', function() {
+						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
+					}, false);
+				}
+
+				req.addEventListener('load', function() {
+					resource.timing["loadEventEnd"] = new Date().getTime();
+					resource.status = req.status;
+					// TODO add response headers
+				}, false);
+				req.addEventListener('timeout', function() { resource.timing["timeout"] = new Date().getTime(); }, false);
+				req.addEventListener('error', function() { resource.timing["error"] = new Date().getTime(); }, false);
+				req.addEventListener('abort', function() { resource.timing["abort"] = new Date().getTime(); }, false);
+
+				req.addEventListener('loadend', function() { impl.fireEvent("xhr_load", resource); }, false);
+
+				resource.url = url;
+				resource.method = method;
+
+				// call the original open method
+				return orig_open.apply(req, arguments);
+			};
+
+			req.send = function() {
+				resource.timing["requestStart"] = new Date().getTime();
+
+				// call the original send method
+				return orig_send.apply(req, arguments);
+			};
+
+			req.resource = resource;
+
+			return req;
+		};
+
+		BOOMR.window.XMLHttpRequest = proxy_XMLHttpRequest;
+	},
+
 	sendBeacon: function(beacon_url_override) {
 		var k, form, furl, img, length, errors=[];
 

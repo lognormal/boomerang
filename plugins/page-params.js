@@ -551,18 +551,23 @@ impl = {
 	mayRetry: [],
 
 	done: function(edata, ename) {
-		var i, j, v, hconfig, handler, limpl=impl, pg="h.pg";
+		var i, j, v, hconfig, handler, limpl=impl, pg="h.pg", data;
 
 		if(ename !== "xhr"  && this.complete) {
 			return;
 		}
 
 		if(ename === "xhr") {
-			if (!edata || !edata.data) {
+			if (!edata) {
 				return;
 			}
-			edata = edata.data;
-			if((!edata.timers || !edata.timers.length) && (!edata.metrics || !edata.metrics.length)) {
+			if (edata.data) {
+				data = edata.data;
+			}
+			else {
+				data = edata;
+			}
+			if((!data.timers || !data.timers.length) && (!data.metrics || !data.metrics.length)) {
 				return;
 			}
 
@@ -575,20 +580,20 @@ impl = {
 				customMetrics: []
 			};
 
-			if (edata.timers && edata.timers.length) {
+			if (data.timers && data.timers.length) {
 				for(i=0; i<impl.customTimers.length; i++) {
-					for(j=0; j<edata.timers.length; j++) {
-						if(impl.customTimers[i].name === edata.timers[j]) {
+					for(j=0; j<data.timers.length; j++) {
+						if(impl.customTimers[i].name === data.timers[j]) {
 							limpl.customTimers.push(impl.customTimers[i]);
 						}
 					}
 				}
 			}
 
-			if (edata.metrics && edata.metrics.length) {
+			if (data.metrics && data.metrics.length) {
 				for(i=0; i<impl.customMetrics.length; i++) {
-					for(j=0; j<edata.metrics.length; j++) {
-						if(impl.customMetrics[i].label === "cmet." + edata.metrics[j] || impl.customMetrics[i].name === edata.metrics[j]) {
+					for(j=0; j<data.metrics.length; j++) {
+						if(impl.customMetrics[i].label === "cmet." + data.metrics[j] || impl.customMetrics[i].name === data.metrics[j]) {
 							limpl.customMetrics.push(impl.customMetrics[i]);
 						}
 					}
@@ -596,9 +601,9 @@ impl = {
 			}
 
 			// Override the URL we check metrics against
-			if(edata.url) {
+			if(data.url) {
 				l = d.createElement("a");
-				l.href = edata.url;
+				l.href = data.url;
 
 				limpl.pageGroups = impl.pageGroups;
 
@@ -618,6 +623,18 @@ impl = {
 						}
 					}
 		};
+
+		// Page Group name for an XHR resource can specify if this is a subresource or not
+		if (data && !("subresource" in data) && data.url) {
+			hconfig.pageGroups.preProcessor = function(v) {
+				if(v && v.match(/_subresource$/)) {
+					v = v.replace(/_subresource$/, "");
+					edata.subresource = 1;
+				}
+
+				return v;
+			};
+		}
 
 		impl.mayRetry = [];
 

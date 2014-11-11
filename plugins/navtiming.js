@@ -21,6 +21,72 @@ if (BOOMR.plugins.NavigationTiming) {
 // A private object to encapsulate all your implementation details
 var impl = {
 	complete: false,
+	xhr_done: function(edata) {
+		var w = BOOMR.window, res, data = {};
+
+		if (!edata) {
+			return;
+		}
+
+		if (edata.data) {
+			edata = edata.data;
+		}
+
+		if (edata.url && w.performance && w.performance.getEntriesByName) {
+			res = w.performance.getEntriesByName(edata.url);
+			if(res && res.length > 0) {
+				res = res[0];
+
+				data = {
+					nt_red_st: res.redirectStart,
+					nt_red_end: res.redirectEnd,
+					nt_fet_st: res.fetchStart,
+					nt_dns_st: res.domainLookupStart,
+					nt_dns_end: res.domainLookupEnd,
+					nt_con_st: res.connectStart,
+					nt_con_end: res.connectEnd,
+					nt_req_st: res.requestStart,
+					nt_res_st: res.responseStart,
+					nt_res_end: res.responseEnd,
+				};
+				if (res.secureConnectionStart) {
+					// secureConnectionStart is OPTIONAL in the spec
+					data.nt_ssl_st = res.secureConnectionStart;
+				}
+			}
+		}
+
+		if (edata.timing) {
+			res = edata.timing;
+			if (!data.nt_req_st) {
+				data.nt_req_st = res.requestStart;
+			}
+			if (!data.nt_res_st) {
+				data.nt_res_st = res.responseStart;
+			}
+			if (!data.nt_res_end) {
+				data.nt_res_end = res.responseEnd;
+			}
+			data.nt_domint = res.domInteractive;
+			data.nt_load_st = res.loadEventEnd;
+			data.nt_load_end = res.loadEventEnd;
+
+			if (res.timeout) {
+				data.nt_timeout = res.timeout;
+			}
+			if (res.error) {
+				data.nt_error = res.error;
+			}
+			if (res.abort) {
+				data.nt_abort = res.abort;
+			}
+		}
+
+		BOOMR.addVar(data);
+
+		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
+	},
+
 	done: function() {
 		var w = BOOMR.window, p, pn, pt, data;
 		if(this.complete) {
@@ -106,6 +172,7 @@ BOOMR.plugins.NavigationTiming = {
 	init: function() {
 		// we'll fire on whichever happens first
 		BOOMR.subscribe("page_ready", impl.done, null, impl);
+		BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
 		BOOMR.subscribe("page_unload", impl.done, null, impl);
 		BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 		return this;
