@@ -728,7 +728,8 @@ impl = {
 			data = edata;
 		}
 
-		if(  (!data.timers     || !data.timers.length)
+		if(  !data.url
+		  && (!data.timers     || !data.timers.length)
 		  && (!data.metrics    || !data.metrics.length)
 		  && (!data.dimensions || !data.dimensions.length)
 		) {
