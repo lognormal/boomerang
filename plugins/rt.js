@@ -926,7 +926,7 @@ BOOMR.plugins.RT = {
 		t_done = impl.validateLoadTimestamp(t_now, edata);
 
 		if(ename==="load" || ename==="visible" || ename==="xhr") {
-			if (!impl.setPageLoadTimers(t_done)) {
+			if (!impl.setPageLoadTimers(ename, t_done, edata)) {
 				return this;
 			}
 		}
