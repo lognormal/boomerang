@@ -22,7 +22,7 @@ if (BOOMR.plugins.NavigationTiming) {
 var impl = {
 	complete: false,
 	xhr_done: function(edata) {
-		var w = BOOMR.window, res, data = {};
+		var w = BOOMR.window, res, data = {}, k;
 
 		if (!edata) {
 			return;
@@ -72,6 +72,9 @@ var impl = {
 			data.nt_load_end = res.loadEventEnd;
 		}
 
+		for(k in data) {
+			if (data.hasOwnProperty(k) && !data[k]) {
+				delete data[k];
 			}
 		}
 
