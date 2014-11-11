@@ -686,24 +686,20 @@ impl = {
 		for(i=0; i<impl.customMetrics.length; i++) {
 			label = impl.customMetrics[i].label;
 
-			if(vars.hasOwnProperty(label)) {
-				BOOMR.removeVar(label);
-			}
+			BOOMR.removeVar(label);
 		}
 
 		// Remove slowest url
-		if (vars.hasOwnProperty("dom.res.slowest")) {
-			BOOMR.removeVar("dom.res.slowest");
-		}
+		BOOMR.removeVar("dom.res.slowest");
 
 		// Remove start time for custom timers
 		for(i=0; i<impl.customTimers.length; i++) {
 			label = impl.customTimers[i].label + "_st";
 
-			if(vars.hasOwnProperty(label)) {
-				BOOMR.removeVar(label);
-			}
+			BOOMR.removeVar(label);
 		}
+
+		BOOMR.removeVar("h.pg", "h.ab", "xhr.pg");
 
 		// TODO remove all resource timing components when start==="*"
 	},
