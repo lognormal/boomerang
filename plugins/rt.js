@@ -570,19 +570,21 @@ impl = {
 	setPageLoadTimers: function(ename, t_done, data) {
 		var t_resp_start;
 
-		impl.initFromCookie();
-		impl.initFromNavTiming();
-
 		if(ename !== "xhr") {
+			impl.initFromCookie();
+			impl.initFromNavTiming();
+
 			if(impl.checkPreRender()) {
 				return false;
 			}
 		}
 
-		if(data && data.timing) {
-			// Use details from xhr object to figure out resp latency and page time
-			// t_resp will use the cookie if available or fallback to NavTiming
-			t_resp_start = data.timing.responseStart;
+		if(ename === "xhr") {
+			if(data && data.timing) {
+				// Use details from xhr object to figure out resp latency and page time
+				// t_resp will use the cookie if available or fallback to NavTiming
+				t_resp_start = data.timing.responseStart;
+			}
 		}
 		else if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
@@ -926,7 +928,7 @@ BOOMR.plugins.RT = {
 		t_done = impl.validateLoadTimestamp(t_now, edata);
 
 		if(ename==="load" || ename==="visible" || ename==="xhr") {
-			if (!impl.setPageLoadTimers(t_done)) {
+			if (!impl.setPageLoadTimers(ename, t_done, edata)) {
 				return this;
 			}
 		}
@@ -968,23 +970,16 @@ BOOMR.plugins.RT = {
 				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 			}
 		}
+		else if (edata && edata.url) {	// ename === "xhr"
+			BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
+			impl.addedVars.push("u");
+		}
 
 		if(edata) {
-			if(edata.status && edata.status !== "200") {
+			if(edata.status && edata.status !== 200) {
 				BOOMR.addVar("http.errno", edata.status);
+				impl.addedVars.push("http.errno");
 			}
-			else if(edata.timing) {
-				if(edata.timing.timeout) {
-					BOOMR.addVar("http.errno", 10503);
-				}
-				else if(edata.timing.error) {
-					BOOMR.addVar("http.errno", 10500);
-				}
-				else if(edata.timing.abort) {
-					BOOMR.addVar("http.errno", 10501);
-				}
-			}
-			impl.addedVars.push("http.errno");
 
 			if(edata.method && edata.method !== "GET") {
 				BOOMR.addVar("http.method", edata.method);
