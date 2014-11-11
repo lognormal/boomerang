@@ -928,15 +928,15 @@ boomr = {
 				}, false);
 				req.addEventListener("timeout", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10503;
+					resource.status = -1001;
 				}, false);
 				req.addEventListener("error", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10500;
+					resource.status = -998;
 				}, false);
 				req.addEventListener("abort", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10501;
+					resource.status = -999;
 				}, false);
 
 				req.addEventListener("loadend", function() {
