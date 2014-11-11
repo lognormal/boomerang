@@ -271,6 +271,9 @@ boomr = {
 	url: myurl,
 	config_url: null,
 
+	//! URLs to exclude from automatic XHR instrumentation
+	xhr_excludes: {},
+
 	session: {
 		// You can disable all cookies by setting site_domain to a falsy value
 		domain: null,
@@ -902,6 +905,16 @@ boomr = {
 			orig_send = req.send;
 
 			req.open = function(method, url, async) {
+				if (BOOMR.xhr_excludes.hasOwnProperty(url)) {
+					// skip instrumentation and call the original open method
+					return orig_open.apply(req, arguments);
+				}
+
+				// Default value of async is true
+				if (async === undefined) {
+					async = true;
+				}
+
 				if (async) {
 					req.addEventListener("readystatechange", function() {
 						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
