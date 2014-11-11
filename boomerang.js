@@ -947,7 +947,7 @@ boomr = {
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
-		this.setImmediate(impl.fireEvent, "onbeacon", impl.vars, impl);
+		impl.fireEvent("onbeacon", impl.vars);
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
