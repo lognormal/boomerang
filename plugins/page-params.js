@@ -53,7 +53,7 @@ Handler.prototype = {
 		return s ? s.replace(this.sanitizeRE, "") : s;
 	},
 
-	handleRegEx: function(re, extract) {
+	handleRegEx: function(re, extract, operand) {
 		var value, m;
 
 		try {
@@ -65,7 +65,11 @@ Handler.prototype = {
 			return false;
 		}
 
-		m = re.exec(l.href);
+		if (!operand) {
+			operand = l.href;
+		}
+
+		m = re.exec(operand);
 
 		if(!m || !m.length) {
 			return false;
@@ -192,17 +196,29 @@ Handler.prototype = {
 		return el.singleNodeValue;
 	},
 
-	Custom: function(o) {
-		var parts, value, ctx=w;
-
-		if(!o.parameter1) {
+	JavaScriptVar: function(o) {
+		if(!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
-		BOOMR.debug("Got variable: " + o.parameter1, "PageVars");
+		this.extractJavaScriptVariable(o.varName);
+	},
+
+	Custom: function(o) {
+		this.extractJavaScriptVariable(o.parameter1);
+	},
+
+	extractJavaScriptVariable: function(varname) {
+		var parts, value, ctx=w;
+
+		if(!varname) {
+			return false;
+		}
+
+		BOOMR.debug("Got variable: " + varname, "PageVars");
 
 		// Split variable into its parts
-		parts = o.parameter1.split(/\./);
+		parts = varname.split(/\./);
 
 		if(!parts || parts.length === 0) {
 			return false;
@@ -292,14 +308,36 @@ Handler.prototype = {
 				"$1");
 	},
 
+	UserAgentRegex: function(o) {
+		return this._Regex(o.parameter1, o.regex, o.replacement, navigator.userAgent);
+	},
+
+	CookieRegex: function(o) {
+		return this._Regex(o.parameter1, o.regex, o.replacement, d.cookie);
+	},
+
+	// New method for custom dimensions
+	URLRegex: function(o) {
+		return this._Regex(o.parameter1, o.regex, o.replacement);
+	},
+
+	// Old method for page groups
 	Regexp: function(o) {
-		if(!o.parameter1 || !o.parameter2) {
+		return this._Regex(null, o.parameter1, o.parameter2);
+	},
+
+	_Regex: function(url, regex, replacement, operand) {
+		if(!this.checkURLPattern(url)) {
 			return false;
 		}
 
-		BOOMR.debug("Got RegEx: " + o.parameter1 + ", " + o.parameter2, "PageVars");
+		if(!regex || !replacement) {
+			return false;
+		}
 
-		return this.handleRegEx(o.parameter1, o.parameter2);
+		BOOMR.debug("Got RegEx: " + url + ", " + regex + ", " + replacement, "PageVars");
+
+		return this.handleRegEx(regex, replacement, operand);
 	},
 
 	URLPatternType: function(o) {
@@ -537,6 +575,9 @@ Handler.prototype = {
 		impl.mayRetry.push({ handler: this, data: o });
 	}
 };
+
+Handler.prototype.XPath = Handler.prototype.URLPatternType;
+Handler.prototype.URLQueryParam = Handler.prototype.URLPattern;
 
 impl = {
 	pageGroups: [],
