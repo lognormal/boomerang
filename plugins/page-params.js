@@ -624,6 +624,18 @@ impl = {
 					}
 		};
 
+		// Page Group name for an XHR resource can specify if this is a subresource or not
+		if (data && !("subresource" in data) && data.url) {
+			hconfig.pageGroups.preProcessor = function(v) {
+				if(v && v.match(/_subresource$/)) {
+					v = v.replace(/_subresource$/, "");
+					edata.subresource = 1;
+				}
+
+				return v;
+			};
+		}
+
 		impl.mayRetry = [];
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
