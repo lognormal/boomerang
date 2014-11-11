@@ -561,19 +561,34 @@ impl = {
 	 *		- t_postrender	time from prerender state to visible state
 	 *		- t_prerender	time from navigation start to visible state
 	 *
+	 * @param ename  The Event name that initiated this control flow
 	 * @param t_done The timestamp when the done() method was called
+	 * @param data   Event data passed in from the caller.  For xhr beacons, this may contain detailed timing information
 	 *
 	 * @returns true if timers were set, false if we're in a prerender state, caller should abort on false.
 	 */
-	setPageLoadTimers: function(t_done) {
+	setPageLoadTimers: function(ename, t_done, data) {
 		impl.initFromCookie();
 		impl.initFromNavTiming();
 
-		if(impl.checkPreRender()) {
-			return false;
+		if(ename!=="xhr") {
+			if(impl.checkPreRender()) {
+				return false;
+			}
 		}
 
-		if(impl.responseStart) {
+		if(data && data.timing) {
+			// Use details from xhr object to figure out resp latency and page time
+			// t_resp will use the cookie if available or fallback to NavTiming
+			BOOMR.plugins.RT.endTimer("t_resp", data.timing.responseStart);
+			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
+				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - data.timing.responseStart);
+			}
+			else {
+				BOOMR.plugins.RT.setTimer("t_page", t_done - data.timing.responseStart);
+			}
+		}
+		else if(impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
 			BOOMR.plugins.RT.endTimer("t_resp", impl.responseStart);
@@ -909,7 +924,7 @@ BOOMR.plugins.RT = {
 
 		t_done = impl.validateLoadTimestamp(t_now, edata);
 
-		if(ename==="load" || ename==="visible") {
+		if(ename==="load" || ename==="visible" || ename==="xhr") {
 			if (!impl.setPageLoadTimers(t_done)) {
 				return this;
 			}
