@@ -968,6 +968,10 @@ BOOMR.plugins.RT = {
 				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 			}
 		}
+		else if (edata && edata.url) {	// ename === "xhr"
+			BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
+			impl.addedVars.push("u");
+		}
 
 		if(edata) {
 			if(edata.status && edata.status !== 200) {
