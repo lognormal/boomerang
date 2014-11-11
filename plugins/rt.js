@@ -976,7 +976,7 @@ BOOMR.plugins.RT = {
 		}
 
 		if(edata) {
-			if(edata.status && edata.status !== 200) {
+			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
 				impl.addedVars.push("http.errno");
 			}
