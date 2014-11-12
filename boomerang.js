@@ -820,6 +820,7 @@ boomr = {
 			orig_send = req.send;
 
 			req.open = function(method, url, async) {
+				var l;
 				if (BOOMR.xhr_excludes.hasOwnProperty(url)) {
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
@@ -858,7 +859,10 @@ boomr = {
 					impl.fireEvent("xhr_load", resource);
 				}, false);
 
-				resource.url = url;
+				l = d.createElement("a");
+				l.href = url;
+
+				resource.url = l.href;
 				resource.method = method;
 
 				// call the original open method
