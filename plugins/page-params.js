@@ -629,7 +629,7 @@ impl = {
 			hconfig.pageGroups.preProcessor = function(v) {
 				if(v && v.match(/_subresource$/)) {
 					v = v.replace(/_subresource$/, "");
-					edata.subresource = 1;
+					edata.subresource = "passive";
 				}
 
 				return v;
