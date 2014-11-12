@@ -992,7 +992,8 @@ BOOMR.plugins.RT = {
 			}
 		}
 
-		if(subresource) {
+		// This is an explicit subresource
+		if(subresource && subresource !== "passive") {
 			BOOMR.addVar("rt.subres", 1);
 			impl.addedVars.push("rt.subres");
 		}
