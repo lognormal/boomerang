@@ -24,6 +24,9 @@ Handler.prototype = {
 		if(this.preProcessor) {
 			value = this.preProcessor(value);
 		}
+		if (!value && value !== 0) {
+			return false;
+		}
 		this.method.call(this.ctx, this.varname, value);
 		return true;
 	},
