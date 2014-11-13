@@ -14,6 +14,7 @@ Handler = function(config) {
 	this.ctx = config.ctx || BOOMR;
 	this.preProcessor = config.preProcessor;
 	this.sanitizeRE = config.sanitizeRE || /[^\w \-]/g;
+	this.cleanUpRE = config.cleanUpRE;
 
 	return this;
 };
@@ -50,7 +51,22 @@ Handler.prototype = {
 	},
 
 	cleanUp: function(s) {
-		return s ? s.replace(this.sanitizeRE, "") : s;
+		var m;
+		if (!s) {
+			return s;
+		}
+
+		if (this.cleanUpRE) {
+			m = s.match(this.cleanUpRE);
+			if (m && m.length > 1) {
+				return m[1];
+			}
+			else {
+				return "";
+			}
+		}
+
+		return s.replace(this.sanitizeRE, "");
 	},
 
 	handleRegEx: function(re, extract, operand) {
@@ -593,14 +609,14 @@ impl = {
 	mayRetry: [],
 
 	done: function(edata, ename) {
-		var i, v, hconfig, handler, limpl=impl;
+		var i, v, hconfig, handler, limpl=impl, data;
 
 		hconfig = {
 			pageGroups:       { varname: "h.pg", stopOnFirst: true },
 			abTests:          { varname: "h.ab", stopOnFirst: true },
-			customMetrics:    { sanitizeRE: /[^\d\.\-]/g },
+			customMetrics:    { cleanUpRE:  /(-?\d+(?:\.\d+)?)/ },
 			customDimensions: { sanitizeRE: /[^\w\. \-]/g },
-			customTimers:     { sanitizeRE: /[^\d\.\-]/g,
+			customTimers:     { cleanUpRE:  /(-?\d+(?:\.\d+)?)/,
 					    method: BOOMR.plugins.RT.setTimer,
 					    ctx: BOOMR.plugins.RT,
 					    preProcessor: function(v) {
