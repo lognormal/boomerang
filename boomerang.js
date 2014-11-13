@@ -820,6 +820,17 @@ boomr = {
 			orig_send = req.send;
 
 			req.open = function(method, url, async) {
+				var l;
+				if (BOOMR.xhr_excludes.hasOwnProperty(url)) {
+					// skip instrumentation and call the original open method
+					return orig_open.apply(req, arguments);
+				}
+
+				// Default value of async is true
+				if (async === undefined) {
+					async = true;
+				}
+
 				if (async) {
 					req.addEventListener("readystatechange", function() {
 						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
@@ -833,22 +844,25 @@ boomr = {
 				}, false);
 				req.addEventListener("timeout", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10503;
+					resource.status = -1001;
 				}, false);
 				req.addEventListener("error", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10500;
+					resource.status = -998;
 				}, false);
 				req.addEventListener("abort", function() {
 					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = 10501;
+					resource.status = -999;
 				}, false);
 
 				req.addEventListener("loadend", function() {
 					impl.fireEvent("xhr_load", resource);
 				}, false);
 
-				resource.url = url;
+				l = d.createElement("a");
+				l.href = url;
+
+				resource.url = l.href;
 				resource.method = method;
 
 				// call the original open method
@@ -1024,6 +1038,11 @@ for(ident in boomr) {
 		BOOMR[ident] = boomr[ident];
 	}
 }
+if (!BOOMR.xhr_excludes) {
+	//! URLs to exclude from automatic XHR instrumentation
+	BOOMR.xhr_excludes={};
+}
+
 }());
 
 BOOMR.plugins = BOOMR.plugins || {};

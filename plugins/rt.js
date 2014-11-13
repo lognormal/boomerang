@@ -976,7 +976,7 @@ BOOMR.plugins.RT = {
 		}
 
 		if(edata) {
-			if(edata.status && edata.status !== 200) {
+			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
 				impl.addedVars.push("http.errno");
 			}
@@ -992,7 +992,8 @@ BOOMR.plugins.RT = {
 			}
 		}
 
-		if(subresource) {
+		// This is an explicit subresource
+		if(subresource && subresource !== "passive") {
 			BOOMR.addVar("rt.subres", 1);
 			impl.addedVars.push("rt.subres");
 		}

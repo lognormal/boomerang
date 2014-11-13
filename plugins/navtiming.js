@@ -53,6 +53,13 @@ var impl = {
 					// secureConnectionStart is OPTIONAL in the spec
 					data.nt_ssl_st = res.secureConnectionStart;
 				}
+
+				for(k in data) {
+					if (data.hasOwnProperty(k) && data[k]) {
+						data[k] += w.performance.timing.navigationStart;
+					}
+				}
+
 			}
 		}
 
