@@ -75,13 +75,15 @@ Handler.prototype = {
 	handleRegEx: function(re, extract, operand) {
 		var value, m;
 
-		try {
-			re = new RegExp(re, "i");
-		}
-		catch(err) {
-			BOOMR.debug("Error generating regex: " + err, "PageVars");
-			BOOMR.addError(err, "PageVars.handleRegEx");
-			return false;
+		if (! (re instanceof RegExp) ) {
+			try {
+				re = new RegExp(re, "i");
+			}
+			catch(err) {
+				BOOMR.debug("Error generating regex: " + err, "PageVars");
+				BOOMR.addError(err, "PageVars.handleRegEx");
+				return false;
+			}
 		}
 
 		if (!operand) {
