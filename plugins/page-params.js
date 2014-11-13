@@ -641,6 +641,13 @@ impl = {
 
 			impl.complete = false;
 
+			if (edata.data) {
+				data = edata.data;
+			}
+			else {
+				data = edata;
+			}
+
 			// Override the URL we check metrics against
 			if(data.url) {
 				l = d.createElement("a");
