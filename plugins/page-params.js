@@ -820,7 +820,7 @@ impl = {
 
 BOOMR.plugins.PageParams = {
 	init: function(config) {
-		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics"];
+		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
 
 		w = BOOMR.window;
 		l = location;
