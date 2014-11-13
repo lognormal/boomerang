@@ -447,6 +447,10 @@ Handler.prototype = {
 			return false;
 		}
 
+		if(url === "slowest") {
+			BOOMR.addVar("dom.res.slowest", res.name);
+		}
+
 		// If start === "*" then we want all resource timing fields for this resource
 		if(o.start === "*") {
 			for(k in res) {
@@ -481,10 +485,6 @@ Handler.prototype = {
 		if (en === 0) {
 			BOOMR.debug("End was 0 (not supported on this resource)", "PageVars");
 			return false;
-		}
-
-		if(url === "slowest") {
-			BOOMR.addVar("dom.res.slowest", res.name);
 		}
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
