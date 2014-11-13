@@ -405,7 +405,7 @@ impl = {
 
 						for(k in res) {
 							if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, "$1$2"), res[k]);
+								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, "$1$2"), Math.round(res[k]));
 								impl.addedVars.push(url + k.replace(/^(...).*(St|En).*$/, "$1$2"));
 							}
 						}

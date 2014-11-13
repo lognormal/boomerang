@@ -455,7 +455,7 @@ Handler.prototype = {
 		if(o.start === "*") {
 			for(k in res) {
 				if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"), res[k]);
+					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"), Math.round(res[k]));
 				}
 			}
 
@@ -489,7 +489,7 @@ Handler.prototype = {
 
 		BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
 
-		BOOMR.addVar(this.varname + "_st", st);
+		BOOMR.addVar(this.varname + "_st", Math.round(st));
 		return this.apply(en-st);
 	},
 
@@ -583,7 +583,7 @@ Handler.prototype = {
 		for(i=0; res && i<res.length; i++) {
 			if(res[i].name === o.parameter2) {
 				if (res[i].startTime) {
-					BOOMR.addVar(this.varname + "_st", res[i].startTime);
+					BOOMR.addVar(this.varname + "_st", Math.round(res[i].startTime));
 				}
 				return this.apply(res[i].duration);
 			}
