@@ -821,7 +821,14 @@ boomr = {
 
 			req.open = function(method, url, async) {
 				var l;
-				if (BOOMR.xhr_excludes.hasOwnProperty(url)) {
+
+				l = d.createElement("a");
+				l.href = url;
+
+				if (BOOMR.xhr_excludes.hasOwnProperty(l.href)
+				    || BOOMR.xhr_excludes.hasOwnProperty(l.hostname)
+				    || BOOMR.xhr_excludes.hasOwnProperty(l.pathname)
+				) {
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -860,9 +867,6 @@ boomr = {
 				addListener("abort",    -999);
 
 				addListener("loadend");
-
-				l = d.createElement("a");
-				l.href = url;
 
 				resource.url = l.href;
 				resource.method = method;
