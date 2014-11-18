@@ -831,33 +831,35 @@ boomr = {
 					async = true;
 				}
 
-				if (async) {
-					req.addEventListener("readystatechange", function() {
-						resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
-					}, false);
+				function addListener(ename, stat) {
+					req.addEventListener(
+							ename,
+							function() {
+								if (ename === "readystatechange") {
+									resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
+								}
+								else if (ename === "loadend") {
+									impl.fireEvent("xhr_load", resource);
+								}
+								else {
+									resource.timing.loadEventEnd = new Date().getTime();
+									resource.status = (stat === undefined ? req.status : stat);
+								}
+							},
+							false
+					);
 				}
 
-				req.addEventListener("load", function() {
-					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = req.status;
-					// TODO add headers in a sane way
-				}, false);
-				req.addEventListener("timeout", function() {
-					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = -1001;
-				}, false);
-				req.addEventListener("error", function() {
-					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = -998;
-				}, false);
-				req.addEventListener("abort", function() {
-					resource.timing.loadEventEnd = new Date().getTime();
-					resource.status = -999;
-				}, false);
+				if (async) {
+					addListener("readystatechange");
+				}
 
-				req.addEventListener("loadend", function() {
-					impl.fireEvent("xhr_load", resource);
-				}, false);
+				addListener("load");
+				addListener("timeout", -1001);
+				addListener("error",    -998);
+				addListener("abort",    -999);
+
+				addListener("loadend");
 
 				l = d.createElement("a");
 				l.href = url;
