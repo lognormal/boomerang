@@ -118,7 +118,7 @@ impl = {
 		}
 		subcookies.tt = this.loadTime;
 		subcookies.obo = this.oboError;
-		t_start = new Date().getTime();
+		t_start = BOOMR.now();
 
 		if(timer) {
 			subcookies[timer] = t_start;
@@ -136,7 +136,7 @@ impl = {
 			return false;
 		}
 
-		t_end = new Date().getTime();
+		t_end = BOOMR.now();
 		if(t_end - t_start > 50) {
 			// It took > 50ms to set the cookie
 			// The user Most likely has cookie prompting turned on so
@@ -352,7 +352,7 @@ impl = {
 			rl: undefined
 		});
 
-		this.maybeResetSession(new Date().getTime());
+		this.maybeResetSession(BOOMR.now());
 	},
 
 	/**
@@ -846,7 +846,7 @@ BOOMR.plugins.RT = {
 			if (timer_name === "t_page") {
 				this.endTimer("t_resp", time_value);
 			}
-			impl.timers[timer_name] = {start: (typeof time_value === "number" ? time_value : new Date().getTime())};
+			impl.timers[timer_name] = {start: (typeof time_value === "number" ? time_value : BOOMR.now())};
 		}
 
 		return this;
@@ -857,7 +857,7 @@ BOOMR.plugins.RT = {
 			impl.timers[timer_name] = impl.timers[timer_name] || {};
 			if(impl.timers[timer_name].end === undefined) {
 				impl.timers[timer_name].end =
-						(typeof time_value === "number" ? time_value : new Date().getTime());
+						(typeof time_value === "number" ? time_value : BOOMR.now());
 			}
 		}
 
@@ -922,7 +922,7 @@ BOOMR.plugins.RT = {
 	// load when the page is usable by the user
 	done: function(edata, ename) {
 		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata) + ", " + ename, "rt");
-		var t_start, t_done, t_now=new Date().getTime(),
+		var t_start, t_done, t_now=BOOMR.now(),
 		    subresource = false;
 
 		impl.complete = false;
