@@ -630,7 +630,9 @@ impl = {
 	 * @param t_start The value of t_start that we plan to use
 	 */
 	setSupportingTimestamps: function(t_start) {
-		BOOMR.addVar("rt.tstart", t_start);
+		if (t_start) {
+			BOOMR.addVar("rt.tstart", t_start);
+		}
 		if(typeof impl.t_start === "number" && impl.t_start !== t_start) {
 			BOOMR.addVar("rt.cstart", impl.t_start);
 		}
