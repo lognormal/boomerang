@@ -36,7 +36,7 @@ load=function() {
 		}
 	}
 
-	t_start=new Date().getTime();
+	t_start=BOOMR.now();
 	s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
 		+ "&t=" + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 		+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
@@ -78,7 +78,7 @@ BOOMR.plugins.LOGN = {
 			BOOMR.setImmediate(loaded);
 			setTimeout(load, 5.5*60*1000);
 
-			BOOMR.addVar("t_configjs", new Date().getTime()-t_start);
+			BOOMR.addVar("t_configjs", BOOMR.now()-t_start);
 			if(typeof BOOMR_configt === "number") {
 				BOOMR.addVar("t_configfb", BOOMR_configt-t_start);
 				delete BOOMR_configt;
