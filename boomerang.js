@@ -800,7 +800,9 @@ boomr = {
 		    orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest,
 		    readyStateMap;
 
-		if (!orig_XMLHttpRequest) {
+		// XHR not supported or XHR so old that it doesn't support addEventListener
+		// (IE 6, 7, as well as newer running in quirks mode.)
+		if (!orig_XMLHttpRequest || !(new orig_XMLHttpRequest()).addEventListener) {
 			// Nothing to instrument
 			return;
 		}
