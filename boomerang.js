@@ -730,6 +730,8 @@ boomr = {
 		}
 	},
 
+	now: (window.performance && window.performance.now ? function() { return Math.round(window.performance.now() + window.performance.timing.navigationStart); } : Date.now || function() { return new Date().getTime(); }),
+
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
 		var i, handler, ev, unload_handler;
 
@@ -786,7 +788,7 @@ boomr = {
 			err = String(err);
 		}
 		if (src !== undefined) {
-			err = "[" + src + ":" + (new Date().getTime()) + "] " + err;
+			err = "[" + src + ":" + BOOMR.now() + "] " + err;
 		}
 
 		if (impl.errors[err]) {
@@ -836,7 +838,7 @@ boomr = {
 	},
 
 	requestStart: function(name) {
-		var t_start = new Date().getTime();
+		var t_start = BOOMR.now();
 		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
 
 		return {
@@ -856,7 +858,7 @@ boomr = {
 			});
 		}
 		else {
-			var timer = name + "|" + (new Date().getTime()-t_start);
+			var timer = name + "|" + (BOOMR.now()-t_start);
 			if(impl.vars.qt) {
 				impl.vars.qt += "," + timer;
 			}
@@ -882,7 +884,9 @@ boomr = {
 		    orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest,
 		    readyStateMap;
 
-		if (!orig_XMLHttpRequest) {
+		// XHR not supported or XHR so old that it doesn't support addEventListener
+		// (IE 6, 7, as well as newer running in quirks mode.)
+		if (!orig_XMLHttpRequest || !(new orig_XMLHttpRequest()).addEventListener) {
 			// Nothing to instrument
 			return;
 		}
@@ -925,13 +929,13 @@ boomr = {
 							ename,
 							function() {
 								if (ename === "readystatechange") {
-									resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
+									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
 									impl.fireEvent("xhr_load", resource);
 								}
 								else {
-									resource.timing.loadEventEnd = new Date().getTime();
+									resource.timing.loadEventEnd = BOOMR.now();
 									resource.status = (stat === undefined ? req.status : stat);
 								}
 							},
@@ -958,7 +962,7 @@ boomr = {
 			};
 
 			req.send = function() {
-				resource.timing.requestStart = new Date().getTime();
+				resource.timing.requestStart = BOOMR.now();
 
 				// call the original send method
 				return orig_send.apply(req, arguments);

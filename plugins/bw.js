@@ -272,7 +272,7 @@ impl = {
 	load_img: function(i, run, callback)
 	{
 		var url = this.base_url + images[i].name
-			+ "?t=" + (new Date().getTime()) + Math.random(),	// Math.random() is slow, but we get it before we start the timer
+			+ "?t=" + BOOMR.now() + Math.random(),	// Math.random() is slow, but we get it before we start the timer
 		    timer=0, tstart=0,
 		    img = new Image(),
 		    that=this;
@@ -302,7 +302,7 @@ impl = {
 		// happens on the first image.  If it didn't, we'd have nothing to measure.
 		timer=setTimeout(handler(null), images[i].timeout + Math.min(400, this.latency ? this.latency.mean : 400));
 
-		tstart = new Date().getTime();
+		tstart = BOOMR.now();
 		img.src=url;
 	},
 
@@ -313,7 +313,7 @@ impl = {
 		}
 
 		if(success !== null) {
-			var lat = new Date().getTime() - tstart;
+			var lat = BOOMR.now() - tstart;
 			this.latencies.push(lat);
 		}
 		// we've got all the latency images at this point,
@@ -343,7 +343,7 @@ impl = {
 
 		var result = {
 				start: tstart,
-				end: new Date().getTime(),
+				end: BOOMR.now(),
 				t: null,
 				state: success,
 				run: run
@@ -380,7 +380,7 @@ impl = {
 				bw_err:		parseFloat(bw.stderr_corrected, 10),
 				lat:		this.latency.mean,
 				lat_err:	parseFloat(this.latency.stderr, 10),
-				bw_time:	Math.round(new Date().getTime()/1000)
+				bw_time:	Math.round(BOOMR.now()/1000)
 			};
 
 		BOOMR.addVar(o);
@@ -444,7 +444,7 @@ impl = {
 			// on DHCP with the same ISP may get different IPs on the same subnet
 			// every time they log in
 
-			t_now = Math.round((new Date().getTime())/1000);	// seconds
+			t_now = Math.round(BOOMR.now()/1000);	// seconds
 
 			// If the subnet changes or the cookie is more than 7 days old,
 			// then we recheck the bandwidth, else we just use what's in the cookie
