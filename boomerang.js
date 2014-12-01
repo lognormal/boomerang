@@ -850,7 +850,13 @@ boomr = {
 									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
-									impl.fireEvent("xhr_load", resource);
+									if(impl.vars["h.cr"]) {
+										impl.fireEvent("xhr_load", resource);
+									}
+									else {
+										BOOMR.debug("Not firing xhr_load since we do not have a crumb yet");
+										BOOMR.debug("Would have sent " + BOOMR.utils.objectToString(resource));
+									}
 								}
 								else {
 									resource.timing.loadEventEnd = BOOMR.now();
