@@ -555,7 +555,7 @@ impl = {
 	done: function(edata, ename) {
 		var i, j, v, hconfig, handler, limpl=impl, pg="h.pg", data;
 
-		if(ename !== "xhr"  && this.complete) {
+		if(ename !== "xhr" && this.complete) {
 			return;
 		}
 
