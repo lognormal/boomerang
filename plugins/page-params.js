@@ -573,8 +573,6 @@ impl = {
 				return;
 			}
 
-			impl.complete = false;
-
 			limpl = {
 				pageGroups: [],
 				abTests: impl.abTests,
@@ -612,6 +610,10 @@ impl = {
 				pg = "xhr.pg";
 			}
 		}
+		else {
+			l = w.location;
+			this.complete = true;
+		}
 
 		hconfig = {
 			pageGroups:    { varname: pg, stopOnFirst: true },
@@ -638,6 +640,10 @@ impl = {
 			};
 		}
 
+		// Since we're going to write new stuff, clear out anything that we've previously written but couldn't be beaconed
+		impl.clearMetrics();
+
+		// Also clear the retry list since we'll repopulate it if needed
 		impl.mayRetry = [];
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
@@ -653,10 +659,7 @@ impl = {
 			}
 		}
 
-		this.complete = true;
 		BOOMR.sendBeacon();
-
-		l = location;
 	},
 
 	retry: function() {
@@ -681,7 +684,7 @@ impl = {
 		}
 	},
 
-	clearMetrics: function(vars) {
+	clearMetrics: function() {
 		var i, label;
 
 		// Remove custom metrics
@@ -717,7 +720,7 @@ BOOMR.plugins.PageParams = {
 		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics"];
 
 		w = BOOMR.window;
-		l = location;
+		l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
 		d = w.document;
 		p = w.performance || null;
 
@@ -753,7 +756,7 @@ BOOMR.plugins.PageParams = {
 		if (impl.mayRetry.length > 0) {
 			impl.retry();
 		}
-		return impl.complete;
+		return true;
 	}
 };
 
