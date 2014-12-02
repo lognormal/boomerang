@@ -544,11 +544,21 @@ boomr = {
 			}
 
 			function submit() {
-				var iframe = document.createElement("iframe");
+				var iframe,
+				    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
+
+				// ref: http://terminalapp.net/submitting-a-form-with-target-set-to-a-script-generated-iframe-on-ie/
+				try {
+					iframe = document.createElement('<iframe name="' + name + '">');	// IE <= 8
+				}
+				catch (ignore) {
+					iframe = document.createElement("iframe");				// everything else
+				}
 
 				form.action = urls.shift();
-				form.target = iframe.name = iframe.id = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
+				form.target = iframe.name = iframe.id = name;
 				iframe.style.display = form.style.display = "none";
+				iframe.src="javascript:false";
 
 				remove(iframe.id);
 				remove(form.id);
