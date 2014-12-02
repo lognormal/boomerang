@@ -536,10 +536,10 @@ impl = {
 		// Boomerang loaded late and...
 		else if (BOOMR.loadedLate) {
 			// We have navigation timing,
-			if(w.performance) {
+			if(w.performance && w.performance.timing) {
 				// and boomerang loaded after onload fired
-				if(w.performance.loadEventStart && w.performance.loadEventStart < BOOMR.t_end) {
-					t_done = w.performance.loadEventStart;
+				if(w.performance.timing.loadEventStart && w.performance.timing.loadEventStart < BOOMR.t_end) {
+					t_done = w.performance.timing.loadEventStart;
 				}
 			}
 			// We don't have navigation timing,
