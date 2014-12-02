@@ -22,16 +22,18 @@ if (BOOMR.plugins.Memory) {
 var impl = {
 	complete: false,
 	done: function() {
-		var w  = BOOMR.window,
-		    p  = w.performance,
-		    c  = w.console,
-		    d  = w.document,
-		    fn = d.getElementsByTagName,
-		    m, f;
+		var w, d, fn, p, c, m, f;
 
-		// handle IE6/7 weirdness regarding host objects
-		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
-		f  = (fn.call === undefined ? function(tag) { return fn(tag); } : fn);
+		try {
+			w  = BOOMR.window;
+			d  = w.document;
+			fn = d.getElementsByTagName;
+			p  = w.performance;
+			c  = w.console;
+		}
+		catch(err) {
+			BOOMR.addError(err, "Memory.done");
+		}
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
 
@@ -47,12 +49,18 @@ var impl = {
 			});
 		}
 
-		BOOMR.addVar({
-			"dom.ln": f.call(d, "*").length,
-			"dom.sz": f.call(d, "html")[0].innerHTML.length,
-			"dom.img": f.call(d, "img").length,
-			"dom.script": f.call(d, "script").length
-		});
+		// handle IE6/7 weirdness regarding host objects
+		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
+		if (fn) {
+			f  = (fn.call === undefined ? function(tag) { return fn(tag); } : fn);
+
+			BOOMR.addVar({
+				"dom.ln": f.call(d, "*").length,
+				"dom.sz": f.call(d, "html")[0].innerHTML.length,
+				"dom.img": f.call(d, "img").length,
+				"dom.script": f.call(d, "script").length
+			});
+		}
 
 		this.complete = true;
 		BOOMR.sendBeacon();
