@@ -555,7 +555,7 @@ impl = {
 	done: function(edata, ename) {
 		var i, j, v, hconfig, handler, limpl=impl, pg="h.pg", data;
 
-		if(ename !== "xhr"  && this.complete) {
+		if(ename !== "xhr" && this.complete) {
 			return;
 		}
 
@@ -572,8 +572,6 @@ impl = {
 			if(!data.url && (!data.timers || !data.timers.length) && (!data.metrics || !data.metrics.length)) {
 				return;
 			}
-
-			impl.complete = false;
 
 			limpl = {
 				pageGroups: [],
@@ -612,6 +610,10 @@ impl = {
 				pg = "xhr.pg";
 			}
 		}
+		else {
+			l = w.location;
+			this.complete = true;
+		}
 
 		hconfig = {
 			pageGroups:    { varname: pg, stopOnFirst: true },
@@ -638,6 +640,10 @@ impl = {
 			};
 		}
 
+		// Since we're going to write new stuff, clear out anything that we've previously written but couldn't be beaconed
+		impl.clearMetrics();
+
+		// Also clear the retry list since we'll repopulate it if needed
 		impl.mayRetry = [];
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
@@ -653,10 +659,7 @@ impl = {
 			}
 		}
 
-		this.complete = true;
 		BOOMR.sendBeacon();
-
-		l = location;
 	},
 
 	retry: function() {
@@ -681,7 +684,7 @@ impl = {
 		}
 	},
 
-	clearMetrics: function(vars) {
+	clearMetrics: function() {
 		var i, label;
 
 		// Remove custom metrics
@@ -717,7 +720,7 @@ BOOMR.plugins.PageParams = {
 		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics"];
 
 		w = BOOMR.window;
-		l = location;
+		l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
 		d = w.document;
 		p = w.performance || null;
 
@@ -725,6 +728,96 @@ BOOMR.plugins.PageParams = {
 		impl.complete = false;
 
 		// Fire on the first of load or unload
+
+		/*
+		Cases (this is what should happen), PageParams MUST be the first plugin for this to work correctly:
+		1. Boomerang & config load before onload, onload fires first, xhr_load next:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on onload, complete === false
+		- done runs on xhr_load (ignores complete)
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		2. Boomerang & config load before onload, unload fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on unload, complete === false
+		* 1 beacon
+
+		3. Boomerang & config load before onload, xhr_load fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on xhr_load, tries to send beacon, does not change complete
+		- done runs on onload, complete === false
+		- done does not run on unload, complete === true
+		* 2 beacons
+
+		4. Boomerang loads before onload, config loads after onload, onload fires first, xhr_load next:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs on onload, skips because of no config, sets complete = true
+		- xhr_load will never fire before config (event ignored)
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false
+		- done runs on xhr_load that fires after config (ignores complete)
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		5. Boomerang loads before onload, config loads after onload, unload fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs on unload, skips because of no config, sets complete = true
+		* 0 beacons
+
+		6. Boomerang loads before onload, config loads after onload, xhr_load fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- xhr_load will never fire before config (event ignored)
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false, sets complete = true
+		- done does not run on unload, complete === true
+		* 1 beacon
+
+		7. Boomerang & config load after onload, onload fires first, xhr_load fires next:
+		- setImmediate `done` on first init (from BOOMR.init)
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs immediately, skips because of no config, sets complete = true
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false, sets to true
+		- done runs on xhr_load only if it fires after config loads
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		8. Boomerang & config load after onload, unload fires before onload:
+		- boomerang doesn't load
+		* 0 beacons
+
+		9. Boomerang & config load after onload, xhr_load fires before onload:
+		- xhr_load ignored because of no boomerang
+		- setImmediate `done` on first init (from BOOMR.init)
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs immediately, skips because of no config, sets complete = true
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs on immediately, complete === false, sets complete = true
+		- done does not run on unload, complete === true
+		* 1 beacon
+		*/
 
 		if (!impl.onloadfired) {
 			BOOMR.subscribe("page_ready", impl.onload, "load", impl);
@@ -753,7 +846,7 @@ BOOMR.plugins.PageParams = {
 		if (impl.mayRetry.length > 0) {
 			impl.retry();
 		}
-		return impl.complete;
+		return true;
 	}
 };
 

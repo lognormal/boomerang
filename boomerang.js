@@ -932,7 +932,13 @@ boomr = {
 									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
-									impl.fireEvent("xhr_load", resource);
+									if(impl.vars["h.cr"]) {
+										impl.fireEvent("xhr_load", resource);
+									}
+									else {
+										BOOMR.debug("Not firing xhr_load since we do not have a crumb yet");
+										BOOMR.debug("Would have sent " + BOOMR.utils.objectToString(resource));
+									}
 								}
 								else {
 									resource.timing.loadEventEnd = BOOMR.now();
@@ -1003,9 +1009,15 @@ boomr = {
 		}
 
 		// use d.URL instead of location.href because of a safari bug
+		impl.vars.pgu = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
 		if(!impl.vars.u) {
-			impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
+			impl.vars.u = impl.vars.pgu;
 		}
+
+		if(impl.vars.pgu === impl.vars.u) {
+			delete impl.vars.pgu;
+		}
+
 		impl.vars.v = BOOMR.version;
 
 		impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36);
