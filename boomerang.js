@@ -565,15 +565,15 @@ boomr = {
 			}
 			else {
 				if(w.onpagehide || w.onpagehide === null) {
-					boomr.utils.addListener(w, "pageshow", BOOMR.page_ready);
+					BOOMR.utils.addListener(w, "pageshow", BOOMR.page_ready);
 				}
 				else {
-					boomr.utils.addListener(w, "load", BOOMR.page_ready);
+					BOOMR.utils.addListener(w, "load", BOOMR.page_ready);
 				}
 			}
 		}
 
-		boomr.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
+		BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		(function() {
 			// visibilitychange is useful to detect if the page loaded through prerender
@@ -612,11 +612,11 @@ boomr = {
 				});
 			}
 
-			boomr.utils.addListener(d, "mouseup", impl.xb_handler("click"));
+			BOOMR.utils.addListener(d, "mouseup", impl.xb_handler("click"));
 
 			forms = d.getElementsByTagName("form");
 			for(iterator = 0; iterator < forms.length; iterator++) {
-				boomr.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
+				BOOMR.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
 			}
 
 			if(!w.onpagehide && w.onpagehide !== null) {
@@ -624,7 +624,7 @@ boomr = {
 				// We only clear w on browsers that don't support onpagehide because
 				// those that do are new enough to not have memory leak problems of
 				// some older browsers
-				boomr.utils.addListener(w, "unload", function() { BOOMR.window=w=null; });
+				BOOMR.utils.addListener(w, "unload", function() { BOOMR.window=w=null; });
 			}
 		}());
 
@@ -715,12 +715,12 @@ boomr = {
 			// pagehide is for iOS devices
 			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
 			if(w.onpagehide || w.onpagehide === null) {
-				boomr.utils.addListener(w, "pagehide", unload_handler);
+				BOOMR.utils.addListener(w, "pagehide", unload_handler);
 			}
 			else {
-				boomr.utils.addListener(w, "unload", unload_handler);
+				BOOMR.utils.addListener(w, "unload", unload_handler);
 			}
-			boomr.utils.addListener(w, "beforeunload", unload_handler);
+			BOOMR.utils.addListener(w, "beforeunload", unload_handler);
 		}
 
 		return this;
