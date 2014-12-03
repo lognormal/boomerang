@@ -957,7 +957,7 @@ BOOMR.plugins.RT = {
 		BOOMR.removeVar(
 			"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
 			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
-			"http.errno", "http.method",
+			"http.errno", "http.method", "xhr.sync",
 			"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 		);
 
@@ -991,6 +991,11 @@ BOOMR.plugins.RT = {
 			if(edata.headers) {
 				BOOMR.addVar("http.hdr", edata.headers);
 				impl.addedVars.push("http.hdr");
+			}
+
+			if(edata.synchronous) {
+				BOOMR.addVar("xhr.sync", 1);
+				impl.addedVars.push("xhr.sync");
 			}
 		}
 

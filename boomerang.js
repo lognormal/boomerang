@@ -880,6 +880,9 @@ boomr = {
 
 				resource.url = l.href;
 				resource.method = method;
+				if (!async) {
+					resource.synchronous = true;
+				}
 
 				// call the original open method
 				return orig_open.apply(req, arguments);
