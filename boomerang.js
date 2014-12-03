@@ -576,20 +576,40 @@ boomr = {
 		boomr.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		(function() {
-			var fire_visible, forms, iterator;
 			// visibilitychange is useful to detect if the page loaded through prerender
 			// or if the page never became visible
 			// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
 			// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
-			fire_visible = function() { impl.fireEvent("visibility_changed"); };
-			if(d.webkitVisibilityState) {
-				boomr.utils.addListener(d, "webkitvisibilitychange", fire_visible);
+			// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
+			var visibilityState, visibilityChange, forms, iterator;
+
+			// Set the name of the hidden property and the change event for visibility
+			if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+				visibilityState = "visibilityState";
+				visibilityChange = "visibilitychange";
 			}
-			else if(d.msVisibilityState) {
-				boomr.utils.addListener(d, "msvisibilitychange", fire_visible);
+			else if (typeof document.mozHidden !== "undefined") {
+				visibilityState = "mozVisibilityState";
+				visibilityChange = "mozvisibilitychange";
 			}
-			else if(d.visibilityState) {
-				boomr.utils.addListener(d, "visibilitychange", fire_visible);
+			else if (typeof document.msHidden !== "undefined") {
+				visibilityState = "msVisibilityState";
+				visibilityChange = "msvisibilitychange";
+			}
+			else if (typeof document.webkitHidden !== "undefined") {
+				visibilityState = "webkitVisibilityState";
+				visibilityChange = "webkitvisibilitychange";
+			}
+ 
+			if(visibilityChange !== undefined) {
+				BOOMR.utils.addListener(d, visibilityChange, function() { impl.fireEvent("visibility_changed"); });
+
+				BOOMR.visibilityState = function() { return d[visibilityState]; };
+
+				// record the last time each visibility state occurred
+				BOOMR.subscribe("visibility_changed", function() {
+					BOOMR.lastVisibilityEvent[BOOMR.visibilityState()] = BOOMR.now();
+				});
 			}
 
 			boomr.utils.addListener(d, "mouseup", impl.xb_handler("click"));
@@ -649,6 +669,11 @@ boomr = {
 	},
 
 	now: (window.performance && window.performance.now ? function() { return Math.round(window.performance.now() + window.performance.timing.navigationStart); } : Date.now || function() { return new Date().getTime(); }),
+
+	// Overridden in init()
+	visibilityState: function() { return 0; },
+
+	lastVisibilityEvent: {},
 
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
 		var i, handler, ev, unload_handler;
@@ -944,6 +969,16 @@ boomr = {
 		impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36);
 		impl.vars["rt.ss"] = BOOMR.session.start;
 		impl.vars["rt.sl"] = BOOMR.session.length;
+
+		if(BOOMR.visibilityState()) {
+			impl.vars["vis.st"] = BOOMR.visibilityState();
+			if(BOOMR.lastVisibilityEvent.visible) {
+				impl.vars["vis.lv"] = BOOMR.now() - BOOMR.lastVisibilityEvent.visible;
+			}
+			if(BOOMR.lastVisibilityEvent.hidden) {
+				impl.vars["vis.lh"] = BOOMR.now() - BOOMR.lastVisibilityEvent.hidden;
+			}
+		}
 
 		if(w !== window) {
 			impl.vars["if"] = "";
