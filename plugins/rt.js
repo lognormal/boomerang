@@ -431,11 +431,7 @@ impl = {
 	 * @returns true if this is a prerender state, false if not (or not supported)
 	 */
 	checkPreRender: function() {
-		if(
-			!(d.visibilityState && d.visibilityState === "prerender")
-			&&
-			!(d.msVisibilityState && d.msVisibilityState === 3)
-		) {
+		if(BOOMR.visibilityState() !== "prerender") {
 			return false;
 		}
 
@@ -703,7 +699,7 @@ impl = {
 
 	visibility_changed: function() {
 		// we care if the page became visible at some point
-		if(!(d.hidden || d.msHidden || d.webkitHidden)) {
+		if(BOOMR.visibilityState() === "visible") {
 			impl.visiblefired = true;
 		}
 	},
@@ -819,7 +815,7 @@ BOOMR.plugins.RT = {
 		impl.timers = {};
 
 		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
-		impl.visiblefired = !(d.hidden || d.msHidden || d.webkitHidden);
+		impl.visiblefired = (BOOMR.visibilityState() === "visible");
 		if(!impl.visiblefired) {
 			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
 		}
