@@ -66,7 +66,7 @@ Default_Boomerang.xml: lognormal lognormal-debug
 	echo "Making minified base64..."
 	base64 -i build/boomerang-$(VERSION).$(DATE).js --break 69 -o $(tmpfile).min.b64
 	echo "Making debug base64..."
-	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 69 -o $(tmpfile).dbg.b64
+	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 80 -o $(tmpfile).dbg.b64
 	awk    '/<Minified><\/Minified>/ { \
 			printf("        <Minified>\n"); \
 			system("cat $(tmpfile).min.b64"); \
