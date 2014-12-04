@@ -88,7 +88,7 @@ BOOMR_check_doc_domain();
 // the parameter is the window
 (function(w) {
 
-var impl, boomr, d, myurl, createCustomEvent, dispatchEvent;
+var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange;
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
@@ -169,6 +169,31 @@ dispatchEvent = function(e_name, e_data) {
 		}
 	});
 };
+
+// visibilitychange is useful to detect if the page loaded through prerender
+// or if the page never became visible
+// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
+// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
+// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
+
+// Set the name of the hidden property and the change event for visibility
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+	visibilityState = "visibilityState";
+	visibilityChange = "visibilitychange";
+}
+else if (typeof document.mozHidden !== "undefined") {
+	visibilityState = "mozVisibilityState";
+	visibilityChange = "mozvisibilitychange";
+}
+else if (typeof document.msHidden !== "undefined") {
+	visibilityState = "msVisibilityState";
+	visibilityChange = "msvisibilitychange";
+}
+else if (typeof document.webkitHidden !== "undefined") {
+	visibilityState = "webkitVisibilityState";
+	visibilityChange = "webkitvisibilitychange";
+}
+
 
 // impl is a private object not reachable from outside the BOOMR object
 // users can set properties by passing in to the init() method
@@ -576,35 +601,9 @@ boomr = {
 		BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		(function() {
-			// visibilitychange is useful to detect if the page loaded through prerender
-			// or if the page never became visible
-			// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
-			// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
-			// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
-			var visibilityState, visibilityChange, forms, iterator;
-
-			// Set the name of the hidden property and the change event for visibility
-			if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
-				visibilityState = "visibilityState";
-				visibilityChange = "visibilitychange";
-			}
-			else if (typeof document.mozHidden !== "undefined") {
-				visibilityState = "mozVisibilityState";
-				visibilityChange = "mozvisibilitychange";
-			}
-			else if (typeof document.msHidden !== "undefined") {
-				visibilityState = "msVisibilityState";
-				visibilityChange = "msvisibilitychange";
-			}
-			else if (typeof document.webkitHidden !== "undefined") {
-				visibilityState = "webkitVisibilityState";
-				visibilityChange = "webkitvisibilitychange";
-			}
- 
+			var forms, iterator;
 			if(visibilityChange !== undefined) {
 				BOOMR.utils.addListener(d, visibilityChange, function() { impl.fireEvent("visibility_changed"); });
-
-				BOOMR.visibilityState = function() { return d[visibilityState]; };
 
 				// record the last time each visibility state occurred
 				BOOMR.subscribe("visibility_changed", function() {
@@ -670,8 +669,7 @@ boomr = {
 
 	now: (window.performance && window.performance.now ? function() { return Math.round(window.performance.now() + window.performance.timing.navigationStart); } : Date.now || function() { return new Date().getTime(); }),
 
-	// Overridden in init()
-	visibilityState: function() { return 0; },
+	visibilityState: ( visibilityState === undefined ? function() { return 0; } : function() { return d[visibilityState]; } ),
 
 	lastVisibilityEvent: {},
 
