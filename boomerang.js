@@ -669,7 +669,7 @@ boomr = {
 
 	now: (window.performance && window.performance.now ? function() { return Math.round(window.performance.now() + window.performance.timing.navigationStart); } : Date.now || function() { return new Date().getTime(); }),
 
-	visibilityState: ( visibilityState === undefined ? function() { return 0; } : function() { return d[visibilityState]; } ),
+	visibilityState: ( visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; } ),
 
 	lastVisibilityEvent: {},
 
