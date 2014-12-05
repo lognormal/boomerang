@@ -447,8 +447,6 @@ impl = {
 		BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
 		BOOMR.plugins.RT.startTimer("t_postrender");				// time from prerender to visible or hidden
 
-		BOOMR.subscribe("visibility_changed", BOOMR.plugins.RT.done, "visible", BOOMR.plugins.RT);
-
 		return true;
 	},
 
@@ -697,11 +695,17 @@ impl = {
 		this.onloadfired = true;
 	},
 
-	visibility_changed: function() {
+	check_visibility: function() {
 		// we care if the page became visible at some point
 		if(BOOMR.visibilityState() === "visible") {
 			impl.visiblefired = true;
 		}
+
+		if(impl.visibilityState === "prerender" && BOOMR.visibilityState() !== "prerender") {
+			BOOMR.plugins.RT.done(null, "visible");
+		}
+
+		impl.visibilityState = BOOMR.visibilityState();
 	},
 
 	page_unload: function(edata) {
@@ -814,11 +818,10 @@ BOOMR.plugins.RT = {
 		impl.complete = false;
 		impl.timers = {};
 
+		impl.check_visibility();
+
 		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
-		impl.visiblefired = (BOOMR.visibilityState() === "visible");
-		if(!impl.visiblefired) {
-			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
-		}
+		BOOMR.subscribe("visibility_changed", impl.check_visibility, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
 		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
 		BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
