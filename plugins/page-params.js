@@ -662,6 +662,15 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<limpl[v].length; i++) {
+					if( (limpl[v][i].only_full_page && ename === "xhr")
+					    ||
+					    (limpl[v][i].only_xhr && ename !== "xhr")
+					) {
+						// do not compute full page timers, metrics & dimensions for xhr calls
+						// or xhr only timers, metrics & dimensions for full page calls
+						continue;
+					}
+
 					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
 						if(limpl[v][i].subresource && ename === "xhr" && edata) {
 							edata.subresource = "active";
