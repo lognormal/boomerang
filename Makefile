@@ -267,7 +267,7 @@ boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
 	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/;' | perl -pe 's/BOOMR\s*=\s*BOOMR\s*\|\|\s*{};//;s/BOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};//;' > $@ && echo "done"
-	if [ -n "$(ESLINT)" ]; then echo "Linting..."; $(ESLINT) $@ && echo "OK"; else echo "Install eslint to check syntax"; fi
+	if [ -n "$(ESLINT)" ]; then echo "Linting..."; if $(ESLINT) $@; then echo "OK"; else false; fi; else echo "Install eslint to check syntax"; fi
 	echo
 
 clean:
