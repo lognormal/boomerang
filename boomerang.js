@@ -872,6 +872,62 @@ boomr = {
 
 		readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
 
+		function send_event(resource) {
+			if(impl.vars["h.cr"]) {
+				impl.fireEvent("xhr_load", resource);
+			}
+			else {
+				BOOMR.debug("Not firing xhr_load since we do not have a crumb yet");
+				BOOMR.debug("Would have sent " + BOOMR.utils.objectToString(resource));
+			}
+		}
+
+		function mutation_cb(mutations, resource) {
+			var nodes_to_wait = 0;
+
+			function load_cb() {
+				nodes_to_wait--;
+
+				if(nodes_to_wait === 0) {
+					resource.timing.loadEventEnd = BOOMR.now();
+
+					send_event(resource);
+				}
+			}
+
+			function wait_for_node(node) {
+				if(!node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/i)) {
+					return;
+				}
+
+				node.addEventListener("load", load_cb);
+				node.addEventListener("error", load_cb);
+				nodes_to_wait++;
+			}
+
+			if(mutations && mutations.length) {
+				resource.timing.domComplete = BOOMR.now();
+
+				mutations.forEach(function(mutation) {
+					if(mutation.type === "childList") {
+						[].slice.call(mutation.addedNodes).forEach(wait_for_node);
+					}
+					else if(mutation.type === "attributes") {
+						wait_for_node(mutation.target);
+					}
+				});
+			}
+			else {
+				// mutation observer did not run in 10ms, so maybe no mutations
+				// we'll just end the xhr measurement now
+				// note, do not do this for CLICK initiated mutation observers
+
+				// we don't need to set the loadEventEnd timer here because the
+				// `load` event already set it
+				send_event(resource);
+			}
+		}
+
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
 		// we'll use composition
 		proxy_XMLHttpRequest = function() {
@@ -909,15 +965,26 @@ boomr = {
 									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
-									if(impl.vars["h.cr"]) {
-										impl.fireEvent("xhr_load", resource);
-									}
-									else {
-										BOOMR.debug("Not firing xhr_load since we do not have a crumb yet");
-										BOOMR.debug("Would have sent " + BOOMR.utils.objectToString(resource));
+									if(!BOOMR.utils.addObserver(
+											d,
+											{
+												childList: true,
+												attributes: true,
+												subtree: true,
+												attributeFilter: ["src", "href"]
+											},
+											// wait 10ms after attaching the observer to see if anything was changed
+											// will start waiting 10ms after control is returned to the event loop
+											10,
+											mutation_cb,
+											resource
+										)
+									) {
+									// could not create MutationObserver, so just fire xhr_load now
+										send_event(resource);
 									}
 								}
-								else {
+								else {	// load, timeout, error, abort
 									resource.timing.loadEventEnd = BOOMR.now();
 									resource.status = (stat === undefined ? req.status : stat);
 								}
