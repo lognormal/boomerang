@@ -663,6 +663,9 @@ impl = {
 
 				for(i=0; i<limpl[v].length; i++) {
 					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
+						if(limpl[v][i].subresource && ename === "xhr" && edata) {
+							edata.subresource = "active";
+						}
 						break;
 					}
 				}
