@@ -985,23 +985,25 @@ BOOMR.plugins.RT = {
 		if(edata) {
 			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
-				impl.addedVars.push("http.errno");
 			}
 
 			if(edata.method && edata.method !== "GET") {
 				BOOMR.addVar("http.method", edata.method);
-				impl.addedVars.push("http.method");
 			}
 
 			if(edata.headers) {
 				BOOMR.addVar("http.hdr", edata.headers);
-				impl.addedVars.push("http.hdr");
 			}
 
 			if(edata.synchronous) {
 				BOOMR.addVar("xhr.sync", 1);
-				impl.addedVars.push("xhr.sync");
 			}
+
+			if(edata.initiator) {
+				BOOMR.addVar("http.initiator", edata.initiator);
+			}
+
+			impl.addedVars.push("http.errno", "http.method", "http.hdr", "xhr.sync", "http.initiator");
 		}
 
 		// This is an explicit subresource
