@@ -580,6 +580,17 @@ impl = {
 				customMetrics: []
 			};
 
+			// Override the URL we check metrics against
+			if (data.url) {
+				l = d.createElement("a");
+				l.href = data.url;
+
+				limpl.pageGroups = impl.pageGroups;
+
+				pg = "xhr.pg";
+			}
+
+
 			if (data.timers && data.timers.length) {
 				for(i=0; i<impl.customTimers.length; i++) {
 					for(j=0; j<data.timers.length; j++) {
@@ -589,6 +600,11 @@ impl = {
 					}
 				}
 			}
+			// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
+			else if (data.url) {
+				limpl.customTimers = impl.customTimers;
+			}
+
 
 			if (data.metrics && data.metrics.length) {
 				for(i=0; i<impl.customMetrics.length; i++) {
@@ -599,15 +615,9 @@ impl = {
 					}
 				}
 			}
-
-			// Override the URL we check metrics against
-			if(data.url) {
-				l = d.createElement("a");
-				l.href = data.url;
-
-				limpl.pageGroups = impl.pageGroups;
-
-				pg = "xhr.pg";
+			// If we have a URL and customer has not overridden which metrics to use, then figure out based on url filters
+			else if (data.url) {
+				limpl.customMetrics = impl.customMetrics;
 			}
 		}
 		else {
@@ -652,7 +662,19 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<limpl[v].length; i++) {
+					if( (limpl[v][i].only_full_page && ename === "xhr")
+					    ||
+					    (limpl[v][i].only_xhr && ename !== "xhr")
+					) {
+						// do not compute full page timers, metrics & dimensions for xhr calls
+						// or xhr only timers, metrics & dimensions for full page calls
+						continue;
+					}
+
 					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
+						if(limpl[v][i].subresource && ename === "xhr" && edata) {
+							edata.subresource = "active";
+						}
 						break;
 					}
 				}

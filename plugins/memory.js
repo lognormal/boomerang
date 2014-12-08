@@ -23,7 +23,7 @@ var impl = {
 	done: function() {
 		var res, doms={}, a;
 		// If we have resource timing, get number of resources
-		if(p.getEntriesByType && p.getEntriesByType("resource").length) {
+		if(p && p.getEntriesByType && p.getEntriesByType("resource").length) {
 			res = p.getEntriesByType("resource");
 			BOOMR.addVar("dom.res", res.length);
 

@@ -431,11 +431,7 @@ impl = {
 	 * @returns true if this is a prerender state, false if not (or not supported)
 	 */
 	checkPreRender: function() {
-		if(
-			!(d.visibilityState && d.visibilityState === "prerender")
-			&&
-			!(d.msVisibilityState && d.msVisibilityState === 3)
-		) {
+		if(BOOMR.visibilityState() !== "prerender") {
 			return false;
 		}
 
@@ -450,8 +446,6 @@ impl = {
 		BOOMR.plugins.RT.endTimer("t_load");					// this will measure actual onload time for a prerendered page
 		BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
 		BOOMR.plugins.RT.startTimer("t_postrender");				// time from prerender to visible or hidden
-
-		BOOMR.subscribe("visibility_changed", BOOMR.plugins.RT.done, "visible", BOOMR.plugins.RT);
 
 		return true;
 	},
@@ -701,11 +695,17 @@ impl = {
 		this.onloadfired = true;
 	},
 
-	visibility_changed: function() {
+	check_visibility: function() {
 		// we care if the page became visible at some point
-		if(!(d.hidden || d.msHidden || d.webkitHidden)) {
+		if(BOOMR.visibilityState() === "visible") {
 			impl.visiblefired = true;
 		}
+
+		if(impl.visibilityState === "prerender" && BOOMR.visibilityState() !== "prerender") {
+			BOOMR.plugins.RT.done(null, "visible");
+		}
+
+		impl.visibilityState = BOOMR.visibilityState();
 	},
 
 	page_unload: function(edata) {
@@ -818,11 +818,10 @@ BOOMR.plugins.RT = {
 		impl.complete = false;
 		impl.timers = {};
 
+		impl.check_visibility();
+
 		BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
-		impl.visiblefired = !(d.hidden || d.msHidden || d.webkitHidden);
-		if(!impl.visiblefired) {
-			BOOMR.subscribe("visibility_changed", impl.visibility_changed, null, impl);
-		}
+		BOOMR.subscribe("visibility_changed", impl.check_visibility, null, impl);
 		BOOMR.subscribe("page_ready", this.done, "load", this);
 		BOOMR.subscribe("xhr_load", this.done, "xhr", this);
 		BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
@@ -921,7 +920,13 @@ BOOMR.plugins.RT = {
 	// onload event fires, or it could be at some other moment during/after page
 	// load when the page is usable by the user
 	done: function(edata, ename) {
-		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
+		// try/catch just in case edata contains cross-origin data and objectToString throws a security exception
+		try {
+			BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
+		}
+		catch(err) {
+			BOOMR.debug("Called done with " + err + ", " + ename, "rt");
+		}
 		var t_start, t_done, t_now=BOOMR.now(),
 		    subresource = false;
 
@@ -957,7 +962,7 @@ BOOMR.plugins.RT = {
 		BOOMR.removeVar(
 			"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
 			"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
-			"http.errno", "http.method",
+			"http.errno", "http.method", "xhr.sync",
 			"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 		);
 
@@ -980,18 +985,25 @@ BOOMR.plugins.RT = {
 		if(edata) {
 			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
-				impl.addedVars.push("http.errno");
 			}
 
 			if(edata.method && edata.method !== "GET") {
 				BOOMR.addVar("http.method", edata.method);
-				impl.addedVars.push("http.method");
 			}
 
 			if(edata.headers) {
 				BOOMR.addVar("http.hdr", edata.headers);
-				impl.addedVars.push("http.hdr");
 			}
+
+			if(edata.synchronous) {
+				BOOMR.addVar("xhr.sync", 1);
+			}
+
+			if(edata.initiator) {
+				BOOMR.addVar("http.initiator", edata.initiator);
+			}
+
+			impl.addedVars.push("http.errno", "http.method", "http.hdr", "xhr.sync", "http.initiator");
 		}
 
 		// This is an explicit subresource

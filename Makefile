@@ -66,7 +66,7 @@ Default_Boomerang.xml: lognormal lognormal-debug
 	echo "Making minified base64..."
 	base64 -i build/boomerang-$(VERSION).$(DATE).js --break 69 -o $(tmpfile).min.b64
 	echo "Making debug base64..."
-	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 69 -o $(tmpfile).dbg.b64
+	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 80 -o $(tmpfile).dbg.b64
 	awk    '/<Minified><\/Minified>/ { \
 			printf("        <Minified>\n"); \
 			system("cat $(tmpfile).min.b64"); \
@@ -267,7 +267,7 @@ boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
 	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/;' | perl -pe 's/BOOMR\s*=\s*BOOMR\s*\|\|\s*{};//;s/BOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};//;' > $@ && echo "done"
-	if [ -n "$(ESLINT)" ]; then echo "Linting..."; $(ESLINT) $@ && echo "OK"; else echo "Install eslint to check syntax"; fi
+	if [ -n "$(ESLINT)" ]; then echo "Linting..."; if $(ESLINT) $@; then echo "OK"; else false; fi; else echo "Install eslint to check syntax"; fi
 	echo
 
 clean:
