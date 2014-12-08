@@ -906,6 +906,7 @@ boomr = {
 				if (!async) {
 					resource.synchronous = true;
 				}
+				resource.initiator = "xhr";
 
 				// call the original open method
 				return orig_open.apply(req, arguments);
