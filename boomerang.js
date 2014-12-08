@@ -495,6 +495,42 @@ boomr = {
 			return (props>0);
 		},
 
+		addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
+			var o = {observer: null, timer: null};
+
+			if(!MutationObserver || !callback || !el) {
+				return null;
+			}
+
+			function done(mutations) {
+				if(o.observer) {
+					o.observer.disconnect();
+					o.observer = null;
+				}
+
+				if(o.timer) {
+					clearTimeout(o.timer);
+					o.timer = null;
+				}
+
+				if(callback) {
+					callback.call(callback_ctx, mutations, callback_data);
+
+					callback = null;
+				}
+			}
+
+			o.observer = new MutationObserver(done);
+
+			if(timeout) {
+				o.timer = setTimeout(done, o.timeout);
+			}
+
+			o.observer.observe(el, config);
+
+			return o;
+		},
+
 		addListener: function(el, type, fn) {
 			if (el.addEventListener) {
 				el.addEventListener(type, fn, false);
