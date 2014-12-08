@@ -580,6 +580,17 @@ impl = {
 				customMetrics: []
 			};
 
+			// Override the URL we check metrics against
+			if (data.url) {
+				l = d.createElement("a");
+				l.href = data.url;
+
+				limpl.pageGroups = impl.pageGroups;
+
+				pg = "xhr.pg";
+			}
+
+
 			if (data.timers && data.timers.length) {
 				for(i=0; i<impl.customTimers.length; i++) {
 					for(j=0; j<data.timers.length; j++) {
@@ -589,6 +600,11 @@ impl = {
 					}
 				}
 			}
+			// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
+			else if (data.url) {
+				limpl.customTimers = impl.customTimers;
+			}
+
 
 			if (data.metrics && data.metrics.length) {
 				for(i=0; i<impl.customMetrics.length; i++) {
@@ -599,15 +615,9 @@ impl = {
 					}
 				}
 			}
-
-			// Override the URL we check metrics against
-			if(data.url) {
-				l = d.createElement("a");
-				l.href = data.url;
-
-				limpl.pageGroups = impl.pageGroups;
-
-				pg = "xhr.pg";
+			// If we have a URL and customer has not overridden which metrics to use, then figure out based on url filters
+			else if (data.url) {
+				limpl.customMetrics = impl.customMetrics;
 			}
 		}
 		else {
