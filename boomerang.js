@@ -495,6 +495,31 @@ boomr = {
 			return (props>0);
 		},
 
+		/**
+		 Add a MutationObserver for a given element and terminate after `timeout`ms.
+		 @param el		DOM element to watch for mutations
+		 @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
+		 @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
+					If set to a falsy value, the observer will wait indefinitely for Mutations.
+		 @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
+						function(mutations, callback_data)
+					Where:
+						mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
+						callback_data is the passed in `callback_data` parameter without modifications
+
+					The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
+					keep watching for mutations. Note that the timeout will not fire any more so the caller MUST call disconnect() at some point
+		 @param callback_data	Any data to be passed to the callback function as its second parameter
+		 @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
+
+		 @returns	- `null` if a MutationObserver could not be created OR
+				- An object containing the observer and the timer object:
+				  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
+
+				The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
+				Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
+				have been cleared automatically.
+		 */
 		addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 			var o = {observer: null, timer: null};
 
@@ -503,10 +528,7 @@ boomr = {
 			}
 
 			function done(mutations) {
-				if(o.observer) {
-					o.observer.disconnect();
-					o.observer = null;
-				}
+				var run_again=false;
 
 				if(o.timer) {
 					clearTimeout(o.timer);
@@ -514,9 +536,16 @@ boomr = {
 				}
 
 				if(callback) {
-					callback.call(callback_ctx, mutations, callback_data);
+					run_again = callback.call(callback_ctx, mutations, callback_data);
 
-					callback = null;
+					if(!run_again) {
+						callback = null;
+					}
+				}
+
+				if(!run_again && o.observer) {
+					o.observer.disconnect();
+					o.observer = null;
 				}
 			}
 
