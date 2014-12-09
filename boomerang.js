@@ -1029,7 +1029,7 @@ boomr = {
 
 			resource.timing.requestStart = BOOMR.now();
 
-			wait(resource, 10);
+			wait(resource, 100);
 		});
 
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
