@@ -1067,6 +1067,12 @@ boomr = {
 					}
 				});
 
+				// No interesting nodes added, so we'll just end the xhr measurement at its old value
+				// do not do this for CLICK initiated mutation observers
+				if(self.nodes_to_wait === 0 && resource.initiator === "xhr") {
+					send_event(resource);
+				}
+
 				return have_scripts;
 			}
 			else {
@@ -1115,7 +1121,7 @@ boomr = {
 
 			resource.timing.requestStart = BOOMR.now();
 
-			wait(resource, 10);
+			wait(resource, 100);
 		});
 
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
