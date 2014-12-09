@@ -1012,6 +1012,20 @@ boomr = {
 				);
 		}
 
+		// Capture clicks and wait 10ms to see if they result in DOM mutations via XHRs
+		BOOMR.subscribe("click", function() {
+			var resource = { timing: {}, initiator: "click" };
+
+			if (!BOOMR.XMLHttpRequest || BOOMR.XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+				// do nothing if we have un-instrumented XHR
+				return;
+			}
+
+			resource.timing.requestStart = BOOMR.now();
+
+			wait(resource, 10);
+		});
+
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
 		// we'll use composition
 		proxy_XMLHttpRequest = function() {
