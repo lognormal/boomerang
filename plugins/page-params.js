@@ -305,7 +305,7 @@ Handler.prototype = {
 	},
 
 	URLPatternType: function(o) {
-		var value;
+		var value, re;
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
@@ -324,10 +324,35 @@ Handler.prototype = {
 				return false;
 			}
 
-			// textContent is way faster than innerText in browsers that support
-			// both, but IE8 and lower only support innerText so, we test textContent
-			// first and fallback to innerText if that fails
-			value = this.cleanUp(value.textContent || value.innerText);
+			if(!o.match || o.match === "numeric") {
+				// textContent is way faster than innerText in browsers that support
+				// both, but IE8 and lower only support innerText so, we test textContent
+				// first and fallback to innerText if that fails
+				value = this.cleanUp(value.textContent || value.innerText);
+			}
+			else if(o.match === "boolean") {
+				value = 1;
+			}
+			else if(o.match.match(/^regex:/)) {
+				re = o.match.match(/^regex:(.*)/);
+				if(!re || re.length < 2) {
+					return false;
+				}
+
+				try {
+					re = new RegExp(re[1], "i");
+
+					if(re.test(value.textContent || value.innerText)) {
+						value = 1;
+					}
+				}
+				catch(err) {
+					BOOMR.debug("Bad pattern: " + re, "PageVars");
+					BOOMR.debug(err, "PageVars");
+					BOOMR.addError(err, "PageVars.URLPatternType");
+					return false;
+				}
+			}
 		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
