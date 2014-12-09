@@ -362,7 +362,7 @@ Handler.prototype = {
 	},
 
 	URLPatternType: function(o) {
-		var value;
+		var value, re;
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
@@ -381,10 +381,35 @@ Handler.prototype = {
 				return false;
 			}
 
-			// textContent is way faster than innerText in browsers that support
-			// both, but IE8 and lower only support innerText so, we test textContent
-			// first and fallback to innerText if that fails
-			value = this.cleanUp(value.textContent || value.innerText);
+			if(!o.match || o.match === "numeric") {
+				// textContent is way faster than innerText in browsers that support
+				// both, but IE8 and lower only support innerText so, we test textContent
+				// first and fallback to innerText if that fails
+				value = this.cleanUp(value.textContent || value.innerText);
+			}
+			else if(o.match === "boolean") {
+				value = 1;
+			}
+			else if(o.match.match(/^regex:/)) {
+				re = o.match.match(/^regex:(.*)/);
+				if(!re || re.length < 2) {
+					return false;
+				}
+
+				try {
+					re = new RegExp(re[1], "i");
+
+					if(re.test(value.textContent || value.innerText)) {
+						value = 1;
+					}
+				}
+				catch(err) {
+					BOOMR.debug("Bad pattern: " + re, "PageVars");
+					BOOMR.debug(err, "PageVars");
+					BOOMR.addError(err, "PageVars.URLPatternType");
+					return false;
+				}
+			}
 		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
@@ -630,7 +655,7 @@ impl = {
 					  }
 		};
 
-		if(ename !== "xhr"  && this.complete) {
+		if(ename !== "xhr" && this.complete) {
 			return;
 		}
 
@@ -670,7 +695,15 @@ impl = {
 				};
 			}
 		}
+		else {
+			l = w.location;
+			this.complete = true;
+		}
 
+		// Since we're going to write new stuff, clear out anything that we've previously written but couldn't be beaconed
+		impl.clearMetrics();
+
+		// Also clear the retry list since we'll repopulate it if needed
 		impl.mayRetry = [];
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
@@ -679,17 +712,26 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<limpl[v].length; i++) {
+					if( (limpl[v][i].only_full_page && ename === "xhr")
+					    ||
+					    (limpl[v][i].only_xhr && ename !== "xhr")
+					) {
+						// do not compute full page timers, metrics & dimensions for xhr calls
+						// or xhr only timers, metrics & dimensions for full page calls
+						continue;
+					}
+
 					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
+						if(limpl[v][i].subresource && ename === "xhr" && edata) {
+							edata.subresource = "active";
+						}
 						break;
 					}
 				}
 			}
 		}
 
-		this.complete = true;
 		BOOMR.sendBeacon();
-
-		l = location;
 	},
 
 	retry: function() {
@@ -714,7 +756,7 @@ impl = {
 		}
 	},
 
-	clearMetrics: function(vars) {
+	clearMetrics: function() {
 		var i, label;
 
 		// Remove custom metrics
@@ -778,6 +820,7 @@ impl = {
 			"dimensions": { impl: "customDimensions", data: data.dimensions }
 		};
 
+		// for each of timers, metrics & dimensions
 		for (k in sections) {
 			if (!sections.hasOwnProperty(k)) {
 				continue;
@@ -785,10 +828,16 @@ impl = {
 
 			section = sections[k];
 
+			// if there's no data elements passed in
 			if (!section.data || !section.data.length) {
+				// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
+				if (data.url) {
+					limpl[section.impl] = impl[section.impl];
+				}
 				continue;
 			}
 
+			// If there are data elements passed in, then check which ones we want
 			for(j=0; j<section.data.length; j++)
 			{
 				m = section.data[j].split(/\s*=\s*/);
@@ -825,7 +874,7 @@ BOOMR.plugins.PageParams = {
 		var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
 
 		w = BOOMR.window;
-		l = location;
+		l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
 		d = w.document;
 		p = w.performance || null;
 
@@ -833,6 +882,96 @@ BOOMR.plugins.PageParams = {
 		impl.complete = false;
 
 		// Fire on the first of load or unload
+
+		/*
+		Cases (this is what should happen), PageParams MUST be the first plugin for this to work correctly:
+		1. Boomerang & config load before onload, onload fires first, xhr_load next:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on onload, complete === false
+		- done runs on xhr_load (ignores complete)
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		2. Boomerang & config load before onload, unload fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on unload, complete === false
+		* 1 beacon
+
+		3. Boomerang & config load before onload, xhr_load fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- attach done to load event on second init (skips because of duplicate)
+		- done runs on xhr_load, tries to send beacon, does not change complete
+		- done runs on onload, complete === false
+		- done does not run on unload, complete === true
+		* 2 beacons
+
+		4. Boomerang loads before onload, config loads after onload, onload fires first, xhr_load next:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs on onload, skips because of no config, sets complete = true
+		- xhr_load will never fire before config (event ignored)
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false
+		- done runs on xhr_load that fires after config (ignores complete)
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		5. Boomerang loads before onload, config loads after onload, unload fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs on unload, skips because of no config, sets complete = true
+		* 0 beacons
+
+		6. Boomerang loads before onload, config loads after onload, xhr_load fires before onload:
+		- attach done to load event on first init
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- xhr_load will never fire before config (event ignored)
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false, sets complete = true
+		- done does not run on unload, complete === true
+		* 1 beacon
+
+		7. Boomerang & config load after onload, onload fires first, xhr_load fires next:
+		- setImmediate `done` on first init (from BOOMR.init)
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs immediately, skips because of no config, sets complete = true
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs immediately, complete === false, sets to true
+		- done runs on xhr_load only if it fires after config loads
+		- done does not run on unload, complete === true
+		* 1 or 2 beacons
+
+		8. Boomerang & config load after onload, unload fires before onload:
+		- boomerang doesn't load
+		* 0 beacons
+
+		9. Boomerang & config load after onload, xhr_load fires before onload:
+		- xhr_load ignored because of no boomerang
+		- setImmediate `done` on first init (from BOOMR.init)
+		- attach done to unload event on first init
+		- attach done to xhr_load event on first init
+		- done runs immediately, skips because of no config, sets complete = true
+		- complete = false on second init
+		- setImmediate `done` on second init (from PageParams.init)
+		- done runs on immediately, complete === false, sets complete = true
+		- done does not run on unload, complete === true
+		* 1 beacon
+		*/
 
 		if (!impl.onloadfired) {
 			BOOMR.subscribe("page_ready", impl.onload, "load", impl);
@@ -861,7 +1000,7 @@ BOOMR.plugins.PageParams = {
 		if (impl.mayRetry.length > 0) {
 			impl.retry();
 		}
-		return impl.complete;
+		return true;
 	}
 };
 

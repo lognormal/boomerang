@@ -75,6 +75,7 @@ var impl = {
 				data.nt_res_end = res.responseEnd;
 			}
 			data.nt_domint = res.domInteractive;
+			data.nt_domcomp = res.domComplete;
 			data.nt_load_st = res.loadEventEnd;
 			data.nt_load_end = res.loadEventEnd;
 		}

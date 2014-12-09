@@ -88,7 +88,7 @@ BOOMR_check_doc_domain();
 // the parameter is the window
 (function(w) {
 
-var impl, boomr, d, myurl, createCustomEvent, dispatchEvent;
+var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange;
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
@@ -169,6 +169,31 @@ dispatchEvent = function(e_name, e_data) {
 		}
 	});
 };
+
+// visibilitychange is useful to detect if the page loaded through prerender
+// or if the page never became visible
+// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
+// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
+// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
+
+// Set the name of the hidden property and the change event for visibility
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+	visibilityState = "visibilityState";
+	visibilityChange = "visibilitychange";
+}
+else if (typeof document.mozHidden !== "undefined") {
+	visibilityState = "mozVisibilityState";
+	visibilityChange = "mozvisibilitychange";
+}
+else if (typeof document.msHidden !== "undefined") {
+	visibilityState = "msVisibilityState";
+	visibilityChange = "msvisibilitychange";
+}
+else if (typeof document.webkitHidden !== "undefined") {
+	visibilityState = "webkitVisibilityState";
+	visibilityChange = "webkitvisibilitychange";
+}
+
 
 // impl is a private object not reachable from outside the BOOMR object
 // users can set properties by passing in to the init() method
@@ -470,6 +495,71 @@ boomr = {
 			return (props>0);
 		},
 
+		/**
+		 Add a MutationObserver for a given element and terminate after `timeout`ms.
+		 @param el		DOM element to watch for mutations
+		 @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
+		 @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
+					If set to a falsy value, the observer will wait indefinitely for Mutations.
+		 @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
+						function(mutations, callback_data)
+					Where:
+						mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
+						callback_data is the passed in `callback_data` parameter without modifications
+
+					The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
+					keep watching for mutations. Note that the timeout will not fire any more so the caller MUST call disconnect() at some point
+		 @param callback_data	Any data to be passed to the callback function as its second parameter
+		 @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
+
+		 @returns	- `null` if a MutationObserver could not be created OR
+				- An object containing the observer and the timer object:
+				  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
+
+				The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
+				Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
+				have been cleared automatically.
+		 */
+		addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
+			var o = {observer: null, timer: null};
+
+			if(!MutationObserver || !callback || !el) {
+				return null;
+			}
+
+			function done(mutations) {
+				var run_again=false;
+
+				if(o.timer) {
+					clearTimeout(o.timer);
+					o.timer = null;
+				}
+
+				if(callback) {
+					run_again = callback.call(callback_ctx, mutations, callback_data);
+
+					if(!run_again) {
+						callback = null;
+					}
+				}
+
+				if(!run_again && o.observer) {
+					o.observer.disconnect();
+					o.observer = null;
+				}
+			}
+
+			o.observer = new MutationObserver(done);
+
+			if(timeout) {
+				o.timer = setTimeout(done, o.timeout);
+			}
+
+			o.observer.observe(el, config);
+
+			return o;
+		},
+
 		addListener: function(el, type, fn) {
 			if (el.addEventListener) {
 				el.addEventListener(type, fn, false);
@@ -565,38 +655,32 @@ boomr = {
 			}
 			else {
 				if(w.onpagehide || w.onpagehide === null) {
-					boomr.utils.addListener(w, "pageshow", BOOMR.page_ready);
+					BOOMR.utils.addListener(w, "pageshow", BOOMR.page_ready);
 				}
 				else {
-					boomr.utils.addListener(w, "load", BOOMR.page_ready);
+					BOOMR.utils.addListener(w, "load", BOOMR.page_ready);
 				}
 			}
 		}
 
-		boomr.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
+		BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
 
 		(function() {
-			var fire_visible, forms, iterator;
-			// visibilitychange is useful to detect if the page loaded through prerender
-			// or if the page never became visible
-			// http://www.w3.org/TR/2011/WD-page-visibility-20110602/
-			// http://www.nczonline.net/blog/2011/08/09/introduction-to-the-page-visibility-api/
-			fire_visible = function() { impl.fireEvent("visibility_changed"); };
-			if(d.webkitVisibilityState) {
-				boomr.utils.addListener(d, "webkitvisibilitychange", fire_visible);
-			}
-			else if(d.msVisibilityState) {
-				boomr.utils.addListener(d, "msvisibilitychange", fire_visible);
-			}
-			else if(d.visibilityState) {
-				boomr.utils.addListener(d, "visibilitychange", fire_visible);
+			var forms, iterator;
+			if(visibilityChange !== undefined) {
+				BOOMR.utils.addListener(d, visibilityChange, function() { impl.fireEvent("visibility_changed"); });
+
+				// record the last time each visibility state occurred
+				BOOMR.subscribe("visibility_changed", function() {
+					BOOMR.lastVisibilityEvent[BOOMR.visibilityState()] = BOOMR.now();
+				});
 			}
 
-			boomr.utils.addListener(d, "mouseup", impl.xb_handler("click"));
+			BOOMR.utils.addListener(d, "mouseup", impl.xb_handler("click"));
 
 			forms = d.getElementsByTagName("form");
 			for(iterator = 0; iterator < forms.length; iterator++) {
-				boomr.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
+				BOOMR.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
 			}
 
 			if(!w.onpagehide && w.onpagehide !== null) {
@@ -604,7 +688,7 @@ boomr = {
 				// We only clear w on browsers that don't support onpagehide because
 				// those that do are new enough to not have memory leak problems of
 				// some older browsers
-				boomr.utils.addListener(w, "unload", function() { BOOMR.window=w=null; });
+				BOOMR.utils.addListener(w, "unload", function() { BOOMR.window=w=null; });
 			}
 		}());
 
@@ -648,6 +732,12 @@ boomr = {
 		}
 	},
 
+	now: (window.performance && window.performance.now ? function() { return Math.round(window.performance.now() + window.performance.timing.navigationStart); } : Date.now || function() { return new Date().getTime(); }),
+
+	visibilityState: ( visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; } ),
+
+	lastVisibilityEvent: {},
+
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
 		var i, handler, ev, unload_handler;
 
@@ -688,12 +778,12 @@ boomr = {
 			// pagehide is for iOS devices
 			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
 			if(w.onpagehide || w.onpagehide === null) {
-				boomr.utils.addListener(w, "pagehide", unload_handler);
+				BOOMR.utils.addListener(w, "pagehide", unload_handler);
 			}
 			else {
-				boomr.utils.addListener(w, "unload", unload_handler);
+				BOOMR.utils.addListener(w, "unload", unload_handler);
 			}
-			boomr.utils.addListener(w, "beforeunload", unload_handler);
+			BOOMR.utils.addListener(w, "beforeunload", unload_handler);
 		}
 
 		return this;
@@ -704,7 +794,7 @@ boomr = {
 			err = String(err);
 		}
 		if (src !== undefined) {
-			err = "[" + src + ":" + (new Date().getTime()) + "] " + err;
+			err = "[" + src + ":" + BOOMR.now() + "] " + err;
 		}
 
 		if (impl.errors[err]) {
@@ -754,7 +844,7 @@ boomr = {
 	},
 
 	requestStart: function(name) {
-		var t_start = new Date().getTime();
+		var t_start = BOOMR.now();
 		BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
 
 		return {
@@ -774,7 +864,7 @@ boomr = {
 			});
 		}
 		else {
-			var timer = name + "|" + (new Date().getTime()-t_start);
+			var timer = name + "|" + (BOOMR.now()-t_start);
 			if(impl.vars.qt) {
 				impl.vars.qt += "," + timer;
 			}
@@ -800,7 +890,9 @@ boomr = {
 		    orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest,
 		    readyStateMap;
 
-		if (!orig_XMLHttpRequest) {
+		// XHR not supported or XHR so old that it doesn't support addEventListener
+		// (IE 6, 7, as well as newer running in quirks mode.)
+		if (!orig_XMLHttpRequest || !(new orig_XMLHttpRequest()).addEventListener) {
 			// Nothing to instrument
 			return;
 		}
@@ -809,10 +901,141 @@ boomr = {
 
 		readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
 
+		function send_event(resource) {
+			if(impl.vars["h.cr"]) {
+				impl.fireEvent("xhr_load", resource);
+			}
+			else {
+				BOOMR.debug("Not firing xhr_load since we do not have a crumb yet");
+				BOOMR.debug("Would have sent " + BOOMR.utils.objectToString(resource));
+			}
+		}
+
+		function MutationHandler() {
+			this.nodes_to_wait = 0;
+		}
+
+		/*
+		Watch for mutations, stop after 10ms if no mutations have occurred
+		1. If mutations result in a SCRIPT, IMG, IFRAME or LINK[rel=stylesheet], then we attach load and error handlers to them
+		2. For anything other than SCRIPT, watcher is stopped immediately
+		3. For SCRIPTs, watcher keeps watching until the SCRIPT's load or error events fire
+		*/
+		MutationHandler.prototype.mutation_cb = function(mutations, resource) {
+			var self = this,
+			    have_scripts = false,
+			    a = d.createElement("A");
+
+			function load_cb() {
+				self.nodes_to_wait--;
+
+				if(self.nodes_to_wait === 0) {
+					resource.timing.loadEventEnd = BOOMR.now();
+
+					send_event(resource);
+				}
+			}
+
+			function wait_for_node(node) {
+				// only images, scripts, iframes and links
+				if(!node.nodeName.match(/^(IMG|SCRIPT|IFRAME|LINK)$/i)) {
+					return;
+				}
+
+				// only link if stylesheet
+				if(node.nodeName.toUpperCase() === "LINK" && !node.rel.match(/\<stylesheet\>/i)) {
+					return;
+				}
+
+				if(node.nodeName.toUpperCase() === "SCRIPT") {
+					// If the resource doesn't have a URL, we'll use the first SCRIPT's url
+					if(!resource.url) {
+						a.href = node.src;
+						resource.url = a.href;
+					}
+
+					have_scripts = true;
+				}
+
+				self.nodes_to_wait++;
+
+				node.addEventListener("load", load_cb);
+				node.addEventListener("error", load_cb);
+			}
+
+			if(mutations && mutations.length) {
+				resource.timing.domComplete = BOOMR.now();
+
+				mutations.forEach(function(mutation) {
+					if(mutation.type === "childList") {
+						[].slice.call(mutation.addedNodes).forEach(wait_for_node);
+					}
+					else if(mutation.type === "attributes") {
+						wait_for_node(mutation.target);
+					}
+				});
+
+				// No interesting nodes added, so we'll just end the xhr measurement at its old value
+				// do not do this for CLICK initiated mutation observers
+				if(self.nodes_to_wait === 0 && resource.initiator === "xhr") {
+					send_event(resource);
+				}
+
+				return have_scripts;
+			}
+			else {
+				// mutation observer did not run in 10ms, so maybe no mutations
+				// we'll just end the xhr measurement now
+				// note, do not do this for CLICK initiated mutation observers
+
+				// we don't need to set the loadEventEnd timer here because the
+				// `load` event already set it
+				if(resource.initiator === "xhr") {
+					send_event(resource);
+				}
+
+				return false;
+			}
+		};
+
+		function wait(resource, timeout) {
+			var handler = new MutationHandler();
+
+			return BOOMR.utils.addObserver(
+					d,
+					{
+						childList: true,
+						attributes: true,
+						subtree: true,
+						attributeFilter: ["src", "href"]
+					},
+					// wait 10ms after attaching the observer to see if anything was changed
+					// will start waiting 10ms after control is returned to the event loop
+					timeout,
+					handler.mutation_cb,
+					resource,
+					handler
+				);
+		}
+
+		// Capture clicks and wait 10ms to see if they result in DOM mutations via XHRs
+		BOOMR.subscribe("click", function() {
+			var resource = { timing: {}, initiator: "click" };
+
+			if (!BOOMR.XMLHttpRequest || BOOMR.XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+				// do nothing if we have un-instrumented XHR
+				return;
+			}
+
+			resource.timing.requestStart = BOOMR.now();
+
+			wait(resource, 100);
+		});
+
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
 		// we'll use composition
 		proxy_XMLHttpRequest = function() {
-			var req, resource = { timing: {} }, orig_open, orig_send;
+			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
 
 			req = new orig_XMLHttpRequest();
 
@@ -843,13 +1066,16 @@ boomr = {
 							ename,
 							function() {
 								if (ename === "readystatechange") {
-									resource.timing[readyStateMap[req.readyState]] = new Date().getTime();
+									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
-									impl.fireEvent("xhr_load", resource);
+									if(!wait(resource, 10)) {
+										// could not create MutationObserver, so just fire xhr_load now
+										send_event(resource);
+									}
 								}
-								else {
-									resource.timing.loadEventEnd = new Date().getTime();
+								else {	// load, timeout, error, abort
+									resource.timing.loadEventEnd = BOOMR.now();
 									resource.status = (stat === undefined ? req.status : stat);
 								}
 							},
@@ -870,13 +1096,16 @@ boomr = {
 
 				resource.url = l.href;
 				resource.method = method;
+				if (!async) {
+					resource.synchronous = true;
+				}
 
 				// call the original open method
 				return orig_open.apply(req, arguments);
 			};
 
 			req.send = function() {
-				resource.timing.requestStart = new Date().getTime();
+				resource.timing.requestStart = BOOMR.now();
 
 				// call the original send method
 				return orig_send.apply(req, arguments);
@@ -917,14 +1146,30 @@ boomr = {
 		}
 
 		// use d.URL instead of location.href because of a safari bug
+		impl.vars.pgu = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
 		if(!impl.vars.u) {
-			impl.vars.u = BOOMR.utils.cleanupURL(d.URL.replace(/#.*/, ""));
+			impl.vars.u = impl.vars.pgu;
 		}
+
+		if(impl.vars.pgu === impl.vars.u) {
+			delete impl.vars.pgu;
+		}
+
 		impl.vars.v = BOOMR.version;
 
 		impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36);
 		impl.vars["rt.ss"] = BOOMR.session.start;
 		impl.vars["rt.sl"] = BOOMR.session.length;
+
+		if(BOOMR.visibilityState()) {
+			impl.vars["vis.st"] = BOOMR.visibilityState();
+			if(BOOMR.lastVisibilityEvent.visible) {
+				impl.vars["vis.lv"] = BOOMR.now() - BOOMR.lastVisibilityEvent.visible;
+			}
+			if(BOOMR.lastVisibilityEvent.hidden) {
+				impl.vars["vis.lh"] = BOOMR.now() - BOOMR.lastVisibilityEvent.hidden;
+			}
+		}
 
 		if(w !== window) {
 			impl.vars["if"] = "";
