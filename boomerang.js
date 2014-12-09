@@ -499,6 +499,31 @@ boomr = {
 			return (props>0);
 		},
 
+		/**
+		 Add a MutationObserver for a given element and terminate after `timeout`ms.
+		 @param el		DOM element to watch for mutations
+		 @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
+		 @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
+					If set to a falsy value, the observer will wait indefinitely for Mutations.
+		 @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
+						function(mutations, callback_data)
+					Where:
+						mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
+						callback_data is the passed in `callback_data` parameter without modifications
+
+					The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
+					keep watching for mutations. Note that the timeout will not fire any more so the caller MUST call disconnect() at some point
+		 @param callback_data	Any data to be passed to the callback function as its second parameter
+		 @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
+
+		 @returns	- `null` if a MutationObserver could not be created OR
+				- An object containing the observer and the timer object:
+				  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
+
+				The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
+				Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
+				have been cleared automatically.
+		 */
 		addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 			var o = {observer: null, timer: null};
 
@@ -507,10 +532,7 @@ boomr = {
 			}
 
 			function done(mutations) {
-				if(o.observer) {
-					o.observer.disconnect();
-					o.observer = null;
-				}
+				var run_again=false;
 
 				if(o.timer) {
 					clearTimeout(o.timer);
@@ -518,9 +540,16 @@ boomr = {
 				}
 
 				if(callback) {
-					callback.call(callback_ctx, mutations, callback_data);
+					run_again = callback.call(callback_ctx, mutations, callback_data);
 
-					callback = null;
+					if(!run_again) {
+						callback = null;
+					}
+				}
+
+				if(!run_again && o.observer) {
+					o.observer.disconnect();
+					o.observer = null;
 				}
 			}
 
@@ -974,13 +1003,25 @@ boomr = {
 			}
 		}
 
-		function mutation_cb(mutations, resource) {
-			var nodes_to_wait = 0;
+		function MutationHandler() {
+			this.nodes_to_wait = 0;
+		}
+
+		/*
+		Watch for mutations, stop after 10ms if no mutations have occurred
+		1. If mutations result in a SCRIPT, IMG, IFRAME or LINK[rel=stylesheet], then we attach load and error handlers to them
+		2. For anything other than SCRIPT, watcher is stopped immediately
+		3. For SCRIPTs, watcher keeps watching until the SCRIPT's load or error events fire
+		*/
+		MutationHandler.prototype.mutation_cb = function(mutations, resource) {
+			var self = this,
+			    have_scripts = false,
+			    a = d.createElement("A");
 
 			function load_cb() {
-				nodes_to_wait--;
+				self.nodes_to_wait--;
 
-				if(nodes_to_wait === 0) {
+				if(self.nodes_to_wait === 0) {
 					resource.timing.loadEventEnd = BOOMR.now();
 
 					send_event(resource);
@@ -988,13 +1029,30 @@ boomr = {
 			}
 
 			function wait_for_node(node) {
-				if(!node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/i)) {
+				// only images, scripts, iframes and links
+				if(!node.nodeName.match(/^(IMG|SCRIPT|IFRAME|LINK)$/i)) {
 					return;
 				}
 
+				// only link if stylesheet
+				if(node.nodeName.toUpperCase() === "LINK" && !node.rel.match(/\<stylesheet\>/i)) {
+					return;
+				}
+
+				if(node.nodeName.toUpperCase() === "SCRIPT") {
+					// If the resource doesn't have a URL, we'll use the first SCRIPT's url
+					if(!resource.url) {
+						a.href = node.src;
+						resource.url = a.href;
+					}
+
+					have_scripts = true;
+				}
+
+				self.nodes_to_wait++;
+
 				node.addEventListener("load", load_cb);
 				node.addEventListener("error", load_cb);
-				nodes_to_wait++;
 			}
 
 			if(mutations && mutations.length) {
@@ -1008,6 +1066,8 @@ boomr = {
 						wait_for_node(mutation.target);
 					}
 				});
+
+				return have_scripts;
 			}
 			else {
 				// mutation observer did not run in 10ms, so maybe no mutations
@@ -1016,14 +1076,52 @@ boomr = {
 
 				// we don't need to set the loadEventEnd timer here because the
 				// `load` event already set it
-				send_event(resource);
+				if(resource.initiator === "xhr") {
+					send_event(resource);
+				}
+
+				return false;
 			}
+		};
+
+		function wait(resource, timeout) {
+			var handler = new MutationHandler();
+
+			return BOOMR.utils.addObserver(
+					d,
+					{
+						childList: true,
+						attributes: true,
+						subtree: true,
+						attributeFilter: ["src", "href"]
+					},
+					// wait 10ms after attaching the observer to see if anything was changed
+					// will start waiting 10ms after control is returned to the event loop
+					timeout,
+					handler.mutation_cb,
+					resource,
+					handler
+				);
 		}
+
+		// Capture clicks and wait 10ms to see if they result in DOM mutations via XHRs
+		BOOMR.subscribe("click", function() {
+			var resource = { timing: {}, initiator: "click" };
+
+			if (!BOOMR.XMLHttpRequest || BOOMR.XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+				// do nothing if we have un-instrumented XHR
+				return;
+			}
+
+			resource.timing.requestStart = BOOMR.now();
+
+			wait(resource, 10);
+		});
 
 		// We could also inherit from window.XMLHttpRequest, but for this implementation,
 		// we'll use composition
 		proxy_XMLHttpRequest = function() {
-			var req, resource = { timing: {} }, orig_open, orig_send;
+			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
 
 			req = new orig_XMLHttpRequest();
 
@@ -1057,22 +1155,8 @@ boomr = {
 									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 								}
 								else if (ename === "loadend") {
-									if(!BOOMR.utils.addObserver(
-											d,
-											{
-												childList: true,
-												attributes: true,
-												subtree: true,
-												attributeFilter: ["src", "href"]
-											},
-											// wait 10ms after attaching the observer to see if anything was changed
-											// will start waiting 10ms after control is returned to the event loop
-											10,
-											mutation_cb,
-											resource
-										)
-									) {
-									// could not create MutationObserver, so just fire xhr_load now
+									if(!wait(resource, 10)) {
+										// could not create MutationObserver, so just fire xhr_load now
 										send_event(resource);
 									}
 								}
@@ -1101,7 +1185,6 @@ boomr = {
 				if (!async) {
 					resource.synchronous = true;
 				}
-				resource.initiator = "xhr";
 
 				// call the original open method
 				return orig_open.apply(req, arguments);
