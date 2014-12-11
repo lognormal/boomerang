@@ -508,7 +508,8 @@ boomr = {
 						callback_data is the passed in `callback_data` parameter without modifications
 
 					The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
-					keep watching for mutations. Note that the timeout will not fire any more so the caller MUST call disconnect() at some point
+					keep watching for mutations. If the return value is numeric and greater than 0, then this will be the new timeout
+					if it is boolean instead, then the timeout will not fire any more so the caller MUST call disconnect() at some point
 		 @param callback_data	Any data to be passed to the callback function as its second parameter
 		 @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
 
@@ -546,6 +547,10 @@ boomr = {
 				if(!run_again && o.observer) {
 					o.observer.disconnect();
 					o.observer = null;
+				}
+
+				if(typeof run_again === "number" && run_again > 0) {
+					o.timer = setTimeout(done, run_again);
 				}
 			}
 
