@@ -622,6 +622,8 @@ Handler.prototype = {
 	}
 };
 
+BOOMR.utils.runXPath = Handler.prototype.runXPath;
+
 Handler.prototype.XPath = Handler.prototype.URLPatternType;
 Handler.prototype.URLQueryParam = Handler.prototype.URLPattern;
 
