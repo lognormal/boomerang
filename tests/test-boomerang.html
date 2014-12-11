@@ -4,10 +4,12 @@
 <title>Basic Boomerang Test</title>
 
 <link rel="stylesheet" href="test-helper.css" type="text/css">
+<script src="lodash.js"></script>
 <script src="yuitest.js"></script>
 <script src="test-helper.js"></script>
 <script src="test-boomerang.js"></script>
 <script src="../boomerang.js"></script>
+<script src="../plugins/restiming.js"></script>
 
 <body class="yui3-skin-sam">
 <script>
@@ -17,6 +19,7 @@ YUI().use("test", "console", function(Y) {
 	suite.add(getStaticTests(Y));
 	suite.add(getMockLoggerTests(Y));
 	suite.add(getInitTests(Y));
+	suite.add(getResTimingTests(Y));
 
 	var TestRunner = getTestRunner(Y);
 

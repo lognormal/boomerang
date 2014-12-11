@@ -200,6 +200,10 @@ else if (typeof document.webkitHidden !== "undefined") {
 impl = {
 	// properties
 	beacon_url: location.protocol + "//%beacon_dest_host%%beacon_dest_path%",
+	// beacon request method, either GET, POST or AUTO. AUTO will check the
+	// request size then use GET if the request URL is less than 2000 chars
+	// otherwise it will fall back to a POST request.
+	beacon_type: "AUTO",
 	//! User's ip address determined on the server.  Used for the BA cookie
 	user_ip: "",
 
@@ -579,12 +583,100 @@ boomr = {
 			} else if (el.detachEvent) {
 				el.detachEvent("on" + type, fn);
 			}
+		},
+
+		pushVars: function (form, vars, prefix) {
+			var k, i, l=0, input;
+
+			for(k in vars) {
+				if(vars.hasOwnProperty(k)) {
+					if(Object.prototype.toString.call(vars[k]) === "[object Array]") {
+						for(i = 0; i < vars[k].length; ++i) {
+							l += BOOMR.utils.pushVars(form, vars[k][i], k + "[" + i + "]");
+						}
+					} else {
+						input = document.createElement("input");
+						input.name = (prefix ? (prefix + "[" + k + "]") : k);
+						input.value = (vars[k]===undefined || vars[k]===null ? "" : vars[k]);
+
+						form.appendChild(input);
+
+						l += encodeURIComponent(input.name).length + encodeURIComponent(input.value).length + 2;
+					}
+				}
+			}
+
+			return l;
+		},
+
+		sendData: function (form, method) {
+			var input  = document.createElement("input"),
+			    urls = [ impl.beacon_url ];
+
+			form.method = method;
+			form.id = "beacon_form";
+
+			// TODO: Determine if we want to send as JSON
+			//if (window.JSON) {
+			//	form.innerHTML = "";
+			//	form.enctype = "text/plain";
+			//	input.value = JSON.stringify(impl.vars);
+			//	form.appendChild(input);
+			//} else {
+				form.enctype = "application/x-www-form-urlencoded";
+			//}
+
+			if(impl.secondary_beacons && impl.secondary_beacons.length) {
+				urls.push.apply(urls, impl.secondary_beacons);
+			}
+
+
+			function remove(id) {
+				var el = document.getElementById(id);
+				if (el) {
+					el.parentNode.removeChild(el);
+				}
+			}
+
+			function submit() {
+				var iframe,
+				    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
+
+				// ref: http://terminalapp.net/submitting-a-form-with-target-set-to-a-script-generated-iframe-on-ie/
+				try {
+					iframe = document.createElement('<iframe name="' + name + '">');	// IE <= 8
+				}
+				catch (ignore) {
+					iframe = document.createElement("iframe");				// everything else
+				}
+
+				form.action = urls.shift();
+				form.target = iframe.name = iframe.id = name;
+				iframe.style.display = form.style.display = "none";
+				iframe.src="javascript:false";
+
+				remove(iframe.id);
+				remove(form.id);
+
+				document.body.appendChild(iframe);
+				document.body.appendChild(form);
+
+				form.submit();
+
+				if (urls.length) {
+					BOOMR.setImmediate(submit);
+				}
+
+				setTimeout(function() { remove(iframe.id); }, 10000);
+			}
+
+			submit();
 		}
 	},
 
 	init: function(config) {
 		var i, k,
-		    properties = ["beacon_url", "user_ip", "strip_query_string", "secondary_beacons"];
+		    properties = ["beacon_url", "beacon_type", "user_ip", "strip_query_string", "secondary_beacons"];
 
 		BOOMR_check_doc_domain();
 
@@ -893,7 +985,7 @@ boomr = {
 	instrumentXHR: function() { },
 
 	sendBeacon: function(beacon_url_override) {
-		var k, url, furl, img, nparams=0, errors=[];
+		var k, form, furl, img, length, errors=[];
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -972,31 +1064,19 @@ boomr = {
 			return true;
 		}
 
-		// if there are already url parameters in the beacon url,
-		// change the first parameter prefix for the boomerang url parameters to &
+		form = document.createElement("form");
+		length = BOOMR.utils.pushVars(form, impl.vars);
 
-		url = [];
-
-		for(k in impl.vars) {
-			if(impl.vars.hasOwnProperty(k)) {
-				nparams++;
-				url.push(encodeURIComponent(k)
-					+ "="
-					+ (
-						impl.vars[k]===undefined || impl.vars[k]===null
-						? ""
-						: encodeURIComponent(impl.vars[k])
-					)
-				);
-			}
-		}
 		BOOMR.removeVar("qt");
-
-		furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
 
 		// If we reach here, we've transferred all vars to the beacon URL.
 		// The only thing that can stop it now is if we're rate limited
 		impl.fireEvent("onbeacon", impl.vars);
+
+		if(!length) {
+			// do not make the request if there is no data
+			return this;
+		}
 
 		// Stop at this point if we are rate limited
 		if(BOOMR.session.rate_limited) {
@@ -1004,19 +1084,9 @@ boomr = {
 			return this;
 		}
 
-		// only send beacon if we actually have something to beacon back
-		if(nparams) {
-			img = new Image();
-			img.src=furl;
-		}
-
-		if (impl.secondary_beacons) {
-			for(k = 0; k<impl.secondary_beacons.length; k++) {
-				furl = impl.secondary_beacons[k] + "?" + url.join("&");
-				img = new Image();
-				img.src=furl;
-			}
-		}
+		// using 2000 here as a de facto maximum URL length based on:
+		// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+		BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > 2000 ? "POST" : "GET") : "POST");
 
 		return true;
 	}
@@ -1068,8 +1138,6 @@ if (!BOOMR.xhr_excludes) {
 }
 
 }());
-
-BOOMR.plugins = BOOMR.plugins || {};
 
 dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
 
