@@ -5,5 +5,5 @@ boomerang-*.js
 Default_Boomerang.xml
 boomerang-build.*
 BoomerangUpdate
-[A-Z0-9][A-Z0-9][A-Z0-9]*.js
+[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]-[A-Z0-9]*.js
 *.diff
