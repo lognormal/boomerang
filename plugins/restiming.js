@@ -298,6 +298,11 @@ function getResourceTiming() {
 			continue;
 		}
 
+		if(e.name.indexOf(BOOMR.url) > -1 ||
+		   e.name.indexOf(BOOMR.config_url) > -1) {
+			continue;
+		}
+
 		//
 		// Compress the RT data into a string:
 		//
