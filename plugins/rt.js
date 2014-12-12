@@ -366,13 +366,25 @@ impl = {
 		else {
 			impl.loadTime += impl.timers.t_done.delta;
 		}
+		impl.sessionHistory += BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ",";
 	},
 
 	/**
 	 * Figure out how long boomerang and config.js took to load using resource timing if available, or built in timestamps
 	 */
 	getBoomerangTimings: function() {
-		var res, k, urls, url;
+		var res, k, urls, url, startTime, data;
+
+		function trimTiming(time, startTime) {
+			// strip from microseconds to milliseconds only
+			var timeMs = Math.round(time ? time : 0),
+			    startTimeMs = Math.round(startTime ? startTime : 0);
+
+			timeMs = (timeMs === 0 ? 0 : (timeMs - startTimeMs));
+
+			return timeMs ? timeMs : "";
+		}
+
 		if(BOOMR.t_start) {
 			// How long does it take Boomerang to load up and execute (fb to lb)?
 			BOOMR.plugins.RT.startTimer("boomerang", BOOMR.t_start);
@@ -393,7 +405,7 @@ impl = {
 		try
 		{
 			if (window.performance && window.performance.getEntriesByName) {
-				urls = { "rt.bmr." : BOOMR.url, "rt.cnf." : BOOMR.config_url };
+				urls = { "rt.bmr" : BOOMR.url, "rt.cnf" : BOOMR.config_url };
 
 				for(url in urls) {
 					if(urls.hasOwnProperty(url) && urls[url]) {
@@ -403,12 +415,23 @@ impl = {
 						}
 						res = res[0];
 
-						for(k in res) {
-							if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-								BOOMR.addVar(url + k.replace(/^(...).*(St|En).*$/, "$1$2"), Math.round(res[k]));
-								impl.addedVars.push(url + k.replace(/^(...).*(St|En).*$/, "$1$2"));
-							}
-						}
+						startTime = trimTiming(res.startTime, 0);
+						data = [
+							startTime,
+							trimTiming(res.responseEnd, startTime),
+							trimTiming(res.responseStart, startTime),
+							trimTiming(res.requestStart, startTime),
+							trimTiming(res.connectEnd, startTime),
+							trimTiming(res.secureConnectionStart, startTime),
+							trimTiming(res.connectStart, startTime),
+							trimTiming(res.domainLookupEnd, startTime),
+							trimTiming(res.domainLookupStart, startTime),
+							trimTiming(res.redirectEnd, startTime),
+							trimTiming(res.redirectStart, startTime)
+						].join(",").replace(/,+$/, "");
+
+						BOOMR.addVar(url, data);
+						impl.addedVars.push(url);
 					}
 				}
 			}
