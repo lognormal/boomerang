@@ -528,7 +528,7 @@ boomr = {
 		addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 			var o = {observer: null, timer: null};
 
-			if(!MutationObserver || !callback || !el) {
+			if(!window.MutationObserver || !callback || !el) {
 				return null;
 			}
 
