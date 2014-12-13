@@ -537,7 +537,10 @@ Handler.prototype = {
 		catch(e) {
 			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
 			// work for browsers using English.
-			if ( !(e.name === "SecurityError" || (e.name === "TypeError" && e.message === "Permission denied")) ) {
+			if ( !(e.name === "SecurityError" ||
+				(e.name === "TypeError" && e.message === "Permission denied") ||
+				(e.name === "Error" && e.message.match(/^Permission denied/))
+			) ) {
 				BOOMR.addError(e, "PageVars.findResource");
 			}
 			return null;
