@@ -993,19 +993,18 @@ BOOMR.plugins.RT = {
 
 		this.addTimersToBeacon();
 
-		if(ename !== "xhr") {
-			BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
+		BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
 
-			if(impl.r2 !== impl.r) {
-				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
+		if(impl.r2 !== impl.r) {
+			BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
+		}
+
+		if (ename === "xhr" && edata) {
+			if(edata.url) {
+				BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
+				impl.addedVars.push("u");
 			}
-		}
-		else if (edata && edata.url) {	// ename === "xhr"
-			BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
-			impl.addedVars.push("u");
-		}
 
-		if(edata) {
 			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
 			}
