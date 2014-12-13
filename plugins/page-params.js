@@ -714,12 +714,8 @@ impl = {
 				handler = new Handler(hconfig[v]);
 
 				for(i=0; i<limpl[v].length; i++) {
-					if( (limpl[v][i].only_full_page && ename === "xhr")
-					    ||
-					    (limpl[v][i].only_xhr && ename !== "xhr")
-					) {
-						// do not compute full page timers, metrics & dimensions for xhr calls
-						// or xhr only timers, metrics & dimensions for full page calls
+					if(ename !== "xhr" && limpl[v][i].only_xhr) {
+						// do not process xhr only items for non-xhr requests
 						continue;
 					}
 
@@ -834,7 +830,12 @@ impl = {
 			if (!section.data || !section.data.length) {
 				// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
 				if (data.url) {
-					limpl[section.impl] = impl[section.impl];
+					for(i=0; i<impl[section.impl].length; i++) {
+						// only allow timers, metrics & dimensions that are xhr_ok
+						if(impl[section.impl][i].xhr_ok) {
+							limpl[section.impl].push(impl[section.impl][i]);
+						}
+					}
 				}
 				continue;
 			}
