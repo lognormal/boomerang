@@ -405,7 +405,7 @@ impl = {
 		}
 
 		this.complete = true;
-		BOOMR.sendBeacon();
+		//BOOMR.sendBeacon();
 		this.running = false;
 	},
 
@@ -496,7 +496,6 @@ BOOMR.plugins.BW = {
 
 		if(!impl.setVarsFromCookie()) {
 			BOOMR.subscribe("page_ready", this.run, null, this);
-			BOOMR.subscribe("page_unload", this.skip, null, this);
 		}
 
 		impl.initialized = true;
@@ -522,7 +521,7 @@ BOOMR.plugins.BW = {
 
 			BOOMR.info("HTTPS detected, skipping bandwidth test", "bw");
 			impl.complete = true;
-			BOOMR.sendBeacon();
+			//BOOMR.sendBeacon();
 			return this;
 		}
 
@@ -545,20 +544,7 @@ BOOMR.plugins.BW = {
 		}
 	},
 
-	skip: function() {
-		// this is called on unload, so we should abort the test
-
-		// it's also possible that we didn't start, so sendBeacon never
-		// gets called.  Let's set our complete state and call sendBeacon.
-		// This happens if onunload fires before onload
-
-		if(!impl.complete) {
-			impl.complete = true;
-			BOOMR.sendBeacon();
-		}
-	},
-
-	is_complete: function() { return impl.complete; }
+	is_complete: function() { return true; }
 };
 
 }());
