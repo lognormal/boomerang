@@ -46,6 +46,7 @@ impl = {
 	responseStart: undefined,
 	loadTime: 0,		// Total load time for the user session
 	oboError: 0,		// Number of pages in the session that had no load time
+	sessionHistory: [],	// all session changes that have happened
 	t_start: undefined,	// t_start that came off the cookie
 	cached_t_start: undefined,	// cached value of t_start once we know its real value
 	t_fb_approx: undefined,	// approximate first byte time for browsers that don't support navtiming
@@ -118,6 +119,9 @@ impl = {
 		}
 		subcookies.tt = this.loadTime;
 		subcookies.obo = this.oboError;
+		if(this.sessionHistory) {
+			subcookies.sh = this.sessionHistory.join(",");
+		}
 		t_start = BOOMR.now();
 
 		if(timer) {
@@ -205,6 +209,9 @@ impl = {
 		if(subcookies.se) {
 			impl.session_exp = parseInt(subcookies.se, 10) || SESSION_EXP;
 		}
+		if(subcookies.sh) {
+			impl.sessionHistory = subcookies.sh.split(",");
+		}
 
 		if(subcookies.bcn) {
 			this.beacon_url = subcookies.bcn;
@@ -245,6 +252,7 @@ impl = {
 					+ ":" + t_start
 					+ ":" + impl.lastActionTime
 					+ ":" + t_done
+					+ ":" + impl.sessionHistory.join(",")
 			);
 
 			impl.addedVars.push("rt.srst");
@@ -257,6 +265,7 @@ impl = {
 			impl.oboError = 0;
 			impl.beacon_url = impl.next_beacon_url;
 			impl.lastActionTime = t_done;
+			impl.sessionHistory = [];
 
 			// Update the cookie with these new values
 			// we also reset the rate limited flag since
@@ -268,7 +277,8 @@ impl = {
 				"ss": BOOMR.session.start,
 				"tt": impl.loadTime,
 				"obo": impl.oboError,
-				"bcn": impl.beacon_url
+				"bcn": impl.beacon_url,
+				"sh": impl.sessionHistory.join(",")
 			});
 		}
 
@@ -366,7 +376,10 @@ impl = {
 		else {
 			impl.loadTime += impl.timers.t_done.delta;
 		}
-		impl.sessionHistory += BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ",";
+		impl.sessionHistory.unshift(BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ",");
+		if(impl.sessionHistory.length > 5) {
+			impl.sessionHistory.length = 5;
+		}
 	},
 
 	/**
@@ -1042,8 +1055,11 @@ BOOMR.plugins.RT = {
 
 		BOOMR.addVar({
 			"rt.tt": impl.loadTime,
-			"rt.obo": impl.oboError
+			"rt.obo": impl.oboError,
+			"rt.sh": impl.sessionHistory
 		});
+
+		impl.addedVars.push("rt.tt", "rt.obo", "rt.sh");
 
 		impl.updateCookie();
 
