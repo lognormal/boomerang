@@ -376,7 +376,7 @@ impl = {
 		else {
 			impl.loadTime += impl.timers.t_done.delta;
 		}
-		impl.sessionHistory.unshift(BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime + ",");
+		impl.sessionHistory.unshift(BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime);
 		if(impl.sessionHistory.length > 5) {
 			impl.sessionHistory.length = 5;
 		}
@@ -1056,7 +1056,7 @@ BOOMR.plugins.RT = {
 		BOOMR.addVar({
 			"rt.tt": impl.loadTime,
 			"rt.obo": impl.oboError,
-			"rt.sh": impl.sessionHistory
+			"rt.sh": impl.sessionHistory.join(",")
 		});
 
 		impl.addedVars.push("rt.tt", "rt.obo", "rt.sh");
