@@ -70,7 +70,7 @@ impl = {
 					"scr.bpp": w.screen.colorDepth + "/" + w.screen.pixelDepth
 				});
 				if(w.screen.orientation) {
-					BOOMR.addVar("scr.orn", w.screen.orientation.angle + "/" + w.screen.orientation.primary);
+					BOOMR.addVar("scr.orn", w.screen.orientation.angle + "/" + w.screen.orientation.type);
 				}
 			}
 			catch(err) {
