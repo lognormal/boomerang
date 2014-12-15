@@ -9,7 +9,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
 (function() {
-var w, p={}, d, f, m;
+var w, p={}, d, m, impl;
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
 BOOMR = BOOMR || {};
@@ -19,7 +19,7 @@ if (BOOMR.plugins.Memory) {
 }
 
 // A private object to encapsulate all your implementation details
-var impl = {
+impl = {
 	done: function() {
 		var res, doms={}, a;
 		// If we have resource timing, get number of resources
