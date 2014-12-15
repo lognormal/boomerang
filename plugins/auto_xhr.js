@@ -245,7 +245,7 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 	var self = this, current_event, els, interesting = false, i, l;
 
 	// only images, scripts, iframes and links if stylesheet
-	if(node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && !node.rel.match(/\<stylesheet\>/i))) {
+	if(node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 		node._bmr = { start: BOOMR.now(), res: index };
 
