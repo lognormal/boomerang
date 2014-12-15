@@ -253,10 +253,16 @@ Handler.prototype = {
 		// - a part evaluates to null (we cannot proceed)
 		// - a part is not an object (might be a leaf but we cannot go further down)
 		// - there are no more parts left (so we can stop)
-		while(value !== null && typeof value === "object" && parts.length) {
-			BOOMR.debug("looking at " + parts[0], "PageVars");
-			ctx = value;
-			value = value[parts.shift()];
+		try {
+			while(value !== null && typeof value === "object" && parts.length) {
+				BOOMR.debug("looking at " + parts[0], "PageVars");
+				ctx = value;
+				value = value[parts.shift()];
+			}
+		}
+		catch(err) {
+			BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "::" + parts.join("."));
+			return false;
 		}
 
 		// parts.length !== 0 means we stopped before the end
@@ -268,7 +274,13 @@ Handler.prototype = {
 		// Value evaluated to a function, so we execute it
 		// We don't have the ability to pass arguments to the function
 		if(typeof value === "function") {
-			value = value.call(ctx);
+			try {
+				value = value.call(ctx);
+			}
+			catch(err) {
+				BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "()");
+				return false;
+			}
 		}
 
 		if(value === undefined || typeof value === "object") {
