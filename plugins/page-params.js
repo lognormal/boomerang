@@ -114,8 +114,9 @@ Handler.prototype = {
 		if(!u) {
 			return true;
 		}
+
 		// Massage pattern into a real regex
-		re = u.replace(/([^\.])\*/g, "$1.*").replace(/^\*/, ".*");
+		re = u.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/\*/g, ".*?");
 		try {
 			re = new RegExp("^" + re + "$", "i");
 		}
