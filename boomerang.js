@@ -879,12 +879,15 @@ boomr = {
 		return this;
 	},
 
-	addError: function(err, src) {
+	addError: function(err, src, extra) {
 		if (typeof err !== "string") {
 			err = String(err);
 		}
 		if (src !== undefined) {
 			err = "[" + src + ":" + BOOMR.now() + "] " + err;
+		}
+		if (extra) {
+			err += ":: " + extra;
 		}
 
 		if (impl.errors[err]) {

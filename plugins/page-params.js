@@ -81,7 +81,7 @@ Handler.prototype = {
 			}
 			catch(err) {
 				BOOMR.debug("Error generating regex: " + err, "PageVars");
-				BOOMR.addError(err, "PageVars.handleRegEx");
+				BOOMR.addError(err, "PageVars.handleRegEx", re);
 				return false;
 			}
 		}
