@@ -66,7 +66,7 @@ impl = {
 		if(w.screen) {
 			try {
 				BOOMR.addVar({
-					"scr.xy": w.screen.width + "x" + w.screen.height 
+					"scr.xy": w.screen.width + "x" + w.screen.height,
 					"scr.bpp": w.screen.colorDepth + "/" + w.screen.pixelDepth
 				});
 				if(w.screen.orientation) {
