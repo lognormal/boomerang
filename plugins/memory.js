@@ -63,6 +63,21 @@ impl = {
 			BOOMR.addError(err, "Memory.done.dom");
 		}
 
+		if(w.screen) {
+			try {
+				BOOMR.addVar({
+					"scr.xy": w.screen.width + "x" + w.screen.height 
+					"scr.bpp": w.screen.colorDepth + "/" + w.screen.pixelDepth
+				});
+				if(w.screen.orientation) {
+					BOOMR.addVar("scr.orn", w.screen.orientation.angle + "/" + w.screen.orientation.primary);
+				}
+			}
+			catch(err) {
+				BOOMR.addError(err, "Memory.done.screen");
+			}
+		}
+
 		// no need of sendBeacon because we're called when the beacon is being sent
 	}
 };
