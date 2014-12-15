@@ -276,7 +276,7 @@ impl = {
 				handler.fn.call(handler.scope, data, handler.cb_data);
 			}
 			catch(err) {
-				BOOMR.addError(err, "fireEvent." + e_name + "[" + i + "]");
+				BOOMR.addError(err, "fireEvent." + e_name + "<" + i + ">");
 			}
 		}
 
