@@ -122,7 +122,7 @@ Handler.prototype = {
 		catch(err) {
 			BOOMR.debug("Bad pattern: " + re, "PageVars");
 			BOOMR.debug(err, "PageVars");
-			BOOMR.addError(err, "PageVars.checkURLPattern");
+			BOOMR.addError(err, "PageVars.checkURLPattern", u);
 			return false;
 		}
 
@@ -205,7 +205,7 @@ Handler.prototype = {
 		}
 		catch(xpath_err) {
 			BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
-			BOOMR.addError(xpath_err, "PageVars.runXPath." + xpath);
+			BOOMR.addError(xpath_err, "PageVars.runXPath", xpath);
 			return null;
 		}
 
@@ -362,7 +362,7 @@ Handler.prototype = {
 	},
 
 	URLPatternType: function(o) {
-		var value, re;
+		var value, re, m;
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
@@ -391,22 +391,22 @@ Handler.prototype = {
 				value = 1;
 			}
 			else if(o.match.match(/^regex:/)) {
-				re = o.match.match(/^regex:(.*)/);
-				if(!re || re.length < 2) {
+				m = o.match.match(/^regex:(.*)/);
+				if(!m || m.length < 2) {
 					return false;
 				}
 
 				try {
-					re = new RegExp(re[1], "i");
+					re = new RegExp(m[1], "i");
 
 					if(re.test(value.textContent || value.innerText)) {
 						value = 1;
 					}
 				}
 				catch(err) {
-					BOOMR.debug("Bad pattern: " + re, "PageVars");
+					BOOMR.debug("Bad pattern: " + o.match, "PageVars");
 					BOOMR.debug(err, "PageVars");
-					BOOMR.addError(err, "PageVars.URLPatternType");
+					BOOMR.addError(err, "PageVars.URLPatternType", o.match);
 					return false;
 				}
 			}
