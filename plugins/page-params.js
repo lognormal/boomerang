@@ -361,11 +361,11 @@ Handler.prototype = {
 	},
 
 	_Regex: function(url, regex, replacement, operand) {
-		if(!this.checkURLPattern(url)) {
+		if(!regex || !replacement) {
 			return false;
 		}
 
-		if(!regex || !replacement) {
+		if(!this.checkURLPattern(url)) {
 			return false;
 		}
 
