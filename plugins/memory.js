@@ -18,6 +18,10 @@ if (BOOMR.plugins.Memory) {
 	return;
 }
 
+function nodeList(type) {
+	return d.getElementsByTagName(type);
+}
+
 // A private object to encapsulate all your implementation details
 impl = {
 	done: function() {
@@ -47,15 +51,16 @@ impl = {
 			});
 		}
 
-		// handle IE6/7 weirdness regarding host objects
-		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
-		if (f) {
+		try {
 			BOOMR.addVar({
-				"dom.ln": f.call(d, "*").length,
-				"dom.sz": f.call(d, "html")[0].innerHTML.length,
-				"dom.img": f.call(d, "img").length,
-				"dom.script": f.call(d, "script").length
+				"dom.ln": nodeList("*").length,
+				"dom.sz": nodeList("html")[0].innerHTML.length,
+				"dom.img": nodeList("img").length,
+				"dom.script": nodeList("script").length
 			});
+		}
+		catch(err) {
+			BOOMR.addError(err, "Memory.done.dom");
 		}
 
 		// no need of sendBeacon because we're called when the beacon is being sent
@@ -64,23 +69,16 @@ impl = {
 
 BOOMR.plugins.Memory = {
 	init: function() {
-		var fn, c;
+		var c;
 
 		try {
 			w  = BOOMR.window;
 			d  = w.document;
-			fn = d.getElementsByTagName;
 			p  = w.performance;
 			c  = w.console;
 		}
 		catch(err) {
-			BOOMR.addError(err, "Memory.done");
-		}
-
-		// handle IE6/7 weirdness regarding host objects
-		// See: http://stackoverflow.com/questions/7125288/what-is-document-getelementbyid
-		if (fn) {
-			f  = (fn.call === undefined ? function(tag) { return fn(tag); } : fn);
+			BOOMR.addError(err, "Memory.init");
 		}
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
