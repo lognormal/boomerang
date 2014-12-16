@@ -50,6 +50,7 @@ impl = {
 	nruns: 5,
 	latency_runs: 10,
 	user_ip: "",
+	test_https: false,
 	cookie_exp: 7*86400,
 	cookie: "BA",
 
@@ -474,7 +475,7 @@ BOOMR.plugins.BW = {
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "BW",
-						["base_url", "timeout", "nruns", "cookie", "cookie_exp"]);
+						["base_url", "timeout", "nruns", "cookie", "cookie_exp", "test_https"]);
 
 		if(config && config.user_ip) {
 			impl.user_ip = config.user_ip;
@@ -513,7 +514,7 @@ BOOMR.plugins.BW = {
 		a = document.createElement("a");
 		a.href = impl.base_url;
 
-		if(a.protocol === "https:") {
+		if( !impl.test_https && a.protocol === "https:") {
 			// we don't run the test for https because SSL stuff will mess up b/w
 			// calculations we could run the test itself over HTTP, but then IE
 			// will complain about insecure resources, so the best is to just bail
