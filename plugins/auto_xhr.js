@@ -367,7 +367,7 @@ function instrumentXHR() {
 
 	// We could also inherit from window.XMLHttpRequest, but for this implementation,
 	// we'll use composition
-	proxy_XMLHttpRequest = function() {
+	BOOMR.proxy_XMLHttpRequest = function() {
 		var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
 
 		req = new BOOMR.orig_XMLHttpRequest();
@@ -444,7 +444,7 @@ function instrumentXHR() {
 		return req;
 	};
 
-	BOOMR.window.XMLHttpRequest = proxy_XMLHttpRequest;
+	BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
 }
 
 function uninstrumentXHR() {
