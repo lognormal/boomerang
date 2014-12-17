@@ -242,12 +242,19 @@ MutationHandler.prototype.load_cb = function(ev) {
 };
 
 MutationHandler.prototype.wait_for_node = function(node, index) {
-	var self = this, current_event, els, interesting = false, i, l;
+	var self = this, current_event, els, interesting = false, i, l, url;
 
 	// only images, scripts, iframes and links if stylesheet
 	if(node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 		node._bmr = { start: BOOMR.now(), res: index };
+
+		url=node.src || node.href;
+
+		// no URL or javascript: or about: URL, so no network activity
+		if(!url || url.match(/^(about:|javascript:)/i)) {
+			return false;
+		}
 
 		node.addEventListener("load", function(ev) { self.load_cb(ev); });
 		node.addEventListener("error", function(ev) { self.load_cb(ev); });
@@ -257,7 +264,7 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 		current_event.nodes_to_wait++;
 
 		if(!current_event.resource.url && node.nodeName === "SCRIPT") {
-			a.href=node.src;
+			a.href = url;
 			current_event.resource.url = a.href;
 		}
 
