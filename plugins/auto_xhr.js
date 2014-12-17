@@ -320,7 +320,7 @@ function instrumentClick() {
 	BOOMR.subscribe("click", function() {
 		var resource = { timing: {}, initiator: "click" };
 
-		if (!BOOMR.XMLHttpRequest || BOOMR.XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		if (!BOOMR.orig_XMLHttpRequest || BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 			// do nothing if we have un-instrumented XHR
 			return;
 		}
@@ -332,15 +332,20 @@ function instrumentClick() {
 }
 
 function instrumentXHR() {
-	var proxy_XMLHttpRequest,
-	    orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest;
-
-	if (BOOMR.XMLHttpRequest && BOOMR.XMLHttpRequest === orig_XMLHttpRequest) {
+	if (BOOMR.proxy_XMLHttpRequest && BOOMR.proxy_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 		// already instrumented
 		return;
 	}
+	else if(BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
-	BOOMR.XMLHttpRequest = orig_XMLHttpRequest;
+		BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
+		MutationHandler.start();
+
+		return;
+	}
+
+	BOOMR.orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest;
 
 	MutationHandler.start();
 
@@ -351,7 +356,7 @@ function instrumentXHR() {
 	proxy_XMLHttpRequest = function() {
 		var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
 
-		req = new orig_XMLHttpRequest();
+		req = new BOOMR.orig_XMLHttpRequest();
 
 		orig_open = req.open;
 		orig_send = req.send;
@@ -429,8 +434,8 @@ function instrumentXHR() {
 }
 
 function uninstrumentXHR() {
-	if (BOOMR.XMLHttpRequest && BOOMR.XMLHttpRequest !== BOOMR.window.XMLHttpRequest) {
-		BOOMR.window.XMLHttpRequest = BOOMR.XMLHttpRequest;
+	if (BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest !== BOOMR.window.XMLHttpRequest) {
+		BOOMR.window.XMLHttpRequest = BOOMR.orig_XMLHttpRequest;
 	}
 }
 
