@@ -72,6 +72,9 @@ impl = {
 				if(w.screen.orientation) {
 					BOOMR.addVar("scr.orn", w.screen.orientation.angle + "/" + w.screen.orientation.type);
 				}
+				if(w.devicePixelRatio > 1) {
+					BOOMR.addVar("scr.dpx", w.devicePixelRatio);
+				}
 			}
 			catch(err) {
 				BOOMR.addError(err, "Memory.done.screen");
