@@ -552,7 +552,7 @@ Handler.prototype = {
 			// work for browsers using English.
 			if ( !(e.name === "SecurityError" ||
 				(e.name === "TypeError" && e.message === "Permission denied") ||
-				(e.name === "Error" && e.message && e.message.match(/^Permission denied/))
+				(e.name === "Error" && e.message && e.message.match(/^(Permission|Access is) denied/))
 			) ) {
 				BOOMR.addError(e, "PageVars.findResource");
 			}
