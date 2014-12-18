@@ -264,7 +264,7 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 				return false;
 			}
 
-			if(node.getAttribute("src") === '' || node.getAttribute("src") === null) {
+			if(node.getAttribute("src") === "" || node.getAttribute("src") === null) {
 				return false;
 			}
 		}
