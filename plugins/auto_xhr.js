@@ -176,6 +176,7 @@ MutationHandler.prototype.sendEvent = function(i) {
 	this.watch--;
 
 	if(BOOMR.hasVar("h.cr")) {
+		this.clearTimeout();
 		ev.resource.resources = ev.resources;
 
 		BOOMR.responseEnd(ev.resource);
@@ -201,7 +202,7 @@ MutationHandler.prototype.setTimeout = function(timeout, index) {
 MutationHandler.prototype.timedout = function(index) {
 	this.clearTimeout();
 
-	if(this.pending_events[index].type === "xhr") {
+	if(this.pending_events[index] && this.pending_events[index].type === "xhr") {
 		this.sendEvent(index);
 	}
 	else {
@@ -256,6 +257,17 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 		node._bmr = { start: BOOMR.now(), res: index };
 
 		url=node.src || node.href;
+
+		if(node.nodeName === "IMG") {
+			if(node.naturalWidth) {
+				// img already loaded
+				return false;
+			}
+
+			if(node.getAttribute("src") === '' || node.getAttribute("src") === null) {
+				return false;
+			}
+		}
 
 		// no URL or javascript: or about: URL, so no network activity
 		if(!url || url.match(/^(about:|javascript:)/i)) {
