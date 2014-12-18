@@ -9,7 +9,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
 (function() {
-var w, p={}, d, m, s, impl;
+var w, p={}, d, m, s, n, impl;
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
 BOOMR = BOOMR || {};
@@ -81,6 +81,23 @@ impl = {
 			}
 		}
 
+		if(n) {
+			try {
+				if(n.battery) {
+					BOOMR.addVar("bat.lvl", n.battery.level);
+				}
+				if(n.hardwareConcurrency) {
+					BOOMR.addVar("cpu.cnc", n.hardwareConcurrency);
+				}
+				if(n.maxTouchPoints) {
+					BOOMR.addVar("scr.mtp", n.maxTouchPoints);
+				}
+			}
+			catch(err) {
+				BOOMR.addError(err, "Memory.done.navigator");
+			}
+		}
+
 		// no need of sendBeacon because we're called when the beacon is being sent
 	}
 };
@@ -95,6 +112,7 @@ BOOMR.plugins.Memory = {
 			p = w.performance;
 			c = w.console;
 			s = w.screen;
+			n = w.navigator;
 		}
 		catch(err) {
 			BOOMR.addError(err, "Memory.init");
