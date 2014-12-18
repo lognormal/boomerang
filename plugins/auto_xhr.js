@@ -175,8 +175,8 @@ MutationHandler.prototype.sendEvent = function(i) {
 
 	this.watch--;
 
+	this.clearTimeout();
 	if(BOOMR.hasVar("h.cr")) {
-		this.clearTimeout();
 		ev.resource.resources = ev.resources;
 
 		BOOMR.responseEnd(ev.resource);
