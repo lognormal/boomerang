@@ -9,7 +9,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
 (function() {
-var w, p={}, d, m, impl;
+var w, p={}, d, m, s, impl;
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
 BOOMR = BOOMR || {};
@@ -63,14 +63,14 @@ impl = {
 			BOOMR.addError(err, "Memory.done.dom");
 		}
 
-		if(w.screen) {
+		if(s) {
 			try {
 				BOOMR.addVar({
-					"scr.xy": w.screen.width + "x" + w.screen.height,
-					"scr.bpp": w.screen.colorDepth + "/" + w.screen.pixelDepth
+					"scr.xy": s.width + "x" + s.height,
+					"scr.bpp": s.colorDepth + "/" + s.pixelDepth
 				});
-				if(w.screen.orientation) {
-					BOOMR.addVar("scr.orn", w.screen.orientation.angle + "/" + w.screen.orientation.type);
+				if(s.orientation) {
+					BOOMR.addVar("scr.orn", s.orientation.angle + "/" + s.orientation.type);
 				}
 				if(w.devicePixelRatio > 1) {
 					BOOMR.addVar("scr.dpx", w.devicePixelRatio);
@@ -94,6 +94,7 @@ BOOMR.plugins.Memory = {
 			d = w.document;
 			p = w.performance;
 			c = w.console;
+			s = w.screen;
 		}
 		catch(err) {
 			BOOMR.addError(err, "Memory.init");
