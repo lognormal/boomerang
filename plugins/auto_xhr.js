@@ -262,18 +262,30 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 			return false;
 		}
 
-		node.addEventListener("load", function(ev) { self.load_cb(ev); });
-		node.addEventListener("error", function(ev) { self.load_cb(ev); });
-
 		current_event = this.pending_events[index];
 
-		current_event.nodes_to_wait++;
-		current_event.resources.push(node);
+		if(!current_event) {
+			return false;
+		}
 
 		if(!current_event.resource.url && node.nodeName === "SCRIPT") {
 			a.href = url;
+
+			if (BOOMR.xhr_excludes.hasOwnProperty(a.href)
+			    || BOOMR.xhr_excludes.hasOwnProperty(a.hostname)
+			    || BOOMR.xhr_excludes.hasOwnProperty(a.pathname)
+			) {
+				// excluded resource, so abort
+				return false;
+			}
 			current_event.resource.url = a.href;
 		}
+
+		node.addEventListener("load", function(ev) { self.load_cb(ev); });
+		node.addEventListener("error", function(ev) { self.load_cb(ev); });
+
+		current_event.nodes_to_wait++;
+		current_event.resources.push(node);
 
 		interesting = true;
 	}
