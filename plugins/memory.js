@@ -90,10 +90,10 @@ BOOMR.plugins.Memory = {
 		var c;
 
 		try {
-			w  = BOOMR.window;
-			d  = w.document;
-			p  = w.performance;
-			c  = w.console;
+			w = BOOMR.window;
+			d = w.document;
+			p = w.performance;
+			c = w.console;
 		}
 		catch(err) {
 			BOOMR.addError(err, "Memory.init");
