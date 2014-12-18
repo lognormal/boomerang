@@ -27,12 +27,33 @@ if (BOOMR.plugins.AutoXHR) {
 /*
 How should this work?
 
+0. History changed
+
+- Pass new URL and timestamp of change on to most recent event (which might not have happened yet)
+
+0.1. History changes as a result of a pushState or replaceState
+- In this case we get the new URL when the developer calls pushState or replaceState
+- we do not know if they plan to make an XHR call or use a dynamic script node, or do nothing interesting
+  (eg: just make a div visible/invisible)
+- we also do not know if they will do this before or after they've called pushState/replaceState
+- so our best bet is to check if either an XHR event or an interesting Mutation event happened in the last 50ms,
+  and if not, then hold on to this state for 50ms to see if an interesting event will happen.
+
+0.2. History changes as a result of the user hitting Back/Forward and we get a window.popstate event
+- In this case we get the new URL from location.href when our event listener runs
+- we do not know if this event change will result in some interesting network activity or not
+- we do not know if the developer's event listener has already run before ours or if it will run in the future
+  or even if they do have an event listener
+- so our best bet is the same as 0.1 above
+
+
 1. Click initiated
 
 - User clicks on something
 - We create a resource with the start time and no URL
 - We turn on DOM observer, and wait up to 50 milliseconds for something
   - If nothing happens after the timeout, we stop watching and clear the resource without firing the event
+  - If a history event happened recently/will happen shortly, use the URL as the resource.url
   - Else if something uninteresting happens, we extend the timeout for 1 second
   - Else if an interesting node is added, we add load and error listeners and turn off the timeout but keep watching
     - If we do not have a resource.url, and if this is a script, then we use the script's URL
@@ -43,12 +64,14 @@ How should this work?
 
 - XHR request is sent
 - We create a resource with the start time and the request URL
+- If a history event happened recently/will happen shortly, use the URL as the resource.url
 - We watch for all changes in state (for async requests) and for load (for all requests)
 - On load, we turn on DOM observer, and wait up to 50 milliseconds for something
   - If something uninteresting happens, we extend the timeout for 1 second
   - Else if an interesting node is added, we add load and error listeners and turn off the timeout
     - Once all listeners have fired, we stop watching, fire the event and clear the resource
   - If nothing happens after the timeout, we stop watching fire the event and clear the resource
+
 
 3. What about overlap?
 
