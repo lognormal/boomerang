@@ -314,6 +314,11 @@ MutationHandler.prototype.mutation_cb = function(mutations) {
 	interesting = false;
 	index = this.pending_events.length-1;
 
+	if(index < 0 || !this.pending_events[index]) {
+		// Nothing waiting for mutations
+		return true;
+	}
+
 	if(mutations && mutations.length) {
 		this.pending_events[index].resource.timing.domComplete = BOOMR.now();
 
