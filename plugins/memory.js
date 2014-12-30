@@ -9,7 +9,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
 (function() {
-var w, p={}, d, m, s, n, impl;
+var w, p={}, d, m, s, n, b, impl;
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
 BOOMR = BOOMR || {};
@@ -25,6 +25,17 @@ function nodeList(type) {
 	catch(err) {
 		BOOMR.addError(err, "Memory.nodeList." + type);
 		return [];
+	}
+}
+
+function errorWrap(condition, callback, component) {
+	if(condition) {
+		try {
+			callback();
+		}
+		catch(err) {
+			BOOMR.addError(err, "Memory.done." + component);
+		}
 	}
 }
 
@@ -57,20 +68,8 @@ impl = {
 			});
 		}
 
-		try {
-			BOOMR.addVar({
-				"dom.ln": nodeList("*").length,
-				"dom.sz": nodeList("html")[0].innerHTML.length,
-				"dom.img": nodeList("img").length,
-				"dom.script": nodeList("script").length
-			});
-		}
-		catch(err) {
-			BOOMR.addError(err, "Memory.done.dom");
-		}
-
-		if(s) {
-			try {
+		errorWrap(s,
+			function() {
 				BOOMR.addVar({
 					"scr.xy": s.width + "x" + s.height,
 					"scr.bpp": s.colorDepth + "/" + s.pixelDepth
@@ -81,33 +80,35 @@ impl = {
 				if(w.devicePixelRatio > 1) {
 					BOOMR.addVar("scr.dpx", w.devicePixelRatio);
 				}
-			}
-			catch(err) {
-				BOOMR.addError(err, "Memory.done.screen");
-			}
-		}
+			},
+			"screen"
+		);
 
-		if(n) {
-			try {
-				if(n.battery) {
-					BOOMR.addVar("bat.lvl", n.battery.level);
-				}
-				else if(n.getBattery) {
-					n.getBattery().then(function(battery) {
-						BOOMR.addVar("bat.lvl", battery.level);
-					});
-				}
+		errorWrap(n,
+			function() {
 				if(n.hardwareConcurrency) {
 					BOOMR.addVar("cpu.cnc", n.hardwareConcurrency);
 				}
 				if(n.maxTouchPoints) {
 					BOOMR.addVar("scr.mtp", n.maxTouchPoints);
 				}
-			}
-			catch(err) {
-				BOOMR.addError(err, "Memory.done.navigator");
-			}
-		}
+			},
+			"navigator"
+		);
+
+		errorWrap(b,
+			function() {
+				BOOMR.addVar("bat.lvl", b.level);
+			},
+			"battery"
+		);
+
+		BOOMR.addVar({
+			"dom.ln": nodeList("*").length,
+			"dom.sz": nodeList("html")[0].innerHTML.length,
+			"dom.img": nodeList("img").length,
+			"dom.script": nodeList("script").length
+		});
 
 		// no need of sendBeacon because we're called when the beacon is being sent
 	}
@@ -124,6 +125,14 @@ BOOMR.plugins.Memory = {
 			c = w.console;
 			s = w.screen;
 			n = w.navigator;
+			if(n.battery) {
+				b = n.battery;
+			}
+			else if(n.getBattery) {
+				n.getBattery().then(function(battery) {
+					b = battery;
+				});
+			}
 		}
 		catch(err) {
 			BOOMR.addError(err, "Memory.init");
