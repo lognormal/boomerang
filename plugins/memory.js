@@ -92,6 +92,11 @@ impl = {
 				if(n.battery) {
 					BOOMR.addVar("bat.lvl", n.battery.level);
 				}
+				else if(n.getBattery) {
+					n.getBattery().then(function(battery) {
+						BOOMR.addVar("bat.lvl", battery.level);
+					});
+				}
 				if(n.hardwareConcurrency) {
 					BOOMR.addVar("cpu.cnc", n.hardwareConcurrency);
 				}
