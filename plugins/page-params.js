@@ -179,7 +179,7 @@ Handler.prototype = {
 	},
 
 	runXPath: function(xpath) {
-		var el, m;
+		var el, m, tryOurs=false, err;
 
 		try {
 			if(d.evaluate) {
@@ -188,26 +188,42 @@ Handler.prototype = {
 			else if(d.selectNodes) {
 				el = d.selectNodes(xpath);
 			}
-			else if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
-				xpath = xpath.slice(6);
-				return this.nodeWalk(d, xpath);
-			}
-			else if((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
-				el = d.getElementById(m[1]);
-				if(!el || !m[2]) {
-					return el;
-				}
-				return this.nodeWalk(el, m[2].slice(1));
-			}
 			else {
-				BOOMR.debug("Could not evaluate XPath", "PageVars");
-				return null;
+				tryOurs=true;
 			}
 		}
 		catch(xpath_err) {
-			BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
-			BOOMR.addError(xpath_err, "PageVars.runXPath", xpath);
-			return null;
+			err=xpath_err;
+			tryOurs=true;
+		}
+
+		if(!el && tryOurs) {
+			try {
+				if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
+					xpath = xpath.slice(6);
+					return this.nodeWalk(d, xpath);
+				}
+				else if((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+					el = d.getElementById(m[1]);
+					if(!el || !m[2]) {
+						return el;
+					}
+					return this.nodeWalk(el, m[2].slice(1));
+				}
+				else {
+					BOOMR.debug("Could not evaluate XPath", "PageVars");
+					if(err) {
+						BOOMR.error("Error evaluating XPath: " + err, "PageVars");
+						BOOMR.addError(err, "PageVars.runXPath.native", xpath);
+					}
+					return null;
+				}
+			}
+			catch(xpath_err) {
+				BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
+				BOOMR.addError(xpath_err, "PageVars.runXPath.ours", xpath);
+				return null;
+			}
 		}
 
 		if(!el || el.resultType !== 9 || !el.singleNodeValue) {
