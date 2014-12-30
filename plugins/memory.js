@@ -19,7 +19,13 @@ if (BOOMR.plugins.Memory) {
 }
 
 function nodeList(type) {
-	return d.getElementsByTagName(type);
+	try {
+		return d.getElementsByTagName(type);
+	}
+	catch(err) {
+		BOOMR.addError(err, "Memory.nodeList." + type);
+		return [];
+	}
 }
 
 // A private object to encapsulate all your implementation details
