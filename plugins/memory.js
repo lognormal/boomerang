@@ -18,13 +18,13 @@ if (BOOMR.plugins.Memory) {
 	return;
 }
 
-function nodeList(type) {
+function nodeCount(type) {
 	try {
-		return d.getElementsByTagName(type);
+		return d.getElementsByTagName(type).length;
 	}
 	catch(err) {
 		BOOMR.addError(err, "Memory.nodeList." + type);
-		return [];
+		return 0;
 	}
 }
 
@@ -103,12 +103,17 @@ impl = {
 			"battery"
 		);
 
-		BOOMR.addVar({
-			"dom.ln": nodeList("*").length,
-			"dom.sz": nodeList("html")[0].innerHTML.length,
-			"dom.img": nodeList("img").length,
-			"dom.script": nodeList("script").length
-		});
+		errorWrap(true,
+			function() {
+				BOOMR.addVar({
+					"dom.ln": nodeCount("*"),
+					"dom.img": nodeCount("img"),
+					"dom.script": nodeCount("script")
+				});
+				BOOMR.addVar("dom.sz", d.documentElement.innerHTML.length);
+			},
+			"dom"
+		);
 
 		// no need of sendBeacon because we're called when the beacon is being sent
 	}
