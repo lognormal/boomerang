@@ -191,8 +191,8 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 
 	try {
 		if(!("performance" in frame) ||
-			!frame.performance ||
-			!frame.performance.getEntriesByType) {
+		   !frame.performance ||
+		   !frame.performance.getEntriesByType) {
 			return entries;
 		}
 
@@ -240,8 +240,8 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		}
 
 		// offset all of the entries by the specified offset for this frame
-		var frameEntries = frame.performance.getEntriesByType("resource");
-		var frameFixedEntries = [];
+		var frameEntries = frame.performance.getEntriesByType("resource"),
+		    frameFixedEntries = [];
 		
 		for(i = 0; frameEntries && i < frameEntries.length; i++) {
 			t = frameEntries[i];
@@ -289,7 +289,7 @@ function toBase36(n) {
 function getResourceTiming() {
 /*eslint no-script-url:0*/
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
-		i, e, j, results = {}, initiatorType, url, data;
+	    i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
 		return [];
@@ -372,7 +372,7 @@ var impl = {
 		this.complete = true;
 		BOOMR.sendBeacon();
 	},
-    
+
 	clearMetrics: function(vars) {
 		if(vars.hasOwnProperty("restiming")) {
 			BOOMR.removeVar("restiming");
