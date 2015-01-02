@@ -164,10 +164,15 @@ function getNavStartTime(frame) {
  * @param [Frame] frame Frame
  * @param [boolean] top This is the top window
  * @param [string] offset Offset in timing from root IFRA
+ * @param [number] depth Recursion depth
  * @return [PerformanceEntry[]] Performance entries
  */
-function findPerformanceEntriesForFrame(frame, isTopWindow, offset) {
+function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, navEntry, t;
+
+	if(depth > 10) {
+		return entries;
+	}
 
 	navStart = getNavStartTime(frame);
 	
@@ -179,8 +184,8 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset) {
 			if(frameNavStart > navStart) {
 				frameOffset = offset + (frameNavStart - navStart);
 			}
-			
-			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset));
+
+			entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1));
 		}
 	}
 
@@ -283,7 +288,7 @@ function toBase36(n) {
  */
 function getResourceTiming() {
 /*eslint no-script-url:0*/
-	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0),
+	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
