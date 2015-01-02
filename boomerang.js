@@ -716,8 +716,18 @@ boomr = {
 					continue;
 				}
 
-				// plugin was previously disabled but is now enabled
+				// plugin was previously disabled
 				if(impl.disabled_plugins[k]) {
+
+					// and has not been explicitly re-enabled
+					if( !config[k]
+						|| !config[k].hasOwnProperty("enabled")
+						|| config[k].enabled !== true
+					) {
+						continue;
+					}
+
+					// plugin is now enabled
 					delete impl.disabled_plugins[k];
 				}
 
