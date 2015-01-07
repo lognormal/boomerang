@@ -42,24 +42,34 @@ function errorWrap(condition, callback, component) {
 // A private object to encapsulate all your implementation details
 impl = {
 	done: function() {
-		var res, doms={}, a;
 		// If we have resource timing, get number of resources
-		if(p && p.getEntriesByType && p.getEntriesByType("resource").length) {
-			res = p.getEntriesByType("resource");
-			BOOMR.addVar("dom.res", res.length);
+		BOOMR.removeVar("dom.res");
+		errorWrap(true,
+			function() {
+				var res, doms={}, a;
 
-			a = document.createElement("a");
+				if(!p || !p.getEntriesByType) {
+					return;
+				}
 
-			res.forEach(function(r) {
-				a.href=r.name;
-				doms[a.hostname] = true;
-			});
+				res = p.getEntriesByType("resource");
+				if(!res || !res.length) {
+					return;
+				}
 
-			BOOMR.addVar("dom.doms", Object.keys(doms).length);
-		}
-		else {
-			BOOMR.removeVar("dom.res");
-		}
+				BOOMR.addVar("dom.res", res.length);
+
+				a = document.createElement("a");
+
+				res.forEach(function(r) {
+					a.href=r.name;
+					doms[a.hostname] = true;
+				});
+
+				BOOMR.addVar("dom.doms", Object.keys(doms).length);
+			},
+			"resources"
+		);
 
 		if(m) {
 			BOOMR.addVar({
