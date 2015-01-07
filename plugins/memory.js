@@ -155,6 +155,12 @@ BOOMR.plugins.Memory = {
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
 
+		if(impl.initialized) {
+			return this;
+		}
+
+		impl.initialized = true;
+
 		// we do this before sending a beacon to get the snapshot when the beacon is sent
 		BOOMR.subscribe("before_beacon", impl.done, null, impl);
 		return this;
