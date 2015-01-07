@@ -11,6 +11,11 @@ if [ $# -lt 5 ]; then
 	exit
 fi
 
+if [ ! -s $BUCKET ]; then
+	echo "$BUCKET does not exist or is empty"
+	exit
+fi
+
 cf_collector=http://localhost:8080/concerto
 og_collector=http://localhost:8080/concerto
 cf_main=http://localhost:8080
