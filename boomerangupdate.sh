@@ -11,7 +11,7 @@ if [ $# -lt 5 ]; then
 	exit
 fi
 
-if [ ! -s $BUCKET ]; then
+if [ ! -s "$BUCKET" ]; then
 	echo "$BUCKET does not exist or is empty"
 	exit
 fi
@@ -45,7 +45,7 @@ elif [ "$1" != "localhost" -a "$1" != "default" -a "$1" != "local" ]; then
 	exit
 fi
 
-total=$( grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" $BUCKET | sort -n | uniq | wc -l | sed -e 's/  *//' )
+total=$( grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" "$BUCKET" | sort -n | uniq | wc -l | sed -e 's/  *//' )
 
 if [ $total -eq 0 ]; then
 	echo "$BUCKET format is incorrect.  Each line should be:"
@@ -69,7 +69,7 @@ current=1
 echo "$1 on $cf_collector      $VERSION" | tee $LOG
 echo "5.1) Finding out the current version of boomerang..." | tee -a $LOG
 
-for i in $(grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" $BUCKET | sort -n | uniq | awk -F "|" '{print $NF}'); do
+for i in $(grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" "$BUCKET" | sort -n | uniq | awk -F "|" '{print $NF}'); do
 	echo "Checking $i... ($current/$total)" | tee -a $LOG
 	current=$(( $current+1 ))
 	result=$( curl -A 'Mozilla/5.0' ${cf_collector}/boomerang/$i 2>/dev/null | \
@@ -77,10 +77,10 @@ for i in $(grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" $BUCKET | sort -n | uniq | awk -
 
 	if [ -z "$result" ]; then
 		echo "Not found" | tee -a $LOG
-		grep " $i\$" $BUCKET | head -1 >> $baddomains
+		grep "\| *$i\$" "$BUCKET" | head -1 >> $baddomains
 	else
 		echo $result | tee -a $LOG
-		grep " $i\$" $BUCKET | head -1 >> $tmpfile1
+		grep "\| *$i\$" "$BUCKET" | head -1 >> $tmpfile1
 	fi
 done
 
@@ -103,10 +103,10 @@ for i in $(cat $tmpfile1 | awk -F "|" '{print $NF}'); do
 
 	if [ -z "$result" ]; then
 		echo "Not found" | tee -a $LOG
-		grep " $i\$" $tmpfile1 >> $baddomains
+		grep "\| *$i\$" $tmpfile1 >> $baddomains
 	else
 		echo $result | tee -a $LOG
-		grep " $i\$" $tmpfile1 >> $tmpfile2
+		grep "\| *$i\$" $tmpfile1 >> $tmpfile2
 	fi
 done
 
