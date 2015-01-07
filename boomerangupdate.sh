@@ -45,6 +45,15 @@ elif [ "$1" != "localhost" -a "$1" != "default" -a "$1" != "local" ]; then
 	exit
 fi
 
+total=$( grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" $BUCKET | sort -n | uniq | wc -l | sed -e 's/  *//' )
+
+if [ $total -eq 0 ]; then
+	echo "$BUCKET format is incorrect.  Each line should be:"
+	echo "  <domain ID> | <domain> | <Folder ID> | <Folder Name> | <Tenant Name> | <API-Key>"
+	echo ""
+	exit
+fi
+
 export tmpfile1=$WORKING_DIR/boomerang-update-step1.tmp.$$
 export tmpfile2=$WORKING_DIR/boomerang-update-step2.tmp.$$
 export baddomains=$WORKING_DIR/ErrorDomains.tsv
@@ -55,7 +64,6 @@ then
         mkdir ${WORKING_DIR}
 fi
 
-total=$( cat $BUCKET | sort -n | uniq | wc -l | sed -e 's/  *//' )
 current=1
 
 echo "$1 on $cf_collector      $VERSION" | tee $LOG
