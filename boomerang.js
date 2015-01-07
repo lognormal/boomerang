@@ -596,6 +596,7 @@ boomr = {
 						}
 					} else {
 						input = document.createElement("input");
+						input.type = "hidden";	// we need `hidden` to preserve newlines. see commit message for more details
 						input.name = (prefix ? (prefix + "[" + k + "]") : k);
 						input.value = (vars[k]===undefined || vars[k]===null ? "" : vars[k]);
 
