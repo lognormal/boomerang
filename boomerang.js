@@ -895,8 +895,7 @@ boomr = {
 		if (typeof err !== "string") {
 			str = String(err);
 			if(str.match(/^\[object/)) {
-				str = err.description || err.message;
-				str = str.replace(/\s+$/, '');
+				str = err.name + ": " + (err.description || err.message).replace(/\r\n$/, "");
 			}
 			err = str;
 		}
