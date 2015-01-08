@@ -86,7 +86,7 @@ impl = {
 			function() {
 				BOOMR.addVar({
 					"scr.xy": s.width + "x" + s.height,
-					"scr.bpp": s.colorDepth + "/" + s.pixelDepth
+					"scr.bpp": s.colorDepth + "/" + (s.pixelDepth || "")
 				});
 				if(s.orientation) {
 					BOOMR.addVar("scr.orn", s.orientation.angle + "/" + s.orientation.type);
