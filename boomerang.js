@@ -863,7 +863,7 @@ boomr = {
 		// don't allow a handler to be attached more than once to the same event
 		for(i=0; i<ev.length; i++) {
 			handler = ev[i];
-			if(handler.fn === fn && handler.cb_data === cb_data && handler.scope === cb_scope) {
+			if(handler && handler.fn === fn && handler.cb_data === cb_data && handler.scope === cb_scope) {
 				return this;
 			}
 		}
