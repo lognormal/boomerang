@@ -700,7 +700,7 @@ impl = {
 					  }
 		};
 
-		if(ename !== "xhr" && this.complete) {
+		if(ename !== "xhr" && (this.complete || !w)) {
 			return;
 		}
 
