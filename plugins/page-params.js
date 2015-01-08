@@ -566,12 +566,23 @@ Handler.prototype = {
 		catch(e) {
 			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
 			// work for browsers using English.
-			if ( !(e.name === "SecurityError" ||
+			if ( e.name === "SecurityError" ||
 				(e.name === "TypeError" && e.message === "Permission denied") ||
 				(e.name === "Error" && e.message && e.message.match(/^(Permission|Access is) denied/))
-			) ) {
-				BOOMR.addError(e, "PageVars.findResource");
+			 ) {
+				return null;
 			}
+
+			try {
+				// PDFs in IE will throw this exception
+				if ( e.name === "TypeError" && e.message === "Invalid calling object" && frame.document.location.pathname.match(/\.pdf$/)) {
+					return null;
+				}
+			}
+			catch(ignore) {
+			}
+
+			BOOMR.addError(e, "PageVars.findResource");
 			return null;
 		}
 
