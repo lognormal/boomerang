@@ -981,14 +981,6 @@ BOOMR.plugins.RT = {
 
 		t_start = impl.determineTStart(ename, edata);
 
-		if(edata && edata.data) {
-			edata = edata.data;
-		}
-
-		if(ename === "xhr" && edata) {
-			subresource = edata.subresource;
-		}
-
 		impl.refreshSession();
 
 		impl.maybeResetSession(t_done, t_start);
@@ -1015,7 +1007,15 @@ BOOMR.plugins.RT = {
 			BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 		}
 
+		if(ename === "xhr" && edata) {
+			if(edata && edata.data) {
+				edata = edata.data;
+			}
+		}
+
 		if (ename === "xhr" && edata) {
+			subresource = edata.subresource;
+
 			if(edata.url) {
 				BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
 				impl.addedVars.push("u");
