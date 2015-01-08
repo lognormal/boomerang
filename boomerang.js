@@ -466,6 +466,10 @@ boomr = {
 			if(!url) {
 				return url;
 			}
+			if(!url.match) {
+				BOOMR.addError("TypeError: Not a string", "hashQueryString", typeof url);
+				return "";
+			}
 			if(url.match(/^\/\//)) {
 				url = location.protocol + url;
 			}
