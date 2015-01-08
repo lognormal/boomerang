@@ -61,7 +61,7 @@ impl = {
 
 				a = document.createElement("a");
 
-				res.forEach(function(r) {
+				[].forEach.call(res, function(r) {
 					a.href=r.name;
 					doms[a.hostname] = true;
 				});
