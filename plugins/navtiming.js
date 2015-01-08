@@ -96,7 +96,7 @@ var impl = {
 
 	done: function() {
 		var w = BOOMR.window, p, pn, pt, data;
-		if(this.complete) {
+		if(this.complete || !w) {
 			return this;
 		}
 

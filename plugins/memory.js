@@ -42,6 +42,10 @@ function errorWrap(condition, callback, component) {
 // A private object to encapsulate all your implementation details
 impl = {
 	done: function() {
+		if (!w) {
+			return;		// this can happen for an unload beacon
+		}
+
 		// If we have resource timing, get number of resources
 		BOOMR.removeVar("dom.res");
 		errorWrap(true,
