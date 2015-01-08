@@ -144,10 +144,10 @@ BOOMR.plugins.Memory = {
 			c = w.console;
 			s = w.screen;
 			n = w.navigator;
-			if(n.battery) {
+			if(n && n.battery) {
 				b = n.battery;
 			}
-			else if(n.getBattery) {
+			else if(n && n.getBattery) {
 				n.getBattery().then(function(battery) {
 					b = battery;
 				});
