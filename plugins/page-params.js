@@ -288,11 +288,11 @@ Handler.prototype = {
 			return false;
 		}
 
-		// Value evaluated to a function, so we execute it
-		// We don't have the ability to pass arguments to the function
+		// Value evaluated to a function, so we execute it, and pass the label in as an argument
+		// We don't have the ability to pass custom arguments to the function
 		if(typeof value === "function") {
 			try {
-				value = value.call(ctx);
+				value = value.call(ctx, this.varname);
 			}
 			catch(err) {
 				BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "()");
