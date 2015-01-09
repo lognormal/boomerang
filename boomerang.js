@@ -154,20 +154,35 @@ if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 	}
 }());
 
-dispatchEvent = function(e_name, e_data) {
+/**
+ dispatch a custom event to the browser
+ @param e_name	The custom event name that consumers can subscribe to
+ @param e_data	Any data passed to subscribers of the custom event via the `event.detail` property
+ @param async	By default, custom events are dispatched immediately.
+		Set to true if the event should be dispatched once the browser has finished its current
+		JavaScript execution.
+ */
+dispatchEvent = function(e_name, e_data, async) {
 	var ev = createCustomEvent(e_name, {"detail": e_data});
 	if (!ev) {
 		return;
 	}
 
-	BOOMR.setImmediate(function() {
+	function dispatch() {
 		if(d.dispatchEvent) {
 			d.dispatchEvent(ev);
 		}
 		else if(d.fireEvent) {
 			d.fireEvent("onpropertychange", ev);
 		}
-	});
+	}
+
+	if(async) {
+		BOOMR.setImmediate(dispatch);
+	}
+	else {
+		dispatch();
+	}
 };
 
 // visibilitychange is useful to detect if the page loaded through prerender
@@ -1176,7 +1191,7 @@ if (!BOOMR.xhr_excludes) {
 
 }());
 
-dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR } );
+dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR }, true );
 
 }(window));
 
