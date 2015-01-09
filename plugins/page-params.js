@@ -700,7 +700,7 @@ impl = {
 					  }
 		};
 
-		if(ename !== "xhr" && (this.complete || !w || edata.type === "unload" || edata.type === "pagehide")) {
+		if(ename !== "xhr" && this.complete) {
 			return;
 		}
 
@@ -1032,7 +1032,7 @@ BOOMR.plugins.PageParams = {
 		if(!impl.initialized) {
 			// We do not want to subscribe to unload or onbeacon more than once
 			// because this will just create too many references
-			BOOMR.subscribe("page_unload", impl.done, "unload", impl);
+			BOOMR.subscribe("before_unload", impl.done, "unload", impl);
 			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 			impl.initialized = true;

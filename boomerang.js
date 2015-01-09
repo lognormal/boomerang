@@ -215,6 +215,7 @@ impl = {
 	events: {
 		"page_ready": [],
 		"page_unload": [],
+		"before_unload": [],
 		"dom_loaded": [],
 		"visibility_changed": [],
 		"before_beacon": [],
@@ -884,19 +885,22 @@ boomr = {
 		// onbeforeunload is the right event to fire, but all browsers don't
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
-		if(e_name === "page_unload") {
+		if(e_name === "page_unload" || e_name === "before_unload") {
 			unload_handler = function(ev) {
 							if(fn) {
 								fn.call(cb_scope, ev || w.event, cb_data);
 							}
 						};
-			// pagehide is for iOS devices
-			// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
-			if(w.onpagehide || w.onpagehide === null) {
-				BOOMR.utils.addListener(w, "pagehide", unload_handler);
-			}
-			else {
-				BOOMR.utils.addListener(w, "unload", unload_handler);
+
+			if(e_name === "page_unload") {
+				// pagehide is for iOS devices
+				// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+				if(w.onpagehide || w.onpagehide === null) {
+					BOOMR.utils.addListener(w, "pagehide", unload_handler);
+				}
+				else {
+					BOOMR.utils.addListener(w, "unload", unload_handler);
+				}
 			}
 			BOOMR.utils.addListener(w, "beforeunload", unload_handler);
 		}

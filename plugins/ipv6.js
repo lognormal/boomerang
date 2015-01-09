@@ -178,7 +178,7 @@ BOOMR.plugins.IPv6 = {
 		impl.host_url = impl.host_url.replace(/^https:/, 'http:');
 
 		BOOMR.subscribe("page_ready", impl.start, null, impl);
-		BOOMR.subscribe("page_unload", impl.skip, null, impl);
+		BOOMR.subscribe("before_unload", impl.skip, null, impl);
 
 		return this;
 	},

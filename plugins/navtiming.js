@@ -96,7 +96,7 @@ var impl = {
 
 	done: function(edata) {
 		var w = BOOMR.window, p, pn, pt, data;
-		if(this.complete || !w || edata.type === "unload" || edata.type === "pagehide") {
+		if(this.complete) {
 			return this;
 		}
 
@@ -182,7 +182,7 @@ BOOMR.plugins.NavigationTiming = {
 			// we'll fire on whichever happens first
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
 			BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
-			BOOMR.subscribe("page_unload", impl.done, null, impl);
+			BOOMR.subscribe("before_unload", impl.done, null, impl);
 			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 
 			impl.initialized = true;
