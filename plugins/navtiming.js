@@ -94,9 +94,9 @@ var impl = {
 		BOOMR.sendBeacon();
 	},
 
-	done: function() {
+	done: function(edata) {
 		var w = BOOMR.window, p, pn, pt, data;
-		if(this.complete || !w) {
+		if(this.complete || !w || edata.type === "unload" || edata.type === "pagehide") {
 			return this;
 		}
 

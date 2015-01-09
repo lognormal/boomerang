@@ -700,7 +700,7 @@ impl = {
 					  }
 		};
 
-		if(ename !== "xhr" && (this.complete || !w)) {
+		if(ename !== "xhr" && (this.complete || !w || edata.type === "unload" || edata.type === "pagehide")) {
 			return;
 		}
 
