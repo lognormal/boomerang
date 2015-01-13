@@ -5,6 +5,8 @@ export WORKING_DIR=./BoomerangUpdate
 export LOG=$WORKING_DIR/update-log.`date +%Y-%m-%d-%H%M%S`.log
 export BUCKET=$3
 export VERSION=$2
+export USERNAME=$4
+export PASSWORD=$5
 
 if [ $# -lt 5 ]; then
 	echo "Usage: <Server> <New Boomerang Version> <Bucket File> <mPulse Username> <mPulse Password>"
@@ -64,6 +66,38 @@ then
         mkdir ${WORKING_DIR}
 fi
 
+### Check why bad domains are bad
+function check_bad_domains {
+
+	echo "Why are bad domains bad?" | tee $LOG
+
+	bcurrent=1
+	btotal=$( wc -l $baddomains | awk '{print $1}' )
+
+	awk -F "|" '{print $1,$2,$4,$5,$6}' "$baddomains" | \
+		while read DomainId DomainName FolderName TenantName ApiKey; do
+			echo "Checking $FolderName/$TenantName/$ApiKey... ($bcurrent/$btotal)" | tee -a $LOG
+			bcurrent=$(( $bcurrent+1 ))
+			result=$( curl -v ${INSECURE} --user $USERNAME:$PASSWORD -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"tenant\":\"$TenantName\"}" ${cf_main}/concerto/services/rest/RepositoryService/v1/Tokens 2>/dev/null | tee -a $LOG )
+			msg=""
+			if echo "$result" | grep -q '{"status":"error",' &>/dev/null; then
+				msg=$( echo "$result" | grep '{"status"' | sed -e 's/.*"message":"//; s/".*//;' )
+			elif echo "$result" | grep -q '^< HTTP/1\.1 401' &>/dev/null; then
+				msg="Invalid Credentials For Tenant"
+			else
+				msg=$( echo "$result" | grep "^< HTTP/1\.1 " | sed -e 's/.*< HTTP\/1\.1 //' )
+			fi
+
+			if [ -n "$msg" ]; then
+				echo "$DomainId | $DomainName | | $FolderName | $TenantName | $ApiKey | $msg " >> ${baddomains}.2
+			fi
+		done
+
+	if [ -s "${baddomains}.2" ]; then
+		mv "${baddomains}.2" "${baddomains}"
+	fi
+}
+
 current=1
 
 echo "$1 on $cf_collector      $VERSION" | tee $LOG
@@ -86,6 +120,8 @@ done
 
 if [ ! -e $tmpfile1 ]; then
 	echo "Nothing passed through" | tee -a $LOG
+	# For the first step, we check bad domains only if we cannot go forward
+	check_bad_domains
 	exit
 fi
 
@@ -112,6 +148,9 @@ done
 
 rm -f $tmpfile1
 
+# For the second step, we always check bad domains because we won't do this after the 3rd step (which does it internally)
+check_bad_domains
+
 if [ ! -e $tmpfile2 ]; then
 	echo "Nothing passed through" | tee -a $LOG
 	exit
@@ -129,7 +168,7 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 	while read DomainId TenantName; do
 		echo "Updating $TenantName/$DomainId... ($current/$total)" | tee -a $LOG
 		current=$(( $current+1 ))
- 		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$4" SOASTA_PASSWORD="$5" DEFAULT_VERSION="$2" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
+ 		result=$( make SOASTA_SERVER=${cf_main} SOASTA_USER="$USERNAME" SOASTA_PASSWORD="$PASSWORD" DEFAULT_VERSION="$VERSION" DOMAIN_ID="$DomainId" TENANT="$TenantName" soasta-set-domain-boomerang 2>&1 | tee -a $LOG )
 		if ! echo "$result" | grep -q "^< HTTP/1\.1 204" &>/dev/null; then
 			echo -n "$DomainId | $TenantName | " >> $baddomains
 			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG | tee -a $baddomains
