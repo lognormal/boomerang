@@ -38,9 +38,12 @@ LOGIT := tee -a $(LOG_FILE)
 #SLACK_CHANNELS += "mpulse-loadtest "
 #endif
 
-SCHEMA_VERSION := $(shell cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/ && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java)
+SCHEMA_DIR := $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/
+BOOMR_XML := $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
 
-NEW_VERSION := $(shell cat $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
+SCHEMA_VERSION := $(shell [ -d $(SCHEMA_DIR) ] && cd $(SCHEMA_DIR) && svn up SchemaVersion.java &>/dev/null && svn revert SchemaVersion.java &>/dev/null; cd - &>/dev/null && sed -ne '/private static final int c_iCurrent/ { s/.*= //;s/;//; p; }' $(SCHEMA_DIR)SchemaVersion.java)
+
+NEW_VERSION := $(shell [ -e $(BOOMR_XML) ] && cat $(BOOMR_XML) | grep 'Value' | sed -e 's/.*<Value>//;s/<\/Value>.*//;' )
 
 JS_CALLS_REMOVE := BOOMR\.(debug|info|warn|error)\s*\(.*?\)\s*;
 
@@ -101,14 +104,14 @@ new-soasta-push create_migration update_schema: SCHEMA_VERSION := $(shell echo "
 # This should be run via new-soasta-push or something else that puts boomerang into the repo
 update_schema:
 	echo "Updating schema version $(OLD_SCHEMA_VERSION) -> $(SCHEMA_VERSION)..."
-	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/SchemaVersion.java
+	perl -pi -e '/private static final int c_iCurrent =/ && s/= \d+;/= $(SCHEMA_VERSION);/' $(SCHEMA_DIR)SchemaVersion.java
 
 
 create_migration: update_schema
 	echo "Creating migration..."
-	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(NEW_VERSION)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java
-	cd $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/migration/ && svn add Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java && cd - >/dev/null
-	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(NEW_VERSION)");/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/com/soasta/repository/persistence/hibernate/RepositoryBuilder.java
+	perl -pe 'BEGIN {my@t=gmtime; %repl=(year=>$$t[5]+1900,from=>$(OLD_SCHEMA_VERSION),to=>$(SCHEMA_VERSION),version=>"$(NEW_VERSION)")} s/%(.+?)%/$$repl{$$1}/g;' MigrationXtoY.java > $(SCHEMA_DIR)migration/Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java
+	cd $(SCHEMA_DIR)migration/ && svn add Migration$(OLD_SCHEMA_VERSION)to$(SCHEMA_VERSION).java && cd - >/dev/null
+	perl -pi -e 's/oSiteConfiguration\.setBoomerangDefaultVersion\(.*/oSiteConfiguration.setBoomerangDefaultVersion("$(NEW_VERSION)");/' $(SCHEMA_DIR)hibernate/RepositoryBuilder.java
 
 
 # Pushes new format and tags git
@@ -121,7 +124,7 @@ soasta-push: new-soasta-push
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
 soasta-upload: 
 	echo "Uploading version $(NEW_VERSION) to $(SOASTA_REST_PREFIX)..." | $(LOGIT)
-	php generate-soasta-json.php $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml | $(LOGIT) | curl -vsS -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
+	php generate-soasta-json.php $(BOOMR_XML) | $(LOGIT) | curl -vsS -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 	echo "" | $(LOGIT)
 	echo "Uploaded version $(NEW_VERSION) to $(SOASTA_SERVER)..." | $(LOGIT)
 	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Uploaded boomerang version $(NEW_VERSION) to $(SOASTA_SERVER)\",\"icon_emoji\":\":shipit:\"}"; echo ""; done
@@ -185,7 +188,7 @@ endif
 new-soasta-push: soasta
 	echo "Updating lastModifiedVersion..."
 	perl -pi -e '/<Import lastModifiedVersion="\d+" file="boomerang\/Default Boomerang.xml" / && s/lastModifiedVersion="\d+"/lastModifiedVersion="$(SCHEMA_VERSION)"/' $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/Index.xml
-	mv Default_Boomerang.xml $(SOASTA_SOURCE)/WebApplications/Concerto/src/META-INF/RepositoryImports/boomerang/Default\ Boomerang.xml
+	mv Default_Boomerang.xml $(BOOMR_XML)
 
 
 lognormal-plugins : override PLUGINS := $(LOGNORMAL_PLUGINS)
