@@ -139,7 +139,7 @@ ifeq ($(strip $(TENANT)),)
 else
 	echo "Setting default boomerang version for $(TENANT)/$(DOMAIN_ID) to $(DEFAULT_VERSION)..." | $(LOGIT)
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
-	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
+	token=`curl $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$(SOASTA_USER)\",\"password\":\"$$soasta_password\",\"tenant\":\"$(TENANT)\"}" $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	set -e && curl -vsS --fail $(INSECURE) -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>&1 | $(LOGIT) | grep -v '^[<>* ]\|\[data not shown\]' | php generate-domain-references.php php://stdin $(DEFAULT_VERSION) | $(LOGIT) | curl -vsS $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>&1 | $(LOGIT)
 	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Set default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) to $(DEFAULT_VERSION) on $(SOASTA_SERVER)\",\"icon_emoji\":\":thumbsup:\"}"; echo ""; done
 endif
@@ -156,7 +156,7 @@ ifeq ($(strip $(TENANT)),)
 else
 	echo "Unsetting default boomerang version for $(TENANT)/$(DOMAIN_ID)..." | $(LOGIT)
 	@if [ -z "$(SOASTA_PASSWORD)" ]; then read -p "Enter host password for user '$(SOASTA_USER)': " -s soasta_password; else soasta_password=$(SOASTA_PASSWORD); fi; \
-	token=`curl -sS $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary '{"userName":"$(SOASTA_USER)","password":"'$$soasta_password'","tenant":"$(TENANT)"}' $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
+	token=`curl -sS $(INSECURE) --user $(SOASTA_USER):$$soasta_password -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$(SOASTA_USER)\",\"password\":\"$$soasta_password\",\"tenant\":\"$(TENANT)\"}" $(SOASTA_TOKEN_PREFIX) 2>/dev/null | perl -pe 's/.*{"token":"(.*)"}.*/$$1/;' `; \
 	set -e && curl -vsS $(INSECURE) --fail -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>&1 | $(LOGIT) | grep -v '^[<>* ]\|\[data not shown\]' | php generate-domain-references.php php://stdin remove | $(LOGIT) | curl -vsS $(INSECURE) --data-binary @- -H "X-Auth-Token: $$token" $(SOASTA_REST_PREFIX)/domain/$(DOMAIN_ID) 2>&1 | $(LOGIT)
 	for channel in $(SLACK_CHANNELS); do echo "Announcing to $$channel"; curl -X POST "https://soasta.slack.com/services/hooks/incoming-webhook?token=CI8oLOcEJ1xfLLWJZBYCr5DI" --data-binary "{\"channel\":\"#$$channel\", \"username\":\"$(SOASTA_USER)\", \"text\":\"Unset default boomerang version for domain:$(DOMAIN_ID) tenant:$(TENANT) on $(SOASTA_SERVER)\",\"icon_emoji\":\":thumbsup:\"}"; echo ""; done
 endif
