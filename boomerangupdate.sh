@@ -80,8 +80,8 @@ function check_bad_domains {
 			bcurrent=$(( $bcurrent+1 ))
 			result=$( curl -v ${INSECURE} --user $USERNAME:$PASSWORD -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"tenant\":\"$TenantName\"}" ${cf_main}/concerto/services/rest/RepositoryService/v1/Tokens 2>/dev/null | tee -a $LOG )
 			msg=""
-			if echo "$result" | grep -q '{"status":"error",' &>/dev/null; then
-				msg=$( echo "$result" | grep '{"status"' | sed -e 's/.*"message":"//; s/".*//;' )
+			if echo "$result" | grep -q '{"fault":' &>/dev/null; then
+				msg=$( echo "$result" | grep '{"fault":' | sed -e 's/.*"code":"//; s/".*//;' )
 			elif echo "$result" | grep -q '^< HTTP/1\.1 401' &>/dev/null; then
 				msg="Invalid Credentials For Tenant"
 			else
