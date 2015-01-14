@@ -634,6 +634,11 @@ boomr = {
 			var input  = document.createElement("input"),
 			    urls = [ impl.beacon_url ];
 
+			// running inside a UIWebView.  Our beacons don't work well here
+			if(navigator.standalone === false) {
+				return;
+			}
+
 			form.method = method;
 			form.id = "beacon_form";
 
