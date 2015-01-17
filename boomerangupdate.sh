@@ -69,36 +69,34 @@ fi
 ### Check why bad domains are bad
 function check_bad_domains {
 
-	echo "Why are bad domains bad?" | tee -a $LOG
+	if [ -e $baddomains ]; then
+		echo "Why are bad domains bad?" | tee -a $LOG
 
-	bcurrent=1
-	btotal=$( wc -l $baddomains | awk '{print $1}' )
+		bcurrent=1
+		btotal=$( wc -l $baddomains | awk '{print $1}' )
 
-	awk -F "|" '{print $1,$2,$4,$5,$6}' "$baddomains" | \
-		while read DomainId DomainName FolderName TenantName ApiKey; do
-			echo "Checking $FolderName/$TenantName/$ApiKey... ($bcurrent/$btotal)" | tee -a $LOG
-			bcurrent=$(( $bcurrent+1 ))
-			result=$( curl -v ${INSECURE} --user $USERNAME:$PASSWORD -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"tenant\":\"$TenantName\"}" ${cf_main}/concerto/services/rest/RepositoryService/v1/Tokens 2>/dev/null | tee -a $LOG )
-			msg=""
-			if echo "$result" | grep -q '{"fault":' &>/dev/null; then
-				msg=$( echo "$result" | grep '{"fault":' | sed -e 's/.*"code":"//; s/".*//;' )
-			else
-				# we need stderr
-				result=$( curl -v ${INSECURE} --user $USERNAME:$PASSWORD -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"tenant\":\"$TenantName\"}" ${cf_main}/concerto/services/rest/RepositoryService/v1/Tokens 2>&1 )
-				if echo "$result" | grep -q '^< HTTP/1\.1 401' &>/dev/null; then
+		awk -F "|" '{print $1,$2,$4,$5,$6}' "$baddomains" | \
+			while read DomainId DomainName FolderName TenantName ApiKey; do
+				echo "Checking $FolderName/$TenantName/$ApiKey... ($bcurrent/$btotal)" | tee -a $LOG
+				bcurrent=$(( $bcurrent+1 ))
+				result=$( curl -v ${INSECURE} --user $USERNAME:$PASSWORD -X PUT -H "Content-Type: application/json" --data-binary "{\"userName\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"tenant\":\"$TenantName\"}" ${cf_main}/concerto/services/rest/RepositoryService/v1/Tokens 2>&1 | tee -a $LOG )
+				msg=""
+				if echo "$result" | grep -q '{"fault":' &>/dev/null; then
+					msg=$( echo "$result" | grep '{"fault":' | sed -e 's/.*"code":"//; s/".*//;' )
+				elif echo "$result" | grep -q '^< HTTP/1\.1 401' &>/dev/null; then
 					msg="Invalid Credentials For Tenant"
 				else
 					msg=$( echo "$result" | grep "^< HTTP/1\.1 " | sed -e 's/.*< HTTP\/1\.1 //' )
 				fi
-			fi
 
-			if [ -n "$msg" ]; then
-				echo "$DomainId | $DomainName | | $FolderName | $TenantName | $ApiKey | $msg " >> ${baddomains}.2
-			fi
-		done
+				if [ -n "$msg" ]; then
+					echo "$DomainId | $DomainName | | $FolderName | $TenantName | $ApiKey | $msg " >> ${baddomains}.2
+				fi
+			done
 
-	if [ -s "${baddomains}.2" ]; then
-		mv "${baddomains}.2" "${baddomains}"
+		if [ -s "${baddomains}.2" ]; then
+			mv "${baddomains}.2" "${baddomains}"
+		fi
 	fi
 }
 
