@@ -100,6 +100,9 @@ for APIKEY in $( grep -E "^[A-Z0-9]+-" "$mpAPIKEYS" | sort -n | uniq ); do
 			fi
 		done
 	done
+	if [ $total -gt 50 ]; then
+		sleep 1;
+	fi
 done
 
 echo "All done" | tee -a $LOG
