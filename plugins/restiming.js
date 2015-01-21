@@ -127,6 +127,14 @@ function optimizeTrie(cur, top) {
  * @return [number] Number of ms from start time
  */
 function trimTiming(time, startTime) {
+	if (typeof time !== "number") {
+		time = 0;
+	}
+
+	if (typeof startTime !== "number") {
+		startTime = 0;
+	}
+
 	// strip from microseconds to milliseconds only
 	var timeMs = Math.round(time ? time : 0),
 	    startTimeMs = Math.round(startTime ? startTime : 0);
@@ -169,6 +177,18 @@ function getNavStartTime(frame) {
  */
 function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, navEntry, t;
+
+	if(typeof isTopWindow === "undefined") {
+		isTopWindow = true;
+	}
+
+	if(typeof offset === "undefined") {
+		offset = 0;
+	}
+
+	if(typeof depth === "undefined") {
+		depth = 0;
+	}
 
 	if(depth > 10) {
 		return entries;
@@ -279,7 +299,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
  * @return Base-36 number, or empty string if undefined.
  */
 function toBase36(n) {
-	return n ? n.toString(36) : "";
+	return (typeof n === "number") ? n.toString(36) : "";
 }
 
 /**
@@ -292,7 +312,7 @@ function getResourceTiming() {
 	    i, e, j, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
-		return [];
+		return {};
 	}
 
 	for(i = 0; i < entries.length; i++) {
@@ -356,6 +376,7 @@ function getResourceTiming() {
 var impl = {
 	complete: false,
 	initialized: false,
+	supported: false,
 	done: function() {
 		var r;
 		if(this.complete) {
@@ -392,6 +413,7 @@ BOOMR.plugins.ResourceTiming = {
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
 			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			BOOMR.subscribe("before_unload", impl.done, null, impl);
+			impl.supported = true;
 		} else {
 			impl.complete = true;
 		}
@@ -403,12 +425,16 @@ BOOMR.plugins.ResourceTiming = {
 	is_complete: function() {
 		return impl.complete;
 	},
+	is_supported: function() {
+		return impl.supported;
+	},
 	// exports for test
 	trimTiming: trimTiming,
 	convertToTrie: convertToTrie,
 	optimizeTrie: optimizeTrie,
 	findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
-	getResourceTiming: getResourceTiming
+	getResourceTiming: getResourceTiming,
+	toBase36: toBase36
 };
 
 }());

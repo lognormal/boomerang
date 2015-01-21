@@ -192,7 +192,7 @@ dispatchEvent = function(e_name, e_data, async) {
 // https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
 
 // Set the name of the hidden property and the change event for visibility
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
 	visibilityState = "visibilityState";
 	visibilityChange = "visibilitychange";
 }
@@ -469,7 +469,7 @@ boomr = {
 		},
 
 		cleanupURL: function(url) {
-			if (!url) {
+			if (!url || Object.prototype.toString.call(url) === "[object Array]") {
 				return "";
 			}
 			if(impl.strip_query_string) {
@@ -687,7 +687,10 @@ boomr = {
 				document.body.appendChild(iframe);
 				document.body.appendChild(form);
 
-				form.submit();
+				try {
+					form.submit();
+				} catch (ignore) {
+				}
 
 				if (urls.length) {
 					BOOMR.setImmediate(submit);

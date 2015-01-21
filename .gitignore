@@ -9,3 +9,7 @@ BoomerangUpdate
 *.diff
 .project
 .settings/
+tests/vendor/
+tests/coverage/
+node_modules/
+build/
