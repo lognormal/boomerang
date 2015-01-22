@@ -129,19 +129,46 @@ module.exports = function (grunt) {
         uglify: {
             options: {
                 preserveComments: false,
-                mangle: false,
+                mangle: true,
                 sourceMap: true
             },
             min_release: {
-                report: "gzip",
                 src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
                 dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
             },
             min_debug: {
-                report: "gzip",
                 src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
                 dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
             }
+        },
+        compress: {
+            main: {
+                options: {
+                    mode: "gzip",
+                    level: 9
+                },
+                files: [
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js.gz",
+                    },
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js.gz",
+                    },
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz",
+                    },
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.gz",
+                    },
+                ]
+            }
+        },
+        filesize: {
+            files: [ "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz" ]
         },
         clean: {
             options: {},
@@ -184,9 +211,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-copy");
+    grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-filesize');
 
     grunt.registerTask("lint", "eslint");
-    grunt.registerTask("build", ["concat", "string-replace", "uglify", "copy:latest"]);
+    grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:latest", "filesize"]);
     grunt.registerTask("test", ["build", "karma:unit"]);
     grunt.registerTask("test:dev", ["build", "karma:dev"]);
     grunt.registerTask("default", ["lint", "build", "test"]);

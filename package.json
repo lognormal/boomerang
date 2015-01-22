@@ -26,7 +26,9 @@
     "karma-firefox-launcher": "^0.1.4",
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
-    "grunt-contrib-copy": "^0.7.0"
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-compress": "^0.13.0",
+    "grunt-filesize": "0.0.7"
   },
   "scripts": {
     "test": "grunt eslint"
