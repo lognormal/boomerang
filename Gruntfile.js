@@ -187,7 +187,8 @@ module.exports = function (grunt) {
                     "tests/vendor/mocha/mocha.js",
                     "tests/vendor/chai/chai.js",
                     "tests/vendor/expect/index.js",
-                    "tests/library/*.js",
+                    "tests/unit/*.js",
+                    "tests/integration/*.js",
                     "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
                 ]
             },
