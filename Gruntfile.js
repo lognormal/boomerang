@@ -177,6 +177,8 @@ module.exports = function (grunt) {
         },
         karma: {
             options: {
+                singleRun: true,
+                colors: true,
                 configFile: "./karma.config.js",
                 preprocessors: {
                     "./build/*.js": ["coverage"]
@@ -188,19 +190,29 @@ module.exports = function (grunt) {
                     "tests/vendor/chai/chai.js",
                     "tests/vendor/expect/index.js",
                     "tests/unit/*.js",
-                    "tests/integration/*.js",
                     "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
                 ]
             },
             unit: {
-                singleRun: true,
-                colors: true,
                 browsers: ["PhantomJS"]
             },
-            dev: {
-                singleRun: true,
-                colors: true,
-                browsers: ["Chrome", "Firefox", "IE", "Opera", "Safari"]
+            all: {
+                browsers: ["Chrome", "Firefox", "IE", "Opera", "Safari", "PhantomJS"]
+            },
+            chrome: {
+                browsers: ["Chrome"]
+            },
+            ie: {
+                browsers: ["IE"]
+            },
+            ff: {
+                browsers: ["Firefox"]
+            },
+            opera: {
+                browsers: ["Opera"]
+            },
+            safari: {
+                browsers: ["Safari"]
             }
         }
     });
@@ -218,6 +230,13 @@ module.exports = function (grunt) {
     grunt.registerTask("lint", "eslint");
     grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:latest", "filesize"]);
     grunt.registerTask("test", ["build", "karma:unit"]);
-    grunt.registerTask("test:dev", ["build", "karma:dev"]);
+
+    grunt.registerTask("test:all", ["build", "karma:all"]);
+    grunt.registerTask("test:chrome", ["build", "karma:chrome"]);
+    grunt.registerTask("test:ie", ["build", "karma:ie"]);
+    grunt.registerTask("test:ff", ["build", "karma:ff"]);
+    grunt.registerTask("test:opera", ["build", "karma:opera"]);
+    grunt.registerTask("test:safari", ["build", "karma:safari"]);
+
     grunt.registerTask("default", ["lint", "test"]);
 };
