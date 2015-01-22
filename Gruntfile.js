@@ -177,19 +177,19 @@ module.exports = function (grunt) {
         },
         karma: {
             options: {
-            configFile: "./karma.config.js",
-            preprocessors: {
-                "./build/*.js": ["coverage"]
-            },
-            basePath: "./",
-            files: [
-                "tests/vendor/mocha/mocha.css",
-                "tests/vendor/mocha/mocha.js",
-                "tests/vendor/chai/chai.js",
-                "tests/vendor/expect/index.js",
-                "tests/library/*.js",
-                "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
-            ]
+                configFile: "./karma.config.js",
+                preprocessors: {
+                    "./build/*.js": ["coverage"]
+                },
+                basePath: "./",
+                files: [
+                    "tests/vendor/mocha/mocha.css",
+                    "tests/vendor/mocha/mocha.js",
+                    "tests/vendor/chai/chai.js",
+                    "tests/vendor/expect/index.js",
+                    "tests/library/*.js",
+                    "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+                ]
             },
             unit: {
                 singleRun: true,
