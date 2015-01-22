@@ -9,22 +9,19 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         pkg:  grunt.file.readJSON("package.json"),
-        builddate: Date.now(),
+        buildDate: Math.round(Date.now() / 1000),
         concat: {
             options: {
-                stripBanners: {
-                    block : true,
-                    line: true
-                },
+                stripBanners: false,
                 seperator: ";"
             },
             debug: {
                 src: src,
-                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js"
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
             },
             release: {
                 src: src,
-                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
             }
         },
         eslint: {
@@ -35,23 +32,69 @@ module.exports = function (grunt) {
             ]
         },
         "string-replace": {
+            all: {
+                files: [
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+                    },
+                    {
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                        dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+                    }
+                ],
+                options: {
+                    replacements: [
+                        {
+                            pattern: /BOOMR.version\s*=\s*".*";/,
+                            replacement: "BOOMR.version = \"<%= pkg.releaseVersion %>.<%= buildDate %>\";"
+                        },
+                        {
+                            pattern: /BOOMR\s*=\s*BOOMR\s*\|\|\s*{};/g,
+                            replacement: ""
+                        },
+                        {
+                            pattern: /BOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};/g,
+                            replacement: ""
+                        }
+                    ]
+                }
+            },
+            debug: {
+                files: [{
+                    src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                    dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+                }],
+                options: {
+                    replacements: [
+                        {
+                            pattern: /key=%client_apikey%/,
+                            replacement: "debug=\&key=%client_apikey%"
+                        }
+                    ]
+                }
+            },
             release: {
-            files: [{
-                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js",
-                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
-            }],
-            options: {
-                replacements: [{
-                    pattern: /else{}/g,
-                    replacement: ""
-                },{
-                    pattern: /\(window\)\);/g,
-                    replacement: "\(window\)\);\n"
-                },{
-                    pattern: /\(\)\);\(function\(/g,
-                    replacement: "\(\)\);\n(function("
-                }]
-            }
+                files: [{
+                    src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+                    dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+                }],
+                options: {
+                    replacements: [
+                        {
+                            pattern: /else{}/g,
+                            replacement: ""
+                        },
+                        {
+                            pattern: /\(window\)\);/g,
+                            replacement: "\(window\)\);\n"
+                        },
+                        {
+                            pattern: /\(\)\);\(function\(/g,
+                            replacement: "\(\)\);\n(function("
+                        }
+                    ]
+                }
             }
         },
         copy: {
@@ -59,17 +102,17 @@ module.exports = function (grunt) {
                 files: [
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js", 
                         dest: "build/<%= pkg.name %>-latest-debug.js", 
                     },
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js", 
                         dest: "build/<%= pkg.name %>-latest-debug.min.js", 
                     },
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js.map", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.map", 
                         dest: "build/<%= pkg.name %>-latest-debug.min.js.map", 
                     },
                 ]
@@ -83,13 +126,13 @@ module.exports = function (grunt) {
             },
             min_release: {
                 report: "gzip",
-                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js",
-                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.min.js"
+                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
             },
             min_debug: {
                 report: "gzip",
-                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js",
-                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js"
+                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
             }
         },
         clean: {
@@ -110,7 +153,7 @@ module.exports = function (grunt) {
                 "tests/vendor/chai/chai.js",
                 "tests/vendor/expect/index.js",
                 "tests/library/*.js",
-                "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
+                "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
             ]
             },
             unit: { 
