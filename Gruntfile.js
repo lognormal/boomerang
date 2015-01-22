@@ -20,11 +20,11 @@ module.exports = function (grunt) {
             },
             debug: {
                 src: src,
-                dest: "build/<%= pkg.name %>-<%= builddate %>-debug.js"
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js"
             },
             release: {
                 src: src,
-                dest: "build/<%= pkg.name %>-<%= builddate %>.js"
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
             }
         },
         eslint: {
@@ -37,8 +37,8 @@ module.exports = function (grunt) {
         "string-replace": {
             release: {
             files: [{
-                src: "build/<%= pkg.name %>-<%= builddate %>.js",
-                dest: "build/<%= pkg.name %>-<%= builddate %>.js"
+                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js",
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
             }],
             options: {
                 replacements: [{
@@ -59,17 +59,17 @@ module.exports = function (grunt) {
                 files: [
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= builddate %>-debug.js", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js", 
                         dest: "build/<%= pkg.name %>-latest-debug.js", 
                     },
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= builddate %>-debug.min.js", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js", 
                         dest: "build/<%= pkg.name %>-latest-debug.min.js", 
                     },
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= builddate %>-debug.min.js.map", 
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js.map", 
                         dest: "build/<%= pkg.name %>-latest-debug.min.js.map", 
                     },
                 ]
@@ -83,13 +83,13 @@ module.exports = function (grunt) {
             },
             min_release: {
                 report: "gzip",
-                src: "build/<%= pkg.name %>-<%= builddate %>.js",
-                dest: "build/<%= pkg.name %>-<%= builddate %>.min.js"
+                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js",
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.min.js"
             },
             min_debug: {
                 report: "gzip",
-                src: "build/<%= pkg.name %>-<%= builddate %>-debug.js",
-                dest: "build/<%= pkg.name %>-<%= builddate %>-debug.min.js"
+                src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.js",
+                dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>-debug.min.js"
             }
         },
         clean: {
@@ -110,7 +110,7 @@ module.exports = function (grunt) {
                 "tests/vendor/chai/chai.js",
                 "tests/vendor/expect/index.js",
                 "tests/library/*.js",
-                "./build/<%= pkg.name %>-<%= builddate %>.js"
+                "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= builddate %>.js"
             ]
             },
             unit: { 
