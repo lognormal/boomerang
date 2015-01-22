@@ -21,7 +21,7 @@ describe("BOOMR.plugins.PageParams", function() {
     describe("basic tests", function() {
         it("Should pass a basic test", function() {
             var test = this;
-            test.run_assertions = function(vars, data) {
+            test.run_assertions = function(vars) {
                 this.beaconVars = vars;
                 this.resume();
             };
@@ -30,14 +30,14 @@ describe("BOOMR.plugins.PageParams", function() {
             window.PageGroupVariable = "PageGroup";
 
             // 2. Tell PageParams to look for a basic JavaScript variable
-            var o = BOOMR.init({
+            BOOMR.init({
                 autorun: false,
                 PageParams: {
                     pageGroups: [
                         {
                             parameter1: "PageGroupVariable"
                         }
-                    ],
+                    ]
                 },
                 log: null
             });

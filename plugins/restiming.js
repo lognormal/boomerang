@@ -148,11 +148,11 @@ function trimTiming(time, startTime) {
  */
 function getNavStartTime(frame) {
 	var navStart = 0;
-	
+
 	try
 	{
 		if(("performance" in frame) &&
-		frame.performance && 
+		frame.performance &&
 		frame.performance.timing &&
 		frame.performance.timing.navigationStart) {
 			navStart = frame.performance.timing.navigationStart;
@@ -162,7 +162,7 @@ function getNavStartTime(frame) {
 	{
 		// swallow all access exceptions
 	}
-	
+
 	return navStart;
 }
 
@@ -195,7 +195,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	}
 
 	navStart = getNavStartTime(frame);
-	
+
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(i = 0; i < frame.frames.length; i++) {
@@ -262,7 +262,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		// offset all of the entries by the specified offset for this frame
 		var frameEntries = frame.performance.getEntriesByType("resource"),
 		    frameFixedEntries = [];
-		
+
 		for(i = 0; frameEntries && i < frameEntries.length; i++) {
 			t = frameEntries[i];
 			frameFixedEntries.push({
@@ -282,7 +282,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 				responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0
 			});
 		}
-		
+
 		entries = entries.concat(frameFixedEntries);
 	}
 	catch(e) {
@@ -309,7 +309,7 @@ function toBase36(n) {
 function getResourceTiming() {
 /*eslint no-script-url:0*/
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
-	    i, e, j, results = {}, initiatorType, url, data;
+	    i, e, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
 		return {};
@@ -317,7 +317,7 @@ function getResourceTiming() {
 
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
-		
+
 		if(e.name.indexOf("about:") === 0 ||
 		   e.name.indexOf("javascript:") === 0) {
 			continue;

@@ -530,9 +530,9 @@ Handler.prototype = {
 				return false;
 			}
 		}
-		
+
 		en = parseFloat(res[o.end], 10);
-		
+
 		if(isNaN(st) || isNaN(en)) {
 			BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
 			return false;

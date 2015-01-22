@@ -36,7 +36,7 @@ describe("BOOMR.utils cookies", function() {
     if (window.location.protocol === "file:") {
         return;
     }
-    
+
     // need to skip some tests this isn't on a TLD (eg localhost), because cookies can't get set
     var canSetCookies = window.location.host.indexOf(".") !== -1;
 

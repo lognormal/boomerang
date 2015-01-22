@@ -177,4 +177,3 @@ BOOMR.plugins.Memory = {
 };
 
 }());
-

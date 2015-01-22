@@ -42,4 +42,3 @@ BOOMR.plugins.CACHE_RELOAD = {
 };
 
 }());
-

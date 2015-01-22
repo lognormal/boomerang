@@ -8,7 +8,7 @@ describe("BOOMR logging", function() {
         assert.isFunction(BOOMR.info);
         BOOMR.info = function() {};
     });
-    
+
     it("Should have an existing BOOMR.debug() function (Will be set to a stub for less noise during tests)", function() {
         assert.isFunction(BOOMR.debug);
         BOOMR.debug = function() {};

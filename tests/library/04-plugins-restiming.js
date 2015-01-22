@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*global chai*/
+/*global chai,expect*/
 
 describe("BOOMR.plugins.ResourceTiming", function() {
     var assert = chai.assert;
@@ -198,13 +198,13 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             var entriesToFind = [
                 { url: "/tests/vendor/mocha/mocha.css", initiatorType: "link" },
                 { url: "/tests/vendor/mocha/mocha.js", initiatorType: "script" },
-                { url: "/tests/vendor/chai/chai.js", initiatorType: "script" },
+                { url: "/tests/vendor/chai/chai.js", initiatorType: "script" }
             ];
 
             // we don't know what order these will come in, so grep thru the list
             for (var i = 0; i < entriesToFind.length; i++) {
                 var entryToFind = entriesToFind[i];
-                
+
                 var found = false;
                 for (var j = 0; j < entries.length; j++) {
                     if (entries[j].name.indexOf(entryToFind.url) &&
@@ -214,7 +214,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
                         break;
                     }
                 }
-                
+
                 assert.isTrue(found);
             }
         });
@@ -240,10 +240,10 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             for (var key in trie) {
                 baseUrl = key;
             }
-            
+
             // first entry is faked navigationTiming data
             assert.isObject(trie[baseUrl]);
-            
+
             //
             // NOTE: this test doesn't work in Karma in C/IE/FF, only in real C/IE/FF and PhantomJS
             // This is due to different RT entries getting downloaded in the different environment

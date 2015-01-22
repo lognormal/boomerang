@@ -550,5 +550,3 @@ BOOMR.plugins.BW = {
 
 }());
 // End of BW plugin
-
-
