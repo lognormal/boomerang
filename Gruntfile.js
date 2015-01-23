@@ -163,7 +163,7 @@ module.exports = function (grunt) {
         },
         clean: {
             options: {},
-            build: ["build/", "tests/build/"],
+            build: ["build/", "tests/build/", "tests/results/", "tests/coverage/"],
             src: ["plugins/*~", "*.js~"]
         },
         karma: {
