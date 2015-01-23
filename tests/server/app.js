@@ -1,8 +1,10 @@
+/* eslint-env node */
+
 //
 // Imports
 //
-var path = require('path');
-var fs = require('fs');
+var path = require("path");
+var fs = require("fs");
 var express = require("express");
 var http = require("http");
 
@@ -12,8 +14,7 @@ var http = require("http");
 var envFile = path.resolve(path.join(__dirname, "env.json"));
 
 if (!fs.existsSync(envFile)) {
-    console.error("Please create " + envFile);
-    process.exit(1);
+    throw new Error("Please create " + envFile + ". There's a env.json.sample in the same dir.");
 }
 
 // load JSON
@@ -22,8 +23,8 @@ var env = require(envFile);
 //
 // Start HTTP server / Express
 //
-app = express();
-server = http.createServer(app);
+var app = express();
+var server = http.createServer(app);
 app.use(express.static(env.www));
 
 // listen

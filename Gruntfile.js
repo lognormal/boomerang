@@ -1,12 +1,24 @@
 /* eslint-env node */
-
 "use strict";
+
+var fs = require("fs");
+var path = require("path");
+var fse = require("fs-extra");
+
 module.exports = function (grunt) {
     // boomerang.js and plugins/*.js order
     var src = [ "boomerang.js" ];
     var plugins = grunt.file.readJSON("plugins.json");
     src.push(plugins.plugins);
     src.push("plugins/zzz_last_plugin.js");
+
+    // ensure env.json exists
+    var envFile = path.resolve(path.join(__dirname, "tests", "server", "env.json"));
+    if (!fs.existsSync(envFile)) {
+        var envFileSample = path.resolve(path.join(__dirname, "tests", "server", "env.json.sample"));
+        console.info("Creating env.json from defaults");
+        fse.copySync(envFileSample, envFile);
+    }
 
     grunt.initConfig({
         pkg:  grunt.file.readJSON("package.json"),
@@ -31,7 +43,8 @@ module.exports = function (grunt) {
                 "boomerang.js",
                 "plugins/*.js",
                 "tests/unit/*.js",
-                "tests/e2e/*.js"
+                "tests/e2e/*.js",
+                "tests/server/*.js"
             ]
         },
         "string-replace": {
