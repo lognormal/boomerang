@@ -1,7 +1,7 @@
 module.exports = function(config) {
     config.set({
         basePath: "./",
-        
+
         port: 4000,
         runnerPort: 4001,
         logLevel: config.LOG_INFO,
@@ -14,8 +14,8 @@ module.exports = function(config) {
         browsers: ["PhantomJS"],
 
         coverageReporter: {
-            type : "html",
-            dir : "tests/coverage/"
+            type: "html",
+            dir: "tests/coverage/"
         }
     });
 };

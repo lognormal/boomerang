@@ -30,7 +30,8 @@ module.exports = function (grunt) {
                 "Gruntfile.js",
                 "boomerang.js",
                 "plugins/*.js",
-                "tests/library/*.js"
+                "tests/unit/*.js",
+                "tests/e2e/*.js"
             ]
         },
         "string-replace": {
@@ -105,23 +106,13 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            // copy files to -latest so test/index.html points to the latest version always
+            // copy files to tests\build\boomerang-latest.js so test/index.html points to the latest version always
             latest: {
                 files: [
                     {
                         nonull: true,
                         src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-                        dest: "build/<%= pkg.name %>-latest-debug.js"
-                    },
-                    {
-                        nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js",
-                        dest: "build/<%= pkg.name %>-latest-debug.min.js"
-                    },
-                    {
-                        nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.map",
-                        dest: "build/<%= pkg.name %>-latest-debug.min.js.map"
+                        dest: "tests/build/<%= pkg.name %>-latest-debug.js"
                     }
                 ]
             }
@@ -172,7 +163,7 @@ module.exports = function (grunt) {
         },
         clean: {
             options: {},
-            build: ["build/"],
+            build: ["build/", "tests/build/"],
             src: ["plugins/*~", "*.js~"]
         },
         karma: {
@@ -181,7 +172,7 @@ module.exports = function (grunt) {
                 colors: true,
                 configFile: "./karma.config.js",
                 preprocessors: {
-                    "./build/*.js": ["coverage"]
+                    "./tests/build/*.js": ["coverage"]
                 },
                 basePath: "./",
                 files: [
@@ -190,11 +181,12 @@ module.exports = function (grunt) {
                     "tests/vendor/chai/chai.js",
                     "tests/vendor/expect/index.js",
                     "tests/unit/*.js",
-                    "./build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+                    "tests/build/*.js"
                 ]
             },
             unit: {
-                browsers: ["PhantomJS"]
+                browsers: ["PhantomJS"],
+                frameworks: ["mocha"]
             },
             all: {
                 browsers: ["Chrome", "Firefox", "IE", "Opera", "Safari", "PhantomJS"]
@@ -214,6 +206,37 @@ module.exports = function (grunt) {
             safari: {
                 browsers: ["Safari"]
             }
+        },
+        protractor: {
+            // NOTE: https://github.com/angular/protractor/issues/1512 Selenium+PhantomJS not working in 1.6.1
+            options: {
+                noColor: false,
+                keepAlive: true
+            },
+            phantomjs: {
+                configFile: "protractor.config.phantom.js"
+            },
+            chrome: {
+                configFile: "protractor.config.chrome.js"
+            }
+        },
+        protractor_webdriver: {
+            options: {
+                keepAlive: true
+            },
+            e2e: {
+            }
+        },
+        connect: {
+            options: {
+                port: 4002,
+                hostname: "localhost"
+            },
+            test: {
+                options: {
+                    base: ["tests"]
+                }
+            }
         }
     });
 
@@ -226,17 +249,26 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-compress");
     grunt.loadNpmTasks("grunt-filesize");
+    grunt.loadNpmTasks("grunt-contrib-connect");
+    grunt.loadNpmTasks("grunt-protractor-runner");
+    grunt.loadNpmTasks("grunt-protractor-webdriver");
 
     grunt.registerTask("lint", "eslint");
     grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:latest", "filesize"]);
-    grunt.registerTask("test", ["build", "karma:unit"]);
 
-    grunt.registerTask("test:all", ["build", "karma:all"]);
-    grunt.registerTask("test:chrome", ["build", "karma:chrome"]);
-    grunt.registerTask("test:ie", ["build", "karma:ie"]);
-    grunt.registerTask("test:ff", ["build", "karma:ff"]);
-    grunt.registerTask("test:opera", ["build", "karma:opera"]);
-    grunt.registerTask("test:safari", ["build", "karma:safari"]);
+    grunt.registerTask("test", ["test:unit", "test:e2e"]);
+    grunt.registerTask("test:unit", ["build", "karma:unit"]);
+    grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
+
+    grunt.registerTask("test:unit:all", ["build", "karma:all"]);
+    grunt.registerTask("test:unit:chrome", ["build", "karma:chrome"]);
+    grunt.registerTask("test:unit:ie", ["build", "karma:ie"]);
+    grunt.registerTask("test:unit:ff", ["build", "karma:ff"]);
+    grunt.registerTask("test:unit:opera", ["build", "karma:opera"]);
+    grunt.registerTask("test:unit:safari", ["build", "karma:safari"]);
+
+    grunt.registerTask("test:e2e:phantomjs", ["build", "connect:test", "protractor_webdriver", "protractor:phantomjs"]);
+    grunt.registerTask("test:e2e:chrome", ["build", "connect:test", "protractor_webdriver", "protractor:chrome"]);
 
     grunt.registerTask("default", ["lint", "test"]);
 };

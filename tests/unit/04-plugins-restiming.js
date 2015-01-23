@@ -253,8 +253,8 @@ describe("BOOMR.plugins.ResourceTiming", function() {
                 assert.isString(trie[baseUrl]["build/boomerang-latest-debug.js"]);
                 assert.equal("3", trie[baseUrl]["build/boomerang-latest-debug.js"][0]);
 
-                // other entries are under /tests
-                assert.isObject(trie[baseUrl]["tests/"]);
+                // other entries will be under vendor
+                assert.isObject(trie[baseUrl]["vendor/"]);
             }
         });
     });
