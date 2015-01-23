@@ -115,6 +115,18 @@ module.exports = function (grunt) {
                         dest: "tests/build/<%= pkg.name %>-latest-debug.js"
                     }
                 ]
+            },
+            webserver: {
+                files: [
+                    {
+                        expand: true,
+                        nonull: true,
+                        cwd: "tests/",
+                        src: "**/*",
+                        force: true,
+                        dest: grunt.file.readJSON("tests/server/env.json").www + "/"
+                    }
+                ]
             }
         },
         uglify: {
@@ -260,6 +272,8 @@ module.exports = function (grunt) {
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
 
+    grunt.registerTask("test:e2e:debug", ["build", "connect::keepalive"]);
+
     grunt.registerTask("test:unit:all", ["build", "karma:all"]);
     grunt.registerTask("test:unit:chrome", ["build", "karma:chrome"]);
     grunt.registerTask("test:unit:ie", ["build", "karma:ie"]);
@@ -269,6 +283,8 @@ module.exports = function (grunt) {
 
     grunt.registerTask("test:e2e:phantomjs", ["build", "connect:test", "protractor_webdriver", "protractor:phantomjs"]);
     grunt.registerTask("test:e2e:chrome", ["build", "connect:test", "protractor_webdriver", "protractor:chrome"]);
+
+    grunt.registerTask("webserver:build", ["build", "copy:webserver"]);
 
     grunt.registerTask("default", ["lint", "test"]);
 };

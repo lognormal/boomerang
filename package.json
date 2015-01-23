@@ -35,7 +35,8 @@
     "grunt-protractor-webdriver": "^0.2.0",
     "phantomjs": "^1.9.13",
     "karma-tap-reporter": "0.0.3",
-    "jasmine-reporters": "^1.0.0"
+    "jasmine-reporters": "^1.0.0",
+    "express": "^4.11.1"
   },
   "scripts": {
     "test": "grunt test",
