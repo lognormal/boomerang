@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
  * Copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
- * Copyright (c) 2014-2015, SOASTA, Inc. All rights reserved.
+ * Copyright (c) 2014, SOASTA, Inc. All rights reserved.
  * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
  */
 
