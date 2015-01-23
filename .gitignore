@@ -11,5 +11,6 @@ BoomerangUpdate
 .settings/
 tests/vendor/
 tests/coverage/
+tests/results/*
 node_modules/
 build/

@@ -10,12 +10,16 @@ module.exports = function(config) {
         autoWatch: false,
 
         frameworks: ["mocha"],
-        reporters: ["progress", "coverage"],
+        reporters: ["progress", "coverage", "tap"],
         browsers: ["PhantomJS"],
 
         coverageReporter: {
             type: "html",
             dir: "tests/coverage/"
+        },
+
+        tapReporter: {
+            outputFile: 'tests/results/unit.tap'
         }
     });
 };
