@@ -37,7 +37,8 @@
     "karma-tap-reporter": "0.0.3",
     "jasmine-reporters": "^1.0.0",
     "express": "^4.11.1",
-    "fs-extra": "^0.15.0"
+    "fs-extra": "^0.15.0",
+    "chai": "^1.10.0"
   },
   "scripts": {
     "test": "grunt test",

@@ -26,6 +26,7 @@
   "devDependencies": {
     "chai": "~1.9.2",
     "mocha": "~1.21.5",
-    "expect": "~0.3.1"
+    "expect": "~0.3.1",
+    "lodash": "~3.0.0"
   }
 }

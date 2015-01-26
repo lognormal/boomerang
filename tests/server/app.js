@@ -23,10 +23,20 @@ var env = require(envFile);
 //
 // Start HTTP server / Express
 //
+var wwwRoot = env.www;
+if (wwwRoot.indexOf("/") !== 0) {
+    wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
+}
+
 var app = express();
 var server = http.createServer(app);
-app.use(express.static(env.www));
+app.use(express.static(wwwRoot));
 
 // listen
-console.log("Server starting on port " + env.port + " for " + env.www);
+console.log("Server starting on port " + env.port + " for " + wwwRoot);
 server.listen(env.port);
+
+// routes
+app.post("/e2e/beacon-blackhole", function(req, res) {
+    res.send();
+});

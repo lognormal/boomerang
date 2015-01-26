@@ -44,7 +44,8 @@ module.exports = function (grunt) {
                 "plugins/*.js",
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
-                "tests/server/*.js"
+                "tests/server/*.js",
+                "tests/pages/**/*.js"
             ]
         },
         "string-replace": {

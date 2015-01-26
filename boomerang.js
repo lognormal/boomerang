@@ -88,7 +88,7 @@ BOOMR_check_doc_domain();
 // the parameter is the window
 (function(w) {
 
-var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange;
+var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
@@ -110,6 +110,7 @@ if(BOOMR.version) {
 
 BOOMR.version = "0.9";
 BOOMR.window = w;
+BOOMR.window_iframe = orig_w;
 
 if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 
