@@ -2,7 +2,7 @@
 /*global browser,by*/
 
 var chai = require("chai");
-var expect = chai.expect;
+var assert = chai.assert;
 
 describe("BOOMR Beacon Type", function() {
     it("Should pass 01-beacon-type/01-resourcetiming-disabled", function(done) {
@@ -13,9 +13,9 @@ describe("BOOMR Beacon Type", function() {
         });
 
         browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
-            expect(complete).to.be.equal(true, "BOOMR_test.isComplete()");
+            assert.equal(complete, true, "BOOMR_test.isComplete()");
             browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
-                expect(testFailures.length).to.be.equal(0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
+                assert.equal(testFailures.length, 0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
                 done();
             });
         });
@@ -29,9 +29,9 @@ describe("BOOMR Beacon Type", function() {
         });
 
         browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
-            expect(complete).to.be.equal(true, "BOOMR_test.isComplete()");
+            assert.equal(complete, true, "BOOMR_test.isComplete()");
             browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
-                expect(testFailures.length).to.be.equal(0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
+                assert.equal(testFailures.length, 0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
                 done();
             });
         });
@@ -45,9 +45,9 @@ describe("BOOMR Beacon Type", function() {
         });
 
         browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
-            expect(complete).to.be.equal(true, "BOOMR_test.isComplete()");
+            assert.equal(complete, true, "BOOMR_test.isComplete()");
             browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
-                expect(testFailures.length).to.be.equal(0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
+                assert.equal(testFailures.length, 0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
                 done();
             });
         });
