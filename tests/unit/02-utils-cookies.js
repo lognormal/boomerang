@@ -40,6 +40,11 @@ describe("BOOMR.utils cookies", function() {
     // need to skip some tests this isn't on a TLD (eg localhost), because cookies can't get set
     var canSetCookies = window.location.host.indexOf(".") !== -1;
 
+    // cookie domain can't have a port
+    var cookieDomain = window.location.host.indexOf(":") === -1 ?
+        window.location.host :
+        window.location.host.substring(0, window.location.host.indexOf(":"));
+
     describe("BOOMR.utils.getCookie()", function() {
         it("Should have an exisiting BOOMR.utils.getCookie function", function() {
             assert.isFunction(BOOMR.utils.getCookie);
@@ -64,7 +69,7 @@ describe("BOOMR.utils cookies", function() {
 
     describe("BOOMR.utils.setCookie()", function() {
         it("Should have an exisiting BOOMR.utils.setCookie function", function() {
-            BOOMR.session.domain = window.location.host;
+            BOOMR.session.domain = cookieDomain;
 
             assert.isFunction(BOOMR.utils.setCookie);
         });
@@ -77,26 +82,26 @@ describe("BOOMR.utils cookies", function() {
         });
 
         it("Should return null if no name was passed as first argument to setCookie()", function()  {
-            BOOMR.session.domain = window.location.host;
+            BOOMR.session.domain = cookieDomain;
 
             assert.isNull(BOOMR.utils.setCookie());
         });
 
         if (canSetCookies) {
             it("Should return false when setting only Cookie name", function() {
-                BOOMR.session.domain = window.location.host;
+                BOOMR.session.domain = cookieDomain;
 
                 assert.isFalse(BOOMR.utils.setCookie(cookieName));
             });
 
             it("Should return true when setting Cookie with value", function() {
-                BOOMR.session.domain = window.location.host;
+                BOOMR.session.domain = cookieDomain;
 
                 assert.isTrue(BOOMR.utils.setCookie(cookieName, "value"));
             });
 
             it("Should return the cookie value string that we've set previously", function() {
-                BOOMR.session.domain = window.location.host;
+                BOOMR.session.domain = cookieDomain;
 
                 var value = "value";
                 BOOMR.utils.setCookie(cookieName, value);
@@ -106,7 +111,7 @@ describe("BOOMR.utils cookies", function() {
             });
 
             it("Should return the EXACT value string that we've set previously", function () {
-                BOOMR.session.domain = window.location.host;
+                BOOMR.session.domain = cookieDomain;
 
                 var value = "1";
                 var value_strict_false = 1;
@@ -119,7 +124,7 @@ describe("BOOMR.utils cookies", function() {
         }
 
         it("Should return false when trying to set a cookie bigger than 500 characters", function() {
-            BOOMR.session.domain = window.location.host;
+            BOOMR.session.domain = cookieDomain;
 
             var value = "";
             for (var index = 0; index <= 500;index++) {
@@ -203,7 +208,7 @@ describe("BOOMR.utils cookies", function() {
 
     describe("BOOMR.utils.removeCookie()", function() {
         it("Should return null when given no argurments", function() {
-            BOOMR.session.domain = window.location.host;
+            BOOMR.session.domain = cookieDomain;
 
             assert.isNull(BOOMR.utils.removeCookie());
         });
@@ -216,7 +221,7 @@ describe("BOOMR.utils cookies", function() {
 
         if (canSetCookies) {
             it("Should return false when removing previously set Cookie", function() {
-                BOOMR.session.domain = window.location.host;
+                BOOMR.session.domain = cookieDomain;
 
                 assert.isTrue(BOOMR.utils.setCookie(cookieName, "value"));
                 assert.isFalse(BOOMR.utils.removeCookie(cookieName));
