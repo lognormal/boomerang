@@ -155,12 +155,6 @@
             return done();
         }
 
-        // RT validation
-        var e = t.findResourceTimingBeacon();
-        assert.isNotNull(e);
-        assert.equal(e.initiatorType, "img");
-        assert.include(e.name, "beacon-blackhole");
-
         done();
     };
 
