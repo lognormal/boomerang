@@ -12,9 +12,13 @@
     var testPasses = [];
 
     // test framework
-    var expect;
+    var assert;
 
+    //
+    // Constants
+    //
     t.BEACON_URL = "/e2e/beacon-blackhole";
+    t.MAX_RESOURCE_WAIT = 500;
 
     t.isComplete = function() {
         return complete;
@@ -106,8 +110,7 @@
         window.mocha.checkLeaks();
 
         // set globals
-        window.assert = window.chai.assert;
-        expect = window.expect = window.chai.expect;
+        assert = window.assert = window.chai.assert;
 
         if (config.testAfterOnBeacon) {
             BOOMR.subscribe("onbeacon", function() {
@@ -142,43 +145,33 @@
         return (window.performance && typeof window.performance.getEntriesByType === "function");
     };
 
-    t.validateBeaconWasImg = function() {
+    t.validateBeaconWasImg = function(done) {
         // look for #beacon_form in the BOOMR window's IFRAME
         var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
-        expect(form).to.equal(null);
+        assert.isNull(form);
 
         if (!t.isResourceTimingSupported()) {
             // can't also validate via RT
-            return;
+            return done();
         }
 
         // RT validation
         var e = t.findResourceTimingBeacon();
-        expect(e).to.not.equal(null);
-        expect(e.initiatorType).to.equal("img");
-        expect(e.name).to.contain("beacon-blackhole");
+        assert.isNotNull(e);
+        assert.equal(e.initiatorType, "img");
+        assert.include(e.name, "beacon-blackhole");
+
+        done();
     };
 
-    t.validateBeaconWasForm = function() {
+    t.validateBeaconWasForm = function(done) {
         // look for #beacon_form in the BOOMR window's IFRAME
         var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
-        expect(form).to.not.equal(null);
-        expect(form.enctype).to.equal("application/x-www-form-urlencoded");
-        expect(form.action).to.contain(t.BEACON_URL);
+        assert.isNotNull(form);
+        assert.equal(form.enctype, "application/x-www-form-urlencoded");
+        assert.include(form.action, t.BEACON_URL);
 
-        if (!t.isResourceTimingSupported()) {
-            // can't also validate via RT
-            return;
-        }
-
-        // RT validation
-        var e = t.findResourceTimingBeacon();
-        if (e === null) {
-            console.error("hi");
-        }
-        expect(e).to.not.equal(null);
-        expect(e.initiatorType).to.equal("iframe");
-        expect(e.name).to.contain(t.BEACON_URL);
+        done();
     };
 
     window.BOOMR_test = t;

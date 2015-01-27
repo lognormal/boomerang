@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*global chai,expect*/
+/*global chai*/
 
 describe("BOOMR.plugins.ResourceTiming", function() {
     var assert = chai.assert;
@@ -36,13 +36,13 @@ describe("BOOMR.plugins.ResourceTiming", function() {
     //
     describe("toBase36()", function() {
         it("should return the base 36 equivalent of 100", function() {
-            expect(BOOMR.plugins.ResourceTiming.toBase36(100)).to.be("2s");
+            assert.equal(BOOMR.plugins.ResourceTiming.toBase36(100), "2s");
         });
 
         it("should return an empty string if the input is not a number", function() {
-            expect(BOOMR.plugins.ResourceTiming.toBase36()).to.be("");
-            expect(BOOMR.plugins.ResourceTiming.toBase36("")).to.be("");
-            expect(BOOMR.plugins.ResourceTiming.toBase36("a")).to.be("");
+            assert.equal(BOOMR.plugins.ResourceTiming.toBase36(), "");
+            assert.equal(BOOMR.plugins.ResourceTiming.toBase36(""), "");
+            assert.equal(BOOMR.plugins.ResourceTiming.toBase36("a"), "");
         });
     });
 
@@ -51,31 +51,31 @@ describe("BOOMR.plugins.ResourceTiming", function() {
     //
     describe("trimTiming()", function() {
         it("should handle 0", function() {
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(0)).to.be(0);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(0), 0);
         });
 
         it("should handle undefined", function() {
-            expect(BOOMR.plugins.ResourceTiming.trimTiming()).to.be(0);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(), 0);
         });
 
         it("should handle non-numbers", function() {
-            expect(BOOMR.plugins.ResourceTiming.trimTiming("a")).to.be(0);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming("a"), 0);
         });
 
         it("should round to the nearest number", function() {
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(0, 0)).to.be(0);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100, 0)).to.be(100);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0)).to.be(101);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100.01, 0)).to.be(100);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0)).to.be(101);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(0, 0), 0);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 0), 100);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0), 101);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.01, 0), 100);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0), 101);
         });
 
         it("should round when given a navtiming offset", function() {
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100)).to.be(100);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100, 1)).to.be(99);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100.12, 1.12)).to.be(99);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100, 100)).to.be(0);
-            expect(BOOMR.plugins.ResourceTiming.trimTiming(100, 101)).to.be(-1);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100), 100);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 1), 99);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.12, 1.12), 99);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 100), 0);
+            assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 101), -1);
         });
     });
 
@@ -92,7 +92,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
                     }
                 }
             };
-            expect(BOOMR.plugins.ResourceTiming.convertToTrie(data)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
         });
 
         it("should convert a two-node tree whose nodes don't intersect", function() {
@@ -109,7 +109,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
                     }
                 }
             };
-            expect(BOOMR.plugins.ResourceTiming.convertToTrie(data)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
         });
 
         it("should convert a complex tree", function() {
@@ -125,7 +125,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
                     }
                 }
             };
-            expect(BOOMR.plugins.ResourceTiming.convertToTrie(data)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
         });
     });
 
@@ -141,7 +141,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
             var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
 
-            expect(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
         });
 
         it("should optimize a simple tree", function() {
@@ -153,7 +153,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
             var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
 
-            expect(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
         });
 
         it("should optimize a complex tree", function() {
@@ -171,7 +171,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
             var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
 
-            expect(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true)).to.eql(expected);
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
         });
     });
 
