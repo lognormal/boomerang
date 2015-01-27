@@ -1,7 +1,7 @@
 .gitignore
 *.gz
 *.swp
-boomerang-*.js
+/boomerang-*.js
 Default_Boomerang.xml
 boomerang-build.*
 BoomerangUpdate
@@ -14,3 +14,4 @@ tests/coverage/
 tests/results/*
 node_modules/
 build/
+tests/server/env.json
