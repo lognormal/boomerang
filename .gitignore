@@ -1,7 +1,7 @@
 .gitignore
 *.gz
 *.swp
-boomerang-*.js
+/boomerang-*.js
 Default_Boomerang.xml
 boomerang-build.*
 BoomerangUpdate
