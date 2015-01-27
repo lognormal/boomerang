@@ -144,7 +144,7 @@
 
     t.validateBeaconWasImg = function() {
         // look for #beacon_form in the BOOMR window's IFRAME
-        var form = BOOMR.window_iframe ? BOOMR.window_iframe.document.getElementById("beacon_form") : null;
+        var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
         expect(form).to.equal(null);
 
         if (!t.isResourceTimingSupported()) {
@@ -161,7 +161,7 @@
 
     t.validateBeaconWasForm = function() {
         // look for #beacon_form in the BOOMR window's IFRAME
-        var form = BOOMR.window_iframe ? BOOMR.window_iframe.document.getElementById("beacon_form") : null;
+        var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
         expect(form).to.not.equal(null);
         expect(form.enctype).to.equal("application/x-www-form-urlencoded");
         expect(form.action).to.contain(t.BEACON_URL);
