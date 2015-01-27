@@ -1,5 +1,5 @@
-/*eslint-env mocha*/
-/*global browser*/
+/*eslint-env mocha,node*/
+/*global browser,by*/
 
 var chai = require("chai");
 var assert = chai.assert;
