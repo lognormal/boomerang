@@ -109,7 +109,7 @@
         window.assert = window.chai.assert;
         expect = window.expect = window.chai.expect;
 
-        if (config.onBeacon) {
+        if (config.testAfterOnBeacon) {
             BOOMR.subscribe("onbeacon", function() {
                 // wait a few more ms so the beacon fires
                 // TODO: Trim this timing down if we can make it more reliable
