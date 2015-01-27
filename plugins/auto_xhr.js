@@ -208,7 +208,7 @@ MutationHandler.prototype.sendEvent = function(i) {
 	}
 	else {
 		// No crumb, so try again after 5 seconds
-		setTimeout(function() { self.send_event(i); }, 5000);
+		setTimeout(function() { self.sendEvent(i); }, 5000);
 	}
 };
 
