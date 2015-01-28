@@ -5,8 +5,8 @@ var chai = require("chai");
 var assert = chai.assert;
 
 describe("BOOMR Beacon Type", function() {
-    it("Should pass 01-beacon-type/01-resourcetiming-disabled", function(done) {
-        browser.driver.get("http://localhost:4002/pages/01-beacon-type/01-resourcetiming-disabled.html");
+    it("Should pass 01-beacon-type/00-resourcetiming-disabled", function(done) {
+        browser.driver.get("http://localhost:4002/pages/01-beacon-type/00-resourcetiming-disabled.html");
 
         browser.driver.wait(function() {
             return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));
@@ -37,8 +37,8 @@ describe("BOOMR Beacon Type", function() {
         });
     });
 
-    it("Should pass 01-beacon-type/01-resourcetiming-enabled-browser-unsupported", function(done) {
-        browser.driver.get("http://localhost:4002/pages/01-beacon-type/01-resourcetiming-enabled-browser-unsupported.html");
+    it("Should pass 01-beacon-type/02-resourcetiming-enabled-browser-unsupported", function(done) {
+        browser.driver.get("http://localhost:4002/pages/01-beacon-type/02-resourcetiming-enabled-browser-unsupported.html");
 
         browser.driver.wait(function() {
             return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));

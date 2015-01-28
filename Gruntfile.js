@@ -285,6 +285,7 @@ module.exports = function (grunt) {
     grunt.registerTask("test", ["test:unit", "test:e2e"]);
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
+    grunt.registerTask("test:e2e:chrome", ["test:e2e:chrome"]);
 
     grunt.registerTask("test:e2e:debug", ["build", "connect::keepalive"]);
 

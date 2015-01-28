@@ -1,6 +1,55 @@
 /*eslint-env mocha*/
 /*global _*/
 
+//
+// BOOMR.plugins.TestFramework
+//
+(function(window) {
+
+    BOOMR = BOOMR || {};
+    BOOMR.plugins = BOOMR.plugins || {};
+    if (BOOMR.plugins.TestFramework) {
+        return;
+    }
+
+    BOOMR.plugins.TestFramework = {
+        initialized: false,
+        fired_page_ready: false,
+        fired_onbeacon: false,
+        fired_before_unload: false,
+        lastBeaconData: false,
+        page_ready: function() {
+            this.fired_page_ready = true;
+        },
+        onbeacon: function(data) {
+            this.fired_onbeacon = true;
+            this.lastBeaconData = data;
+        },
+        before_unload: function() {
+            this.fired_before_unload = true;
+        },
+        init: function() {
+            if(this.initialized) {
+                return this;
+            }
+
+            BOOMR.subscribe("page_ready", this.page_ready, null, this);
+            BOOMR.subscribe("onbeacon", this.onbeacon, null, this);
+            BOOMR.subscribe("before_unload", this.before_unload, null, this);
+
+            this.initialized = true;
+
+            return this;
+        },
+        is_complete: function() {
+            return true;
+        }
+    };
+})();
+
+//
+// BOOMR_test
+//
 (function(window) {
     "use strict";
 
@@ -20,6 +69,9 @@
     t.BEACON_URL = "/e2e/beacon-blackhole";
     t.MAX_RESOURCE_WAIT = 500;
 
+    //
+    // Exports
+    //
     t.isComplete = function() {
         return complete;
     };
