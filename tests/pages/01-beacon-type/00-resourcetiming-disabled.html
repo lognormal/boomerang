@@ -4,12 +4,10 @@
         <title>Mocha</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- NOTE: If these change, update 04-plugins-restiming.js -->
         <link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
     </head>
     <body>
         <div id="mocha"></div>
-        <!-- NOTE: If these change, update 04-plugins-restiming.js -->
         <script src="../../vendor/mocha/mocha.js"></script>
         <script src="../../vendor/node-assert/assert.js"></script>
         <script src="../../vendor/assertive-chai/assertive-chai.js"></script>
@@ -19,7 +17,7 @@
         <script>
             mocha.setup("bdd");
         </script>
-        <script src="01-resourcetiming-disabled.js" type="text/javascript"></script>
+        <script src="00-resourcetiming-disabled.js" type="text/javascript"></script>
         <script>
             BOOMR_test.init({
                 ResourceTiming: {
