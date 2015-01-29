@@ -386,7 +386,7 @@ impl = {
 	 * Figure out how long boomerang and config.js took to load using resource timing if available, or built in timestamps
 	 */
 	getBoomerangTimings: function() {
-		var res, k, urls, url, startTime, data;
+		var res, urls, url, startTime, data;
 
 		function trimTiming(time, startTime) {
 			// strip from microseconds to milliseconds only
@@ -797,7 +797,7 @@ impl = {
 		BOOMR.plugins.RT.endTimer("t_domloaded");
 	},
 
-	clear: function(vars) {
+	clear: function() {
 		if (impl.addedVars && impl.addedVars.length > 0) {
 			BOOMR.removeVar(impl.addedVars);
 			impl.addedVars = [];
@@ -822,7 +822,7 @@ BOOMR.plugins.RT = {
 		// we already had a beacon URL, in which case we'll hold on to it until our session
 		// expires, and then use it.
 		// It's possible that a beacon collector dies while a session is active, and in that
-		// case we might end up sending beacons to a blackhole until the next config.js 
+		// case we might end up sending beacons to a blackhole until the next config.js
 		// request tells us to force the new beacon url
 		if(config && config.beacon_url) {
 			if(!impl.beacon_url || config.force_beacon_url) {
@@ -1091,5 +1091,3 @@ BOOMR.plugins.RT = {
 
 }(window));
 // End of RT plugin
-
-

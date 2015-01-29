@@ -59,7 +59,7 @@ var impl = {
 	},
 
 	start: function() {
-		this.load_img('ipv6', 'host');
+		this.load_img("ipv6", "host");
 	},
 
 	load_img: function() {
@@ -77,7 +77,7 @@ var impl = {
 		}
 
 		// Skip if URL wasn't set for this test
-		if(!this[which + '_url']) {
+		if(!this[which + "_url"]) {
 			return this.load_img.apply(this, a);
 		}
 
@@ -106,7 +106,7 @@ var impl = {
 		img.onerror = error;
 		timer = setTimeout(error, this.timeout);
 		this.timers[which].start = new Date().getTime();
-		img.src = this[which + '_url'] + rnd;
+		img.src = this[which + "_url"] + rnd;
 
 		return true;
 	},
@@ -116,19 +116,19 @@ var impl = {
 			return;
 		}
 
-		BOOMR.removeVar('ipv6_latency', 'ipv6_lookup');
+		BOOMR.removeVar("ipv6_latency", "ipv6_lookup");
 		if(this.timers.ipv6.end !== null) {
-			BOOMR.addVar('ipv6_latency', this.timers.ipv6.end - this.timers.ipv6.start);
+			BOOMR.addVar("ipv6_latency", this.timers.ipv6.end - this.timers.ipv6.start);
 		}
 		else {
-			BOOMR.addVar('ipv6_latency', 'NA');
+			BOOMR.addVar("ipv6_latency", "NA");
 		}
 
 		if(this.timers.host.end !== null) {
-			BOOMR.addVar('ipv6_lookup', this.timers.host.end - this.timers.host.start);
+			BOOMR.addVar("ipv6_lookup", this.timers.host.end - this.timers.host.start);
 		}
 		else {
-			BOOMR.addVar('ipv6_lookup', 'NA');
+			BOOMR.addVar("ipv6_lookup", "NA");
 		}
 
 		this.complete = true;
@@ -169,13 +169,13 @@ BOOMR.plugins.IPv6 = {
 		}
 
 		// make sure that test images use the same protocol as the host page
-		if(BOOMR.window.location.protocol === 'https:') {
+		if(BOOMR.window.location.protocol === "https:") {
 			impl.complete = true;
 			return this;
 		}
 
-		impl.ipv6_url = impl.ipv6_url.replace(/^https:/, 'http:');
-		impl.host_url = impl.host_url.replace(/^https:/, 'http:');
+		impl.ipv6_url = impl.ipv6_url.replace(/^https:/, "http:");
+		impl.host_url = impl.host_url.replace(/^https:/, "http:");
 
 		BOOMR.subscribe("page_ready", impl.start, null, impl);
 		BOOMR.subscribe("before_unload", impl.skip, null, impl);
@@ -189,4 +189,3 @@ BOOMR.plugins.IPv6 = {
 };
 
 }());
-

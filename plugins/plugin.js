@@ -9,10 +9,7 @@ own plugins.
 //               THIS IS A SAMPLE PLUGIN                //
 //////////////////////////////////////////////////////////
 
-// w is the window object
-(function(w) {
-
-var d=w.document;
+(function() {
 
 // First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 // you'll need this.
@@ -26,7 +23,7 @@ var impl = {
 
 BOOMR.plugins.MyPlugin = {
 	init: function(config) {
-		var i, properties = ["prop1", "prop2"];	// list of user configurable properties in O
+		var properties = ["prop1", "prop2"];	// list of user configurable properties in O
 
 		// This block is only needed if you actually have user configurable properties
 		BOOMR.utils.pluginConfig(impl, config, "MyPlugin", properties);
@@ -48,5 +45,4 @@ BOOMR.plugins.MyPlugin = {
 	}
 };
 
-}(window));
-
+}());

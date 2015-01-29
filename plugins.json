@@ -1,0 +1,15 @@
+{
+    "plugins": [
+        "plugins/page-params.js",
+        "plugins/auto_xhr.js",
+        "plugins/rt.js",
+        "plugins/bw.js",
+        "plugins/navtiming.js",
+        "plugins/restiming.js",
+        "plugins/mobile.js",
+        "plugins/memory.js",
+        "plugins/cache_reload.js",
+        "plugins/md5.js",
+        "plugins/logn_config.js"
+    ]
+}

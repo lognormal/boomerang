@@ -127,6 +127,14 @@ function optimizeTrie(cur, top) {
  * @return [number] Number of ms from start time
  */
 function trimTiming(time, startTime) {
+	if (typeof time !== "number") {
+		time = 0;
+	}
+
+	if (typeof startTime !== "number") {
+		startTime = 0;
+	}
+
 	// strip from microseconds to milliseconds only
 	var timeMs = Math.round(time ? time : 0),
 	    startTimeMs = Math.round(startTime ? startTime : 0);
@@ -140,11 +148,11 @@ function trimTiming(time, startTime) {
  */
 function getNavStartTime(frame) {
 	var navStart = 0;
-	
+
 	try
 	{
 		if(("performance" in frame) &&
-		frame.performance && 
+		frame.performance &&
 		frame.performance.timing &&
 		frame.performance.timing.navigationStart) {
 			navStart = frame.performance.timing.navigationStart;
@@ -154,7 +162,7 @@ function getNavStartTime(frame) {
 	{
 		// swallow all access exceptions
 	}
-	
+
 	return navStart;
 }
 
@@ -170,12 +178,24 @@ function getNavStartTime(frame) {
 function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, navEntry, t;
 
+	if(typeof isTopWindow === "undefined") {
+		isTopWindow = true;
+	}
+
+	if(typeof offset === "undefined") {
+		offset = 0;
+	}
+
+	if(typeof depth === "undefined") {
+		depth = 0;
+	}
+
 	if(depth > 10) {
 		return entries;
 	}
 
 	navStart = getNavStartTime(frame);
-	
+
 	// get sub-frames' entries first
 	if(frame.frames) {
 		for(i = 0; i < frame.frames.length; i++) {
@@ -242,7 +262,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		// offset all of the entries by the specified offset for this frame
 		var frameEntries = frame.performance.getEntriesByType("resource"),
 		    frameFixedEntries = [];
-		
+
 		for(i = 0; frameEntries && i < frameEntries.length; i++) {
 			t = frameEntries[i];
 			frameFixedEntries.push({
@@ -262,7 +282,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 				responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0
 			});
 		}
-		
+
 		entries = entries.concat(frameFixedEntries);
 	}
 	catch(e) {
@@ -273,13 +293,17 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 }
 
 /**
- * Converts a number to base-36
+ * Converts a number to base-36.
+ *
+ * If not a number, or === 0, return "". This is to facilitate
+ * compression in the timing array, where "blanks" or 0s show as a series
+ * of trailing ",,,," that can be trimmed.
  *
  * @param [number] n Number
- * @return Base-36 number, or empty string if undefined.
+ * @return Base-36 number, or empty string.
  */
 function toBase36(n) {
-	return n ? n.toString(36) : "";
+	return (typeof n === "number" && n !== 0) ? n.toString(36) : "";
 }
 
 /**
@@ -289,15 +313,15 @@ function toBase36(n) {
 function getResourceTiming() {
 /*eslint no-script-url:0*/
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
-	    i, e, j, results = {}, initiatorType, url, data;
+	    i, e, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
-		return [];
+		return {};
 	}
 
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
-		
+
 		if(e.name.indexOf("about:") === 0 ||
 		   e.name.indexOf("javascript:") === 0) {
 			continue;
@@ -356,6 +380,7 @@ function getResourceTiming() {
 var impl = {
 	complete: false,
 	initialized: false,
+	supported: false,
 	done: function() {
 		var r;
 		if(this.complete) {
@@ -392,6 +417,7 @@ BOOMR.plugins.ResourceTiming = {
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
 			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			BOOMR.subscribe("before_unload", impl.done, null, impl);
+			impl.supported = true;
 		} else {
 			impl.complete = true;
 		}
@@ -403,12 +429,16 @@ BOOMR.plugins.ResourceTiming = {
 	is_complete: function() {
 		return impl.complete;
 	},
+	is_supported: function() {
+		return impl.supported;
+	},
 	// exports for test
 	trimTiming: trimTiming,
 	convertToTrie: convertToTrie,
 	optimizeTrie: optimizeTrie,
 	findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
-	getResourceTiming: getResourceTiming
+	getResourceTiming: getResourceTiming,
+	toBase36: toBase36
 };
 
 }());

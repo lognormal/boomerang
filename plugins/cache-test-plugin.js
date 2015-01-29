@@ -9,7 +9,7 @@ var dc=document,
     t_start, load;
 
 // Don't even bother creating the plugin if this is mhtml
-if(!dom || dom === 'localhost' || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if(!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
@@ -20,7 +20,7 @@ load=function() {
 	s1.onload = BOOMR.plugins.CT.loaded;
 	s1.src="//lognormal.net/boomerang/cache-test-v2.js";
 	t_start = new Date().getTime();
-	BOOMR.addVar('cch.ce', t_start);
+	BOOMR.addVar("cch.ce", t_start);
 
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
@@ -36,7 +36,7 @@ BOOMR.plugins.CT = {
 			return this;
 		}
 
-		if(BOOMR.window == window) {
+		if(BOOMR.window === window) {
 			BOOMR.subscribe("page_ready", load, null, null);
 		}
 		else {
@@ -57,8 +57,8 @@ BOOMR.plugins.CT = {
 		if(!t) { t=-1; }
 		// how long did it take for the call to return
 		BOOMR.addVar({
-			'cch.lt': new Date().getTime()-t_start,
-			'cch.se': t
+			"cch.lt": new Date().getTime()-t_start,
+			"cch.se": t
 		});
 		complete = true;
 		BOOMR.sendBeacon();
@@ -67,4 +67,3 @@ BOOMR.plugins.CT = {
 };
 
 }());
-

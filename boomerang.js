@@ -88,7 +88,7 @@ BOOMR_check_doc_domain();
 // the parameter is the window
 (function(w) {
 
-var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange;
+var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
 // This is the only block where we use document without the w. qualifier
 if(w.parent !== w
@@ -110,6 +110,7 @@ if(BOOMR.version) {
 
 BOOMR.version = "0.9";
 BOOMR.window = w;
+BOOMR.boomerang_frame = orig_w;
 
 if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 
@@ -192,7 +193,7 @@ dispatchEvent = function(e_name, e_data, async) {
 // https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
 
 // Set the name of the hidden property and the change event for visibility
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
 	visibilityState = "visibilityState";
 	visibilityChange = "visibilitychange";
 }
@@ -469,7 +470,7 @@ boomr = {
 		},
 
 		cleanupURL: function(url) {
-			if (!url) {
+			if (!url || Object.prototype.toString.call(url) === "[object Array]") {
 				return "";
 			}
 			if(impl.strip_query_string) {
@@ -634,11 +635,6 @@ boomr = {
 			var input  = document.createElement("input"),
 			    urls = [ impl.beacon_url ];
 
-			// running inside a UIWebView.  Our beacons don't work well here
-			if(navigator.standalone === false) {
-				return;
-			}
-
 			form.method = method;
 			form.id = "beacon_form";
 
@@ -665,6 +661,7 @@ boomr = {
 			}
 
 			function submit() {
+				/*eslint-disable no-script-url*/
 				var iframe,
 				    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
 
@@ -687,7 +684,10 @@ boomr = {
 				document.body.appendChild(iframe);
 				document.body.appendChild(form);
 
-				form.submit();
+				try {
+					form.submit();
+				} catch (ignore) {
+				}
 
 				if (urls.length) {
 					BOOMR.setImmediate(submit);
@@ -1042,7 +1042,7 @@ boomr = {
 	instrumentXHR: function() { },
 
 	sendBeacon: function(beacon_url_override) {
-		var k, form, furl, img, length, errors=[];
+		var k, form, furl, img, length=0, errors=[], url, nparams=0;
 
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
@@ -1121,8 +1121,33 @@ boomr = {
 			return true;
 		}
 
-		form = document.createElement("form");
-		length = BOOMR.utils.pushVars(form, impl.vars);
+		if(!BOOMR.hasVar("restiming")) {
+			// Use an Image beacon if we're not sending ResourceTiming data
+
+			// if there are already url parameters in the beacon url,
+			// change the first parameter prefix for the boomerang url parameters to &
+
+			url = [];
+
+			for(k in impl.vars) {
+				if(impl.vars.hasOwnProperty(k)) {
+					nparams++;
+					url.push(encodeURIComponent(k)
+						+ "="
+						+ (
+							impl.vars[k]===undefined || impl.vars[k]===null
+							? ""
+							: encodeURIComponent(impl.vars[k])
+						)
+					);
+				}
+			}
+
+			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
+		} else {
+			form = document.createElement("form");
+			length = BOOMR.utils.pushVars(form, impl.vars);
+		}
 
 		BOOMR.removeVar("qt");
 
@@ -1130,7 +1155,7 @@ boomr = {
 		// The only thing that can stop it now is if we're rate limited
 		impl.fireEvent("onbeacon", impl.vars);
 
-		if(!length) {
+		if(length === 0 && nparams === 0) {
 			// do not make the request if there is no data
 			return this;
 		}
@@ -1141,9 +1166,22 @@ boomr = {
 			return this;
 		}
 
-		// using 2000 here as a de facto maximum URL length based on:
-		// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
-		BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > 2000 ? "POST" : "GET") : "POST");
+		if(nparams) {
+			img = new Image();
+			img.src=furl;
+
+			if (impl.secondary_beacons) {
+				for(k = 0; k<impl.secondary_beacons.length; k++) {
+					furl = impl.secondary_beacons[k] + "?" + url.join("&");
+					img = new Image();
+					img.src=furl;
+				}
+			}
+		} else {
+			// using 2000 here as a de facto maximum URL length based on:
+			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+			BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > 2000 ? "POST" : "GET") : "POST");
+		}
 
 		return true;
 	}
