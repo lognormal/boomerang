@@ -30,6 +30,10 @@ elif [ "$1" = "lt2" ]; then
 	cf_collector=http://c-lt2.go-mpulse.net
 	og_collector=http://o-lt2.go-mpulse.net
 	cf_main=https://mpulse-lt2.soasta.com
+elif [ "$1" = "lt3" ]; then
+	cf_collector=http://c-lt3.go-mpulse.net
+	og_collector=http://o-lt3.go-mpulse.net
+	cf_main=https://mpulse-lt3.soasta.com
 elif [ "$1" = "rum-dev" ]; then
 	cf_collector=http://rum-dev-collector.soasta.com
 	og_collector=http://rum-dev-collector.soasta.com
@@ -41,6 +45,7 @@ elif [ "$1" != "localhost" -a "$1" != "default" -a "$1" != "local" ]; then
 	echo "<Server> should be one of:"
 	echo "	default (localhost)"
 	echo "	lt2"
+	echo "	lt3"
 	echo "	rum-dev"
 	echo "	mpulse-production"
 	echo ""
@@ -165,7 +170,7 @@ current=1
 echo "5.3) Update the version for a specific domain..." | tee -a $LOG
 
 echo "$1 on $cf_main    $VERSION" | tee -a $LOG
- 
+
 awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 	while read DomainId TenantName; do
 		echo "Updating $TenantName/$DomainId... ($current/$total)" | tee -a $LOG
@@ -175,7 +180,7 @@ awk -F "|" '{print $1,$5}' "$tmpfile2" | \
 			echo -n "$DomainId | $TenantName | " >> $baddomains
 			echo "$result" | grep "^< HTTP/1\.1 " | grep -v 204 | sed -e 's/.*< HTTP\/1\.1 //' | tee -a $LOG | tee -a $baddomains
 		fi
-			
+
 	done
 
 rm -f $tmpfile2
