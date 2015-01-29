@@ -293,13 +293,17 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 }
 
 /**
- * Converts a number to base-36
+ * Converts a number to base-36.
+ *
+ * If not a number, or === 0, return "". This is to facilitate
+ * compression in the timing array, where "blanks" or 0s show as a series
+ * of trailing ",,,," that can be trimmed.
  *
  * @param [number] n Number
- * @return Base-36 number, or empty string if undefined.
+ * @return Base-36 number, or empty string.
  */
 function toBase36(n) {
-	return (typeof n === "number" && n > 0) ? n.toString(36) : "";
+	return (typeof n === "number" && n !== 0) ? n.toString(36) : "";
 }
 
 /**
