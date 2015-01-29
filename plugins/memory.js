@@ -63,7 +63,7 @@ impl = {
 
 				BOOMR.addVar("dom.res", res.length);
 
-				a = document.createElement("a");
+				a = BOOMR.window.document.createElement("a");
 
 				[].forEach.call(res, function(r) {
 					a.href=r.name;
