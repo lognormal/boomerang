@@ -44,6 +44,10 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             assert.equal(BOOMR.plugins.ResourceTiming.toBase36(""), "");
             assert.equal(BOOMR.plugins.ResourceTiming.toBase36("a"), "");
         });
+
+        it("should return an empty string if the input is 0", function() {
+            assert.equal(BOOMR.plugins.ResourceTiming.toBase36(0), "");
+        });
     });
 
     //

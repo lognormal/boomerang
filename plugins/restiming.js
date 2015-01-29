@@ -299,7 +299,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
  * @return Base-36 number, or empty string if undefined.
  */
 function toBase36(n) {
-	return (typeof n === "number") ? n.toString(36) : "";
+	return (typeof n === "number" && n > 0) ? n.toString(36) : "";
 }
 
 /**
