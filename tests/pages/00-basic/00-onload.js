@@ -27,12 +27,26 @@ describe("e2e/00-basic/00-onload", function() {
 		if (BOOMR_test.isResourceTimingSupported()) {
 			assert.isNumber(tf.lastBeaconData["dom.doms"], "dom.doms");
 			assert.isNumber(tf.lastBeaconData["dom.res"], "dom.res");
+		} else {
+			assert.isUndefined(tf.lastBeaconData["dom.doms"], "dom.doms undefined");
+			assert.isUndefined(tf.lastBeaconData["dom.res"], "dom.res undefined");
 		}
 	});
 
 	it("Should have set mem.* properties", function() {
-		assert.isNumber(tf.lastBeaconData["mem.total"], "mem.total");
-		assert.isNumber(tf.lastBeaconData["mem.used"], "mem.used");
+		var p = window.performance;
+		var c = window.console;
+		var m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
+
+		if (m) {
+			// they should exist
+			assert.isNumber(tf.lastBeaconData["mem.total"], "mem.total");
+			assert.isNumber(tf.lastBeaconData["mem.used"], "mem.used");
+		} else {
+			// they shouldn't exist, not supported by the Browser
+			assert.isUndefined(tf.lastBeaconData["mem.total"], "mem.total undefined");
+			assert.isUndefined(tf.lastBeaconData["mem.used"], "mem.total undefined");
+		}
 	});
 
 	it("Should have set RT properties", function() {
@@ -61,11 +75,15 @@ describe("e2e/00-basic/00-onload", function() {
 		// only if we have orientation
 		if(s && s.orientation) {
 			assert.isString(tf.lastBeaconData["scr.orn"], "scr.orn");
+		} else {
+			assert.isUndefined(tf.lastBeaconData["scr.orn"], "scr.orn undefined");
 		}
 
 		// only if we have pixel ratio
 		if(window.devicePixelRatio && window.devicePixelRatio > 1) {
 			assert.isNumber(tf.lastBeaconData["scr.dpx"], "scr.dpx");
+		} else {
+			assert.isUndefined(tf.lastBeaconData["scr.dpx"], "scr.dpx undefined");
 		}
 	});
 
