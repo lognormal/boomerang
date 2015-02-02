@@ -30,13 +30,23 @@ if (wwwRoot.indexOf("/") !== 0) {
 
 var app = express();
 var server = http.createServer(app);
-app.use(express.static(wwwRoot));
 
 // listen
 console.log("Server starting on port " + env.port + " for " + wwwRoot);
 server.listen(env.port);
 
-// routes
+//
+// Routes
+//
+
+// blackhole for beacons, send 204
 app.post("/e2e/beacon-blackhole", function(req, res) {
-    res.send();
+    res.status(204).send();
 });
+
+app.get("/e2e/beacon-blackhole", function(req, res) {
+    res.status(204).send();
+});
+
+// all static content follows afterwards
+app.use(express.static(wwwRoot));
