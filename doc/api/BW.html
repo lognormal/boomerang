@@ -75,6 +75,13 @@ is sent over SSL, then running the test over SSL probably gets you what you want
 set <code>test_https</code> to <code>true</code>, boomerang will run the test instead of skipping.
 </dd>
 
+<dt>block_beacon</dt>
+<dd>
+<strong>[optional]</strong>
+By default, the bandwidth plugin will not block boomerang from sending a beacon, so the results
+will not be included in the broadcast with default settings. If you set <code>block_beacon</code> to
+<code>true</code>, boomerang will wait for the results of the test before sending the beacon.
+</dd>
 
 </dl>
 

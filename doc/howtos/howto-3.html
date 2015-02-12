@@ -28,7 +28,10 @@ that by measuring not just the bandwidth, but also the error value in that measu
 
 <p>
 Simply adding boomerang to a page and calling the <code>init()</code> method is sufficient to start the bandwidth
-test and beacon its results back to the server.  This is the code you'd use:
+test. If you want the beacon results to include the results of the bandwidth test, setting <code>block_beacon</code>
+to <code>true</code> will force boomerang to wait for the test to complete before sending the beacon. If you do not
+turn on the <code>block_beacon</code> feature, you will only receive bandwidth results if they were cached in a
+cookie by a previous test run.
 </p>
 <pre>
 &lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
@@ -36,7 +39,8 @@ test and beacon its results back to the server.  This is the code you'd use:
 BOOMR.init({
 	beacon_url: "http://yoursite.com/path/to/beacon.php",
 	BW: {
-		base_url: "http://base_url/to/bandwidth/images/"
+		base_url: "http://base_url/to/bandwidth/images/",
+		block_beacon: true
 	}
 });
 &lt;/script&gt;
