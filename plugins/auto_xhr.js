@@ -426,7 +426,6 @@ function instrumentXHR() {
 
 		req.open = function(method, url, async) {
 			a.href = url;
-			url = a.href;
 
 			if (BOOMR.xhr_excludes.hasOwnProperty(a.href)
 			    || BOOMR.xhr_excludes.hasOwnProperty(a.hostname)
@@ -471,7 +470,7 @@ function instrumentXHR() {
 
 			addListener("loadend");
 
-			resource.url = url;
+			resource.url = a.href;
 			resource.method = method;
 			if (!async) {
 				resource.synchronous = true;
@@ -506,7 +505,7 @@ BOOMR.plugins.AutoXHR = {
 	is_complete: function() { return true; },
 	init: function(config) {
 		d = BOOMR.window.document;
-		a = document.createElement("A");
+		a = BOOMR.window.document.createElement("A");
 
 		BOOMR.instrumentXHR = instrumentXHR;
 		BOOMR.uninstrumentXHR = uninstrumentXHR;

@@ -511,7 +511,7 @@ BOOMR.plugins.BW = {
 		}
 
 		// Turn image url into an absolute url if it isn't already
-		a = document.createElement("a");
+		a = BOOMR.window.document.createElement("a");
 		a.href = impl.base_url;
 
 		if( !impl.test_https && a.protocol === "https:") {
