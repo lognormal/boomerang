@@ -17,13 +17,17 @@
         fired_page_ready: false,
         fired_onbeacon: false,
         fired_before_unload: false,
+        fired_before_beacon: false,
         lastBeaconData: false,
         page_ready: function() {
             this.fired_page_ready = true;
         },
+        before_beacon: function(data) {
+            this.fired_before_beacon = true;
+            this.lastBeaconData = _.clone(data);
+        },
         onbeacon: function(data) {
             this.fired_onbeacon = true;
-            this.lastBeaconData = data;
         },
         before_unload: function() {
             this.fired_before_unload = true;
@@ -34,6 +38,7 @@
             }
 
             BOOMR.subscribe("page_ready", this.page_ready, null, this);
+            BOOMR.subscribe("before_beacon", this.before_beacon, null, this);
             BOOMR.subscribe("onbeacon", this.onbeacon, null, this);
             BOOMR.subscribe("before_unload", this.before_unload, null, this);
 
