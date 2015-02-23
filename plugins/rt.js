@@ -556,8 +556,13 @@ impl = {
 	 * Validate that the time we think is the load time is correct.  This can be wrong if boomerang was loaded
 	 * after onload, so in that case, if navigation timing is available, we use that instead.
 	 */
-	validateLoadTimestamp: function(t_now, data) {
+	validateLoadTimestamp: function(t_now, data, ename) {
 		var t_done = t_now;
+
+		// if this is an XHR event, trust the input end "now" timestamp
+		if(ename === "xhr") {
+			return t_done;
+		}
 
 		// xhr beacon with detailed timing information
 		if (data && data.timing && data.timing.loadEventEnd) {
@@ -971,7 +976,7 @@ BOOMR.plugins.RT = {
 
 		impl.complete = false;
 
-		t_done = impl.validateLoadTimestamp(t_now, edata);
+		t_done = impl.validateLoadTimestamp(t_now, edata, ename);
 
 		if(ename==="load" || ename==="visible" || ename==="xhr") {
 			if (!impl.setPageLoadTimers(ename, t_done, edata)) {
