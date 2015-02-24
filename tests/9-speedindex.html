@@ -1,0 +1,33 @@
+<html>
+<head>
+</head>
+<body>
+  This page should load without javascript errors.<br>
+  This page calls init() with no parameters, so onload should fire and try to measure page performance.
+  It will collect the dom stats.<br>
+  Status: <span id="state" style="background-color:green;">PASS</span>
+  <br/>Link: <a href="?page2">link</a>
+
+  <script type="text/javascript">
+  BOOMR_lstart = new Date().getTime();
+  window.onerror = function() {
+    var st = document.getElementById("state");
+    st.style.backgroundColor="red";
+    st.innerHTML = "FAIL";
+  }
+  </script>
+  <script src="../boomerang.js" type="text/javascript"></script>
+  <script src="../plugins/rt.js" type="text/javascript"></script>
+  <script src="../plugins/speedindex.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    BOOMR.subscribe('before_beacon', function(o) { console.log(o); document.getElementById("text").innerHTML= o['speedIndex']});
+    BOOMR.init();
+  </script>
+  <div id="text"></div>
+  <img src="../images/image-5.png">
+</body>
+</html>
+<!--
+    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+-->
