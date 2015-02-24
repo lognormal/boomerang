@@ -1,5 +1,5 @@
 /*eslint-env mocha*/
-/*global BOOMR_test,assert*/
+/*global assert*/
 
 describe("e2e/03-page-params/00-custom-metrics", function() {
 	var tf = BOOMR.plugins.TestFramework;
