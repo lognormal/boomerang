@@ -6,7 +6,8 @@
 //
 (function(window) {
 
-    BOOMR = BOOMR || {};
+    // set our namespace
+    var BOOMR = window.BOOMR = window.BOOMR || {};
     BOOMR.plugins = BOOMR.plugins || {};
     if (BOOMR.plugins.TestFramework) {
         return;
@@ -17,17 +18,22 @@
         fired_page_ready: false,
         fired_onbeacon: false,
         fired_before_unload: false,
-        fired_before_beacon: false,
-        lastBeaconData: false,
+        beacons: [],
         page_ready: function() {
             this.fired_page_ready = true;
         },
         before_beacon: function(data) {
-            this.fired_before_beacon = true;
-            this.lastBeaconData = _.clone(data);
         },
         onbeacon: function(data) {
+            this.beacons.push(_.clone(data));
             this.fired_onbeacon = true;
+        },
+        lastBeacon: function() {
+            if (this.beacons.length === 0) {
+                return false;
+            }
+
+            return this.beacons[this.beacons.length - 1];
         },
         before_unload: function() {
             this.fired_before_unload = true;
@@ -50,7 +56,7 @@
             return true;
         }
     };
-})();
+})(window);
 
 //
 // BOOMR_test
@@ -224,6 +230,21 @@
 
         done();
     };
+
+    t.validateBeaconWasSent = function(done) {
+        var tf = BOOMR.plugins.TestFramework;
+
+        // ensure we fired a beacon ('onbeacon')
+        assert.isTrue(tf.fired_onbeacon);
+
+        // ensure the data was sent to 'onbeacon'
+        assert.isObject(tf.lastBeacon());
+
+        // ensure the beacon has basic properties
+        assert.isString(tf.lastBeacon().v);
+
+        done();
+    }
 
     window.BOOMR_test = t;
 

@@ -202,7 +202,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             var entriesToFind = [
                 { url: "/tests/vendor/mocha/mocha.css", initiatorType: "link" },
                 { url: "/tests/vendor/mocha/mocha.js", initiatorType: "script" },
-                { url: "/tests/vendor/chai/chai.js", initiatorType: "script" }
+                { url: "/tests/vendor/assertive-chai/assertive-chai.js", initiatorType: "script" }
             ];
 
             // we don't know what order these will come in, so grep thru the list

@@ -38,14 +38,11 @@ server.listen(env.port);
 //
 // Routes
 //
-
-// blackhole for beacons, send 204
-app.post("/e2e/beacon-blackhole", function(req, res) {
-    res.status(204).send();
-});
-
 app.get("/e2e/beacon-blackhole", function(req, res) {
-    res.status(204).send();
+	res.status(204).send();
+});
+app.post("/e2e/beacon-blackhole", function(req, res) {
+	res.status(204).send();
 });
 
 // all static content follows afterwards
