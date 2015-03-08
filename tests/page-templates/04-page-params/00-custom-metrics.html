@@ -1,0 +1,48 @@
+<%= header %>
+<%= boomerangSnippet %>
+<div class="cart-container" style="display: none">
+    <div id="cart-total">$444.44</div>
+</div>
+<script src="00-custom-metrics.js" type="text/javascript"></script>
+<script>
+custom_metric_1 = 111;
+custom_metric_2 = function() {
+    return 222;
+}
+
+BOOMR_test.init({
+    testAfterOnBeacon: true,
+    PageParams: {
+        customMetrics: [
+            {
+                varName: "custom_metric_1",
+                label: "cmet1",
+                type: "JavaScriptVar"
+            },
+            {
+                varName: "custom_metric_2",
+                label: "cmet2",
+                type: "JavaScriptVar"
+            },
+            {
+                varName: "missing_metric",
+                label: "cmet3",
+                type: "JavaScriptVar"
+            },
+            {
+                parameter1: "",
+                parameter2: "//div[@id='cart-total']",
+                label: "cmet4",
+                type: "URLPatternType"
+            },
+            {
+                parameter1: "",
+                parameter2: "",
+                label: "cmet5",
+                type: "URLPatternType"
+            }
+        ]
+    }
+});
+</script>
+<%= footer %>

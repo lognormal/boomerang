@@ -1,30 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mocha</title>
+    <title>Boomerang Test <%= fileName %></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
-</head>
-<body>
-    <div id="mocha"></div>
     <script src="../../vendor/mocha/mocha.js"></script>
     <script src="../../vendor/node-assert/assert.js"></script>
     <script src="../../vendor/assertive-chai/assertive-chai.js"></script>
-    <script src="../../vendor/lodash/lodash.js"></script>
-    <script src="../../build/boomerang-latest-debug.js" type="text/javascript"></script>
+    <script src="../../vendor/lodash/lodash.js"></script></head>
     <script src="../../boomerang-test-framework.js" type="text/javascript"></script>
+<body>
+    <div id="mocha"></div>
     <script>
-        mocha.setup("bdd");
+    mocha.setup("bdd");
     </script>
-    <script src="00-onload.js" type="text/javascript"></script>
-    <script>
-        BOOMR_test.init({
-            ResourceTiming: {
-                enabled: false
-            },
-            testAfterOnBeacon: true
-        });
-    </script>
-</body>
-</html>

@@ -6,20 +6,29 @@ var path = require("path");
 var fse = require("fs-extra");
 
 module.exports = function (grunt) {
+    //
+    // paths
+    //
+    var testsDir = path.join(__dirname, "tests");
+    var pluginsDir = path.join(__dirname, "plugins");
+
     // boomerang.js and plugins/*.js order
     var src = [ "boomerang.js" ];
     var plugins = grunt.file.readJSON("plugins.json");
     src.push(plugins.plugins);
-    src.push("plugins/zzz_last_plugin.js");
+    src.push(path.join(pluginsDir, "zzz_last_plugin.js"));
 
     // ensure env.json exists
-    var envFile = path.resolve(path.join(__dirname, "tests", "server", "env.json"));
+    var envFile = path.resolve(path.join(testsDir, "server", "env.json"));
     if (!fs.existsSync(envFile)) {
-        var envFileSample = path.resolve(path.join(__dirname, "tests", "server", "env.json.sample"));
+        var envFileSample = path.resolve(path.join(testsDir, "server", "env.json.sample"));
         console.info("Creating env.json from defaults");
         fse.copySync(envFileSample, envFile);
     }
 
+    //
+    // Config
+    //
     grunt.initConfig({
         pkg:  grunt.file.readJSON("package.json"),
         buildDate: Math.round(Date.now() / 1000),
@@ -45,7 +54,7 @@ module.exports = function (grunt) {
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
                 "tests/server/*.js",
-                "tests/pages/**/*.js"
+                "tests/page-templates/**/*.js"
             ]
         },
         "string-replace": {
@@ -206,7 +215,6 @@ module.exports = function (grunt) {
                     "tests/vendor/mocha/mocha.js",
                     "tests/vendor/node-assert/assert.js",
                     "tests/vendor/assertive-chai/assertive-chai.js",
-                    "tests/vendor/lodash/lodash.js",
                     "tests/unit/*.js",
                     "tests/build/*.js"
                 ]
@@ -279,11 +287,15 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-connect");
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
+    grunt.loadNpmTasks("grunt-template");
+
+    // custom tasks
+    grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
 
     grunt.registerTask("lint", "eslint");
     grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:latest", "filesize"]);
 
-    grunt.registerTask("test", ["test:unit", "test:e2e"]);
+    grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
     grunt.registerTask("test:e2e:chrome", ["test:e2e:chrome"]);
@@ -300,6 +312,7 @@ module.exports = function (grunt) {
     grunt.registerTask("test:e2e:phantomjs", ["build", "connect:test", "protractor_webdriver", "protractor:phantomjs"]);
     grunt.registerTask("test:e2e:chrome", ["build", "connect:test", "protractor_webdriver", "protractor:chrome"]);
 
+    grunt.registerTask("test:build", ["pages-builder"]);
     grunt.registerTask("webserver:build", ["build", "copy:webserver"]);
 
     grunt.registerTask("default", ["lint", "test"]);
