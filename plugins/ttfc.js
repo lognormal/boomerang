@@ -26,23 +26,38 @@ Metric will be sent for every new page loaded.
   }
 
   function clicked() {
-    BOOMR.utils.setCookie(name, {value: new Date().getTime() - w.BOOMR_lstart});
+    if (w.sessionStorage) {
+      w.sessionStorage.setItem(name, new Date().getTime() - w.BOOMR_lstart);
+    }
+    else {
+      BOOMR.utils.setCookie(name, {value: new Date().getTime() - w.BOOMR_lstart});
+    }
     BOOMR.utils.removeListener(d, 'mousedown', clicked);
   }
 
   BOOMR.plugins.TTFC = {
     init: function() {
-      var ttfc = BOOMR.utils.getCookie(name);
-      if (ttfc) {
-        ttfc = BOOMR.utils.getSubCookies(ttfc);
-      } else {
-        ttfc = {value: 0};
-      }
+      if (w.sessionStorage) {
+        var ttfc = w.sessionStorage.getItem(name) || "0";
 
-      // cookie set? we can now store it to be sent
-      if (ttfc.value) {
-        BOOMR.plugins.RT.setTimer(name, parseInt(ttfc.value));
-        BOOMR.utils.removeCookie(name);
+        if (ttfc) {
+          BOOMR.plugins.RT.setTimer(name, parseInt(ttfc));
+          w.sessionStorage.removeItem(name);
+        }
+      }
+      else {
+        var ttfc = BOOMR.utils.getCookie(name);
+        if (ttfc) {
+          ttfc = BOOMR.utils.getSubCookies(ttfc);
+        } else {
+          ttfc = {value: 0};
+        }
+
+        // cookie set? we can now store it to be sent
+        if (ttfc.value) {
+          BOOMR.plugins.RT.setTimer(name, parseInt(ttfc.value));
+          BOOMR.utils.removeCookie(name);
+        }
       }
 
       if (w.BOOMR_lstart) {
