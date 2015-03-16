@@ -694,8 +694,8 @@ impl = {
 			customTimers:     { cleanUpRE:  /(-?\d+(?:\.\d+)?)/,
 					    method: BOOMR.plugins.RT.setTimer,
 					    ctx: BOOMR.plugins.RT,
-					    preProcessor: function(v) {
-							return Math.round(typeof v === "number" ? v : parseFloat(v, 10));
+					    preProcessor: function(val) {
+							return Math.round(typeof val === "number" ? val : parseFloat(val, 10));
 						}
 					  }
 		};
@@ -730,13 +730,13 @@ impl = {
 				hconfig.pageGroups.varname = "xhr.pg";
 
 				// Page Group name for an XHR resource can specify if this is a subresource or not
-				hconfig.pageGroups.preProcessor = function(v) {
-					if(v && v.match(/_subresource$/)) {
-						v = v.replace(/_subresource$/, "");
+				hconfig.pageGroups.preProcessor = function(val) {
+					if(val && val.match(/_subresource$/)) {
+						val = val.replace(/_subresource$/, "");
 						edata.subresource = "passive";
 					}
 
-					return v;
+					return val;
 				};
 			}
 		}
