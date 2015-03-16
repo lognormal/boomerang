@@ -20,6 +20,10 @@
 		"space-infix-ops":0,
 		"no-console":0,
 		"no-delete-var":0,
-		"no-underscore-dangle":0
+		"no-underscore-dangle":0,
+		"no-multi-spaces":1,
+		"dot-notation":[2, {"allowKeywords": false}],
+		"space-unary-ops": 0,
+		"key-spacing": 0
 	}
 }
