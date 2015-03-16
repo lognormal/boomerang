@@ -83,7 +83,7 @@ impl = {
 		fw = (q3-q1)*1.5;
 
 		// fw === 0 => all items are identical, so no need to filter
-		if (fw === 0) {
+		if(fw === 0) {
 			return a;
 		}
 
@@ -230,7 +230,7 @@ impl = {
 				(bandwidths[Math.floor(n/2)] + bandwidths[Math.ceil(n/2)]) / 2
 			);
 
-		if (bandwidths_corrected.length < 1) {
+		if(bandwidths_corrected.length < 1) {
 			BOOMR.debug("not enough valid corrected datapoints, falling back to uncorrected", "bw");
 			debug_info.push("l==" + bandwidths_corrected.length);
 
@@ -285,7 +285,7 @@ impl = {
 					callback.call(that, i, tstart, run, value);
 				}
 
-				if (value !== null) {
+				if(value !== null) {
 					img.onload=img.onerror=null;
 					img=null;
 					clearTimeout(timer);
@@ -408,8 +408,9 @@ impl = {
 
 		this.complete = true;
 
-		if (this.block_beacon === true)
+		if(this.block_beacon === true) {
 			BOOMR.sendBeacon();
+		}
 
 		this.running = false;
 	},
@@ -435,7 +436,7 @@ impl = {
 
 		cookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
 
-		if (cookies && cookies.ba) {
+		if(cookies && cookies.ba) {
 
 			ba = parseInt(cookies.ba, 10);
 			bw_e = parseFloat(cookies.be, 10);
@@ -527,8 +528,9 @@ BOOMR.plugins.BW = {
 			BOOMR.info("HTTPS detected, skipping bandwidth test", "bw");
 			impl.complete = true;
 
-			if (impl.block_beacon === true)
+			if(impl.block_beacon === true) {
 				BOOMR.sendBeacon();
+			}
 
 			return this;
 		}
@@ -545,7 +547,7 @@ BOOMR.plugins.BW = {
 
 	abort: function() {
 		impl.aborted = true;
-		if (impl.running) {
+		if(impl.running) {
 			impl.finish();	// we don't defer this call because it might be called from
 					// onunload and we want the entire chain to complete
 					// before we return
@@ -553,8 +555,7 @@ BOOMR.plugins.BW = {
 	},
 
 	is_complete: function() {
-		if (impl.block_beacon === true)
-		{
+		if(impl.block_beacon === true) {
 			return impl.complete;
 		}
 		else {
