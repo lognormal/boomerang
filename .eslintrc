@@ -20,7 +20,6 @@
 		"space-infix-ops":0,
 		"no-console":0,
 		"no-delete-var":0,
-		"no-space-before-semi":0,
 		"no-underscore-dangle":0
 	}
 }
