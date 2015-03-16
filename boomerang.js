@@ -19,7 +19,7 @@ you, but we have a few ideas.
 /*eslint-env browser*/
 /*global BOOMR:true, BOOMR_start:true, BOOMR_lstart:true, console:false*/
 /*eslint no-mixed-spaces-and-tabs:[2, true], console:0, camelcase:0, strict:0, quotes:[2, "double", "avoid-escape"], new-cap:0*/
-/*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0, no-multi-spaces:1*/
+/*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0, no-multi-spaces:1, space-unary-ops: 0, key-spacing: 0, dot-notation: 1*/
 
 // Measure the time the script started
 // This has to be global so that we don't wait for the entire
@@ -1094,7 +1094,7 @@ boomr = {
 		}
 
 		if(w !== window) {
-			impl.vars.if = "";
+			impl.vars["if"] = "";
 		}
 
 		for (k in impl.errors) {
