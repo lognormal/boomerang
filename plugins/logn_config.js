@@ -109,4 +109,4 @@ BOOMR.plugins.LOGN = {
  but not for the debug version.  We use special comment tags to indicate that this code
  block should be removed if the debug version is requested.
 */
-BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true,/*BEGIN DEBUG TOKEN*/log:null,/*END DEBUG TOKEN*/wait:true,site_domain:null,ResourceTiming:{enabled:false}});
+BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true, /*BEGIN DEBUG TOKEN*/log:null, /*END DEBUG TOKEN*/wait:true, site_domain:null, ResourceTiming:{enabled:false}});
