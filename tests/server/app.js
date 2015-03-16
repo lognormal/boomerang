@@ -46,4 +46,5 @@ app.post("/e2e/beacon-blackhole", function(req, res) {
 });
 
 // all static content follows afterwards
+/*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));

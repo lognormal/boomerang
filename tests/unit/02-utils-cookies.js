@@ -127,7 +127,7 @@ describe("BOOMR.utils cookies", function() {
             BOOMR.session.domain = cookieDomain;
 
             var value = "";
-            for (var index = 0; index <= 500;index++) {
+            for (var index = 0; index <= 500; index++) {
                 value += "1";
             }
 
