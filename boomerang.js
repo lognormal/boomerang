@@ -19,7 +19,7 @@ you, but we have a few ideas.
 /*eslint-env browser*/
 /*global BOOMR:true, BOOMR_start:true, BOOMR_lstart:true, console:false*/
 /*eslint no-mixed-spaces-and-tabs:[2, true], console:0, camelcase:0, strict:0, quotes:[2, "double", "avoid-escape"], new-cap:0*/
-/*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0*/
+/*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0, no-multi-spaces:1*/
 
 // Measure the time the script started
 // This has to be global so that we don't wait for the entire
@@ -906,9 +906,9 @@ boomr = {
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
 		if(e_name === "page_unload" || e_name === "before_unload") {
-			unload_handler = function(ev) {
+			unload_handler = function(evt) {
 							if(fn) {
-								fn.call(cb_scope, ev || w.event, cb_data);
+								fn.call(cb_scope, evt || w.event, cb_data);
 							}
 						};
 
@@ -1094,7 +1094,7 @@ boomr = {
 		}
 
 		if(w !== window) {
-			impl.vars["if"] = "";
+			impl.vars.if = "";
 		}
 
 		for (k in impl.errors) {
@@ -1202,7 +1202,7 @@ else if(typeof BOOMR.window.BOOMR_lstart === "number") {
 	var make_logger;
 
 	if(typeof console === "object" && console.log !== undefined) {
-		boomr.log = function(m,l,s) { console.log(s + ": [" + l + "] " + m); };
+		boomr.log = function(m, l, s) { console.log(s + ": [" + l + "] " + m); };
 	}
 
 	make_logger = function(l) {

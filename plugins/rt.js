@@ -388,10 +388,10 @@ impl = {
 	getBoomerangTimings: function() {
 		var res, urls, url, startTime, data;
 
-		function trimTiming(time, startTime) {
+		function trimTiming(time, st) {
 			// strip from microseconds to milliseconds only
 			var timeMs = Math.round(time ? time : 0),
-			    startTimeMs = Math.round(startTime ? startTime : 0);
+			    startTimeMs = Math.round(st ? st : 0);
 
 			timeMs = (timeMs === 0 ? 0 : (timeMs - startTimeMs));
 
