@@ -1,8 +1,8 @@
 (function(){
     var dom,doc,where,iframe = document.createElement('iframe'),win = window;
     
-    function boomerangSaveLoadTime() {
-        win.BOOMR_onload=new Date().getTime();
+    function boomerangSaveLoadTime(e) {
+        win.BOOMR_onload=e.timeStamp || new Date().getTime();
     }
     if (document.body.addEventListener) {
         win.addEventListener("load", boomerangSaveLoadTime, false);

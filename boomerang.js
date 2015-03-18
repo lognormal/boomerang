@@ -308,8 +308,6 @@ impl = {
 boomr = {
 	//! t_lstart: value of BOOMR_lstart set in host page
 	t_start: BOOMR_start,
-	//! t_pload: Value of the BOOMR_onload set in the host page
-	t_onload: undefined,
 	//! t_end: value set in zzz_last_plugin.js
 
 	url: myurl,
@@ -1200,11 +1198,7 @@ else if(typeof BOOMR.window.BOOMR_lstart === "number") {
 	boomr.t_lstart = BOOMR.window.BOOMR_lstart;
 }
 
-if(typeof BOOMR_onload === "number") {
-	boomr.t_onload = BOOMR_onload;
-	delete BOOMR_onload;
-}
-else if(typeof BOOMR.window.BOOMR_onload === "number") {
+if(typeof BOOMR.window.BOOMR_onload === "number") {
 	boomr.t_onload = BOOMR.window.BOOMR_onload;
 }
 
