@@ -580,8 +580,9 @@ impl = {
 			// We don't have navigation timing,
 			else {
 				// So we'll just use the time when boomerang was added to the page
-				// Assuming that this means boomerang was added in onload
-				t_done = BOOMR.t_lstart || BOOMR.t_start || t_now;
+				// Assuming that this means boomerang was added in onload.  If we logged the
+				// onload timestamp (via loader snippet), use that first.
+				t_done = BOOMR.t_onload || BOOMR.t_lstart || BOOMR.t_start || t_now;
 			}
 		}
 

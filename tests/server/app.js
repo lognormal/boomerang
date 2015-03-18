@@ -45,6 +45,9 @@ app.post("/e2e/beacon-blackhole", function(req, res) {
 	res.status(204).send();
 });
 
+// /delay - delays a response
+app.get("/delay", require("./route-delay"));
+
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));

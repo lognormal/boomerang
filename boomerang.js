@@ -17,7 +17,7 @@ you, but we have a few ideas.
 */
 
 /*eslint-env browser*/
-/*global BOOMR:true, BOOMR_start:true, BOOMR_lstart:true, console:false*/
+/*global BOOMR:true, BOOMR_start:true, BOOMR_lstart:true, BOOMR_onload:true, console:false*/
 /*eslint no-mixed-spaces-and-tabs:[2, true], console:0, camelcase:0, strict:0, quotes:[2, "double", "avoid-escape"], new-cap:0*/
 /*eslint space-infix-ops:0, no-console:0, no-delete-var:0, no-space-before-semi:0, no-multi-spaces:0, space-unary-ops: 0, key-spacing: 0, dot-notation: [2, {"allowKeywords": false }]*/
 
@@ -308,6 +308,8 @@ impl = {
 boomr = {
 	//! t_lstart: value of BOOMR_lstart set in host page
 	t_start: BOOMR_start,
+	//! t_pload: Value of the BOOMR_onload set in the host page
+	t_onload: undefined,
 	//! t_end: value set in zzz_last_plugin.js
 
 	url: myurl,
@@ -1196,6 +1198,14 @@ if(typeof BOOMR_lstart === "number") {
 }
 else if(typeof BOOMR.window.BOOMR_lstart === "number") {
 	boomr.t_lstart = BOOMR.window.BOOMR_lstart;
+}
+
+if(typeof BOOMR_onload === "number") {
+	boomr.t_onload = BOOMR_onload;
+	delete BOOMR_onload;
+}
+else if(typeof BOOMR.window.BOOMR_onload === "number") {
+	boomr.t_onload = BOOMR.window.BOOMR_onload;
 }
 
 (function() {
