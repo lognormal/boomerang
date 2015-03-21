@@ -239,11 +239,11 @@ Handler.prototype = {
 			return false;
 		}
 
-		this.extractJavaScriptVariable(o.varName);
+		return this.extractJavaScriptVariable(o.varName);
 	},
 
 	Custom: function(o) {
-		this.extractJavaScriptVariable(o.parameter1);
+		return this.extractJavaScriptVariable(o.parameter1);
 	},
 
 	extractJavaScriptVariable: function(varname) {
