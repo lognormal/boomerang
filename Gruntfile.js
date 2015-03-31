@@ -265,7 +265,11 @@ module.exports = function (grunt) {
         connect: {
             options: {
                 port: 4002,
-                hostname: "localhost"
+                hostname: "localhost",
+                middleware: function(connect, options, middlewares) {
+                    middlewares.push(['/delay', require("./tests/server/route-delay")]);
+                    return middlewares;
+                }
             },
             test: {
                 options: {
