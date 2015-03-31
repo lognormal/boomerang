@@ -246,10 +246,10 @@ impl = {
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 
-		if(!BOOMR.session.start													// no start time
-		   || (t_start && BOOMR.session.start > t_start)						// or we have a better start time
-		   || t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp		// or it's been more than session_exp since the last action
-		   || (avgSessionLength > sessionExp) 									// or the average page session length is longer than the session exp
+		if(!BOOMR.session.start									// no start time
+		   || (t_start && BOOMR.session.start > t_start)					// or we have a better start time
+		   || t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp			// or it's been more than session_exp since the last action
+		   || (avgSessionLength > sessionExp) 							// or the average page session length is longer than the session exp
 		) {
 			// First we write the old session values to the beacon to help debug session resets on the server-side
 			BOOMR.addVar("rt.srst",
@@ -314,7 +314,7 @@ impl = {
 			return;
 		}
 
-		subcookies.s = Math.max(+subcookies.ld||0,Math.max(+subcookies.ul||0, +subcookies.cl||0));
+		subcookies.s = Math.max(+subcookies.ld||0, Math.max(+subcookies.ul||0, +subcookies.cl||0));
 
 		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 
@@ -367,8 +367,8 @@ impl = {
 			ul: undefined,	// onbeforeunload time
 			cl: undefined,	// onclick time
 			hd: undefined,	// onunload or onpagehide time
-			rl: undefined,
-			ld: undefined	// last load time
+			ld: undefined,	// last load time
+			rl: undefined
 		});
 
 		this.maybeResetSession(BOOMR.now());
