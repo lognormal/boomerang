@@ -235,14 +235,22 @@ impl = {
 
 		BOOMR.removeVar("rt.srst");
 
+		// determine the average page session length, which is the session length over # of pages
+		var avgSessionLength = 0;
+		if (BOOMR.session.start && BOOMR.session.length) {
+			avgSessionLength = (BOOMR.now() - BOOMR.session.start) / BOOMR.session.length;
+		}
+
+		var sessionExp = impl.session_exp*1000;
+
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 
 		if(!BOOMR.session.start									// no start time
 		   || (t_start && BOOMR.session.start > t_start)					// or we have a better start time
-		   || t_done - (impl.lastActionTime || BOOMR.t_start) > impl.session_exp*1000		// or it's been more than session_exp since the last action
+		   || t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp			// or it's been more than session_exp since the last action
+		   || (avgSessionLength > sessionExp) 							// or the average page session length is longer than the session exp
 		) {
-
 			// First we write the old session values to the beacon to help debug session resets on the server-side
 			BOOMR.addVar("rt.srst",
 					BOOMR.session.ID + "-" + BOOMR.session.start
@@ -306,7 +314,7 @@ impl = {
 			return;
 		}
 
-		subcookies.s = Math.max(+subcookies.ul||0, +subcookies.cl||0);
+		subcookies.s = Math.max(+subcookies.ld||0, Math.max(+subcookies.ul||0, +subcookies.cl||0));
 
 		BOOMR.debug("Read from cookie " + BOOMR.utils.objectToString(subcookies), "rt");
 
@@ -359,6 +367,7 @@ impl = {
 			ul: undefined,	// onbeforeunload time
 			cl: undefined,	// onclick time
 			hd: undefined,	// onunload or onpagehide time
+			ld: undefined,	// last load time
 			rl: undefined
 		});
 
@@ -776,6 +785,12 @@ impl = {
 		}
 		if(etarget && etarget.nodeName.toUpperCase() === element) {
 			BOOMR.debug("passing through", "rt");
+
+			// we might need to reset the session first, as updateCookie()
+			// below sets the lastActionTime
+			this.refreshSession();
+			this.maybeResetSession(BOOMR.now());
+
 			// user event, they may be going to another page
 			// if this page is being opened in a different tab, then
 			// our unload handler won't fire, so we need to set our
@@ -1059,6 +1074,9 @@ BOOMR.plugins.RT = {
 		   || (ename === "xhr" && !subresource)		// xhr beacon and this is not a subresource
 		   || !impl.onloadfired) {			// unload fired before onload
 			impl.incrementSessionDetails();
+
+			// save a last-loaded timestamp in the cookie
+			impl.updateCookie(null, "ld");
 		}
 
 		BOOMR.addVar({
