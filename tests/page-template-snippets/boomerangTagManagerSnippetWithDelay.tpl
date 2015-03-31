@@ -2,11 +2,11 @@
     var dom,doc,where,iframe = document.createElement('iframe'),win = window;
     
     function boomerangSaveLoadTime(e) {
-        win.BOOMR_onload=e.timeStamp || new Date().getTime();
+        win.BOOMR_onload=(e && e.timeStamp) || new Date().getTime();
     }
     if (document.body.addEventListener) {
         win.addEventListener("load", boomerangSaveLoadTime, false);
-    } else if (el.attachEvent) {
+    } else if (document.body.attachEvent) {
         win.attachEvent("onload", boomerangSaveLoadTime);
     }
     
