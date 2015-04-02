@@ -88,7 +88,7 @@ var impl = {
 
 		BOOMR.addVar(data);
 
-		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
+		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
 
 		this.complete = true;
 		BOOMR.sendBeacon();
@@ -142,7 +142,7 @@ var impl = {
 
 			BOOMR.addVar(data);
 
-			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
+			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
 		}
 
 		// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
@@ -159,7 +159,7 @@ var impl = {
 
 				BOOMR.addVar(data);
 
-				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) {}
+				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
 			}
 		}
 
