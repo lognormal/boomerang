@@ -34,7 +34,7 @@ if (wwwRoot.indexOf("/") !== 0) {
 }
 
 module.exports = function(req, res) {
-    var q = require('url').parse(req.url, true)['query'];
+    var q = require("url").parse(req.url, true).query;
     var delay = q.delay;
     var file = q.file;
 
@@ -55,4 +55,4 @@ module.exports = function(req, res) {
             fileStream.pipe(res);
         });
     }, delay);
-}
+};
