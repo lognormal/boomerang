@@ -18,9 +18,21 @@ if (BOOMR.plugins.Memory) {
 	return;
 }
 
-function nodeCount(type) {
+function nodeCount(type, filter) {
+	var tags, r;
 	try {
-		return d.getElementsByTagName(type).length;
+		tags = d.getElementsByTagName(type);
+		r = tags.length;
+		if(typeof filter === "function") {
+			try {
+				tags = [].filter.call(tags, filter);
+				r += "/" + tags.length;
+			}
+			catch(err) {
+				BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
+			}
+		}
+		return r;
 	}
 	catch(err) {
 		BOOMR.addError(err, "Memory.nodeList." + type);
@@ -122,7 +134,7 @@ impl = {
 				BOOMR.addVar({
 					"dom.ln": nodeCount("*"),
 					"dom.img": nodeCount("img"),
-					"dom.script": nodeCount("script")
+					"dom.script": nodeCount("script", function(el) { return el.src && !el.src.match(/^(?:about:|javascript:|#)/); })
 				});
 				BOOMR.addVar("dom.sz", d.documentElement.innerHTML.length);
 			},
