@@ -6,6 +6,7 @@
 		"BOOMR":true,
 		"BOOMR_start":true,
 		"BOOMR_lstart":true,
+		"BOOMR_onload":true,
 		"console":false,
 		"unescape":false,
 		"BOOMR_configt":true
