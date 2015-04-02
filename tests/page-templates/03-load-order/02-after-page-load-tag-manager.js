@@ -41,7 +41,7 @@ describe("e2e/03-load-order/02-after-page-load-tag-manager", function() {
     it("Should have a end timestamp equal to BOOMR.t_onload (if NavTiming not supported)", function() {
         var b = tf.lastBeacon();
         if (!(window.performance && window.performance.timing)) {
-            assert.operator(b["rt.end"], "=", BOOMR.t_onload);
+            assert.equal(b["rt.end"], BOOMR.t_onload);
         }
     });
 });
