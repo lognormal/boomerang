@@ -1,6 +1,6 @@
 {
 	"env": {
-		"browser": true
+		"browser":true
 	},
 	"globals": {
 		"BOOMR":true,
@@ -22,9 +22,10 @@
 		"no-console":0,
 		"no-delete-var":0,
 		"no-underscore-dangle":0,
-		"no-multi-spaces": 0,
+		"no-multi-spaces":0,
 		"dot-notation":[2, {"allowKeywords": false}],
-		"space-unary-ops": 0,
-		"key-spacing": 0
+		"space-unary-ops":0,
+		"key-spacing":0,
+		"no-empty":2
 	}
 }

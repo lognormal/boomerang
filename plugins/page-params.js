@@ -579,8 +579,7 @@ Handler.prototype = {
 					return null;
 				}
 			}
-			catch(ignore) {
-			}
+			catch(ignore) { /* empty */ }
 
 			BOOMR.addError(e, "PageVars.findResource");
 			return null;

@@ -124,6 +124,7 @@ if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 		}
 	}
 	catch(ignore) {
+		// empty
 	}
 
 	try {
@@ -138,6 +139,7 @@ if (!BOOMR.plugins) { BOOMR.plugins = {}; }
 		}
 	}
 	catch(ignore) {
+		// empty
 	}
 
 	if (!createCustomEvent && d.createEventObject) {
@@ -687,6 +689,7 @@ boomr = {
 				try {
 					form.submit();
 				} catch (ignore) {
+					// empty
 				}
 
 				if (urls.length) {
@@ -866,7 +869,10 @@ boomr = {
 				};
 			}
 		}
-		catch(ignore) { }
+		catch(ignore) {
+			// empty
+		}
+
 		return Date.now || function() { return new Date().getTime(); };
 	}()),
 

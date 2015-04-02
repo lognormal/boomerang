@@ -160,7 +160,7 @@ function getNavStartTime(frame) {
 	}
 	catch(e)
 	{
-		// swallow all access exceptions
+		// empty
 	}
 
 	return navStart;
