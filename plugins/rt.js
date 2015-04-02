@@ -670,6 +670,7 @@ impl = {
 	 * 	- rt.tstart: The value of t_start that we determined was appropriate
 	 *	- rt.cstart: The value of t_start from the cookie if different from rt.tstart
 	 *	- rt.bstart: The timestamp when boomerang started
+	 *	- rt.blstart:The timestamp when boomerang was added to the host page
 	 *	- rt.end:    The timestamp when the t_done timer ended
 	 *
 	 * @param t_start The value of t_start that we plan to use
