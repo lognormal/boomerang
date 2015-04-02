@@ -4,6 +4,11 @@ Send the variable t_page for browsers that don't support navtiming.
 */
 
 (function(w, d) {
+  if (w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance) {
+    //mandatory since calling startTimer("t_page") has the side-effect of calling endTimer("t_resp").
+    //which lead to wrong ttfb when the performance timing is available
+    return;
+  }
 
   BOOMR = BOOMR || {};
   BOOMR.plugins = BOOMR.plugins || {};

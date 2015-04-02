@@ -1,6 +1,13 @@
 /**
 \file support_legacy_browser.js
 Send the variable t_page for browsers that don't support navtiming.
+Time mark for firstPaintTime calculated in RenderViewImpl::DidFlushPaint (src/content/renderer/render_view_impl.cc)
+called from handler of IPC message ViewMsg_UpdateRect_ACK, RenderWidget::OnUpdateRectAck (src/content/renderer/render_widget.cc).
+All incoming IPC messages are handled by the MessageLoop instance.
+But sometimes this MessageLoop may be busy handling  the previous IPC messages and tasks.
+This results in a delay between actual page rendering time and firstPaintTime value.
+This delay is not constant and may differ, depending on the environment, loaded web-page content, system workload etc.
+This delay can be seen at chrome://tracing page, especially for a Debug build.
 */
 
 (function(w) {
@@ -13,7 +20,7 @@ Send the variable t_page for browsers that don't support navtiming.
   var impl = {
     complete: false,
     done: function() {
-      var firstPaintTime, firstPaint;
+      var firstPaint;
       // Chrome
       if (w.chrome && w.chrome.loadTimes) {
         var chromeTimes = w.chrome.loadTimes();
@@ -25,26 +32,14 @@ Send the variable t_page for browsers that don't support navtiming.
 
         // Convert to ms
         firstPaint = chromeTimes.firstPaintTime * 1000;
-        var startTime = chromeTimes.startLoadTime * 1000;
-        if ('requestTime' in chromeTimes && chromeTimes.requestTime !== 0) {
-          startTime = chromeTimes.requestTime * 1000;
-        }
-
-        firstPaintTime = firstPaint - startTime;
       }
       // IE
       else if (typeof w.performance.timing.msFirstPaint === 'number') {
         firstPaint = w.performance.timing.msFirstPaint;
-
-        // if (firstPaint === 0) {
-        //   return setTimeout(impl.done.bind(this), 100);
-        // }
-
-        firstPaintTime = firstPaint - w.performance.timing.navigationStart;
       }
 
-      if (firstPaintTime) {
-        BOOMR.addVar({startRender : firstPaintTime});
+      if (firstPaint) {
+        BOOMR.addVar({startRender : firstPaint - w.performance.timing.navigationStart});
       }
 
       this.complete = true;
