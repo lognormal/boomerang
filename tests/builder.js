@@ -87,7 +87,7 @@ module.exports = function() {
 
             // Set all template vars to their file name
             opts.snippetFiles.forEach(function(file) {
-                var snippetName = file.replace(testSnippetsDir + "/", "").replace(".tpl", "");
+                var snippetName = file.replace(testSnippetsDir + path.sep, "").replace(".tpl", "");
 
                 grunt.log.ok(snippetName);
 
@@ -117,7 +117,7 @@ module.exports = function() {
 
             // Set all template vars to their file name
             async.eachSeries(opts.templateDirs, function(dir, cb2) {
-                var templateDir = dir.replace(testTemplatesDir + "/", "");
+                var templateDir = dir.replace(testTemplatesDir + path.sep, "");
                 var supportDir = path.join(testTemplatesDir, templateDir, "support");
 
                 rootIndexHtml += '<p><a href="' + templateDir + '/index.html">' + templateDir + '</a></p>';
@@ -133,8 +133,8 @@ module.exports = function() {
                         }
 
                         files.forEach(function(file) {
-                            var supportFileBasePath = file.replace(testTemplatesDir + "/", "");
-                            var supportFileName = supportFileBasePath.replace(templateDir + "/", "").replace("support/", "");
+                            var supportFileBasePath = file.replace(testTemplatesDir + path.sep, "");
+                            var supportFileName = supportFileBasePath.replace(templateDir + path.sep, "").replace("support" + path.sep, "");
 
                             grunt.log.ok(supportFileBasePath);
                             grunt.file.copy(file, path.join(supportDirDest, supportFileName));
@@ -150,8 +150,8 @@ module.exports = function() {
 
                     files.forEach(function(file) {
                         // template file
-                        var templateFile = file.replace(testTemplatesDir + "/", "");
-                        var templateFileName = templateFile.replace(templateDir + "/", "");
+                        var templateFile = file.replace(testTemplatesDir + path.sep, "");
+                        var templateFileName = templateFile.replace(templateDir + path.sep, "");
                         var templateFileDest = path.join(testPagesDir, templateFile);
 
                         grunt.log.ok(templateFile);
@@ -164,7 +164,7 @@ module.exports = function() {
 
                         // javascript file
                         var jsFile = file.replace(".html", "") + ".js";
-                        var jsFileName = jsFile.replace(testTemplatesDir + "/", "");
+                        var jsFileName = jsFile.replace(testTemplatesDir + path.sep, "");
                         var jsFileDest = path.join(testPagesDir, jsFileName);
 
                         // read contents
