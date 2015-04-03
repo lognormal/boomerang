@@ -71,6 +71,8 @@
     var testFailures = [];
     var testPasses = [];
 
+    var beaconsSeen = 0;
+
     // test framework
     var assert;
 
@@ -168,6 +170,14 @@
         // initialize boomerang
         BOOMR.init(config);
 
+        // fake session details so beacons send
+        BOOMR.addVar({
+            "h.key": "aaaaa-bbbbb-ccccc-ddddd-eeeee",
+            "h.d": "localhost",
+            "h.t": new Date().getTime(),
+            "h.cr": "abc"
+        })
+
         // setup Mocha
         window.mocha.globals(["BOOMR", "PageGroupVariable"]);
         window.mocha.checkLeaks();
@@ -176,10 +186,18 @@
         assert = window.assert = window.chai.assert;
 
         if (config.testAfterOnBeacon) {
+            // default to waiting until one beacon was sent, otherwise use
+            // the number passed in
+            if (typeof config.testAfterOnBeacon !== "number") {
+                config.testAfterOnBeacon = 1;
+            }
+
             BOOMR.subscribe("onbeacon", function() {
-                // wait a few more ms so the beacon fires
-                // TODO: Trim this timing down if we can make it more reliable
-                setTimeout(t.runTests, 1000);
+                if (++beaconsSeen == config.testAfterOnBeacon) {
+                    // wait a few more ms so the beacon fires
+                    // TODO: Trim this timing down if we can make it more reliable
+                    setTimeout(t.runTests, 1000);
+                }
             });
         } else {
             BOOMR.setImmediate(t.runTests);
