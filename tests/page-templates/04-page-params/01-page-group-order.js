@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/04-page-params/00-page-groups", function() {
+describe("e2e/04-page-params/01-page-group-order", function() {
     var tf = BOOMR.plugins.TestFramework;
     var t = BOOMR_test;
 
