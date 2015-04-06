@@ -46,8 +46,7 @@ load=function() {
 		+ "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36)
 		+ (complete?"&r=":"")				// if this is running after complete, then we're just refreshing the crumb
 		+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
-		+ (complete?"":"&plugins=" + plugins.join(","))
-	;
+		+ (complete?"":"&plugins=" + plugins.join(","));
 
 	BOOMR.config_url = s1.src;
 
