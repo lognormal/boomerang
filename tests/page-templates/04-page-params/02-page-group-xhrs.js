@@ -24,7 +24,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
             assert.equal(b["xhr.pg"], "Test Pages");
         }
     });
-    
+
     it("Should not have a second beacon (if the browser doesn't support MutationObserver)", function() {
         if (typeof window.MutationObserver !== "function") {
             assert.equal(typeof tf.beacons[1], "undefined");
