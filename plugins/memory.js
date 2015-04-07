@@ -31,11 +31,13 @@ function nodeCount(type, keys, filter) {
 			if(typeof filter === "function") {
 				try {
 					tags = [].filter.call(tags, filter);
-					if(keys.length > 1) {
-						o[keys[1]] = tags.length;
-					}
-					else {
-						r += "/" + tags.length;
+					if(tags.length !== r) {
+						if(keys.length > 1) {
+							o[keys[1]] = tags.length;
+						}
+						else {
+							r += "/" + tags.length;
+						}
 					}
 				}
 				catch(err) {
