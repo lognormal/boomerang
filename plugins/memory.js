@@ -146,9 +146,14 @@ impl = {
 			function() {
 				BOOMR.addVar({
 					"dom.ln": nodeCount("*"),
-					"dom.img": nodeCount("img"),
 					"dom.sz": d.documentElement.innerHTML.length
 				});
+
+				BOOMR.addVar(nodeCount(
+					"img",
+					["dom.img", "dom.img.ext"],
+					function(el) { return el.src && !el.src.match(/^(?:about:|javascript:|data:|#)/); })
+				);
 
 				BOOMR.addVar(nodeCount(
 					"script",
