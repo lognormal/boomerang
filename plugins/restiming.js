@@ -171,7 +171,7 @@ function getNavStartTime(frame) {
  *
  * @param [Frame] frame Frame
  * @param [boolean] top This is the top window
- * @param [string] offset Offset in timing from root IFRA
+ * @param [string] offset Offset in timing from root IFRAME
  * @param [number] depth Recursion depth
  * @return [PerformanceEntry[]] Performance entries
  */
