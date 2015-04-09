@@ -18,9 +18,34 @@ if (BOOMR.plugins.Memory) {
 	return;
 }
 
-function nodeCount(type) {
+function nodeCount(type, keys, filter) {
+	var tags, r, o;
 	try {
-		return d.getElementsByTagName(type).length;
+		tags = d.getElementsByTagName(type);
+		r = tags.length;
+
+		if(keys && keys.length) {
+			o = {};
+			o[keys[0]] = r;
+
+			if(typeof filter === "function") {
+				try {
+					tags = [].filter.call(tags, filter);
+					if(tags.length !== r) {
+						if(keys.length > 1) {
+							o[keys[1]] = tags.length;
+						}
+						else {
+							r += "/" + tags.length;
+						}
+					}
+				}
+				catch(err) {
+					BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
+				}
+			}
+		}
+		return o || r;
 	}
 	catch(err) {
 		BOOMR.addError(err, "Memory.nodeList." + type);
@@ -121,10 +146,20 @@ impl = {
 			function() {
 				BOOMR.addVar({
 					"dom.ln": nodeCount("*"),
-					"dom.img": nodeCount("img"),
-					"dom.script": nodeCount("script")
+					"dom.sz": d.documentElement.innerHTML.length
 				});
-				BOOMR.addVar("dom.sz", d.documentElement.innerHTML.length);
+
+				BOOMR.addVar(nodeCount(
+					"img",
+					["dom.img", "dom.img.ext"],
+					function(el) { return el.src && !el.src.match(/^(?:about:|javascript:|data:|#)/); })
+				);
+
+				BOOMR.addVar(nodeCount(
+					"script",
+					["dom.script", "dom.script.ext"],
+					function(el) { return el.src && !el.src.match(/^(?:about:|javascript:|#)/); })
+				);
 			},
 			"dom"
 		);
