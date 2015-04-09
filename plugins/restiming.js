@@ -293,6 +293,39 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 }
 
 /**
+ * Finds all remote resources in the selected window that are visible, and returns an object
+ * keyed by the url with an array of height,width,top,left as the value
+ *
+ * @param [Window] win Window to search
+ * @return [Object] Object with URLs of visible assets as keys, and Array[height, width, top, left] as value
+ */
+function getVisibleEntries(win) {
+	var els = ["IMG", "IFRAME"], entries = {}, x, y, doc=win.document;
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX
+	// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+	x = (win.pageXOffset !== undefined) ? win.pageXOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollLeft;
+	y = (win.pageYOffset !== undefined) ? win.pageYOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollTop;
+
+	els.forEach(function(elname) {
+		var el = doc.getElementsByTagName(elname), i, rect;
+
+		for(i=0; i<el.length; i++) {
+			if(el[i] && el[i].src && !entries[el[i].src]) {
+				rect = el[i].getBoundingClientRect();
+				// Require both height & width to be non-zero
+				// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
+				if((rect.height || el[i].offsetHeight) && (rect.width || el[i].offsetWidth)) {
+					entries[el[i].src] = [el[i].offsetHeight, el[i].offsetWidth, rect.top + y, rect.left + x];
+				}
+			}
+		}
+	});
+
+	return entries;
+}
+
+/**
  * Converts a number to base-36.
  *
  * If not a number, or === 0, return "". This is to facilitate
