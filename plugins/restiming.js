@@ -427,7 +427,7 @@ BOOMR.plugins.ResourceTiming = {
 		return this;
 	},
 	is_complete: function() {
-		return impl.complete;
+		return true;
 	},
 	is_supported: function() {
 		return impl.supported;
