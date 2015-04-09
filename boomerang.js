@@ -839,8 +839,16 @@ boomr = {
 	},
 
 	setImmediate: function(fn, data, cb_data, cb_scope) {
-		var cb = function() {
-			fn.call(cb_scope || null, data, cb_data || {});
+		var cb, cstack;
+
+		// DEBUG: This is to help debugging, we'll see where setImmediate calls were made from
+		if(typeof Error !== "undefined") {
+			cstack = new Error().stack.replace(/^Error/, "Called");
+		}
+		// END-DEBUG
+
+		cb = function() {
+			fn.call(cb_scope || null, data, cb_data || {}, cstack);
 			cb=null;
 		};
 
