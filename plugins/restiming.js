@@ -346,11 +346,14 @@ function toBase36(n) {
 function getResourceTiming() {
 /*eslint no-script-url:0*/
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
+	    visibleEntries,
 	    i, e, results = {}, initiatorType, url, data;
 
 	if(!entries || !entries.length) {
 		return {};
 	}
+
+	visibleEntries = getVisibleEntries(BOOMR.window);
 
 	for(i = 0; i < entries.length; i++) {
 		e = entries[i];
@@ -404,6 +407,13 @@ function getResourceTiming() {
 			results[url] += "|" + data;
 		} else {
 			results[url] = data;
+		}
+
+		if(visibleEntries[url] !== undefined) {
+			// We use * as an additional separator to indicate it is not a new resource entry
+			// The following characters will not be URL encoded:
+			// *!-.()~_ but - and . are special to number representation so we don't use them
+			results[url] += "|*" + visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "");
 		}
 	}
 
