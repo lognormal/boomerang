@@ -991,6 +991,7 @@ BOOMR.plugins.RT = {
 		var t_start, t_done, t_now=BOOMR.now(),
 		    subresource = false;
 
+		// We may have to rerun if this was a pre-rendered page, so set complete to false, and only set to true when we're done
 		impl.complete = false;
 
 		t_done = impl.validateLoadTimestamp(t_now, edata, ename);
