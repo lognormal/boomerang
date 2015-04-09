@@ -1056,13 +1056,24 @@ boomr = {
 	instrumentXHR: function() { },
 
 	sendBeacon: function(beacon_url_override) {
-		var k, form, furl, img, length=0, errors=[], url, nparams=0;
-
 		// This plugin wants the beacon to go somewhere else,
 		// so update the location
 		if(beacon_url_override) {
 			impl.beacon_url = beacon_url_override;
 		}
+
+		if(!impl.beaconQueued) {
+			impl.beaconQueued = true;
+			BOOMR.setImmediate(BOOMR.real_sendBeacon, null, null, BOOMR);
+		}
+
+		return true;
+	},
+
+	real_sendBeacon: function() {
+		var k, form, furl, img, length=0, errors=[], url, nparams=0;
+
+		impl.beaconQueued = false;
 
 		BOOMR.debug("Checking if we can send beacon");
 
