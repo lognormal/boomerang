@@ -843,7 +843,8 @@ boomr = {
 
 		// DEBUG: This is to help debugging, we'll see where setImmediate calls were made from
 		if(typeof Error !== "undefined") {
-			cstack = new Error().stack.replace(/^Error/, "Called");
+			cstack = new Error();
+			cstack = cstack.stack ? cstack.stack.replace(/^Error/, "Called") : undefined;
 		}
 		// END-DEBUG
 
