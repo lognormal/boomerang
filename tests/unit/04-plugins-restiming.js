@@ -17,17 +17,13 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             assert.isFunction(BOOMR.plugins.ResourceTiming.is_supported);
         });
 
-        it("Should not be complete before init", function() {
-            assert.isFalse(BOOMR.plugins.ResourceTiming.is_complete());
+        it("Should always be complete", function() {
+            assert.isTrue(BOOMR.plugins.ResourceTiming.is_complete());
         });
 
-        it("Should not be complete before done (unless not supported)", function() {
+        it("Should always be complete", function() {
             BOOMR.plugins.ResourceTiming.init();
-            if (BOOMR.plugins.ResourceTiming.is_supported()) {
-                assert.isFalse(BOOMR.plugins.ResourceTiming.is_complete());
-            } else {
-                assert.isTrue(BOOMR.plugins.ResourceTiming.is_complete());
-            }
+            assert.isTrue(BOOMR.plugins.ResourceTiming.is_complete());
         });
     });
 
