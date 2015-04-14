@@ -890,7 +890,7 @@ boomr = {
 	lastVisibilityEvent: {},
 
 	subscribe: function(e_name, fn, cb_data, cb_scope) {
-		var i, handler, ev, unload_handler;
+		var i, handler, ev;
 
 		e_name = e_name.toLowerCase();
 
@@ -921,23 +921,33 @@ boomr = {
 		// support it.  This allows us to fall back to onunload when onbeforeunload
 		// isn't implemented
 		if(e_name === "page_unload" || e_name === "before_unload") {
-			unload_handler = function(evt) {
+			(function() {
+				var unload_handler, evt_idx = ev.length;
+
+				unload_handler = function(evt) {
 							if(fn) {
 								fn.call(cb_scope, evt || w.event, cb_data);
 							}
+
+							// If this was the last unload handler, we'll try to send the beacon immediately after it is done
+							// The beacon will only be sent if one of the handlers has queued it
+							if(e_name === "page_unload" && evt_idx === impl.events[e_name].length) {
+								BOOMR.real_sendBeacon();
+							}
 						};
 
-			if(e_name === "page_unload") {
-				// pagehide is for iOS devices
-				// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
-				if(w.onpagehide || w.onpagehide === null) {
-					BOOMR.utils.addListener(w, "pagehide", unload_handler);
+				if(e_name === "page_unload") {
+					// pagehide is for iOS devices
+					// see http://www.webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+					if(w.onpagehide || w.onpagehide === null) {
+						BOOMR.utils.addListener(w, "pagehide", unload_handler);
+					}
+					else {
+						BOOMR.utils.addListener(w, "unload", unload_handler);
+					}
 				}
-				else {
-					BOOMR.utils.addListener(w, "unload", unload_handler);
-				}
-			}
-			BOOMR.utils.addListener(w, "beforeunload", unload_handler);
+				BOOMR.utils.addListener(w, "beforeunload", unload_handler);
+			}());
 		}
 
 		return this;
@@ -1073,6 +1083,10 @@ boomr = {
 
 	real_sendBeacon: function() {
 		var k, form, furl, img, length=0, errors=[], url, nparams=0;
+
+		if(!impl.beaconQueued) {
+			return;
+		}
 
 		impl.beaconQueued = false;
 
