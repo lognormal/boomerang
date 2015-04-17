@@ -1099,6 +1099,9 @@ boomr = {
 			}
 		}
 
+		impl.vars["ua.plt"] = navigator.platform;
+		impl.vars["ua.vnd"] = navigator.vendor;
+
 		if(w !== window) {
 			impl.vars["if"] = "";
 		}
