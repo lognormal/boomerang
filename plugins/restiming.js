@@ -316,7 +316,7 @@ function getVisibleEntries(win) {
 				// Require both height & width to be non-zero
 				// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
 				if((rect.height || el[i].offsetHeight) && (rect.width || el[i].offsetWidth)) {
-					entries[el[i].src] = [el[i].offsetHeight, el[i].offsetWidth, rect.top + y, rect.left + x];
+					entries[el[i].src] = [el[i].offsetHeight, el[i].offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
 				}
 			}
 		}
