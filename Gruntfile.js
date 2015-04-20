@@ -130,7 +130,7 @@ module.exports = function (grunt) {
         },
         copy: {
             // copy files to tests\build\boomerang-latest.js so test/index.html points to the latest version always
-            latest: {
+            debug: {
                 files: [
                     {
                         nonull: true,
@@ -264,7 +264,7 @@ module.exports = function (grunt) {
         },
         connect: {
             options: {
-                port: 4002,
+                port: 3000,
                 hostname: "localhost",
                 middleware: function(connect, options, middlewares) {
                     middlewares.push(["/delay", require("./tests/server/route-delay")]);
@@ -275,6 +275,24 @@ module.exports = function (grunt) {
                 options: {
                     base: ["tests"]
                 }
+            }
+        },
+        watch: {
+            test: {
+                files: [
+                    'tests/e2e/*.js',
+                    'tests/page-template-snippets/**/*',
+                    'tests/page-templates/**/*',
+                    'tests/unit/**/*'
+                ],
+                tasks: ['test:build']
+            },
+            boomerang: {
+                files: [
+                    'boomerang.js',
+                    'plugins/*.js',
+                ],
+                tasks: ['build:test']
             }
         }
     });
@@ -292,19 +310,21 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
     grunt.loadNpmTasks("grunt-template");
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // custom tasks
     grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
 
     grunt.registerTask("lint", "eslint");
-    grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:latest", "filesize"]);
+    grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
+    grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
 
     grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
     grunt.registerTask("test:e2e:chrome", ["test:e2e:chrome"]);
 
-    grunt.registerTask("test:e2e:debug", ["build", "connect::keepalive"]);
+    grunt.registerTask("test:debug", ["test:build", "build:test", "connect", "watch"]);
 
     grunt.registerTask("test:unit:all", ["build", "karma:all"]);
     grunt.registerTask("test:unit:chrome", ["build", "karma:chrome"]);
