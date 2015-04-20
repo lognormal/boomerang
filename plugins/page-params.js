@@ -364,11 +364,7 @@ Handler.prototype = {
 	},
 
 	CookieRegex: function(o) {
-		var cookieValue = o.cookieName ? BOOMR.utils.getCookie(o.cookieName) : d.cookie;
-		if (typeof cookieValue === "undefined") {
-			return false;
-		}
-		return this._Regex(o.parameter1, o.regex, o.replacement, cookieValue);
+		return this._Regex(o.parameter1, o.regex, o.replacement, o.cookieName ? BOOMR.utils.getCookie(o.cookieName) : d.cookie);
 	},
 
 	// New method for custom dimensions
