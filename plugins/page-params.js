@@ -86,7 +86,7 @@ Handler.prototype = {
 			}
 		}
 
-		if (!operand) {
+		if (typeof operand === "undefined") {
 			return false;
 		}
 
