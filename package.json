@@ -22,6 +22,7 @@
     "grunt-contrib-connect": "^0.9.0",
     "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-uglify": "^0.6.0",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-eslint": "^10.0.0",
     "grunt-filesize": "0.0.7",
     "grunt-karma": "^0.9.0",
@@ -48,7 +49,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lognormal/lognormal-boomerang.git"
+    "url": "https://github.com/lognormal/boomerang.git"
   },
   "keywords": [
     "rum",
@@ -156,5 +157,5 @@
   "bugs": {
     "url": "https://github.com/lognormal/boomerang/issues"
   },
-  "homepage": "https://github.com/lognormal/lognormal-boomerang"
+  "homepage": "https://github.com/lognormal/boomerang"
 }
