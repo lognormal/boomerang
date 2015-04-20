@@ -1085,7 +1085,7 @@ boomr = {
 		var k, form, furl, img, length=0, errors=[], url, nparams=0;
 
 		if(!impl.beaconQueued) {
-			return;
+			return false;
 		}
 
 		impl.beaconQueued = false;

@@ -280,19 +280,19 @@ module.exports = function (grunt) {
         watch: {
             test: {
                 files: [
-                    'tests/e2e/*.js',
-                    'tests/page-template-snippets/**/*',
-                    'tests/page-templates/**/*',
-                    'tests/unit/**/*'
+                    "tests/e2e/*.js",
+                    "tests/page-template-snippets/**/*",
+                    "tests/page-templates/**/*",
+                    "tests/unit/**/*"
                 ],
-                tasks: ['test:build']
+                tasks: ["test:build"]
             },
             boomerang: {
                 files: [
-                    'boomerang.js',
-                    'plugins/*.js',
+                    "boomerang.js",
+                    "plugins/*.js"
                 ],
-                tasks: ['build:test']
+                tasks: ["build:test"]
             }
         }
     });
@@ -310,7 +310,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
     grunt.loadNpmTasks("grunt-template");
-    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks("grunt-contrib-watch");
 
     // custom tasks
     grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
