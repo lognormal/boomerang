@@ -86,8 +86,8 @@ Handler.prototype = {
 			}
 		}
 
-		if (!operand) {
-			operand = l.href;
+		if (typeof operand === "undefined") {
+			return false;
 		}
 
 		m = re.exec(operand);
@@ -355,7 +355,8 @@ Handler.prototype = {
 					+ "(.*)"
 					+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*")
 					+ "$",
-				"$1");
+				"$1",
+				l.href);
 	},
 
 	UserAgentRegex: function(o) {
@@ -368,12 +369,12 @@ Handler.prototype = {
 
 	// New method for custom dimensions
 	URLRegex: function(o) {
-		return this._Regex(o.parameter1, o.regex, o.replacement);
+		return this._Regex(o.parameter1, o.regex, o.replacement, l.href);
 	},
 
 	// Old method for page groups
 	Regexp: function(o) {
-		return this._Regex(null, o.parameter1, o.parameter2);
+		return this._Regex(null, o.parameter1, o.parameter2, l.href);
 	},
 
 	_Regex: function(url, regex, replacement, operand) {
