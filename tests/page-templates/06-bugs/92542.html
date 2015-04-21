@@ -1,0 +1,29 @@
+<%= header %>
+<!--
+This bug found a UserTiming shim on the root page, but not in an IFRAME.  The UserTiming
+shim was adding performance.getEntriesByName/Type on the root page, but we weren't
+checking for its existence in the IFRAME when recursively calling page-param.js findResource()
+-->
+<script src="92542.js" type="text/javascript"></script>
+<script src="support/usertiming.js" type="text/javascript"></script>
+<iframe src="support/92542-iframe.html"></iframe>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+    PageParams: {
+        customTimers: [
+            {
+                "name":"rt",
+                "index":0,
+                "type":"ResourceTiming",
+                "label":"custom0",
+                "start":"startTime",
+                "end":"responseEnd",
+                "url":"/e2e/nop*"
+            }
+        ]
+    },
+    testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
