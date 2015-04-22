@@ -49,7 +49,11 @@ This delay can be seen at chrome://tracing page, especially for a Debug build.
 
   BOOMR.plugins.StartRender = {
     init: function() {
-      BOOMR.subscribe("page_ready", impl.done, null, impl);
+      if (w.performance && w.performance.timing) {
+        BOOMR.subscribe("page_ready", impl.done, null, impl);
+      } else {
+        this.complete = true;
+      }
       return this;
     },
 

@@ -266,7 +266,11 @@ var RUMSpeedIndex = function(win) {
 
   BOOMR.plugins.SpeedIndex = {
     init: function() {
-      BOOMR.subscribe("page_ready", impl.done, null, impl);
+      if (win.performance && win.performance.timing) {
+        BOOMR.subscribe("page_ready", impl.done, null, impl);
+      } else {
+        this.complete = true;
+      }
       return this;
     },
 
