@@ -631,11 +631,6 @@ BOOMR.plugins.RT = {
 		if (t_other.length) {
 			BOOMR.addVar("t_other", t_other.join(","));
 		}
-
-		if (source === "beacon") {
-			impl.timers = {};
-			impl.complete = false;	// reset this state for the next call
-		}
 	},
 
 	// Called when the page has reached a "usable" state.  This may be when the
@@ -645,6 +640,11 @@ BOOMR.plugins.RT = {
 		BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata) + ", " + ename, "rt");
 		var t_start, t_done=new Date().getTime(),
 		    subresource = false;
+
+		if (impl.complete) {
+			//don't send two beacons.
+			return;
+		}
 
 		impl.complete = false;
 
