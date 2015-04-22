@@ -7,6 +7,8 @@ see: http://www.w3.org/TR/resource-timing/
 
 (function() {
 
+var impl;
+
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
 if (BOOMR.plugins.ResourceTiming) {
@@ -21,6 +23,16 @@ var initiatorTypes = {
 	"css": 4,
 	"xmlhttprequest": 5
 };
+
+// Words that will be broken (by ensuring the optimized trie doesn't contain
+// the whole string) in URLs, to ensure NoScript doesn't think this is an XSS attack
+var defaultXssBreakWords = [
+	/(h)(ref)/gi,
+	/(s)(rc)/gi,
+	/(a)(ction)/gi
+];
+
+var xssBreakDelim = "\n";
 
 /**
  * Converts entries to a Trie:
@@ -39,15 +51,24 @@ var initiatorTypes = {
  * @return A trie
  */
 function convertToTrie(entries) {
-	var trie = {}, url, i, value, letters, letter, cur, node;
+	var trie = {}, url, urlFixed, i, value, letters, letter, cur, node;
 
 	for(url in entries) {
+		urlFixed = url;
+
+		// find any strings to break
+		for(i = 0; i < impl.xssBreakWords.length; i++) {
+			// Add a xssBreakDelim character after the first letter.  optimizeTrie will
+			// ensure this sequence doesn't get combined.
+			urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + xssBreakDelim + "$2");
+		}
+
 		if(!entries.hasOwnProperty(url)) {
 			continue;
 		}
 
 		value = entries[url];
-		letters = url.split("");
+		letters = urlFixed.split("");
 		cur = trie;
 
 		for(i = 0; i < letters.length; i++) {
@@ -92,7 +113,18 @@ function optimizeTrie(cur, top) {
 			if(ret) {
 				// swap the current leaf with compressed one
 				delete cur[node];
-				node = node + ret.name;
+
+				if(node === xssBreakDelim) {
+					// If this node is a newline, which can't be in a regular URL,
+					// it's due to the XSS patch.  Remove the placeholder character,
+					// and make sure this node isn't compressed by incrementing
+					// num to be greater than one.
+					node = ret.name;
+					num++;
+				}
+				else {
+					node = node + ret.name;
+				}
 				cur[node] = ret.value;
 			}
 		}
@@ -377,10 +409,11 @@ function getResourceTiming() {
 	return optimizeTrie(convertToTrie(results), true);
 }
 
-var impl = {
+impl = {
 	complete: false,
 	initialized: false,
 	supported: false,
+	xssBreakWords: defaultXssBreakWords,
 	done: function() {
 		var r;
 		if(this.complete) {
@@ -406,8 +439,10 @@ var impl = {
 };
 
 BOOMR.plugins.ResourceTiming = {
-	init: function() {
+	init: function(config) {
 		var p = BOOMR.window.performance;
+
+		BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords"]);
 
 		if(impl.initialized) {
 			return this;

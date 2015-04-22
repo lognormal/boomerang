@@ -214,7 +214,7 @@ module.exports = function (grunt) {
                     "tests/vendor/mocha/mocha.css",
                     "tests/vendor/mocha/mocha.js",
                     "tests/vendor/node-assert/assert.js",
-                    "tests/vendor/assertive-chai/assertive-chai.js",
+                    "tests/vendor/assertive-chai/dist/assertive-chai.js",
                     "tests/unit/*.js",
                     "tests/build/*.js"
                 ]
@@ -264,7 +264,7 @@ module.exports = function (grunt) {
         },
         connect: {
             options: {
-                port: 3000,
+                port: 4002,
                 hostname: "localhost",
                 middleware: function(connect, options, middlewares) {
                     middlewares.push(["/delay", require("./tests/server/route-delay")]);
