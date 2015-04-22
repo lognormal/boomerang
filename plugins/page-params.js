@@ -558,7 +558,10 @@ Handler.prototype = {
 		}
 
 		try {
-			if (!("performance" in frame) || !frame.performance) {
+			if (!("performance" in frame
+				&& frame.performance
+				&& frame.performance.getEntriesByName
+				&& frame.performance.getEntriesByType)) {
 				return null;
 			}
 
