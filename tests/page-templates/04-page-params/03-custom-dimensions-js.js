@@ -21,12 +21,12 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 
     it("Should have the custom dimension 3 - JavaScript var Numeric", function() {
         var b = tf.lastBeacon();
-        assert.equal(b["cdim.CD3"], 111);
+        assert.equal(b["cdim.CD3"], "111");
     });
 
     it("Should have the custom dimension 4 - JavaScript function Numeric", function() {
         var b = tf.lastBeacon();
-        assert.equal(b["cdim.CD4"], 222);
+        assert.equal(b["cdim.CD4"], "222");
     });
 
     it("Should have the custom dimension 5 - JavaScript Var Text", function() {
@@ -42,5 +42,10 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
     it("Should be missing custom dimension 7 - JavaScript var missing", function() {
         var b = tf.lastBeacon();
         assert.equal(b["cdim.CD7"], undefined);
+    });
+
+    it("Should be missing custom dimension 8 - QueryParam", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD8"], undefined);
     });
 });
