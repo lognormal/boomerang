@@ -303,10 +303,7 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 		if(!current_event.resource.url && node.nodeName === "SCRIPT") {
 			a.href = url;
 
-			if (BOOMR.xhr_excludes.hasOwnProperty(a.href)
-			    || BOOMR.xhr_excludes.hasOwnProperty(a.hostname)
-			    || BOOMR.xhr_excludes.hasOwnProperty(a.pathname)
-			) {
+			if (shouldExclude(a)) {
 				// excluded resource, so abort
 				return false;
 			}
@@ -427,10 +424,7 @@ function instrumentXHR() {
 		req.open = function(method, url, async) {
 			a.href = url;
 
-			if (BOOMR.xhr_excludes.hasOwnProperty(a.href)
-			    || BOOMR.xhr_excludes.hasOwnProperty(a.hostname)
-			    || BOOMR.xhr_excludes.hasOwnProperty(a.pathname)
-			) {
+			if (shouldExclude(a)) {
 				// skip instrumentation and call the original open method
 				return orig_open.apply(req, arguments);
 			}
@@ -501,6 +495,29 @@ function uninstrumentXHR() {
 	}
 }
 
+function shouldExclude(anchor)
+{
+  return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
+    BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
+    BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
+}
+
+function getPathName(anchor)
+{
+  if (!anchor)
+    return;
+
+  // correct relitivism in IE
+  anchor.href = anchor.href;
+
+  // correct missing leading slash in IE
+  var pathName = anchor.pathname;
+  if (pathName.charAt(0) !== "/")
+    pathName = "/" + pathName;
+
+  return pathName;
+}
+
 BOOMR.plugins.AutoXHR = {
 	is_complete: function() { return true; },
 	init: function(config) {
@@ -516,7 +533,8 @@ BOOMR.plugins.AutoXHR = {
 		else if (config.instrument_xhr === false) {
 			BOOMR.uninstrumentXHR();
 		}
-	}
+	},
+  getPathname: getPathName
 };
 
 })();

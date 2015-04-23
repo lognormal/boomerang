@@ -18,27 +18,14 @@ BOOMR_test.init({
                 parameter2: "XHR Test Pages_subresource"
             },
         ]
-    }
+    },
+    afterBoomerangLoad:
+      function()
+      {
+        var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+        xhr.open("GET", "/pages/blah", true);
+        xhr.send();
+      }
 });
-
-function sendXhr() {
-    var xhr;
-    if (window.XMLHttpRequest) {
-        xhr = new XMLHttpRequest();
-    } else {
-        xhr = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-
-    xhr.open("GET", "/pages/blah", true);
-    xhr.send();
-}
-
-// wait until Boomerang is loaded (and instrumented XHRs) to send
-if (window.document.addEventListener) {
-    window.document.addEventListener("onBoomerangLoaded", sendXhr);
-} else if (window.document.attachEvent) {
-    window.document.attachEvent("onBoomerangLoaded", sendXhr);
-}
-
 </script>
 <%= footer %>
