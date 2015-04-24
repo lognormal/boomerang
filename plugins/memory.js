@@ -24,15 +24,15 @@ function nodeCount(type, keys, filter) {
 		tags = d.getElementsByTagName(type);
 		r = tags.length;
 
-		if(keys && keys.length) {
+		if (keys && keys.length) {
 			o = {};
 			o[keys[0]] = r;
 
-			if(typeof filter === "function") {
+			if (typeof filter === "function") {
 				try {
 					tags = [].filter.call(tags, filter);
-					if(tags.length !== r) {
-						if(keys.length > 1) {
+					if (tags.length !== r) {
+						if (keys.length > 1) {
 							o[keys[1]] = tags.length;
 						}
 						else {
@@ -54,7 +54,7 @@ function nodeCount(type, keys, filter) {
 }
 
 function errorWrap(condition, callback, component) {
-	if(condition) {
+	if (condition) {
 		try {
 			callback();
 		}
@@ -77,12 +77,12 @@ impl = {
 			function() {
 				var res, doms={}, a;
 
-				if(!p || !p.getEntriesByType) {
+				if (!p || !p.getEntriesByType) {
 					return;
 				}
 
 				res = p.getEntriesByType("resource");
-				if(!res || !res.length) {
+				if (!res || !res.length) {
 					return;
 				}
 
@@ -100,7 +100,7 @@ impl = {
 			"resources"
 		);
 
-		if(m) {
+		if (m) {
 			BOOMR.addVar({
 				"mem.total": m.totalJSHeapSize,
 				"mem.used" : m.usedJSHeapSize
@@ -113,10 +113,10 @@ impl = {
 					"scr.xy": s.width + "x" + s.height,
 					"scr.bpp": s.colorDepth + "/" + (s.pixelDepth || "")
 				});
-				if(s.orientation) {
+				if (s.orientation) {
 					BOOMR.addVar("scr.orn", s.orientation.angle + "/" + s.orientation.type);
 				}
-				if(w.devicePixelRatio > 1) {
+				if (w.devicePixelRatio > 1) {
 					BOOMR.addVar("scr.dpx", w.devicePixelRatio);
 				}
 			},
@@ -125,10 +125,10 @@ impl = {
 
 		errorWrap(n,
 			function() {
-				if(n.hardwareConcurrency) {
+				if (n.hardwareConcurrency) {
 					BOOMR.addVar("cpu.cnc", n.hardwareConcurrency);
 				}
-				if(n.maxTouchPoints) {
+				if (n.maxTouchPoints) {
 					BOOMR.addVar("scr.mtp", n.maxTouchPoints);
 				}
 			},
@@ -179,10 +179,10 @@ BOOMR.plugins.Memory = {
 			c = w.console;
 			s = w.screen;
 			n = w.navigator;
-			if(n && n.battery) {
+			if (n && n.battery) {
 				b = n.battery;
 			}
-			else if(n && n.getBattery) {
+			else if (n && n.getBattery) {
 				n.getBattery().then(function(battery) {
 					b = battery;
 				});
@@ -194,7 +194,7 @@ BOOMR.plugins.Memory = {
 
 		m = (p && p.memory ? p.memory : (c && c.memory ? c.memory : null));
 
-		if(impl.initialized) {
+		if (impl.initialized) {
 			return this;
 		}
 

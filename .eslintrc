@@ -26,6 +26,9 @@
 		"dot-notation":[2, {"allowKeywords": false}],
 		"space-unary-ops":0,
 		"key-spacing":0,
-		"no-empty":2
+		"no-empty":2,
+		"brace-style": [1, "stroustrup", { "allowSingleLine": true }],
+		"space-after-keywords": [2, "always"],
+		"no-space-before-semi": 0
 	}
 }

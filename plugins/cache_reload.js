@@ -9,7 +9,7 @@
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
-if(BOOMR.plugins.CACHE_RELOAD) {
+if (BOOMR.plugins.CACHE_RELOAD) {
 	return;
 }
 
@@ -21,7 +21,7 @@ BOOMR.plugins.CACHE_RELOAD = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "CACHE_RELOAD", ["url"]);
 
-		if(!impl.url) {
+		if (!impl.url) {
 			return this;
 		}
 

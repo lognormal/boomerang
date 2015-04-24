@@ -108,7 +108,7 @@ function MutationHandler() {
 }
 
 MutationHandler.stop = function() {
-	if(MutationHandler.observer && MutationHandler.observer.observer) {
+	if (MutationHandler.observer && MutationHandler.observer.observer) {
 		MutationHandler.observer.observer.disconnect();
 		MutationHandler.observer = null;
 	}
@@ -145,26 +145,26 @@ MutationHandler.prototype.addEvent = function(resource) {
 	    last_ev,
 	    index = this.pending_events.length;
 
-	for(i=index-1; i>=0; i--) {
-		if(this.pending_events[i] && !this.pending_events[i].complete) {
+	for (i=index-1; i>=0; i--) {
+		if (this.pending_events[i] && !this.pending_events[i].complete) {
 			last_ev = this.pending_events[i];
 			break;
 		}
 	}
 
-	if(last_ev) {
-		if(last_ev.type === "click") {
+	if (last_ev) {
+		if (last_ev.type === "click") {
 			// 3.1 & 3.3
-			if(last_ev.nodes_to_wait === 0 || !last_ev.resource.url) {
+			if (last_ev.nodes_to_wait === 0 || !last_ev.resource.url) {
 				this.pending_events[i] = undefined;
 				return null;	// abort
 			}
 			// last_ev will no longer receive watches as ev will receive them
 			// last_ev will wait fall interesting nodes and then send event
 		}
-		else if(last_ev.type === "xhr") {
+		else if (last_ev.type === "xhr") {
 			// 3.2
-			if(ev.type === "click") {
+			if (ev.type === "click") {
 				return null;
 			}
 
@@ -179,7 +179,7 @@ MutationHandler.prototype.addEvent = function(resource) {
 	// If we don't have a MutationObserver, then we just abort
 	if (!MutationHandler.observer) {
 		// If we already have detailed resource we can forward the event
-		if(resource.url && resource.timing.loadEventEnd) {
+		if (resource.url && resource.timing.loadEventEnd) {
 			this.sendEvent(index);
 		}
 
@@ -200,7 +200,7 @@ MutationHandler.prototype.sendEvent = function(i) {
 	this.watch--;
 
 	this.clearTimeout();
-	if(BOOMR.hasVar("h.cr")) {
+	if (BOOMR.hasVar("h.cr")) {
 		ev.resource.resources = ev.resources;
 
 		BOOMR.responseEnd(ev.resource);
@@ -214,7 +214,7 @@ MutationHandler.prototype.sendEvent = function(i) {
 
 MutationHandler.prototype.setTimeout = function(timeout, index) {
 	var self = this;
-	if(!timeout) {
+	if (!timeout) {
 		return;
 	}
 
@@ -226,11 +226,11 @@ MutationHandler.prototype.setTimeout = function(timeout, index) {
 MutationHandler.prototype.timedout = function(index) {
 	this.clearTimeout();
 
-	if(this.pending_events[index] && this.pending_events[index].type === "xhr") {
+	if (this.pending_events[index] && this.pending_events[index].type === "xhr") {
 		this.sendEvent(index);
 	}
 	else {
-		if(this.watch > 0) {
+		if (this.watch > 0) {
 			this.watch--;
 		}
 		this.pending_events[index] = undefined;
@@ -238,7 +238,7 @@ MutationHandler.prototype.timedout = function(index) {
 };
 
 MutationHandler.prototype.clearTimeout = function() {
-	if(this.timer) {
+	if (this.timer) {
 		clearTimeout(this.timer);
 		this.timer = null;
 	}
@@ -259,13 +259,13 @@ MutationHandler.prototype.load_cb = function(ev) {
 	current_event = this.pending_events[index];
 
 	// event aborted
-	if(!current_event) {
+	if (!current_event) {
 		return;
 	}
 
 	current_event.nodes_to_wait--;
 
-	if(current_event.nodes_to_wait === 0) {
+	if (current_event.nodes_to_wait === 0) {
 		current_event.resource.timing.loadEventEnd = BOOMR.now();
 
 		this.sendEvent(index);
@@ -276,31 +276,31 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 	var self = this, current_event, els, interesting = false, i, l, url;
 
 	// only images, scripts, iframes and links if stylesheet
-	if(node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+	if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 		node._bmr = { start: BOOMR.now(), res: index };
 
 		url=node.src || node.href;
 
-		if(node.nodeName === "IMG") {
-			if(node.naturalWidth) {
+		if (node.nodeName === "IMG") {
+			if (node.naturalWidth) {
 				// img already loaded
 				return false;
 			}
 		}
 
 		// no URL or javascript: or about: URL, so no network activity
-		if(!url || url.match(/^(about:|javascript:)/i)) {
+		if (!url || url.match(/^(about:|javascript:)/i)) {
 			return false;
 		}
 
 		current_event = this.pending_events[index];
 
-		if(!current_event) {
+		if (!current_event) {
 			return false;
 		}
 
-		if(!current_event.resource.url && node.nodeName === "SCRIPT") {
+		if (!current_event.resource.url && node.nodeName === "SCRIPT") {
 			a.href = url;
 
 			if (BOOMR.xhr_excludes.hasOwnProperty(a.href)
@@ -321,10 +321,10 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 
 		interesting = true;
 	}
-	else if(node.nodeType === Node.ELEMENT_NODE) {
+	else if (node.nodeType === Node.ELEMENT_NODE) {
 		els = node.getElementsByTagName("IMG");
-		if(els && els.length) {
-			for(i=0, l=els.length; i<l; i++) {
+		if (els && els.length) {
+			for (i=0, l=els.length; i<l; i++) {
 				interesting |= this.wait_for_node(els[i], index);
 			}
 		}
@@ -346,29 +346,29 @@ MutationHandler.prototype.mutation_cb = function(mutations) {
 	interesting = false;
 	index = this.pending_events.length-1;
 
-	if(index < 0 || !this.pending_events[index]) {
+	if (index < 0 || !this.pending_events[index]) {
 		// Nothing waiting for mutations
 		return true;
 	}
 
-	if(mutations && mutations.length) {
+	if (mutations && mutations.length) {
 		this.pending_events[index].resource.timing.domComplete = BOOMR.now();
 
 		mutations.forEach(function(mutation) {
 			var i, l;
-			if(mutation.type === "attributes") {
+			if (mutation.type === "attributes") {
 				interesting |= self.wait_for_node(mutation.target, index);
 			}
-			else if(mutation.type === "childList") {
+			else if (mutation.type === "childList") {
 				l = mutation.addedNodes.length;
-				for(i=0; i<l; i++) {
+				for (i=0; i<l; i++) {
 					interesting |= self.wait_for_node(mutation.addedNodes[i], index);
 				}
 			}
 		});
 	}
 
-	if(!interesting) {
+	if (!interesting) {
 		this.setTimeout(1000, index);
 	}
 
@@ -399,7 +399,7 @@ function instrumentXHR() {
 		// already instrumented
 		return;
 	}
-	else if(BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+	else if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 		// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
 		BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
@@ -510,7 +510,7 @@ BOOMR.plugins.AutoXHR = {
 		BOOMR.instrumentXHR = instrumentXHR;
 		BOOMR.uninstrumentXHR = uninstrumentXHR;
 
-		if(config.instrument_xhr) {
+		if (config.instrument_xhr) {
 			BOOMR.instrumentXHR();
 		}
 		else if (config.instrument_xhr === false) {

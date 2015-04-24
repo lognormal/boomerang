@@ -24,7 +24,7 @@
     "use strict";
 
 BOOMR = BOOMR || {};
-if(BOOMR.utils && BOOMR.utils.md5) {
+if (BOOMR.utils && BOOMR.utils.md5) {
 	return;
 }
 BOOMR.utils = BOOMR.utils || {};
