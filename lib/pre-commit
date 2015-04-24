@@ -58,4 +58,4 @@ EOF
 fi
 
 GRUNT_EXEC=$(which grunt || $GIT_ROOT/node_modules/.bin/grunt)
-$GRUNT_EXEC lint
+$GRUNT_EXEC --gruntfile $GIT_ROOT/Gruntfile.js lint
