@@ -58,11 +58,11 @@
         is_complete: function() {
             return true;
         },
-        initXMLHttpRequest: function() {
-          return window.XMLHttpRequest ?
-            new XMLHttpRequest() :
-            new ActiveXObject("Microsoft.XMLHTTP");
-        }
+		initXMLHttpRequest: function() {
+			return window.XMLHttpRequest ?
+				new XMLHttpRequest() :
+				new ActiveXObject("Microsoft.XMLHTTP");
+		}
     };
 })(window);
 
