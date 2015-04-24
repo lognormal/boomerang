@@ -58,11 +58,11 @@
         is_complete: function() {
             return true;
         },
-		initXMLHttpRequest: function() {
-			return window.XMLHttpRequest ?
-				new XMLHttpRequest() :
-				new ActiveXObject("Microsoft.XMLHTTP");
-		}
+	initXMLHttpRequest: function() {
+		return window.XMLHttpRequest ?
+			new XMLHttpRequest() :
+			new ActiveXObject("Microsoft.XMLHTTP");
+	}
     };
 })(window);
 
@@ -178,9 +178,9 @@
         // initialize boomerang
         BOOMR.init(config);
 
-		if (config.afterBoomerangLoad) {
-			config.afterBoomerangLoad();
-		}
+	if (config.afterBoomerangLoad) {
+		config.afterBoomerangLoad();
+	}
 
         // fake session details so beacons send
         BOOMR.addVar({

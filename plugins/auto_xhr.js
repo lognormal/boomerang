@@ -29,18 +29,18 @@ function getPathName(anchor) {
 		return null;
 	}
 
-/*
-correct relativism in IE
-anchor.href = "./path/file";
-anchor.pathname == "./path/file"; //should be "/path/file"
-*/
+	/*
+	correct relativism in IE
+	anchor.href = "./path/file";
+	anchor.pathname == "./path/file"; //should be "/path/file"
+	*/
 	anchor.href = anchor.href;
 
-/*
-correct missing leading slash in IE
-anchor.href = "path/file";
-anchor.pathname === "path/file"; //should be "/path/file"
-*/
+	/*
+	correct missing leading slash in IE
+	anchor.href = "path/file";
+	anchor.pathname === "path/file"; //should be "/path/file"
+	*/
 	var pathName = anchor.pathname;
 	if (pathName.charAt(0) !== "/") {
 		pathName = "/" + pathName;
