@@ -36,7 +36,7 @@
             return this.beacons[this.beacons.length - 1];
         },
         beaconCount: function() {
-            return this.beacons.length;
+			return this.beacons.length;
         },
         before_unload: function() {
             this.fired_before_unload = true;
@@ -178,9 +178,9 @@
         // initialize boomerang
         BOOMR.init(config);
 
-        if (config.afterBoomerangLoad) {
-            config.afterBoomerangLoad();
-        }
+		if (config.afterBoomerangLoad) {
+			config.afterBoomerangLoad();
+		}
 
         // fake session details so beacons send
         BOOMR.addVar({

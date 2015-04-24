@@ -25,26 +25,34 @@ if (BOOMR.plugins.AutoXHR) {
 }
 
 function getPathName(anchor) {
-  if (!anchor) {
-    return null;
-  }
+	if (!anchor) {
+		return null;
+	}
 
-  // correct relativism in IE
-  anchor.href = anchor.href;
+/*
+correct relativism in IE
+anchor.href = "./path/file";
+anchor.pathname == "./path/file"; //should be "/path/file"
+*/
+	anchor.href = anchor.href;
 
-  // correct missing leading slash in IE
-  var pathName = anchor.pathname;
-  if (pathName.charAt(0) !== "/") {
-    pathName = "/" + pathName;
-  }
+/*
+correct missing leading slash in IE
+anchor.href = "path/file";
+anchor.pathname === "path/file"; //should be "/path/file"
+*/
+	var pathName = anchor.pathname;
+	if (pathName.charAt(0) !== "/") {
+		pathName = "/" + pathName;
+	}
 
-  return pathName;
+	return pathName;
 }
 
 function shouldExcludeXhr(anchor) {
-  return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
-    BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
-    BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
+	return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
+		BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
+		BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
 }
 
 /*
@@ -534,7 +542,7 @@ BOOMR.plugins.AutoXHR = {
 			BOOMR.uninstrumentXHR();
 		}
 	},
-  getPathname: getPathName
+	getPathname: getPathName
 };
 
 })();
