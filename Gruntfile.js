@@ -54,6 +54,7 @@ module.exports = function (grunt) {
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
                 "tests/server/*.js",
+                "tests/*.js",
                 "tests/page-templates/**/*.js"
             ]
         },

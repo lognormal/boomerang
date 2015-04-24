@@ -22,7 +22,7 @@
         page_ready: function() {
             this.fired_page_ready = true;
         },
-        before_beacon: function(data) {
+        before_beacon: function() {
         },
         onbeacon: function(data) {
             this.beacons.push(_.clone(data));
@@ -176,7 +176,7 @@
             "h.d": "localhost",
             "h.t": new Date().getTime(),
             "h.cr": "abc"
-        })
+        });
 
         // setup Mocha
         window.mocha.globals(["BOOMR", "PageGroupVariable"]);
@@ -193,7 +193,7 @@
             }
 
             BOOMR.subscribe("onbeacon", function() {
-                if (++beaconsSeen == config.testAfterOnBeacon) {
+                if (++beaconsSeen === config.testAfterOnBeacon) {
                     // wait a few more ms so the beacon fires
                     // TODO: Trim this timing down if we can make it more reliable
                     setTimeout(t.runTests, 1000);
@@ -262,7 +262,7 @@
         assert.isString(tf.lastBeacon().v);
 
         done();
-    }
+    };
 
     window.BOOMR_test = t;
 
