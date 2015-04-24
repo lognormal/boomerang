@@ -24,6 +24,29 @@ if (BOOMR.plugins.AutoXHR) {
 	return;
 }
 
+function getPathName(anchor) {
+  if (!anchor) {
+    return null;
+  }
+
+  // correct relativism in IE
+  anchor.href = anchor.href;
+
+  // correct missing leading slash in IE
+  var pathName = anchor.pathname;
+  if (pathName.charAt(0) !== "/") {
+    pathName = "/" + pathName;
+  }
+
+  return pathName;
+}
+
+function shouldExcludeXhr(anchor) {
+  return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
+    BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
+    BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
+}
+
 /*
 How should this work?
 
@@ -303,7 +326,7 @@ MutationHandler.prototype.wait_for_node = function(node, index) {
 		if(!current_event.resource.url && node.nodeName === "SCRIPT") {
 			a.href = url;
 
-			if (shouldExclude(a)) {
+			if (shouldExcludeXhr(a)) {
 				// excluded resource, so abort
 				return false;
 			}
@@ -424,7 +447,7 @@ function instrumentXHR() {
 		req.open = function(method, url, async) {
 			a.href = url;
 
-			if (shouldExclude(a)) {
+			if (shouldExcludeXhr(a)) {
 				// skip instrumentation and call the original open method
 				return orig_open.apply(req, arguments);
 			}
@@ -493,29 +516,6 @@ function uninstrumentXHR() {
 	if (BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest !== BOOMR.window.XMLHttpRequest) {
 		BOOMR.window.XMLHttpRequest = BOOMR.orig_XMLHttpRequest;
 	}
-}
-
-function shouldExclude(anchor)
-{
-  return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
-    BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
-    BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
-}
-
-function getPathName(anchor)
-{
-  if (!anchor)
-    return;
-
-  // correct relitivism in IE
-  anchor.href = anchor.href;
-
-  // correct missing leading slash in IE
-  var pathName = anchor.pathname;
-  if (pathName.charAt(0) !== "/")
-    pathName = "/" + pathName;
-
-  return pathName;
 }
 
 BOOMR.plugins.AutoXHR = {
