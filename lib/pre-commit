@@ -1,11 +1,13 @@
 #!/bin/sh
 #
-# An example hook script to verify what is about to be committed.
-# Called by "git commit" with no arguments.  The hook should
-# exit with non-zero status after issuing an appropriate message if
-# it wants to stop the commit.
+# git pre-commit hook
+# 
+# This script should be copied into your local clones .git/hooks/
+# directory and made executable (`chmod +x`).
 #
-# To enable this hook, rename this file to "pre-commit".
+# After that, the script will run before every call to git commit and
+# check if grunt is installed and if `grunt lint` comes back successfully.
+
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
