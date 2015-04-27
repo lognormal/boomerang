@@ -9,28 +9,29 @@ BOOMR_test.init({
     "instrument_xhr": true,
     testAfterOnBeacon: 2,
     afterBoomerangLoad:
-      function() {
-        var xhrSent = false;
-        BOOMR.xhr_excludes["/pages/06-bugs/support/script2.js"] = true;
-        BOOMR.subscribe(
-          "onbeacon",
-          function() {
-            if (xhrSent)
-              return;
-            xhrSent = true;
+        function() {
+            var xhrSent = false;
+            BOOMR.xhr_excludes["/pages/06-bugs/support/script2.js"] = true;
+            BOOMR.subscribe(
+                "onbeacon",
+                function() {
+                    if (xhrSent) {
+                        return;
+                    }
+                    xhrSent = true;
 
-            var xhr;
-            xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-            xhr.open("GET", "support/script1.js");
-            xhr.send(null);
+                    var xhr;
+                    xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+                    xhr.open("GET", "support/script1.js");
+                    xhr.send(null);
 
-            setTimeout(function(){
-              xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-              xhr.open("GET", "support/script2.js");
-              xhr.send(null);
-            }, 500);
-          });
-      }
-  });
+                    setTimeout(function(){
+                        xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+                        xhr.open("GET", "support/script2.js");
+                        xhr.send(null);
+                    }, 500);
+                });
+        }
+});
 </script>
 <%= footer %>

@@ -20,11 +20,11 @@ BOOMR_test.init({
         ]
     },
     afterBoomerangLoad:
-      function() {
-        var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-        xhr.open("GET", "/pages/blah", true);
-        xhr.send();
-      }
+        function() {
+            var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+            xhr.open("GET", "/pages/blah", true);
+            xhr.send();
+        }
 });
 </script>
 <%= footer %>
