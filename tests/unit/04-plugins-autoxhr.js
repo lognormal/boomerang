@@ -9,28 +9,53 @@ describe("BOOMR.plugins.AutoXHR", function() {
             assert.isFunction(BOOMR.plugins.AutoXHR.getPathname);
         });
 
-        it("getPathname test", function() {
+        function test(href, expected) {
             var anchor = document.createElement("a");
-            function test(href, expected) {
-                anchor.href = href;
-                assert.equal(
-                    BOOMR.plugins.AutoXHR.getPathname(anchor),
-                    expected);
-            }
+            anchor.href = href;
+            assert.equal(
+                BOOMR.plugins.AutoXHR.getPathname(anchor),
+                expected);
+        }
 
-            var pathName = window.location.pathname, shortPathName = pathName;
-            if (pathName === "/context.html") { //unit tests
-                shortPathName = "/";
-            }
+        var pathName = window.location.pathname, shortPathName = pathName;
+        if (pathName === "/context.html" || //unit tests (local)
+            pathName === "/unit/index.html") { //unit tests (build)
+            shortPathName = "/";
+        }
 
+        it("getPathname test - path/file.js", function() {
             test("path/file.js", shortPathName + "path/file.js");
+        });
+
+        it("getPathname test - /path/file.js", function() {
             test("/path/file.js", "/path/file.js");
+        });
+
+        it("getPathname test - //path/file.js", function() {
             test("//path/file.js", "/file.js");
+        });
+
+        it("getPathname test - ./path/file.js", function() {
             test("./path/file.js", shortPathName + "path/file.js");
+        });
+
+        it("getPathname test - ../path/file.js", function() {
             test("../path/file.js", "/path/file.js");
+        });
+
+        it("getPathname test - #ref", function() {
             test("#ref", pathName);
+        });
+
+        it("getPathname test - ?val=1", function() {
             test("?val=1", pathName);
+        });
+
+        it("getPathname test - (empty string))", function() {
             test("", pathName);
+        });
+
+        it("getPathname test - ../../../../file.js", function() {
             test("../../../../file.js", "/file.js");
         });
     });
