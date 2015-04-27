@@ -22,8 +22,6 @@
         page_ready: function() {
             this.fired_page_ready = true;
         },
-        before_beacon: function() {
-        },
         onbeacon: function(data) {
             this.beacons.push(_.clone(data));
             this.fired_onbeacon = true;
@@ -44,7 +42,6 @@
             }
 
             BOOMR.subscribe("page_ready", this.page_ready, null, this);
-            BOOMR.subscribe("before_beacon", this.before_beacon, null, this);
             BOOMR.subscribe("onbeacon", this.onbeacon, null, this);
             BOOMR.subscribe("before_unload", this.before_unload, null, this);
 
