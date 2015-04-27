@@ -62,12 +62,12 @@ describe("e2e/00-basic/00-onload", function() {
         assert.isString(tf.lastBeacon()["scr.xy"], "scr.xy");
 
         // only if we have orientation
-        if(s && s.orientation) {
+        if (s && s.orientation) {
             assert.isString(tf.lastBeacon()["scr.orn"], "scr.orn");
         }
 
         // only if we have pixel ratio
-        if(window.devicePixelRatio && window.devicePixelRatio > 1) {
+        if (window.devicePixelRatio && window.devicePixelRatio > 1) {
             assert.isNumber(tf.lastBeacon()["scr.dpx"], "scr.dpx");
         }
     });

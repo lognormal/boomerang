@@ -33,7 +33,7 @@ Beacon parameters:
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
-if(BOOMR.plugins.IPv6) {
+if (BOOMR.plugins.IPv6) {
 	return;
 }
 
@@ -71,13 +71,13 @@ var impl = {
 			a = arguments;
 
 		// Terminate if we've reached end of test list
-		if(!which || !this.timers.hasOwnProperty(which)) {
+		if (!which || !this.timers.hasOwnProperty(which)) {
 			this.done();
 			return false;
 		}
 
 		// Skip if URL wasn't set for this test
-		if(!this[which + "_url"]) {
+		if (!this[which + "_url"]) {
 			return this.load_img.apply(this, a);
 		}
 
@@ -112,19 +112,19 @@ var impl = {
 	},
 
 	done: function() {
-		if(this.complete) {
+		if (this.complete) {
 			return;
 		}
 
 		BOOMR.removeVar("ipv6_latency", "ipv6_lookup");
-		if(this.timers.ipv6.end !== null) {
+		if (this.timers.ipv6.end !== null) {
 			BOOMR.addVar("ipv6_latency", this.timers.ipv6.end - this.timers.ipv6.start);
 		}
 		else {
 			BOOMR.addVar("ipv6_latency", "NA");
 		}
 
-		if(this.timers.host.end !== null) {
+		if (this.timers.host.end !== null) {
 			BOOMR.addVar("ipv6_lookup", this.timers.host.end - this.timers.host.start);
 		}
 		else {
@@ -140,7 +140,7 @@ var impl = {
 		// gets called.  Let's set our complete state and call sendBeacon.
 		// This happens if onunload fires before onload
 
-		if(!this.complete) {
+		if (!this.complete) {
 			this.complete = true;
 			BOOMR.sendBeacon();
 		}
@@ -153,23 +153,23 @@ BOOMR.plugins.IPv6 = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "IPv6", ["ipv6_url", "host_url", "timeout"]);
 
-		if(config && config.wait) {
+		if (config && config.wait) {
 			return this;
 		}
 
-		if(!impl.ipv6_url) {
+		if (!impl.ipv6_url) {
 			BOOMR.warn("IPv6.ipv6_url is not set.  Cannot run IPv6 test.", "ipv6");
 			impl.complete = true;	// set to true so that is_complete doesn't
 						// block other plugins
 			return this;
 		}
 
-		if(!impl.host_url) {
+		if (!impl.host_url) {
 			BOOMR.warn("IPv6.host_url is not set.  Will skip hostname test.", "ipv6");
 		}
 
 		// make sure that test images use the same protocol as the host page
-		if(BOOMR.window.location.protocol === "https:") {
+		if (BOOMR.window.location.protocol === "https:") {
 			impl.complete = true;
 			return this;
 		}

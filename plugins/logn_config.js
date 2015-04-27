@@ -8,14 +8,14 @@ var dc=document,
     load, loaded;
 
 // Don't even bother creating the plugin if this is mhtml
-if(BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if (BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
 running = complete = false;
 
 loaded=function() {
-	if(complete) {
+	if (complete) {
 		return;
 	}
 	complete = true;
@@ -30,7 +30,7 @@ load=function() {
 	    plugins = [],
 	    pluginName;
 
-	for(pluginName in BOOMR.plugins) {
+	for (pluginName in BOOMR.plugins) {
 		if (BOOMR.plugins.hasOwnProperty(pluginName)) {
 			plugins.push(encodeURIComponent(pluginName));
 		}
@@ -53,24 +53,24 @@ load=function() {
 	s0.parentNode.insertBefore(s1, s0);
 	s0=s1=null;
 
-	if(complete) {
+	if (complete) {
 		setTimeout(load, 5.5*60*1000);
 	}
 };
 
 BOOMR.plugins.LOGN = {
 	init: function(config) {
-		if(complete || BOOMR.session.rate_limited) {
+		if (complete || BOOMR.session.rate_limited) {
 			return this;
 		}
 
-		if(config && config.rate_limited) {
+		if (config && config.rate_limited) {
 			BOOMR.session.rate_limited=true;
 			return this;
 		}
 
 		// if we are called a second time while running, it means config.js has finished loading
-		if(running) {
+		if (running) {
 			// We need this monstrosity because Internet Explorer is quite moody
 			// regarding whether it will or willn't fire onreadystatechange for
 			// every change of readyState
@@ -78,7 +78,7 @@ BOOMR.plugins.LOGN = {
 			setTimeout(load, 5.5*60*1000);
 
 			BOOMR.addVar("t_configjs", BOOMR.now()-t_start);
-			if(typeof BOOMR_configt === "number") {
+			if (typeof BOOMR_configt === "number") {
 				BOOMR.addVar("t_configfb", BOOMR_configt-t_start);
 				delete BOOMR_configt;
 			}
@@ -86,7 +86,7 @@ BOOMR.plugins.LOGN = {
 		}
 
 		running=true;
-		if(w === window) {
+		if (w === window) {
 			BOOMR.subscribe("page_ready", load, null, null);
 		}
 		else {

@@ -1,4 +1,4 @@
-/*eslint-env browser,amd,node*/
+/*eslint-disable*/
 //
 // usertiming.js
 //
