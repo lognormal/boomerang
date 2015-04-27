@@ -9,8 +9,8 @@ describe("BOOMR.plugins.AutoXHR", function() {
             assert.isFunction(BOOMR.plugins.AutoXHR.getPathname);
         });
 
-        var anchor = document.createElement("a");
         function test(href, expected) {
+            var anchor = document.createElement("a");
             anchor.href = href;
             assert.equal(
                 BOOMR.plugins.AutoXHR.getPathname(anchor),
@@ -23,43 +23,39 @@ describe("BOOMR.plugins.AutoXHR", function() {
             shortPathName = "/";
         }
 
-        it("getPathname test - A", function() {
+        it("getPathname test - path/file.js", function() {
             test("path/file.js", shortPathName + "path/file.js");
         });
 
-        it("getPathname test - B", function() {
-            test("path/file.js", shortPathName + "path/file.js");
-        });
-
-        it("getPathname test - C", function() {
+        it("getPathname test - /path/file.js", function() {
             test("/path/file.js", "/path/file.js");
         });
 
-        it("getPathname test - D", function() {
+        it("getPathname test - //path/file.js", function() {
             test("//path/file.js", "/file.js");
         });
 
-        it("getPathname test - E", function() {
+        it("getPathname test - ./path/file.js", function() {
             test("./path/file.js", shortPathName + "path/file.js");
         });
 
-        it("getPathname test - F", function() {
+        it("getPathname test - ../path/file.js", function() {
             test("../path/file.js", "/path/file.js");
         });
 
-        it("getPathname test - G", function() {
+        it("getPathname test - #ref", function() {
             test("#ref", pathName);
         });
 
-        it("getPathname test - H", function() {
+        it("getPathname test - ?val=1", function() {
             test("?val=1", pathName);
         });
 
-        it("getPathname test - I", function() {
+        it("getPathname test - (empty string))", function() {
             test("", pathName);
         });
 
-        it("getPathname test - J", function() {
+        it("getPathname test - ../../../../file.js", function() {
             test("../../../../file.js", "/file.js");
         });
     });
