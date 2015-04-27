@@ -18,14 +18,19 @@ describe("BOOMR.plugins.AutoXHR", function() {
                     expected);
             }
 
-            test("path/file.js", "/unit/path/file.js");
+            var pathName = window.location.pathname, shortPathName = pathName;
+            if (pathName === "/context.html") { //unit tests
+                shortPathName = "/";
+            }
+
+            test("path/file.js", shortPathName + "path/file.js");
             test("/path/file.js", "/path/file.js");
             test("//path/file.js", "/file.js");
-            test("./path/file.js", "/unit/path/file.js");
+            test("./path/file.js", shortPathName + "path/file.js");
             test("../path/file.js", "/path/file.js");
-            test("#ref", "/unit/");
-            test("?val=1", "/unit/");
-            test("", "/unit/");
+            test("#ref", pathName);
+            test("?val=1", pathName);
+            test("", pathName);
             test("../../../../file.js", "/file.js");
         });
     });
