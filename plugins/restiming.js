@@ -53,17 +53,17 @@ var xssBreakDelim = "\n";
 function convertToTrie(entries) {
 	var trie = {}, url, urlFixed, i, value, letters, letter, cur, node;
 
-	for(url in entries) {
+	for (url in entries) {
 		urlFixed = url;
 
 		// find any strings to break
-		for(i = 0; i < impl.xssBreakWords.length; i++) {
+		for (i = 0; i < impl.xssBreakWords.length; i++) {
 			// Add a xssBreakDelim character after the first letter.  optimizeTrie will
 			// ensure this sequence doesn't get combined.
 			urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + xssBreakDelim + "$2");
 		}
 
-		if(!entries.hasOwnProperty(url)) {
+		if (!entries.hasOwnProperty(url)) {
 			continue;
 		}
 
@@ -71,22 +71,25 @@ function convertToTrie(entries) {
 		letters = urlFixed.split("");
 		cur = trie;
 
-		for(i = 0; i < letters.length; i++) {
+		for (i = 0; i < letters.length; i++) {
 			letter = letters[i];
 			node = cur[letter];
 
-			if(typeof node === "undefined") {
+			if (typeof node === "undefined") {
 				// nothing exists yet, create either a leaf if this is the end of the word,
 				// or a branch if there are letters to go
 				cur = cur[letter] = (i === (letters.length - 1) ? value : {});
-			} else if(typeof node === "string") {
+			}
+			else if (typeof node === "string") {
 				// this is a leaf, but we need to go further, so convert it into a branch
 				cur = cur[letter] = { "|": node };
-			} else {
-				if(i === (letters.length - 1)) {
+			}
+			else {
+				if (i === (letters.length - 1)) {
 					// this is the end of our key, and we've hit an existing node.  Add our timings.
 					cur[letter]["|"] = value;
-				} else {
+				}
+				else {
 					// continue onwards
 					cur = cur[letter];
 				}
@@ -106,15 +109,15 @@ function convertToTrie(entries) {
 function optimizeTrie(cur, top) {
 	var num = 0, node, ret, topNode;
 
-	for(node in cur) {
-		if(typeof cur[node] === "object") {
+	for (node in cur) {
+		if (typeof cur[node] === "object") {
 			// optimize children
 			ret = optimizeTrie(cur[node], false);
-			if(ret) {
+			if (ret) {
 				// swap the current leaf with compressed one
 				delete cur[node];
 
-				if(node === xssBreakDelim) {
+				if (node === xssBreakDelim) {
 					// If this node is a newline, which can't be in a regular URL,
 					// it's due to the XSS patch.  Remove the placeholder character,
 					// and make sure this node isn't compressed by incrementing
@@ -131,21 +134,24 @@ function optimizeTrie(cur, top) {
 		num++;
 	}
 
-	if(num === 1) {
+	if (num === 1) {
 		// compress single leafs
-		if(top) {
+		if (top) {
 			// top node gets special treatment so we're not left with a {node:,value:} at top
 			topNode = {};
 			topNode[node] = cur[node];
 			return topNode;
-		} else {
+		}
+		else {
 			// other nodes we return name and value separately
 			return { name: node, value: cur[node] };
 		}
-	} else if(top) {
+	}
+	else if (top) {
 		// top node with more than 1 child, return it as-is
 		return cur;
-	} else {
+	}
+	else {
 		// more than two nodes and not the top, we can't compress any more
 		return false;
 	}
@@ -181,17 +187,15 @@ function trimTiming(time, startTime) {
 function getNavStartTime(frame) {
 	var navStart = 0;
 
-	try
-	{
-		if(("performance" in frame) &&
+	try {
+		if (("performance" in frame) &&
 		frame.performance &&
 		frame.performance.timing &&
 		frame.performance.timing.navigationStart) {
 			navStart = frame.performance.timing.navigationStart;
 		}
 	}
-	catch(e)
-	{
+	catch(e) {
 		// empty
 	}
 
@@ -210,30 +214,30 @@ function getNavStartTime(frame) {
 function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, navEntry, t;
 
-	if(typeof isTopWindow === "undefined") {
+	if (typeof isTopWindow === "undefined") {
 		isTopWindow = true;
 	}
 
-	if(typeof offset === "undefined") {
+	if (typeof offset === "undefined") {
 		offset = 0;
 	}
 
-	if(typeof depth === "undefined") {
+	if (typeof depth === "undefined") {
 		depth = 0;
 	}
 
-	if(depth > 10) {
+	if (depth > 10) {
 		return entries;
 	}
 
 	navStart = getNavStartTime(frame);
 
 	// get sub-frames' entries first
-	if(frame.frames) {
-		for(i = 0; i < frame.frames.length; i++) {
+	if (frame.frames) {
+		for (i = 0; i < frame.frames.length; i++) {
 			frameNavStart = getNavStartTime(frame.frames[i]);
 			frameOffset = 0;
-			if(frameNavStart > navStart) {
+			if (frameNavStart > navStart) {
 				frameOffset = offset + (frameNavStart - navStart);
 			}
 
@@ -242,16 +246,16 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 	}
 
 	try {
-		if(!("performance" in frame) ||
+		if (!("performance" in frame) ||
 		   !frame.performance ||
 		   !frame.performance.getEntriesByType) {
 			return entries;
 		}
 
 		// add an entry for the top page
-		if(isTopWindow) {
+		if (isTopWindow) {
 			navEntries = frame.performance.getEntriesByType("navigation");
-			if(navEntries && navEntries.length === 1) {
+			if (navEntries && navEntries.length === 1) {
 				navEntry = navEntries[0];
 
 				// replace document with the actual URL
@@ -270,7 +274,8 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 					responseStart: navEntry.responseStart,
 					responseEnd: navEntry.responseEnd
 				});
-			} else if(frame.performance.timing){
+			}
+			else if (frame.performance.timing){
 				// add a fake entry from the timing object
 				t = frame.performance.timing;
 				entries.push({
@@ -295,7 +300,7 @@ function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		var frameEntries = frame.performance.getEntriesByType("resource"),
 		    frameFixedEntries = [];
 
-		for(i = 0; frameEntries && i < frameEntries.length; i++) {
+		for (i = 0; frameEntries && i < frameEntries.length; i++) {
 			t = frameEntries[i];
 			frameFixedEntries.push({
 				name: t.name,
@@ -347,19 +352,19 @@ function getResourceTiming() {
 	var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 	    i, e, results = {}, initiatorType, url, data;
 
-	if(!entries || !entries.length) {
+	if (!entries || !entries.length) {
 		return {};
 	}
 
-	for(i = 0; i < entries.length; i++) {
+	for (i = 0; i < entries.length; i++) {
 		e = entries[i];
 
-		if(e.name.indexOf("about:") === 0 ||
+		if (e.name.indexOf("about:") === 0 ||
 		   e.name.indexOf("javascript:") === 0) {
 			continue;
 		}
 
-		if(e.name.indexOf(BOOMR.url) > -1 ||
+		if (e.name.indexOf(BOOMR.url) > -1 ||
 		   e.name.indexOf(BOOMR.config_url) > -1) {
 			continue;
 		}
@@ -378,7 +383,7 @@ function getResourceTiming() {
 
 		// prefix initiatorType to the string
 		initiatorType = initiatorTypes[e.initiatorType];
-		if(typeof initiatorType === "undefined") {
+		if (typeof initiatorType === "undefined") {
 			initiatorType = 0;
 		}
 
@@ -399,9 +404,10 @@ function getResourceTiming() {
 		url = BOOMR.utils.cleanupURL(e.name);
 
 		// if this entry already exists, add a pipe as a separator
-		if(results[url] !== undefined) {
+		if (results[url] !== undefined) {
 			results[url] += "|" + data;
-		} else {
+		}
+		else {
 			results[url] = data;
 		}
 	}
@@ -416,12 +422,12 @@ impl = {
 	xssBreakWords: defaultXssBreakWords,
 	done: function() {
 		var r;
-		if(this.complete) {
+		if (this.complete) {
 			return;
 		}
 		BOOMR.removeVar("restiming");
 		r = getResourceTiming();
-		if(r) {
+		if (r) {
 			BOOMR.info("Client supports Resource Timing API", "restiming");
 			BOOMR.addVar({
 				restiming: JSON.stringify(r)
@@ -432,7 +438,7 @@ impl = {
 	},
 
 	clearMetrics: function(vars) {
-		if(vars.hasOwnProperty("restiming")) {
+		if (vars.hasOwnProperty("restiming")) {
 			BOOMR.removeVar("restiming");
 		}
 	}
@@ -444,16 +450,17 @@ BOOMR.plugins.ResourceTiming = {
 
 		BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords"]);
 
-		if(impl.initialized) {
+		if (impl.initialized) {
 			return this;
 		}
 
-		if(p && typeof p.getEntriesByType === "function") {
+		if (p && typeof p.getEntriesByType === "function") {
 			BOOMR.subscribe("page_ready", impl.done, null, impl);
 			BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 			BOOMR.subscribe("before_unload", impl.done, null, impl);
 			impl.supported = true;
-		} else {
+		}
+		else {
 			impl.complete = true;
 		}
 

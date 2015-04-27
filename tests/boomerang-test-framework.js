@@ -37,7 +37,7 @@
             this.fired_before_unload = true;
         },
         init: function() {
-            if(this.initialized) {
+            if (this.initialized) {
                 return this;
             }
 
@@ -153,7 +153,8 @@
                 window.document.addEventListener("onBoomerangLoaded", function() {
                     t.init(config);
                 });
-            } else if (window.document.attachEvent) {
+            }
+            else if (window.document.attachEvent) {
                 window.document.attachEvent("onBoomerangLoaded", function() {
                     t.init(config);
                 });
@@ -196,7 +197,8 @@
                     setTimeout(t.runTests, 1000);
                 }
             });
-        } else {
+        }
+        else {
             BOOMR.setImmediate(t.runTests);
         }
 
@@ -259,6 +261,16 @@
         assert.isString(tf.lastBeacon().v);
 
         done();
+    };
+
+    t.canSetCookies = function() {
+        var testCookieName = "test_cookie";
+
+        // set a cookie
+        document.cookie = [testCookieName + "=true", "path=/", "domain=" + location.hostname].join("; ");
+
+        // determine if it was set OK
+        return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
     };
 
     window.BOOMR_test = t;

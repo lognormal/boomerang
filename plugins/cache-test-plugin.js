@@ -9,7 +9,7 @@ var dc=document,
     t_start, load;
 
 // Don't even bother creating the plugin if this is mhtml
-if(!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+if (!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 	return;
 }
 
@@ -32,11 +32,11 @@ load=function() {
 
 BOOMR.plugins.CT = {
 	init: function() {
-		if(complete) {
+		if (complete) {
 			return this;
 		}
 
-		if(BOOMR.window === window) {
+		if (BOOMR.window === window) {
 			BOOMR.subscribe("page_ready", load, null, null);
 		}
 		else {
@@ -51,10 +51,10 @@ BOOMR.plugins.CT = {
 	},
 
 	loaded: function(t) {
-		if(complete) {
+		if (complete) {
 			return;
 		}
-		if(!t) { t=-1; }
+		if (!t) { t=-1; }
 		// how long did it take for the call to return
 		BOOMR.addVar({
 			"cch.lt": new Date().getTime()-t_start,
