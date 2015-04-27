@@ -36,7 +36,7 @@
             return this.beacons[this.beacons.length - 1];
         },
         beaconCount: function() {
-		return this.beacons.length;
+            return this.beacons.length;
         },
         before_unload: function() {
             this.fired_before_unload = true;
@@ -59,9 +59,9 @@
             return true;
         },
 	initXMLHttpRequest: function() {
-		return window.XMLHttpRequest ?
-			new XMLHttpRequest() :
-			new ActiveXObject("Microsoft.XMLHTTP");
+            return window.XMLHttpRequest ?
+                new XMLHttpRequest() :
+                new ActiveXObject("Microsoft.XMLHTTP");
 	}
     };
 })(window);
