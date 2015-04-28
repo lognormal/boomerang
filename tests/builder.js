@@ -1,3 +1,4 @@
+/*eslint-env node*/
 //
 // Imports
 //
@@ -65,9 +66,6 @@ module.exports = function() {
     //make grunt know this task is async.
     var done = this.async();
 
-    // options we'll be passing thru
-    var opts = {};
-
     async.waterfall([
         //
         // First, load all static template variables
@@ -120,11 +118,15 @@ module.exports = function() {
                 var templateDir = dir.replace(testTemplatesDir + path.sep, "");
                 var supportDir = path.join(testTemplatesDir, templateDir, "support");
 
-                rootIndexHtml += '<p><a href="' + templateDir + '/index.html">' + templateDir + '</a></p>';
+                rootIndexHtml += "<p><a href='" + templateDir + "/index.html'>" + templateDir + "</a></p>";
 
                 // copy support files over
                 if (grunt.file.exists(supportDir)) {
                     getFiles(supportDir, "", function(err, files) {
+                        if (err) {
+                            return cb2(err);
+                        }
+
                         var supportDirDest = path.join(testPagesDir, templateDir, "support");
 
                         if (!grunt.file.exists(supportDirDest)) {
@@ -144,6 +146,10 @@ module.exports = function() {
 
                 // get all files for this dir
                 getFiles(dir, ".html", function(err, files) {
+                    if (err) {
+                        return cb2(err);
+                    }
+
                     var indexHtml = "";
                     var indexFile = path.join(testPagesDir, templateDir, "index.html");
                     var indexFileName = path.join(templateDir, "index.html");
@@ -182,8 +188,8 @@ module.exports = function() {
                         //
                         // Index.html
                         //
-                        indexHtml += '<p><a href="' + templateFileName + '">' + templateFileName + '</a></p>';
-                        indexHtml += '<iframe src="' + templateFileName + '" style="width: 100%"></iframe>\n'
+                        indexHtml += "<p><a href='" + templateFileName + "'>" + templateFileName + "</a></p>";
+                        indexHtml += "<iframe src='" + templateFileName + "' style='width: 100%'></iframe>\n";
 
                         // if the .js file exists, copy that too
                         if (grunt.file.exists(jsFile)) {
@@ -206,10 +212,14 @@ module.exports = function() {
                 // test definitions
                 grunt.file.write(e2eJsonPath, JSON.stringify(testDefinitions));
 
-                cb(null, opts);
+                cb(err, opts);
             });
-        },
-    ], function(err, opts) {
+        }
+    ], function(err) {
+        if (err) {
+            console.log(err);
+        }
+
         done();
     });
 };
