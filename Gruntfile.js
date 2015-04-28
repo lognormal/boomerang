@@ -51,10 +51,12 @@ module.exports = function (grunt) {
                 "Gruntfile.js",
                 "boomerang.js",
                 "plugins/*.js",
+                "tests/*.js",
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
                 "tests/server/*.js",
-                "tests/*.js",
+                "tests/page-templates/**/*.js",
+                "tests/page-templates/**/*.html",
                 "tests/page-templates/**/*.js"
             ]
         },
