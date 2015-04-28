@@ -2,14 +2,19 @@
 	"env": {
 		"browser":true
 	},
+	"plugins": [
+		"html"
+	],
 	"globals": {
 		"BOOMR":true,
 		"BOOMR_start":true,
 		"BOOMR_lstart":true,
 		"BOOMR_onload":true,
+		"BOOMR_test":true,
 		"console":false,
 		"unescape":false,
-		"BOOMR_configt":true
+		"BOOMR_configt":true,
+		"ActiveXObject":true
 	},
 	"rules": {
 		"no-mixed-spaces-and-tabs":[2, true],
