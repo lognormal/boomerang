@@ -21,7 +21,7 @@ Handler = function(config) {
 
 Handler.prototype = {
 	apply: function(value) {
-		if(this.preProcessor) {
+		if (this.preProcessor) {
 			value = this.preProcessor(value);
 		}
 		if (!value && value !== 0) {
@@ -33,10 +33,10 @@ Handler.prototype = {
 
 	handle: function(o) {
 		var h = this;
-		if(!this.isValid(o)) {
+		if (!this.isValid(o)) {
 			return false;
 		}
-		if(o.label) {
+		if (o.label) {
 			h = new Handler(this);
 			h.varname = o.label;
 		}
@@ -86,13 +86,13 @@ Handler.prototype = {
 			}
 		}
 
-		if (!operand) {
-			operand = l.href;
+		if (typeof operand === "undefined") {
+			return false;
 		}
 
 		m = re.exec(operand);
 
-		if(!m || !m.length) {
+		if (!m || !m.length) {
 			return false;
 		}
 
@@ -111,7 +111,7 @@ Handler.prototype = {
 		var re;
 
 		// Empty pattern matches all URLs
-		if(!u) {
+		if (!u) {
 			return true;
 		}
 
@@ -127,12 +127,12 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(!urlToCheck) {
+		if (!urlToCheck) {
 			urlToCheck = l.href;
 		}
 
 		// Check if URL matches
-		if(!re.exec(urlToCheck)) {
+		if (!re.exec(urlToCheck)) {
 			BOOMR.debug("No match " + re + " on " + urlToCheck, "PageVars");
 			return false;
 		}
@@ -143,34 +143,34 @@ Handler.prototype = {
 	nodeWalk: function(root, xpath) {
 		var m, nodes, index, el;
 
-		if(!xpath) {
+		if (!xpath) {
 			return root;
 		}
 
 		m = xpath.match(/^(\w+)(?:\[(\d+)\])?\/?(.*)/);
 
-		if(!m || !m.length) {
+		if (!m || !m.length) {
 			return null;
 		}
 
 		nodes = root.getElementsByTagName(m[1]);
 
-		if(m[2]) {
+		if (m[2]) {
 			index = parseInt(m[2], 10);
-			if(isNaN(index)) {
+			if (isNaN(index)) {
 				return null;
 			}
 			index--;	// XPath indices start at 1
-			if(nodes.length <= index) {
+			if (nodes.length <= index) {
 				return null;
 			}
 			nodes = [nodes[index]];
 		}
 
-		for(index=0; index<nodes.length; index++) {
+		for (index=0; index<nodes.length; index++) {
 			el = this.nodeWalk(nodes[index], m[3]);
 
-			if(el) {
+			if (el) {
 				return el;
 			}
 		}
@@ -182,10 +182,10 @@ Handler.prototype = {
 		var el, m, tryOurs=false, err;
 
 		try {
-			if(d.evaluate) {
+			if (d.evaluate) {
 				el = d.evaluate(xpath, d, null, 9, null);
 			}
-			else if(d.selectNodes) {
+			else if (d.selectNodes) {
 				el = d.selectNodes(xpath);
 			}
 			else {
@@ -197,22 +197,22 @@ Handler.prototype = {
 			tryOurs=true;
 		}
 
-		if(!el && tryOurs) {
+		if (!el && tryOurs) {
 			try {
-				if(xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
+				if (xpath.match(/^\/html(?:\/\w+(?:\[\d+\])?)*$/)) {
 					xpath = xpath.slice(6);
 					return this.nodeWalk(d, xpath);
 				}
-				else if((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+				else if ((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
 					el = d.getElementById(m[1]);
-					if(!el || !m[2]) {
+					if (!el || !m[2]) {
 						return el;
 					}
 					return this.nodeWalk(el, m[2].slice(1));
 				}
 				else {
 					BOOMR.debug("Could not evaluate XPath", "PageVars");
-					if(err) {
+					if (err) {
 						BOOMR.error("Error evaluating XPath: " + err, "PageVars");
 						BOOMR.addError(err, "PageVars.runXPath.native", xpath);
 					}
@@ -226,7 +226,7 @@ Handler.prototype = {
 			}
 		}
 
-		if(!el || el.resultType !== 9 || !el.singleNodeValue) {
+		if (!el || el.resultType !== 9 || !el.singleNodeValue) {
 			BOOMR.debug("XPath did not return anything: " + el + ", " + el.resultType + ", " + el.singleNodeValue, "PageVars");
 			return null;
 		}
@@ -235,7 +235,7 @@ Handler.prototype = {
 	},
 
 	JavaScriptVar: function(o) {
-		if(!this.checkURLPattern(o.parameter1)) {
+		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
@@ -249,7 +249,7 @@ Handler.prototype = {
 	extractJavaScriptVariable: function(varname) {
 		var parts, value, ctx=w;
 
-		if(!varname) {
+		if (!varname) {
 			return false;
 		}
 
@@ -258,7 +258,7 @@ Handler.prototype = {
 		// Split variable into its parts
 		parts = varname.split(/\./);
 
-		if(!parts || parts.length === 0) {
+		if (!parts || parts.length === 0) {
 			return false;
 		}
 
@@ -271,7 +271,7 @@ Handler.prototype = {
 		// - a part is not an object (might be a leaf but we cannot go further down)
 		// - there are no more parts left (so we can stop)
 		try {
-			while(value !== null && typeof value === "object" && parts.length) {
+			while (value !== null && typeof value === "object" && parts.length) {
 				BOOMR.debug("looking at " + parts[0], "PageVars");
 				ctx = value;
 				value = value[parts.shift()];
@@ -284,13 +284,13 @@ Handler.prototype = {
 
 		// parts.length !== 0 means we stopped before the end
 		// so skip
-		if(parts.length !== 0) {
+		if (parts.length !== 0) {
 			return false;
 		}
 
 		// Value evaluated to a function, so we execute it, and pass the label in as an argument
 		// We don't have the ability to pass custom arguments to the function
-		if(typeof value === "function") {
+		if (typeof value === "function") {
 			try {
 				value = value.call(ctx, this.varname);
 			}
@@ -300,7 +300,7 @@ Handler.prototype = {
 			}
 		}
 
-		if(value === undefined || typeof value === "object") {
+		if (value === undefined || typeof value === "object") {
 			return false;
 		}
 
@@ -313,13 +313,13 @@ Handler.prototype = {
 
 	URLPattern: function(o) {
 		var value, params, i, kv;
-		if(!o.parameter2) {
+		if (!o.parameter2) {
 			return false;
 		}
 
 		BOOMR.debug("Got URL Pattern: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-		if(!this.checkURLPattern(o.parameter1)) {
+		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
@@ -328,10 +328,10 @@ Handler.prototype = {
 
 		BOOMR.debug("Got params: " + params, "PageVars");
 
-		for(i=0; i<params.length; i++) {
-			if(params[i]) {
+		for (i=0; i<params.length; i++) {
+			if (params[i]) {
 				kv = params[i].split("=");
-				if(kv.length && kv[0] === o.parameter2) {
+				if (kv.length && kv[0] === o.parameter2) {
 					BOOMR.debug("final value: " + kv[1], "PageVars");
 					value = this.cleanUp(decodeURIComponent(kv[1]));
 					return this.apply(value);
@@ -345,7 +345,7 @@ Handler.prototype = {
 	},
 
 	URLSubstringTrailingText: function(o) {
-		if(!o.parameter1) {
+		if (!o.parameter1) {
 			return false;
 		}
 		BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
@@ -355,7 +355,8 @@ Handler.prototype = {
 					+ "(.*)"
 					+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*")
 					+ "$",
-				"$1");
+				"$1",
+				l.href);
 	},
 
 	UserAgentRegex: function(o) {
@@ -368,20 +369,20 @@ Handler.prototype = {
 
 	// New method for custom dimensions
 	URLRegex: function(o) {
-		return this._Regex(o.parameter1, o.regex, o.replacement);
+		return this._Regex(o.parameter1, o.regex, o.replacement, l.href);
 	},
 
 	// Old method for page groups
 	Regexp: function(o) {
-		return this._Regex(null, o.parameter1, o.parameter2);
+		return this._Regex(null, o.parameter1, o.parameter2, l.href);
 	},
 
 	_Regex: function(url, regex, replacement, operand) {
-		if(!regex || !replacement) {
+		if (!regex || !replacement) {
 			return false;
 		}
 
-		if(!this.checkURLPattern(url)) {
+		if (!this.checkURLPattern(url)) {
 			return false;
 		}
 
@@ -395,40 +396,40 @@ Handler.prototype = {
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-		if(!this.checkURLPattern(o.parameter1)) {
+		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
-		if(!o.parameter2) {
+		if (!o.parameter2) {
 			value = "1";
 		}
 		else {
 
 			value = this.runXPath(o.parameter2);
 
-			if(!value) {
+			if (!value) {
 				return false;
 			}
 
-			if(!o.match || o.match === "numeric") {
+			if (!o.match || o.match === "numeric") {
 				// textContent is way faster than innerText in browsers that support
 				// both, but IE8 and lower only support innerText so, we test textContent
 				// first and fallback to innerText if that fails
 				value = this.cleanUp(value.textContent || value.innerText);
 			}
-			else if(o.match === "boolean") {
+			else if (o.match === "boolean") {
 				value = 1;
 			}
-			else if(o.match.match(/^regex:/)) {
+			else if (o.match.match(/^regex:/)) {
 				m = o.match.match(/^regex:(.*)/);
-				if(!m || m.length < 2) {
+				if (!m || m.length < 2) {
 					return false;
 				}
 
 				try {
 					re = new RegExp(m[1], "i");
 
-					if(re.test(value.textContent || value.innerText)) {
+					if (re.test(value.textContent || value.innerText)) {
 						value = 1;
 					}
 				}
@@ -450,17 +451,17 @@ Handler.prototype = {
 		var el, url, res, st, en, k;
 
 		// Require at least xpath or url
-		if(!o.parameter2 && !o.url) {
+		if (!o.parameter2 && !o.url) {
 			return false;
 		}
 
 		// Require start and end or start==="*"
-		if(!o.start || (!o.end && o.start !== "*")) {
+		if (!o.start || (!o.end && o.start !== "*")) {
 			return false;
 		}
 
 		// Require browser that supports ResourceTiming
-		if(!p || !p.getEntriesByName) {
+		if (!p || !p.getEntriesByName) {
 			BOOMR.debug("This browser does not support ResourceTiming", "PageVars");
 			return false;
 		}
@@ -468,32 +469,32 @@ Handler.prototype = {
 		BOOMR.debug("Got ResourceTiming: " + o.parameter1 + ", " + o.parameter2 + ", " + o.url, "PageVars");
 
 		// Require page URL to match
-		if(!this.checkURLPattern(o.parameter1)) {
+		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
-		if(o.parameter2 === "slowest" || o.url === "slowest") {
+		if (o.parameter2 === "slowest" || o.url === "slowest") {
 			url = "slowest";
 		}
-		else if(o.url) {
+		else if (o.url) {
 			url = o.url;
 		}
-		else if(o.parameter2) {
+		else if (o.parameter2) {
 			el = this.runXPath(o.parameter2);
-			if(!el) {
+			if (!el) {
 				return false;
 			}
 
 			url = el.src || el.href;
 		}
 
-		if(!url) {
+		if (!url) {
 			return false;
 		}
 
 		res = this.findResource(url);
 
-		if(!res) {
+		if (!res) {
 			BOOMR.debug("No resource matched", "PageVars");
 
 			// If we reach here, that means the url wasn't found.  We'll save it for retrying because it's
@@ -503,14 +504,14 @@ Handler.prototype = {
 			return false;
 		}
 
-		if(url === "slowest") {
+		if (url === "slowest") {
 			BOOMR.addVar("dom.res.slowest", res.name);
 		}
 
 		// If start === "*" then we want all resource timing fields for this resource
-		if(o.start === "*") {
-			for(k in res) {
-				if(res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
+		if (o.start === "*") {
+			for (k in res) {
+				if (res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
 					BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"), Math.round(res[k]));
 				}
 			}
@@ -519,7 +520,7 @@ Handler.prototype = {
 			return this.apply(res.duration);
 		}
 
-		if(o.relative_to_nt || o.start === "navigationStart") {
+		if (o.relative_to_nt || o.start === "navigationStart") {
 			st = 0;
 		}
 		else {
@@ -533,7 +534,7 @@ Handler.prototype = {
 
 		en = parseFloat(res[o.end], 10);
 
-		if(isNaN(st) || isNaN(en)) {
+		if (isNaN(st) || isNaN(en)) {
 			BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
 			return false;
 		}
@@ -557,7 +558,10 @@ Handler.prototype = {
 		}
 
 		try {
-			if (!("performance" in frame) || !frame.performance) {
+			if (!("performance" in frame
+				&& frame.performance
+				&& frame.performance.getEntriesByName
+				&& frame.performance.getEntriesByType)) {
 				return null;
 			}
 
@@ -585,24 +589,24 @@ Handler.prototype = {
 			return null;
 		}
 
-		if(reslist && reslist.length > 0) {
+		if (reslist && reslist.length > 0) {
 			return reslist[0];
 		}
 
 		// no exact match, maybe it has wildcards
 		reslist = frame.performance.getEntriesByType("resource");
-		if(reslist && reslist.length > 0) {
-			for(i=0; i<reslist.length; i++) {
+		if (reslist && reslist.length > 0) {
+			for (i=0; i<reslist.length; i++) {
 
 				// if we want the slowest url, then iterate through all till we find it
-				if(url === "slowest") {
-					if(!res || reslist[i].duration > res.duration) {
+				if (url === "slowest") {
+					if (!res || reslist[i].duration > res.duration) {
 						res = reslist[i];
 					}
 				}
 
 				// else stop at the first that matches the pattern
-				else if(reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
+				else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
 					res = reslist[i];
 					url = res.name;
 					break;
@@ -610,12 +614,12 @@ Handler.prototype = {
 			}
 		}
 
-		if(res) {
+		if (res) {
 			return res;
 		}
 
 		if (frame.frames) {
-			for(i=0; i<frame.frames.length; i++) {
+			for (i=0; i<frame.frames.length; i++) {
 				res = this.findResource(url, frame.frames[i]);
 				if (res) {
 					return res;
@@ -626,31 +630,31 @@ Handler.prototype = {
 
 	UserTiming: function(o) {
 		var res, i;
-		if(!o.parameter2) {
+		if (!o.parameter2) {
 			return false;
 		}
 
-		if(!p || !p.getEntriesByType) {
+		if (!p || !p.getEntriesByType) {
 			BOOMR.debug("This browser does not support UserTiming", "PageVars");
 			return false;
 		}
 
-		if(!this.checkURLPattern(o.parameter1)) {
+		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
 
 		// Check performance.mark
 		res = p.getEntriesByType("mark");
-		for(i=0; res && i<res.length; i++) {
-			if(res[i].name === o.parameter2) {
+		for (i=0; res && i<res.length; i++) {
+			if (res[i].name === o.parameter2) {
 				return this.apply(res[i].startTime);
 			}
 		}
 
 		// Check performance.measure
 		res = p.getEntriesByType("measure");
-		for(i=0; res && i<res.length; i++) {
-			if(res[i].name === o.parameter2) {
+		for (i=0; res && i<res.length; i++) {
+			if (res[i].name === o.parameter2) {
 				if (res[i].startTime) {
 					BOOMR.addVar(this.varname + "_st", Math.round(res[i].startTime));
 				}
@@ -699,11 +703,11 @@ impl = {
 					  }
 		};
 
-		if(ename !== "xhr" && this.complete) {
+		if (ename !== "xhr" && this.complete) {
 			return;
 		}
 
-		if(ename === "xhr") {
+		if (ename === "xhr") {
 			limpl = impl.extractXHRParams(edata, hconfig);
 
 			if (limpl === null) {
@@ -720,7 +724,7 @@ impl = {
 			}
 
 			// Override the URL we check metrics against
-			if(data.url) {
+			if (data.url) {
 				l = d.createElement("a");
 				l.href = data.url;
 
@@ -730,7 +734,7 @@ impl = {
 
 				// Page Group name for an XHR resource can specify if this is a subresource or not
 				hconfig.pageGroups.preProcessor = function(val) {
-					if(val && val.match(/_subresource$/)) {
+					if (val && val.match(/_subresource$/)) {
 						val = val.replace(/_subresource$/, "");
 						edata.subresource = "passive";
 					}
@@ -751,18 +755,18 @@ impl = {
 		impl.mayRetry = [];
 
 		// Page Groups, AB Tests, Custom Metrics & Timers
-		for(v in hconfig) {
-			if(hconfig.hasOwnProperty(v)) {
+		for (v in hconfig) {
+			if (hconfig.hasOwnProperty(v)) {
 				handler = new Handler(hconfig[v]);
 
-				for(i=0; i<limpl[v].length; i++) {
-					if(ename !== "xhr" && limpl[v][i].only_xhr) {
+				for (i=0; i<limpl[v].length; i++) {
+					if (ename !== "xhr" && limpl[v][i].only_xhr) {
 						// do not process xhr only items for non-xhr requests
 						continue;
 					}
 
-					if( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
-						if(limpl[v][i].subresource && ename === "xhr" && edata) {
+					if ( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
+						if (limpl[v][i].subresource && ename === "xhr" && edata) {
 							edata.subresource = "active";
 						}
 						break;
@@ -800,7 +804,7 @@ impl = {
 		var i, label;
 
 		// Remove custom metrics
-		for(i=0; i<impl.customMetrics.length; i++) {
+		for (i=0; i<impl.customMetrics.length; i++) {
 			label = impl.customMetrics[i].label;
 
 			BOOMR.removeVar(label);
@@ -810,7 +814,7 @@ impl = {
 		BOOMR.removeVar("dom.res.slowest");
 
 		// Remove start time for custom timers
-		for(i=0; i<impl.customTimers.length; i++) {
+		for (i=0; i<impl.customTimers.length; i++) {
 			label = impl.customTimers[i].label + "_st";
 
 			BOOMR.removeVar(label);
@@ -838,7 +842,7 @@ impl = {
 			data = edata;
 		}
 
-		if(  !data.url
+		if (  !data.url
 		  && (!data.timers     || !data.timers.length)
 		  && (!data.metrics    || !data.metrics.length)
 		  && (!data.dimensions || !data.dimensions.length)
@@ -872,9 +876,9 @@ impl = {
 			if (!section.data || !section.data.length) {
 				// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
 				if (data.url) {
-					for(i=0; i<impl[section.impl].length; i++) {
+					for (i=0; i<impl[section.impl].length; i++) {
 						// only allow timers, metrics & dimensions that are xhr_ok
-						if(impl[section.impl][i].xhr_ok) {
+						if (impl[section.impl][i].xhr_ok) {
 							limpl[section.impl].push(impl[section.impl][i]);
 						}
 					}
@@ -883,16 +887,13 @@ impl = {
 			}
 
 			// If there are data elements passed in, then check which ones we want
-			for(j=0; j<section.data.length; j++)
-			{
+			for (j=0; j<section.data.length; j++) {
 				m = section.data[j].split(/\s*=\s*/);
 				itemName = m[0];
 				value = m[1];	// undefined if no =, empty string if set to empty
 
-				for(i=0; i<impl[section.impl].length; i++)
-				{
-					if(impl[section.impl][i].name === itemName)
-					{
+				for (i=0; i<impl[section.impl].length; i++) {
+					if (impl[section.impl][i].name === itemName) {
 						if (value === undefined) {
 							// If no predefined value, then go through the flow
 							limpl[section.impl].push(impl[section.impl][i]);
@@ -1028,7 +1029,7 @@ BOOMR.plugins.PageParams = {
 			BOOMR.setImmediate(impl.done, {}, "load", impl);
 		}
 
-		if(!impl.initialized) {
+		if (!impl.initialized) {
 			// We do not want to subscribe to unload or onbeacon more than once
 			// because this will just create too many references
 			BOOMR.subscribe("before_unload", impl.done, "unload", impl);

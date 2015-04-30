@@ -127,6 +127,86 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             };
             assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
         });
+
+        it("should should break 'href' for NoScript", function() {
+            var data = {"href": "abc"};
+            var expected = {
+                "h": {
+                    "\n": {
+                        "r": {
+                            "e": {
+                                "f": "abc"
+                            }
+                        }
+                    }
+                }
+            };
+
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
+        });
+
+        it("should should break 'src' for NoScript", function() {
+            var data = {"src": "abc"};
+            var expected = {
+                "s": {
+                    "\n": {
+                        "r": {
+                            "c": "abc"
+                        }
+                    }
+                }
+            };
+
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
+        });
+
+        it("should should break 'action' for NoScript", function() {
+            var data = {"action": "abc"};
+            var expected = {
+                "a": {
+                    "\n": {
+                        "c": {
+                            "t": {
+                                "i": {
+                                    "o": {
+                                        "n": "abc"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
+        });
+
+        it("should update XSS words from config.js", function() {
+            BOOMR.init({
+                ResourceTiming: {
+                    enabled: true,
+                    xssBreakWords:  [
+                        /(h)(ref)/gi,
+                        /(s)(rc)/gi,
+                        /(a)(ction)/gi,
+                        /(m)(oo)/gi
+                    ]
+                }
+            });
+
+            var data = {"moo": "abc"};
+            var expected = {
+                "m": {
+                    "\n": {
+                        "o": {
+                            "o": "abc"
+                        }
+                    }
+                }
+            };
+
+            assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
+        });
     });
 
     //
@@ -173,6 +253,50 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
             assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
         });
+
+        it("should should break 'href' for NoScript", function() {
+            var data = {"href": "abc" };
+            var expected = {
+                "h": {
+                    "ref": "abc"
+                }
+            };
+
+            var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+            var optTrie = BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true);
+            var optTrieJson = JSON.stringify(optTrie);
+
+            assert.deepEqual(optTrie, expected);
+
+            assert.equal(optTrieJson.indexOf("href"), -1);
+        });
+
+        it("should should break 'href', 'action' and 'src' for NoScript", function() {
+            var data = {"href": "abc", "123action123": "abc", "_src_abc_action123": "abc" };
+            var expected = {
+                "_s": {
+                    "rc_abc_a": {
+                        "ction123": "abc"
+                    }
+                },
+                "123a": {
+                    "ction123": "abc"
+                },
+                "h": {
+                    "ref": "abc"
+                }
+            };
+
+            var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+            var optTrie = BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true);
+            var optTrieJson = JSON.stringify(optTrie);
+
+            assert.deepEqual(optTrie, expected);
+
+            assert.equal(optTrieJson.indexOf("href"), -1);
+        });
     });
 
     describe("findPerformanceEntriesForFrame()", function() {
@@ -198,7 +322,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
             var entriesToFind = [
                 { url: "/tests/vendor/mocha/mocha.css", initiatorType: "link" },
                 { url: "/tests/vendor/mocha/mocha.js", initiatorType: "script" },
-                { url: "/tests/vendor/assertive-chai/assertive-chai.js", initiatorType: "script" }
+                { url: "/tests/vendor/assertive-chai/dist/assertive-chai.js", initiatorType: "script" }
             ];
 
             // we don't know what order these will come in, so grep thru the list

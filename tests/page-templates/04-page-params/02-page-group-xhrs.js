@@ -10,7 +10,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
     });
 
     it("Should have sent two beacons", function() {
-        assert.equal(tf.beacons.length, typeof window.MutationObserver === "function" ? 2 : 1);
+        assert.equal(tf.beaconCount(), typeof window.MutationObserver === "function" ? 2 : 1);
     });
 
     it("Should set the Page Group of the first beacon 'Test Pages'", function() {

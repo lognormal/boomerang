@@ -34,7 +34,7 @@ var impl = {
 
 		if (edata.url && w.performance && w.performance.getEntriesByName) {
 			res = w.performance.getEntriesByName(edata.url);
-			if(res && res.length > 0) {
+			if (res && res.length > 0) {
 				res = res[0];
 
 				data = {
@@ -54,7 +54,7 @@ var impl = {
 					data.nt_ssl_st = res.secureConnectionStart;
 				}
 
-				for(k in data) {
+				for (k in data) {
 					if (data.hasOwnProperty(k) && data[k]) {
 						data[k] += w.performance.timing.navigationStart;
 					}
@@ -80,7 +80,7 @@ var impl = {
 			data.nt_load_end = res.loadEventEnd;
 		}
 
-		for(k in data) {
+		for (k in data) {
 			if (data.hasOwnProperty(k) && !data[k]) {
 				delete data[k];
 			}
@@ -88,7 +88,8 @@ var impl = {
 
 		BOOMR.addVar(data);
 
-		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
+		try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
+		catch(ignore) { /* empty */ }
 
 		this.complete = true;
 		BOOMR.sendBeacon();
@@ -96,14 +97,14 @@ var impl = {
 
 	done: function() {
 		var w = BOOMR.window, p, pn, pt, data;
-		if(this.complete) {
+		if (this.complete) {
 			return this;
 		}
 
 		impl.addedVars = [];
 
 		p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
-		if(p && p.timing && p.navigation) {
+		if (p && p.timing && p.navigation) {
 			BOOMR.info("This user agent supports NavigationTiming.", "nt");
 			pn = p.navigation;
 			pt = p.timing;
@@ -142,16 +143,17 @@ var impl = {
 
 			BOOMR.addVar(data);
 
-			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
+			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
+			catch(ignore) { /* empty */ }
 		}
 
 		// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
 		//     firstPaintTime below is in seconds.microseconds.  The server needs to deal with this.
 
 		// This is Chrome only, so will not overwrite nt_first_paint above
-		if(w.chrome && w.chrome.loadTimes) {
+		if (w.chrome && w.chrome.loadTimes) {
 			pt = w.chrome.loadTimes();
-			if(pt) {
+			if (pt) {
 				data = {
 					nt_spdy: (pt.wasFetchedViaSpdy?1:0),
 					nt_cinf: pt.connectionInfo,
@@ -160,7 +162,8 @@ var impl = {
 
 				BOOMR.addVar(data);
 
-				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); } catch(ignore) { /* empty */ }
+				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
+				catch(ignore) { /* empty */ }
 			}
 		}
 

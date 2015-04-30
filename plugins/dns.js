@@ -14,7 +14,7 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
-if(BOOMR.plugins.DNS) {
+if (BOOMR.plugins.DNS) {
 	return;
 }
 
@@ -29,7 +29,7 @@ var impl = {
 	gen_url: "",
 
 	start: function() {
-		if(impl.gen_url) {	// already running
+		if (impl.gen_url) {	// already running
 			return;
 		}
 
@@ -82,11 +82,11 @@ BOOMR.plugins.DNS = {
 	init: function(config) {
 		BOOMR.utils.pluginConfig(impl, config, "DNS", ["base_url"]);
 
-		if(config && config.wait) {
+		if (config && config.wait) {
 			return this;
 		}
 
-		if(!impl.base_url) {
+		if (!impl.base_url) {
 			BOOMR.warn("DNS.base_url is not set.  Cannot run DNS test.", "dns");
 			impl.complete = true;	// set to true so that is_complete doesn't
 						// block other plugins
@@ -94,7 +94,7 @@ BOOMR.plugins.DNS = {
 		}
 
 		// do not run test over https
-		if(BOOMR.window.location.protocol === "https:") {
+		if (BOOMR.window.location.protocol === "https:") {
 			impl.complete = true;
 			return this;
 		}

@@ -51,9 +51,12 @@ module.exports = function (grunt) {
                 "Gruntfile.js",
                 "boomerang.js",
                 "plugins/*.js",
+                "tests/*.js",
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
                 "tests/server/*.js",
+                "tests/page-templates/**/*.js",
+                "tests/page-templates/**/*.html",
                 "tests/page-templates/**/*.js"
             ]
         },
@@ -214,7 +217,7 @@ module.exports = function (grunt) {
                     "tests/vendor/mocha/mocha.css",
                     "tests/vendor/mocha/mocha.js",
                     "tests/vendor/node-assert/assert.js",
-                    "tests/vendor/assertive-chai/assertive-chai.js",
+                    "tests/vendor/assertive-chai/dist/assertive-chai.js",
                     "tests/unit/*.js",
                     "tests/build/*.js"
                 ]
@@ -264,7 +267,7 @@ module.exports = function (grunt) {
         },
         connect: {
             options: {
-                port: 3000,
+                port: 4002,
                 hostname: "localhost",
                 middleware: function(connect, options, middlewares) {
                     middlewares.push(["/delay", require("./tests/server/route-delay")]);
@@ -280,19 +283,19 @@ module.exports = function (grunt) {
         watch: {
             test: {
                 files: [
-                    'tests/e2e/*.js',
-                    'tests/page-template-snippets/**/*',
-                    'tests/page-templates/**/*',
-                    'tests/unit/**/*'
+                    "tests/e2e/*.js",
+                    "tests/page-template-snippets/**/*",
+                    "tests/page-templates/**/*",
+                    "tests/unit/**/*"
                 ],
-                tasks: ['test:build']
+                tasks: ["test:build"]
             },
             boomerang: {
                 files: [
-                    'boomerang.js',
-                    'plugins/*.js',
+                    "boomerang.js",
+                    "plugins/*.js"
                 ],
-                tasks: ['build:test']
+                tasks: ["build:test"]
             }
         }
     });
@@ -310,7 +313,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
     grunt.loadNpmTasks("grunt-template");
-    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks("grunt-contrib-watch");
 
     // custom tasks
     grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));

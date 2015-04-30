@@ -10,7 +10,7 @@ var impl, images;
 
 BOOMR = BOOMR || {};
 BOOMR.plugins = BOOMR.plugins || {};
-if(BOOMR.plugins.BW) {
+if (BOOMR.plugins.BW) {
 	return;
 }
 
@@ -73,8 +73,7 @@ impl = {
 	ncmp: function(a, b) { return (a-b); },
 
 	// Calculate the interquartile range of an array of data points
-	iqr: function(a)
-	{
+	iqr: function(a) {
 		var l = a.length-1, q1, q3, fw, b = [], i;
 
 		q1 = (a[Math.floor(l*0.25)] + a[Math.ceil(l*0.25)])/2;
@@ -83,14 +82,14 @@ impl = {
 		fw = (q3-q1)*1.5;
 
 		// fw === 0 => all items are identical, so no need to filter
-		if(fw === 0) {
+		if (fw === 0) {
 			return a;
 		}
 
 		l++;
 
-		for(i=0; i<l && a[i] < q3+fw; i++) {
-			if(a[i] > q1-fw) {
+		for (i=0; i<l && a[i] < q3+fw; i++) {
+			if (a[i] > q1-fw) {
 				b.push(a[i]);
 			}
 		}
@@ -98,8 +97,7 @@ impl = {
 		return b;
 	},
 
-	calc_latency: function()
-	{
+	calc_latency: function() {
 		var	i, n,
 			sum=0, sumsq=0,
 			amean, median,
@@ -119,7 +117,7 @@ impl = {
 		BOOMR.debug("lat_filtered: " + lat_filtered, "bw");
 
 		// First we get the arithmetic mean, standard deviation and standard error
-		for(i=0; i<n; i++) {
+		for (i=0; i<n; i++) {
 			sum += lat_filtered[i];
 			sumsq += lat_filtered[i] * lat_filtered[i];
 		}
@@ -141,8 +139,7 @@ impl = {
 		return { mean: amean, median: median, stddev: std_dev, stderr: std_err };
 	},
 
-	calc_bw: function()
-	{
+	calc_bw: function() {
 		var	i, j, n=0,
 			r, bandwidths=[], bandwidths_corrected=[],
 			sum=0, sumsq=0, sum_corrected=0, sumsq_corrected=0,
@@ -150,8 +147,8 @@ impl = {
 			amean_corrected, std_dev_corrected, std_err_corrected, median_corrected,
 			nimgs, bw, bw_c, debug_info=[];
 
-		for(i=0; i<this.nruns; i++) {
-			if(!this.results[i] || !this.results[i].r) {
+		for (i=0; i<this.nruns; i++) {
+			if (!this.results[i] || !this.results[i].r) {
 				continue;
 			}
 
@@ -161,12 +158,12 @@ impl = {
 			// 3 images that succeeded that way we don't consider small images that
 			// downloaded fast without really saturating the network
 			nimgs=0;
-			for(j=r.length-1; j>=0 && nimgs<3; j--) {
+			for (j=r.length-1; j>=0 && nimgs<3; j--) {
 				// if we hit an undefined image time, we skipped everything before this
-				if(!r[j]) {
+				if (!r[j]) {
 					break;
 				}
-				if(r[j].t === null) {
+				if (r[j].t === null) {
 					continue;
 				}
 
@@ -177,7 +174,7 @@ impl = {
 				bw = images[j].size*1000/r[j].t;
 				bandwidths.push(bw);
 
-				if(r[j].t > this.latency.mean) {
+				if (r[j].t > this.latency.mean) {
 					bw_c = images[j].size*1000/(r[j].t - this.latency.mean);
 					bandwidths_corrected.push(bw_c);
 				}
@@ -194,10 +191,11 @@ impl = {
 
 		// First do IQR filtering since we use the median here
 		// and should use the stddev after filtering.
-		if(bandwidths.length > 3) {
+		if (bandwidths.length > 3) {
 			bandwidths = this.iqr(bandwidths.sort(this.ncmp));
 			bandwidths_corrected = this.iqr(bandwidths_corrected.sort(this.ncmp));
-		} else {
+		}
+		else {
 			bandwidths = bandwidths.sort(this.ncmp);
 			bandwidths_corrected = bandwidths_corrected.sort(this.ncmp);
 		}
@@ -208,12 +206,12 @@ impl = {
 		// Now get the mean & median.
 		// Also get corrected values that eliminate latency
 		n = Math.max(bandwidths.length, bandwidths_corrected.length);
-		for(i=0; i<n; i++) {
-			if(i<bandwidths.length) {
+		for (i=0; i<n; i++) {
+			if (i<bandwidths.length) {
 				sum += bandwidths[i];
 				sumsq += Math.pow(bandwidths[i], 2);
 			}
-			if(i<bandwidths_corrected.length) {
+			if (i<bandwidths_corrected.length) {
 				sum_corrected += bandwidths_corrected[i];
 				sumsq_corrected += Math.pow(bandwidths_corrected[i], 2);
 			}
@@ -230,7 +228,7 @@ impl = {
 				(bandwidths[Math.floor(n/2)] + bandwidths[Math.ceil(n/2)]) / 2
 			);
 
-		if(bandwidths_corrected.length < 1) {
+		if (bandwidths_corrected.length < 1) {
 			BOOMR.debug("not enough valid corrected datapoints, falling back to uncorrected", "bw");
 			debug_info.push("l==" + bandwidths_corrected.length);
 
@@ -271,8 +269,7 @@ impl = {
 		};
 	},
 
-	load_img: function(i, run, callback)
-	{
+	load_img: function(i, run, callback) {
 		var url = this.base_url + images[i].name
 			+ "?t=" + BOOMR.now() + Math.random(),	// Math.random() is slow, but we get it before we start the timer
 		    timer=0, tstart=0,
@@ -281,11 +278,11 @@ impl = {
 
 		function handler(value) {
 			return function() {
-				if(callback) {
+				if (callback) {
 					callback.call(that, i, tstart, run, value);
 				}
 
-				if(value !== null) {
+				if (value !== null) {
 					img.onload=img.onerror=null;
 					img=null;
 					clearTimeout(timer);
@@ -308,37 +305,35 @@ impl = {
 		img.src=url;
 	},
 
-	lat_loaded: function(i, tstart, run, success)
-	{
-		if(run !== this.latency_runs+1) {
+	lat_loaded: function(i, tstart, run, success) {
+		if (run !== this.latency_runs+1) {
 			return;
 		}
 
-		if(success !== null) {
+		if (success !== null) {
 			var lat = BOOMR.now() - tstart;
 			this.latencies.push(lat);
 		}
 		// we've got all the latency images at this point,
 		// so we can calculate latency
-		if(this.latency_runs === 0) {
+		if (this.latency_runs === 0) {
 			this.latency = this.calc_latency();
 		}
 
 		BOOMR.setImmediate(this.iterate, null, null, this);
 	},
 
-	img_loaded: function(i, tstart, run, success)
-	{
-		if(run !== this.runs_left+1) {
+	img_loaded: function(i, tstart, run, success) {
+		if (run !== this.runs_left+1) {
 			return;
 		}
 
-		if(this.results[this.nruns-run].r[i])	{	// already called on this image
+		if (this.results[this.nruns-run].r[i])	{	// already called on this image
 			return;
 		}
 
 		// if timeout, then we set the next image to the end of loop marker
-		if(success === null) {
+		if (success === null) {
 			this.results[this.nruns-run].r[i+1] = {t:null, state: null, run: run};
 			return;
 		}
@@ -350,30 +345,30 @@ impl = {
 				state: success,
 				run: run
 			};
-		if(success) {
+		if (success) {
 			result.t = result.end-result.start;
 		}
 		this.results[this.nruns-run].r[i] = result;
 
 		// we terminate if an image timed out because that means the connection is
 		// too slow to go to the next image
-		if(i >= images.end-1 || this.results[this.nruns-run].r[i+1] !== undefined) {
+		if (i >= images.end-1 || this.results[this.nruns-run].r[i+1] !== undefined) {
 			BOOMR.debug(BOOMR.utils.objectToString(this.results[this.nruns-run], undefined, 2), "bw");
 			// First run is a pilot test to decide what the largest image
 			// that we can download is. All following runs only try to
 			// download this image
-			if(run === this.nruns) {
+			if (run === this.nruns) {
 				images.start = i;
 			}
 			BOOMR.setImmediate(this.iterate, null, null, this);
-		} else {
+		}
+		else {
 			this.load_img(i+1, run, this.img_loaded);
 		}
 	},
 
-	finish: function()
-	{
-		if(!this.latency) {
+	finish: function() {
+		if (!this.latency) {
 			this.latency = this.calc_latency();
 		}
 		var	bw = this.calc_bw(),
@@ -386,13 +381,13 @@ impl = {
 			};
 
 		BOOMR.addVar(o);
-		if(bw.debug_info.length > 0) {
+		if (bw.debug_info.length > 0) {
 			BOOMR.addVar("bw_debug", bw.debug_info.join(","));
 		}
 
 		// If we have an IP address we can make the BA cookie persistent for a while
 		// because we'll recalculate it if necessary (when the user's IP changes).
-		if(!isNaN(o.bw) && o.bw > 0) {
+		if (!isNaN(o.bw) && o.bw > 0) {
 			BOOMR.utils.setCookie(this.cookie,
 						{
 							ba: Math.round(o.bw),
@@ -408,20 +403,19 @@ impl = {
 
 		this.complete = true;
 
-		if(this.block_beacon === true) {
+		if (this.block_beacon === true) {
 			BOOMR.sendBeacon();
 		}
 
 		this.running = false;
 	},
 
-	iterate: function()
-	{
-		if(!this.aborted) {
-			if(!this.runs_left) {
+	iterate: function() {
+		if (!this.aborted) {
+			if (!this.runs_left) {
 				this.finish();
 			}
-			else if(this.latency_runs) {
+			else if (this.latency_runs) {
 				this.load_img("l", this.latency_runs--, this.lat_loaded);
 			}
 			else {
@@ -436,7 +430,7 @@ impl = {
 
 		cookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie));
 
-		if(cookies && cookies.ba) {
+		if (cookies && cookies.ba) {
 
 			ba = parseInt(cookies.ba, 10);
 			bw_e = parseFloat(cookies.be, 10);
@@ -454,7 +448,7 @@ impl = {
 
 			// If the subnet changes or the cookie is more than 7 days old,
 			// then we recheck the bandwidth, else we just use what's in the cookie
-			if(c_sn === p_sn && t >= t_now - this.cookie_exp && ba > 0) {
+			if (c_sn === p_sn && t >= t_now - this.cookie_exp && ba > 0) {
 				this.complete = true;
 				BOOMR.addVar({
 					bw:      ba,
@@ -475,18 +469,18 @@ impl = {
 
 BOOMR.plugins.BW = {
 	init: function(config) {
-		if(impl.initialized) {
+		if (impl.initialized) {
 			return this;
 		}
 
 		BOOMR.utils.pluginConfig(impl, config, "BW",
 						["base_url", "timeout", "nruns", "cookie", "cookie_exp", "test_https", "block_beacon"]);
 
-		if(config && config.user_ip) {
+		if (config && config.user_ip) {
 			impl.user_ip = config.user_ip;
 		}
 
-		if(!impl.base_url) {
+		if (!impl.base_url) {
 			return this;
 		}
 
@@ -500,7 +494,7 @@ BOOMR.plugins.BW = {
 
 		BOOMR.removeVar("ba", "ba_err", "lat", "lat_err");
 
-		if(!impl.setVarsFromCookie()) {
+		if (!impl.setVarsFromCookie()) {
 			BOOMR.subscribe("page_ready", this.run, null, this);
 		}
 
@@ -511,7 +505,7 @@ BOOMR.plugins.BW = {
 
 	run: function() {
 		var a;
-		if(impl.running || impl.complete) {
+		if (impl.running || impl.complete) {
 			return this;
 		}
 
@@ -519,7 +513,7 @@ BOOMR.plugins.BW = {
 		a = BOOMR.window.document.createElement("a");
 		a.href = impl.base_url;
 
-		if( !impl.test_https && a.protocol === "https:") {
+		if ( !impl.test_https && a.protocol === "https:") {
 			// we don't run the test for https because SSL stuff will mess up b/w
 			// calculations we could run the test itself over HTTP, but then IE
 			// will complain about insecure resources, so the best is to just bail
@@ -528,7 +522,7 @@ BOOMR.plugins.BW = {
 			BOOMR.info("HTTPS detected, skipping bandwidth test", "bw");
 			impl.complete = true;
 
-			if(impl.block_beacon === true) {
+			if (impl.block_beacon === true) {
 				BOOMR.sendBeacon();
 			}
 
@@ -547,7 +541,7 @@ BOOMR.plugins.BW = {
 
 	abort: function() {
 		impl.aborted = true;
-		if(impl.running) {
+		if (impl.running) {
 			impl.finish();	// we don't defer this call because it might be called from
 					// onunload and we want the entire chain to complete
 					// before we return
@@ -555,7 +549,7 @@ BOOMR.plugins.BW = {
 	},
 
 	is_complete: function() {
-		if(impl.block_beacon === true) {
+		if (impl.block_beacon === true) {
 			return impl.complete;
 		}
 		else {

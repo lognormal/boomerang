@@ -22,8 +22,6 @@
         page_ready: function() {
             this.fired_page_ready = true;
         },
-        before_beacon: function(data) {
-        },
         onbeacon: function(data) {
             this.beacons.push(_.clone(data));
             this.fired_onbeacon = true;
@@ -35,16 +33,18 @@
 
             return this.beacons[this.beacons.length - 1];
         },
+        beaconCount: function() {
+            return this.beacons.length;
+        },
         before_unload: function() {
             this.fired_before_unload = true;
         },
         init: function() {
-            if(this.initialized) {
+            if (this.initialized) {
                 return this;
             }
 
             BOOMR.subscribe("page_ready", this.page_ready, null, this);
-            BOOMR.subscribe("before_beacon", this.before_beacon, null, this);
             BOOMR.subscribe("onbeacon", this.onbeacon, null, this);
             BOOMR.subscribe("before_unload", this.before_unload, null, this);
 
@@ -54,7 +54,12 @@
         },
         is_complete: function() {
             return true;
-        }
+        },
+	initXMLHttpRequest: function() {
+            return window.XMLHttpRequest ?
+                new XMLHttpRequest() :
+                new ActiveXObject("Microsoft.XMLHTTP");
+	}
     };
 })(window);
 
@@ -156,7 +161,8 @@
                 window.document.addEventListener("onBoomerangLoaded", function() {
                     t.init(config);
                 });
-            } else if (window.document.attachEvent) {
+            }
+            else if (window.document.attachEvent) {
                 window.document.attachEvent("onBoomerangLoaded", function() {
                     t.init(config);
                 });
@@ -170,13 +176,17 @@
         // initialize boomerang
         BOOMR.init(config);
 
+	if (config.afterBoomerangLoad) {
+		config.afterBoomerangLoad();
+	}
+
         // fake session details so beacons send
         BOOMR.addVar({
             "h.key": "aaaaa-bbbbb-ccccc-ddddd-eeeee",
             "h.d": "localhost",
             "h.t": new Date().getTime(),
             "h.cr": "abc"
-        })
+        });
 
         // setup Mocha
         window.mocha.globals(["BOOMR", "PageGroupVariable"]);
@@ -193,13 +203,14 @@
             }
 
             BOOMR.subscribe("onbeacon", function() {
-                if (++beaconsSeen == config.testAfterOnBeacon) {
+                if (++beaconsSeen === config.testAfterOnBeacon) {
                     // wait a few more ms so the beacon fires
                     // TODO: Trim this timing down if we can make it more reliable
                     setTimeout(t.runTests, 1000);
                 }
             });
-        } else {
+        }
+        else {
             BOOMR.setImmediate(t.runTests);
         }
 
@@ -262,7 +273,17 @@
         assert.isString(tf.lastBeacon().v);
 
         done();
-    }
+    };
+
+    t.canSetCookies = function() {
+        var testCookieName = "test_cookie";
+
+        // set a cookie
+        document.cookie = [testCookieName + "=true", "path=/", "domain=" + location.hostname].join("; ");
+
+        // determine if it was set OK
+        return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
+    };
 
     window.BOOMR_test = t;
 

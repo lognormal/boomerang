@@ -73,7 +73,7 @@ impl = {
 		var t_end, t_start, subcookies, k;
 
 		// Disable use of RT cookie by setting its name to a falsy value
-		if(!this.cookie) {
+		if (!this.cookie) {
 			return false;
 		}
 
@@ -81,16 +81,16 @@ impl = {
 
 		// Numeric indices were a bug, we need to clean it up
 		for (k in subcookies) {
-			if(subcookies.hasOwnProperty(k)) {
-				if(!isNaN(parseInt(k, 10))) {
+			if (subcookies.hasOwnProperty(k)) {
+				if (!isNaN(parseInt(k, 10))) {
 					delete subcookies[k];
 				}
 			}
 		}
 
 		if (typeof params === "object") {
-			for(k in params) {
-				if(params.hasOwnProperty(k)) {
+			for (k in params) {
+				if (params.hasOwnProperty(k)) {
 					if (params[k] === undefined ) {
 						if (subcookies.hasOwnProperty(k)) {
 							delete subcookies[k];
@@ -111,37 +111,37 @@ impl = {
 		subcookies.si = BOOMR.session.ID;
 		subcookies.ss = BOOMR.session.start;
 		subcookies.sl = BOOMR.session.length;
-		if(impl.session_exp !== SESSION_EXP) {
+		if (impl.session_exp !== SESSION_EXP) {
 			subcookies.se = impl.session_exp;
 		}
-		if(BOOMR.session.rate_limited) {
+		if (BOOMR.session.rate_limited) {
 			subcookies.rl = 1;
 		}
 		subcookies.tt = this.loadTime;
 		subcookies.obo = this.oboError;
-		if(this.sessionHistory) {
+		if (this.sessionHistory) {
 			subcookies.sh = this.sessionHistory.join(",");
 		}
 		t_start = BOOMR.now();
 
-		if(timer) {
+		if (timer) {
 			subcookies[timer] = t_start;
 			impl.lastActionTime = t_start;
 		}
 
 		// If we got a beacon_url from config, set it into the cookie
-		if(this.beacon_url) {
+		if (this.beacon_url) {
 			subcookies.bcn = this.beacon_url;
 		}
 
 		BOOMR.debug("Setting cookie (timer=" + timer + ")\n" + BOOMR.utils.objectToString(subcookies), "rt");
-		if(!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
+		if (!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
 			BOOMR.error("cannot set start cookie", "rt");
 			return false;
 		}
 
 		t_end = BOOMR.now();
-		if(t_end - t_start > 50) {
+		if (t_end - t_start > 50) {
 			// It took > 50ms to set the cookie
 			// The user Most likely has cookie prompting turned on so
 			// t_start won't be the actual unload time
@@ -174,15 +174,15 @@ impl = {
 	 *			- rl: rate limited flag. 1 if rate limited
 	 */
 	refreshSession: function(subcookies) {
-		if(!subcookies) {
+		if (!subcookies) {
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
 		}
 
-		if(!subcookies) {
+		if (!subcookies) {
 			return;
 		}
 
-		if(subcookies.ss) {
+		if (subcookies.ss) {
 			BOOMR.session.start = parseInt(subcookies.ss, 10);
 		}
 		else {
@@ -191,33 +191,33 @@ impl = {
 			// or when the first bytes of boomerang loaded up.
 			BOOMR.session.start = BOOMR.t_lstart || BOOMR.t_start;
 		}
-		if(subcookies.si && subcookies.si.match(/-/)) {
+		if (subcookies.si && subcookies.si.match(/-/)) {
 			BOOMR.session.ID = subcookies.si;
 		}
-		if(subcookies.sl) {
+		if (subcookies.sl) {
 			BOOMR.session.length = parseInt(subcookies.sl, 10);
 		}
-		if(subcookies.tt && subcookies.tt.match(/\d/)) {
+		if (subcookies.tt && subcookies.tt.match(/\d/)) {
 			this.loadTime = parseInt(subcookies.tt, 10);
 		}
-		if(subcookies.obo) {
+		if (subcookies.obo) {
 			this.oboError = parseInt(subcookies.obo, 10)||0;
 		}
-		if(subcookies.dm && !BOOMR.session.domain) {
+		if (subcookies.dm && !BOOMR.session.domain) {
 			BOOMR.session.domain = subcookies.dm;
 		}
-		if(subcookies.se) {
+		if (subcookies.se) {
 			impl.session_exp = parseInt(subcookies.se, 10) || SESSION_EXP;
 		}
-		if(subcookies.sh) {
+		if (subcookies.sh) {
 			impl.sessionHistory = subcookies.sh.split(",");
 		}
 
-		if(subcookies.bcn) {
+		if (subcookies.bcn) {
 			this.beacon_url = subcookies.bcn;
 		}
 
-		if(subcookies.rl && subcookies.rl === "1") {
+		if (subcookies.rl && subcookies.rl === "1") {
 			BOOMR.session.rate_limited = true;
 		}
 	},
@@ -246,7 +246,7 @@ impl = {
 		// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 		// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 
-		if(!BOOMR.session.start									// no start time
+		if (!BOOMR.session.start									// no start time
 		   || (t_start && BOOMR.session.start > t_start)					// or we have a better start time
 		   || t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp			// or it's been more than session_exp since the last action
 		   || (avgSessionLength > sessionExp) 							// or the average page session length is longer than the session exp
@@ -310,7 +310,7 @@ impl = {
 		var url, subcookies;
 		subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
 
-		if(!subcookies) {
+		if (!subcookies) {
 			return;
 		}
 
@@ -320,7 +320,7 @@ impl = {
 
 		// If we have a start time, and either a referrer, or a clicked on URL,
 		// we check if the start time is usable
-		if(subcookies.s && (subcookies.r || subcookies.nu)) {
+		if (subcookies.s && (subcookies.r || subcookies.nu)) {
 			this.r = subcookies.r;
 			url = BOOMR.utils.hashQueryString(d.URL, true);
 
@@ -342,7 +342,7 @@ impl = {
 
 				// additionally, if we have a pagehide, or unload event, that's a proxy
 				// for the first byte of the current page, so use that wisely
-				if(+subcookies.hd > subcookies.s) {
+				if (+subcookies.hd > subcookies.s) {
 					this.t_fb_approx = parseInt(subcookies.hd, 10);
 				}
 			}
@@ -353,7 +353,7 @@ impl = {
 
 		// regardless of whether the start time was usable or not, it's the last action that
 		// we measured, so use that for the session
-		if(subcookies.s) {
+		if (subcookies.s) {
 			this.lastActionTime = subcookies.s;
 		}
 
@@ -379,14 +379,14 @@ impl = {
 	 */
 	incrementSessionDetails: function() {
 		BOOMR.session.length++;
-		if(isNaN(impl.timers.t_done.delta)) {
+		if (isNaN(impl.timers.t_done.delta)) {
 			impl.oboError++;
 		}
 		else {
 			impl.loadTime += impl.timers.t_done.delta;
 		}
 		impl.sessionHistory.unshift(BOOMR.now() + "=" + BOOMR.session.length + ":" + impl.oboError + ":" + impl.loadTime);
-		if(impl.sessionHistory.length > 5) {
+		if (impl.sessionHistory.length > 5) {
 			impl.sessionHistory.length = 5;
 		}
 	},
@@ -407,7 +407,7 @@ impl = {
 			return timeMs ? timeMs : "";
 		}
 
-		if(BOOMR.t_start) {
+		if (BOOMR.t_start) {
 			// How long does it take Boomerang to load up and execute (fb to lb)?
 			BOOMR.plugins.RT.startTimer("boomerang", BOOMR.t_start);
 			BOOMR.plugins.RT.endTimer("boomerang", BOOMR.t_end);	// t_end === null defaults to current time
@@ -415,7 +415,7 @@ impl = {
 			// How long did it take from page request to boomerang fb?
 			BOOMR.plugins.RT.endTimer("boomr_fb", BOOMR.t_start);
 
-			if(BOOMR.t_lstart) {
+			if (BOOMR.t_lstart) {
 				// when did the boomerang loader start loading boomerang on the page?
 				BOOMR.plugins.RT.endTimer("boomr_ld", BOOMR.t_lstart);
 				// What was the network latency for boomerang (request to first byte)?
@@ -424,15 +424,14 @@ impl = {
 		}
 
 		// use window and not w because we want the inner iframe
-		try
-		{
+		try {
 			if (window.performance && window.performance.getEntriesByName) {
 				urls = { "rt.bmr" : BOOMR.url, "rt.cnf" : BOOMR.config_url };
 
-				for(url in urls) {
-					if(urls.hasOwnProperty(url) && urls[url]) {
+				for (url in urls) {
+					if (urls.hasOwnProperty(url) && urls[url]) {
 						res = window.performance.getEntriesByName(urls[url]);
-						if(!res || res.length === 0) {
+						if (!res || res.length === 0) {
 							continue;
 						}
 						res = res[0];
@@ -458,8 +457,7 @@ impl = {
 				}
 			}
 		}
-		catch(e)
-		{
+		catch(e) {
 			BOOMR.addError(e, "rt.getBoomerangTimings");
 		}
 	},
@@ -476,7 +474,7 @@ impl = {
 	 * @returns true if this is a prerender state, false if not (or not supported)
 	 */
 	checkPreRender: function() {
-		if(BOOMR.visibilityState() !== "prerender") {
+		if (BOOMR.visibilityState() !== "prerender") {
 			return false;
 		}
 
@@ -503,7 +501,7 @@ impl = {
 	initFromNavTiming: function() {
 		var ti, p, source;
 
-		if(this.navigationStart) {
+		if (this.navigationStart) {
 			return;
 		}
 
@@ -513,14 +511,14 @@ impl = {
 		// http://blog.chromium.org/2010/07/do-you-know-how-slow-your-web-page-is.html
 		p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
 
-		if(p && p.navigation) {
+		if (p && p.navigation) {
 			this.navigationType = p.navigation.type;
 		}
 
-		if(p && p.timing) {
+		if (p && p.timing) {
 			ti = p.timing;
 		}
-		else if(w.chrome && w.chrome.csi && w.chrome.csi().startE) {
+		else if (w.chrome && w.chrome.csi && w.chrome.csi().startE) {
 			// Older versions of chrome also have a timing API that's sort of documented here:
 			// http://ecmanaut.blogspot.com/2010/06/google-bom-feature-ms-since-pageload.html
 			// source here:
@@ -530,7 +528,7 @@ impl = {
 			};
 			source = "csi";
 		}
-		else if(w.gtbExternal && w.gtbExternal.startE()) {
+		else if (w.gtbExternal && w.gtbExternal.startE()) {
 			// The Google Toolbar exposes navigation start time similar to old versions of chrome
 			// This would work for any browser that has the google toolbar installed
 			ti = {
@@ -539,7 +537,7 @@ impl = {
 			source = "gtb";
 		}
 
-		if(ti) {
+		if (ti) {
 			// Always use navigationStart since it falls back to fetchStart (not with redirects)
 			// If not set, we leave t_start alone so that timers that depend
 			// on it don't get sent back.  Never use requestStart since if
@@ -550,7 +548,7 @@ impl = {
 			this.responseStart = ti.responseStart || undefined;
 
 			// bug in Firefox 7 & 8 https://bugzilla.mozilla.org/show_bug.cgi?id=691547
-			if(navigator.userAgent.match(/Firefox\/[78]\./)) {
+			if (navigator.userAgent.match(/Firefox\/[78]\./)) {
 				this.navigationStart = ti.unloadEventStart || ti.fetchStart || undefined;
 			}
 		}
@@ -569,7 +567,7 @@ impl = {
 		var t_done = t_now;
 
 		// if this is an XHR event, trust the input end "now" timestamp
-		if(ename === "xhr") {
+		if (ename === "xhr") {
 			return t_done;
 		}
 
@@ -580,9 +578,9 @@ impl = {
 		// Boomerang loaded late and...
 		else if (BOOMR.loadedLate) {
 			// We have navigation timing,
-			if(w.performance && w.performance.timing) {
+			if (w.performance && w.performance.timing) {
 				// and boomerang loaded after onload fired
-				if(w.performance.timing.loadEventStart && w.performance.timing.loadEventStart < BOOMR.t_end) {
+				if (w.performance.timing.loadEventStart && w.performance.timing.loadEventStart < BOOMR.t_end) {
 					t_done = w.performance.timing.loadEventStart;
 				}
 			}
@@ -615,32 +613,32 @@ impl = {
 	setPageLoadTimers: function(ename, t_done, data) {
 		var t_resp_start;
 
-		if(ename !== "xhr") {
+		if (ename !== "xhr") {
 			impl.initFromCookie();
 			impl.initFromNavTiming();
 
-			if(impl.checkPreRender()) {
+			if (impl.checkPreRender()) {
 				return false;
 			}
 		}
 
-		if(ename === "xhr") {
-			if(data && data.timing) {
+		if (ename === "xhr") {
+			if (data && data.timing) {
 				// Use details from xhr object to figure out resp latency and page time
 				// t_resp will use the cookie if available or fallback to NavTiming
 				t_resp_start = data.timing.responseStart;
 			}
 		}
-		else if(impl.responseStart) {
+		else if (impl.responseStart) {
 			// Use NavTiming API to figure out resp latency and page time
 			// t_resp will use the cookie if available or fallback to NavTiming
 			t_resp_start = impl.responseStart;
 		}
-		else if(impl.timers.hasOwnProperty("t_page")) {
+		else if (impl.timers.hasOwnProperty("t_page")) {
 			// If the dev has already started t_page timer, we can end it now as well
 			BOOMR.plugins.RT.endTimer("t_page");
 		}
-		else if(impl.t_fb_approx) {
+		else if (impl.t_fb_approx) {
 			// If we have an approximate first byte time from the cookie, use it
 			t_resp_start = impl.t_fb_approx;
 		}
@@ -648,7 +646,7 @@ impl = {
 		if (t_resp_start) {
 			BOOMR.plugins.RT.endTimer("t_resp", t_resp_start);
 
-			if(impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
+			if (impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
 				BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
 			}
 			else {
@@ -657,7 +655,7 @@ impl = {
 		}
 
 		// If a prerender timer was started, we can end it now as well
-		if(impl.timers.hasOwnProperty("t_postrender")) {
+		if (impl.timers.hasOwnProperty("t_postrender")) {
 			BOOMR.plugins.RT.endTimer("t_postrender");
 			BOOMR.plugins.RT.endTimer("t_prerender");
 		}
@@ -679,7 +677,7 @@ impl = {
 		if (t_start) {
 			BOOMR.addVar("rt.tstart", t_start);
 		}
-		if(typeof impl.t_start === "number" && impl.t_start !== t_start) {
+		if (typeof impl.t_start === "number" && impl.t_start !== t_start) {
 			BOOMR.addVar("rt.cstart", impl.t_start);
 		}
 		BOOMR.addVar("rt.bstart", BOOMR.t_start);
@@ -707,26 +705,26 @@ impl = {
 	 */
 	determineTStart: function(ename, data) {
 		var t_start;
-		if(ename==="xhr") {
-			if(data && data.name && impl.timers[data.name]) {
+		if (ename==="xhr") {
+			if (data && data.name && impl.timers[data.name]) {
 				// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
 				// and xhr.pg is set to {page group name}
 				t_start = impl.timers[data.name].start;
 			}
-			else if(data && data.timing && data.timing.requestStart) {
+			else if (data && data.timing && data.timing.requestStart) {
 				// For automatically instrumented xhr timers, we have detailed timing information
 				t_start = data.timing.requestStart;
 			}
 			BOOMR.addVar("rt.start", "manual");
 		}
-		else if(impl.navigationStart) {
+		else if (impl.navigationStart) {
 			t_start = impl.navigationStart;
 		}
-		else if(impl.t_start && impl.navigationType !== 2) {
+		else if (impl.t_start && impl.navigationType !== 2) {
 			t_start = impl.t_start;			// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
 			BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
 		}						// but will have time of previous page start, so t_done will be wrong
-		else if(impl.cached_t_start) {
+		else if (impl.cached_t_start) {
 			t_start = impl.cached_t_start;
 		}
 		else {
@@ -749,11 +747,11 @@ impl = {
 
 	check_visibility: function() {
 		// we care if the page became visible at some point
-		if(BOOMR.visibilityState() === "visible") {
+		if (BOOMR.visibilityState() === "visible") {
 			impl.visiblefired = true;
 		}
 
-		if(impl.visibilityState === "prerender" && BOOMR.visibilityState() !== "prerender") {
+		if (impl.visibilityState === "prerender" && BOOMR.visibilityState() !== "prerender") {
 			BOOMR.plugins.RT.done(null, "visible");
 		}
 
@@ -762,7 +760,7 @@ impl = {
 
 	page_unload: function(edata) {
 		BOOMR.debug("Unload called with " + BOOMR.utils.objectToString(edata) + " when unloadfired = " + this.unloadfired, "rt");
-		if(!this.unloadfired) {
+		if (!this.unloadfired) {
 			// run done on abort or on page_unload to measure session length
 			BOOMR.plugins.RT.done(edata, "unload");
 		}
@@ -778,14 +776,14 @@ impl = {
 
 	_iterable_click: function(name, element, etarget, value_cb) {
 		var value;
-		if(!etarget) {
+		if (!etarget) {
 			return;
 		}
 		BOOMR.debug(name + " called with " + etarget.nodeName, "rt");
-		while(etarget && etarget.nodeName.toUpperCase() !== element) {
+		while (etarget && etarget.nodeName.toUpperCase() !== element) {
 			etarget = etarget.parentNode;
 		}
-		if(etarget && etarget.nodeName.toUpperCase() === element) {
+		if (etarget && etarget.nodeName.toUpperCase() === element) {
 			BOOMR.debug("passing through", "rt");
 
 			// we might need to reset the session first, as updateCookie()
@@ -832,7 +830,7 @@ BOOMR.plugins.RT = {
 
 	init: function(config) {
 		BOOMR.debug("init RT", "rt");
-		if(w !== BOOMR.window) {
+		if (w !== BOOMR.window) {
 			w = BOOMR.window;
 		}
 		d = w.document;
@@ -846,8 +844,8 @@ BOOMR.plugins.RT = {
 		// It's possible that a beacon collector dies while a session is active, and in that
 		// case we might end up sending beacons to a blackhole until the next config.js
 		// request tells us to force the new beacon url
-		if(config && config.beacon_url) {
-			if(!impl.beacon_url || config.force_beacon_url) {
+		if (config && config.beacon_url) {
+			if (!impl.beacon_url || config.force_beacon_url) {
 				impl.beacon_url = config.beacon_url;
 			}
 			impl.next_beacon_url = config.beacon_url;
@@ -872,7 +870,7 @@ BOOMR.plugins.RT = {
 
 		// only initialize once.  we still collect config and check/set cookies
 		// every time init is called, but we attach event handlers only once
-		if(impl.initialized) {
+		if (impl.initialized) {
 			return this;
 		}
 
@@ -902,7 +900,7 @@ BOOMR.plugins.RT = {
 	},
 
 	startTimer: function(timer_name, time_value) {
-		if(timer_name) {
+		if (timer_name) {
 			if (timer_name === "t_page") {
 				this.endTimer("t_resp", time_value);
 			}
@@ -913,9 +911,9 @@ BOOMR.plugins.RT = {
 	},
 
 	endTimer: function(timer_name, time_value) {
-		if(timer_name) {
+		if (timer_name) {
 			impl.timers[timer_name] = impl.timers[timer_name] || {};
-			if(impl.timers[timer_name].end === undefined) {
+			if (impl.timers[timer_name].end === undefined) {
 				impl.timers[timer_name].end =
 						(typeof time_value === "number" ? time_value : BOOMR.now());
 			}
@@ -925,7 +923,7 @@ BOOMR.plugins.RT = {
 	},
 
 	setTimer: function(timer_name, time_delta) {
-		if(timer_name) {
+		if (timer_name) {
 			impl.timers[timer_name] = { delta: time_delta };
 		}
 
@@ -936,14 +934,14 @@ BOOMR.plugins.RT = {
 		var t_name, timer,
 		    t_other=[];
 
-		for(t_name in impl.timers) {
-			if(impl.timers.hasOwnProperty(t_name)) {
+		for (t_name in impl.timers) {
+			if (impl.timers.hasOwnProperty(t_name)) {
 				timer = impl.timers[t_name];
 
 				// if delta is a number, then it was set using setTimer
 				// if not, then we have to calculate it using start & end
-				if(typeof timer.delta !== "number") {
-					if(typeof timer.start !== "number") {
+				if (typeof timer.delta !== "number") {
+					if (typeof timer.start !== "number") {
 						timer.start = impl.cached_t_start;
 					}
 					timer.delta = timer.end - timer.start;
@@ -952,11 +950,11 @@ BOOMR.plugins.RT = {
 				// If the caller did not set a start time, and if there was no start cookie
 				// Or if there was no end time for this timer,
 				// then timer.delta will be NaN, in which case we discard it.
-				if(isNaN(timer.delta)) {
+				if (isNaN(timer.delta)) {
 					continue;
 				}
 
-				if(impl.basic_timers.hasOwnProperty(t_name)) {
+				if (impl.basic_timers.hasOwnProperty(t_name)) {
 					BOOMR.addVar(t_name, timer.delta);
 					impl.addedVars.push(t_name);
 				}
@@ -996,7 +994,7 @@ BOOMR.plugins.RT = {
 
 		t_done = impl.validateLoadTimestamp(t_now, edata, ename);
 
-		if(ename==="load" || ename==="visible" || ename==="xhr") {
+		if (ename==="load" || ename==="visible" || ename==="xhr") {
 			if (!impl.setPageLoadTimers(ename, t_done, edata)) {
 				return this;
 			}
@@ -1026,12 +1024,12 @@ BOOMR.plugins.RT = {
 
 		BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
 
-		if(impl.r2 !== impl.r) {
+		if (impl.r2 !== impl.r) {
 			BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
 		}
 
-		if(ename === "xhr" && edata) {
-			if(edata && edata.data) {
+		if (ename === "xhr" && edata) {
+			if (edata && edata.data) {
 				edata = edata.data;
 			}
 		}
@@ -1039,28 +1037,28 @@ BOOMR.plugins.RT = {
 		if (ename === "xhr" && edata) {
 			subresource = edata.subresource;
 
-			if(edata.url) {
+			if (edata.url) {
 				BOOMR.addVar("u", BOOMR.utils.cleanupURL(edata.url.replace(/#.*/, "")));
 				impl.addedVars.push("u");
 			}
 
-			if(edata.status && (edata.status < -1 || edata.status >= 400)) {
+			if (edata.status && (edata.status < -1 || edata.status >= 400)) {
 				BOOMR.addVar("http.errno", edata.status);
 			}
 
-			if(edata.method && edata.method !== "GET") {
+			if (edata.method && edata.method !== "GET") {
 				BOOMR.addVar("http.method", edata.method);
 			}
 
-			if(edata.headers) {
+			if (edata.headers) {
 				BOOMR.addVar("http.hdr", edata.headers);
 			}
 
-			if(edata.synchronous) {
+			if (edata.synchronous) {
 				BOOMR.addVar("xhr.sync", 1);
 			}
 
-			if(edata.initiator) {
+			if (edata.initiator) {
 				BOOMR.addVar("http.initiator", edata.initiator);
 			}
 
@@ -1068,12 +1066,12 @@ BOOMR.plugins.RT = {
 		}
 
 		// This is an explicit subresource
-		if(subresource && subresource !== "passive") {
+		if (subresource && subresource !== "passive") {
 			BOOMR.addVar("rt.subres", 1);
 			impl.addedVars.push("rt.subres");
 		}
 
-		if(ename === "load" || ename === "visible"	// we're in onload
+		if (ename === "load" || ename === "visible"	// we're in onload
 		   || (ename === "xhr" && !subresource)		// xhr beacon and this is not a subresource
 		   || !impl.onloadfired) {			// unload fired before onload
 			impl.incrementSessionDetails();
@@ -1092,14 +1090,14 @@ BOOMR.plugins.RT = {
 
 		impl.updateCookie();
 
-		if(ename==="unload") {
+		if (ename==="unload") {
 			BOOMR.addVar("rt.quit", "");
 
-			if(!impl.onloadfired) {
+			if (!impl.onloadfired) {
 				BOOMR.addVar("rt.abld", "");
 			}
 
-			if(!impl.visiblefired) {
+			if (!impl.visiblefired) {
 				BOOMR.addVar("rt.ntvu", "");
 			}
 		}
