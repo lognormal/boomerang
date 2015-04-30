@@ -192,7 +192,7 @@ BOOMR.plugins.NavigationTiming = {
 	},
 
 	is_complete: function() {
-		return impl.complete;
+		return true;
 	}
 };
 
