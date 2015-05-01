@@ -72,6 +72,42 @@ Handler.prototype = {
 		return s.replace(this.sanitizeRE, "");
 	},
 
+	extractFromDOMElement: function (element, o) {
+		var m, re;
+
+		if ((!o.match || o.match === "numeric")) {
+			// textContent is way faster than innerText in browsers that support
+			// both, but IE8 and lower only support innerText so, we test textContent
+			// first and fallback to innerText if that fails
+			element = this.cleanUp(element.textContent || element.innerText);
+		}
+		else if (o.match === "boolean") {
+			element = 1;
+		}
+		else if (o.match.match(/^regex:/)) {
+			m = o.match.match(/^regex:(.*)/);
+			if (!m || m.length < 2) {
+				return false;
+			}
+
+			try {
+				re = new RegExp(m[1], "i");
+
+				if (re.test(element.textContent || element.innerText)) {
+					element = 1;
+				}
+			}
+			catch(err) {
+				BOOMR.debug("Bad pattern: " + o.match, "PageVars");
+				BOOMR.debug(err, "PageVars");
+				BOOMR.addError(err, "PageVars.URLPatternType", o.match);
+				return false;
+			}
+		}
+
+		return element;
+	},
+
 	handleRegEx: function(re, extract, operand) {
 		var value, m;
 
@@ -234,6 +270,28 @@ Handler.prototype = {
 		return el.singleNodeValue;
 	},
 
+	runQuerySelector: function(queryselector) {
+		var el;
+
+		try {
+			if (d.querySelector) {
+				el = d.querySelector(queryselector);
+			}
+			else {
+				throw new Error("document.querySelector missing");
+			}
+		}
+		catch (exception) {
+			return false;
+		}
+
+		if (!el) {
+			BOOMR.debug("QuerySelector '" + queryselector + "'yielded no result!");
+		}
+
+		return el;
+	},
+
 	JavaScriptVar: function(o) {
 		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
@@ -392,7 +450,7 @@ Handler.prototype = {
 	},
 
 	URLPatternType: function(o) {
-		var value, re, m;
+		var value;
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
@@ -400,46 +458,26 @@ Handler.prototype = {
 			return false;
 		}
 
-		if (!o.parameter2) {
-			value = "1";
+		if (!o.parameter2 && !o.queryselector) {
+			value = 1;
+		}
+		else if (o.queryselector) {
+			value = this.runQuerySelector(o.queryselector);
+
+			if (!value) {
+				return false;
+			}
+
+			value = this.extractFromDOMElement(value, o);
 		}
 		else {
-
 			value = this.runXPath(o.parameter2);
 
 			if (!value) {
 				return false;
 			}
 
-			if (!o.match || o.match === "numeric") {
-				// textContent is way faster than innerText in browsers that support
-				// both, but IE8 and lower only support innerText so, we test textContent
-				// first and fallback to innerText if that fails
-				value = this.cleanUp(value.textContent || value.innerText);
-			}
-			else if (o.match === "boolean") {
-				value = 1;
-			}
-			else if (o.match.match(/^regex:/)) {
-				m = o.match.match(/^regex:(.*)/);
-				if (!m || m.length < 2) {
-					return false;
-				}
-
-				try {
-					re = new RegExp(m[1], "i");
-
-					if (re.test(value.textContent || value.innerText)) {
-						value = 1;
-					}
-				}
-				catch(err) {
-					BOOMR.debug("Bad pattern: " + o.match, "PageVars");
-					BOOMR.debug(err, "PageVars");
-					BOOMR.addError(err, "PageVars.URLPatternType", o.match);
-					return false;
-				}
-			}
+			value = this.extractFromDOMElement(value, o);
 		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
@@ -669,6 +707,7 @@ Handler.prototype = {
 };
 
 BOOMR.utils.runXPath = Handler.prototype.runXPath;
+BOOMR.utils.runQuerySelector = Handler.prototype.runQuerySelector;
 
 Handler.prototype.XPath = Handler.prototype.URLPatternType;
 Handler.prototype.URLQueryParam = Handler.prototype.URLPattern;
