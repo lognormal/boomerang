@@ -268,7 +268,7 @@ module.exports = function (grunt) {
         connect: {
             options: {
                 port: 4002,
-                hostname: "localhost",
+                hostname: "0.0.0.0",
                 middleware: function(connect, options, middlewares) {
                     middlewares.push(["/delay", require("./tests/server/route-delay")]);
                     return middlewares;
@@ -325,7 +325,6 @@ module.exports = function (grunt) {
     grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
-    grunt.registerTask("test:e2e:chrome", ["test:e2e:chrome"]);
 
     grunt.registerTask("test:debug", ["test:build", "build:test", "connect", "watch"]);
 
