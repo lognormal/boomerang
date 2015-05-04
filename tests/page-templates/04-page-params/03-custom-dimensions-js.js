@@ -48,4 +48,9 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
         var b = tf.lastBeacon();
         assert.equal(b["cdim.CD8"], undefined);
     });
+
+    it("Should be having custom dimension 9 - QuerySelector", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD9"], "444.44");
+    });
 });
