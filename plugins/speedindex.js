@@ -266,10 +266,11 @@ var RUMSpeedIndex = function(win) {
 
   BOOMR.plugins.SpeedIndex = {
     init: function() {
-      if (win.performance && win.performance.timing) {
+      if (w.performance && w.performance.timing && w.performance.getEntriesByType) {
         BOOMR.subscribe("page_ready", impl.done, null, impl);
       } else {
-        this.complete = true;
+        BOOMR.debug("plugin SpeedIndex is inactive");
+        impl.complete = true;
       }
       return this;
     },

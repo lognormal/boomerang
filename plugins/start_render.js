@@ -52,7 +52,8 @@ This delay can be seen at chrome://tracing page, especially for a Debug build.
       if (w.performance && w.performance.timing) {
         BOOMR.subscribe("page_ready", impl.done, null, impl);
       } else {
-        this.complete = true;
+        BOOMR.debug("plugin StartRender is inactive");
+        impl.complete = true;
       }
       return this;
     },
