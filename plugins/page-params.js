@@ -278,7 +278,7 @@ Handler.prototype = {
 				el = d.querySelector(queryselector);
 			}
 			else {
-				throw new Error("document.querySelector missing");
+				return false;
 			}
 		}
 		catch (exception) {
