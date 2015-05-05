@@ -44,10 +44,10 @@ server.listen(port, function() {
 //
 // Routes
 //
-app.get("/e2e/beacon-blackhole", function(req, res) {
+app.get("/blackhole", function(req, res) {
 	res.status(204).send();
 });
-app.post("/e2e/beacon-blackhole", function(req, res) {
+app.post("/blackhole", function(req, res) {
 	res.status(204).send();
 });
 

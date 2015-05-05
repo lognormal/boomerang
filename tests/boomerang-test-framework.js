@@ -84,7 +84,7 @@
     //
     // Constants
     //
-    t.BEACON_URL = "/e2e/beacon-blackhole";
+    t.BEACON_URL = "/blackhole";
     t.MAX_RESOURCE_WAIT = 500;
 
     //
