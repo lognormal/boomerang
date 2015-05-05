@@ -265,18 +265,14 @@ module.exports = function (grunt) {
             e2e: {
             }
         },
-        connect: {
+        express: {
             options: {
                 port: 4002,
-                hostname: "0.0.0.0",
-                middleware: function(connect, options, middlewares) {
-                    middlewares.push(["/delay", require("./tests/server/route-delay")]);
-                    return middlewares;
-                }
+                hostname: "0.0.0.0"
             },
-            test: {
+            dev: {
                 options: {
-                    base: ["tests"]
+                    script: "tests/server/app.js"
                 }
             }
         },
@@ -296,11 +292,18 @@ module.exports = function (grunt) {
                     "plugins/*.js"
                 ],
                 tasks: ["build:test"]
+            },
+            express: {
+                files: [
+                    "tests/server/*.js"
+                ],
+                tasks: ["express"]
             }
         }
     });
 
     grunt.loadNpmTasks("grunt-eslint");
+    grunt.loadNpmTasks("grunt-express-server");
     grunt.loadNpmTasks("grunt-karma");
     grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-string-replace");
@@ -309,7 +312,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-compress");
     grunt.loadNpmTasks("grunt-filesize");
-    grunt.loadNpmTasks("grunt-contrib-connect");
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
     grunt.loadNpmTasks("grunt-template");
@@ -326,7 +328,7 @@ module.exports = function (grunt) {
     grunt.registerTask("test:unit", ["build", "karma:unit"]);
     grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
 
-    grunt.registerTask("test:debug", ["test:build", "build:test", "connect", "watch"]);
+    grunt.registerTask("test:debug", ["test:build", "build:test", "express", "watch"]);
 
     grunt.registerTask("test:unit:all", ["build", "karma:all"]);
     grunt.registerTask("test:unit:chrome", ["build", "karma:chrome"]);
@@ -335,8 +337,8 @@ module.exports = function (grunt) {
     grunt.registerTask("test:unit:opera", ["build", "karma:opera"]);
     grunt.registerTask("test:unit:safari", ["build", "karma:safari"]);
 
-    grunt.registerTask("test:e2e:phantomjs", ["build", "connect:test", "protractor_webdriver", "protractor:phantomjs"]);
-    grunt.registerTask("test:e2e:chrome", ["build", "connect:test", "protractor_webdriver", "protractor:chrome"]);
+    grunt.registerTask("test:e2e:phantomjs", ["build", "express", "protractor_webdriver", "protractor:phantomjs"]);
+    grunt.registerTask("test:e2e:chrome", ["build", "express", "protractor_webdriver", "protractor:chrome"]);
 
     grunt.registerTask("test:build", ["pages-builder"]);
     grunt.registerTask("webserver:build", ["build", "copy:webserver"]);

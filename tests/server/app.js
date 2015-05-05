@@ -28,12 +28,18 @@ if (wwwRoot.indexOf("/") !== 0) {
     wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
 }
 
+if (!fs.existsSync(wwwRoot)) {
+    wwwRoot = path.join(__dirname, "..");
+}
+
 var app = express();
 var server = http.createServer(app);
 
 // listen
-console.log("Server starting on port " + env.port + " for " + wwwRoot);
-server.listen(env.port);
+var port = process.env.PORT || env.port;
+server.listen(port, function() {
+    console.log("Server starting on port " + port + " for " + wwwRoot);
+});
 
 //
 // Routes
