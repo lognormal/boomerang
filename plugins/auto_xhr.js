@@ -469,14 +469,20 @@ function instrumentXHR() {
 				req.addEventListener(
 						ename,
 						function() {
+							function setLoadEventEnd()
+							{
+								resource.timing.loadEventEnd = BOOMR.now();
+							}
+
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
-							}
-							else if (ename === "loadend") {
-								handler.addEvent(resource);
+								if (req.readyState === 4) {
+									setLoadEventEnd();
+									handler.addEvent(resource);
+								}
 							}
 							else {	// load, timeout, error, abort
-								resource.timing.loadEventEnd = BOOMR.now();
+								setLoadEventEnd();
 								resource.status = (stat === undefined ? req.status : stat);
 							}
 						},
@@ -484,16 +490,11 @@ function instrumentXHR() {
 				);
 			}
 
-			if (async) {
-				addListener("readystatechange");
-			}
-
+			addListener("readystatechange");
 			addListener("load");
 			addListener("timeout", -1001);
 			addListener("error",    -998);
 			addListener("abort",    -999);
-
-			addListener("loadend");
 
 			resource.url = a.href;
 			resource.method = method;
