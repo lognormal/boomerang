@@ -278,11 +278,11 @@ Handler.prototype = {
 				el = d.querySelector(queryselector);
 			}
 			else {
-				return false;
+				return null;
 			}
 		}
 		catch (exception) {
-			return false;
+			return null;
 		}
 
 		if (!el) {
