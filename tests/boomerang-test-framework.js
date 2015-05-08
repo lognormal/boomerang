@@ -274,17 +274,7 @@
         assert.isString(tf.lastBeacon().v);
 
         done();
-    };
-
-    t.canSetCookies = function() {
-        var testCookieName = "test_cookie";
-
-        // set a cookie
-        document.cookie = [testCookieName + "=true", "path=/", "domain=" + location.hostname].join("; ");
-
-        // determine if it was set OK
-        return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
-    };
+    }
 
     window.BOOMR_test = t;
 
