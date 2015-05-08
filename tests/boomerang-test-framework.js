@@ -163,8 +163,11 @@
                 });
             }
             else if (window.document.attachEvent) {
-                window.document.attachEvent("onBoomerangLoaded", function() {
-                    t.init(config);
+                document.attachEvent("onpropertychange", function(e) {
+                    e = e || window.event;
+                    if (e && e.propertyName === "onBoomerangLoaded") {
+                        t.init(config);
+                    }
                 });
             }
 
@@ -176,9 +179,9 @@
         // initialize boomerang
         BOOMR.init(config);
 
-	if (config.afterBoomerangLoad) {
-		config.afterBoomerangLoad();
-	}
+        if (config.afterBoomerangLoad) {
+            config.afterBoomerangLoad();
+        }
 
         // fake session details so beacons send
         BOOMR.addVar({
