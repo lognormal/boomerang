@@ -459,7 +459,7 @@ Handler.prototype = {
 		}
 
 		if (!o.parameter2 && !o.queryselector) {
-			value = 1;
+			value = "1";
 		}
 		else if (o.queryselector) {
 			value = this.runQuerySelector(o.queryselector);
