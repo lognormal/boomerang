@@ -282,6 +282,8 @@ Handler.prototype = {
 			}
 		}
 		catch (exception) {
+			BOOMR.error("" + exception, "PageVars");
+			BOOMR.addError(exception, "PageVars.runQueryselector", queryselector);
 			return null;
 		}
 
