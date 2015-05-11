@@ -469,8 +469,7 @@ function instrumentXHR() {
 				req.addEventListener(
 						ename,
 						function() {
-							function setLoadEventEnd()
-							{
+							function setLoadEventEnd() {
 								resource.timing.loadEventEnd = BOOMR.now();
 							}
 
