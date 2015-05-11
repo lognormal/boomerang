@@ -69,8 +69,13 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
         assert.equal(b["cdim.CD12"], undefined);
     });
 
-    it("Should be having custom dimension 13 - No parameter1, parameter2 or queryselector set should return \"1\"", function() {
+    it("Should be missing custom dimension 13 - No parameter1, parameter2 or queryselector set should return undefined", function() {
         var b = tf.lastBeacon();
-        assert.equal(b["cdim.CD13"], "1");
+        assert.equal(b["cdim.CD13"], undefined);
+    });
+
+    it("Should be having custom dimension 14 - No parameter2 or queryselector set should return undefined", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD14"], undefined);
     });
 });

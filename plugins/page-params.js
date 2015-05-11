@@ -456,10 +456,6 @@ Handler.prototype = {
 
 		BOOMR.debug("Got URLPatternType: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-		if (!o.parameter1 && !o.parameter2 && !o.queryselector) {
-			return false;
-		}
-
 		if (!this.checkURLPattern(o.parameter1)) {
 			return false;
 		}
@@ -467,6 +463,7 @@ Handler.prototype = {
 		if (o.parameter1 && !o.parameter2 && !o.queryselector) {
 			value = "1";
 		}
+
 		else if (o.queryselector) {
 			value = this.runQuerySelector(o.queryselector);
 
