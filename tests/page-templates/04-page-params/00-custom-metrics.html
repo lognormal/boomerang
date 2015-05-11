@@ -1,6 +1,6 @@
 <%= header %>
 <%= boomerangSnippet %>
-<div class="cart-container" style="display: none">
+<div class="cart-container" style="display: none" id="cart-container">
     <div id="cart-total">$444.44</div>
 </div>
 <script src="00-custom-metrics.js" type="text/javascript"></script>
@@ -41,6 +41,18 @@ BOOMR_test.init({
                 parameter1: "",
                 parameter2: "",
                 label: "cmet5",
+                type: "URLPatternType"
+            },
+            {
+                parameter1: "",
+                parameter2: "//div[@id=\"cart-total\"]",
+                label: "cmet6",
+                type: "URLPatternType"
+            },
+            {
+                parameter1: "",
+                parameter2: "//div[@id=\"cart-container\"]/div",
+                label: "cmet7",
                 type: "URLPatternType"
             }
         ]
