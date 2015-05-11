@@ -460,7 +460,7 @@ Handler.prototype = {
 			return false;
 		}
 
-		if (!o.parameter2 && !o.queryselector) {
+		if (!o.parameter1 && !o.parameter2 && !o.queryselector) {
 			value = "1";
 		}
 		else if (o.queryselector) {
