@@ -34,18 +34,23 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
         assert.equal(b.cmet5, 1);
     });
 
-    it("Should have the custom metric 6 - XPath with ID (double quote)", function() {
+    it("Should have the custom metric 6 - QuerySelector", function() {
         var b = tf.lastBeacon();
         assert.equal(b.cmet6, 444.44);
     });
 
-    it("Should have the custom metric 7 - XPath rooted at an ID (double quote) with another element name following", function() {
+    it("Should have the custom metric 7 - XPath with ID (double quote)", function() {
         var b = tf.lastBeacon();
         assert.equal(b.cmet7, 444.44);
     });
 
-    it("Should have the custom metric 8 - XPath with ID (single quote) where the ID has a a letter, number, hyphen, underscore, colon and a period", function() {
+    it("Should have the custom metric 8 - XPath rooted at an ID (double quote) with another element name following", function() {
         var b = tf.lastBeacon();
-        assert.equal(b.cmet8, 555.55);
+        assert.equal(b.cmet8, 444.44);
+    });
+
+    it("Should have the custom metric 9 - XPath with ID (single quote) where the ID has a a letter, number, hyphen, underscore, colon and a period", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b.cmet9, 555.55);
     });
 });
