@@ -16,3 +16,6 @@ node_modules/
 build/
 tests/server/env.json
 npm-debug.log
+*.#*
+*#*
+*~

@@ -48,4 +48,34 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
         var b = tf.lastBeacon();
         assert.equal(b["cdim.CD8"], undefined);
     });
+
+    it("Should be having custom dimension 9 - QuerySelector", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD9"], "444.44");
+    });
+
+    it("Should be having custom dimension 10 - QuerySelector with non-standard attribute selector", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD10"], "444.44");
+    });
+
+    it("Should be having custom dimension 11 - QuerySelector with multiple values", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD11"], "444.44");
+    });
+
+    it("Should be missing custom dimension 12 - QuerySelector with no matched element", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD12"], undefined);
+    });
+
+    it("Should be missing custom dimension 13 - No parameter1, parameter2 or queryselector set should return undefined", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD13"], undefined);
+    });
+
+    it("Should be having custom dimension 14 - No parameter2 or queryselector set should return undefined", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b["cdim.CD14"], undefined);
+    });
 });
