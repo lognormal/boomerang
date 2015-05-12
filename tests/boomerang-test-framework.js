@@ -130,24 +130,43 @@
         }
     };
 
+    t.flattenTestTitles = function(test) {
+        var titles = [];
+        while (test.parent.title) {
+            titles.push(test.parent.title);
+            test = test.parent;
+        }
+        return titles.reverse();
+    };
+
     t.runTests = function() {
-        window.mocha.run(function(){
+        var runner = window.mocha.run();
+
+        runner.on("pass", function(test){
+            testPasses.push({
+                test: test
+            });
+        })
+        .on("fail", function(test, err){
+            testFailures.push({
+                name: test.title,
+                result: false,
+                message: err.message,
+                // stack: err.stack,
+                titles: t.flattenTestTitles(test)
+            });
+        })
+        .on("end", function() {
             complete = true;
+
+            // for saucelabs-mocha
+            window.mochaResults = runner.stats;
+            window.mochaResults.reports = testFailures;
 
             // convenient way for selenium to wait
             var competeDiv = document.createElement("div");
             competeDiv.id = "BOOMR_test_complete";
             document.body.appendChild(competeDiv);
-        })
-        .on("pass", function(test){
-            testPasses.push({
-                test: test
-            });
-        }).on("fail", function(test, err){
-            testFailures.push({
-                test: test,
-                err: err
-            });
         });
     };
 
@@ -192,7 +211,7 @@
         });
 
         // setup Mocha
-        window.mocha.globals(["BOOMR", "PageGroupVariable"]);
+        window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results"]);
         window.mocha.checkLeaks();
 
         // set globals
