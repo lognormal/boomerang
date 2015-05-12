@@ -43,4 +43,9 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
         var b = tf.lastBeacon();
         assert.equal(b.cmet7, 444.44);
     });
+
+    it("Should have the custom metric 8 - XPath with ID (single quote) where the ID has a a letter, number, hyphen, underscore, colon and a period", function() {
+        var b = tf.lastBeacon();
+        assert.equal(b.cmet8, 555.55);
+    });
 });
