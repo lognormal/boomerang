@@ -28,20 +28,26 @@ if (wwwRoot.indexOf("/") !== 0) {
     wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
 }
 
+if (!fs.existsSync(wwwRoot)) {
+    wwwRoot = path.join(__dirname, "..");
+}
+
 var app = express();
 var server = http.createServer(app);
 
 // listen
-console.log("Server starting on port " + env.port + " for " + wwwRoot);
-server.listen(env.port);
+var port = process.env.PORT || env.port;
+server.listen(port, function() {
+    console.log("Server starting on port " + port + " for " + wwwRoot);
+});
 
 //
 // Routes
 //
-app.get("/e2e/beacon-blackhole", function(req, res) {
+app.get("/blackhole", function(req, res) {
 	res.status(204).send();
 });
-app.post("/e2e/beacon-blackhole", function(req, res) {
+app.post("/blackhole", function(req, res) {
 	res.status(204).send();
 });
 

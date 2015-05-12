@@ -33,6 +33,10 @@ if (wwwRoot.indexOf("/") !== 0) {
     wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
 }
 
+if (!fs.existsSync(wwwRoot)) {
+    wwwRoot = path.join(__dirname, "..");
+}
+
 module.exports = function(req, res) {
     var q = require("url").parse(req.url, true).query;
     var delay = q.delay;
