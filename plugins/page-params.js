@@ -203,7 +203,7 @@ Handler.prototype = {
 					xpath = xpath.slice(6);
 					return this.nodeWalk(d, xpath);
 				}
-				else if ((m = xpath.match(/\[@id=(["'])([\w-]+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+				else if ((m = xpath.match(/\[@id=(["'])([^"']+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
 					el = d.getElementById(m[2]);
 					if (!el || !m[3]) {
 						return el;
