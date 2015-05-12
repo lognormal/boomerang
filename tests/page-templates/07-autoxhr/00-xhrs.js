@@ -13,10 +13,7 @@ describe("e2e/07-autoxhr/00-xhrs", function() {
             return done();
         }
 
-        setTimeout(function(){
-            assert.equal(tf.beaconCount(), 5);
-            done();
-        }, 500);
+        tf.waitForBeaconCount(done, 5);
     });
 
     it("Should get 1 beacon: 1 onload, 0 xhr (XMLHttpRequest === null)", function(done) {
