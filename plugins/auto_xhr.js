@@ -8,7 +8,7 @@ var d, handler, a,
 // save us some execution time.
 
 // XHR not supported or XHR so old that it doesn't support addEventListener
-// (IE 6, 7, as well as newer running in quirks mode.)
+// (IE 6, 7, 8, as well as newer running in quirks mode.)
 if (!window.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
 	// Nothing to instrument
 	return;
@@ -469,27 +469,23 @@ function instrumentXHR() {
 				req.addEventListener(
 						ename,
 						function() {
-							function setLoadEventEnd() {
-								resource.timing.loadEventEnd = BOOMR.now();
-							}
-
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
-								if (req.readyState === 4) {
-									setLoadEventEnd();
-									handler.addEvent(resource);
-								}
 							}
 							else {	// load, timeout, error, abort
-								setLoadEventEnd();
+								resource.timing.loadEventEnd = BOOMR.now();
 								resource.status = (stat === undefined ? req.status : stat);
+                                handler.addEvent(resource);
 							}
 						},
 						false
 				);
 			}
 
-			addListener("readystatechange");
+			if (async) {
+				addListener("readystatechange");
+			}
+
 			addListener("load");
 			addListener("timeout", -1001);
 			addListener("error",    -998);
