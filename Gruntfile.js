@@ -4,8 +4,18 @@
 var fs = require("fs");
 var path = require("path");
 var fse = require("fs-extra");
+var stripJsonComments = require("strip-json-comments");
+var grunt = require("grunt");
 
-module.exports = function (grunt) {
+//
+// Constants
+//
+var TEST_URL_BASE = "http://boomerang-test.soasta.com:3000/";
+
+//
+// Grunt config
+//
+module.exports = function() {
     //
     // paths
     //
@@ -24,6 +34,14 @@ module.exports = function (grunt) {
         var envFileSample = path.resolve(path.join(testsDir, "server", "env.json.sample"));
         console.info("Creating env.json from defaults");
         fse.copySync(envFileSample, envFile);
+    }
+
+    // Build SauceLabs E2E test URLs
+    var e2eTests = JSON.parse(stripJsonComments(grunt.file.read("tests/e2e/e2e.json")));
+    var e2eUrls = [];
+
+    for (var i = 0; i < e2eTests.length; i++) {
+        e2eUrls.push(TEST_URL_BASE + "pages/" + e2eTests[i].path + "/" + e2eTests[i].file + ".html");
     }
 
     //
@@ -107,6 +125,26 @@ module.exports = function (grunt) {
                     ]
                 }
             },
+            "debug-tests": {
+                files: [{
+                    src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                    dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug-tests.js"
+                }],
+                options: {
+                    replacements: [
+                        {
+                            // Send beacons to null
+                            pattern: /location\.protocol \+ \"\/\/%beacon_dest_host%%beacon_dest_path%/,
+                            replacement: "\"/blackhole"
+                        },
+                        {
+                            // Add config to null
+                            pattern: /\/\/%config_host%%config_path%/,
+                            replacement: "/blackhole"
+                        }
+                    ]
+                }
+            },
             release: {
                 files: [{
                     src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
@@ -137,7 +175,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         nonull: true,
-                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+                        src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug-tests.js",
                         dest: "tests/build/<%= pkg.name %>-latest-debug.js"
                     }
                 ]
@@ -275,6 +313,52 @@ module.exports = function (grunt) {
                 }
             }
         },
+        "saucelabs-mocha": {
+            all: {
+                options: {
+                    // username: "", // SAUCE_USERNAME
+                    // key: "",      // SAUCE_ACCESS_KEY
+                    build: process.env.CI_BUILD_NUMBER,
+                    tunneled: false
+                }
+            },
+            unit: {
+                options: {
+                    urls: [TEST_URL_BASE + "unit/"],
+                    testname: "Boomerang Unit Tests",
+                    browsers: JSON.parse(stripJsonComments(grunt.file.read("tests/browsers-unit.json")))
+                }
+            },
+            "unit-debug": {
+                options: {
+                    urls: [TEST_URL_BASE + "unit/"],
+                    testname: "Boomerang Unit Tests",
+                    browsers: [{
+                        "browserName": "internet explorer",
+                        "version":     "11",
+                        "platform":    "Windows 8.1"
+                    }]
+                }
+            },
+            e2e: {
+                options: {
+                    urls: e2eUrls,
+                    testname: "Boomerang E2E Tests",
+                    browsers: JSON.parse(stripJsonComments(grunt.file.read("tests/browsers-unit.json")))
+                }
+            },
+            "e2e-debug": {
+                options: {
+                    urls: e2eUrls,
+                    testname: "Boomerang E2E Tests",
+                    browsers: [{
+                        "browserName": "internet explorer",
+                        "version":     "11",
+                        "platform":    "Windows 8.1"
+                    }]
+                }
+            }
+        },
         watch: {
             test: {
                 files: [
@@ -314,6 +398,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-protractor-runner");
     grunt.loadNpmTasks("grunt-protractor-webdriver");
     grunt.loadNpmTasks("grunt-template");
+    grunt.loadNpmTasks("grunt-saucelabs");
     grunt.loadNpmTasks("grunt-contrib-watch");
 
     // custom tasks
@@ -338,6 +423,12 @@ module.exports = function (grunt) {
 
     grunt.registerTask("test:e2e:phantomjs", ["build", "express", "protractor_webdriver", "protractor:phantomjs"]);
     grunt.registerTask("test:e2e:chrome", ["build", "express", "protractor_webdriver", "protractor:chrome"]);
+
+    grunt.registerTask("test:matrix", ["test:matrix:unit", "test:matrix:e2e"]);
+    grunt.registerTask("test:matrix:unit", ["saucelabs-mocha:unit"]);
+    grunt.registerTask("test:matrix:unit:debug", ["saucelabs-mocha:unit-debug"]);
+    grunt.registerTask("test:matrix:e2e", ["saucelabs-mocha:e2e"]);
+    grunt.registerTask("test:matrix:e2e:debug", ["saucelabs-mocha:e2e-debug"]);
 
     grunt.registerTask("test:build", ["pages-builder"]);
     grunt.registerTask("webserver:build", ["build", "copy:webserver"]);
