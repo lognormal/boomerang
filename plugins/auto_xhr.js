@@ -475,7 +475,7 @@ function instrumentXHR() {
 							else {	// load, timeout, error, abort
 								resource.timing.loadEventEnd = BOOMR.now();
 								resource.status = (stat === undefined ? req.status : stat);
-                                handler.addEvent(resource);
+								handler.addEvent(resource);
 							}
 						},
 						false
