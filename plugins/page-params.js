@@ -239,12 +239,12 @@ Handler.prototype = {
 					xpath = xpath.slice(6);
 					return this.nodeWalk(d, xpath);
 				}
-				else if ((m = xpath.match(/\[@id="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
-					el = d.getElementById(m[1]);
-					if (!el || !m[2]) {
+				else if ((m = xpath.match(/\[@id=(["'])([^"']+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+					el = d.getElementById(m[2]);
+					if (!el || !m[3]) {
 						return el;
 					}
-					return this.nodeWalk(el, m[2].slice(1));
+					return this.nodeWalk(el, m[3].slice(1));
 				}
 				else {
 					BOOMR.debug("Could not evaluate XPath", "PageVars");
