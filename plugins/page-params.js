@@ -461,7 +461,7 @@ Handler.prototype = {
 		}
 
 		if (o.parameter1 && !o.parameter2 && !o.queryselector) {
-			value = false;
+			value = "1";
 		}
 		else if (o.queryselector) {
 			value = this.runQuerySelector(o.queryselector);
