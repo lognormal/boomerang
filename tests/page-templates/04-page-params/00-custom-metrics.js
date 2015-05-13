@@ -31,7 +31,7 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 
     it("Should have the custom metric 5 - URL", function() {
         var b = tf.lastBeacon();
-        assert.equal(b.cmet5, 1);
+        assert.equal(b.cmet5, undefined);
     });
 
     it("Should have the custom metric 6 - QuerySelector", function() {
