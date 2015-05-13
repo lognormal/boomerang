@@ -60,6 +60,18 @@
                 new XMLHttpRequest() :
                 new ActiveXObject("Microsoft.XMLHTTP");
 	}
+        waitForBeaconCount: function(done, beaconCount) {
+            function testBeaconCount()
+            {
+                if (BOOMR.plugins.TestFramework.beaconCount() === beaconCount) {
+                    done();
+                } else {
+                    setTimeout(testBeaconCount, 100);
+                }
+            }
+
+            testBeaconCount();
+        }
     };
 })(window);
 

@@ -8,7 +8,7 @@ var d, handler, a,
 // save us some execution time.
 
 // XHR not supported or XHR so old that it doesn't support addEventListener
-// (IE 6, 7, as well as newer running in quirks mode.)
+// (IE 6, 7, 8, as well as newer running in quirks mode.)
 if (!window.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
 	// Nothing to instrument
 	return;
@@ -472,12 +472,10 @@ function instrumentXHR() {
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 							}
-							else if (ename === "loadend") {
-								handler.addEvent(resource);
-							}
 							else {	// load, timeout, error, abort
 								resource.timing.loadEventEnd = BOOMR.now();
 								resource.status = (stat === undefined ? req.status : stat);
+								handler.addEvent(resource);
 							}
 						},
 						false
@@ -492,8 +490,6 @@ function instrumentXHR() {
 			addListener("timeout", -1001);
 			addListener("error",    -998);
 			addListener("abort",    -999);
-
-			addListener("loadend");
 
 			resource.url = a.href;
 			resource.method = method;
