@@ -463,7 +463,6 @@ Handler.prototype = {
 		if (o.parameter1 && !o.parameter2 && !o.queryselector) {
 			value = "1";
 		}
-
 		else if (o.queryselector) {
 			value = this.runQuerySelector(o.queryselector);
 
@@ -473,7 +472,7 @@ Handler.prototype = {
 
 			value = this.extractFromDOMElement(value, o);
 		}
-		else {
+		else if (o.parameter2) {
 			value = this.runXPath(o.parameter2);
 
 			if (!value) {
@@ -481,6 +480,9 @@ Handler.prototype = {
 			}
 
 			value = this.extractFromDOMElement(value, o);
+		}
+		else {
+			return false;
 		}
 
 		BOOMR.debug("Final value: " + value, "PageVars");
