@@ -109,7 +109,17 @@ see: http://www.w3.org/TR/resource-timing/
 	function optimizeTrie(cur, top) {
 		var num = 0, node, ret, topNode;
 
+		// capture trie keys first as we'll be modifying it
+		var keys = [];
+
 		for (node in cur) {
+			if (cur.hasOwnProperty(node)) {
+				keys.push(node);
+			}
+		}
+
+		for (var i = 0; i < keys.length; i++) {
+			node = keys[i];
 			if (typeof cur[node] === "object") {
 				// optimize children
 				ret = optimizeTrie(cur[node], false);
