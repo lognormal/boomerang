@@ -7,31 +7,31 @@
 document.cookie = ["cookie_set=true", "path=/", "domain=" + location.hostname].join("; ");
 
 BOOMR_test.init({
-    testAfterOnBeacon: true,
-    PageParams: {
-        customDimensions: [
-            {
-                "name": "CD1",
-                "index": 1,
-                "type": "CookieRegex",
-                "label": "cdim.CD1",
-                "dataType": "Boolean",
-                "regex": "^(.*)$",
-                "replacement": "$1",
-                "cookieName": "cookie_undefined"
-            },
-            {
-                "name": "CD2",
-                "index": 2,
-                "type": "CookieRegex",
-                "label": "cdim.CD2",
-                "dataType": "Boolean",
-                "regex": "^(.*)$",
-                "replacement": "$1",
-                "cookieName": "cookie_set"
-            }
-        ]
-    }
+	testAfterOnBeacon: true,
+	PageParams: {
+		customDimensions: [
+			{
+				"name": "CD1",
+				"index": 1,
+				"type": "CookieRegex",
+				"label": "cdim.CD1",
+				"dataType": "Boolean",
+				"regex": "^(.*)$",
+				"replacement": "$1",
+				"cookieName": "cookie_undefined"
+			},
+			{
+				"name": "CD2",
+				"index": 2,
+				"type": "CookieRegex",
+				"label": "cdim.CD2",
+				"dataType": "Boolean",
+				"regex": "^(.*)$",
+				"replacement": "$1",
+				"cookieName": "cookie_set"
+			}
+		]
+	}
 });
 </script>
 <%= footer %>

@@ -2,9 +2,9 @@
 /*global assert*/
 
 describe("e2e/06-bugs/92542", function() {
-    var tf = BOOMR.plugins.TestFramework;
+	var tf = BOOMR.plugins.TestFramework;
 
-    it("Should not have any errors", function() {
-        assert.equal(typeof tf.lastBeacon().errors, "undefined");
-    });
+	it("Should not have any errors", function() {
+		assert.equal(typeof tf.lastBeacon().errors, "undefined");
+	});
 });

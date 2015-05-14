@@ -3,28 +3,28 @@
 <script src="02-page-group-xhrs.js" type="text/javascript"></script>
 <script>
 BOOMR_test.init({
-    testAfterOnBeacon: typeof window.MutationObserver === "function" ? 2 : 1,
-    instrument_xhr: true,
-    PageParams: {
-        pageGroups: [
-            {
-                type: "Regexp",
-                parameter1: "/pages/.*",
-                parameter2: "Test Pages"
-            },
-            {
-                type: "Regexp",
-                parameter1: "/pages/.*",
-                parameter2: "XHR Test Pages_subresource"
-            }
-        ]
-    },
-    afterBoomerangLoad:
-        function() {
-            var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-            xhr.open("GET", "/pages/blah", true);
-            xhr.send();
-        }
+	testAfterOnBeacon: typeof window.MutationObserver === "function" ? 2 : 1,
+	instrument_xhr: true,
+	PageParams: {
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: "/pages/.*",
+				parameter2: "Test Pages"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/pages/.*",
+				parameter2: "XHR Test Pages_subresource"
+			}
+		]
+	},
+	afterBoomerangLoad:
+		function() {
+			var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+			xhr.open("GET", "/pages/blah", true);
+			xhr.send();
+		}
 });
 </script>
 <%= footer %>
