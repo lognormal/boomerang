@@ -10,20 +10,20 @@ checking for its existence in the IFRAME when recursively calling page-param.js 
 <%= boomerangSnippet %>
 <script>
 BOOMR_test.init({
-    PageParams: {
-        customTimers: [
-            {
-                "name":"rt",
-                "index":0,
-                "type":"ResourceTiming",
-                "label":"custom0",
-                "start":"startTime",
-                "end":"responseEnd",
-                "url":"/e2e/nop*"
-            }
-        ]
-    },
-    testAfterOnBeacon: true
+	PageParams: {
+		customTimers: [
+			{
+				"name":"rt",
+				"index":0,
+				"type":"ResourceTiming",
+				"label":"custom0",
+				"start":"startTime",
+				"end":"responseEnd",
+				"url":"/e2e/nop*"
+			}
+		]
+	},
+	testAfterOnBeacon: true
 });
 </script>
 <%= footer %>

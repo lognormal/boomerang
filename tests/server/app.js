@@ -14,7 +14,7 @@ var http = require("http");
 var envFile = path.resolve(path.join(__dirname, "env.json"));
 
 if (!fs.existsSync(envFile)) {
-    throw new Error("Please create " + envFile + ". There's a env.json.sample in the same dir.");
+	throw new Error("Please create " + envFile + ". There's a env.json.sample in the same dir.");
 }
 
 // load JSON
@@ -25,11 +25,11 @@ var env = require(envFile);
 //
 var wwwRoot = env.www;
 if (wwwRoot.indexOf("/") !== 0) {
-    wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
+	wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
 }
 
 if (!fs.existsSync(wwwRoot)) {
-    wwwRoot = path.join(__dirname, "..");
+	wwwRoot = path.join(__dirname, "..");
 }
 
 var app = express();
@@ -38,7 +38,7 @@ var server = http.createServer(app);
 // listen
 var port = process.env.PORT || env.port;
 server.listen(port, function() {
-    console.log("Server starting on port " + port + " for " + wwwRoot);
+	console.log("Server starting on port " + port + " for " + wwwRoot);
 });
 
 //

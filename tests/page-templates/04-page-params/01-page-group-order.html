@@ -7,32 +7,32 @@
 
 page_group_var = 111;
 page_group_fn = function() {
-    return 222;
+	return 222;
 };
 page_group_fn_2 = function() {
-    return 333;
+	return 333;
 };
 
 BOOMR_test.init({
-    testAfterOnBeacon: true,
-    PageParams: {
-        pageGroups: [
-            {
-                type: "Regexp",
-                parameter1: "/no-match/",
-                parameter2: "No Match"
-            },
-            {
-                // this one should be the match (111)
-                type: "Custom",
-                parameter1: "page_group_var"
-            },
-            {
-                type: "Custom",
-                parameter1: "page_group_fn"
-            }
-        ]
-    }
+	testAfterOnBeacon: true,
+	PageParams: {
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: "/no-match/",
+				parameter2: "No Match"
+			},
+			{
+				// this one should be the match (111)
+				type: "Custom",
+				parameter1: "page_group_var"
+			},
+			{
+				type: "Custom",
+				parameter1: "page_group_fn"
+			}
+		]
+	}
 });
 </script>
 <%= footer %>
