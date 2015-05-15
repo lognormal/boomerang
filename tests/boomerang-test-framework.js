@@ -128,9 +128,9 @@
 		var messages = [];
 		for (var i = 0; i < testFailures.length; i++) {
 			messages.push({
-				title: testFailures[i].test.title,
-				name: testFailures[i].err.name,
-				message: testFailures[i].err.message
+				title: testFailures[i].titles,
+				name: testFailures[i].name,
+				message: testFailures[i].message
 			});
 		}
 
