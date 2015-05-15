@@ -254,6 +254,17 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
 		});
 
+		it("should optimize a single-node tree with more characters", function() {
+			var data = {"abcde": "abcde"};
+			var expected = {
+				"abcde": "abcde"
+			};
+
+			var trie = BOOMR.plugins.ResourceTiming.convertToTrie(data);
+
+			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
+		});
+
 		it("should should break 'href' for NoScript", function() {
 			var data = {"href": "abc" };
 			var expected = {
