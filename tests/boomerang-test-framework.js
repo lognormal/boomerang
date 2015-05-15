@@ -71,6 +71,12 @@
 			}
 
 			testBeaconCount();
+		},
+		supportsXMLHttpRequest: function() {
+			if (window.XMLHttpRequest && (new XMLHttpRequest()).addEventListener) {
+				return true;
+			}
+			return false;
 		}
 	};
 })(window);
