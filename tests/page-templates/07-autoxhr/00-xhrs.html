@@ -7,40 +7,35 @@ IE9 (and older) and phantomjs do not fire 'loadend' for XHRs, no autoxhr beacon 
 <script>
 BOOMR_test.init({
 	"instrument_xhr": true,
-	afterBoomerangLoad:
-		function() {
-			var xhrSent = false;
-			BOOMR.subscribe(
-				"onbeacon",
-				function() {
-					if (xhrSent) {
-						return;
-					}
-					xhrSent = true;
+	afterFirstBeacon:
+		function()
+		{
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
 
-					var xhr;
-					xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-					xhr.open("GET", "support/script200.js"); //200, async
-					xhr.send(null);
+			var xhr;
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "support/script200.js"); //200, async
+			xhr.send(null);
 
-					setTimeout(function(){
-						xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-						xhr.open("GET", "support/script200.js", false); //200, sync
-						xhr.send(null);
-					}, 100);
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.open("GET", "support/script200.js", false); //200, sync
+				xhr.send(null);
+			}, 100);
 
-					setTimeout(function(){
-						xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-						xhr.open("GET", "support/script404.js"); //404, async
-						xhr.send(null);
-					}, 200);
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.open("GET", "support/script404.js"); //404, async
+				xhr.send(null);
+			}, 200);
 
-					setTimeout(function(){
-						xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
-						xhr.open("GET", "support/script404.js", false); //404, sync
-						xhr.send(null);
-					}, 300);
-				});
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.open("GET", "support/script404.js", false); //404, sync
+				xhr.send(null);
+			}, 300);
 		}
 });
 </script>

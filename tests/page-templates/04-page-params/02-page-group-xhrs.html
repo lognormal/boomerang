@@ -19,11 +19,15 @@ BOOMR_test.init({
 			}
 		]
 	},
-	afterBoomerangLoad:
+	afterFirstBeacon:
 		function() {
-			var xhr = BOOMR.plugins.TestFramework.initXMLHttpRequest();
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			var xhr = new XMLHttpRequest();
 			xhr.open("GET", "/pages/blah", true);
-			xhr.send();
+			xhr.send(null);
 		}
 });
 </script>

@@ -55,15 +55,16 @@
 		is_complete: function() {
 			return true;
 		},
-		initXMLHttpRequest: function() {
-			return window.XMLHttpRequest ?
-				new XMLHttpRequest() :
-				new ActiveXObject("Microsoft.XMLHTTP");
-		},
-		waitForBeaconCount: function(done, beaconCount) {
+		ensureBeaconCount: function(done, beaconCount) {
+			function compareBeaconCount() {
+				return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
+			}
 			function testBeaconCount() {
-				if (BOOMR.plugins.TestFramework.beaconCount() === beaconCount) {
-					done();
+				if (compareBeaconCount()) {
+					setTimeout(
+						function() {
+							done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
+						}, 1000);
 				}
 				else {
 					setTimeout(testBeaconCount, 100);
@@ -72,11 +73,11 @@
 
 			testBeaconCount();
 		},
-		supportsXMLHttpRequest: function() {
-			if (window.XMLHttpRequest && (new XMLHttpRequest()).addEventListener) {
-				return true;
+		ifAutoXHR: function(done, doTest) {
+			if (BOOMR.plugins.AutoXHR) {
+				return doTest();
 			}
-			return false;
+			done();
 		}
 	};
 })(window);
@@ -216,8 +217,18 @@
 		// initialize boomerang
 		BOOMR.init(config);
 
-		if (config.afterBoomerangLoad) {
-			config.afterBoomerangLoad();
+		if (config.afterFirstBeacon) {
+			var xhrSent = false;
+			BOOMR.subscribe(
+				"onbeacon",
+				function() {
+					if (xhrSent) {
+						return;
+					}
+					xhrSent = true;
+
+					config.afterFirstBeacon();
+				});
 		}
 
 		// fake session details so beacons send
