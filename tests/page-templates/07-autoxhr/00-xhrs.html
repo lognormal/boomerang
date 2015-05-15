@@ -8,8 +8,7 @@ IE9 (and older) and phantomjs do not fire 'loadend' for XHRs, no autoxhr beacon 
 BOOMR_test.init({
 	"instrument_xhr": true,
 	afterFirstBeacon:
-		function()
-		{
+		function() {
 			if (!BOOMR.plugins.AutoXHR) {
 				return;
 			}
