@@ -69,6 +69,7 @@ module.exports = function() {
                 "Gruntfile.js",
                 "boomerang.js",
                 "plugins/*.js",
+                "tasks/**.js",
                 "tests/*.js",
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
@@ -237,6 +238,20 @@ module.exports = function() {
         filesize: {
             files: [ "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz" ]
         },
+        "mpulse-test": {
+            release: {
+                boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+            },
+            debug: {
+                boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+            },
+            min_release: {
+                boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
+            },
+            min_debug: {
+                boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
+            }
+        },
         clean: {
             options: {},
             build: ["build/*", "tests/build/*", "tests/results/*.tap", "tests/results/*.xml", "tests/coverage/*"],
@@ -401,9 +416,11 @@ module.exports = function() {
     grunt.loadNpmTasks("grunt-saucelabs");
     grunt.loadNpmTasks("grunt-contrib-watch");
 
+    grunt.loadTasks("tasks");
+
     // custom tasks
     grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
-
+    grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
     grunt.registerTask("lint", "eslint");
     grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
     grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);

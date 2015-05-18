@@ -14,6 +14,7 @@ tests/results/*
 tests/pages/*
 node_modules/
 build/
+tasks/mpulse-test.config.json
 tests/server/env.json
 npm-debug.log
 *.#*
