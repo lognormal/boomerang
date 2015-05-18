@@ -9,8 +9,14 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent two beacons", function() {
-		assert.equal(tf.beaconCount(), typeof window.MutationObserver === "function" ? 2 : 1);
+	it("Should have sent two beacons", function(done) {
+		var _this = this;
+		tf.ifAutoXHR(
+			done,
+			function() {
+				_this.timeout(10000);
+				tf.ensureBeaconCount(done,  2);
+			});
 	});
 
 	it("Should set the Page Group of the first beacon 'Test Pages'", function() {
@@ -18,16 +24,13 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		assert.equal(b["h.pg"], "Test Pages");
 	});
 
-	it("Should set the Page Group of the second beacon 'XHR Test Pages' (if the browser supports MutationObserver)", function() {
-		if (typeof window.MutationObserver === "function") {
-			var b = tf.lastBeacon();
-			assert.equal(b["xhr.pg"], "Test Pages");
-		}
-	});
-
-	it("Should not have a second beacon (if the browser doesn't support MutationObserver)", function() {
-		if (typeof window.MutationObserver !== "function") {
-			assert.equal(typeof tf.beacons[1], "undefined");
-		}
+	it("Should set the Page Group of the second beacon 'XHR Test Pages'", function(done) {
+		tf.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.lastBeacon();
+				assert.equal(b["xhr.pg"], "XHR Test Pages");
+				done();
+			});
 	});
 });
