@@ -24,12 +24,12 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		assert.equal(b["h.pg"], "Test Pages");
 	});
 
-	it("Should set the Page Group of the second beacon 'Test Pages'", function(done) {
+	it("Should set the Page Group of the second beacon 'XHR Test Pages'", function(done) {
 		tf.ifAutoXHR(
 			done,
 			function() {
 				var b = tf.lastBeacon();
-				assert.equal(b["xhr.pg"], "Test Pages");
+				assert.equal(b["xhr.pg"], "XHR Test Pages");
 				done();
 			});
 	});
