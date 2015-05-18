@@ -83,7 +83,7 @@ module.exports = function(grunt) {
 			boomerang = boomerang.replace(stringTemplates.configJsHost + stringTemplates.configJsPath, config.server + defaultConfigJsPath);
 			boomerang = boomerang.replace(stringTemplates.apikey, config.apikey);
 			boomerang = boomerang.replace(stringTemplates.configURLSuffix, config.configURLSuffix || "");
-			boomerang = boomerang.replace(/\\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*/, secondaryBeaconsProcessed);
+			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*/, secondaryBeaconsProcessed);
 
 			grunt.file.write("build/" + config.apikey + ".js", boomerang, {encoding: "utf8"});
 		}
