@@ -24,7 +24,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		assert.equal(b["h.pg"], "Test Pages");
 	});
 
-	it("Should get only 2 beacons: 1 onload, 1 xhr (2nd xhr should be excluded)", function(done) {
+	it("Should set the Page Group of the second beacon 'Test Pages'", function(done) {
 		tf.ifAutoXHR(
 			done,
 			function() {
