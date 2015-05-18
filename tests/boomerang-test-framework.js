@@ -73,11 +73,11 @@
 
 			testBeaconCount();
 		},
-		ifAutoXHR: function(done, doTest) {
+		ifAutoXHR: function(done, testXhr, testDegenerate) {
 			if (BOOMR.plugins.AutoXHR) {
-				return doTest();
+				return (testXhr || done)();
 			}
-			done();
+			(testDegenerate || done)();
 		}
 	};
 })(window);

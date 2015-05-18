@@ -11,4 +11,13 @@ describe("e2e/07-autoxhr/00-xhrs", function() {
 			});
 	});
 
+	it("Should get 1 beacons: 1 onload, 0 xhr (XMLHttpRequest === null)", function(done) {
+		tf.ifAutoXHR(
+			done,
+			undefined,
+			function() {
+				tf.ensureBeaconCount(done, 1);
+			});
+	});
+
 });
