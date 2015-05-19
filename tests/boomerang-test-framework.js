@@ -314,14 +314,11 @@
 	t.validateBeaconWasSent = function(done) {
 		var tf = BOOMR.plugins.TestFramework;
 
-		// ensure we fired a beacon ('onbeacon')
-		assert.isTrue(tf.fired_onbeacon);
+		assert.isTrue(tf.fired_onbeacon, "ensure we fired a beacon ('onbeacon')");
 
-		// ensure the data was sent to 'onbeacon'
-		assert.isObject(tf.lastBeacon());
+		assert.isObject(tf.lastBeacon(), "ensure the data was sent to 'onbeacon'");
 
-		// ensure the beacon has basic properties
-		assert.isString(tf.lastBeacon().v);
+		assert.isString(tf.lastBeacon().v, "ensure the beacon has basic properties");
 
 		done();
 	};
