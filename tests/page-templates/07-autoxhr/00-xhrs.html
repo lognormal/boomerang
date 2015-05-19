@@ -35,6 +35,27 @@ BOOMR_test.init({
 				xhr.open("GET", "support/script404.js", false); //404, sync
 				xhr.send(null);
 			}, 300);
+
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.open("GET", "http://soasta.com"); //error
+				xhr.send(null);
+			}, 400);
+
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.open("GET", "support/script200.js"); //200, async, abort
+				xhr.send(null);
+				xhr.abort();
+			}, 500);
+
+			setTimeout(function(){
+				xhr = new XMLHttpRequest();
+				xhr.timeout = 1;
+				xhr.open("GET", "support/script200.js"); //200, async, timeout
+				xhr.send(null);
+			}, 600);
+
 		}
 });
 </script>
