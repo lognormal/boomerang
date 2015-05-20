@@ -751,7 +751,13 @@
 				return;
 			}
 
-			if (ename === "xhr") {
+			//
+			// XHRs are handled differently than normal or SPA navigations (which apply
+			// all Page Groups, Timers, Metrics, Dimensions and ABs).  XHRs look at Page Groups
+			// and remove any _subresource in the name.  XHRs also only apply Timers, Metrics
+			// and Dimensions that have 'xhr_ok' set.
+			//
+			if (ename === "xhr" && edata.initiator !== "spa") {
 				limpl = impl.extractXHRParams(edata, hconfig);
 
 				if (limpl === null) {

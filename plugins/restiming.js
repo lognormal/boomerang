@@ -355,12 +355,14 @@ see: http://www.w3.org/TR/resource-timing/
 
 	/**
 	 * Gathers performance entries and optimizes the result.
+	 * @param [number] since Only get timings since
 	 * @return Optimized performance entries trie
 	 */
-	function getResourceTiming() {
-	/*eslint no-script-url:0*/
+	function getResourceTiming(since) {
+		/*eslint no-script-url:0*/
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
-		    i, e, results = {}, initiatorType, url, data;
+		    i, e, results = {}, initiatorType, url, data,
+		    navStart = getNavStartTime(BOOMR.window);
 
 		if (!entries || !entries.length) {
 			return {};
@@ -376,6 +378,10 @@ see: http://www.w3.org/TR/resource-timing/
 
 			if (e.name.indexOf(BOOMR.url) > -1 ||
 			   e.name.indexOf(BOOMR.config_url) > -1) {
+				continue;
+			}
+
+			if (since && (navStart + e.startTime) < since) {
 				continue;
 			}
 
@@ -429,6 +435,16 @@ see: http://www.w3.org/TR/resource-timing/
 		complete: false,
 		initialized: false,
 		supported: false,
+		xhr_load: function() {
+			if (this.complete) {
+				return;
+			}
+
+			// page load might not have happened, or will happen later, so
+			// set us as complete so we don't hold the page load
+			this.complete = true;
+			BOOMR.sendBeacon();
+		},
 		xssBreakWords: defaultXssBreakWords,
 		done: function() {
 			var r;
@@ -466,6 +482,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			if (p && typeof p.getEntriesByType === "function") {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
+				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 				impl.supported = true;
@@ -482,7 +499,7 @@ see: http://www.w3.org/TR/resource-timing/
 			return true;
 		},
 		is_supported: function() {
-			return impl.supported;
+			return impl.initialized && impl.supported;
 		},
 		// exports for test
 		trimTiming: trimTiming,

@@ -44,6 +44,8 @@ server.listen(port, function() {
 //
 // Routes
 //
+
+// /blackhole - returns a 204
 app.get("/blackhole", function(req, res) {
 	res.status(204).send();
 });

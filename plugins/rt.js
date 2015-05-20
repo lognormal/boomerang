@@ -567,7 +567,7 @@
 			var t_done = t_now;
 
 			// if this is an XHR event, trust the input end "now" timestamp
-			if (ename === "xhr") {
+			if (ename === "xhr" && (!data || data.initiator !== "spa")) {
 				return t_done;
 			}
 
@@ -715,7 +715,9 @@
 					// For automatically instrumented xhr timers, we have detailed timing information
 					t_start = data.timing.requestStart;
 				}
-				BOOMR.addVar("rt.start", "manual");
+				if (data && data.initiator !== "page") {
+					BOOMR.addVar("rt.start", "manual");
+				}
 			}
 			else if (impl.navigationStart) {
 				t_start = impl.navigationStart;
@@ -1109,8 +1111,14 @@
 			return this;
 		},
 
-		is_complete: function() { return impl.complete; }
+		is_complete: function() { return impl.complete; },
 
+		navigationStart: function() {
+			if (!impl.navigationStart) {
+				impl.initFromNavTiming();
+			}
+			return impl.navigationStart;
+		}
 	};
 
 }(window));

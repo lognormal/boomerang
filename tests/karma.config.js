@@ -16,11 +16,11 @@ module.exports = function(config) {
 
 		coverageReporter: {
 			type: "html",
-			dir: "tests/coverage/"
+			dir: "coverage/"
 		},
 
 		tapReporter: {
-			outputFile: "tests/results/unit.tap"
+			outputFile: "results/unit.tap"
 		}
 	});
 };

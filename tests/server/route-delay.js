@@ -9,6 +9,7 @@ var fs = require("fs");
 //
 var mimeTypes = {
 	"html": "text/html",
+	"json": "application/json",
 	"jpeg": "image/jpeg",
 	"jpg": "image/jpeg",
 	"png": "image/png",
