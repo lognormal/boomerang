@@ -34,6 +34,7 @@
 		"brace-style": [1, "stroustrup", { "allowSingleLine": true }],
 		"space-after-keywords": [2, "always"],
 		"no-space-before-semi": 0,
-		"indent": [2, "tab"]
+		"indent": [2, "tab"],
+		"space-before-function-paren": [2, "never"]
 	}
 }

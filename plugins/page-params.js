@@ -72,7 +72,7 @@
 			return s.replace(this.sanitizeRE, "");
 		},
 
-		extractFromDOMElement: function (element, o) {
+		extractFromDOMElement: function(element, o) {
 			var m, re;
 
 			if ((!o.match || o.match === "numeric")) {

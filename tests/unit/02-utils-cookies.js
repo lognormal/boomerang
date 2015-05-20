@@ -110,7 +110,7 @@ describe("BOOMR.utils cookies", function() {
 				BOOMR.utils.removeCookie(cookieName);
 			});
 
-			it("Should return the EXACT value string that we've set previously", function () {
+			it("Should return the EXACT value string that we've set previously", function() {
 				BOOMR.session.domain = cookieDomain;
 
 				var value = "1";
@@ -161,7 +161,7 @@ describe("BOOMR.utils cookies", function() {
 		});
 
 		if (canSetCookies) {
-			it("Should return the value that we've set previously", function () {
+			it("Should return the value that we've set previously", function() {
 				var value = { subValue: "value" };
 				BOOMR.utils.setCookie(cookieName, value);
 				assert.deepEqual(BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(cookieName)), { subValue: "value" });

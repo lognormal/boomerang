@@ -18,7 +18,7 @@ describe("BOOMR.utils.pluginConfig()", function() {
 		assert.isFalse(BOOMR.utils.pluginConfig({}, config, "", []));
 	});
 
-	it("Should return false if no configuration was set, no valid config-keys were defined, but a value to a key was requested", function () {
+	it("Should return false if no configuration was set, no valid config-keys were defined, but a value to a key was requested", function() {
 		assert.isFalse(BOOMR.utils.pluginConfig({}, {}, pluginName, ["notExistingKey"]));
 	});
 

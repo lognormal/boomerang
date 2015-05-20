@@ -113,7 +113,7 @@ BOOMR_check_doc_domain();
 	(function() {
 		try {
 			if (new w.CustomEvent("CustomEvent") !== undefined) {
-				createCustomEvent = function (e_name, params) {
+				createCustomEvent = function(e_name, params) {
 					return new w.CustomEvent(e_name, params);
 				};
 			}
@@ -124,7 +124,7 @@ BOOMR_check_doc_domain();
 
 		try {
 			if (!createCustomEvent && d.createEvent && d.createEvent( "CustomEvent" )) {
-				createCustomEvent = function (e_name, params) {
+				createCustomEvent = function(e_name, params) {
 					var evt = d.createEvent( "CustomEvent" );
 					params = params || { cancelable: false, bubbles: false };
 					evt.initCustomEvent( e_name, params.bubbles, params.cancelable, params.detail );
@@ -138,7 +138,7 @@ BOOMR_check_doc_domain();
 		}
 
 		if (!createCustomEvent && d.createEventObject) {
-			createCustomEvent = function (e_name, params) {
+			createCustomEvent = function(e_name, params) {
 				var evt = d.createEventObject();
 				evt.type = evt.propertyName = e_name;
 				evt.detail = params.detail;
@@ -596,7 +596,7 @@ BOOMR_check_doc_domain();
 				}
 			},
 
-			removeListener: function (el, type, fn) {
+			removeListener: function(el, type, fn) {
 				if (el.removeEventListener) {
 					el.removeEventListener(type, fn, false);
 				}
@@ -605,7 +605,7 @@ BOOMR_check_doc_domain();
 				}
 			},
 
-			pushVars: function (form, vars, prefix) {
+			pushVars: function(form, vars, prefix) {
 				var k, i, l=0, input;
 
 				for (k in vars) {
@@ -631,7 +631,7 @@ BOOMR_check_doc_domain();
 				return l;
 			},
 
-			sendData: function (form, method) {
+			sendData: function(form, method) {
 				var input = document.createElement("input"),
 				    urls = [ impl.beacon_url ];
 
