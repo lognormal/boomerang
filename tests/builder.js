@@ -18,9 +18,9 @@ function getFiles(dir, nameMatch, callback) {
 			});
 		},
 		function(matches, cb) {
-			var files = matches.map(function (match) {
+			var files = matches.map(function(match) {
 				return path.join(dir, match);
-			}).filter(function (match) {
+			}).filter(function(match) {
 				return fs.statSync(match).isFile()
 					&& (nameMatch === "" || match.indexOf(nameMatch) !== -1);
 			});
@@ -38,9 +38,9 @@ function getDirs(dir, callback) {
 			});
 		},
 		function(matches, cb) {
-			var dirs = matches.map(function (match) {
+			var dirs = matches.map(function(match) {
 				return path.join(dir, match);
-			}).filter(function (match) {
+			}).filter(function(match) {
 				return !fs.statSync(match).isFile();
 			});
 

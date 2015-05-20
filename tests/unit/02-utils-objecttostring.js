@@ -34,7 +34,7 @@ describe("BOOMR.utils.objectToString()", function() {
 		assert.equal(BOOMR.utils.objectToString(object), expected);
 	});
 
-	it("Should return a string representation of a nested array as a flat key value string with default seperator (\",\") as \"1,2,3%2C4,5,6\" ", function () {
+	it("Should return a string representation of a nested array as a flat key value string with default seperator (\",\") as \"1,2,3%2C4,5,6\" ", function() {
 		var object =
 			[
 				"1",
