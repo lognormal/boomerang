@@ -18,9 +18,16 @@ describe("e2e/05-angular/06-angular-hard-nav-resources", function() {
 		assert.equal(tf.beacons.length, 1);
 	});
 
-	it("Should take as long as the longest img load (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming is supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "delay=5000", 100, 3000, 30000, true);
+		}
+	});
+
+	it("Should take as long as the longest img load (if MutationObserver is supported but NavigationTiming is not)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+			var b = tf.beacons[0];
+			assert.equal(b.t_done, undefined);
 		}
 	});
 

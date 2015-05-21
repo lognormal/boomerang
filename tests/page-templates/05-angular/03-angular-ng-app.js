@@ -17,9 +17,16 @@ describe("e2e/05-angular/03-angular-ng-app", function() {
 		assert.equal(tf.beacons.length, 1);
 	});
 
-	it("Should take as long as the longest img load (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg", 100, 3000, 30000, true);
+		}
+	});
+
+	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+			var b = tf.lastBeacon();
+			assert.equal(b.t_done, undefined);
 		}
 	});
 

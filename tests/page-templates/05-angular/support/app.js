@@ -3,7 +3,7 @@ angular.module("app", ["ngResource", "ngRoute"])
 	.factory("Widgets", ["$resource", function($resource) {
 		// NOTE: Using absolute urls instead of relative URLs otherwise IE11 has problems
 		// resolving them in html5Mode
-		return $resource("/pages/05-angular/support/widgets.json", null, {});
+		return $resource("/pages/05-angular/support/widgets.json?rnd=" + Math.random(), null, {});
 	}])
 
 	.controller("mainCtrl", ["$scope", "Widgets", function($scope, Widgets) {

@@ -31,15 +31,22 @@ describe("e2e/05-angular/07-angular-soft-nav-resources", function() {
 		assert.isTrue(b.u.indexOf("/07-angular-soft-nav-resources.html") !== -1);
 	});
 
-	it("Should have the first beacon take as long as the first img load", function() {
-		if (window.MutationObserver) {
+	it("Should have the first beacon take as long as the first img load (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
+		}
+	});
+
+	it("Should have the first beacon take as long as the first img load (if MutationObserver is supported but NavigationTiming is not)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+			var b = tf.beacons[0];
+			assert.equal(b.t_done, undefined);
 		}
 	});
 
 	it("Should have the first beacon take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "widgets.json", 100, 0, 30000, true);
+			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, false);
 		}
 	});
 
