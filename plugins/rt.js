@@ -715,7 +715,12 @@
 					// For automatically instrumented xhr timers, we have detailed timing information
 					t_start = data.timing.requestStart;
 				}
-				if (data && data.initiator !== "page") {
+
+				if (data && data.initiator === "spa") {
+					// if we don't have a start time, set to none so it can possibly be fixed up
+					BOOMR.addVar("rt.start", "none");
+				}
+				else {
 					BOOMR.addVar("rt.start", "manual");
 				}
 			}
