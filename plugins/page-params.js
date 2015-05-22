@@ -728,6 +728,8 @@
 		initialized: false,
 		onloadfired: false,
 
+		autorun: true,
+
 		mayRetry: [],
 
 		done: function(edata, ename) {
@@ -967,7 +969,7 @@
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
-			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
+			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions", "autorun"];
 
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
@@ -976,6 +978,10 @@
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
+
+			if (typeof config.autorun !== "undefined") {
+				impl.autorun = config.autorun;
+			}
 
 			// Fire on the first of load or unload
 
@@ -1073,7 +1079,7 @@
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
 			}
-			else {
+			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
 				// then we just run immediately
 				BOOMR.setImmediate(impl.done, {}, "load", impl);
