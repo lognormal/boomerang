@@ -53,12 +53,16 @@ module.exports = function(grunt) {
 	grunt.registerMultiTask("mpulse-test", description, function() {
 		var jsonConfig = {};
 
+		var app = grunt.option("app");
+
 		// don't break the build if the config file does not exist
 		try { jsonConfig = grunt.file.readJSON(configFilePath); }
 		catch(e) {
 			grunt.log.warn("No file " + configFilePath + " found!");
 			jsonConfig = {};
 		}
+
+		jsonConfig = jsonConfig[app] ? jsonConfig[app] : jsonConfig["default"];
 
 		var gruntConfig = grunt.config.get("mpulse-test");
 
@@ -76,7 +80,10 @@ module.exports = function(grunt) {
 			secondaryBeacon: secondaryBeaconServers
 		});
 
+		grunt.verbose.debug("Finished building configuration: ");
+		grunt.verbose.debug(JSON.stringify(config, null, 2));
 		try {
+			grunt.verbose.debug("Reading file: " + config.boomerang);
 			var boomerang = grunt.file.read(config.boomerang, { encoding: "utf8" });
 
 			boomerang = boomerang.replace(stringTemplates.beaconDestinationHost + stringTemplates.beaconDestinationPath, config.server);
