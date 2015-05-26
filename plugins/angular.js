@@ -36,6 +36,7 @@
 	var hooked = false,
 		initialRouteChangeCompleted = false,
 		lastLocationChange = "",
+		autoXhrEnabled = false,
 		resource;
 
 	if (BOOMR.plugins.Angular) {
@@ -103,6 +104,11 @@
 
 			// start listening for changes
 			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
+
+			// re-enable AutoXHR if it's enabled in config.js
+			if (autoXhrEnabled) {
+				BOOMR.plugins.AutoXHR.enableAutoXhr();
+			}
 		});
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
@@ -124,12 +130,22 @@
 		is_hooked: function() {
 			return hooked;
 		},
+		init: function(config) {
+			if (config && config.instrument_xhr) {
+				autoXhrEnabled = config.instrument_xhr;
+			}
+		},
 		hook: function($rootScope, hadRouteChange) {
 			if (hooked) {
 				return this;
 			}
 
 			if (hadRouteChange) {
+				if (autoXhrEnabled) {
+					// re-enable AutoXHR if it's enabled in config.js
+					BOOMR.plugins.AutoXHR.enableAutoXhr();
+				}
+
 				// We missed the initial route change (we loaded too slowly), so we're too
 				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
 				initialRouteChangeCompleted = true;

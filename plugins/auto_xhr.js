@@ -199,6 +199,14 @@
 				// 3.4
 				// nothing to do
 			}
+			else if (last_ev.type === "spa") {
+				// This could occur if this event started prior to the SPA taking
+				// over, and is now completing while the SPA event is occuring.  Let
+				// the SPA event take control.
+				if (ev.type === "xhr") {
+					return null;
+				}
+			}
 		}
 
 		this.watch++;
@@ -722,6 +730,10 @@
 			autoXhrEnabled = config.instrument_xhr;
 			if (config.Angular && config.Angular.enabled) {
 				singlePageApp = true;
+
+				// disable auto-xhr until the SPA has fired its first beacon
+				autoXhrEnabled = false;
+
 				BOOMR.instrumentXHR();
 			}
 			else if (autoXhrEnabled) {
@@ -734,7 +746,10 @@
 		getMutationHandler: function() {
 			return handler;
 		},
-		getPathname: getPathName
+		getPathname: getPathName,
+		enableAutoXhr: function() {
+			autoXhrEnabled = true;
+		}
 	};
 
 })();
