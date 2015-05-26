@@ -1,6 +1,8 @@
 {
-    "server": "localhost:8080",
-    "apikey": "PH7E4-H9YBZ-6NM8T-L4UQK-ZJAPW",
-    "secondaryBeacons": [],
-    "boomerang": ""
+    "default": { 
+	"server": "localhost:8080",
+	"apikey": "PH7E4-H9YBZ-6NM8T-L4UQK-ZJAPW",
+	"secondaryBeacons": [],
+	"boomerang": ""
+    }
 }
