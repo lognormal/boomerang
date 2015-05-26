@@ -69,7 +69,7 @@ module.exports = function() {
                 "Gruntfile.js",
                 "boomerang.js",
                 "plugins/*.js",
-                "tasks/**.js",
+		"tasks/*.js",
                 "tests/*.js",
                 "tests/unit/*.js",
                 "tests/e2e/*.js",
