@@ -1,0 +1,48 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.debug.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+
+<script type="text/x-handlebars">
+  <div class="container">
+    <h1>Testing Ember.js</h1>
+    {{outlet}}
+  </div>
+</script>
+
+<script src="09-autoxhr-before-page-load.js" type="text/javascript"></script>
+<script>
+/*eslint-disable no-unused-vars*/
+BOOMR = window.BOOMR ? BOOMR : {};
+BOOMR.xhr_excludes = BOOMR.xhr_excludes ? BOOMR.xhr_excludes : {};
+
+var excludables = [
+	"metric.html",
+	"widget.html",
+	"widgets.html",
+        "img.jpg"
+];
+
+for (var index = 0; index < excludables.length; index++) {
+	BOOMR.xhr_excludes["/pages/08-ember/support/" + excludables[index]] = true;
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+
+if (BOOMR.plugins.AutoXHR) {
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", "support/widget.json");
+	xhr.send(null);
+}
+</script>
+<%= footer %>

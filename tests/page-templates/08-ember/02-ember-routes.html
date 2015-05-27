@@ -1,0 +1,39 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script>
+ /*eslint-disable no-unused-vars*/
+ var ember_nav_routes = ["/widgets", "/widget/1", "/widget/2", "/widget/3"];
+</script>
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.debug.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+<script src="02-ember-routes.js"></script>
+
+<!-- Handlebars templates for our application. -->
+<script type="text/x-handlebars">
+  <div class="container">
+    <h1>Testing Ember.js</h1>
+    {{outlet}}
+  </div>
+</script>
+<script>
+/*eslint-disable no-unused-vars*/
+BOOMR_test.init({
+    testAfterOnBeacon: 5,
+    Ember: {
+        enabled: true
+    },
+    instrument_xhr: true,
+    autorun: false,
+    PageParams: {
+	customMetrics: [],
+	customDimensions: []
+    }
+});
+</script>
+
+<%= footer %>
