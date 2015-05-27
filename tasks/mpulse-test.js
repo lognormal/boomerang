@@ -4,10 +4,12 @@
  *
  * configure tasks/mpulse-test.config.json
  * {
- *   "server": "localhost:8080",
- *   "apikey": "PH7E4-H9YBZ-6NM8T-L4UQK-ZJAPW",
- *   "secondary_beacons": [],
- *   "boomerang": "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+ *   "default": {
+ *     "server": "localhost:8080",
+ *     "apikey": "11111-11111-11111-11111-11111",
+ *     "secondaryBeacons": [],
+ *     "boomerang": ""
+ *   }
  * }
  *
  * keys and values map as follows:
@@ -16,6 +18,25 @@
  *   apikey: API Key for the specific application you wish to use
  *   secondary_beacons: list of servers to send beacons to next to the main servers for debugging purposes
  *   boomerang: boomerang script taken as basis for modification.
+ *
+ * `default` is the name of the app that this build is supposed to generate beacons for.
+ * You may have multiple named apps in the configuration file:
+ *
+ * {
+ *   "default": { ... },
+ *   "mpulse": { ... },
+ *   "soasta": { ... }
+ * }
+ *
+ * These do not serve the same purpose as the build targets in Gruntfile.js they only decide which API Key
+ * and Collector we're supposed to use to send our beacons. This way you may have release, debug, and various
+ * minified versions of the same app-specific boomerang script.
+ *
+ * Choose which app to build for with the commandline parameter --app. For the above example config file:
+ *
+ *  $> grunt mpulse-test:debug --app mpulse
+ *
+ * to build a debug version of boomerang for mpulse.
  *
  * Values can also be partially overridden by Gruntfile.js.
  * Application of Values from different sources is hirarchically set as follows:
