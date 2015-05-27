@@ -77,7 +77,9 @@ module.exports = function(grunt) {
 		var app = grunt.option("app");
 
 		// don't break the build if the config file does not exist
-		try { jsonConfig = grunt.file.readJSON(configFilePath); }
+		try {
+			jsonConfig = grunt.file.readJSON(configFilePath);
+		}
 		catch(e) {
 			grunt.log.warn("No file " + configFilePath + " found!");
 			jsonConfig = {};
