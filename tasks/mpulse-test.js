@@ -52,7 +52,7 @@ module.exports = function(grunt) {
 
 	var defaultConfig = {
 		server: "localhost:8080",
-		apikey: "PH7E4-H9YBZ-6NM8T-L4UQK-ZJAPW",
+		apikey: "11111-11111-11111-11111-11111",
 		secondaryBeacons: [],
 		boomerang: ""
 	};
