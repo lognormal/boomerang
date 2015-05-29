@@ -49,26 +49,52 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		assert.equal(b["cdim.CD8"], undefined);
 	});
 
-	it("Should be having custom dimension 9 - QuerySelector if QuerySelector is supported by the browser", function() {
-		if (window.document.querySelector) {
-			var b = tf.lastBeacon();
+	it("Should be having custom dimension 9 - QuerySelector", function() {
+		var b = tf.lastBeacon();
+		if (t.isQuerySelectorSupported()) {
 			assert.equal(b["cdim.CD9"], "444.44");
+		}
+		else {
+			assert.equal(b.cmet6, undefined);
 		}
 	});
 
+	it("Should be having custom dimension 9 - QuerySelector return undefined if QuerySelector not supported", function() {
+		if (!t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
+			assert.equal(b.cmet6, undefined);
+		}
+	});
+
+
 	it("Should be having custom dimension 10 - QuerySelector with non-standard attribute selector", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD10"], "444.44");
+		if (t.isQuerySelectorSupported()) {
+			assert.equal(b["cdim.CD10"], "444.44");
+		}
+		else {
+			assert.equal(b["cdim.CD10"], undefined);
+		}
 	});
 
 	it("Should be having custom dimension 11 - QuerySelector with multiple values", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD11"], "444.44");
+		if (t.isQuerySelectorSupported()) {
+			assert.equal(b["cdim.CD11"], "444.44");
+		}
+		else {
+			assert.equal(b["cdim.CD11"], undefined);
+		}
 	});
 
 	it("Should be missing custom dimension 12 - QuerySelector with no matched element", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD12"], undefined);
+		if (t.isQuerySelectorSupported()) {
+			assert.equal(b["cdim.CD12"], undefined);
+		}
+		else {
+			assert.equal(b["cdim.CD12"], undefined);
+		}
 	});
 
 	it("Should be missing custom dimension 13 - No parameter1, parameter2 or queryselector set should return undefined", function() {
