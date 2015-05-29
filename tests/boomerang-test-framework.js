@@ -288,6 +288,10 @@
 		return (window.performance && typeof window.performance.getEntriesByType === "function");
 	};
 
+	t.isQuerySelectorSupported = function() {
+		return (window.document.querySelector && typeof(window.document.querySelector) === "function");
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		// look for #beacon_form in the BOOMR window's IFRAME
 		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
