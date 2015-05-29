@@ -34,9 +34,11 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet5, undefined);
 	});
 
-	it("Should have the custom metric 6 - QuerySelector", function() {
-		var b = tf.lastBeacon();
-		assert.equal(b.cmet6, 444.44);
+	it("Should have the custom metric 6 - QuerySelector if QuerySelectors are supported by the browser", function() {
+		if (window.document.querySelector && typeof window.document.querySelector === "function") {
+			var b = tf.lastBeacon();
+			assert.equal(b.cmet6, 444.44);
+		}
 	});
 
 	it("Should have the custom metric 7 - XPath with ID (double quote)", function() {
