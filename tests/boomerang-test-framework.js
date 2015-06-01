@@ -55,7 +55,7 @@
 		is_complete: function() {
 			return true;
 		},
-		ensureBeaconCount: function(done, beaconCount, beaconCheck) {
+		ensureBeaconCount: function(done, beaconCount) {
 			function compareBeaconCount() {
 				return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
 			}
@@ -63,11 +63,7 @@
 				if (compareBeaconCount()) {
 					setTimeout(
 						function() {
-							var match = compareBeaconCount();
-							if (!match) {
-								return done(new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
-							}
-							(beaconCheck === undefined ? done : beaconCheck)();
+							done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
 						}, 1000);
 				}
 				else {
@@ -82,14 +78,6 @@
 				return (testXhr || done)();
 			}
 			(testDegenerate || done)();
-		},
-		beaconFired: function(done, testName, beaconTest) {
-			for (var i = 0; i < this.beacons.length; i++) {
-				if (beaconTest(this.beacons[i])) {
-					return;
-				}
-			}
-			done(new Error(testName));
 		}
 	};
 })(window);
@@ -228,9 +216,7 @@
 
 		// initialize boomerang
 		BOOMR.init(config);
-		if (config.onBoomerangLoaded) {
-			config.onBoomerangLoaded();
-		}
+
 		if (config.afterFirstBeacon) {
 			var xhrSent = false;
 			BOOMR.subscribe(
