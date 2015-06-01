@@ -289,7 +289,7 @@
 	};
 
 	t.isQuerySelectorSupported = function() {
-		return (window.document.querySelector && typeof(window.document.querySelector) === "function");
+		return typeof window.document.querySelector === "function";
 	};
 
 	t.validateBeaconWasImg = function(done) {
