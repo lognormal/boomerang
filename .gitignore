@@ -16,6 +16,7 @@ node_modules/
 build/
 tests/server/env.json
 npm-debug.log
+/tests/e2e/e2e.json
 *.#*
 *#*
 *~

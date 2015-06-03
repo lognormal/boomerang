@@ -11,11 +11,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 
 	it("Should have sent two beacons", function(done) {
 		var _this = this;
-		tf.ifAutoXHR(
+		t.ifAutoXHR(
 			done,
 			function() {
 				_this.timeout(10000);
-				tf.ensureBeaconCount(done,  2);
+				t.ensureBeaconCount(done,  2);
 			});
 	});
 
@@ -25,7 +25,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 	});
 
 	it("Should set the Page Group of the second beacon 'XHR Test Pages'", function(done) {
-		tf.ifAutoXHR(
+		t.ifAutoXHR(
 			done,
 			function() {
 				var b = tf.lastBeacon();
