@@ -2,6 +2,7 @@
     "plugins": [
         "plugins/page-params.js",
         "plugins/auto_xhr.js",
+        "plugins/angular.js",
         "plugins/rt.js",
         "plugins/bw.js",
         "plugins/navtiming.js",

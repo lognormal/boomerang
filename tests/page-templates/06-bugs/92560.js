@@ -10,12 +10,13 @@ describe("e2e/06-bugs/92560", function() {
 			expected);
 	}
 
-	var tf = BOOMR.plugins.TestFramework;
+	var t = BOOMR_test;
+
 	it("Should get only 2 beacons: 1 onload, 1 xhr (2nd xhr should be excluded)", function(done) {
-		tf.ifAutoXHR(
+		t.ifAutoXHR(
 			done,
 			function() {
-				tf.ensureBeaconCount(done,  2);
+				t.ensureBeaconCount(done,  2);
 			});
 	});
 

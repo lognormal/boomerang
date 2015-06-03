@@ -677,7 +677,7 @@
 				return false;
 			}
 
-			if (!p || !p.getEntriesByType) {
+			if (!p || typeof p.getEntriesByType !== "function") {
 				BOOMR.debug("This browser does not support UserTiming", "PageVars");
 				return false;
 			}
@@ -728,6 +728,8 @@
 		initialized: false,
 		onloadfired: false,
 
+		autorun: true,
+
 		mayRetry: [],
 
 		done: function(edata, ename) {
@@ -751,7 +753,13 @@
 				return;
 			}
 
-			if (ename === "xhr") {
+			//
+			// XHRs are handled differently than normal or SPA navigations (which apply
+			// all Page Groups, Timers, Metrics, Dimensions and ABs).  XHRs look at Page Groups
+			// and remove any _subresource in the name.  XHRs also only apply Timers, Metrics
+			// and Dimensions that have 'xhr_ok' set.
+			//
+			if (ename === "xhr" && edata.initiator !== "spa") {
 				limpl = impl.extractXHRParams(edata, hconfig);
 
 				if (limpl === null) {
@@ -961,7 +969,7 @@
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
-			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
+			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions", "autorun"];
 
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
@@ -970,6 +978,10 @@
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
+
+			if (typeof config.autorun !== "undefined") {
+				impl.autorun = config.autorun;
+			}
 
 			// Fire on the first of load or unload
 
@@ -1067,7 +1079,7 @@
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
 			}
-			else {
+			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
 				// then we just run immediately
 				BOOMR.setImmediate(impl.done, {}, "load", impl);

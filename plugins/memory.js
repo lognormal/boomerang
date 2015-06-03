@@ -77,7 +77,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 				function() {
 					var res, doms={}, a;
 
-					if (!p || !p.getEntriesByType) {
+					if (!p || typeof p.getEntriesByType !== "function") {
 						return;
 					}
 

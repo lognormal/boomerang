@@ -5,7 +5,8 @@
 	    dom=w.location.hostname,
 	    complete, running,
 	    t_start,
-	    load, loaded;
+	    load, loaded,
+	    autorun=true;
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -20,7 +21,10 @@
 		}
 		complete = true;
 		running = false;
-		BOOMR.sendBeacon();
+
+		if (autorun) {
+			BOOMR.sendBeacon();
+		}
 	};
 
 	load=function() {
@@ -69,6 +73,10 @@
 				return this;
 			}
 
+			if (config && typeof config.autorun !== "undefined") {
+				autorun = config.autorun;
+			}
+
 			// if we are called a second time while running, it means config.js has finished loading
 			if (running) {
 				// We need this monstrosity because Internet Explorer is quite moody
@@ -108,4 +116,4 @@
  but not for the debug version.  We use special comment tags to indicate that this code
  block should be removed if the debug version is requested.
 */
-BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true, /*BEGIN DEBUG TOKEN*/log:null, /*END DEBUG TOKEN*/wait:true, site_domain:null, ResourceTiming:{enabled:false}});
+BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true, /*BEGIN DEBUG TOKEN*/log:null, /*END DEBUG TOKEN*/wait:true, site_domain:null, ResourceTiming:{enabled:false}, Angular:{enabled:false}});

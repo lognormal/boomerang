@@ -36,7 +36,7 @@ elif [ "$1" = "lt3" ]; then
 	cf_main=https://mpulse-lt3.soasta.com
 elif [ "$1" = "rum-dev" ]; then
 	cf_collector=http://rum-dev-collector.soasta.com
-	og_collector=http://rum-dev-collector.soasta.com
+	og_collector=http://rum-dev-collector-origin.soasta.com
 	cf_main=https://rum-dev.soasta.com
 elif [ "$1" != "localhost" -a "$1" != "default" -a "$1" != "local" ]; then
 	echo ""

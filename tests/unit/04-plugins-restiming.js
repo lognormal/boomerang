@@ -362,7 +362,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			// need to be updated.
 			//
 
-			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming(window);
+			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming();
 
 			// NOTE: what is tested depends on the environment, whether it supports ResourceTiming or not
 			if (!BOOMR.plugins.ResourceTiming.is_supported()) {

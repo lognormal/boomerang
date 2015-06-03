@@ -7,9 +7,6 @@
 var chai = require("chai");
 var assert = chai.assert;
 
-var tests = require("./e2e.json");
-var disabledTests = require("./e2e.disabled.json");
-
 //
 // Functions
 //
@@ -34,21 +31,4 @@ function run(path, file) {
 	});
 }
 
-var disabledTestLookup = {};
-for (var i = 0; i < disabledTests.length; i++) {
-	var key = disabledTests[i].path + "-" + disabledTests[i].file;
-	disabledTestLookup[key] = 1;
-}
-
-//
-// Run the tests in e2e.json
-//
-for (i = 0; i < tests.length; i++) {
-	var data = tests[i];
-	key = data.path + "-" + data.file;
-	if (disabledTestLookup[key]) {
-		continue;
-	}
-
-	run(data.path, data.file);
-}
+run("05-angular", "00-angular-bootstrap");
