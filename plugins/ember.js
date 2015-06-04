@@ -44,15 +44,12 @@
 				requestStart: requestStart
 			},
 			initiator: "spa",
-			url: url,
-			onComplete: cb
+			url: url
 		};
 	}
 
 	function startMOListener() {
-		resource = buildResource(BOOMR.window.document.URL, function() {
-			BOOMR.plugins.RT.done();
-		});
+		resource = buildResource(BOOMR.window.document.URL);
 
 		// start listening for changes
 		resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
@@ -105,9 +102,7 @@
 
 				// didTransition is the only action called on initial Page Build so we need to check here for resources
 				if (!initialRouteChangeCompleted) {
-					if (startMOListener() === null) {
-						BOOMR.plugins.RT.done();
-					}
+					startMOListener()
 				}
 
 				initialRouteChangeCompleted = true;
