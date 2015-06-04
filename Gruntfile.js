@@ -73,6 +73,7 @@ module.exports = function() {
 				"boomerang.js",
 				"*.config*.js",
 				"plugins/*.js",
+				"tasks/**.js",
 				"tests/*.js",
 				"tests/unit/*.js",
 				"tests/unit/*.html",
@@ -398,7 +399,6 @@ module.exports = function() {
 			}
 		}
 	});
-
 	grunt.loadNpmTasks("grunt-eslint");
 	grunt.loadNpmTasks("grunt-express-server");
 	grunt.loadNpmTasks("grunt-karma");
@@ -421,6 +421,15 @@ module.exports = function() {
 	grunt.registerTask("lint", "eslint");
 	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
+	grunt.loadTasks("tasks");
+
+	// custom tasks
+	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
+	grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
+	grunt.registerTask("lint", "eslint");
+	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
+	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
+
 
 	grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
 	grunt.registerTask("test:unit", ["build", "karma:unit"]);
