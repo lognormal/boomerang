@@ -13,12 +13,6 @@ describe("e2e/08-ember/02-ember-routes", function() {
 		assert.equal(tf.beacons.length, 5);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 2; i++) {
-			assert.equal(tf.beacons[i]["http.initiator"], "spa");
-		}
-	});
-
 	//
 	// Beacon 1
 	//
@@ -29,7 +23,7 @@ describe("e2e/08-ember/02-ember-routes", function() {
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(4, "img.jpg&id=3", 3000, 5000, 30000);
+			t.validateBeaconWasSentAfter(4, "img.jpg&id=3", 3000, 0, 30000);
 		}
 	});
 

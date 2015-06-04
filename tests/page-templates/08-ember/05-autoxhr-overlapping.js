@@ -32,7 +32,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widget.json", 500, 1500, 30000);
+					t.validateBeaconWasSentAfter(0, "support/metric.html", 500, 1500, 30000);
 				}
 				done();
 			});
