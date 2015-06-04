@@ -47,7 +47,6 @@ module.exports = function() {
 		e2eUrls.push(TEST_URL_BASE + "pages/" + e2eTests[i].path + "/" + e2eTests[i].file + ".html");
 	}
 
-<<<<<<< HEAD
 	//
 	// Config
 	//
