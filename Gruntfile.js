@@ -73,7 +73,7 @@ module.exports = function() {
 				"boomerang.js",
 				"*.config*.js",
 				"plugins/*.js",
-				"tasks/**.js",
+				"tasks/*.js",
 				"tests/*.js",
 				"tests/unit/*.js",
 				"tests/unit/*.html",
