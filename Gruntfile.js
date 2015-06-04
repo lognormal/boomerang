@@ -259,10 +259,39 @@ module.exports = function() {
 						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.gz"
 					}
 				]
+			},
+			plugins: {
+				options: {
+					mode: "gzip",
+					level: 9
+				},
+				files: [{
+					expand: true,
+					cwd: "build/plugins",
+					src: "./*.js",
+					dest: "build/plugins/",
+					ext: ".min.js.gz",
+					extDot: "first"
+				}]
 			}
 		},
 		filesize: {
-			files: [ "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz" ]
+			default: {
+				files: [{
+					expand: true,
+					cwd: "build",
+					src: "./**/*.min.js.gz",
+					ext: ".min.js.gz",
+					extDot: "first"
+				}],
+				options: {
+					output: {
+						path: "tests/results/filesizes.csv",
+						format: "\"{filename}\",{size},{kb},{now:YYYYMMDDhhmmss};", /* https://github.com/k-maru/grunt-filesize/issues/8 */
+						append: true
+					}
+				}
+			}
 		},
 		clean: {
 			options: {},
