@@ -18,9 +18,7 @@
 
 (function() {
 	var initialRouteChangeCompleted = false,
-	    lastLocationChange = "",
 	    requestStart = 0,
-	    appname = "",
 	    autoXhrEnabled = false;
 
 	if (BOOMR.plugins.Ember || !BOOMR.plugins.AutoXHR) {
