@@ -47,6 +47,7 @@ module.exports = function() {
 		e2eUrls.push(TEST_URL_BASE + "pages/" + e2eTests[i].path + "/" + e2eTests[i].file + ".html");
 	}
 
+<<<<<<< HEAD
 	//
 	// Config
 	//
@@ -417,7 +418,6 @@ module.exports = function() {
 
 	// custom tasks
 	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
-
 	grunt.registerTask("lint", "eslint");
 	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
@@ -429,7 +429,6 @@ module.exports = function() {
 	grunt.registerTask("lint", "eslint");
 	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
-
 
 	grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
 	grunt.registerTask("test:unit", ["build", "karma:unit"]);
