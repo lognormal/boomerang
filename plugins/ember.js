@@ -11,7 +11,7 @@
  * });
  *
  * BOOMR.plugins.Ember will take your Application and test if it has ApplicationRoute setup at this point.
- * If that isn't the case it will extend() Ember.Route to with the actions willTransition and didTransition
+ * If that isn't the case it will extend() Ember.Route to with the action didTransition and activate
  * Once didTransition has triggered we set our selfs up for the Run-Loop coming to 'afterRender' at which
  * point we configure our Beacon data and run BOOMR.responseEnd should this not be the first beacon we send.
  */
@@ -21,8 +21,7 @@
 	    lastLocationChange = "",
 	    requestStart = 0,
 	    appname = "",
-	    autoXhrEnabled = false,
-	    resource;
+	    autoXhrEnabled = false;
 
 	if (BOOMR.plugins.Ember || !BOOMR.plugins.AutoXHR) {
 		return;
@@ -34,61 +33,38 @@
 	 * @param {string} msg Message
 	 */
 	function log(msg) {
-		BOOMR.debug(appname, msg, "Ember");
+		BOOMR.debug(msg, "Ember");
 	}
 
-	function buildResource(url, cb) {
-		// construct the resource we'll be waiting for
-		return {
+	function startMOListener() {
+		var resource = {
 			timing: {
 				requestStart: requestStart
 			},
 			initiator: "spa",
-			url: url
+			url: BOOMR.window.document.URL
 		};
-	}
 
-	function startMOListener() {
-		resource = buildResource(BOOMR.window.document.URL);
+		requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
 
 		// start listening for changes
 		resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
-
-		return resource.index;
 	}
 
 	BOOMR.plugins.Ember = {
-		willTransition: function(transition) {
+		activate: function() {
 			// Make sure the original didTransition callback is called before we procede.
-			this._super(transition);
-			log("willTransition");
-
-			if (transition &&
-			    transition.intent &&
-			    transition.intent.url) {
-				lastLocationChange = transition.intent.url;
-			}
-
-			var url = lastLocationChange ? lastLocationChange : BOOMR.window.document.URL;
-
-			resource = buildResource(url);
-
-			// willTransition is only called on in-app transitions so safe
-			// call to go for requestStart to be now()
-			requestStart = BOOMR.now();
+			this._super.apply(arguments);
+			log("activate" + BOOMR.utils.objectToString(arguments));
 
 			startMOListener();
 
-			log("willTransition: " + BOOMR.now());
+			log("activate: " + BOOMR.now());
 		},
 		didTransition: function() {
 			// Make sure the original didTransition callback is called before we procede.
 			this._super();
 			log("didTransition");
-
-			if (!initialRouteChangeCompleted) {
-				requestStart = BOOMR.plugins.RT.navigationStart();
-			}
 
 			// Make sure the site has finished running before we beacon
 			// We're also not guaranteed to have an Ember Object in our
@@ -98,18 +74,12 @@
 				BOOMR.addVar("u", BOOMR.window.document.URL);
 				BOOMR.addVar("http.initiator", "spa");
 
-				log("Render Finished:" + BOOMR.now() + " for URL: " + BOOMR.window.document.URL + " time since requestStart " + (BOOMR.now() - requestStart));
-
-				// didTransition is the only action called on initial Page Build so we need to check here for resources
-				if (!initialRouteChangeCompleted) {
-					startMOListener()
-				}
-
 				initialRouteChangeCompleted = true;
 
 				if (autoXhrEnabled) {
 					BOOMR.plugins.AutoXHR.enableAutoXhr();
 				}
+				log("Render Finished:" + BOOMR.now() + " for URL: " + BOOMR.window.document.URL + " time since requestStart " + (BOOMR.now() - requestStart));
 			});
 		},
 		is_complete: function() {
@@ -123,17 +93,17 @@
 		hook: function(App) {
 			if (App.ApplicationRoute) {
 				App.ApplicationRoute.reopen({
+					activate: BOOMR.plugins.Ember.activate,
 					actions: {
-						didTransition: BOOMR.plugins.Ember.didTransition,
-						willTransition: BOOMR.plugins.Ember.willTransition
+						didTransition: BOOMR.plugins.Ember.didTransition
 					}
 				});
 			}
 			else {
 				App.ApplicationRoute = BOOMR.window.Ember.Route.extend({
+					activate: BOOMR.plugins.Ember.activate,
 					actions: {
-						didTransition: BOOMR.plugins.Ember.didTransition,
-						willTransition: BOOMR.plugins.Ember.willTransition
+						didTransition: BOOMR.plugins.Ember.didTransition
 					}
 				});
 			}
