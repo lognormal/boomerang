@@ -204,18 +204,35 @@ module.exports = function() {
 			}
 		},
 		uglify: {
-			options: {
-				preserveComments: false,
-				mangle: true,
-				sourceMap: true
+			default: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					sourceMap: true
+				},
+				min_release: {
+					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
+				},
+				min_debug: {
+					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
+				}
 			},
-			min_release: {
-				src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
-			},
-			min_debug: {
-				src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
+			plugins: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					sourceMap: true
+				},
+				files: [{
+					expand: true,
+					cwd: "plugins/",
+					src: ["./*.js"],
+					dest: "build/plugins/",
+					ext: ".min.js",
+					extDot: "first"
+				}]
 			}
 		},
 		compress: {
