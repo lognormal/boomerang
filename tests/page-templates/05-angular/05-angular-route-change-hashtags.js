@@ -50,7 +50,11 @@ describe("e2e/05-angular/05-angular-route-change-hashtags", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
+<<<<<<< HEAD
 			assert.equal(b["rt.start"], "none");
+=======
+			assert.equal(b["rt.start"], "manual");
+>>>>>>> AngularJS support
 		}
 	});
 
