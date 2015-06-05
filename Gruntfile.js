@@ -211,14 +211,15 @@ module.exports = function() {
 					mangle: true,
 					sourceMap: true
 				},
-				min_release: {
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
-				},
-				min_debug: {
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
-				}
+				files: [{
+					expand: true,
+					cwd: "build/",
+					src: ["<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+					      "<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"],
+					dest: "build/",
+					ext: ".min.js",
+					extDot: "last"
+				}]
 			},
 			plugins: {
 				options: {
