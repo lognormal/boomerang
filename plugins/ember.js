@@ -35,6 +35,8 @@
 	}
 
 	function startMOListener() {
+		requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
+
 		var resource = {
 			timing: {
 				requestStart: requestStart
@@ -42,9 +44,6 @@
 			initiator: "spa",
 			url: BOOMR.window.document.URL
 		};
-
-		requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
-
 		// start listening for changes
 		resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
 	}
