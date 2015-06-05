@@ -34,34 +34,28 @@
 		BOOMR.debug(msg, "Ember");
 	}
 
-	function startMOListener() {
-		requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
-
-		var resource = {
-			timing: {
-				requestStart: requestStart
-			},
-			initiator: "spa",
-			url: BOOMR.window.document.URL
-		};
-		// start listening for changes
-		resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
-	}
-
 	BOOMR.plugins.Ember = {
 		activate: function() {
 			// Make sure the original didTransition callback is called before we procede.
 			this._super.apply(arguments);
-			log("activate" + BOOMR.utils.objectToString(arguments));
-
-			startMOListener();
-
 			log("activate: " + BOOMR.now());
+
+			requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
+
+			var resource = {
+				timing: {
+					requestStart: requestStart
+				},
+				initiator: "spa",
+				url: BOOMR.window.document.URL
+			};
+			// start listening for changes
+			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
 		},
 		didTransition: function() {
 			// Make sure the original didTransition callback is called before we procede.
-			this._super();
-			log("didTransition");
+			this._super.apply(arguments);
+			log("didTransition" + BOOMR.now());
 
 			// Make sure the site has finished running before we beacon
 			// We're also not guaranteed to have an Ember Object in our
