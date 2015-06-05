@@ -83,9 +83,9 @@ describe("e2e/08-ember/02-ember-routes", function() {
 		assert.isTrue(b.u.indexOf("/02-ember-routes.html") !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of less than 5 seconds (~500ms initial page load + 1500ms xhr/template + 2500ms xhr/template/delay )", function() {
+	it("Should have sent the third with a timestamp of less than 6 seconds ( inital page load widgets,1,2  )", function() {
 		// now that the initial page is cached, it should be a quick navigation
 		var b = tf.beacons[2];
-		assert.operator(b.t_done, "<=", 5000);
+		assert.operator(b.t_done, "<=", 6000);
 	});
 });
