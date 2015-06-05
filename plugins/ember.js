@@ -86,7 +86,8 @@
 				App.ApplicationRoute.reopen({
 					activate: BOOMR.plugins.Ember.activate,
 					actions: {
-						didTransition: BOOMR.plugins.Ember.didTransition
+						didTransition: BOOMR.plugins.Ember.didTransition,
+						willTransition: BOOMR.plugins.Ember.activate
 					}
 				});
 			}
@@ -94,7 +95,8 @@
 				App.ApplicationRoute = BOOMR.window.Ember.Route.extend({
 					activate: BOOMR.plugins.Ember.activate,
 					actions: {
-						didTransition: BOOMR.plugins.Ember.didTransition
+						didTransition: BOOMR.plugins.Ember.didTransition,
+						willTransition: BOOMR.plugins.Ember.activate
 					}
 				});
 			}
