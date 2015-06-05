@@ -56,9 +56,6 @@ app.post("/blackhole", function(req, res) {
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
 
-// filesizes sends down an array of data parsed from the reports csv
-app.get("/filesizes", require("./filesizes"));
-
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));
