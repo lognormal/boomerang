@@ -282,7 +282,7 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "build",
-					src: "./**/*.min.js.gz",
+					src: "./**/*.min.js*",
 					ext: ".min.js.gz",
 					extDot: "first"
 				}],
