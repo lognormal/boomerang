@@ -16,20 +16,6 @@
 <script src="08-autoxhr-additional-after-delay.js" type="text/javascript"></script>
 <script>
 /*eslint-disable no-unused-vars*/
-BOOMR = window.BOOMR ? BOOMR : {};
-BOOMR.xhr_excludes = BOOMR.xhr_excludes ? BOOMR.xhr_excludes : {};
-
-var excludables = [
-	"metric.html",
-	"widget.html",
-	"widgets.html",
-        "img.jpg"
-];
-
-for (var index = 0; index < excludables.length; index++) {
-	BOOMR.xhr_excludes["/pages/08-ember/support/" + excludables[index]] = true;
-}
-
 BOOMR_test.init({
 	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
 	afterFirstBeacon: function() {
