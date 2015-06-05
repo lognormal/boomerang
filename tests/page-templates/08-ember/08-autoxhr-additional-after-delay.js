@@ -32,7 +32,7 @@ describe("e2e/08-ember/08-autoxhr-trigger-additional-after-delay", function() {
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widget.json", 500, 1500, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widget.json", 1500, 500, 30000);
 				}
 				done();
 			});

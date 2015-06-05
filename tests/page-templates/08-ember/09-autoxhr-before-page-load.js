@@ -16,7 +16,7 @@ describe("e2e/08-ember/09-autoxhr-before-page-load", function() {
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "img.jpg", 100, 3000, 30000, true);
+			t.validateBeaconWasSentAfter(0, "img.jpg", 1500, 0, 30000, true);
 		}
 	});
 

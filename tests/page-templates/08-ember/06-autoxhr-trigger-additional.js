@@ -32,7 +32,7 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widget.json", 500, 0, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widget.json", 1500, 0, 30000);
 				}
 				done();
 			});
