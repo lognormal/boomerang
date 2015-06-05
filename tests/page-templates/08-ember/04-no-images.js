@@ -16,7 +16,7 @@ describe("e2e/08-ember/04-no-images", function() {
 
 	it("Should take as long as the widget.json take to load (if NavigationTiming is supported)", function() {
 		if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "widget.json", 600, 1000, 30000, true);
+			t.validateBeaconWasSentAfter(0, "widget.json", 1500, 0, 30000, true);
 		}
 	});
 
