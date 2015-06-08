@@ -20,7 +20,7 @@ App.ApplicationRoute = Ember.Route.extend({
 						var nextRoute = window.ember_nav_routes.shift();
 						setTimeout(function() {
 							router.transitionTo(nextRoute);
-						}, 1000);
+						}, 100);
 					}
 				});
 			}
