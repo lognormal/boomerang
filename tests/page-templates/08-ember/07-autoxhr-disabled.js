@@ -35,12 +35,12 @@ describe("e2e/08-ember/07-autoxhr-disabled", function() {
 	//
 	// Beacon 1 (page load)
 	//
-	it("Should send the first beacon (page load) with the time it took to load widget.json (if NavigationTiming is supported)", function(done) {
+	it("Should send the first beacon (page load) with the time it took to load widgets.json (if NavigationTiming is supported)", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "widget.json", 1500, 0, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000);
 				}
 				done();
 			});
@@ -53,7 +53,7 @@ describe("e2e/08-ember/07-autoxhr-disabled", function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 					var b = tf.beacons[0];
 					assert.equal(b.t_done, undefined);
-					assert.equal(b["rt.start"], "manual");
+					assert.equal(b["rt.start"], "none");
 				}
 				done();
 			});

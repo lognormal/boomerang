@@ -27,12 +27,12 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 	//
 	// Beacon 1 (page load)
 	//
-	it("Should send the first beacon (page load) with the time it took to load widget.json (if NavigationTiming is supported)", function(done) {
+	it("Should send the first beacon (page load) with the time it took to load widgets.json (if NavigationTiming is supported)", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widget.json", 1500, 0, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000);
 				}
 				done();
 			});
@@ -45,7 +45,7 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 					var b = tf.beacons[0];
 					assert.equal(b.t_done, undefined);
-					assert.equal(b["rt.start"], "manual");
+					assert.equal(b["rt.start"], "none");
 				}
 				done();
 			});
@@ -85,11 +85,11 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 			});
 	});
 
-	it("Should send the second beacon (XHR) with widget.json as the 'u' parameter", function(done) {
+	it("Should send the second beacon (XHR) with widgets.json as the 'u' parameter", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[1].u, "widget.json&id=1");
+				assert.include(tf.beacons[1].u, "widgets.json&id=1");
 				done();
 			});
 	});

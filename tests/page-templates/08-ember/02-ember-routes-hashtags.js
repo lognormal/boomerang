@@ -9,8 +9,14 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 6 beacons (1 init, widgets, widget/{1,2,3} + back to '/')", function() {
-		assert.equal(tf.beacons.length, 6);
+	it("Should have sent three beacons", function() {
+		assert.equal(tf.beacons.length, 3);
+	});
+
+	it("Should have sent all beacons as http.initiator = SPA", function() {
+		for (var i = 0; i < 2; i++) {
+			assert.equal(tf.beacons[i]["http.initiator"], "spa");
+		}
 	});
 
 	//
@@ -21,9 +27,15 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
 	});
 
+	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
+		}
+	});
+
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
-			var b = tf.beacons[1];
+			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 		}
 	});
@@ -38,25 +50,22 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
-			assert.equal(b["rt.start"], "manual");
+			assert.equal(b["rt.start"], "none");
 		}
 	});
 
 	//
 	// Beacon 2
 	//
-	it("Should have sent the second beacon for /widgets", function() {
+	it("Should have sent the second beacon for /widget/1", function() {
 		var b = tf.beacons[1];
-		assert.isTrue(b.u.indexOf("/widgets") !== -1);
+		assert.isTrue(b.u.indexOf("/widget/1") !== -1);
 	});
 
-	//
-	// Beacon 3
-	//
 	it("Should have sent the second beacon with a timestamp of at least 1 second (if MutationObserver is supported)", function() {
 		if (window.MutationObserver) {
 			// because of the widget IMG delaying 1 second
-			var b = tf.beacons[2];
+			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 1000);
 		}
 	});
@@ -64,22 +73,22 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 	it("Should have sent the second beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
 		if (typeof window.MutationObserver === "undefined") {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
-			var b = tf.beacons[2];
+			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 0);
 		}
 	});
 
-	it("Should have sent the third beacon for /02-ember-routes-hashtags.html", function() {
+	//
+	// Beacon 3
+	//
+	it("Should have sent the third beacon for /04-ember-routes-hashtags.html", function() {
 		var b = tf.beacons[2];
 		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
 	});
 
-	//
-	// Beacon 5
-	//
-	it("Should have sent the 5th beacon with a timestamp of at least 3 seconds (index, widgets, widget/1,2,3 delay for 3rd image is 3 seconds)", function() {
+	it("Should have sent the third with a timestamp of less than 1 second", function() {
 		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[4];
-		assert.operator(b.t_done, ">=", 3000);
+		var b = tf.beacons[2];
+		assert.operator(b.t_done, "<=", 1000);
 	});
 });

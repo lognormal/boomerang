@@ -27,12 +27,12 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 	//
 	// Beacon 1 (page load)
 	//
-	it("Should send the first beacon (page load) with the time it took to load widget.json (if NavigationTiming is supported)", function(done) {
+	it("Should send the first beacon (page load) with the time it took to load widgets.json (if NavigationTiming is supported)", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widget.json", 1500, 0, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000);
 				}
 				done();
 			});
@@ -45,7 +45,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 					var b = tf.beacons[0];
 					assert.equal(b.t_done, undefined);
-					assert.equal(b["rt.start"], "manual");
+					assert.equal(b["rt.start"], "none");
 				}
 				done();
 			});
@@ -63,7 +63,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 	//
 	// Beacon 2 (XHRs)
 	//
-	it("Should send the second beacon (XHR) with the 2 seconds it took to load widget.json", function(done) {
+	it("Should send the second beacon (XHR) with the 2 seconds it took to load widgets.json", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -76,7 +76,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[1].u, "widget.json&id=1");
+				assert.include(tf.beacons[1].u, "widgets.json&id=1");
 				done();
 			});
 	});
@@ -84,7 +84,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 	//
 	// Beacon 3 (XHRs)
 	//
-	it("Should send the third beacon (XHR) with the 4.5 seconds it took to load widget.json", function(done) {
+	it("Should send the third beacon (XHR) with the 4.5 seconds it took to load widgets.json", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -97,7 +97,7 @@ describe("e2e/08-ember/05-autoxhr-overlapping", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[2].u, "widget.json&id=2");
+				assert.include(tf.beacons[2].u, "widgets.json&id=2");
 				done();
 			});
 	});
