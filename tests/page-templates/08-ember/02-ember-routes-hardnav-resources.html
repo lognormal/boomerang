@@ -1,0 +1,35 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script>
+ /*eslint-disable no-unused-vars*/
+ window.imgs = [0, 500, 1500, 3000, 5000];
+</script>
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.prod.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+<script src="02-ember-routes-hardnav-resources.js"></script>
+
+<!-- Handlebars templates for our application. -->
+<script type="text/x-handlebars">
+  <div class="container">
+    <h1>Testing Ember.js</h1>
+    {{outlet}}
+  </div>
+</script>
+<script>
+/*eslint-disable no-unused-vars*/
+BOOMR_test.init({
+    testAfterOnBeacon: true,
+    Ember: {
+        enabled: true
+    },
+    instrument_xhr: true,
+    autorun: false
+});
+</script>
+
+<%= footer %>
