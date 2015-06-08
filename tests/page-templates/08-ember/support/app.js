@@ -1,13 +1,12 @@
 /*global Ember,App*/
 window.App = Ember.Application.create({
-	LOG_TRANSITIONS: false,
-	LOG_TRANSITIONS_INTERNAL: false
+	LOG_TRANSITIONS: true,
+	LOG_TRANSITIONS_INTERNAL: true
 });
 
 Ember.Handlebars.helper("random", function() {
 	return new Ember.Handlebars.SafeString(Math.floor(Math.random() * 1000 * 1000) + "");
 });
-
 App.ApplicationRoute = Ember.Route.extend({
 	init: function() {
 		var router = this;
@@ -35,7 +34,7 @@ App.WidgetsRoute = Ember.Route.extend({
 		});
 	},
 	model: function() {
-		return Ember.$.getJSON("support/widget.json");
+		return Ember.$.getJSON("support/widgets.json");
 	}
 });
 
@@ -46,7 +45,7 @@ App.WidgetRoute = Ember.Route.extend({
 		});
 	},
 	model: function(params)  {
-		return Ember.$.getJSON("support/widget.json").then(function(data) {
+		return Ember.$.getJSON("support/widgets.json").then(function(data) {
 			return data.filter(function(model) {
 				return String(model.id) === params.id;
 			})[0];
@@ -61,7 +60,11 @@ App.MetricRoute = Ember.Route.extend({
 		});
 	},
 	model: function() {
-		return Ember.$.getJSON("support/widget.json");
+		return Ember.$.getJSON("support/widgets.json").then(function(data) {
+			data.imgs = window.imgs ? window.imgs : [];
+
+			return data;
+		});
 	}
 });
 
@@ -75,9 +78,59 @@ App.Router.map(function() {
 		return 22;
 	};
 
-	if (window.BOOMR && BOOMR.version) {
-		if (BOOMR.plugins.Ember) {
-			BOOMR.plugins.Ember.hook(App);
+	window.custom_timer_1 = 11;
+	window.custom_timer_2 = function() {
+		return 22;
+	};
+
+	if (typeof window.performance !== "undefined" &&
+	    typeof window.performance.mark === "function") {
+		window.performance.mark("mark_usertiming");
+	}
+
+	var hadRouteChange = false;
+	var hadRouteChangeToggle = function() {
+		hadRouteChange = true;
+	};
+
+	if (App.ApplicationRoute) {
+		App.ApplicationRoute.reopen({
+			activate: hadRouteChangeToggle
+		});
+	}
+	else {
+		App.ApplicationRoute = Ember.Route.extend({
+			activate: hadRouteChangeToggle
+		});
+	}
+
+	function hookEmberBoomerang() {
+		if (window.BOOMR && BOOMR.version) {
+			if (BOOMR.plugins && BOOMR.plugins.Ember) {
+				BOOMR.plugins.Ember.hook(App, hadRouteChange);
+			}
+			return true;
+		}
+	}
+
+
+	if (!hookEmberBoomerang()) {
+		if (document.addEventListener) {
+			document.addEventListener("onBoomerangLoaded", hookEmberBoomerang);
+		}
+		else if (document.attachEvent) {
+			document.attachEvent("onpropertychange", function(e) {
+				e = e || window.event;
+				if (e && e.propertyName === "onBoomerangLoaded") {
+					hookEmberBoomerang();
+				}
+			});
 		}
 	}
 });
+
+if (window.navhtml5) {
+	App.Router.reopen({
+		location: "history"
+	});
+}
