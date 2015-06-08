@@ -2,7 +2,7 @@
 # Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
 PLUGINS := plugins/rt.js plugins/bw.js
-STANDALONE_PLUGINS := 
+STANDALONE_PLUGINS :=
 LOGNORMAL_PLUGINS := plugins/page-params.js plugins/auto_xhr.js plugins/angular.js plugins/rt.js plugins/bw.js plugins/navtiming.js plugins/restiming.js plugins/mobile.js plugins/memory.js plugins/cache_reload.js plugins/md5.js plugins/logn_config.js
 
 VERSION := $(shell sed -ne '/^	BOOMR\.version/{s/^.*"\([^"]*\)".*/\1/;p;q;}' boomerang.js)
@@ -15,7 +15,7 @@ HOSTS := bacon1 bacon2 bacon3 bacon4 bacon10
 SOASTA_SOURCE := ~/src/soasta/trunk/source
 SOASTA_SERVER := http://localhost:8080
 SOASTA_USER := SOASTA
-SOASTA_PASSWORD := 
+SOASTA_PASSWORD :=
 # Note that there MUST BE NO trailing slash in the following
 SOASTA_REST_BASE := $(SOASTA_SERVER)/concerto/services/rest/RepositoryService/v1
 SOASTA_REST_PREFIX := $(SOASTA_REST_BASE)/Objects
@@ -122,7 +122,7 @@ soasta-push: new-soasta-push
 
 
 # Upload new version of boomerang to a running mpulse, but don't make it default yet
-soasta-upload: 
+soasta-upload:
 	echo "Uploading version $(NEW_VERSION) to $(SOASTA_REST_PREFIX)..." | $(LOGIT)
 	php generate-soasta-json.php $(BOOMR_XML) | $(LOGIT) | curl -vsS -T - $(INSECURE) --user $(soasta_user_password) $(SOASTA_REST_PREFIX)
 	echo "" | $(LOGIT)
@@ -269,7 +269,7 @@ boomerang-$(VERSION).$(DATE)-debug.js: boomerang.js $(PLUGINS)
 	echo
 	echo "Making $@ ..."
 	echo "using plugins: $(PLUGINS)..."
-	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(	BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/;' | perl -pe 's/BOOMR\s*=\s*BOOMR\s*\|\|\s*{};//;s/BOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};//;' > $@ && echo "done"
+	cat boomerang.js $(PLUGINS) plugins/zzz_last_plugin.js | sed -e 's/^\(	BOOMR\.version = "\)$(VERSION)\("\)/\1$(VERSION).$(DATE)\2/;' | perl -pe 's/\tBOOMR\s*=\s*BOOMR\s*\|\|\s*{};//;s/\tBOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};//;' > $@ && echo "done"
 	if [ -n "$(ESLINT)" ]; then echo "Linting..."; if $(ESLINT) $@; then echo "OK"; else false; fi; else echo "Install eslint to check syntax"; fi
 	echo
 
@@ -281,7 +281,7 @@ clean:
 	rm -f *.dbg.b64
 	rm -f $(tmpfile)
 	rm -f $(tmpfile)*
-	
+
 build-clean:
 	rm -f build/*
 
