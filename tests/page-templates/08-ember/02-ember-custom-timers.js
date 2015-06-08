@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/01-ember-custom-timers", function() {
+describe("e2e/08-ember/02-ember-custom-timers", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

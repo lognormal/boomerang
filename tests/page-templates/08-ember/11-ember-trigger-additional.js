@@ -1,34 +1,26 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/07-autoxhr-disabled", function() {
+describe("e2e/08-ember/14-ember-autoxhr-before-page-load", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
 	it("Should have only sent one beacon (if AutoXHR is not enabled)", function(done) {
-		var that = this;
 		t.ifAutoXHR(
 			done,
 			undefined,
 			function() {
-				// wait 3 seconds to make sure another beacon wasn't sent
-				that.timeout(10000);
-				setTimeout(function() {
-					t.ensureBeaconCount(done, 1);
-				}, 3000);
+				t.ensureBeaconCount(done, 1);
 			});
 	});
 
-	it("Should have only sent one beacon (if AutoXHR is enabled)", function(done) {
-		var that = this;
+	it("Should have sent two beacons (if AutoXHR is enabled)", function(done) {
+		var _this = this;
 		t.ifAutoXHR(
 			done,
 			function() {
-				// wait 3 seconds to make sure another beacon wasn't sent
-				that.timeout(10000);
-				setTimeout(function() {
-					t.ensureBeaconCount(done, 1);
-				}, 3000);
+				_this.timeout(10000);
+				t.ensureBeaconCount(done, 2);
 			});
 	});
 
@@ -63,7 +55,41 @@ describe("e2e/08-ember/07-autoxhr-disabled", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[0].u, "07-autoxhr-disabled.html");
+				assert.include(tf.beacons[0].u, "11-ember-trigger-additional.html");
+				done();
+			});
+	});
+
+	//
+	// Beacon 2 (XHRs)
+	//
+	it("Should send the second beacon (XHR) with the 4 seconds it took to load both widgets.json and the image (if MutationObserver is supported)", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				if (window.MutationObserver) {
+					assert.closeTo(tf.beacons[1].t_done, 4000, 500);
+				}
+				done();
+			});
+	});
+
+	it("Should send the second beacon (XHR) with the 2 seconds it took to load widgets.json (if MutationObserver is not supported)", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				if (typeof window.MutationObserver === "undefined") {
+					assert.closeTo(tf.beacons[1].t_done, 2000, 500);
+				}
+				done();
+			});
+	});
+
+	it("Should send the second beacon (XHR) with widgets.json as the 'u' parameter", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				assert.include(tf.beacons[1].u, "widgets.json&id=1");
 				done();
 			});
 	});

@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/03-autoxhr-after-load", function() {
+describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -32,7 +32,7 @@ describe("e2e/08-ember/03-autoxhr-after-load", function() {
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(1, "support/widget.json", 3000, 500, 30000);
+					t.validateBeaconWasSentAfter(1, "support/widgets.json", 3000, 500, 30000);
 				}
 				done();
 			});
@@ -55,7 +55,7 @@ describe("e2e/08-ember/03-autoxhr-after-load", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[0].u, "03-autoxhr-after-load.html");
+				assert.include(tf.beacons[0].u, "09-ember-autoxhr-after-load.html");
 				done();
 			});
 	});
@@ -76,7 +76,7 @@ describe("e2e/08-ember/03-autoxhr-after-load", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[1].u, "widget.json");
+				assert.include(tf.beacons[1].u, "widgets.json");
 				done();
 			});
 	});
@@ -84,7 +84,7 @@ describe("e2e/08-ember/03-autoxhr-after-load", function() {
 	//
 	// Beacon 3 (XHR)
 	//
-	it("Should send the third beacon (XHR) with the 1s it took to load the widget.json XHR", function(done) {
+	it("Should send the third beacon (XHR) with the 1s it took to load the widgets.json XHR", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -97,7 +97,7 @@ describe("e2e/08-ember/03-autoxhr-after-load", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[2].u, "widget.json");
+				assert.include(tf.beacons[2].u, "widgets.json");
 				done();
 			});
 	});

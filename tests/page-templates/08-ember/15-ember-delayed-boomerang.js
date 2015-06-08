@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/10-delayed-boomerang", function() {
+describe("e2e/08-ember/15-ember-delayed-boomerang", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/02-ember-routes-hashtags", function() {
+describe("e2e/08-ember/05-ember-route-change-hashtags", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -22,9 +22,9 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 	//
 	// Beacon 1
 	//
-	it("Should have sent the first beacon for /02-ember-routes-hashtags.html", function() {
+	it("Should have sent the first beacon for /05-ember-route-change-hashtags.html", function() {
 		var b = tf.beacons[0];
-		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
+		assert.isTrue(b.u.indexOf("/05-ember-route-change-hashtags.html") !== -1);
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
@@ -81,9 +81,9 @@ describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 	//
 	// Beacon 3
 	//
-	it("Should have sent the third beacon for /04-ember-routes-hashtags.html", function() {
+	it("Should have sent the third beacon for /05-ember-route-change-hashtags.html", function() {
 		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
+		assert.isTrue(b.u.indexOf("/05-ember-route-change-hashtags.html") !== -1);
 	});
 
 	it("Should have sent the third with a timestamp of less than 1 second", function() {

@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
+describe("e2e/08-ember/10-ember-autoxhr-overlapping", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -14,13 +14,13 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 			});
 	});
 
-	it("Should have sent two beacons (if AutoXHR is enabled)", function(done) {
+	it("Should have sent three beacons (if AutoXHR is enabled)", function(done) {
 		var _this = this;
 		t.ifAutoXHR(
 			done,
 			function() {
 				_this.timeout(10000);
-				t.ensureBeaconCount(done, 2);
+				t.ensureBeaconCount(done, 3);
 			});
 	});
 
@@ -55,7 +55,7 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				assert.include(tf.beacons[0].u, "06-autoxhr-trigger-additional.html");
+				assert.include(tf.beacons[0].u, "10-ember-autoxhr-overlapping.html");
 				done();
 			});
 	});
@@ -63,24 +63,11 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 	//
 	// Beacon 2 (XHRs)
 	//
-	it("Should send the second beacon (XHR) with the 4 seconds it took to load both widgets.json and the image (if MutationObserver is supported)", function(done) {
+	it("Should send the second beacon (XHR) with the 2 seconds it took to load widgets.json", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (window.MutationObserver) {
-					assert.closeTo(tf.beacons[1].t_done, 4000, 500);
-				}
-				done();
-			});
-	});
-
-	it("Should send the second beacon (XHR) with the 2 seconds it took to load widgets.json (if MutationObserver is not supported)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				if (typeof window.MutationObserver === "undefined") {
-					assert.closeTo(tf.beacons[1].t_done, 2000, 500);
-				}
+				assert.closeTo(tf.beacons[1].t_done, 2000, 500);
 				done();
 			});
 	});
@@ -90,6 +77,27 @@ describe("e2e/08-ember/06-autoxhr-trigger-additional", function() {
 			done,
 			function() {
 				assert.include(tf.beacons[1].u, "widgets.json&id=1");
+				done();
+			});
+	});
+
+	//
+	// Beacon 3 (XHRs)
+	//
+	it("Should send the third beacon (XHR) with the 4.5 seconds it took to load widgets.json", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				assert.closeTo(tf.beacons[2].t_done, 4500, 500);
+				done();
+			});
+	});
+
+	it("Should send the third beacon (XHR) with widgets.json as the 'u' parameter", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				assert.include(tf.beacons[2].u, "widgets.json&id=2");
 				done();
 			});
 	});

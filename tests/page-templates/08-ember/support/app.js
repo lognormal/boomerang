@@ -129,7 +129,7 @@ App.Router.map(function() {
 	}
 });
 
-if (window.navhtml5) {
+if (window.html5_mode) {
 	App.Router.reopen({
 		location: "history"
 	});

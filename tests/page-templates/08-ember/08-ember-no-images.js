@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/04-no-images", function() {
+describe("e2e/08-ember/08-ember-no-images", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

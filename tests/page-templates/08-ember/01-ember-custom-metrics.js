@@ -36,6 +36,6 @@ describe("e2e/08-ember/01-ember-custom-metrics", function() {
 
 	it("Should have the custom metric 5 - URL", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b.cmet5, undefined);
+		assert.equal(b.cmet5, 1);
 	});
 });
