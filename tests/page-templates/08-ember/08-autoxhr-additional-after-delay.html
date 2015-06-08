@@ -28,13 +28,13 @@ BOOMR_test.init({
 		//
 		setTimeout(function(){
 			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/delay?delay=2000&file=/pages/08-ember/support/widget.json&id=1&rnd=" + Math.random(), true);
+			xhr.open("GET", "/delay?delay=2000&file=/pages/05-angular/support/widgets.json&id=1&rnd=" + Math.random(), true);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
 					// fire another XHR after ~0ms, which should still get tracked by the MO
 					setTimeout(function() {
 						var img = document.createElement("img");
-						img.src = "/delay?delay=2000&file=/pages/08-ember/support/img.jpg&rnd=" + Math.random();
+						img.src = "/delay?delay=2000&file=/pages/05-angular/support/img.jpg&rnd=" + Math.random();
 						document.body.appendChild(img);
 					}, 0);
 				}
