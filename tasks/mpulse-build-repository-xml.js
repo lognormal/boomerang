@@ -21,27 +21,29 @@ module.exports = function(grunt) {
 			schema_version: grunt.option("schema-version") || 1
 		});
 
+		// read in the XML .tmpl file
 		var template = grunt.file.read(options.template);
 
+		// read in both the minified and debug builds
 		var minFile = grunt.file.read(options.filePrefix + ".min.js");
 		var debugFile = grunt.file.read(options.filePrefix + "-debug.js");
 
+		// convert both to base64
 		var minFileBase64 = new Buffer(minFile).toString("base64").match(/.{1,80}/g).join("\n");
-
 		var debugFileBase64 = new Buffer(debugFile).toString("base64").match(/.{1,80}/g).join("\n");
 
-		// replace parts of the template
+		// run the template
 		var xml = grunt.template.process(template, {
 			data: {
 				minified: minFileBase64,
 				debug: debugFileBase64,
 				version: options.version,
 				name: "boomerang-" + options.version,
-				schema_version: 1
+				schema_version: options.schema_version
 			}});
 
+		// write to XML
 		var xmlFileName = options.filePrefix + ".xml";
-
 		grunt.log.ok("Writing " + xmlFileName);
 		grunt.file.write(xmlFileName, xml);
 	});
