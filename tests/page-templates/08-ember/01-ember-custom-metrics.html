@@ -1,27 +1,6 @@
 <%= header %>
 <%= boomerangScript %>
 
-<script>
-/*global custom_metric_1:true, custom_metric_2:true*/
-/*eslint-disable no-unused-vars*/
-
-BOOMR = window.BOOMR ? BOOMR : {};
-BOOMR.xhr_excludes = BOOMR.xhr_excludes ? BOOMR.xhr_excludes : {};
-
-var excludables = [
-	"metric.html",
-	"widget.html",
-	"widgets.html",
-	"img.jpg",
-	"widget.json"
-];
-
-for (var index = 0; index < excludables.length; index++) {
-	BOOMR.xhr_excludes["/pages/08-ember/support/" + excludables[index]] = true;
-}
-</script>
-
-
 <script src="../../vendor/jquery/dist/jquery.min.js"></script>
 <script src="../../vendor/ember/ember.debug.js"></script>
 <script src="../../vendor/handlebars/handlebars.min.js"></script>
@@ -31,55 +10,57 @@ for (var index = 0; index < excludables.length; index++) {
 
 <!-- Handlebars templates for our application. -->
 <script type="text/x-handlebars">
-  <div class="container">
-    <h1>Testing Ember.js</h1>
-    {{outlet}}
-  </div>
+	<div class="container">
+		<h1>Testing Ember.js</h1>
+		{{outlet}}
+	</div>
 </script>
 
 <script>
- custom_metric_1 = 111;
- custom_metric_2 = function() { return 222; };
+custom_metric_1 = 111;
+custom_metric_2 = function() {
+	return 222;
+};
 
- BOOMR_test.init({
-     testAfterOnBeacon: true,
-     Ember: {
-         enabled: true
-     },
-     instrument_xhr: true,
-     autorun: false,
-     PageParams: {
-         customMetrics: [
-             {
-                 varName: "custom_metric_1",
-                 label: "cmet1",
-                 type: "JavaScriptVar"
-             },
-             {
-                 varName: "custom_metric_2",
-                 label: "cmet2",
-                 type: "JavaScriptVar"
-             },
-             {
-                 varName: "missing_metric",
-                 label: "cmet3",
-                 type: "JavaScriptVar"
-             },
-             {
-                 parameter1: "",
-                 parameter2: "//div[@id='cart-total']",
-                 label: "cmet4",
-                 type: "URLPatternType"
-             },
-             {
-                 parameter1: "",
-                 parameter2: "",
-                 label: "cmet5",
-                 type: "URLPatternType"
-             }
-         ]
-     }
- });
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false,
+	PageParams: {
+		customMetrics: [
+			{
+				varName: "custom_metric_1",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_2",
+				label: "cmet2",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "missing_metric",
+				label: "cmet3",
+				type: "JavaScriptVar"
+			},
+			{
+				parameter1: "",
+				parameter2: "//div[@id='cart-total']",
+				label: "cmet4",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "*",
+				parameter2: "",
+				label: "cmet5",
+				type: "URLPatternType"
+			}
+		]
+	}
+});
 </script>
 
 <%= footer %>

@@ -1,27 +1,6 @@
 <%= header %>
 <%= boomerangScript %>
 
-<script>
-/*global custom_metric_1:true, custom_metric_2:true*/
-/*eslint-disable no-unused-vars*/
-
-BOOMR = window.BOOMR ? BOOMR : {};
-BOOMR.xhr_excludes = BOOMR.xhr_excludes ? BOOMR.xhr_excludes : {};
-
-var excludables = [
-	"metric.html",
-	"widget.html",
-	"widgets.html",
-	"img.jpg",
-	"widget.json"
-];
-
-for (var index = 0; index < excludables.length; index++) {
-	BOOMR.xhr_excludes["/pages/08-ember/support/" + excludables[index]] = true;
-}
-</script>
-
-
 <script src="../../vendor/jquery/dist/jquery.min.js"></script>
 <script src="../../vendor/ember/ember.prod.js"></script>
 <script src="../../vendor/handlebars/handlebars.min.js"></script>
@@ -31,10 +10,10 @@ for (var index = 0; index < excludables.length; index++) {
 
 <!-- Handlebars templates for our application. -->
 <script type="text/x-handlebars">
-  <div class="container">
-    <h1>Testing Ember.js</h1>
-    {{outlet}}
-  </div>
+	<div class="container">
+		<h1>Testing Ember.js</h1>
+		{{outlet}}
+	</div>
 </script>
 
 <script>

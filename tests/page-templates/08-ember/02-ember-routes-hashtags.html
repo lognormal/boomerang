@@ -2,9 +2,9 @@
 <%= boomerangScript %>
 
 <script>
- /*eslint-disable no-unused-vars*/
- var ember_nav_routes = ["/widget/1", "/"];
- window.imgs = [3000];
+/*eslint-disable no-unused-vars*/
+var ember_nav_routes = ["/widget/1", "/"];
+window.imgs = [3000];
 </script>
 
 <script src="../../vendor/jquery/dist/jquery.min.js"></script>
@@ -16,20 +16,20 @@
 
 <!-- Handlebars templates for our application. -->
 <script type="text/x-handlebars">
-  <div class="container">
-    <h1>Testing Ember.js</h1>
-    {{outlet}}
-  </div>
+	<div class="container">
+		<h1>Testing Ember.js</h1>
+		{{outlet}}
+	</div>
 </script>
 <script>
 /*eslint-disable no-unused-vars*/
 BOOMR_test.init({
-    testAfterOnBeacon: 3,
-    Ember: {
-        enabled: true
-    },
-    instrument_xhr: true,
-    autorun: false
+	testAfterOnBeacon: 3,
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
 });
 </script>
 
