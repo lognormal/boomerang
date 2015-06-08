@@ -428,11 +428,11 @@ module.exports = function() {
 
 	// custom tasks
 	grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
-	grunt.registerTask("mpulse:xml", ["build", "mpulse-build-repository-xml"]);
+	grunt.registerTask("mpulse:xml", ["build"]);
 
 	grunt.registerTask("lint", "eslint");
 
-	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
+	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize", "mpulse-build-repository-xml"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
 
 	grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
@@ -459,7 +459,8 @@ module.exports = function() {
 	grunt.registerTask("test:matrix:e2e:debug", ["saucelabs-mocha:e2e-debug"]);
 
 	grunt.registerTask("test:build", ["pages-builder"]);
-	grunt.registerTask("webserver:build", ["build", "copy:webserver"]);
 
-	grunt.registerTask("default", ["lint", "test"]);
+	grunt.registerTask("jenkins", ["lint", "build", "test", "copy:webserver"]);
+
+	grunt.registerTask("default", ["lint", "build", "test"]);
 };

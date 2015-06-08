@@ -67,23 +67,23 @@ which-version:
 # The SCHEMA_VERSION used here is the new one only if we're pushing to soasta svn, else it's the old one though we could just omit it
 Default_Boomerang.xml: lognormal lognormal-debug
 	echo "Making minified base64..."
-	base64 -i build/boomerang-$(VERSION).$(DATE).js --break 69 -o $(tmpfile).min.b64
+	base64 -i build/boomerang-$(VERSION).$(DATE).js --break 80 -o $(tmpfile).min.b64
 	echo "Making debug base64..."
 	base64 -i build/boomerang-$(VERSION).$(DATE)-debug.js --break 80 -o $(tmpfile).dbg.b64
-	awk    '/<% minified &%>/ { \
+	awk    '/<%= minified %>/ { \
 			system("cat $(tmpfile).min.b64"); \
 			next; \
 		} \
-		/<% debug %>/ { \
+		/<%= debug %>/ { \
 			system("cat $(tmpfile).dbg.b64"); \
 			next; \
 		} \
-		/<% version %>/ { \
-			printf("$(VERSION).$(DATE)\n"); \
+		/<%= version %>/ { \
+			printf("        <Value>$(VERSION).$(DATE)</Value>\n"); \
 			next; \
 		} \
 		{ print }' tasks/mpulse-build-repository-xml.tmpl > Default_Boomerang.xml
-	perl -pi -e 's/%schema_version%/$(SCHEMA_VERSION)/;s/%name%/boomerang-$(VERSION).$(DATE)/;' Default_Boomerang.xml
+	perl -pi -e 's/<%= schema_version %>/$(SCHEMA_VERSION)/;s/<%= name %>/boomerang-$(VERSION).$(DATE)/;' Default_Boomerang.xml
 	rm $(tmpfile).min.b64
 	rm $(tmpfile).dbg.b64
 
