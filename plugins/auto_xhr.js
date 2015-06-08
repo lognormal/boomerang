@@ -388,8 +388,12 @@
 
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth) {
-					// img already loaded
-					return false;
+					// if the attribute change affected the src/currentSrc attributes we want to know that
+					// as that means we need to fetch a new Resource from the server
+					if (node.src && node.currentSrc && (node.src === node.currentSrc)) {
+						// img already loaded
+						return false;
+					}
 				}
 				else if (node.getAttribute("src") === "") {
 					// placeholder IMG
