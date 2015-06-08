@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/02-ember-routes", function() {
+describe("e2e/08-ember/02-ember-routes-hashtags", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -9,22 +9,16 @@ describe("e2e/08-ember/02-ember-routes", function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 5 beacons (1 init, widgets, widget/{1,2,3})", function() {
-		assert.equal(tf.beacons.length, 5);
+	it("Should have sent 6 beacons (1 init, widgets, widget/{1,2,3} + back to '/')", function() {
+		assert.equal(tf.beacons.length, 6);
 	});
 
 	//
 	// Beacon 1
 	//
-	it("Should have sent the first beacon for /02-ember-routes.html", function() {
+	it("Should have sent the first beacon for /02-ember-routes-hashtags.html", function() {
 		var b = tf.beacons[0];
-		assert.isTrue(b.u.indexOf("/02-ember-routes.html") !== -1);
-	});
-
-	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(4, "img.jpg&id=3", 3000, 0, 30000);
-		}
+		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
 	});
 
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
@@ -75,17 +69,17 @@ describe("e2e/08-ember/02-ember-routes", function() {
 		}
 	});
 
-	//
-	// Beacon 4
-	//
-	it("Should have sent the third beacon for /02-ember-routes.html", function() {
+	it("Should have sent the third beacon for /02-ember-routes-hashtags.html", function() {
 		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("/02-ember-routes.html") !== -1);
+		assert.isTrue(b.u.indexOf("/02-ember-routes-hashtags.html") !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of less than 6 seconds ( inital page load widgets,1,2  )", function() {
+	//
+	// Beacon 5
+	//
+	it("Should have sent the 5th beacon with a timestamp of at least 3 seconds (index, widgets, widget/1,2,3 delay for 3rd image is 3 seconds)", function() {
 		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[2];
-		assert.operator(b.t_done, "<=", 6000);
+		var b = tf.beacons[4];
+		assert.operator(b.t_done, ">=", 3000);
 	});
 });

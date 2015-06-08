@@ -3,15 +3,15 @@
 
 <script>
  /*eslint-disable no-unused-vars*/
- var ember_nav_routes = ["/widgets", "/widget/1", "/widget/2", "/widget/3"];
+ var ember_nav_routes = ["/widgets", "/widget/1", "/widget/2", "/widget/3", "/"];
 </script>
 
 <script src="../../vendor/jquery/dist/jquery.min.js"></script>
-<script src="../../vendor/ember/ember.debug.js"></script>
+<script src="../../vendor/ember/ember.prod.js"></script>
 <script src="../../vendor/handlebars/handlebars.min.js"></script>
 <script src="../../vendor/ember/ember-template-compiler.js"></script>
 <script src="support/app.js"></script>
-<script src="02-ember-routes.js"></script>
+<script src="02-ember-routes-hashtags.js"></script>
 
 <!-- Handlebars templates for our application. -->
 <script type="text/x-handlebars">
@@ -23,7 +23,7 @@
 <script>
 /*eslint-disable no-unused-vars*/
 BOOMR_test.init({
-    testAfterOnBeacon: 5,
+    testAfterOnBeacon: 6,
     Ember: {
         enabled: true
     },
