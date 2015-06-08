@@ -397,6 +397,12 @@ module.exports = function() {
 				],
 				tasks: ["express"]
 			}
+		},
+		"mpulse-build-repository-xml": {
+			options: {
+				filePrefix: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>",
+				version: "<%= pkg.releaseVersion %>.<%= buildDate %>"
+			}
 		}
 	});
 	grunt.loadNpmTasks("grunt-eslint");
@@ -415,17 +421,17 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-saucelabs");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	// custom tasks
-	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
-	grunt.registerTask("lint", "eslint");
-	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
-	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
+	// tasks/*.js
 	grunt.loadTasks("tasks");
 
-	// custom tasks
 	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
+
+	// custom tasks
 	grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
+	grunt.registerTask("mpulse:xml", ["build", "mpulse-build-repository-xml"]);
+
 	grunt.registerTask("lint", "eslint");
+
 	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
 
