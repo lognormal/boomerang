@@ -14,13 +14,9 @@ exports.config = {
 		// this until inside the onPrepare function.
 		require("jasmine-reporters");
 
-		var tapReporter = new jasmine.TapReporter({
-			savePath: "tests/results/e2e.tap"
-		});
+		var junitReporter = new jasmine.JUnitXmlReporter("tests/results", true, true, "e2e", true);
 
-		var junitReporter = new jasmine.JUnitXmlReporter("tests/results", false);
-
-		jasmine.getEnv().addReporter(tapReporter);
+		jasmine.getEnv().addReporter(new jasmine.ConsoleReporter());
 		jasmine.getEnv().addReporter(junitReporter);
 	}
 };
