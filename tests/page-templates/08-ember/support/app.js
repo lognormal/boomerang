@@ -131,6 +131,7 @@ App.Router.map(function() {
 
 if (window.html5_mode) {
 	App.Router.reopen({
-		location: "history"
+		location: "history",
+		rootURL: "/04-ember-route-change.html"
 	});
 }
