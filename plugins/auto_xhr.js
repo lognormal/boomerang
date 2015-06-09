@@ -377,23 +377,28 @@
 	};
 
 	MutationHandler.prototype.wait_for_node = function(node, index) {
-		var self = this, current_event, els, interesting = false, i, l, url;
+		var self = this, current_event, els, interesting = false, i, l, url, loaded = false;
 
 		// only images, scripts, iframes and links if stylesheet
 		if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+
+			// if the attribute change affected the src/currentSrc attributes we want to know that
+			// as that means we need to fetch a new Resource from the server
+			if ((node._bmr && node._bmr.end) &&
+			    (node.src && node.currentSrc &&
+			     (node.src !== node.currentSrc))) {
+				loaded = true;
+			}
 
 			node._bmr = { start: BOOMR.now(), res: index };
 
 			url=node.src || node.href;
 
 			if (node.nodeName === "IMG") {
-				if (node.naturalWidth) {
-					// if the attribute change affected the src/currentSrc attributes we want to know that
-					// as that means we need to fetch a new Resource from the server
-					if (node.src && node.currentSrc && (node.src === node.currentSrc)) {
-						// img already loaded
-						return false;
-					}
+				if (node.naturalWidth && !loaded) {
+					// img already loaded
+					return false;
+
 				}
 				else if (node.getAttribute("src") === "") {
 					// placeholder IMG
