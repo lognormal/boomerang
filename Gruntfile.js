@@ -245,6 +245,14 @@ module.exports = function() {
 				]
 			}
 		},
+		"mpulse-test": {
+				release: {
+						boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
+				},
+				base: {
+						boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+				}
+		},
 		filesize: {
 			files: [ "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz" ]
 		},

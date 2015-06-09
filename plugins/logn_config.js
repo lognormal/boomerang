@@ -32,7 +32,8 @@
 		    s1=dc.createElement(s),
 		    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
 		    plugins = [],
-		    pluginName;
+		    pluginName,
+		    url;
 
 		for (pluginName in BOOMR.plugins) {
 			if (BOOMR.plugins.hasOwnProperty(pluginName)) {
@@ -41,7 +42,12 @@
 		}
 
 		t_start=BOOMR.now();
-		s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
+
+		var configAsJSON = false;
+		url = configAsJSON ?
+			"//%config_host%%config_json_path%" :
+			"//%config_host%%config_path%";
+		url+="?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
 			+ "&t=" + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 			+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
 			+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
@@ -52,10 +58,27 @@
 			+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 			+ (complete?"":"&plugins=" + plugins.join(","));
 
-		BOOMR.config_url = s1.src;
+		BOOMR.config_url = url;
 
-		s0.parentNode.insertBefore(s1, s0);
-		s0=s1=null;
+		if (configAsJSON) {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", url, true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					BOOMR_configt = new Date().getTime();
+					var configData = JSON.parse(xhr.responseText);
+					BOOMR.session.ID = configData.session_id;
+					delete configData.session_id;
+					BOOMR.addVar(configData);
+				}
+			};
+			xhr.send(null);
+		}
+		else {
+			s1.src = url;
+			s0.parentNode.insertBefore(s1, s0);
+			s0=s1=null;
+		}
 
 		if (complete) {
 			setTimeout(load, 5.5*60*1000);

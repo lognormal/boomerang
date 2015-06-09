@@ -60,8 +60,9 @@ module.exports = function(grunt) {
 	var stringTemplates = {
 		beaconDestinationHost: "%beacon_dest_host%",
 		beaconDestinationPath: "%beacon_dest_path%",
-		configJsHost: "%config_host%",
+		configHost: "%config_host%",
 		configJsPath: "%config_path%",
+		configJsonPath: "%config_json_path%",
 		apikey: /%client_apikey%/g,
 		configURLSuffix: "%config_url_suffix%",
 		secondaryBeacon: "secondary_beacons:[<%= secondaryBeacon %>],instrument_xhr:true,"
@@ -70,6 +71,7 @@ module.exports = function(grunt) {
 	var description = "Build Boomerang for a specific combination of collector-server and apikey";
 	var configFilePath = "tasks/mpulse-test.config.json";
 	var defaultConfigJsPath = "/boomerang/config.js";
+	var defaultConfigJsonPath = "/api/config.json";
 
 	grunt.registerMultiTask("mpulse-test", description, function() {
 		var jsonConfig = {};
@@ -110,10 +112,15 @@ module.exports = function(grunt) {
 			var boomerang = grunt.file.read(config.boomerang, { encoding: "utf8" });
 
 			boomerang = boomerang.replace(stringTemplates.beaconDestinationHost + stringTemplates.beaconDestinationPath, config.server);
-			boomerang = boomerang.replace(stringTemplates.configJsHost + stringTemplates.configJsPath, config.server + defaultConfigJsPath);
+			boomerang = boomerang.replace(stringTemplates.configHost + stringTemplates.configJsPath, config.server + defaultConfigJsPath);
+			boomerang = boomerang.replace(stringTemplates.configHost + stringTemplates.configJsonPath, config.server + defaultConfigJsonPath);
 			boomerang = boomerang.replace(stringTemplates.apikey, config.apikey);
 			boomerang = boomerang.replace(stringTemplates.configURLSuffix, config.configURLSuffix || "");
 			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
+
+			if (grunt.option("config-json") === true) {
+				boomerang = boomerang.replace(/var\s*configAsJSON\s*=\s*false;/, "var configAsJSON = true;");
+			}
 
 			grunt.file.write("build/" + config.apikey + ".js", boomerang, {encoding: "utf8"});
 		}
