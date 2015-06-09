@@ -33,7 +33,8 @@
  */
 
 (function() {
-	var initialRouteChangeCompleted = false,
+	var initialRouteChangeStarted = false,
+	    initialRouteChangeCompleted = false,
 	    requestStart = 0,
 	    hooked = false,
 	    autoXhrEnabled = false,
@@ -87,6 +88,9 @@
 			// Make sure the original didTransition callback is called before we proceed.
 			this._super();
 			log("activate");
+
+			initialRouteChangeStarted = true;
+
 			changeStart();
 		}
 
@@ -125,6 +129,10 @@
 		init: function(config) {
 			if (config && config.instrument_xhr) {
 				autoXhrEnabled = config.instrument_xhr;
+
+				if (initialRouteChangeStarted && autoXhrEnabled) {
+					BOOMR.plugins.AutoXHR.enableAutoXhr();
+				}
 			}
 		},
 		hook: function(App, hadRouteChange) {
