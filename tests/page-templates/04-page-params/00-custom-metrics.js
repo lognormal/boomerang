@@ -35,15 +35,15 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 	});
 
 	it("Should have the custom metric 6 - QuerySelector if QuerySelector is supported", function() {
-		var b = tf.lastBeacon();
 		if (t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
 			assert.equal(b.cmet6, 444.44);
 		}
 	});
 
 	it("Should have the custom metric 6 - QuerySelector undefined if QuerySelector is not supported", function() {
-		var b = tf.lastBeacon();
 		if (!t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
 			assert.equal(b.cmet6, undefined);
 		}
 	});
