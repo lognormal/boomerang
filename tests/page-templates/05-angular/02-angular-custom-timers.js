@@ -33,9 +33,18 @@ describe("e2e/05-angular/02-angular-custom-timers", function() {
 		assert.equal(t.parseTimers(b.t_other).custom2, 22);
 	});
 
-	it("Should have the custom timer 3 - UserTiming", function() {
-		var b = tf.lastBeacon();
-		assert.isTrue(t.parseTimers(b.t_other).custom3 > 0);
+	it("Should have the custom timer 3 - UserTiming (if UserTiming is supported)", function() {
+		if (t.isUserTimingSupported()) {
+			var b = tf.lastBeacon();
+			assert.isTrue(t.parseTimers(b.t_other).custom3 > 0);
+		}
+	});
+
+	it("Should be missing the custom timer 3 - UserTiming (if UserTiming is not supported)", function() {
+		if (!t.isUserTimingSupported()) {
+			var b = tf.lastBeacon();
+			assert.equal(typeof t.parseTimers(b.t_other).custom3, "undefined");
+		}
 	});
 
 	it("Should be missing custom timer 4 - JavaScript var", function() {
