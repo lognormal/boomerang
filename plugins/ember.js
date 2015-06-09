@@ -1,7 +1,7 @@
 /*global BOOMR*/
 
 /**
- * Add this to the end of your route definitions
+ * Add this to the end of your route definitions, substituting App for your Ember
  *
  * function hookEmberBoomerang() {
  *   if (window.BOOMR && BOOMR.version) {
