@@ -57,8 +57,6 @@
 	function hook(App) {
 
 		function changeStart(transition) {
-			BOOMR.addVar("http.initiator", "spa");
-
 			var url = transition && transition.intent.url ? transition.intent.url : BOOMR.window.document.URL;
 			requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
 
