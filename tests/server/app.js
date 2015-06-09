@@ -7,6 +7,7 @@ var path = require("path");
 var fs = require("fs");
 var express = require("express");
 var http = require("http");
+var compress = require("compression");
 
 //
 // Load env.json
@@ -40,6 +41,9 @@ var port = process.env.PORT || env.port;
 server.listen(port, function() {
 	console.log("Server starting on port " + port + " for " + wwwRoot);
 });
+
+// ensure content is compressed
+app.use(compress());
 
 //
 // Routes
