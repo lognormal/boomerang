@@ -84,14 +84,14 @@
 		}
 
 		function activate() {
-			// Make sure the original didTransition callback is called before we procede.
+			// Make sure the original didTransition callback is called before we proceed.
 			this._super();
 			log("activate");
 			changeStart();
 		}
 
 		function willTransition(transition) {
-			// Make sure the original didTransition callback is called before we procede.
+			// Make sure the original didTransition callback is called before we proceed.
 			log("willTransition");
 			changeStart(transition);
 
