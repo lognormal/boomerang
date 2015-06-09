@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/08-ember/14-ember-autoxhr-before-page-load", function() {
+describe("e2e/08-ember/11-ember-trigger-additional", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

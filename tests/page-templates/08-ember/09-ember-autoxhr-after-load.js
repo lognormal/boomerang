@@ -27,12 +27,12 @@ describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 	//
 	// Beacon 1 (page load)
 	//
-	it("Should send the second beacon (widget.json 3s) with the time it took to load widget.json (if NavigationTiming is supported)", function(done) {
+	it("Should send the second beacon (widgets.json 3s) with the time it took to load widget.json (if NavigationTiming is supported)", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(1, "support/widgets.json", 3000, 500, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000);
 				}
 				done();
 			});
@@ -45,7 +45,7 @@ describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 					var b = tf.beacons[0];
 					assert.equal(b.t_done, undefined);
-					assert.equal(b["rt.start"], "manual");
+					assert.equal(b["rt.start"], "none");
 				}
 				done();
 			});
@@ -63,7 +63,7 @@ describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 	//
 	// Beacon 2 (XHR)
 	//
-	it("Should send the second beacon (XHR) with the 3s it took to load the widget.json XHR", function(done) {
+	it("Should send the second beacon (XHR) with the 3s it took to load the widgets.json XHR", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -72,7 +72,7 @@ describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 			});
 	});
 
-	it("Should send the second beacon (XHR) with widget.json as the 'u' parameter", function(done) {
+	it("Should send the second beacon (XHR) with widgets.json as the 'u' parameter", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -93,7 +93,7 @@ describe("e2e/08-ember/09-ember-autoxhr-after-load", function() {
 			});
 	});
 
-	it("Should send the third beacon (XHR) with widget.json as the 'u' parameter", function(done) {
+	it("Should send the third beacon (XHR) with widgets.json as the 'u' parameter", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {

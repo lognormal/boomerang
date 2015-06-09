@@ -41,7 +41,7 @@ describe("e2e/08-ember/00-ember-start", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
-			assert.equal(b["rt.start"], "manual");
+			assert.equal(b["rt.start"], "none");
 		}
 	});
 });
