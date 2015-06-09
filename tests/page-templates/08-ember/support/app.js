@@ -130,8 +130,11 @@ App.Router.map(function() {
 });
 
 if (window.html5_mode) {
+	var path = window.location.pathname.split("/"),
+	    rootURL = "/" + path[path.length-1];
+
 	App.Router.reopen({
 		location: "history",
-		rootURL: "/04-ember-route-change.html"
+		rootURL: rootURL
 	});
 }
