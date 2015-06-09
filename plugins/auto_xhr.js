@@ -747,8 +747,7 @@
 
 			autoXhrEnabled = config.instrument_xhr;
 			if ((config.Angular && config.Angular.enabled) ||
-			    (config.Ember && config.Ember.enabled)
-			   ) {
+			    (config.Ember && config.Ember.enabled)) {
 				singlePageApp = true;
 
 				// disable auto-xhr until the SPA has fired its first beacon

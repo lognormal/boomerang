@@ -50,7 +50,7 @@
 	 */
 	function log(msg) {
 		var currentRouteName = container.lookup("controller:application") ? container.lookup("controller:application").get("currentRouteName") + " " : "";
-		BOOMR.debug( currentRouteName + msg, "Ember");
+		BOOMR.debug(currentRouteName + msg, "Ember");
 	}
 
 	function hook(App) {
