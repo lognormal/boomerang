@@ -32,15 +32,22 @@ module.exports = function(grunt) {
 		var minFileBase64 = new Buffer(minFile).toString("base64").match(/.{1,80}/g).join("\n");
 		var debugFileBase64 = new Buffer(debugFile).toString("base64").match(/.{1,80}/g).join("\n");
 
-		// run the template
-		var xml = grunt.template.process(template, {
-			data: {
-				minified: minFileBase64,
-				debug: debugFileBase64,
-				version: options.version,
-				name: "boomerang-" + options.version,
-				schema_version: options.schema_version
-			}});
+		var xml = "";
+		try {
+			// run the template
+			xml = grunt.template.process(template, {
+				data: {
+					minified: minFileBase64,
+					debug: debugFileBase64,
+					version: options.version,
+					name: "boomerang-" + options.version,
+					schema_version: options.schema_version
+				}});
+		}
+		catch (e) {
+			grunt.verbose.debug(JSON.stringify(e, null, 2));
+			grunt.fail.error("Something went wrong during template processing (mpulse-build-repository-xml.tmpl)");
+		}
 
 		// write to XML
 		var xmlFileName = options.filePrefix + ".xml";
