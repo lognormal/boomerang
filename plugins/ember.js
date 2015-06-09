@@ -36,7 +36,8 @@
 	var initialRouteChangeCompleted = false,
 	    requestStart = 0,
 	    hooked = false,
-	    autoXhrEnabled = false;
+	    autoXhrEnabled = false,
+	    container;
 
 	if (BOOMR.plugins.Ember || !BOOMR.plugins.AutoXHR) {
 		return;
@@ -48,7 +49,8 @@
 	 * @param {string} msg Message
 	 */
 	function log(msg) {
-		BOOMR.debug(msg, "Ember");
+		var currentRouteName = container.lookup("controller:application") ? container.lookup("controller:application").get("currentRouteName") + " " : "";
+		BOOMR.debug( currentRouteName + msg, "Ember");
 	}
 
 	function hook(App) {
@@ -113,6 +115,7 @@
 			});
 		}
 
+		container = App.__container__;
 	}
 
 	BOOMR.plugins.Ember = {
