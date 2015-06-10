@@ -82,6 +82,9 @@
 			}
 		}
 
+		/**
+		 * activate will be called on first navigation
+		 */
 		function activate() {
 			// Make sure the original didTransition callback is called before we proceed.
 			this._super();
@@ -92,6 +95,9 @@
 			changeStart();
 		}
 
+		/**
+		 * subsequent navigations will use willTransition
+		 */
 		function willTransition(transition) {
 			// Make sure the original didTransition callback is called before we proceed.
 			log("willTransition");
