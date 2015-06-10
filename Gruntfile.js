@@ -278,7 +278,7 @@ module.exports = function() {
 			}
 		},
 		filesize: {
-			default: {
+			csv: {
 				files: [{
 					expand: true,
 					cwd: "build",
@@ -291,6 +291,21 @@ module.exports = function() {
 						path: "tests/results/filesizes.csv",
 						format: "\"{filename}\",{size},{kb},{now:YYYYMMDDhhmmss};", /* https://github.com/k-maru/grunt-filesize/issues/8 */
 						append: true
+					}
+				}
+			},
+			default: {
+				files: [{
+					expand: true,
+					cwd: "build",
+					src: "./**/*.min.js*",
+					ext: ".min.js.gz",
+					extDot: "first"
+				}],
+				options: {
+					output: {
+						format: "{filename}: Size of {size} bytes ({kb} kilobyte)",
+						stdout: true
 					}
 				}
 			}
