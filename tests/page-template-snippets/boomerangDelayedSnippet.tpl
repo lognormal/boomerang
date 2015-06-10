@@ -1,0 +1,3 @@
+<script>
+<%= boomerangTagManagerSnippetWithDelay %>
+</script>

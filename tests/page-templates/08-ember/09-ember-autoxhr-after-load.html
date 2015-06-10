@@ -1,0 +1,43 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.debug.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+<script src="09-ember-autoxhr-after-load.js"></script>
+
+<script type="text/x-handlebars">
+	<div class="container">
+		<h1>Testing Ember.js</h1>
+		{{outlet}}
+	</div>
+</script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+		setTimeout(function(){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/delay?delay=3000&file=/pages/08-ember/support/widgets.json", false);
+			xhr.send(null);
+		}, 100);
+
+		setTimeout(function(){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/delay?delay=1000&file=/pages/08-ember/support/widgets.json", false);
+			xhr.send(null);
+		}, 4000);
+	},
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>

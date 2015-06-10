@@ -377,17 +377,23 @@
 	};
 
 	MutationHandler.prototype.wait_for_node = function(node, index) {
-		var self = this, current_event, els, interesting = false, i, l, url;
+		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false;
 
 		// only images, scripts, iframes and links if stylesheet
 		if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+
+			// if the attribute change affected the src/currentSrc attributes we want to know that
+			// as that means we need to fetch a new Resource from the server
+			if (node._bmr && node._bmr.end) {
+				exisitingNodeSrcUrlChanged = true;
+			}
 
 			node._bmr = { start: BOOMR.now(), res: index };
 
 			url=node.src || node.href;
 
 			if (node.nodeName === "IMG") {
-				if (node.naturalWidth) {
+				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
 					// img already loaded
 					return false;
 				}
@@ -737,7 +743,8 @@
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
 
 			autoXhrEnabled = config.instrument_xhr;
-			if (config.Angular && config.Angular.enabled) {
+			if ((config.Angular && config.Angular.enabled) ||
+			    (config.Ember && config.Ember.enabled)) {
 				singlePageApp = true;
 
 				// disable auto-xhr until the SPA has fired its first beacon
