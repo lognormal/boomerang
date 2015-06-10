@@ -41,7 +41,7 @@ describe("e2e/05-angular/00-angular-bootstrap", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
-			assert.equal(b["rt.start"], "manual");
+			assert.equal(b["rt.start"], "none");
 		}
 	});
 

@@ -205,18 +205,36 @@ module.exports = function() {
 			}
 		},
 		uglify: {
-			options: {
-				preserveComments: false,
-				mangle: true,
-				sourceMap: true
+			default: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					sourceMap: true
+				},
+				files: [{
+					expand: true,
+					cwd: "build/",
+					src: ["<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
+					      "<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"],
+					dest: "build/",
+					ext: ".min.js",
+					extDot: "last"
+				}]
 			},
-			min_release: {
-				src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
-			},
-			min_debug: {
-				src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js"
+			plugins: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					sourceMap: true
+				},
+				files: [{
+					expand: true,
+					cwd: "plugins/",
+					src: ["./*.js"],
+					dest: "build/plugins/",
+					ext: ".min.js",
+					extDot: "first"
+				}]
 			}
 		},
 		compress: {
@@ -243,10 +261,39 @@ module.exports = function() {
 						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.gz"
 					}
 				]
+			},
+			plugins: {
+				options: {
+					mode: "gzip",
+					level: 9
+				},
+				files: [{
+					expand: true,
+					cwd: "build/plugins",
+					src: "./*.js",
+					dest: "build/plugins/",
+					ext: ".min.js.gz",
+					extDot: "first"
+				}]
 			}
 		},
 		filesize: {
-			files: [ "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz" ]
+			default: {
+				files: [{
+					expand: true,
+					cwd: "build",
+					src: "./**/*.min.js*",
+					ext: ".min.js.gz",
+					extDot: "first"
+				}],
+				options: {
+					output: {
+						path: "tests/results/filesizes.csv",
+						format: "\"{filename}\",{size},{kb},{now:YYYYMMDDhhmmss};", /* https://github.com/k-maru/grunt-filesize/issues/8 */
+						append: true
+					}
+				}
+			}
 		},
 		clean: {
 			options: {},
@@ -298,7 +345,7 @@ module.exports = function() {
 			// NOTE: https://github.com/angular/protractor/issues/1512 Selenium+PhantomJS not working in 1.6.1
 			options: {
 				noColor: false,
-				keepAlive: true
+				keepAlive: false
 			},
 			phantomjs: {
 				configFile: "tests/protractor.config.phantom.js"
@@ -397,6 +444,12 @@ module.exports = function() {
 				],
 				tasks: ["express"]
 			}
+		},
+		"mpulse-build-repository-xml": {
+			options: {
+				filePrefix: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>",
+				version: "<%= pkg.releaseVersion %>.<%= buildDate %>"
+			}
 		}
 	});
 	grunt.loadNpmTasks("grunt-eslint");
@@ -415,18 +468,18 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-saucelabs");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	// custom tasks
-	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
-	grunt.registerTask("lint", "eslint");
-	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
-	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
+	// tasks/*.js
 	grunt.loadTasks("tasks");
 
-	// custom tasks
 	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
+
+	// custom tasks
 	grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
+	grunt.registerTask("mpulse:xml", ["build"]);
+
 	grunt.registerTask("lint", "eslint");
-	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize"]);
+
+	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize", "mpulse-build-repository-xml"]);
 	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
 
 	grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
@@ -453,7 +506,8 @@ module.exports = function() {
 	grunt.registerTask("test:matrix:e2e:debug", ["saucelabs-mocha:e2e-debug"]);
 
 	grunt.registerTask("test:build", ["pages-builder"]);
-	grunt.registerTask("webserver:build", ["build", "copy:webserver"]);
 
-	grunt.registerTask("default", ["lint", "test"]);
+	grunt.registerTask("jenkins", ["lint", "build", "test", "copy:webserver"]);
+
+	grunt.registerTask("default", ["lint", "build", "test"]);
 };
