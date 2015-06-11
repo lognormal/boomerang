@@ -54,7 +54,8 @@ module.exports = function(grunt) {
 		server: "localhost:8080",
 		apikey: "11111-11111-11111-11111-11111",
 		secondaryBeacons: [],
-		boomerang: ""
+		boomerang: "",
+		configAsJSON: false
 	};
 
 	var stringTemplates = {
@@ -118,7 +119,7 @@ module.exports = function(grunt) {
 			boomerang = boomerang.replace(stringTemplates.configURLSuffix, config.configURLSuffix || "");
 			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
 
-			if (grunt.option("config-json") === true) {
+			if (config.configAsJSON) {
 				boomerang = boomerang.replace(/var\s*configAsJSON\s*=\s*false;/, "var configAsJSON = true;");
 			}
 

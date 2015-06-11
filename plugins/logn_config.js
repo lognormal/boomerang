@@ -58,24 +58,45 @@
 			+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 			+ (complete?"":"&plugins=" + plugins.join(","));
 
-		BOOMR.config_url = url;
+		if (configAsJSON) {
+			url += "&acao=";
+		}
+
+		s1.src = url; // absolutize the url
+		BOOMR.config_url = s1.src;
 
 		if (configAsJSON) {
+			/*eslint-disable no-inner-declarations,no-empty*/
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", url, true);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4 && xhr.status === 200) {
-					BOOMR_configt = new Date().getTime();
-					var configData = JSON.parse(xhr.responseText);
-					BOOMR.session.ID = configData.session_id;
-					delete configData.session_id;
-					BOOMR.addVar(configData);
+					BOOMR_configt = BOOMR.now();
+					var configData;
+					try {
+						configData = JSON.parse(xhr.responseText);
+					}
+					catch (e) {}
+
+					if (configData) {
+						function stripVars(data, params) {
+							var vars = {};
+							for (var i = 0; i < params.length; i++) {
+								vars[params[i]] = data[params[i]];
+								delete data[params[i]];
+							}
+							return vars;
+						}
+						BOOMR.session.ID = configData.session_id;
+						delete configData.session_id;
+						BOOMR.addVar(
+							stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"])).init(configData);
+					}
 				}
 			};
 			xhr.send(null);
 		}
 		else {
-			s1.src = url;
 			s0.parentNode.insertBefore(s1, s0);
 			s0=s1=null;
 		}
