@@ -513,7 +513,7 @@ module.exports = function() {
 		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
 		"test:matrix:e2e": ["saucelabs-mocha:e2e"],
 		"test:matrix:e2e:debug": ["saucelabs-mocha:e2e-debug"],
-		"test:build": ["pages-builder"],
+		"test:build": ["pages-builder", "build"],
 		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
 		"default": ["lint", "build", "test", "filesize:default"]
 	};
