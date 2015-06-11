@@ -20,7 +20,7 @@ describe("e2e/05-angular/02-angular-custom-timers", function() {
 
 	it("Should be missing the custom timer 0 - NavigationTiming - because it's handled on the server", function() {
 		var b = tf.lastBeacon();
-		assert.equal(typeof t.parseTimers(b.t_other).custom0, "undefined");
+		assert.isUndefined(t.parseTimers(b.t_other).custom0);
 	});
 
 	it("Should have the custom timer 1 - JavaScript variable - having been updated by the Angular App", function() {
@@ -33,18 +33,27 @@ describe("e2e/05-angular/02-angular-custom-timers", function() {
 		assert.equal(t.parseTimers(b.t_other).custom2, 22);
 	});
 
-	it("Should have the custom timer 3 - UserTiming", function() {
-		var b = tf.lastBeacon();
-		assert.isTrue(t.parseTimers(b.t_other).custom3 > 0);
+	it("Should have the custom timer 3 - UserTiming (if UserTiming is supported)", function() {
+		if (t.isUserTimingSupported()) {
+			var b = tf.lastBeacon();
+			assert.isTrue(t.parseTimers(b.t_other).custom3 > 0);
+		}
+	});
+
+	it("Should be missing the custom timer 3 - UserTiming (if UserTiming is not supported)", function() {
+		if (!t.isUserTimingSupported()) {
+			var b = tf.lastBeacon();
+			assert.isUndefined(t.parseTimers(b.t_other).custom3);
+		}
 	});
 
 	it("Should be missing custom timer 4 - JavaScript var", function() {
 		var b = tf.lastBeacon();
-		assert.equal(typeof t.parseTimers(b.t_other).custom4, "undefined");
+		assert.isUndefined(t.parseTimers(b.t_other).custom4);
 	});
 
 	it("Should be missing custom timer 5 - UserTiming", function() {
 		var b = tf.lastBeacon();
-		assert.equal(typeof t.parseTimers(b.t_other).custom5, "undefined");
+		assert.isUndefined(t.parseTimers(b.t_other).custom5);
 	});
 });

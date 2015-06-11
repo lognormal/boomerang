@@ -265,6 +265,13 @@
 		return (window.performance && typeof window.performance.getEntriesByType === "function");
 	};
 
+	t.isUserTimingSupported = function() {
+		return (window.performance &&
+		        typeof window.performance.getEntriesByType === "function" &&
+		        typeof window.performance.mark === "function" &&
+		        typeof window.performance.measure === "function");
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		// look for #beacon_form in the BOOMR window's IFRAME
 		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
