@@ -2,7 +2,9 @@
     "plugins": [
         "plugins/page-params.js",
         "plugins/auto_xhr.js",
+        "plugins/spa.js",
         "plugins/angular.js",
+        "plugins/backbone.js",
         "plugins/ember.js",
         "plugins/rt.js",
         "plugins/bw.js",

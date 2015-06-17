@@ -33,14 +33,14 @@
 *   }]);
 */
 (function() {
-	var hooked = false,
-	    initialRouteChangeCompleted = false,
-	    lastLocationChange = "",
-	    autoXhrEnabled = false;
+	var hooked = false;
 
-	if (BOOMR.plugins.Angular) {
+	if (BOOMR.plugins.Angular || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}
+
+	// register as a SPA plugin
+	BOOMR.plugins.SPA.register("Angular");
 
 	/**
 	 * Bootstraps the Angular plugin with the specified $rootScope of the host
@@ -55,8 +55,9 @@
 			return false;
 		}
 
-		// We need the AutoXHR plugin to operate
-		if (!BOOMR.plugins.AutoXHR) {
+		// We need the AutoXHR and SPA plugins to operate
+		if (!BOOMR.plugins.AutoXHR ||
+		    !BOOMR.plugins.SPA) {
 			return false;
 		}
 
@@ -77,43 +78,14 @@
 		$rootScope.$on("$routeChangeStart", function(event, currRoute){
 			log("$routeChangeStart: " + (currRoute ? currRoute.templateUrl : ""));
 
-			// If this was the first request, use navStart as the begin timestamp.  Otherwise, use
-			// "now" as the begin timestamp.
-			var requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
-
-			// if we were given a URL by $locationChangeStart use that, otherwise, use the document.URL
-			var url = lastLocationChange ? lastLocationChange : BOOMR.window.document.URL;
-
-			// construct the resource we'll be waiting for
-			var resource = {
-				timing: {
-					requestStart: requestStart
-				},
-				initiator: "spa",
-				url: url
-			};
-
-			if (!initialRouteChangeCompleted) {
-				// if we haven't completed our initial SPA navigation yet (this is a hard nav), wait
-				// for all of the resources to be downloaded
-				resource.onComplete = function() {
-					initialRouteChangeCompleted = true;
-				};
-			}
-
-			// start listening for changes
-			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
-
-			// re-enable AutoXHR if it's enabled in config.js
-			if (autoXhrEnabled) {
-				BOOMR.plugins.AutoXHR.enableAutoXhr();
-			}
+			BOOMR.plugins.SPA.route_change();
 		});
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
 		$rootScope.$on("$locationChangeStart", function(event, newState){
 			log("$locationChangeStart: " + newState);
-			lastLocationChange = newState;
+
+			BOOMR.plugins.SPA.last_location(newState);
 		});
 
 		return true;
@@ -126,43 +98,18 @@
 		is_complete: function() {
 			return true;
 		},
-		is_hooked: function() {
-			return hooked;
-		},
-		init: function(config) {
-			if (config && config.instrument_xhr) {
-				autoXhrEnabled = config.instrument_xhr;
-			}
-		},
 		hook: function($rootScope, hadRouteChange) {
 			if (hooked) {
 				return this;
 			}
 
-			if (hadRouteChange) {
-				if (autoXhrEnabled) {
-					// re-enable AutoXHR if it's enabled in config.js
-					BOOMR.plugins.AutoXHR.enableAutoXhr();
-				}
-
-				// We missed the initial route change (we loaded too slowly), so we're too
-				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
-				initialRouteChangeCompleted = true;
-
-				// Tell BOOMR this is a SPA navigation still
-				BOOMR.addVar("http.initiator", "spa");
-
-				// Since we held the original beacon (autorun=false), we need to tell BOOMR
-				// that the page has loaded OK.
-				BOOMR.page_ready();
-			}
-
 			if (bootstrap($rootScope)) {
+				BOOMR.plugins.SPA.hook(hadRouteChange);
+
 				hooked = true;
 			}
 
 			return this;
 		}
 	};
-
 }(BOOMR.window));

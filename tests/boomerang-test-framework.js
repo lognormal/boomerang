@@ -85,6 +85,8 @@
 	//
 	// Exports
 	//
+	t.templates = {};
+
 	t.isComplete = function() {
 		return complete;
 	};
