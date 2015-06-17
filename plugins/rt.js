@@ -716,7 +716,7 @@
 					t_start = data.timing.requestStart;
 				}
 
-				if (data && data.initiator === "spa") {
+				if (typeof t_start === "undefined" && data && data.initiator === "spa") {
 					// if we don't have a start time, set to none so it can possibly be fixed up
 					BOOMR.addVar("rt.start", "none");
 				}
