@@ -81,7 +81,8 @@ module.exports = function() {
 				"tests/server/*.js",
 				"tests/page-templates/**/*.js",
 				"tests/page-templates/**/*.html",
-				"tests/page-templates/**/*.js"
+				"tests/page-templates/**/*.js",
+				"tests/test-templates/**/*.js"
 			]
 		},
 		"string-replace": {
@@ -305,7 +306,14 @@ module.exports = function() {
 		},
 		clean: {
 			options: {},
-			build: ["build/*", "tests/build/*", "tests/results/*.tap", "tests/results/*.xml", "tests/coverage/*"],
+			build: [
+				"build/*",
+				"tests/build/*",
+				"tests/results/*.tap",
+				"tests/results/*.xml",
+				"tests/coverage/*",
+				"tests/pages/**/*"
+			],
 			src: ["plugins/*~", "*.js~"]
 		},
 		karma: {
@@ -435,14 +443,16 @@ module.exports = function() {
 					"tests/e2e/*.js",
 					"tests/page-template-snippets/**/*",
 					"tests/page-templates/**/*",
-					"tests/unit/**/*"
+					"tests/unit/**/*",
+					"tests/test-templates/**/*.js"
 				],
 				tasks: ["test:build"]
 			},
 			boomerang: {
 				files: [
 					"boomerang.js",
-					"plugins/*.js"
+					"plugins/*.js",
+					"plugins.json"
 				],
 				tasks: ["build:test"]
 			},

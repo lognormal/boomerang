@@ -743,11 +743,22 @@
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
 
 			autoXhrEnabled = config.instrument_xhr;
-			if ((config.Angular && config.Angular.enabled) ||
-			    (config.Ember && config.Ember.enabled)) {
-				singlePageApp = true;
 
-				// disable auto-xhr until the SPA has fired its first beacon
+			// check to see if any of the SPAs were enabled
+			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
+				var supported = BOOMR.plugins.SPA.supported_frameworks();
+				for (var i = 0; i < supported.length; i++) {
+					var spa = supported[i];
+					if (config[spa] && config[spa].enabled) {
+						singlePageApp = true;
+						break;
+					}
+				}
+			}
+
+			if (singlePageApp) {
+				// Disable auto-xhr until the SPA has fired its first beacon.  The
+				// plugin will re-enable after it's ready.
 				autoXhrEnabled = false;
 
 				BOOMR.instrumentXHR();
