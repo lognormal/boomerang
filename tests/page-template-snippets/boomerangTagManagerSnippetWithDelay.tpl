@@ -1,15 +1,15 @@
 (function(){
 	var dom,doc,where,iframe = document.createElement('iframe'),win = window;
-	
+
 	function boomerangSaveLoadTime(e) {
 		win.BOOMR_onload=(e && e.timeStamp) || new Date().getTime();
 	}
-	if (document.body.addEventListener) {
+	if (win.addEventListener) {
 		win.addEventListener("load", boomerangSaveLoadTime, false);
-	} else if (document.body.attachEvent) {
+	} else if (win.attachEvent) {
 		win.attachEvent("onload", boomerangSaveLoadTime);
 	}
-	
+
 	iframe.src = "javascript:false";
 	(iframe.frameElement || iframe).style.cssText = "width:0;height:0;border:0;display:none;";
 	where = document.getElementsByTagName('script')[0];
