@@ -287,11 +287,11 @@ module.exports = function() {
 				}
 		},
 		filesize: {
-			default: {
+			csv: {
 				files: [{
 					expand: true,
 					cwd: "build",
-					src: "./**/*.min.js*",
+					src: ["./**/*.min.js", "./**/*.min.js.gz"],
 					ext: ".min.js.gz",
 					extDot: "first"
 				}],
@@ -300,6 +300,21 @@ module.exports = function() {
 						path: "tests/results/filesizes.csv",
 						format: "\"{filename}\",{size},{kb},{now:YYYYMMDDhhmmss};", /* https://github.com/k-maru/grunt-filesize/issues/8 */
 						append: true
+					}
+				}
+			},
+			default: {
+				files: [{
+					expand: true,
+					cwd: "build",
+					src: ["./**/*.min.js", "./**/*.min.js.gz"],
+					ext: ".min.js.gz",
+					extDot: "first"
+				}],
+				options: {
+					output: {
+						format: "{filename}: Size of {size:0,0} bytes ({kb:0.00} kilobyte)",
+						stdout: true
 					}
 				}
 			}
@@ -491,41 +506,71 @@ module.exports = function() {
 
 	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
 
-	// custom tasks
-	grunt.registerTask("mpulse:test", ["build", "mpulse-test:release"]);
-	grunt.registerTask("mpulse:xml", ["build"]);
+	// Custom aliases for configured grunt tasks
+	var aliases = {
+		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml"],
+		"build:test": ["concat:debug", "string-replace", "copy:debug"],
+		"default": ["lint", "build", "test", "filesize:default"],
+		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
+		"lint": ["eslint"],
+		"mpulse:test": ["build", "mpulse-test:release"],
+		"mpulse:xml": ["build"],
+		"test": ["build", "test:build", "test:unit", "test:e2e"],
+		"test:build": ["pages-builder", "build"],
+		"test:debug": ["test:build", "build:test", "express", "watch"],
+		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
+		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],
+		"test:e2e:debug": ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"],
+		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
+		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
+		"test:matrix:e2e": ["saucelabs-mocha:e2e"],
+		"test:matrix:e2e:debug": ["saucelabs-mocha:e2e-debug"],
+		"test:matrix:unit": ["saucelabs-mocha:unit"],
+		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
+		"test:unit": ["test:build", "build", "karma:unit"],
+		"test:unit:all": ["build", "karma:all"],
+		"test:unit:chrome": ["build", "karma:chrome"],
+		"test:unit:ff": ["build", "karma:ff"],
+		"test:unit:ie": ["build", "karma:ie"],
+		"test:unit:opera": ["build", "karma:opera"],
+		"test:unit:safari": ["build", "karma:safari"]
+	};
 
-	grunt.registerTask("lint", "eslint");
+	function isAlias(task) {
+		return aliases[task] ? true : false;
+	}
 
-	grunt.registerTask("build", ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize", "mpulse-build-repository-xml"]);
-	grunt.registerTask("build:test", ["concat:debug", "string-replace", "copy:debug"]);
+	function resolveAlias(task) {
+		var tasks = [],
+		    resolved = false;
+		tasks = aliases[task];
 
-	grunt.registerTask("test", ["test:build", "test:unit", "test:e2e"]);
-	grunt.registerTask("test:unit", ["build", "karma:unit"]);
-	grunt.registerTask("test:e2e", ["test:e2e:phantomjs"]);
+		function checkDuplicates(insertableTask) {
+			return tasks.indexOf(insertableTask) === -1;
+		}
 
-	grunt.registerTask("test:debug", ["test:build", "build:test", "express", "watch"]);
+		while (!resolved) {
+			if (tasks.filter(isAlias).length === 0) {
+				resolved = true;
+			}
 
-	grunt.registerTask("test:unit:all", ["build", "karma:all"]);
-	grunt.registerTask("test:unit:chrome", ["build", "karma:chrome"]);
-	grunt.registerTask("test:unit:ie", ["build", "karma:ie"]);
-	grunt.registerTask("test:unit:ff", ["build", "karma:ff"]);
-	grunt.registerTask("test:unit:opera", ["build", "karma:opera"]);
-	grunt.registerTask("test:unit:safari", ["build", "karma:safari"]);
+			for (var index = 0; index < tasks.length; index++) {
+				if (isAlias(tasks[index])) {
+					var aliasTask = tasks[index];
+					var beforeTask = tasks.slice(0, index );
+					var afterTask = tasks.slice(index +1, tasks.length);
+					var insertTask = aliases[aliasTask].filter(checkDuplicates);
+					tasks = [].concat(beforeTask, insertTask, afterTask);
+				}
+			}
+		}
 
-	grunt.registerTask("test:e2e:phantomjs", ["build", "express", "protractor_webdriver", "protractor:phantomjs"]);
-	grunt.registerTask("test:e2e:chrome", ["build", "express", "protractor_webdriver", "protractor:chrome"]);
-	grunt.registerTask("test:e2e:debug", ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"]);
+		return tasks;
+	}
 
-	grunt.registerTask("test:matrix", ["test:matrix:unit", "test:matrix:e2e"]);
-	grunt.registerTask("test:matrix:unit", ["saucelabs-mocha:unit"]);
-	grunt.registerTask("test:matrix:unit:debug", ["saucelabs-mocha:unit-debug"]);
-	grunt.registerTask("test:matrix:e2e", ["saucelabs-mocha:e2e"]);
-	grunt.registerTask("test:matrix:e2e:debug", ["saucelabs-mocha:e2e-debug"]);
-
-	grunt.registerTask("test:build", ["pages-builder"]);
-
-	grunt.registerTask("jenkins", ["lint", "build", "test", "copy:webserver"]);
-
-	grunt.registerTask("default", ["lint", "build", "test"]);
+	Object.keys(aliases).map(function(alias) {
+		var resolved = resolveAlias(alias);
+		grunt.log.debug("Resolving task alias: " + alias + " to " + JSON.stringify(resolved));
+		grunt.registerTask(alias, resolved);
+	});
 };
