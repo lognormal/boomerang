@@ -551,7 +551,8 @@ module.exports = function() {
 	}
 
 	Object.keys(aliases).map(function(alias) {
-		grunt.log.debug("Resolving task alias: " + alias + " to " + JSON.stringify(resolveAlias(alias)));
-		grunt.registerTask(alias, resolveAlias(alias));
+		var resolved = resolveAlias(alias);
+		grunt.log.debug("Resolving task alias: " + alias + " to " + JSON.stringify(resolved));
+		grunt.registerTask(alias, resolved);
 	});
 };
