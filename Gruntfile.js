@@ -282,7 +282,7 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "build",
-					src: "./**/*.min.js*",
+					src: ["./**/*.min.js", "./**/*.min.js.gz"],
 					ext: ".min.js.gz",
 					extDot: "first"
 				}],
@@ -298,13 +298,13 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "build",
-					src: "./**/*.min.js*",
+					src: ["./**/*.min.js", "./**/*.min.js.gz"],
 					ext: ".min.js.gz",
 					extDot: "first"
 				}],
 				options: {
 					output: {
-						format: "{filename}: Size of {size} bytes ({kb} kilobyte)",
+						format: "{filename}: Size of {size:0,0} bytes ({kb:0.00} kilobyte)",
 						stdout: true
 					}
 				}
