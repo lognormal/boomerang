@@ -75,10 +75,10 @@ App.Router.map(function() {
 	this.resource("widget", {path: "widgets/:id"});
 
 	if (window.html5_mode) {
-		var path = window.location.pathname.split("/"),
-		    rootURL = "/" + path[path.length-1];
+		var appPath = window.location.pathname.split("/"),
+		    appRootURL = "/" + appPath[appPath.length-1];
 
-		this.route("metric", { path: rootURL });
+		this.route("metric", { path: appRootURL });
 	}
 
 	this.route("metric", { path: "/" });
