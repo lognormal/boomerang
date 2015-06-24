@@ -13,6 +13,9 @@ describe("e2e/06-bugs/92560", function() {
 	var t = BOOMR_test;
 
 	it("Should get only 2 beacons: 1 onload, 1 xhr (2nd xhr should be excluded)", function(done) {
+		// because the XHRs might take over a second
+		this.timeout(10000);
+
 		t.ifAutoXHR(
 			done,
 			function() {
