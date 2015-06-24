@@ -753,6 +753,17 @@
 				return;
 			}
 
+			try {
+				/*eslint-disable no-unused-expressions*/
+				BOOMR.window.location.href;
+			}
+			catch(e) {
+				// If document.domain is changed during page load (from www.blah.com to blah.com, for example),
+				// BOOMR.window.location.href throws "Permission Denied" in IE < 11.
+				// Resetting the inner domain to match the outer makes location accessible again
+				BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
+			}
+
 			//
 			// XHRs are handled differently than normal or SPA navigations (which apply
 			// all Page Groups, Timers, Metrics, Dimensions and ABs).  XHRs look at Page Groups
