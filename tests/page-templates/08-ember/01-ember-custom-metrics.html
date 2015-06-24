@@ -1,0 +1,66 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.debug.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+<script src="01-ember-custom-metrics.js"></script>
+
+<!-- Handlebars templates for our application. -->
+<script type="text/x-handlebars">
+	<div class="container">
+		<h1>Testing Ember.js</h1>
+		{{outlet}}
+	</div>
+</script>
+
+<script>
+window.custom_metric_1 = 111;
+window.custom_metric_2 = function() {
+	return 222;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false,
+	PageParams: {
+		customMetrics: [
+			{
+				varName: "custom_metric_1",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_2",
+				label: "cmet2",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "missing_metric",
+				label: "cmet3",
+				type: "JavaScriptVar"
+			},
+			{
+				parameter1: "",
+				parameter2: "//div[@id='cart-total']",
+				label: "cmet4",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "*",
+				parameter2: "",
+				label: "cmet5",
+				type: "URLPatternType"
+			}
+		]
+	}
+});
+</script>
+
+<%= footer %>

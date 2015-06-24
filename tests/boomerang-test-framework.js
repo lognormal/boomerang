@@ -54,30 +54,6 @@
 		},
 		is_complete: function() {
 			return true;
-		},
-		ensureBeaconCount: function(done, beaconCount) {
-			function compareBeaconCount() {
-				return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
-			}
-			function testBeaconCount() {
-				if (compareBeaconCount()) {
-					setTimeout(
-						function() {
-							done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
-						}, 1000);
-				}
-				else {
-					setTimeout(testBeaconCount, 100);
-				}
-			}
-
-			testBeaconCount();
-		},
-		ifAutoXHR: function(done, testXhr, testDegenerate) {
-			if (BOOMR.plugins.AutoXHR) {
-				return (testXhr || done)();
-			}
-			(testDegenerate || done)();
 		}
 	};
 })(window);
@@ -109,6 +85,8 @@
 	//
 	// Exports
 	//
+	t.templates = {};
+
 	t.isComplete = function() {
 		return complete;
 	};
@@ -216,6 +194,7 @@
 
 		// initialize boomerang
 		BOOMR.init(config);
+		BOOMR.addVar("h.cr", "test");
 
 		if (config.afterFirstBeacon) {
 			var xhrSent = false;
@@ -292,6 +271,13 @@
 		return typeof window.document.querySelector === "function";
 	};
 
+	t.isUserTimingSupported = function() {
+		return (window.performance &&
+		        typeof window.performance.getEntriesByType === "function" &&
+		        typeof window.performance.mark === "function" &&
+		        typeof window.performance.measure === "function");
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		// look for #beacon_form in the BOOMR window's IFRAME
 		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
@@ -335,6 +321,133 @@
 
 		// determine if it was set OK
 		return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
+	};
+
+	t.parseTimers = function(timers) {
+		var timerValues = {};
+
+		var timersSplit = timers.split(",");
+		for (var i = 0; i < timersSplit.length; i++) {
+			var timerSplit = timersSplit[i].split("|");
+			timerValues[timerSplit[0]] = timerSplit[1];
+		}
+
+		return timerValues;
+	};
+
+	/**
+	* Finds the first load of the specified resource.
+	* @param {string} url Partial URL match
+	* @return {PerformanceResourceTiming} Last resource to load for that URL
+	*/
+	t.findFirstResource = function(url) {
+		if ("performance" in window &&
+			window.performance &&
+			window.performance.getEntriesByType) {
+			var entries = window.performance.getEntriesByType("resource");
+
+			for (var i = 0; i < entries.length; i++) {
+				if (entries[i].name.indexOf(url) !== -1) {
+					return entries[i];
+				}
+			}
+		}
+
+		return null;
+	};
+
+	/**
+	* Finds the last load of the specified resource.
+	* @param {string} url Partial URL match
+	* @return {PerformanceResourceTiming} Last resource to load for that URL
+	*/
+	t.findLastResource = function(url) {
+		if ("performance" in window &&
+			window.performance &&
+			window.performance.getEntriesByType) {
+			var entries = window.performance.getEntriesByType("resource");
+
+			var res = null;
+			for (var i = 0; i < entries.length; i++) {
+				if (entries[i].name.indexOf(url) !== -1) {
+					if (res === null || entries[i].responseEnd > res.responseEnd) {
+						res = entries[i];
+					}
+				}
+			}
+
+			return res;
+		}
+		else {
+			return null;
+		}
+	};
+
+	/**
+	 * Validates the beacon was sent with a load time equal to when the specified resource
+	 * loaded.
+	 *
+	 * @param {number} beaconIndex Which beacon
+	 * @param {string} urlMatch URL to match
+	 * @param {number} closeTo Range that the load time can be off by
+	 * @param {number} fallbackMin If RT is not supported, the minimum time
+	 * @param {number} fallbackMax If RT is not supported, the maximum time
+	 * @param {boolean} useLastMatch Use the last match of the resource instead of the first
+	 */
+	t.validateBeaconWasSentAfter = function(beaconIndex, urlMatch, closeTo, fallbackMin, fallbackMax, useLastMatch) {
+		var tf = BOOMR.plugins.TestFramework;
+
+		var res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
+		if (res != null) {
+			assert.closeTo(tf.beacons[beaconIndex].t_done, res.responseEnd, closeTo);
+		}
+		else {
+			// we don't have ResourceTiming, use the fallback times
+			assert.operator(tf.beacons[beaconIndex].t_done, ">=", fallbackMin);
+			assert.operator(tf.beacons[beaconIndex].t_done, "<=", fallbackMax);
+		}
+	};
+
+	/**
+	 * Ensures the number of beacons specified were sent.
+	 *
+	 * Also waits a second after the beacon count was hit to ensure no additional
+	 * beacons were sent.
+	 *
+	 * @param {function} done Callback
+	 * @param {number} beaconCount Expected beacon count
+	 */
+	t.ensureBeaconCount = function(done, beaconCount) {
+		function compareBeaconCount() {
+			return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
+		}
+		function testBeaconCount() {
+			if (compareBeaconCount()) {
+				setTimeout(
+					function() {
+						done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
+					}, 1000);
+			}
+			else {
+				setTimeout(testBeaconCount, 100);
+			}
+		}
+
+		testBeaconCount();
+	};
+
+	/**
+	 * Runs the specified callback if AutoXHR is enabled
+	 *
+	 * @param {function} done Test done callback
+	 * @param {function} testXhr Test to run if AutoXHR is enabled
+	 * @param {function} testDegenerate Test if AutoXHR is not enabled
+	 */
+	t.ifAutoXHR = function(done, testXhr, testDegenerate) {
+		if (BOOMR.plugins.AutoXHR) {
+			return (testXhr || done)();
+		}
+		(testDegenerate || done)();
 	};
 
 	window.BOOMR_test = t;

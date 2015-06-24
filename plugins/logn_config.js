@@ -5,7 +5,8 @@
 	    dom=w.location.hostname,
 	    complete, running,
 	    t_start,
-	    load, loaded;
+	    load, loaded,
+	    autorun=true;
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -20,7 +21,10 @@
 		}
 		complete = true;
 		running = false;
-		BOOMR.sendBeacon();
+
+		if (autorun) {
+			BOOMR.sendBeacon();
+		}
 	};
 
 	load=function() {
@@ -28,7 +32,8 @@
 		    s1=dc.createElement(s),
 		    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
 		    plugins = [],
-		    pluginName;
+		    pluginName,
+		    url;
 
 		for (pluginName in BOOMR.plugins) {
 			if (BOOMR.plugins.hasOwnProperty(pluginName)) {
@@ -37,7 +42,12 @@
 		}
 
 		t_start=BOOMR.now();
-		s1.src="//%config_host%%config_path%?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
+
+		var configAsJSON = false;
+		url = configAsJSON ?
+			"//%config_host%%config_json_path%" :
+			"//%config_host%%config_path%";
+		url+="?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
 			+ "&t=" + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 			+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
 			+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
@@ -48,10 +58,48 @@
 			+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 			+ (complete?"":"&plugins=" + plugins.join(","));
 
+		if (configAsJSON) {
+			url += "&acao=";
+		}
+
+		s1.src = url; // absolutize the url
 		BOOMR.config_url = s1.src;
 
-		s0.parentNode.insertBefore(s1, s0);
-		s0=s1=null;
+		if (configAsJSON) {
+			/*eslint-disable no-inner-declarations,no-empty*/
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", url, true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					BOOMR_configt = BOOMR.now();
+					var configData;
+					try {
+						configData = JSON.parse(xhr.responseText);
+					}
+					catch (e) {}
+
+					if (configData) {
+						function stripVars(data, params) {
+							var vars = {};
+							for (var i = 0; i < params.length; i++) {
+								vars[params[i]] = data[params[i]];
+								delete data[params[i]];
+							}
+							return vars;
+						}
+						BOOMR.session.ID = configData.session_id;
+						delete configData.session_id;
+						BOOMR.addVar(stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"]));
+						BOOMR.init(configData);
+					}
+				}
+			};
+			xhr.send(null);
+		}
+		else {
+			s0.parentNode.insertBefore(s1, s0);
+			s0=s1=null;
+		}
 
 		if (complete) {
 			setTimeout(load, 5.5*60*1000);
@@ -67,6 +115,10 @@
 			if (config && config.rate_limited) {
 				BOOMR.session.rate_limited=true;
 				return this;
+			}
+
+			if (config && typeof config.autorun !== "undefined") {
+				autorun = config.autorun;
 			}
 
 			// if we are called a second time while running, it means config.js has finished loading
@@ -108,4 +160,4 @@
  but not for the debug version.  We use special comment tags to indicate that this code
  block should be removed if the debug version is requested.
 */
-BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true, /*BEGIN DEBUG TOKEN*/log:null, /*END DEBUG TOKEN*/wait:true, site_domain:null, ResourceTiming:{enabled:false}});
+BOOMR.addVar({"h.key": "%client_apikey%"}).init({primary:true, /*BEGIN DEBUG TOKEN*/log:null, /*END DEBUG TOKEN*/wait:true, site_domain:null, ResourceTiming:{enabled:false}, Angular:{enabled:false}, Ember:{enabled:false}, Backbone:{enabled:false}});

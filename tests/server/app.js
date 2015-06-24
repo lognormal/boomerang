@@ -7,6 +7,7 @@ var path = require("path");
 var fs = require("fs");
 var express = require("express");
 var http = require("http");
+var compress = require("compression");
 
 //
 // Load env.json
@@ -41,9 +42,14 @@ server.listen(port, function() {
 	console.log("Server starting on port " + port + " for " + wwwRoot);
 });
 
+// ensure content is compressed
+app.use(compress());
+
 //
 // Routes
 //
+
+// /blackhole - returns a 204
 app.get("/blackhole", function(req, res) {
 	res.status(204).send();
 });
