@@ -48,10 +48,6 @@ describe("e2e/06-bugs/92560", function() {
 		test("?val=1", "/pages/06-bugs/92560.html");
 	});
 
-	it("getPathname test - (empty string))", function() {
-		test("", "/pages/06-bugs/92560.html");
-	});
-
 	it("getPathname test - ../../../../file.js", function() {
 		test("../../../../file.js", "/file.js");
 	});
