@@ -38,7 +38,7 @@ App.WidgetsRoute = Ember.Route.extend({
 	}
 });
 
-App.WidgetRoute = Ember.Route.extend({
+App.WidgetsWidgetRoute = Ember.Route.extend({
 	beforeModel: function() {
 		return Ember.$.get("support/widget.html").then(function(data) {
 			Ember.TEMPLATES.widget = Ember.Handlebars.compile(data);
@@ -52,6 +52,8 @@ App.WidgetRoute = Ember.Route.extend({
 		});
 	}
 });
+
+App.WidgetRoute = App.WidgetsWidgetRoute;
 
 App.MetricRoute = Ember.Route.extend({
 	beforeModel: function() {
@@ -69,8 +71,16 @@ App.MetricRoute = Ember.Route.extend({
 });
 
 App.Router.map(function() {
-	this.resource("widgets", {path: "/widgets"});
-	this.resource("widget", {path: "/widget/:id"});
+	this.resource("widgets");
+	this.resource("widget", {path: "widgets/:id"});
+
+	if (window.html5_mode) {
+		var path = window.location.pathname.split("/"),
+		    rootURL = "/" + path[path.length-1];
+
+		this.route("metric", { path: rootURL });
+	}
+
 	this.route("metric", { path: "/" });
 
 	window.custom_metric_1 = 11;
