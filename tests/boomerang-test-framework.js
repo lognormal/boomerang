@@ -267,6 +267,10 @@
 		return (window.performance && typeof window.performance.getEntriesByType === "function");
 	};
 
+	t.isQuerySelectorSupported = function() {
+		return typeof window.document.querySelector === "function";
+	};
+
 	t.isUserTimingSupported = function() {
 		return (window.performance &&
 		        typeof window.performance.getEntriesByType === "function" &&
