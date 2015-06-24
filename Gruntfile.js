@@ -461,7 +461,7 @@ module.exports = function() {
 					"tests/unit/**/*",
 					"tests/test-templates/**/*.js"
 				],
-				tasks: ["test:build"]
+				tasks: ["pages-builder"]
 			},
 			boomerang: {
 				files: [
