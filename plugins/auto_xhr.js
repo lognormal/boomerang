@@ -704,19 +704,36 @@
 
 				resource.url = a.href;
 				resource.method = method;
+
+				// reset any statuses from previous calls to .open()
+				if (typeof resource.status !== "undefined") {
+					delete resource.status;
+				}
+
 				if (!async) {
 					resource.synchronous = true;
 				}
 
 				// call the original open method
-				return orig_open.apply(req, arguments);
+				try {
+					return orig_open.apply(req, arguments);
+				}
+				catch (e) {
+					// if there was an exception during .open(), .send() won't work either,
+					// so let's fire loadFinished now
+					resource.status = -997;
+					loadFinished();
+				}
 			};
 
 			req.send = function() {
 				resource.timing.requestStart = BOOMR.now();
 
-				// call the original send method
-				return orig_send.apply(req, arguments);
+				// call the original send method unless there was an error
+				// during .open
+				if (typeof resource.status === "undefined") {
+					return orig_send.apply(req, arguments);
+				}
 			};
 
 			req.resource = resource;
