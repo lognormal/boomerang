@@ -42,7 +42,7 @@
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("Ember");
 
-	function hook(App) {
+	function hook(App, hadRouteChange) {
 		if (typeof App === "undefined") {
 			return false;
 		}
@@ -72,7 +72,7 @@
 			this._super();
 			log("activate");
 
-			BOOMR.plugins.SPA.route_change();
+			BOOMR.plugins.SPA.route_change(hadRouteChange);
 		}
 
 		/**
@@ -80,7 +80,7 @@
 		 */
 		function willTransition(transition) {
 			log("willTransition");
-			BOOMR.plugins.SPA.route_change();
+			BOOMR.plugins.SPA.route_change(hadRouteChange);
 
 			BOOMR.plugins.SPA.last_location(transition && transition.intent.url ?
 							transition.intent.url :
@@ -120,7 +120,7 @@
 				return this;
 			}
 
-			if (hook(App)) {
+			if (hook(App, hadRouteChange)) {
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 
 				hooked = true;
