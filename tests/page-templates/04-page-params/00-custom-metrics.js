@@ -56,6 +56,6 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 
 	it("Should have the custom metric 10 - No XPath and No QuerySelector given but matching \"parameter1\" set", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b.cmet10, 1);
+		assert.equal(b.cmet10, "1");
 	});
 });
