@@ -14,8 +14,9 @@
 	<link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
 	<script src="../../vendor/mocha/mocha.js"></script>
 	<script src="../../vendor/assertive-chai/dist/assertive-chai.js"></script>
-	<script src="../../vendor/lodash/lodash.js"></script></head>
+	<script src="../../vendor/lodash/lodash.js"></script>
 	<script src="../../boomerang-test-framework.js" type="text/javascript"></script>
+	</head>
 <body>
 	<div id="mocha"></div>
 	<script>
