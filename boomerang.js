@@ -59,7 +59,9 @@ function BOOMR_check_doc_domain(domain) {
 			// Resetting the inner domain to match the outer makes location accessible once again
 			BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
 		}
-		catch(e) {}
+		catch(err) {
+			BOOMR.debug("Inner domain assignment failed");
+		}
 	}
 
 	if (domain.indexOf(".") === -1) {
