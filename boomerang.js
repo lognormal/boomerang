@@ -60,7 +60,7 @@ function BOOMR_check_doc_domain(domain) {
 			BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
 		}
 		catch(err) {
-			BOOMR.debug("Inner domain assignment failed");
+			BOOMR.addError(err, "inner domain assignment failed");
 		}
 	}
 
