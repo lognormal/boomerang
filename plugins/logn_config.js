@@ -28,10 +28,17 @@
 		}
 	};
 
-	var configIfNonDebugDestruct = function(element) {
+	var removeNodeIfSafe = function(element) {
 		var CONFIGJSDEBUG_TOKEN = "CONFIGJSDEBUG_TOKEN";
 		if (CONFIGJSDEBUG_TOKEN) {
-			element.remove();
+			if (typeof element.remove === "function" ) {
+				/* use remove() if available*/
+				element.remove();
+			}
+			else if (typeof element.removeNode === "function" || typeof element.removeNode === "object") {
+				/* testing against object as well as function is required as IE6 calls this an object */
+				element.removeNode(true);
+			}
 		}
 	};
 
@@ -99,7 +106,7 @@
 						delete configData.session_id;
 						BOOMR.addVar(stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"]));
 						BOOMR.init(configData);
-						configIfNonDebugDestruct(s1);
+						removeNodeIfSafe(s1);
 					}
 				}
 			};
@@ -112,7 +119,7 @@
 
 		if (complete) {
 			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
-			configIfNonDebugDestruct(s1);
+			removeNodeIfSafe(s1);
 		}
 	};
 
