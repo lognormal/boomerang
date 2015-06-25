@@ -27,6 +27,13 @@
 		}
 	};
 
+	var configIfNonDebugDestruct = function(element) {
+		var CONFIGJSDEBUG_TOKEN = "CONFIGJSDEBUG_TOKEN";
+		if (CONFIGJSDEBUG_TOKEN) {
+			element.remove();
+		}
+	};
+
 	load=function() {
 		var s0=dc.getElementsByTagName(s)[0],
 		    s1=dc.createElement(s),
@@ -91,6 +98,7 @@
 						delete configData.session_id;
 						BOOMR.addVar(stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"]));
 						BOOMR.init(configData);
+						configIfNonDebugDestruct(s1);
 					}
 				}
 			};
