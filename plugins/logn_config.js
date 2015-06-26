@@ -106,13 +106,15 @@
 		}
 		else {
 			s0.parentNode.insertBefore(s1, s0);
-			s0=s1=null;
+			s0=null;
 		}
 
 		if (complete) {
-			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 			removeNodeIfSafe(s1);
+			s1=null;
+			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 		}
+
 	};
 
 	BOOMR.plugins.LOGN = {
