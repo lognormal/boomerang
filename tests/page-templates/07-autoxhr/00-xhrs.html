@@ -13,49 +13,50 @@ BOOMR_test.init({
 				return;
 			}
 
-			var xhr;
-			xhr = new XMLHttpRequest();
-			xhr.open("GET", "support/script200.js"); //200, async
-			xhr.send(null);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.open("GET", "support/script200.js", false); //200, sync
-				xhr.send(null);
-			}, 100);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.open("GET", "support/script404.js"); //404, async
-				xhr.send(null);
-			}, 200);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.open("GET", "support/script404.js", false); //404, sync
-				xhr.send(null);
-			}, 300);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.open("GET", "http://soasta.com"); //error
-				xhr.send(null);
-			}, 400);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.open("GET", "support/script200.js"); //200, async, abort
-				xhr.send(null);
-				xhr.abort();
-			}, 500);
-
-			setTimeout(function(){
-				xhr = new XMLHttpRequest();
-				xhr.timeout = 1;
-				xhr.open("GET", "support/script200.js"); //200, async, timeout
-				xhr.send(null);
-			}, 600);
-
+			var xhrNum = 0;
+			BOOMR.subscribe("onbeacon", function() {
+				setTimeout(function() {
+					var xhr;
+					if (xhrNum === 0) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 1) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js", false); //200, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 2) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js"); //404, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 3) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js", false); //404, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 4) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "http://soasta.com"); //error
+						xhr.send(null);
+					}
+					else if (xhrNum === 5) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async, abort
+						xhr.send(null);
+						xhr.abort();
+					}
+					else if (xhrNum === 6) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async, timeout
+						xhr.timeout = 1;
+						xhr.send(null);
+					}
+					xhrNum++;
+				}, 100);
+			});
 		}
 });
 </script>
