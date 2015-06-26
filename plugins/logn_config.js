@@ -99,7 +99,6 @@
 						delete configData.session_id;
 						BOOMR.addVar(stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"]));
 						BOOMR.init(configData);
-						removeNodeIfSafe(s1);
 					}
 				}
 			};
