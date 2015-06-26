@@ -31,14 +31,7 @@
 	var removeNodeIfSafe = function(element) {
 		var CONFIGJSDEBUG_TOKEN = "CONFIGJSDEBUG_TOKEN";
 		if (CONFIGJSDEBUG_TOKEN) {
-			if (typeof element.remove === "function" ) {
-				/* use remove() if available*/
-				element.remove();
-			}
-			else if (typeof element.removeNode === "function" || typeof element.removeNode === "object") {
-				/* testing against object as well as function is required as IE6 calls this an object */
-				element.removeNode(true);
-			}
+			element.parentNode.removeChild(element);
 		}
 	};
 
