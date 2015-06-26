@@ -706,9 +706,7 @@
 				resource.method = method;
 
 				// reset any statuses from previous calls to .open()
-				if (typeof resource.status !== "undefined") {
-					delete resource.status;
-				}
+				delete resource.status;
 
 				if (!async) {
 					resource.synchronous = true;
