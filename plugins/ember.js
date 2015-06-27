@@ -33,7 +33,8 @@
  */
 
 (function() {
-	var hooked = false;
+	var hooked = false,
+	    routeHooked = false;
 
 	if (BOOMR.plugins.Ember || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -42,7 +43,7 @@
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("Ember");
 
-	function hook(App, hadRouteChange) {
+	function hook(App) {
 		if (typeof App === "undefined") {
 			return false;
 		}
@@ -65,42 +66,70 @@
 		log("Startup");
 
 		/**
-		 * activate will be called on first navigation
+		 * beforeModel even earlier than activate
 		 */
-		function activate() {
-			// Make sure the original didTransition callback is called before we proceed.
-			this._super();
-			log("activate");
+		function beforeModel(transition) {
+			// Make sure the original beforeModel callback is called before we proceed.
+			this._super(transition);
 
-			BOOMR.plugins.SPA.route_change(hadRouteChange);
+			log("beforeModel");
+
+			if (transition && transition.intent && transition.intent.url) {
+				log("[beforeModel] LastLocation: " + transition.intent.url);
+				BOOMR.plugins.SPA.last_location(transition.intent.url);
+			}
+
+			if (!routeHooked) {
+				BOOMR.plugins.SPA.route_change();
+				routeHooked = true;
+			}
+
+			return true;
 		}
 
 		/**
 		 * subsequent navigations will use willTransition
 		 */
 		function willTransition(transition) {
-			log("willTransition");
-			BOOMR.plugins.SPA.route_change(hadRouteChange);
+			this._super(transition);
 
-			BOOMR.plugins.SPA.last_location(transition && transition.intent.url ?
-							transition.intent.url :
-							BOOMR.window.document.URL);
+			log("willTransition");
+
+			if (transition && transition.intent && transition.intent.url) {
+				log("[willTransition] LastLocation: " + transition.intent.url);
+				BOOMR.plugins.SPA.last_location(transition.intent.url);
+			}
+
+			if (!routeHooked) {
+				BOOMR.plugins.SPA.route_change();
+				routeHooked = true;
+			}
 			return true;
+		}
+
+		function didTransition(transition) {
+			this._super(transition);
+
+			log("didTransition");
+			log("didTransition: Remove hook");
+			routeHooked=false;
 		}
 
 		if (App.ApplicationRoute) {
 			App.ApplicationRoute.reopen({
-				activate: activate,
+				beforeModel: beforeModel,
 				actions: {
-					willTransition: willTransition
+					willTransition: willTransition,
+					didTransition: didTransition
 				}
 			});
 		}
 		else {
 			App.ApplicationRoute = BOOMR.window.Ember.Route.extend({
-				activate: activate,
+				beforeModel: beforeModel,
 				actions: {
-					willTransition: willTransition
+					willTransition: willTransition,
+					didTransition: didTransition
 				}
 			});
 		}
@@ -122,7 +151,6 @@
 
 			if (hook(App, hadRouteChange)) {
 				BOOMR.plugins.SPA.hook(hadRouteChange);
-
 				hooked = true;
 			}
 		}
