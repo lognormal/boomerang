@@ -1,18 +1,18 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert,BOOMR*/
 
-describe("e2e/10-config-override/01-no-config-override", function() {
+describe("e2e/10-config-override/01-config-deep", function() {
 
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	it("Should pass basic beacon validation", function(done) {
+	it("Should pass basic beacon validation (since we enabled autorun in the override)", function(done) {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have config override flag set to undefined", function() {
+	it("Should have config override flag set to 1", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["c.o"], undefined);
+		assert.equal(b["c.o"], 1);
 	});
 
 	it("Should have the custom metric 1 - JavaScript var", function() {
