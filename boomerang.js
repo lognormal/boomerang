@@ -276,6 +276,7 @@ BOOMR_check_doc_domain();
 			"instrument_xhr",
 			"RT.session_exp",
 			"BW.base_url",
+			"BW.enable",
 			"ResourceTiming.enabled",
 			"secondaryBeacons",
 			"autorun"
