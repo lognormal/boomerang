@@ -571,8 +571,8 @@
 				t_done = data.timing.loadEventEnd;
 			}
 			else if (ename === "xhr" && (!data || data.initiator !== "spa")) {
-			// if this is an XHR event, trust the input end "now" timestamp
-				return t_done;
+				// if this is an XHR event, trust the input end "now" timestamp
+				t_done = t_now;
 			}
 			// Boomerang loaded late and...
 			else if (BOOMR.loadedLate) {
