@@ -275,7 +275,7 @@ BOOMR_check_doc_domain();
 			"PageParams.abTests",
 			"instrument_xhr",
 			"RT.session_exp",
-			"BW",
+			"BW.base_url",
 			"ResourceTiming.enabled",
 			"secondaryBeacons",
 			"autorun"
@@ -855,6 +855,7 @@ BOOMR_check_doc_domain();
 
 			if (window && window.BOOMR_config) {
 				config = this.overrideConfig(config);
+				BOOMR.addVar("c.o", 1);
 			}
 
 			if (config.primary && impl.handlers_attached) {

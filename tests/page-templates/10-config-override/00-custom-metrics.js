@@ -10,6 +10,11 @@ describe("e2e/10-config-override/00-custom-metrics", function() {
 		t.validateBeaconWasSent(done);
 	});
 
+	it("Should have config override flag set to 1", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["c.o"], 1);
+	});
+
 	it("Should have the custom metric 1 - JavaScript var", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet1, 11);
