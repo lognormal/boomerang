@@ -35,7 +35,7 @@ BOOMR_test.init({
 		var js = this.createElement("script");
 		if(dom) this.domain = dom;
 		js.id = "boomr-if-as";
-		js.src = '/delay?delay=3000&file=build/boomerang-latest-debug.js'
+		js.src = '/delay?delay=3000&file=build/boomerang-latest-debug.js&rnd=' + Math.random();
 		BOOMR_lstart=new Date().getTime();
 		this.body.appendChild(js);
 	};
