@@ -564,15 +564,13 @@
 		 * after onload, so in that case, if navigation timing is available, we use that instead.
 		 */
 		validateLoadTimestamp: function(t_now, data, ename) {
-			var t_done = t_now;
-
 			// beacon with detailed timing information
 			if (data && data.timing && data.timing.loadEventEnd) {
-				t_done = data.timing.loadEventEnd;
+				return data.timing.loadEventEnd;
 			}
 			else if (ename === "xhr" && (!data || data.initiator !== "spa")) {
 				// if this is an XHR event, trust the input end "now" timestamp
-				t_done = t_now;
+				return t_now;
 			}
 			// Boomerang loaded late and...
 			else if (BOOMR.loadedLate) {
@@ -580,7 +578,7 @@
 				if (w.performance && w.performance.timing) {
 					// and boomerang loaded after onload fired
 					if (w.performance.timing.loadEventStart && w.performance.timing.loadEventStart < BOOMR.t_end) {
-						t_done = w.performance.timing.loadEventStart;
+						return w.performance.timing.loadEventStart;
 					}
 				}
 				// We don't have navigation timing,
@@ -588,11 +586,12 @@
 					// So we'll just use the time when boomerang was added to the page
 					// Assuming that this means boomerang was added in onload.  If we logged the
 					// onload timestamp (via loader snippet), use that first.
-					t_done = BOOMR.t_onload || BOOMR.t_lstart || BOOMR.t_start || t_now;
+					return BOOMR.t_onload || BOOMR.t_lstart || BOOMR.t_start || t_now;
 				}
 			}
 
-			return t_done;
+			// default to now
+			return t_now;
 		},
 
 		/**
