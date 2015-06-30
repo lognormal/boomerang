@@ -566,14 +566,13 @@
 		validateLoadTimestamp: function(t_now, data, ename) {
 			var t_done = t_now;
 
-			// if this is an XHR event, trust the input end "now" timestamp
-			if (ename === "xhr" && (!data || data.initiator !== "spa")) {
-				return t_done;
-			}
-
-			// xhr beacon with detailed timing information
+			// beacon with detailed timing information
 			if (data && data.timing && data.timing.loadEventEnd) {
 				t_done = data.timing.loadEventEnd;
+			}
+			else if (ename === "xhr" && (!data || data.initiator !== "spa")) {
+				// if this is an XHR event, trust the input end "now" timestamp
+				t_done = t_now;
 			}
 			// Boomerang loaded late and...
 			else if (BOOMR.loadedLate) {
