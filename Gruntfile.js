@@ -186,6 +186,11 @@ module.exports = function() {
 							// Remove ConfigJS Script tag from DOM to keep low memory footprint
 							pattern: /"CONFIGJSDEBUG_TOKEN"/,
 							replacement: "true"
+						},
+						{
+							// Leave ConfigJS Script tag in DOM If debug
+							pattern: /\* CONFIGJSDEBUG_TOKEN \*/,
+							replacement: ""
 						}
 					]
 				}

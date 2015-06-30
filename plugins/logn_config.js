@@ -110,7 +110,7 @@
 		}
 
 		if (complete) {
-			removeNodeIfSafe(s1);
+			/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
 			s1=null;
 			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 		}
