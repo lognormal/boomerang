@@ -44,7 +44,9 @@
 
 <p>
   Each plugin requires to be either enabled or disabled in boomerang's <code>init()</code>
-  function of BoomerangJS.</p>
+  function of BoomerangJS. As mentioned above you should only compile one SPA plugin plus its depenedncies
+  into your Boomerang release. This avoids breaking Boomerang by running multiple SPA-plugins at the same time.
+</p>
 
 <dl class="api">
   <dt>init(oConfig)</dt>
