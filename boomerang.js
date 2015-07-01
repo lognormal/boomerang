@@ -790,8 +790,8 @@ BOOMR_check_doc_domain();
 				config = {};
 			}
 
-			if (window && window.BOOMR_config) {
-				config = BOOMR.checkOverrides(window.BOOMR_config, impl.allowedConfigOverrides, config);
+			if (BOOMR.window && BOOMR.window.BOOMR_config) {
+				config = impl.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 				BOOMR.addVar("c.o", 1);
 			}
 
