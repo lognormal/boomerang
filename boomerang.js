@@ -348,6 +348,31 @@ BOOMR_check_doc_domain();
 			}
 
 			return;// true;
+		},
+
+		/**
+		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
+		 */
+		checkOverrides: function(override, whitelist, config) {
+			for (var property in override) {
+				if (!whitelist.hasOwnProperty(property) ||
+				    (typeof whitelist[property] === "object") &&
+				    !(typeof override[property] === "object")) {
+					continue;
+				}
+
+				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
+					config[property] = config[property] || {};
+					config[property] = impl.checkOverrides(override[property], whitelist[property], config[property]);
+				}
+				else if (typeof override[property] === "object" && typeof whitelist[property] === "boolean" &&  whitelist[property] === true ) {
+					config[property] = override[property];
+				}
+				else {
+					config[property] = override[property];
+				}
+			}
+			return config;
 		}
 	};
 
@@ -903,34 +928,6 @@ BOOMR_check_doc_domain();
 			impl.fireEvent("page_ready", ev);
 			impl.onloadfired = true;
 			return this;
-		},
-
-		/**
-		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
-		 */
-		checkOverrides: function(override, whitelist, config) {
-			for (var property in override) {
-
-				if (!whitelist.hasOwnProperty(property) ||
-				    (typeof whitelist[property] === "object") &&
-				    !(typeof override[property] === "object")) {
-					continue;
-				}
-
-				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
-					config[property] = config[property] || {};
-					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
-				}
-				else if ( typeof override[property] === "object" &&
-					  typeof whitelist[property] === "boolean" &&
-					  whitelist[property] === true ) {
-					config[property] = override[property];
-				}
-				else {
-					config[property] = override[property];
-				}
-			}
-			return config;
 		},
 
 		setImmediate: function(fn, data, cb_data, cb_scope) {
