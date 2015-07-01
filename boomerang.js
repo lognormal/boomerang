@@ -258,45 +258,6 @@ BOOMR_check_doc_domain();
 			"onboomerangloaded": "onBoomerangLoaded"
 		},
 
-		/**
-		 * allowedConfigOverrides: list of configuration options allowed to be
-		 * overwritten by user defined configuration via BOOMR_config.
-		 *
-		 * Object is build like the init() config object with the overwritable properties set to true.
-		 * Other properties set by the override not set here.
-		 */
-		allowedConfigOverrides: {
-			Angular: {
-				enabled: true
-			},
-			Ember: {
-				enabled: true
-			},
-			Backbone: {
-				enabled: true
-			},
-			PageParams: {
-				pageGroups: true,
-				customMetrics: true,
-				customDimensions: true,
-				customTimers: true,
-				abTests: true
-			},
-			instrument_xhr: true,
-			RT: {
-				session_exp: true
-			},
-			BW: {
-				base_url: true,
-				enable: true
-			},
-			ResourceTiming: {
-				enabled: true
-			},
-			secondaryBeacons: true,
-			autorun: true
-		},
-
 		vars: {},
 
 		errors: {},
@@ -765,11 +726,6 @@ BOOMR_check_doc_domain();
 				config = {};
 			}
 
-			if (BOOMR.window && BOOMR.window.BOOMR_config) {
-				BOOMR.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
-				BOOMR.addVar("c.o", 1);
-			}
-
 			if (config.primary && impl.handlers_attached) {
 				return this;
 			}
@@ -889,27 +845,6 @@ BOOMR_check_doc_domain();
 		page_ready_autorun: function(ev) {
 			if (impl.autorun) {
 				BOOMR.page_ready(ev);
-			}
-		},
-
-		/**
-		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
-		 */
-		checkOverrides: function(override, whitelist, config) {
-			for (var property in override) {
-				if (!whitelist.hasOwnProperty(property) ||
-				    (typeof whitelist[property] === "object") &&
-				    !(typeof override[property] === "object")) {
-					continue;
-				}
-
-				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
-					config[property] = config[property] || {};
-					BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
-				}
-				else {
-					config[property] = override[property];
-				}
 			}
 		},
 
