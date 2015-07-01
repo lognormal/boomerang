@@ -348,28 +348,6 @@ BOOMR_check_doc_domain();
 			}
 
 			return;// true;
-		},
-
-		/**
-		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
-		 */
-		checkOverrides: function(override, whitelist, config) {
-			for (var property in override) {
-				if (!whitelist.hasOwnProperty(property) ||
-				    (typeof whitelist[property] === "object") &&
-				    !(typeof override[property] === "object")) {
-					continue;
-				}
-
-				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
-					config[property] = config[property] || {};
-					config[property] = impl.checkOverrides(override[property], whitelist[property], config[property]);
-				}
-				else {
-					config[property] = override[property];
-				}
-			}
-			return config;
 		}
 	};
 
@@ -788,7 +766,7 @@ BOOMR_check_doc_domain();
 			}
 
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
-				config = impl.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
+				config = BOOMR.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 				BOOMR.addVar("c.o", 1);
 			}
 
@@ -912,6 +890,28 @@ BOOMR_check_doc_domain();
 			if (impl.autorun) {
 				BOOMR.page_ready(ev);
 			}
+		},
+
+		/**
+		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
+		 */
+		checkOverrides: function(override, whitelist, config) {
+			for (var property in override) {
+				if (!whitelist.hasOwnProperty(property) ||
+				    (typeof whitelist[property] === "object") &&
+				    !(typeof override[property] === "object")) {
+					continue;
+				}
+
+				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
+					config[property] = config[property] || {};
+					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
+				}
+				else {
+					config[property] = override[property];
+				}
+			}
+			return config;
 		},
 
 		// The page dev calls this method when they determine the page is usable.
