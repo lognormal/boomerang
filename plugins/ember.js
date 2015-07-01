@@ -148,7 +148,7 @@
 				return this;
 			}
 
-			if (hook(App, hadRouteChange)) {
+			if (hook(App)) {
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 				hooked = true;
 			}
