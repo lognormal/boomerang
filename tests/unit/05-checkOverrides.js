@@ -14,7 +14,8 @@ describe("BOOMR.checkOverrides", function() {
 		    inputConfig = {};
 		var expect = {};
 
-		assert.deepEqual(BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig), expect);
+		BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		assert.deepEqual(inputConfig, expect);
 	});
 
 	it("Should replace only the whitelisted properties in a flat config override", function(){
@@ -34,8 +35,8 @@ describe("BOOMR.checkOverrides", function() {
 			name: "2",
 			id: 2
 		};
-
-		assert.deepEqual(BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig), expect);
+		BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		assert.deepEqual(inputConfig, expect);
 	});
 
 	it("Should replace deeply nested objects only to where we allow it", function(){
@@ -71,6 +72,8 @@ describe("BOOMR.checkOverrides", function() {
 				status: "off"
 			}
 		};
-		assert.deepEqual(BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig), expect);
+
+		BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		assert.deepEqual(inputConfig, expect);
 	});
 });

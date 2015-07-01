@@ -766,7 +766,7 @@ BOOMR_check_doc_domain();
 			}
 
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
-				config = BOOMR.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
+				BOOMR.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 				BOOMR.addVar("c.o", 1);
 			}
 
@@ -905,13 +905,12 @@ BOOMR_check_doc_domain();
 
 				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
 					config[property] = config[property] || {};
-					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
+					BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
 				}
 				else {
 					config[property] = override[property];
 				}
 			}
-			return config;
 		},
 
 		// The page dev calls this method when they determine the page is usable.
