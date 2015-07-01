@@ -249,6 +249,14 @@ if (!hookEmberBoomerang()) {
 </ul>
 
 <p>Compatible versions of each framework should work as intended.</p>
+
+<h2>Browser compatibility considerations</h2>
+
+<p>As these plugins require AutoXHR and the availabilltiy of <code>MutationObserver</code> it is advisable to
+  have a polyfill for browsers where the framework may be supported but <code>MutationObserver</code> isn't. See
+  the <code>MutationObserver</code> <a href="http://caniuse.com/#feat=mutationobserver">supported browser</a> list.
+  If you are required to support browsers that don't support <code>MutationObserver</code>, consider adding a polyfill.
+</p>
 </body>
 </html>
 <!--
