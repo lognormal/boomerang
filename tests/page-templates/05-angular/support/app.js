@@ -80,10 +80,16 @@ angular.module("app", ["ngResource", "ngRoute"])
 	}])
 
 	.run(["$rootScope", "$location", "$timeout", function($rootScope, $location, $timeout) {
+		var hadRouteChange = false;
+
+		$rootScope.$on("$routeChangeStart", function() {
+			hadRouteChange = true;
+		});
+
 		function hookAngularBoomerang() {
 			if (window.BOOMR && BOOMR.version) {
 				if (BOOMR.plugins && BOOMR.plugins.Angular) {
-					BOOMR.plugins.Angular.hook($rootScope);
+					BOOMR.plugins.Angular.hook($rootScope, hadRouteChange);
 				}
 				return true;
 			}
