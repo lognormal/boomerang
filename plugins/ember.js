@@ -111,7 +111,6 @@
 			this._super(transition);
 
 			log("didTransition");
-			log("didTransition: Remove hook");
 			routeHooked=false;
 		}
 
