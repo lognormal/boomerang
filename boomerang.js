@@ -259,11 +259,11 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * allowedConfigOverrides: list of configuration elements allowed to be
+		 * allowedConfigOverrides: list of configuration options allowed to be
 		 * overwritten by user defined configuration via BOOMR_config.
 		 *
 		 * Object is build like the init() config object with the overwritable properties set to true.
-		 * Other properties set by the override not set here scxo
+		 * Other properties set by the override not set here.
 		 */
 		allowedConfigOverrides: {
 			Angular: {
