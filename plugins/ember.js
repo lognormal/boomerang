@@ -152,6 +152,7 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 				hooked = true;
 			}
+			return this;
 		}
 	};
 }());
