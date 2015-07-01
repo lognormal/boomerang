@@ -32,7 +32,7 @@ describe("BOOMR.checkOverrides", function() {
 
 		var expect = {
 			name: "2",
-			id: 2,
+			id: 2
 		};
 
 		assert.deepEqual(BOOMR.checkOverrides(inputOverride, inputWhitelist, inputConfig), expect);
@@ -59,7 +59,7 @@ describe("BOOMR.checkOverrides", function() {
 				height: 1,
 				length: 1,
 				status: "on"
-			},
+			}
 		};
 
 		var expect = {

@@ -919,12 +919,11 @@ BOOMR_check_doc_domain();
 
 				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
 					config[property] = config[property] || {};
-					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property])
+					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property]);
 				}
 				else if ( typeof override[property] === "object" &&
 					  typeof whitelist[property] === "boolean" &&
-					  whitelist[property] === true )
-				{
+					  whitelist[property] === true ) {
 					config[property] = override[property];
 				}
 				else {
