@@ -262,25 +262,40 @@ BOOMR_check_doc_domain();
 		 * allowedConfigOverrides: list of configuration elements allowed to be
 		 * overwritten by user defined configuration via BOOMR_config.
 		 *
-		 * Values are dot delimited strings allowing for depth values to be accessed as well.
+		 * Object is build like the init() config object with the overwritable properties set to true.
+		 * Other properties set by the override not set here scxo
 		 */
-		allowedConfigOverrides: [
-			"Angular.enable",
-			"Ember.enable",
-			"Backbone.enable",
-			"PageParams.pageGroups",
-			"PageParams.customMetrics",
-			"PageParams.customDimensions",
-			"PageParams.customTimers",
-			"PageParams.abTests",
-			"instrument_xhr",
-			"RT.session_exp",
-			"BW.base_url",
-			"BW.enable",
-			"ResourceTiming.enabled",
-			"secondaryBeacons",
-			"autorun"
-		],
+		allowedConfigOverrides: {
+			Angular: {
+				enabled: true
+			},
+			Ember: {
+				enabled: true
+			},
+			Backbone: {
+				enabled: true
+			},
+			PageParams: {
+				pageGroups: true,
+				customMetrics: true,
+				customDimensions: true,
+				customTimers: true,
+				abTests: true
+			},
+			instrument_xhr: true,
+			RT: {
+				session_exp: true
+			},
+			BW: {
+				base_url: true,
+				enable: true
+			},
+			ResourceTiming: {
+				enabled: true
+			},
+			secondaryBeacons: true,
+			autorun: true
+		},
 
 		vars: {},
 
@@ -358,110 +373,6 @@ BOOMR_check_doc_domain();
 
 		// Utility functions
 		utils: {
-			/**
-			 * deep merge content of target and src where target is the basis and src is a sub-/superset of target.
-			 */
-			deepmerge: function(target, src) {
-				var array = Array.isArray(src);
-				var dst = array && [] || {};
-
-				if (array) {
-					target = target || [];
-					dst = dst.concat(target);
-
-					for (var i = 0; i < src.length; i++) {
-						var e = src[i];
-						if (typeof dst[i] === "undefined") {
-							dst[i] = e;
-						}
-						else if (typeof e === "object") {
-							dst[i] = this.deepmerge(target[i], e);
-						}
-						else {
-							if (target.indexOf(e) === -1) {
-								dst.push(e);
-							}
-						}
-					}
-				}
-				else {
-					if (target && typeof target === "object") {
-						for (var key in target) {
-							dst[key] = target[key];
-						}
-					}
-					for (var srckey in src) {
-						if (typeof src[srckey] !== "object" || !src[srckey]) {
-							dst[srckey] = src[srckey];
-						}
-						else {
-							if (!target[srckey]) {
-								dst[srckey] = src[srckey];
-							}
-							else {
-								dst[srckey] = this.deepmerge(target[srckey], src[srckey]);
-							}
-						}
-					}
-				}
-
-				return dst;
-			},
-
-			/**
-			 * Filter out whitelisted object properties in depth.
-			 * obj: the object to filter on
-			 * whitelist: the list of allowed properties
-			 *            these can be in-depth properties such
-			 *            that properties that are objects themselves
-			 *            can also be accounted for
-			 * seperator: Seperator to determine if this is a deep or
-			 *            shallow property of the object.
-			 *            By default "."
-			 *
-			 * Returns an object with all the allowed properties left in it
-			 */
-			filterByWhitelist: function(obj, whitelist, separator) {
-				var object = {};
-
-				if (typeof whitelist === "undefined") {
-					return {};
-				}
-
-				for (var i = 0, length = whitelist.length; i < length; ++i) {
-					var k = 0,
-					    names = whitelist[i].split(separator || "."),
-					    value = obj,
-					    name,
-					    count = names.length - 1,
-					    ref = object,
-					    exists = true;
-
-					while (k < count) { // walks to n - 1
-						name = names[k++];
-						value = value[name];
-
-						if (typeof value !== "undefined") {
-							if (typeof object[name] === "undefined") {
-								ref[name] = {};
-							}
-
-							ref = ref[name];
-						}
-						else {
-							exists = false;
-							break;
-						}
-					}
-
-					if (exists) {
-						ref[names[count]] = value[names[count]];
-					}
-				}
-
-				return object;
-			},
-
 			objectToString: function(o, separator, nest_level) {
 				var value = [], k;
 
@@ -855,7 +766,7 @@ BOOMR_check_doc_domain();
 			}
 
 			if (window && window.BOOMR_config) {
-				config = this.overrideConfig(config);
+				config = BOOMR.checkOverrides(window.BOOMR_config, impl.allowedConfigOverrides, config);
 				BOOMR.addVar("c.o", 1);
 			}
 
@@ -994,10 +905,31 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
-		overrideConfig: function(config) {
-			if (typeof window.BOOMR_config === "object") {
-				var cleanOverrideConfig = this.utils.filterByWhitelist(window.BOOMR_config, impl.allowedConfigOverrides, ".");
-				return this.utils.deepmerge(config, cleanOverrideConfig);
+		/**
+		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
+		 */
+		checkOverrides: function(override, whitelist, config) {
+			for (var property in override) {
+
+				if (!whitelist.hasOwnProperty(property) ||
+				    (typeof whitelist[property] === "object") &&
+				    !(typeof override[property] === "object")) {
+					continue;
+				}
+
+				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
+					config[property] = config[property] || {};
+					config[property] = BOOMR.checkOverrides(override[property], whitelist[property], config[property])
+				}
+				else if ( typeof override[property] === "object" &&
+					  typeof whitelist[property] === "boolean" &&
+					  whitelist[property] === true )
+				{
+					config[property] = override[property];
+				}
+				else {
+					config[property] = override[property];
+				}
 			}
 			return config;
 		},
