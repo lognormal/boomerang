@@ -365,9 +365,6 @@ BOOMR_check_doc_domain();
 					config[property] = config[property] || {};
 					config[property] = impl.checkOverrides(override[property], whitelist[property], config[property]);
 				}
-				else if (typeof override[property] === "object" && typeof whitelist[property] === "boolean" &&  whitelist[property] === true ) {
-					config[property] = override[property];
-				}
 				else {
 					config[property] = override[property];
 				}
