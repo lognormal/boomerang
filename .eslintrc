@@ -13,7 +13,8 @@
 		"BOOMR_test":true,
 		"console":false,
 		"unescape":false,
-		"BOOMR_configt":true
+		"BOOMR_configt":true,
+		"BOOMR_check_doc_domain":true
 	},
 	"rules": {
 		"no-mixed-spaces-and-tabs":[2, true],

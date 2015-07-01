@@ -7,6 +7,12 @@
 	// Default SPA activity timeout, in milliseconds
 	var SPA_TIMEOUT = 1000;
 
+	// Custom XHR status codes
+	var XHR_STATUS_TIMEOUT        = -1001;
+	var XHR_STATUS_ABORT          = -999;
+	var XHR_STATUS_ERROR          = -998;
+	var XHR_STATUS_OPEN_EXCEPTION = -997;
+
 	// If this browser cannot support XHR, we'll just skip this plugin which will
 	// save us some execution time.
 
@@ -698,25 +704,41 @@
 				}
 
 				addListener("load");
-				addListener("timeout", -1001);
-				addListener("error",    -998);
-				addListener("abort",    -999);
+				addListener("timeout", XHR_STATUS_TIMEOUT);
+				addListener("error",   XHR_STATUS_ERROR);
+				addListener("abort",   XHR_STATUS_ABORT);
 
 				resource.url = a.href;
 				resource.method = method;
+
+				// reset any statuses from previous calls to .open()
+				delete resource.status;
+
 				if (!async) {
 					resource.synchronous = true;
 				}
 
 				// call the original open method
-				return orig_open.apply(req, arguments);
+				try {
+					return orig_open.apply(req, arguments);
+				}
+				catch (e) {
+					// if there was an exception during .open(), .send() won't work either,
+					// so let's fire loadFinished now
+					resource.status = XHR_STATUS_OPEN_EXCEPTION;
+					loadFinished();
+				}
 			};
 
 			req.send = function() {
 				resource.timing.requestStart = BOOMR.now();
 
-				// call the original send method
-				return orig_send.apply(req, arguments);
+				// call the original send method unless there was an error
+				// during .open
+				if (typeof resource.status === "undefined" ||
+				    resource.status !== XHR_STATUS_OPEN_EXCEPTION) {
+					return orig_send.apply(req, arguments);
+				}
 			};
 
 			req.resource = resource;

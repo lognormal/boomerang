@@ -267,6 +267,10 @@
 		return (window.performance && typeof window.performance.getEntriesByType === "function");
 	};
 
+	t.isQuerySelectorSupported = function() {
+		return typeof window.document.querySelector === "function";
+	};
+
 	t.isUserTimingSupported = function() {
 		return (window.performance &&
 		        typeof window.performance.getEntriesByType === "function" &&
@@ -441,9 +445,9 @@
 	 */
 	t.ifAutoXHR = function(done, testXhr, testDegenerate) {
 		if (BOOMR.plugins.AutoXHR) {
-			return (testXhr || done)();
+			return (testXhr || done || function(){})();
 		}
-		(testDegenerate || done)();
+		(testDegenerate || done || function(){})();
 	};
 
 	window.BOOMR_test = t;

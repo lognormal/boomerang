@@ -51,6 +51,19 @@ function BOOMR_check_doc_domain(domain) {
 		domain = document.domain;
 	}
 
+	if (window.BOOMR && BOOMR.boomerang_frame && BOOMR.window) {
+		/*eslint-disable no-empty*/
+		try {
+			// If document.domain is changed during page load (from www.blah.com to blah.com, for example),
+			// BOOMR.window.location.href throws "Permission Denied" in IE.
+			// Resetting the inner domain to match the outer makes location accessible once again
+			BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
+		}
+		catch(err) {
+			BOOMR.addError(err, "inner domain assignment failed");
+		}
+	}
+
 	if (domain.indexOf(".") === -1) {
 		return;// false;	// not okay, but we did our best
 	}

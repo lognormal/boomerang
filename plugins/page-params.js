@@ -753,6 +753,8 @@
 				return;
 			}
 
+			BOOMR_check_doc_domain();
+
 			//
 			// XHRs are handled differently than normal or SPA navigations (which apply
 			// all Page Groups, Timers, Metrics, Dimensions and ABs).  XHRs look at Page Groups
