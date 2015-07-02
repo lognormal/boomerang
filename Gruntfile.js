@@ -329,7 +329,7 @@ module.exports = function() {
 				"tests/coverage/*",
 				"tests/pages/**/*"
 			],
-			src: ["plugins/*~", "*.js~"]
+			src: ["plugins/*~", "*.js~", "*.html~"]
 		},
 		karma: {
 			options: {

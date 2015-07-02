@@ -33,131 +33,126 @@
  */
 
 (function() {
-	var initialRouteChangeStarted = false,
-	    initialRouteChangeCompleted = false,
-	    requestStart = 0,
-	    hooked = false,
-	    autoXhrEnabled = false,
-	    container;
+	var hooked = false,
+	    routeHooked = false;
 
-	if (BOOMR.plugins.Ember || !BOOMR.plugins.AutoXHR) {
+	if (BOOMR.plugins.Ember || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}
 
-	/**
-	 * Debug logging for this App
-	 *
-	 * @param {string} msg Message
-	 */
-	function log(msg) {
-		var currentRouteName = container.lookup("controller:application") ? container.lookup("controller:application").get("currentRouteName") + " " : "";
-		BOOMR.debug(currentRouteName + msg, "Ember");
-	}
+	// register as a SPA plugin
+	BOOMR.plugins.SPA.register("Ember");
 
 	function hook(App) {
+		if (typeof App === "undefined") {
+			return false;
+		}
 
-		function changeStart(transition) {
-			var url = transition && transition.intent.url ? transition.intent.url : BOOMR.window.document.URL;
-			requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
-
-			var resource = {
-				timing: {
-					requestStart: requestStart
-				},
-				initiator: "spa",
-				url: url
-			};
-
-			if (!initialRouteChangeCompleted) {
-				resource.onComplete = function() {
-					initialRouteChangeCompleted = true;
-				};
-			}
-
-			// start listening for changes
-			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
-
-			if (autoXhrEnabled) {
-				BOOMR.plugins.AutoXHR.enableAutoXhr();
-			}
+		// We need the AutoXHR and SPA plugins to operate
+		if (!BOOMR.plugins.AutoXHR ||
+		    !BOOMR.plugins.SPA) {
+			return false;
 		}
 
 		/**
-		 * activate will be called on first navigation
+		 * Debug logging for this $rootScope's ID
+		 *
+		 * @param {string} msg Message
 		 */
-		function activate() {
-			// Make sure the original didTransition callback is called before we proceed.
-			this._super();
-			log("activate");
+		function log(msg) {
+			BOOMR.debug(msg, "Ember");
+		}
 
-			initialRouteChangeStarted = true;
+		log("Startup");
 
-			changeStart();
+		/**
+		 * beforeModel even earlier than activate
+		 */
+		function beforeModel(transition) {
+			// Make sure the original beforeModel callback is called before we proceed.
+			this._super(transition);
+
+			log("beforeModel");
+
+			if (transition && transition.intent && transition.intent.url) {
+				log("[beforeModel] LastLocation: " + transition.intent.url);
+				BOOMR.plugins.SPA.last_location(transition.intent.url);
+			}
+
+			if (!routeHooked) {
+				BOOMR.plugins.SPA.route_change();
+				routeHooked = true;
+			}
+
+			return true;
 		}
 
 		/**
 		 * subsequent navigations will use willTransition
 		 */
 		function willTransition(transition) {
-			// Make sure the original didTransition callback is called before we proceed.
-			log("willTransition");
-			changeStart(transition);
+			this._super(transition);
 
+			log("willTransition");
+
+			if (transition && transition.intent && transition.intent.url) {
+				log("[willTransition] LastLocation: " + transition.intent.url);
+				BOOMR.plugins.SPA.last_location(transition.intent.url);
+			}
+
+			if (!routeHooked) {
+				BOOMR.plugins.SPA.route_change();
+				routeHooked = true;
+			}
 			return true;
+		}
+
+		function didTransition(transition) {
+			this._super(transition);
+
+			log("didTransition");
+			routeHooked=false;
 		}
 
 		if (App.ApplicationRoute) {
 			App.ApplicationRoute.reopen({
-				activate: activate,
+				beforeModel: beforeModel,
 				actions: {
-					willTransition: willTransition
+					willTransition: willTransition,
+					didTransition: didTransition
 				}
 			});
 		}
 		else {
 			App.ApplicationRoute = BOOMR.window.Ember.Route.extend({
-				activate: activate,
+				beforeModel: beforeModel,
 				actions: {
-					willTransition: willTransition
+					willTransition: willTransition,
+					didTransition: didTransition
 				}
 			});
 		}
 
-		container = App.__container__;
+		return true;
 	}
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.Ember = {
 		is_complete: function() {
 			return true;
 		},
-		init: function(config) {
-			if (config && config.instrument_xhr) {
-				autoXhrEnabled = config.instrument_xhr;
-
-				if (initialRouteChangeStarted && autoXhrEnabled) {
-					BOOMR.plugins.AutoXHR.enableAutoXhr();
-				}
-			}
-		},
 		hook: function(App, hadRouteChange) {
-
 			if (hooked) {
 				return this;
 			}
 
-			if (hadRouteChange) {
-				if (autoXhrEnabled) {
-					BOOMR.plugins.AutoXHR.enableAutoXhr();
-				}
-
-				initialRouteChangeCompleted = true;
-				BOOMR.addVar("http.initiator", "spa");
-				BOOMR.page_ready();
-			}
-
-			if (hook(App) ) {
+			if (hook(App)) {
+				BOOMR.plugins.SPA.hook(hadRouteChange);
 				hooked = true;
 			}
+			return this;
 		}
 	};
 }());
