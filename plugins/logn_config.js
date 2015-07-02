@@ -28,6 +28,10 @@
 		}
 	};
 
+	var removeNodeIfSafe = function(element) {
+		element.parentNode.removeChild(element);
+	};
+
 	load=function() {
 		var s0=dc.getElementsByTagName(s)[0],
 		    s1=dc.createElement(s),
@@ -99,12 +103,15 @@
 		}
 		else {
 			s0.parentNode.insertBefore(s1, s0);
-			s0=s1=null;
+			s0=null;
 		}
 
 		if (complete) {
+			/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
+			s1=null;
 			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 		}
+
 	};
 
 	BOOMR.plugins.LOGN = {
@@ -136,6 +143,7 @@
 					delete BOOMR_configt;
 				}
 				return this;
+
 			}
 
 			running=true;

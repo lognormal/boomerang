@@ -133,6 +133,11 @@ module.exports = function() {
 							// Show debug log
 							pattern: /\/\*BEGIN DEBUG TOKEN\*\/.*\/\*END DEBUG TOKEN\*\//,
 							replacement: ""
+						},
+						{
+							// Leave ConfigJS Script tag in DOM If debug
+							pattern: /\* CONFIGJSDEBUG_TOKEN \*/,
+							replacement: ""
 						}
 					]
 				}
