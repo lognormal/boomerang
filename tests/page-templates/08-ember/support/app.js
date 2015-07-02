@@ -81,14 +81,7 @@ App.Router.map(function() {
 	this.resource("widgets");
 	this.resource("widget", {path: "widgets/:id"});
 
-	if (window.html5_mode) {
-		var appPath = window.location.pathname.split("/"),
-		    appRootURL = "/" + appPath[appPath.length-1];
-
-		this.route("metric", { path: appRootURL });
-	}
-
-	this.route("metric", { path: "/" });
+	this.route("metric", { path: "" });
 
 	window.custom_metric_1 = 11;
 	window.custom_metric_2 = function() {
@@ -147,11 +140,8 @@ App.Router.map(function() {
 });
 
 if (window.html5_mode) {
-	var path = window.location.pathname.split("/"),
-	    rootURL = "/" + path[path.length-1];
-
 	App.Router.reopen({
 		location: "history",
-		rootURL: rootURL
+		rootURL: ""
 	});
 }
