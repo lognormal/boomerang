@@ -445,9 +445,9 @@
 	 */
 	t.ifAutoXHR = function(done, testXhr, testDegenerate) {
 		if (BOOMR.plugins.AutoXHR) {
-			return (testXhr || done)();
+			return (testXhr || done || function(){})();
 		}
-		(testDegenerate || done)();
+		(testDegenerate || done || function(){})();
 	};
 
 	window.BOOMR_test = t;

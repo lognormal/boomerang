@@ -1,4 +1,7 @@
 /*global Ember,App*/
+
+var rnd = Math.random();
+
 window.App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 	LOG_TRANSITIONS_INTERNAL: true
@@ -29,23 +32,23 @@ App.ApplicationRoute = Ember.Route.extend({
 
 App.WidgetsRoute = Ember.Route.extend({
 	beforeModel: function() {
-		return Ember.$.get("support/widgets.html").then(function(data) {
+		return Ember.$.get("support/widgets.html?rnd=" + Math.random()).then(function(data) {
 			Ember.TEMPLATES.widgets = Ember.Handlebars.compile(data);
 		});
 	},
 	model: function() {
-		return Ember.$.getJSON("support/widgets.json");
+		return Ember.$.getJSON("support/widgets.json?rnd=" + Math.random());
 	}
 });
 
-App.WidgetRoute = Ember.Route.extend({
+App.WidgetsWidgetRoute = Ember.Route.extend({
 	beforeModel: function() {
-		return Ember.$.get("support/widget.html").then(function(data) {
+		return Ember.$.get("support/widget.html?rnd=" + Math.random()).then(function(data) {
 			Ember.TEMPLATES.widget = Ember.Handlebars.compile(data);
 		});
 	},
 	model: function(params)  {
-		return Ember.$.getJSON("support/widgets.json").then(function(data) {
+		return Ember.$.getJSON("support/widgets.json?rnd=" + Math.random()).then(function(data) {
 			return data.filter(function(model) {
 				return String(model.id) === params.id;
 			})[0];
@@ -53,25 +56,32 @@ App.WidgetRoute = Ember.Route.extend({
 	}
 });
 
+App.WidgetRoute = App.WidgetsWidgetRoute;
+
 App.MetricRoute = Ember.Route.extend({
 	beforeModel: function() {
-		return Ember.$.get("support/metric.html").then(function(data) {
+		return Ember.$.get("support/metric.html?rnd=" + Math.random()).then(function(data) {
 			Ember.TEMPLATES.metric = Ember.Handlebars.compile(data);
 		});
 	},
 	model: function() {
-		return Ember.$.getJSON("support/widgets.json").then(function(data) {
-			data.imgs = window.imgs ? window.imgs : [];
-
-			return data;
+		return Ember.$.getJSON("support/widgets.json?rnd=" + Math.random()).then(function(data) {
+			var model = {};
+			model.widgets = data;
+			model.imgs = typeof window.imgs !== "undefined" ? window.imgs : [0];
+			console.log(model.imgs);
+			model.hide = model.imgs[0] === -1;
+			model.rnd = rnd;
+			return model;
 		});
 	}
 });
 
 App.Router.map(function() {
-	this.resource("widgets", {path: "/widgets"});
-	this.resource("widget", {path: "/widget/:id"});
-	this.route("metric", { path: "/" });
+	this.resource("widgets");
+	this.resource("widget", {path: "widgets/:id"});
+
+	this.route("metric", { path: "" });
 
 	window.custom_metric_1 = 11;
 	window.custom_metric_2 = function() {
@@ -130,11 +140,8 @@ App.Router.map(function() {
 });
 
 if (window.html5_mode) {
-	var path = window.location.pathname.split("/"),
-	    rootURL = "/" + path[path.length-1];
-
 	App.Router.reopen({
 		location: "history",
-		rootURL: rootURL
+		rootURL: ""
 	});
 }

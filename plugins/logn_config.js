@@ -6,7 +6,8 @@
 	    complete, running,
 	    t_start,
 	    load, loaded,
-	    autorun=true;
+	    autorun=true,
+	    CONFIG_RELOAD_TIMEOUT=5.5*60*1000;
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
@@ -108,7 +109,7 @@
 		if (complete) {
 			/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
 			s1=null;
-			setTimeout(load, 5.5*60*1000);
+			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 		}
 
 	};
@@ -134,7 +135,7 @@
 				// regarding whether it will or willn't fire onreadystatechange for
 				// every change of readyState
 				BOOMR.setImmediate(loaded);
-				setTimeout(load, 5.5*60*1000);
+				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 
 				BOOMR.addVar("t_configjs", BOOMR.now()-t_start);
 				if (typeof BOOMR_configt === "number") {

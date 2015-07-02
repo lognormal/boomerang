@@ -16,7 +16,7 @@ BOOMR_test.templates.SPA["08-no-images"] = function() {
 
 	it("Should take as long as the widgets.json take to load (if NavigationTiming is supported)", function() {
 		if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 3000, 30000, true);
+			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, true);
 		}
 	});
 

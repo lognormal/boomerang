@@ -84,8 +84,8 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 	//
 	it("Should have sent the third beacon for /05-route-change.html", function() {
 		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("#/05-route-change-hashtags.html") !== -1 ||
-		              b.u.indexOf("#05-route-change-hashtags.html") !== -1);
+		assert.isTrue(b.u.indexOf("05-route-change-hashtags.html#") !== -1 ||
+		              b.u.indexOf("05-route-change-hashtags.html#/") !== -1);
 	});
 
 	it("Should have sent the third with a timestamp of less than 1 second", function() {
