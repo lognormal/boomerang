@@ -176,6 +176,14 @@ module.exports = function() {
 						{
 							pattern: /\(\)\);\(function\(/g,
 							replacement: "\(\)\);\n(function("
+						},
+						{
+							pattern: /BEGIN UNIT_TEST_CODE \*\//,
+							replacement: ""
+						},
+						{
+							pattern: /\/\* END UNIT_TEST_CODE /,
+							replacement: ""
 						}
 					]
 				}
