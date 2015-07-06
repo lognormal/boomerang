@@ -12,7 +12,7 @@ describe("e2e/10-config-override/01-config-deep", function() {
 
 	it("Should have config override flag set to 1", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["c.o"], 1);
+		assert.equal(b["c.o"], "");
 	});
 
 	it("Should have the custom metric 1 - JavaScript var", function() {

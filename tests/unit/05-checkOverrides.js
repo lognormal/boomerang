@@ -1,16 +1,16 @@
 /*eslint-env mocha*/
 /*global chai*/
 
-describe("BOOMR.checkOverrides", function() {
+describe("BOOMR.plugins.ConfigOverride.safeOverrideConfig", function() {
 	var assert = chai.assert;
 
 	// If BOOMR wasn't built with ConfigOverride included just skip() the tests here
-	if (!BOOMR || !BOOMR.plugins.ConfigOverride.checkOverrides) {
+	if (!BOOMR || !BOOMR.plugins.ConfigOverride.safeOverrideConfig) {
 		this.skip();
 	}
 
-	it("Should have a function on the BOOMR object called checkOverrides", function(){
-		assert.isFunction(BOOMR.plugins.ConfigOverride.checkOverrides);
+	it("Should have a function on the BOOMR object called safeOverrideConfig", function(){
+		assert.isFunction(BOOMR.plugins.ConfigOverride.safeOverrideConfig);
 	});
 
 	it("Should return empty object if passed null as overrides and an empty config object", function(){
@@ -19,7 +19,7 @@ describe("BOOMR.checkOverrides", function() {
 		    inputConfig = {};
 		var expect = {};
 
-		BOOMR.plugins.ConfigOverride.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		BOOMR.plugins.ConfigOverride.safeOverrideConfig(inputOverride, inputWhitelist, inputConfig);
 		assert.deepEqual(inputConfig, expect);
 	});
 
@@ -40,7 +40,7 @@ describe("BOOMR.checkOverrides", function() {
 			name: "2",
 			id: 2
 		};
-		BOOMR.plugins.ConfigOverride.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		BOOMR.plugins.ConfigOverride.safeOverrideConfig(inputOverride, inputWhitelist, inputConfig);
 		assert.deepEqual(inputConfig, expect);
 	});
 
@@ -78,7 +78,7 @@ describe("BOOMR.checkOverrides", function() {
 			}
 		};
 
-		BOOMR.plugins.ConfigOverride.checkOverrides(inputOverride, inputWhitelist, inputConfig);
+		BOOMR.plugins.ConfigOverride.safeOverrideConfig(inputOverride, inputWhitelist, inputConfig);
 		assert.deepEqual(inputConfig, expect);
 	});
 });

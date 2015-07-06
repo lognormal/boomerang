@@ -9,10 +9,10 @@
 
 	var impl = {
 		/**
-		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
+		 * safeOverrideConfig - override current @param config with values from @param override if @param whitelist allows
 		 */
-		checkOverrides: function(override, whitelist, config) {
-			for (var property in override) {
+		safeOverrideConfig: function(override, whitelist, config) {
+			for (var property in whitelist) {
 				if (!whitelist.hasOwnProperty(property) ||
 				    (typeof whitelist[property] === "object") &&
 				    !(typeof override[property] === "object")) {
@@ -21,10 +21,12 @@
 
 				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
 					config[property] = config[property] || {};
-					impl.checkOverrides(override[property], whitelist[property], config[property]);
+					impl.safeOverrideConfig(override[property], whitelist[property], config[property]);
 				}
 				else {
 					config[property] = override[property];
+					// set c.o here so we are sure that we actually changed something
+					BOOMR.addVar("c.o", "");
 				}
 			}
 		},
@@ -73,15 +75,16 @@
 		init: function(config) {
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
 				BOOMR.debug("Found BOOMR_config on global scope: " + BOOMR.utils.objectToString(BOOMR.window.BOOMR_config), "ConfigOverride");
-				impl.checkOverrides(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
-				BOOMR.addVar("c.o", 1);
+				impl.safeOverrideConfig(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 			}
 			return this;
 		},
 		is_complete: function() {
 			return true;
-		},
-		checkOverrides: impl.checkOverrides
+		}
+		/* BEGIN UNIT_TEST_CODE */,
+		safeOverrideConfig: impl.safeOverrideConfig
+		/* END UNIT_TEST_CODE */
 	};
 
 }());
