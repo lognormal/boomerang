@@ -13,7 +13,7 @@
 		 */
 		safeConfigOverride: function(override, whitelist, config) {
 			for (var property in whitelist) {
-				if (!whitelist.hasOwnProperty(property) ||
+				if (!override.hasOwnProperty(property) ||
 				    (typeof whitelist[property] === "object") &&
 				    !(typeof override[property] === "object")) {
 					continue;
