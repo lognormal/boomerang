@@ -3,6 +3,10 @@
 	BOOMR = BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
+	if (BOOMR.plugins.ConfigOverride) {
+		return;
+	}
+
 	var impl = {
 		/**
 		 * checkOverrides - override current @param config with values from @param override if @param whitelist allows
