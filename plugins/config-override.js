@@ -9,9 +9,9 @@
 
 	var impl = {
 		/**
-		 * safeOverrideConfig - override current @param config with values from @param override if @param whitelist allows
+		 * safeConfigOverride - override current @param config with values from @param override if @param whitelist allows
 		 */
-		safeOverrideConfig: function(override, whitelist, config) {
+		safeConfigOverride: function(override, whitelist, config) {
 			for (var property in whitelist) {
 				if (!whitelist.hasOwnProperty(property) ||
 				    (typeof whitelist[property] === "object") &&
@@ -21,7 +21,7 @@
 
 				if (typeof override[property] === "object" && typeof whitelist[property] === "object") {
 					config[property] = config[property] || {};
-					impl.safeOverrideConfig(override[property], whitelist[property], config[property]);
+					impl.safeConfigOverride(override[property], whitelist[property], config[property]);
 				}
 				else {
 					config[property] = override[property];
@@ -75,7 +75,7 @@
 		init: function(config) {
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
 				BOOMR.debug("Found BOOMR_config on global scope: " + BOOMR.utils.objectToString(BOOMR.window.BOOMR_config), "ConfigOverride");
-				impl.safeOverrideConfig(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
+				impl.safeConfigOverride(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 			}
 			return this;
 		},
@@ -83,7 +83,7 @@
 			return true;
 		}
 		/* BEGIN UNIT_TEST_CODE */,
-		safeOverrideConfig: impl.safeOverrideConfig
+		safeConfigOverride: impl.safeConfigOverride
 		/* END UNIT_TEST_CODE */
 	};
 
