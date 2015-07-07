@@ -350,7 +350,7 @@ module.exports = function() {
 				colors: true,
 				configFile: "./tests/karma.config.js",
 				preprocessors: {
-					"./tests/build/*.js": ["coverage"]
+					"./build/*.js": ["coverage"]
 				},
 				basePath: "./",
 				files: [
