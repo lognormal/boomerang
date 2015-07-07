@@ -1,0 +1,126 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="05-js-array-subscript.js" type="text/javascript"></script>
+<script>
+/*global custom_metric_1:true, custom_metric_2:true, custom_metric_3:true, custom_metric_4:true*/
+/*eslint-disable no-unused-vars*/
+custom_metric_1 = [111];
+custom_metric_2 = {
+	foo: [0, 222]
+};
+custom_metric_3 = [
+	{
+		foo: {
+			moo: [0, 0, 0,
+				{
+					woo: [0, 333]
+				}
+			]
+		}
+	}
+];
+custom_metric_4 = [
+	function() {
+		return 444;
+	}
+];
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	PageParams: {
+		abTests: [
+			{
+				"type": "Custom",
+				"parameter1": "custom_metric_1[0]"
+			}
+		],
+		customMetrics: [
+			{
+				varName: "custom_metric_1[0]",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_2.foo[1]",
+				label: "cmet2",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_3[0].foo.moo[3].woo[1]",
+				label: "cmet3",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_4[0]",
+				label: "cmet4",
+				type: "JavaScriptVar"
+			}
+		],
+		customDimensions: [
+			{
+				"name": "JS1",
+				"index": 0,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS1",
+				"dataType": "Text",
+				"varName": "custom_metric_1[0]"
+			},
+			{
+				"name": "JS2",
+				"index": 1,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS2",
+				"dataType": "Text",
+				"varName": "custom_metric_2.foo[1]"
+			},
+			{
+				"name": "JS3",
+				"index": 2,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS3",
+				"dataType": "Text",
+				"varName": "custom_metric_3[0].foo.moo[3].woo[1]"
+			},
+			{
+				"name": "JS4",
+				"index": 3,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS4",
+				"dataType": "Text",
+				"varName": "custom_metric_4[0]"
+			}
+		],
+		customTimers: [
+			{
+				"name": "JST1",
+				"index": 0,
+				"type": "Custom",
+				"label": "custom0",
+				"parameter1": "custom_metric_1[0]"
+			},
+			{
+				"name": "JST2",
+				"index": 1,
+				"type": "Custom",
+				"label": "custom1",
+				"parameter1": "custom_metric_2.foo[1]"
+			},
+			{
+				"name": "JST3",
+				"index": 2,
+				"type": "Custom",
+				"label": "custom2",
+				"parameter1": "custom_metric_3[0].foo.moo[3].woo[1]"
+			},
+			{
+				"name": "JST4",
+				"index": 3,
+				"type": "Custom",
+				"label": "custom3",
+				"parameter1": "custom_metric_4[0]"
+			}
+		]
+	}
+});
+</script>
+<%= footer %>

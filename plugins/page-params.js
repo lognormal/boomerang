@@ -323,7 +323,7 @@
 			}
 
 			// Top part needs to be global in the primary window
-			value = w[parts.shift()];
+			value = this.extractJavaScriptVariableValue(w, parts.shift());
 
 			// Then we navigate down the object looking at each part
 			// until:
@@ -334,7 +334,7 @@
 				while (value !== null && typeof value === "object" && parts.length) {
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
-					value = value[parts.shift()];
+					value = this.extractJavaScriptVariableValue(value, parts.shift());
 				}
 			}
 			catch(err) {
@@ -369,6 +369,25 @@
 			value = this.cleanUp(String(value));
 
 			return this.apply(value);
+		},
+
+		extractJavaScriptVariableValue: function(value, part) {
+			// regex to extract array subscript index
+			var match, re = /\[(\d+)\]?/;
+
+			if ((match = re.exec(part)) !== null) {
+				var index = parseInt(match[1], 10);
+
+				// strip part of the subscript [n]
+				part = part.substr(0, part.indexOf("["));
+
+				// return value.part[index]
+				return value[part][index];
+			}
+			else {
+				// no subscript, return value.part
+				return value[part];
+			}
 		},
 
 		URLPattern: function(o) {
@@ -1106,6 +1125,10 @@
 			}
 			return true;
 		}
+
+		/* BEGIN UNIT_TEST_CODE */,
+		Handler: Handler
+		/* END UNIT_TEST_CODE */
 	};
 
 }());
