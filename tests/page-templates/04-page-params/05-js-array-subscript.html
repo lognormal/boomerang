@@ -13,7 +13,9 @@ custom_metric_3 = [
 		foo: {
 			moo: [0, 0, 0,
 				{
-					woo: [0, 333]
+					woo: [0, 333,
+						[0, 0, 0, 555]
+					]
 				}
 			]
 		}
@@ -54,6 +56,11 @@ BOOMR_test.init({
 				varName: "custom_metric_4[0]",
 				label: "cmet4",
 				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_3[0].foo.moo[3].woo[2][3]",
+				label: "cmet5",
+				type: "JavaScriptVar"
 			}
 		],
 		customDimensions: [
@@ -88,6 +95,14 @@ BOOMR_test.init({
 				"label": "cdim.JS4",
 				"dataType": "Text",
 				"varName": "custom_metric_4[0]"
+			},
+			{
+				"name": "JS5",
+				"index": 4,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS5",
+				"dataType": "Text",
+				"varName": "custom_metric_3[0].foo.moo[3].woo[2][3]"
 			}
 		],
 		customTimers: [
@@ -118,6 +133,13 @@ BOOMR_test.init({
 				"type": "Custom",
 				"label": "custom3",
 				"parameter1": "custom_metric_4[0]"
+			},
+			{
+				"name": "JST5",
+				"index": 4,
+				"type": "Custom",
+				"label": "custom4",
+				"parameter1": "custom_metric_3[0].foo.moo[3].woo[2][3]"
 			}
 		]
 	}

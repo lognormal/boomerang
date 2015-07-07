@@ -29,6 +29,11 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet4, 444);
 	});
 
+	it("Should have the custom metric 5 - Complex JavaScript with double subscripts", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet5, 555);
+	});
+
 	it("Should have the custom dimension 1 - JavaScript var with subscript", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["cdim.JS1"], "111");
@@ -49,6 +54,11 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b["cdim.JS4"], "444");
 	});
 
+	it("Should have the custom dimension 5 - Complex JavaScript with double subscripts", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.JS5"], 555);
+	});
+
 	it("Should have the custom timer 1 - JavaScript var with subscript", function() {
 		var b = tf.lastBeacon();
 		assert.equal(t.parseTimers(b.t_other).custom0, 111);
@@ -67,6 +77,11 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 	it("Should have the custom timer 4 - JavaScript var with subscript function", function() {
 		var b = tf.lastBeacon();
 		assert.equal(t.parseTimers(b.t_other).custom3, 444);
+	});
+
+	it("Should have the custom timer 5 - Complex JavaScript with double subscripts", function() {
+		var b = tf.lastBeacon();
+		assert.equal(t.parseTimers(b.t_other).custom4, 555);
 	});
 
 	it("Should have the A/B test", function() {

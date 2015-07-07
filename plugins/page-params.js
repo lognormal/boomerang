@@ -373,16 +373,38 @@
 
 		extractJavaScriptVariableValue: function(value, part) {
 			// regex to extract array subscript index
-			var match, re = /\[(\d+)\]?/;
+			var match, index, ret, subscripts, indicies = [], i, re = /(.+?)\[(\d+)\]((?:\[\d+\])+)*/;
 
 			if ((match = re.exec(part)) !== null) {
-				var index = parseInt(match[1], 10);
+				// part before subscript
+				part = match[1];
 
-				// strip part of the subscript [n]
-				part = part.substr(0, part.indexOf("["));
+				// first subscript's index
+				index = parseInt(match[2], 10);
 
-				// return value.part[index]
-				return value[part][index];
+				// start our return value with the first array subscript
+				ret = value[part][index];
+
+				// see if there are any more subscripts (eg [0][1])
+				subscripts = match[3];
+
+				// if there are other subscripts, loop over them
+				if (typeof subscripts !== "undefined") {
+					// get all indicies
+					indicies = subscripts.substr(1, subscripts.length - 2).split("][");
+
+					for (i = 0; i < indicies.length; i++) {
+						if (typeof ret === "undefined") {
+							break;
+						}
+
+						// go further into the array
+						index = parseInt(indicies[i], 10);
+						ret = ret[index];
+					}
+				}
+
+				return ret;
 			}
 			else {
 				// no subscript, return value.part

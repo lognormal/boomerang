@@ -28,6 +28,10 @@ describe("BOOMR.plugins.PageParams", function() {
 			foo: [0, 111, 222]
 		};
 
+		var testObj3 = {
+			foo: [0, [111, [222, [333, [444]]]]]
+		};
+
 		var handler = new plugin.Handler({});
 
 		it("Should work with regular property syntax #1", function() {
@@ -44,6 +48,30 @@ describe("BOOMR.plugins.PageParams", function() {
 
 		it("Should work with array syntax #2", function() {
 			assert.equal(222, handler.extractJavaScriptVariableValue(testObj2, "foo[2]"));
+		});
+
+		it("Should work with double array syntax", function() {
+			assert.equal(111, handler.extractJavaScriptVariableValue(testObj3, "foo[1][0]"));
+		});
+
+		it("Should work with triple array syntax", function() {
+			assert.equal(222, handler.extractJavaScriptVariableValue(testObj3, "foo[1][1][0]"));
+		});
+
+		it("Should work with quad array syntax", function() {
+			assert.equal(333, handler.extractJavaScriptVariableValue(testObj3, "foo[1][1][1][0]"));
+		});
+
+		it("Should return undefined when using an out-of-range index", function() {
+			assert.isUndefined(handler.extractJavaScriptVariableValue(testObj2, "foo[10]"));
+		});
+
+		it("Should return undefined when using an out-of-range index for the second subscript", function() {
+			assert.isUndefined(handler.extractJavaScriptVariableValue(testObj2, "foo[1][10]"));
+		});
+
+		it("Should return undefined when using two out-of-range indexes", function() {
+			assert.isUndefined(handler.extractJavaScriptVariableValue(testObj2, "foo[10][10]"));
 		});
 
 		it("Should return undefined on negative array syntax", function() {
