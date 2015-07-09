@@ -375,30 +375,29 @@
 			// regex to extract array subscript index
 			var match, index, re = /(.+?)\[(\d+)\]((?:\[\d+\])+)*/;
 
-			if ((match = re.exec(part)) !== null) {
-				// split into js var name, or subscripts
-				re = /([a-zA-Z_$][\w$]*|\[(\d+)\])/g;
-
-				// We'll match either a variable name (the first part of the regex),
-				// or an array subsript (the second option in the | in the regex).
-				while ((match = re.exec(part)) !== null && typeof value !== "undefined") {
-					if (match.length === 3 && match[2]) {
-						// when we matched an array subscript, such as '[1]'
-						index = parseInt(match[2], 10);
-						value = value[index];
-					}
-					else {
-						// when we matched a JavaScript variable name
-						value = value[match[1]];
-					}
-				}
-
-				return value;
-			}
-			else {
+			if ((match = re.exec(part)) === null) {
 				// no subscript, return value.part
 				return value[part];
 			}
+
+			// split into js var name, or subscripts
+			re = /([a-zA-Z_$][\w$]*|\[(\d+)\])/g;
+
+			// We'll match either a variable name (the first part of the regex),
+			// or an array subsript (the second option in the | in the regex).
+			while ((match = re.exec(part)) !== null && typeof value !== "undefined") {
+				if (match.length === 3 && match[2]) {
+					// when we matched an array subscript, such as '[1]'
+					index = parseInt(match[2], 10);
+					value = value[index];
+				}
+				else {
+					// when we matched a JavaScript variable name
+					value = value[match[1]];
+				}
+			}
+
+			return value;
 		},
 
 		URLPattern: function(o) {
