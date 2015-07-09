@@ -377,7 +377,7 @@
 
 			if ((match = re.exec(part)) !== null) {
 				// split into js var name, or subscripts
-				re = /([a-zA-Z_$][\w_$]*|\[(\d+)\])/g;
+				re = /([a-zA-Z_$][\w$]*|\[(\d+)\])/g;
 
 				// We'll match either a variable name (the first part of the regex),
 				// or an array subsript (the second option in the | in the regex).
