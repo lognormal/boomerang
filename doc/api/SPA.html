@@ -246,14 +246,14 @@ if (!hookEmberBoomerang()) {
 <h2 id="custom">Custom SPA Support</h2>
 
 <p>If you use a SPA framework that isn't one of the above or want to write your own
-  integration into your setup, we allow you to do so by using the underlying code the
-  plugins above use to hook in.</p>
+  integration into your setup, we allow you to do so by using the underlying code used by
+  the pre-built plugins to hook in.</p>
 
 <h3><code>BOOMR.plugins.SPA</code> API</h3>
 <dl>
   <dt><code>is_complete()</code></dt>
   <dd>
-    Since the SPA plugin is just another BOOMR plugin we have to implement <code>is_complete</code>. It'll return
+    Since the SPA plugin is just another BOOMR plugin we have to implement <code>is_complete</code>. It shoudl always return
     true as it isn't bound to the normal boomerang lifecycle and does not have to complete for the classic onload beacon to fire.
   </dd>
 
@@ -266,9 +266,9 @@ if (!hookEmberBoomerang()) {
   <dt><code>register</code></dt>
   <dd>
     <p>
-      Since there can be multiple SPA frameworks compiled into your version boomerang &emdash; but strongly discouraged &emdash;
+      Since there can be multiple SPA frameworks compiled into your version of boomerang
       each SPA plugin should register itself by calling <code>register</code> with the name of the plugin as a string argument.
-      This will make sure, that in the case you call <code>BOOMR.init()</code> with the option to enable the SPA plugin of
+      This will make sure, that when you call <code>BOOMR.init()</code> with the option to enable the SPA plugin of
       your choice AutoXHR will acknowledge that and disable itself until re-enabled by the SPA plugin after the first
       <code>route change</code> has finished.
     </p>
