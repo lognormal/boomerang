@@ -62,7 +62,8 @@
 			},
 			BW: {
 				base_url: true,
-				enable: true
+				enable: true,
+				test_https: true
 			},
 			ResourceTiming: {
 				enabled: true
