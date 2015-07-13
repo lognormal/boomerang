@@ -640,12 +640,7 @@
 				reslist = frame.performance.getEntriesByName(url);
 			}
 			catch(e) {
-				// These are expected for cross-origin iframe access, although the Internet Explorer check will only
-				// work for browsers using English.
-				if ( e.name === "SecurityError" ||
-					(e.name === "TypeError" && e.message === "Permission denied") ||
-					(e.name === "Error" && e.message && e.message.match(/^(Permission|Access is) denied/))
-				 ) {
+				if (BOOMR.isCrossOriginError(e)) {
 					return null;
 				}
 

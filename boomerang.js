@@ -48,20 +48,22 @@ function BOOMR_check_doc_domain(domain) {
 			return;// true;	// nothing to do
 		}
 
+		if (window.BOOMR && BOOMR.boomerang_frame && BOOMR.window) {
+			try {
+				// If document.domain is changed during page load (from www.blah.com to blah.com, for example),
+				// BOOMR.window.location.href throws "Permission Denied" in IE.
+				// Resetting the inner domain to match the outer makes location accessible once again
+				if (BOOMR.boomerang_frame.document.domain !== BOOMR.window.document.domain) {
+					BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
+				}
+			}
+			catch(err) {
+				if (!BOOMR.isCrossOriginError(err)) {
+					BOOMR.addError(err, "BOOMR_check_doc_domain.domainFix");
+				}
+			}
+		}
 		domain = document.domain;
-	}
-
-	if (window.BOOMR && BOOMR.boomerang_frame && BOOMR.window) {
-		/*eslint-disable no-empty*/
-		try {
-			// If document.domain is changed during page load (from www.blah.com to blah.com, for example),
-			// BOOMR.window.location.href throws "Permission Denied" in IE.
-			// Resetting the inner domain to match the outer makes location accessible once again
-			BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
-		}
-		catch(err) {
-			BOOMR.addError(err, "inner domain assignment failed");
-		}
 	}
 
 	if (domain.indexOf(".") === -1) {
@@ -998,6 +1000,14 @@ BOOMR_check_doc_domain();
 			else {
 				impl.errors[err] = 1;
 			}
+		},
+
+		isCrossOriginError: function(err) {
+			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
+			// work for browsers using English.
+			return err.name === "SecurityError" ||
+				(err.name === "TypeError" && err.message === "Permission denied") ||
+				(err.name === "Error" && err.message && err.message.match(/^(Permission|Access is) denied/));
 		},
 
 		addVar: function(name, value) {
