@@ -32,12 +32,17 @@
   Plugins in the same boomerang build.
 </p>
 
+<p>
+  <strong>Note:</strong> If you are unsure if your version of a specific SPA is supported by the plugins presented here please refer to the <a href="#compat">compatibillity list</a> below.
+</p>
+
 <p>The code and examples described in this document apply for the following
   frameworks:</p>
 <ul>
   <li><a href="#angular">AngularJS</a></li>
   <li><a href="#backbone">Backbone.js</a></li>
   <li><a href="#ember">Ember.js</a></li>
+  <li><a href="#custom">Custom SPAs</a></li>
 </ul>
 
 <h2 id="initConfig"><code>init()</code> Configuration</h2>
@@ -238,7 +243,89 @@ if (!hookEmberBoomerang()) {
   <code>willTransition</code> event.
 </p>
 
-<h2>SPA-Plugin compatibillity:</h2>
+<h2 id="custom">Custom SPA Support</h2>
+
+<p>If you use a SPA framework that isn't one of the above or want to write your own
+  integration into your setup, we allow you to do so by using the underlying code used by
+  the pre-built plugins to hook in.</p>
+
+<h3><code>BOOMR.plugins.SPA</code> API</h3>
+<dl>
+  <dt><code>is_complete()</code></dt>
+  <dd>
+    Since the SPA plugin is just another BOOMR plugin we have to implement <code>is_complete</code>. It shoudl always return
+    true as it isn't bound to the normal boomerang lifecycle and does not have to complete for the classic onload beacon to fire.
+  </dd>
+
+  <dt><code>init(config)</code></dt>
+  <dd>
+    As is the case with <code>is_complete()</code> we have to implement <code>init()</code> to configure the SPA plugin. Here we
+    configure the SPA plugins abillity to enable or disable AutoXHR on demand after the first <code>route change</code> has happend.
+  </dd>
+
+  <dt><code>register</code></dt>
+  <dd>
+    <p>
+      Since there can be multiple SPA frameworks compiled into your version of boomerang
+      each SPA plugin should register itself by calling <code>register</code> with the name of the plugin as a string argument.
+      This will make sure, that when you call <code>BOOMR.init()</code> with the option to enable the SPA plugin of
+      your choice AutoXHR will acknowledge that and disable itself until re-enabled by the SPA plugin after the first
+      <code>route change</code> has finished.
+    </p>
+    <p>
+      This means your SPA plugin should register itself early on in the evaluation of your plugins code. Even before defining
+      the plugin itself. Here is an example:
+    </p>
+    <pre><code>(function(){
+	<em>// If our plugin is already defined just skip re-evaluating.</em>
+	<em>// same goes for if BOOMR.plugins.SPA is not defined </em>
+	if (BOOMR.plugins.MySPAPlugin || typeof BOOMR.plugins.SPA === "undefined") {
+		return;
+	}
+
+	<em>// register as a SPA plugin</em>
+	BOOMR.plugins.SPA.register("MySPAPlugin");
+
+	BOOMR.plugins.MySPAPlugin = {
+		<em>/* Your SPA Code */</em>
+	};
+}());</code></pre>
+  </dd>
+
+  <dt><code>supported_frameworks</code></dt>
+  <dd>
+    Used internally in the AutoXHR plugin to check if one of the registered SPA plugins has been enabled.
+  </dd>
+
+  <dt><code>hook(hadRouteChange)</code></dt>
+  <dd>
+    <p>Called by a SPA plugin once it has hooked into the framework of choice. The boolean argument <code>hadRouteChange</code>
+      is used to flag if Boomerang has loaded late or not. This will decide if AutoXHR will be enabled right away or only when the
+      first <code>route_change</code> call has happend. <code>hook</code> will set the flag <code>http.initiator</code> to
+      <code>spa</code> to flag that the next beacon comes from a SPA event.
+    </p>
+  </dd>
+
+  <dt><code>route_change</code></dt>
+  <dd>
+    <p>
+      As soon as the first <code>route_change</code> event, triggered by the SPA, will be initiated this function should be called
+      enablinge listening for any DOM changes (using <code>MutationObserver</code>) and XHR calls required to finish the route change.
+      This will make sure that all required assets for the <code>route_change</code> have been fetched. Since this is a SPA event
+      <code>AutoXHR</code> will wait an entire second for everything to settle.
+    </p>
+  </dd>
+
+  <dt><code>last_location(url)</code></dt>
+  <dd>
+    <p>
+      To make sure that the sent beacon at the end of the <code>route_change</code> event will also contain the refferal URL
+      we came from, <code>last_location</code> documents this URL to put into the beacon.
+    </p>
+  </dd>
+</dl>
+
+<h2 id="compat">SPA-Plugin compatibillity:</h2>
 
 <p>The SPA plugins were tested and used in production environments with the following versions of each SPA-Framework:</p>
 
