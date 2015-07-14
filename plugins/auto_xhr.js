@@ -457,6 +457,11 @@
 				}
 				current_event.resource.url = a.href;
 			}
+			else if (!current_event.resource.url && node.nodeName === "IMG") {
+				// TODO: Should we apply BOOMR.xhr_excludes?
+				a.href = url;
+				current_event.resource.url = a.href;
+			}
 
 			node.addEventListener("load", function(ev) { self.load_cb(ev); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev); });
