@@ -448,7 +448,7 @@
 				*/
 			}
 
-			if (!current_event.resource.url && ( node.nodeName === "SCRIPT" || node.nodeName === "IMG" )) {
+			if (!current_event.resource.url && (node.nodeName === "SCRIPT" || node.nodeName === "IMG")) {
 				a.href = url;
 
 				if (shouldExcludeXhr(a)) {
