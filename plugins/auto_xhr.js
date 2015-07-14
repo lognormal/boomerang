@@ -448,18 +448,13 @@
 				*/
 			}
 
-			if (!current_event.resource.url && node.nodeName === "SCRIPT") {
+			if (!current_event.resource.url && ( node.nodeName === "SCRIPT" || node.nodeName === "IMG" )) {
 				a.href = url;
 
 				if (shouldExcludeXhr(a)) {
 					// excluded resource, so abort
 					return false;
 				}
-				current_event.resource.url = a.href;
-			}
-			else if (!current_event.resource.url && node.nodeName === "IMG") {
-				// TODO: Should we apply BOOMR.xhr_excludes?
-				a.href = url;
 				current_event.resource.url = a.href;
 			}
 
