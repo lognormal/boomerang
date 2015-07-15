@@ -1,6 +1,6 @@
 <%= header %>
-<%= boomerangSnippet %>
-<script src="02-onclick.js"></script>
+<%= boomerangScript %>
+
 <div id="clickable">Click Me!</div>
 <div id="picture"></div>
 <script type="text/javascript">
@@ -25,11 +25,13 @@
 }(this, this.document));
 </script>
 
+<script src="02-onclick.js"></script>
+
 <script>
 var eventFired = false;
 BOOMR_test.init({
-	"instrument_xhr": true,
-	testAfterOnBeacon: (BOOMR.plugins.AutoXHR ? 2 : 1),
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	instrument_xhr: true,
 	afterFirstBeacon: function() {
 		if (!BOOMR.plugins.AutoXHR || eventFired) {
 			return;
