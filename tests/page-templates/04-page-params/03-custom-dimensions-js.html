@@ -24,6 +24,7 @@
 <script>
 /*global custom_dimension_1:true, custom_dimension_2:true, custom_dimension_3:true*/
 /*global custom_dimension_4:true, custom_dimension_5:true, custom_dimension_6:true*/
+/*global custom_dimension_15:true*/
 /*eslint-disable no-unused-vars*/
 
 custom_dimension_1 = true;
@@ -37,6 +38,14 @@ custom_dimension_4 = function() {
 custom_dimension_5 = "abc";
 custom_dimension_6 = function() {
 	return "def";
+};
+
+custom_dimension_15 = function() {
+	return false;
+};
+
+custom_dimension_15.isTrue = function() {
+	return true;
 };
 
 BOOMR_test.init({
@@ -107,53 +116,61 @@ BOOMR_test.init({
 				"dataType": "Boolean",
 				"parameter2": "query"
 			},
-		{
-		"name": "CD9",
-		"index": 9,
-		"type": "URLPatternType",
-		"label": "cdim.CD9",
-		"dataType": "Text",
-		"queryselector": ".cart-container #cart-total"
-		},
-		{
-		"name": "CD10",
-		"index": 10,
-		"type": "URLPatternType",
-		"label": "cdim.CD10",
-		"dataType": "Numeric",
-		"queryselector": ".container .basket p[custom-attr='price']"
-		},
-		{
-		"name": "CD11",
-		"index": 11,
-		"type": "URLPatternType",
-		"label": "cdim.CD11",
-		"dataType": "Numeric",
-		"queryselector": ".container .basket  p"
-		},
-		{
-		"name": "CD12",
-		"index": 12,
-		"type": "URLPatternType",
-		"label": "cdim.CD12",
-		"dataType": "Numeric",
-		"queryselector": ".does #not [value='exist']"
-		},
-		{
-		"name": "CD13",
-		"index": 13,
-		"type": "URLPatternType",
-		"label": "cdim.CD13",
-		"dataType": "Text"
-		},
-		{
-		"name": "CD14",
-		"index": 14,
-		"type": "URLPatternType",
-		"label": "cdim.CD14",
-		"dataType": "Text",
-		"parameter1": "03-custom-dimensions-js.html$"
-		}
+			{
+				"name": "CD9",
+				"index": 9,
+				"type": "URLPatternType",
+				"label": "cdim.CD9",
+				"dataType": "Text",
+				"queryselector": ".cart-container #cart-total"
+			},
+			{
+				"name": "CD10",
+				"index": 10,
+				"type": "URLPatternType",
+				"label": "cdim.CD10",
+				"dataType": "Numeric",
+				"queryselector": ".container .basket p[custom-attr='price']"
+			},
+			{
+				"name": "CD11",
+				"index": 11,
+				"type": "URLPatternType",
+				"label": "cdim.CD11",
+				"dataType": "Numeric",
+				"queryselector": ".container .basket  p"
+			},
+			{
+				"name": "CD12",
+				"index": 12,
+				"type": "URLPatternType",
+				"label": "cdim.CD12",
+				"dataType": "Numeric",
+				"queryselector": ".does #not [value='exist']"
+			},
+			{
+				"name": "CD13",
+				"index": 13,
+				"type": "URLPatternType",
+				"label": "cdim.CD13",
+				"dataType": "Text"
+			},
+			{
+				"name": "CD14",
+				"index": 14,
+				"type": "URLPatternType",
+				"label": "cdim.CD14",
+				"dataType": "Text",
+				"parameter1": "03-custom-dimensions-js.html$"
+			},
+			{
+				"name": "CD15",
+				"index": 15,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD15",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_15.isTrue"
+			}
 		]
 	}
 });

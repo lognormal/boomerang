@@ -92,4 +92,9 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["cdim.CD14"], undefined);
 	});
+
+	it("Should be having custom dimension 15 - Function custom_dimension15 has static function property isTrue and should return true", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD15"], "true");
+	});
 });

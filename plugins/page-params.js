@@ -331,7 +331,7 @@
 			// - a part is not an object (might be a leaf but we cannot go further down)
 			// - there are no more parts left (so we can stop)
 			try {
-				while (value !== null && typeof value === "object" && parts.length) {
+				while (value !== null && (typeof value === "object" || typeof value === "function" && value.hasOwnProperty(parts[0]) && !value.prototype.hasOwnProperty(parts[0]) ) && parts.length) {
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
 					value = this.extractJavaScriptVariableValue(value, parts.shift());
