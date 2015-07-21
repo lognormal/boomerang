@@ -24,7 +24,7 @@
 <script>
 /*global custom_dimension_1:true, custom_dimension_2:true, custom_dimension_3:true*/
 /*global custom_dimension_4:true, custom_dimension_5:true, custom_dimension_6:true*/
-/*global custom_dimension_15:true*/
+/*global custom_dimension_15:true, custom_dimension_16:true*/
 /*eslint-disable no-unused-vars*/
 
 custom_dimension_1 = true;
@@ -47,6 +47,16 @@ custom_dimension_15 = function() {
 custom_dimension_15.isTrue = function() {
 	return true;
 };
+
+var CustomDimension = function () {
+
+};
+
+CustomDimension.prototype.isTrue = function() {
+    return false
+};
+
+custom_dimension_16 = new CustomDimension();
 
 BOOMR_test.init({
 	testAfterOnBeacon: true,
@@ -170,6 +180,14 @@ BOOMR_test.init({
 				"label": "cdim.CD15",
 				"dataType": "Boolean",
 				"varName": "custom_dimension_15.isTrue"
+			},
+			{
+				"name": "CD16",
+				"index": 16,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD16",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_16.isTrue"
 			}
 		]
 	}

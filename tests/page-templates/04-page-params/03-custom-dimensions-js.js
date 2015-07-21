@@ -97,4 +97,9 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["cdim.CD15"], "true");
 	});
+
+	it("Should be having custom dimension 16 - Pseudo class custom_dimension16 has prototype property isTrue and should return false since it's also a prototype member when accessing isTrue on an instance of the class", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD16"], "false");
+	});
 });
