@@ -72,6 +72,14 @@
 			return s.replace(this.sanitizeRE, "");
 		},
 
+		isValidObjectMember: function(value, part) {
+			if (value === null ) {
+				return false;
+			}
+
+			return  typeof value === "object" || (typeof value === "function" && value.hasOwnProperty(part));
+		},
+
 		extractFromDOMElement: function(element, o) {
 			var m, re;
 
@@ -329,9 +337,11 @@
 			// until:
 			// - a part evaluates to null (we cannot proceed)
 			// - a part is not an object (might be a leaf but we cannot go further down)
+			// - a part is a function but has an own property that is in our parts
 			// - there are no more parts left (so we can stop)
 			try {
-				while (value !== null && typeof value === "object" && parts.length) {
+				while (parts.length && this.isValidObjectMember(value, parts[0])) {
+
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
 					value = this.extractJavaScriptVariableValue(value, parts.shift());
