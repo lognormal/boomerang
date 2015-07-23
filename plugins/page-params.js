@@ -77,7 +77,7 @@
 				return false;
 			}
 
-			return  typeof value === "object" || typeof value === "function" && value.hasOwnProperty(part);
+			return  typeof value === "object" || (typeof value === "function" && value.hasOwnProperty(part));
 		},
 
 		extractFromDOMElement: function(element, o) {
