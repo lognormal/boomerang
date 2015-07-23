@@ -56,6 +56,9 @@ CustomDimension.prototype.isTrue = function() {
 	return false;
 };
 
+CustomDimension.static_property = true;
+CustomDimension.prototype.property = false;
+
 custom_dimension_16 = new CustomDimension();
 
 BOOMR_test.init({
@@ -188,6 +191,22 @@ BOOMR_test.init({
 				"label": "cdim.CD16",
 				"dataType": "Boolean",
 				"varName": "custom_dimension_16.isTrue"
+			},
+			{
+				"name": "CD17",
+				"index": 17,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD17",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_16.property"
+			},
+			{
+				"name": "CD18",
+				"index": 18,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD18",
+				"dataType": "Boolean",
+				"varName": "CustomDimension.static_property"
 			}
 		]
 	}

@@ -102,4 +102,14 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["cdim.CD16"], "false");
 	});
+
+	it("Should be having custom dimension 17 - Should return \"false\" for a property set on the pseudo class prototype", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD17"], "false");
+	});
+
+	it("Should be having custom dimension 18 - Should return \"true\" for a property set on the pseudo class directly", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD18"], "true");
+	});
 });

@@ -72,13 +72,12 @@
 			return s.replace(this.sanitizeRE, "");
 		},
 
-		isValidFunctionMember: function(value, part) {
+		isValidObjectMember: function(value, part) {
 			if (value === null ) {
 				return false;
 			}
 
-			return  typeof value === "object" || typeof value === "function" && value.hasOwnProperty(part) &&
-				!value.prototype.hasOwnProperty(part);
+			return  typeof value === "object" || typeof value === "function" && value.hasOwnProperty(part);
 		},
 
 		extractFromDOMElement: function(element, o) {
@@ -341,7 +340,7 @@
 			// - a part is a function but has an own property that is in our parts
 			// - there are no more parts left (so we can stop)
 			try {
-				while (parts.length && this.isValidFunctionMember(value, parts[0])) {
+				while (parts.length && this.isValidObjectMember(value, parts[0])) {
 
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
