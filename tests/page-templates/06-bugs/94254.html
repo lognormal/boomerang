@@ -1,12 +1,23 @@
 <%= header %>
 
-<script src="../../build/boomerang-latest.js" type="text/javascript"></script>
+<script type="text/javascript">
+function runTests() {
+	var dom = window.location.hostname;
+	if (dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+</script>
 
+<%= boomerangLatestScript %>
 <script src="94254.js" type="text/javascript"></script>
-
 <script type="text/javascript">
 BOOMR_test.init({
-	autorun: true
+	autorun: true,
+	testAfterOnBeacon: runTests()
 });
 </script>
 <%= footer %>
