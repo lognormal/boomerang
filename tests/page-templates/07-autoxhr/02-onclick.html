@@ -3,57 +3,68 @@
 
 <div id="clickable">Click Me!</div>
 <div id="picture"></div>
+
 <script type="text/javascript">
-(function(w, d) {
-	 var imageHolder = d.getElementById("picture");
-	 function clickCb() {
-		var imageElement = d.createElement("img");
-		imageElement.src = "support/img.jpg";
-		imageHolder.appendChild(imageElement);
-	}
+ (function(w, d) {
+     var imageHolder = d.getElementById("picture");
+     var clickable = d.getElementById("clickable");
+     function clickCb() {
+	 var imageElement = d.createElement("img");
+	 imageElement.src = "support/img.jpg";
+	 imageHolder.appendChild(imageElement);
+	 console.log("Click Called on clickable!");
+     }
 
-	function addEvent(element, evnt, funct){
-		if (element.attachEvent) {
-			return element.attachEvent("on"+evnt, funct);
-		}
-		else {
-			return element.addEventListener(evnt, funct, true);
-		}
-	}
-
-	addEvent(d.getElementById("clickable"), "mouseup", clickCb);
+     function addEvent(element, event, funct){
+	 if (element.attachEvent) {
+	     console.log("Using attachEvent!");
+	     return element.attachEvent("on"+event, funct);
+	 }
+	 else {
+	     console.log("Using addEventListener!");
+	     return element.addEventListener(event, funct);
+	 }
+     }
+     console.log(addEvent(clickable, "mouseup", clickCb));
 }(this, this.document));
 </script>
-
 <script src="02-onclick.js"></script>
-
 <script>
 var eventFired = false;
 BOOMR_test.init({
-	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
 	instrument_xhr: true,
+    	ResourceTiming: {
+		enabled: true
+	},
+	autorun: true,
 	afterFirstBeacon: function() {
 		if (!BOOMR.plugins.AutoXHR || eventFired) {
 			return;
 		}
 
+		console.log("After First Beacon event!");
 		setTimeout(function() {
 			var clickable = document.getElementById("clickable");
 
-			function eventFire(el, etype){
-				if (el.fireEvent) {
+			function eventFire(etype){
+				console.log("eventFire called!")
+				if (clickable.fireEvent) {
+					console.log("el.fireEvent called!");
 					el.fireEvent("on" + etype);
 				}
 				else {
-					var evObj = document.createEvent("Events");
+					console.log("Creating event!");
+					var evObj = document.createEvent("MouseEvent");
 					evObj.initEvent(etype, true, false);
-					el.dispatchEvent(evObj);
+					clickable.dispatchEvent(evObj);
 				}
 				eventFired = true;
 			}
-			eventFire(clickable, "mouseup");
-		}, 1000);
+			eventFire("mouseup");
+		}, 50);
 	}
 });
 </script>
+
 <%= footer %>
