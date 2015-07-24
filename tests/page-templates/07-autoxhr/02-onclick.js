@@ -5,7 +5,7 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 	it("Should have sent at least 2 beacons, 1x onload, 1x xhr", function(done) {
-		if(window.MutationObserver && typeof window.MutationObserver === "function") {
+		if (window.MutationObserver && typeof window.MutationObserver === "function") {
 
 			t.ifAutoXHR(
 				done,
@@ -22,7 +22,7 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 	});
 
 	it("Should get 2 beacons: 1st onload 2nd image fetch", function(done){
-		if(window.MutationObserver && typeof window.MutationObserver === "function") {
+		if (window.MutationObserver && typeof window.MutationObserver === "function") {
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -36,7 +36,7 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 	});
 
 	it("Should have a second beacon with the image URL in it", function(done){
-		if(window.MutationObserver && typeof window.MutationObserver === "function") {
+		if (window.MutationObserver && typeof window.MutationObserver === "function") {
 			t.ifAutoXHR(
 				done,
 				function() {

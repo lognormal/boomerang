@@ -5,27 +5,24 @@
 <div id="picture"></div>
 
 <script type="text/javascript">
- (function(w, d) {
-     var imageHolder = d.getElementById("picture");
-     var clickable = d.getElementById("clickable");
-     function clickCb() {
-	 var imageElement = d.createElement("img");
-	 imageElement.src = "support/img.jpg";
-	 imageHolder.appendChild(imageElement);
-	 console.log("Click Called on clickable!");
-     }
+(function(w, d) {
+	var imageHolder = d.getElementById("picture");
+	var clickable = d.getElementById("clickable");
+	function clickCb() {
+		var imageElement = d.createElement("img");
+		imageElement.src = "support/img.jpg";
+		imageHolder.appendChild(imageElement);
+	}
 
-     function addEvent(element, event, funct){
-	 if (element.attachEvent) {
-	     console.log("Using attachEvent!");
-	     return element.attachEvent("on"+event, funct);
-	 }
-	 else {
-	     console.log("Using addEventListener!");
-	     return element.addEventListener(event, funct);
-	 }
-     }
-     console.log(addEvent(clickable, "mouseup", clickCb));
+	function addEvent(element, event, funct){
+		if (element.attachEvent) {
+			return element.attachEvent("on"+event, funct);
+		}
+		else {
+			return element.addEventListener(event, funct);
+		}
+	}
+	addEvent(clickable, "mouseup", clickCb);
 }(this, this.document));
 </script>
 <script src="02-onclick.js"></script>
@@ -34,7 +31,7 @@ var eventFired = false;
 BOOMR_test.init({
 	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
 	instrument_xhr: true,
-    	ResourceTiming: {
+	ResourceTiming: {
 		enabled: true
 	},
 	autorun: true,
@@ -43,18 +40,14 @@ BOOMR_test.init({
 			return;
 		}
 
-		console.log("After First Beacon event!");
 		setTimeout(function() {
 			var clickable = document.getElementById("clickable");
 
 			function eventFire(etype){
-				console.log("eventFire called!")
 				if (clickable.fireEvent) {
-					console.log("el.fireEvent called!");
-					el.fireEvent("on" + etype);
+					clickable.fireEvent("on" + etype);
 				}
 				else {
-					console.log("Creating event!");
 					var evObj = document.createEvent("MouseEvent");
 					evObj.initEvent(etype, true, false);
 					clickable.dispatchEvent(evObj);
