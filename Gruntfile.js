@@ -192,6 +192,47 @@ module.exports = function() {
 						}
 					]
 				}
+			},
+			"release-test": {
+				files: [{
+					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+					dest: "tests/build/<%= pkg.name %>-latest.js"
+				}],
+				options: {
+					replacements: [
+						{
+							pattern: /else{}/g,
+							replacement: ""
+						},
+						{
+							pattern: /\(window\)\);/g,
+							replacement: "\(window\)\);\n"
+						},
+						{
+							pattern: /\(\)\);\(function\(/g,
+							replacement: "\(\)\);\n(function("
+						},
+						{
+							// Add &debug key to request
+							pattern: /key=%client_apikey%/,
+							replacement: "debug=\&key=%client_apikey%"
+						},
+						{
+							// Send beacons to null
+							pattern: /location\.protocol \+ \"\/\/%beacon_dest_host%%beacon_dest_path%/,
+							replacement: "\"/blackhole"
+						},
+						{
+							// Add config to null
+							pattern: /\/\/%config_host%%config_path%/,
+							replacement: "/blackhole"
+						},
+						{
+							pattern: /CONFIG_RELOAD_TIMEOUT=5\.5\*60\*1000;/,
+							replacement: "CONFIG_RELOAD_TIMEOUT=1000;"
+						}
+					]
+				}
 			}
 		},
 		copy: {
