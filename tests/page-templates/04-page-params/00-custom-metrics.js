@@ -67,4 +67,9 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet10, "1");
 	});
+
+	it("Should have a beacon with the length of the cookie created by RT", function() {
+		var b = tf.lastBeacon();
+		assert.closeTo(parseInt(b.cmet11), document.cookie.length, 20);
+	});
 });
