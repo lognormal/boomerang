@@ -34,7 +34,8 @@
 
 	load=function() {
 		var s0=dc.getElementsByTagName(s)[0],
-		    s1=dc.createElement(s),
+		    s1,
+		    a=dc.createElement("A"),
 		    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
 		    plugins = [],
 		    pluginName,
@@ -67,8 +68,9 @@
 			url += "&acao=";
 		}
 
-		s1.src = url; // absolutize the url
-		BOOMR.config_url = s1.src;
+		// absolutize the url
+		a.href = url;
+		BOOMR.config_url = a.href;
 
 		if (configAsJSON) {
 			/*eslint-disable no-inner-declarations,no-empty*/
@@ -102,13 +104,17 @@
 			xhr.send(null);
 		}
 		else {
+			s1=dc.createElement(s);
+			s1.src = url;
 			s0.parentNode.insertBefore(s1, s0);
 			s0=null;
 		}
 
 		if (complete) {
-			/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
-			s1=null;
+			if (s1) {
+				/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
+				s1=null;
+			}
 			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 		}
 
