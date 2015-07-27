@@ -1,23 +1,28 @@
 /*eslint-env node*/
 /**
- * Grunt Tasks - mpulse-test
+ * Grunt Tasks - mpulse-build-for
  *
- * configure tasks/mpulse-test.config.json
+ * Configure tasks/mpulse-build-for.config.json
  * {
  *   "default": {
  *     "server": "localhost:8080",
  *     "apikey": "11111-11111-11111-11111-11111",
  *     "secondaryBeacons": [],
- *     "boomerang": ""
+ *     "configAsJSON": false
  *   }
  * }
  *
- * keys and values map as follows:
+ * Keys and values map as follows:
  *
  *   server: mPulse Collector server to send beacons to and fetch config.js from
  *   apikey: API Key for the specific application you wish to use
  *   secondary_beacons: list of servers to send beacons to next to the main servers for debugging purposes
- *   boomerang: boomerang script taken as basis for modification.
+ *   configAsJSON: Whether or not to use config.json instead of config.js
+ *
+ * Other parameters are set via Gruntfile.js but can be overridden if desired:
+ *
+ *   boomerang: boomerang script taken as basis for modification.  By default, a new version of Boomerang is built.
+ *   outputSuffix: The output suffix of the built file.
  *
  * `default` is the name of the app that this build is supposed to generate beacons for.
  * You may have multiple named apps in the configuration file:
@@ -28,22 +33,28 @@
  *   "soasta": { ... }
  * }
  *
- * These do not serve the same purpose as the build targets in Gruntfile.js they only decide which API Key
+ * These do not serve the same purpose as the build targets in Gruntfile.js, they only decide which API Key
  * and Collector we're supposed to use to send our beacons. This way you may have release, debug, and various
  * minified versions of the same app-specific boomerang script.
  *
- * Choose which app to build for with the commandline parameter --app. For the above example config file:
+ * Choose which app to build for with the commandline parameter --app. For the above example config file, use
+ * the following to build a debug version of boomerang for mpulse:
  *
- *  $> grunt mpulse-test:debug --app mpulse
+ *  $> grunt mpulse-build-for:debug --app mpulse
  *
- * to build a debug version of boomerang for mpulse.
+ * To build both debug and min versions for an app:
+ *
+ *  $> grunt mpulse:build --app mpulse
  *
  * Values can also be partially overridden by Gruntfile.js.
+ *
  * Application of Values from different sources is hirarchically set as follows:
  *
- *   defaultConfig <= tasks/mpulse-test.config.json <= Gruntfile.js
+ *   defaultConfig <= tasks/mpulse-build-for.config.json <= Gruntfile.js
  *
- * Filepaths are relative to the root of the project or Gruntfile.js file
+ * Filepaths are relative to the root of the project or Gruntfile.js file.
+ *
+ * By default, the resulting file will be in build/[apikey][outputSuffix].js
  */
 
 var merge = require("deepmerge");
@@ -70,11 +81,11 @@ module.exports = function(grunt) {
 	};
 
 	var description = "Build Boomerang for a specific combination of collector-server and apikey";
-	var configFilePath = "tasks/mpulse-test.config.json";
+	var configFilePath = "tasks/mpulse-build-for.config.json";
 	var defaultConfigJsPath = "/boomerang/config.js";
 	var defaultConfigJsonPath = "/api/config.json";
 
-	grunt.registerMultiTask("mpulse-test", description, function() {
+	grunt.registerMultiTask("mpulse-build-for", description, function() {
 		var jsonConfig = {};
 
 		var app = grunt.option("app");
@@ -90,7 +101,7 @@ module.exports = function(grunt) {
 
 		jsonConfig = jsonConfig[app] ? jsonConfig[app] : jsonConfig["default"];
 
-		var gruntConfig = grunt.config.get("mpulse-test");
+		var gruntConfig = grunt.config.get("mpulse-build-for");
 
 		var defaultJsonConfig = merge(defaultConfig, jsonConfig),
 		    config = merge(defaultJsonConfig, gruntConfig[this.target]);
@@ -123,7 +134,7 @@ module.exports = function(grunt) {
 				boomerang = boomerang.replace(/var\s*configAsJSON\s*=\s*false;/, "var configAsJSON = true;");
 			}
 
-			grunt.file.write("build/" + config.apikey + ".js", boomerang, {encoding: "utf8"});
+			grunt.file.write("build/" + config.apikey + config.outputSuffix + ".js", boomerang, {encoding: "utf8"});
 		}
 		catch (e) {
 			grunt.verbose.debug(JSON.stringify(e, null, 2));
