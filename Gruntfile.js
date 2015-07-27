@@ -332,12 +332,14 @@ module.exports = function() {
 				}]
 			}
 		},
-		"mpulse-test": {
+		"mpulse-build-for": {
 				release: {
-						boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js"
+					boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js",
+					outputSuffix: ".min"
 				},
 				base: {
-						boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+					boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+					outputSuffix: ""
 				}
 		},
 		filesize: {
@@ -567,7 +569,7 @@ module.exports = function() {
 		"default": ["lint", "build", "test", "filesize:default"],
 		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
 		"lint": ["eslint"],
-		"mpulse:test": ["build", "mpulse-test:release"],
+		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
 		"mpulse:xml": ["build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 		"test:build": ["pages-builder", "build"],
