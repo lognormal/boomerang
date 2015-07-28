@@ -254,7 +254,7 @@ module.exports = function() {
 						cwd: "tests/",
 						src: "**/*",
 						force: true,
-						dest: grunt.file.readJSON("tests/server/env.json").www + "/"
+						dest: grunt.file.readJSON("tests/server/env.json").publish + "/"
 					}
 				]
 			}
