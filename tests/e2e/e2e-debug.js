@@ -4,10 +4,18 @@
 //
 // Imports
 //
+var fs = require("fs");
 var chai = require("chai");
 var assert = chai.assert;
 
-var tests = require("./e2e-debug.json");
+var testsFile = "./e2e-debug.json";
+
+var tests = [];
+
+if (fs.existsSync(testsFile)) {
+	tests = require(testsFile);
+}
+
 var i;
 
 //
