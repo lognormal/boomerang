@@ -118,7 +118,7 @@ BOOMR_check_doc_domain();
 		return;
 	}
 
-	BOOMR.version = "0.9";
+	BOOMR.version = "1.0";
 	BOOMR.window = w;
 	BOOMR.boomerang_frame = orig_w;
 
