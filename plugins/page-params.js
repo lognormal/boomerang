@@ -73,11 +73,23 @@
 		},
 
 		isValidObjectMember: function(value, part) {
-			if (value === null ) {
+			if (value === null) {
 				return false;
 			}
 
-			return  typeof value === "object" || (typeof value === "function" && value.hasOwnProperty(part)) || (typeof value === "string" && value.hasOwnProperty(part));
+			if (typeof value === "object") {
+				return true;
+			}
+
+			if (typeof value === "function" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			if (typeof value === "string" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			return false;
 		},
 
 		extractFromDOMElement: function(element, o) {

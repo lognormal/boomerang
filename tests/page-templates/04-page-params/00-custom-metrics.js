@@ -68,8 +68,8 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet10, "1");
 	});
 
-	it("Should have a beacon with the length of the cookie created by RT", function() {
+	it("Should have the custom metric 11 - Length of the current document.cookie varying based on later running rt.js", function() {
 		var b = tf.lastBeacon();
-		assert.closeTo(parseInt(b.cmet11), document.cookie.length, 20);
+		assert.closeTo(parseInt(b.cmet11), document.cookie.length, 50);
 	});
 });
