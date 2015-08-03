@@ -1,3 +1,3 @@
 <script>
-<%= boomerangTagManagerSnippetWithDelay %>
+<%= boomerangDelayedSnippetNoScript %>
 </script>
