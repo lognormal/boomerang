@@ -535,9 +535,17 @@ module.exports = function() {
 			}
 		},
 		"mpulse-build-repository-xml": {
-			options: {
-				filePrefix: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>",
-				version: "<%= pkg.releaseVersion %>.<%= buildDate %>"
+			"build": {
+				options: {
+					filePrefix: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>",
+					version: "<%= pkg.releaseVersion %>.<%= buildDate %>"
+				}
+			},
+			"from": {
+				options: {
+					filePrefix: grunt.option("file-prefix"),
+					version: grunt.option("boomerang-version")
+				}
 			}
 		}
 	});
@@ -564,7 +572,7 @@ module.exports = function() {
 
 	// Custom aliases for configured grunt tasks
 	var aliases = {
-		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml"],
+		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
 		"build:test": ["concat:debug", "string-replace", "copy:debug"],
 		"default": ["lint", "build", "test", "filesize:default"],
 		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],

@@ -13,7 +13,7 @@ var path = require("path");
 module.exports = function(grunt) {
 	var description = "Builds a mPulse Repository XML for boomerang.js";
 
-	grunt.registerTask("mpulse-build-repository-xml", description, function() {
+	grunt.registerMultiTask("mpulse-build-repository-xml", description, function() {
 		var options = this.options({
 			filePrefix: "",
 			template: path.join(__dirname, "mpulse-build-repository-xml.tmpl"),
