@@ -767,6 +767,10 @@
 
 			autoXhrEnabled = config.instrument_xhr;
 
+			if (autoXhrEnabled && config.AutoXHR && config.AutoXHR.beforeOnload) {
+				holdXhr = false;
+			}
+
 			// check to see if any of the SPAs were enabled
 			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
 				var supported = BOOMR.plugins.SPA.supported_frameworks();
