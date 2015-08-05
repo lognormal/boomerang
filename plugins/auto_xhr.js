@@ -2,6 +2,7 @@
 	var d, handler, a,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
+	    holdXhr = true,
 	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
 
 	// Default SPA activity timeout, in milliseconds
@@ -636,7 +637,7 @@
 			req.open = function(method, url, async) {
 				a.href = url;
 
-				if (shouldExcludeXhr(a)) {
+				if (holdXhr || shouldExcludeXhr(a)) {
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -787,10 +788,18 @@
 			}
 			else if (autoXhrEnabled) {
 				BOOMR.instrumentXHR();
+
+				// listen to page load / etc and hold XHR until then
+				BOOMR.subscribe("page_ready", this.unholdXhr, null, this);
+				BOOMR.subscribe("onbeacon", this.unholdXhr, null, this);
+				BOOMR.subscribe("before_unload", this.unholdXhr, null, this);
 			}
 			else if (autoXhrEnabled === false) {
 				BOOMR.uninstrumentXHR();
 			}
+		},
+		unholdXhr: function() {
+			holdXhr = false;
 		},
 		getMutationHandler: function() {
 			return handler;
