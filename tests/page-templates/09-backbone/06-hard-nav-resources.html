@@ -1,0 +1,23 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="../../vendor/jquery/dist/jquery.js"></script>
+<script src="../../vendor/handlebars/handlebars.js"></script>
+<script src="../../vendor/backbone/backbone.js"></script>
+<base href="/pages/09-backbone/04-route-change.html" />
+<div id="content"></div>
+<script src="support/app.js"></script>
+<script src="/test-templates/spa/06-hard-nav-resources.js" type="text/javascript"></script>
+<script src="06-hard-nav-resources.js" type="text/javascript"></script>
+<script>
+window.backbone_imgs = [0, 500, 1500, 3000, 5000];
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Backbone: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

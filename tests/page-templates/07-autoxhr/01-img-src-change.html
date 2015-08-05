@@ -1,0 +1,50 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="01-img-src-change.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: (typeof window.MutationObserver !== "undefined") ? 2 : 1,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+		var resource = {
+			timing: {
+				requestStart: BOOMR.now()
+			},
+			initiator: "spa",
+			url: BOOMR.window.document.URL
+		};
+
+		resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
+
+		var updated = false;
+		setTimeout(function() {
+			var initialImage = BOOMR.window.document.createElement("img");
+			initialImage.setAttribute("src", "");
+			BOOMR.window.document.body.appendChild(initialImage);
+
+			setTimeout(function() {
+				initialImage.setAttribute("src", "/delay?delay=500&file=/pages/07-autoxhr/support/img.jpg&id=1&rnd=" + Math.random());
+			}, 100);
+
+			initialImage.addEventListener("load", function() {
+				if (!updated) {
+					setTimeout(function() {
+						initialImage.setAttribute("src", "/delay?delay=2000&file=/pages/07-autoxhr/support/img.jpg&id=2&rnd=" + Math.random());
+					}, 100);
+					updated = true;
+				}
+			});
+		}, 100);
+	},
+	instrument_xhr: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	autorun: true
+});
+</script>
+
+<%= footer %>

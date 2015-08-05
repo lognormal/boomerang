@@ -1,0 +1,37 @@
+<%= header %>
+<%= boomerangScript %>
+<base href="/pages/05-angular/07-soft-nav-resources.html" />
+<script src="../../vendor/angular/angular.js"></script>
+<script src="../../vendor/angular-resource/angular-resource.js"></script>
+<script src="../../vendor/angular-route/angular-route.js"></script>
+<script>
+/*eslint-disable no-unused-vars*/
+window.angular_html5_mode = true;
+
+// view a widget then come back so debugging (F5) is easier
+window.angular_nav_routes = [
+	"/widgets/1",
+	"/widgets/2",
+	"/widgets/3",
+	"/07-soft-nav-resources.html"
+];
+
+</script>
+<script src="support/app.js"></script>
+<div ng-app="app">
+	<div ng-view>
+	</div>
+</div>
+<script src="/test-templates/spa/07-soft-nav-resources.js" type="text/javascript"></script>
+<script src="07-soft-nav-resources.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 5,
+	Angular: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

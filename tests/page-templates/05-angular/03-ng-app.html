@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="../../vendor/angular/angular.js"></script>
+<script src="../../vendor/angular-resource/angular-resource.js"></script>
+<script src="../../vendor/angular-route/angular-route.js"></script>
+<script src="support/app.js"></script>
+<div ng-app="app">
+	<div ng-view>
+	</div>
+</div>
+<script src="03-ng-app.js" type="text/javascript"></script>
+<script>
+/*eslint-disable no-unused-vars*/
+window.angular_imgs = [3000];
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Angular: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

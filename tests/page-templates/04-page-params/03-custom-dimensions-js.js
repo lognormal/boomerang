@@ -49,19 +49,33 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		assert.equal(b["cdim.CD8"], undefined);
 	});
 
-	it("Should be having custom dimension 9 - QuerySelector", function() {
+	it("Should be having custom dimension 9 - QuerySelector if QuerySelector is supported", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD9"], "444.44");
+		if (t.isQuerySelectorSupported()) {
+			assert.equal(b["cdim.CD9"], "444.44");
+		}
 	});
 
-	it("Should be having custom dimension 10 - QuerySelector with non-standard attribute selector", function() {
-		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD10"], "444.44");
+	it("Should be having custom dimension 9 - QuerySelector return undefined if QuerySelector not supported", function() {
+		if (!t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
+			assert.equal(b["cdim.CD9"], undefined);
+		}
 	});
 
-	it("Should be having custom dimension 11 - QuerySelector with multiple values", function() {
-		var b = tf.lastBeacon();
-		assert.equal(b["cdim.CD11"], "444.44");
+
+	it("Should be having custom dimension 10 - QuerySelector with non-standard attribute selector if QuerySelector is supported", function() {
+		if (t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
+			assert.equal(b["cdim.CD10"], "444.44");
+		}
+	});
+
+	it("Should be having custom dimension 11 - QuerySelector with multiple values if QuerySelector is supported", function() {
+		if (t.isQuerySelectorSupported()) {
+			var b = tf.lastBeacon();
+			assert.equal(b["cdim.CD11"], "444.44");
+		}
 	});
 
 	it("Should be missing custom dimension 12 - QuerySelector with no matched element", function() {
@@ -77,5 +91,25 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 	it("Should be having custom dimension 14 - No parameter2 or queryselector set should return undefined", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["cdim.CD14"], undefined);
+	});
+
+	it("Should be having custom dimension 15 - Function custom_dimension15 has static function property isTrue and should return true", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD15"], "true");
+	});
+
+	it("Should be having custom dimension 16 - Pseudo class custom_dimension16 has prototype property isTrue and should return false since it's also a prototype member when accessing isTrue on an instance of the class", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD16"], "false");
+	});
+
+	it("Should be having custom dimension 17 - Should return \"false\" for a property set on the pseudo class prototype", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD17"], "false");
+	});
+
+	it("Should be having custom dimension 18 - Should return \"true\" for a property set on the pseudo class directly", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b["cdim.CD18"], "true");
 	});
 });

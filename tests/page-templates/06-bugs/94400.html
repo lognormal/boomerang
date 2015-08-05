@@ -1,0 +1,44 @@
+<%= header %>
+<!--
+if the domain of the hosting page changes after boomerang loads, but before the beacon is fired,
+calling BOOMR.window.location.href from inside boomerang results in "Permission Denied" in IE<11.
+-->
+<script src="94400.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+
+<!-- make sure boomerang is loaded before the page is loaded, to slow the beacon (yes this image doesn't exist) -->
+<img src="/delay?delay=1000&file=img.jpg" />
+
+<script>
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		"customMetrics": [{
+			"name": "Conversion",
+			"index": 0,
+			"type": "URLPatternType",
+			"label": "cmet.Conversion",
+			"dataType": "Percentage",
+			"parameter1": "*OrderShippingBillingConfirmationView*",
+			"parameter2": ""
+		}]
+	}
+});
+
+function changeDomain() {
+	document.domain = "boomerang.soasta.com";
+}
+if (document.addEventListener) {
+	document.addEventListener("onBoomerangLoaded", changeDomain);
+}
+else if (document.attachEvent) {
+	document.attachEvent("onpropertychange", function(e) {
+		e = e || window.event;
+		if (e && e.propertyName === "onBoomerangLoaded") {
+			changeDomain();
+		}
+	});
+}
+</script>
+<%= footer %>

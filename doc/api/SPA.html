@@ -1,0 +1,352 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Single Page Application Plugin APIs</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../boomerang-docs.css">
+</head>
+<body>
+<span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
+<h1>Single Page Application Plugin APIs</h1>
+
+<p>
+  <strong>Note:</strong> These plugins require the <code>AutoXHR</code> and <code>SPA</code>
+  Plugins to be included in your build of Boomerang.
+</p>
+
+<p>
+  The Single Page Application (SPA) Plugins are designed to support Boomerang
+  in cases where SPAs are used on the page and therefore the page's
+  <code>onload</code> event doesn't matter. In those cases Boomerang will
+  send Beacons when a <code>route change</code> event appears.
+</p>
+<p>
+  Between the start and end of the route changes Boomerang will monitor the
+  <code>DOM</code> for <code>MutationObserver</code> events and <code>XHR</code>
+  requests. If those happen we will automatically assume that they are relevant
+  to the <code>route change</code> event.
+</p>
+
+<p>
+  <strong>Note:</strong> It is not advisable to provide support for multiple SPA
+  Plugins in the same boomerang build.
+</p>
+
+<p>
+  <strong>Note:</strong> If you are unsure if your version of a specific SPA is supported by the plugins presented here please refer to the <a href="#compat">compatibillity list</a> below.
+</p>
+
+<p>The code and examples described in this document apply for the following
+  frameworks:</p>
+<ul>
+  <li><a href="#angular">AngularJS</a></li>
+  <li><a href="#backbone">Backbone.js</a></li>
+  <li><a href="#ember">Ember.js</a></li>
+  <li><a href="#custom">Custom SPAs</a></li>
+</ul>
+
+<h2 id="initConfig"><code>init()</code> Configuration</h2>
+
+<p>
+  Each plugin requires to be either enabled or disabled in boomerang's <code>init()</code>
+  function of BoomerangJS. As mentioned above you should only compile one SPA plugin plus its depenedncies
+  into your Boomerang release. This avoids breaking Boomerang by running multiple SPA-plugins at the same time.
+</p>
+
+<dl class="api">
+  <dt>init(oConfig)</dt>
+  <dd>
+    <p>
+      Called by the <a href="BOOMR.html#init">BOOMR.init()</a> method to configure the
+      SPA plugin. There is only one configurable option:
+    </p>
+    <dl>
+      <dt>enabled</dt>
+      <dd>
+	<strong>[required]</strong>
+	Set this to true <strong>only</strong> for the SPA you wish to work with in your project or application.
+      </dd>
+    </dl>
+<pre>BOOMR.init({
+	<i>// AngularJS</i>
+	<em>Angular: {							</em>
+	<em>			enabled: true				</em>
+	<em>}								</em>
+	<i>// Ember.js</i>
+	<em>Ember: {							</em>
+	<em>			enabled: true				</em>
+	<em>},								</em>
+	<i>// Backbone.js</i>
+	<em>Backbone: {							</em>
+	<em>			enabled: true				</em>
+	<em>},								</em>
+	<em>autorun: false,							</em>
+	<i>// Disable XHR instrumentation as this is auto-enabled by the SPA-plugins </i>
+	<em>instrument_xhr: false						</em>
+});</pre>
+<p><strong>NOTE:</strong>
+  It is advisable to tell Boomerang not to start automatically by setting the
+  <code>autorun</code> flag to <code>false</code>.
+</p>
+<p><strong>NOTE:</strong>
+  If you are not using a SPA-Framework but rely mostly on XMLHttpRequests to build your site, you can leave out the SPA plugin configuration and just enable <code>instrument_xhr</code> to measure your site.</p>
+  </dd>
+</dl>
+
+<dl class="api">
+  <dt>is_complete()</dt>
+  <dd>
+    <p>This should always return <code>true</code> as <code>EventListener</code>s
+      for <code>MutationObserver</code> and <code>route change</code> will trigger
+      independent to the <code>onLoad</code> event.</p>
+  </dd>
+</dl>
+
+<dl class="api">
+  <dt>hook()</dt>
+  <dd>
+    <p>Hook specific to the SPA. Please refer to the SPA-Framework specific documentation
+      below on which parameters to fill this with</p>
+  </dd>
+</dl>
+
+<h2 id="angular"><code>AngularJS</code> Configuration</h2>
+
+<p>
+  For AngularJS it is necessary to hook Boomerang into the application
+  from the <code>run</code> Callback.
+</p>
+
+<p>In your AngularJS Application or module add this to the <code>run()</code> callback:</p>
+
+<pre><code><em>// If boomerang is loaded to late to watch the first route change happen </em>
+<em>// toggle hadRouteChange to true using the routeChangeStart callback.</em>
+<em>// This will tell the plugin to fire a beacon immediately as it gets</em>
+<em>// initialized and not wait for a routeChange event.</em>
+var hadRouteChange = false;
+$rootScope.$on("$routeChangeStart", function() {
+  hadRouteChange = true;
+});
+function hookAngularBoomerang() {
+  if (window.BOOMR && BOOMR.version) {
+    if (BOOMR.plugins && BOOMR.plugins.Angular) {
+<em>// pass your $rootScope object and the aforementioned hadRoueChange variable to</em>
+<em>// the hook to both make sure we are listening for route changes and check whether</em>
+<em>// or not we we're on time</em>
+      BOOMR.plugins.Angular.hook($rootScope, hadRouteChange);
+    }
+    return true;
+  }
+}
+<em>// If we hooked in correctly we would return true if not we wait for the onBoomerangLoaded event</em>
+<em>// to fire and try again as we can be sure then that Boomerang has arrived in the page</em>
+if (!hookAngularBoomerang()) {
+  if (document.addEventListener) {
+    document.addEventListener("onBoomerangLoaded", hookAngularBoomerang);
+  } else if (document.attachEvent) {
+    document.attachEvent("onpropertychange", function(e) {
+      e = e || window.event;
+      if (e && e.propertyName === "onBoomerangLoaded") {
+        hookAngularBoomerang();
+      }
+    });
+  }
+}
+</code></pre>
+
+<p>
+  Internally the AngularJS plugin will hook into the <code>$routeChangeStart</code>
+  event and set timers for when the request for the route change started. After
+  that &mdash; once the <code>routeChange</code> has happend &mdash; the
+  <code>MutationObserver</code> that has been set up will realize that
+  everything has been loaded, give itself another second to make sure it hasn't
+  missed any final changes and then send a beacon out.
+</p>
+
+<h2 id="backbone"><code>Backbone.js</code> Configuration</h2>
+
+<p>
+  For Backbone.js we need to be hooked into the application prior to the first
+  <code>Backbone.history.start()</code> call in the application. Failing that
+  (eg. Boomerang was too late to initialize) a variable called
+  <code>hadRouteChange</code> passed to the Backbone.js hook should be set to <code>true</code>.
+</p>
+
+<p>Given these rules you can add the following to your Router definition (<code>Backbone.Router.extend({})</code>)
+  in the <code>init()</code> function.</p>
+<pre><code>var hadRouteChange = false;
+app.Router.on("route", function() {
+  hadRouteChange = true;
+});
+function hookBackboneBoomerang() {
+  if (window.BOOMR && BOOMR.version) {
+    if (BOOMR.plugins && BOOMR.plugins.Backbone) {
+      BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
+    }
+    return true;
+  }
+}
+
+if (!hookBackboneBoomerang()) {
+  if (document.addEventListener) {
+    document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
+  } else if (document.attachEvent) {
+    document.attachEvent("onpropertychange", function(e) {
+      e = e || window.event;
+      if (e && e.propertyName === "onBoomerangLoaded") {
+        hookBackboneBoomerang();
+      }
+    });
+  }
+}</code></pre>
+
+
+<h2 id="ember"><code>Ember.js</code> Configuration</h2>
+
+<p>
+  To make Ember.js work with Boomerang it is necessary to pass the Application
+  itself to the Boomerang plugin.
+</p>
+
+<p>In your Ember.js Application add this to the <code>route()</code> callback:</p>
+
+<pre><code>function hookEmberBoomerang() {
+  if (window.BOOMR && BOOMR.version) {
+    if (BOOMR.plugins && BOOMR.plugins.Ember) {
+      BOOMR.plugins.Ember.hook(App);
+    }
+    return true;
+  }
+}
+
+if (!hookEmberBoomerang()) {
+  if (document.addEventListener) {
+    document.addEventListener("onBoomerangLoaded", hookEmberBoomerang);
+  }
+  else if (document.attachEvent) {
+    document.attachEvent("onpropertychange", function(e) {
+      e = e || window.event;
+      if (e && e.propertyName === "onBoomerangLoaded") {
+        hookEmberBoomerang();
+      }
+    });
+  }
+}</code></pre>
+
+<p>Just like the AngularJS/Backbone.js SPA plugin we intend to hook into the application
+  as early as possible. However the difference here lies in the point we
+  hook into. The Ember.js plugins <code>hook()</code> function will either
+  <code>reopen</code> the already set <code>ApplicationRoute</code> or set
+  the Ember.js applications <code>ApplicationRoute</code> by
+  <code>extend()</code>ing the <code>Ember.Route</code> Class.
+  We will hook into the applications <code>activate</code> function and
+  <code>willTransition</code> event.
+</p>
+
+<h2 id="custom">Custom SPA Support</h2>
+
+<p>If you use a SPA framework that isn't one of the above or want to write your own
+  integration into your setup, we allow you to do so by using the underlying code used by
+  the pre-built plugins to hook in.</p>
+
+<h3><code>BOOMR.plugins.SPA</code> API</h3>
+<dl>
+  <dt><code>is_complete()</code></dt>
+  <dd>
+    Since the SPA plugin is just another BOOMR plugin we have to implement <code>is_complete</code>. It shoudl always return
+    true as it isn't bound to the normal boomerang lifecycle and does not have to complete for the classic onload beacon to fire.
+  </dd>
+
+  <dt><code>init(config)</code></dt>
+  <dd>
+    As is the case with <code>is_complete()</code> we have to implement <code>init()</code> to configure the SPA plugin. Here we
+    configure the SPA plugins abillity to enable or disable AutoXHR on demand after the first <code>route change</code> has happend.
+  </dd>
+
+  <dt><code>register</code></dt>
+  <dd>
+    <p>
+      Since there can be multiple SPA frameworks compiled into your version of boomerang
+      each SPA plugin should register itself by calling <code>register</code> with the name of the plugin as a string argument.
+      This will make sure, that when you call <code>BOOMR.init()</code> with the option to enable the SPA plugin of
+      your choice AutoXHR will acknowledge that and disable itself until re-enabled by the SPA plugin after the first
+      <code>route change</code> has finished.
+    </p>
+    <p>
+      This means your SPA plugin should register itself early on in the evaluation of your plugins code. Even before defining
+      the plugin itself. Here is an example:
+    </p>
+    <pre><code>(function(){
+	<em>// If our plugin is already defined just skip re-evaluating.</em>
+	<em>// same goes for if BOOMR.plugins.SPA is not defined </em>
+	if (BOOMR.plugins.MySPAPlugin || typeof BOOMR.plugins.SPA === "undefined") {
+		return;
+	}
+
+	<em>// register as a SPA plugin</em>
+	BOOMR.plugins.SPA.register("MySPAPlugin");
+
+	BOOMR.plugins.MySPAPlugin = {
+		<em>/* Your SPA Code */</em>
+	};
+}());</code></pre>
+  </dd>
+
+  <dt><code>supported_frameworks</code></dt>
+  <dd>
+    Used internally in the AutoXHR plugin to check if one of the registered SPA plugins has been enabled.
+  </dd>
+
+  <dt><code>hook(hadRouteChange)</code></dt>
+  <dd>
+    <p>Called by a SPA plugin once it has hooked into the framework of choice. The boolean argument <code>hadRouteChange</code>
+      is used to flag if Boomerang has loaded late or not. This will decide if AutoXHR will be enabled right away or only when the
+      first <code>route_change</code> call has happend. <code>hook</code> will set the flag <code>http.initiator</code> to
+      <code>spa</code> to flag that the next beacon comes from a SPA event.
+    </p>
+  </dd>
+
+  <dt><code>route_change</code></dt>
+  <dd>
+    <p>
+      As soon as the first <code>route_change</code> event, triggered by the SPA, will be initiated this function should be called
+      enablinge listening for any DOM changes (using <code>MutationObserver</code>) and XHR calls required to finish the route change.
+      This will make sure that all required assets for the <code>route_change</code> have been fetched. Since this is a SPA event
+      <code>AutoXHR</code> will wait an entire second for everything to settle.
+    </p>
+  </dd>
+
+  <dt><code>last_location(url)</code></dt>
+  <dd>
+    <p>
+      To make sure that the sent beacon at the end of the <code>route_change</code> event will also contain the refferal URL
+      we came from, <code>last_location</code> documents this URL to put into the beacon.
+    </p>
+  </dd>
+</dl>
+
+<h2 id="compat">SPA-Plugin compatibillity:</h2>
+
+<p>The SPA plugins were tested and used in production environments with the following versions of each SPA-Framework:</p>
+
+<ul>
+  <li>AngularJS: <a href="https://github.com/angular/angular.js/blob/master/CHANGELOG.md#1314-instantaneous-browserification-2015-02-24">1.3.14</a></li>
+  <li>Backbone.js: <a href="http://backbonejs.org/#changelog">1.2.0</a></li>
+  <li>Ember.js: <a href="http://emberjs.com/blog/2015/05/13/ember-1-12-released.html">1.12.1</a></li>
+</ul>
+
+<p>Compatible versions of each framework should work as intended.</p>
+
+<h2>Browser compatibility considerations</h2>
+
+<p>As these plugins require AutoXHR and the availabilltiy of <code>MutationObserver</code> it is advisable to
+  have a polyfill for browsers where the framework may be supported but <code>MutationObserver</code> isn't. See
+  the <code>MutationObserver</code> <a href="http://caniuse.com/#feat=mutationobserver">supported browser</a> list.
+  If you are required to support browsers that don't support <code>MutationObserver</code>, consider adding a polyfill.
+</p>
+</body>
+</html>
+<!--
+    Copyright (c) 2015, SOASTA Inc.  All rights reserved.
+    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+-->

@@ -72,6 +72,26 @@
 			return s.replace(this.sanitizeRE, "");
 		},
 
+		isValidObjectMember: function(value, part) {
+			if (value === null) {
+				return false;
+			}
+
+			if (typeof value === "object") {
+				return true;
+			}
+
+			if (typeof value === "function" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			if (typeof value === "string" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			return false;
+		},
+
 		extractFromDOMElement: function(element, o) {
 			var m, re;
 
@@ -323,18 +343,20 @@
 			}
 
 			// Top part needs to be global in the primary window
-			value = w[parts.shift()];
+			value = this.extractJavaScriptVariableValue(w, parts.shift());
 
 			// Then we navigate down the object looking at each part
 			// until:
 			// - a part evaluates to null (we cannot proceed)
 			// - a part is not an object (might be a leaf but we cannot go further down)
+			// - a part is a function but has an own property that is in our parts
 			// - there are no more parts left (so we can stop)
 			try {
-				while (value !== null && typeof value === "object" && parts.length) {
+				while (parts.length && this.isValidObjectMember(value, parts[0])) {
+
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
-					value = value[parts.shift()];
+					value = this.extractJavaScriptVariableValue(value, parts.shift());
 				}
 			}
 			catch(err) {
@@ -369,6 +391,35 @@
 			value = this.cleanUp(String(value));
 
 			return this.apply(value);
+		},
+
+		extractJavaScriptVariableValue: function(value, part) {
+			// regex to extract array subscript index
+			var match, index, re = /(.+?)\[(\d+)\]((?:\[\d+\])+)*/;
+
+			if ((match = re.exec(part)) === null) {
+				// no subscript, return value.part
+				return value[part];
+			}
+
+			// split into js var name, or subscripts
+			re = /([a-zA-Z_$][\w$]*|\[(\d+)\])/g;
+
+			// We'll match either a variable name (the first part of the regex),
+			// or an array subsript (the second option in the | in the regex).
+			while ((match = re.exec(part)) !== null && typeof value !== "undefined") {
+				if (match.length === 3 && match[2]) {
+					// when we matched an array subscript, such as '[1]'
+					index = parseInt(match[2], 10);
+					value = value[index];
+				}
+				else {
+					// when we matched a JavaScript variable name
+					value = value[match[1]];
+				}
+			}
+
+			return value;
 		},
 
 		URLPattern: function(o) {
@@ -611,12 +662,7 @@
 				reslist = frame.performance.getEntriesByName(url);
 			}
 			catch(e) {
-				// These are expected for cross-origin iframe access, although the Internet Explorer check will only
-				// work for browsers using English.
-				if ( e.name === "SecurityError" ||
-					(e.name === "TypeError" && e.message === "Permission denied") ||
-					(e.name === "Error" && e.message && e.message.match(/^(Permission|Access is) denied/))
-				 ) {
+				if (BOOMR.isCrossOriginError(e)) {
 					return null;
 				}
 
@@ -677,7 +723,7 @@
 				return false;
 			}
 
-			if (!p || !p.getEntriesByType) {
+			if (!p || typeof p.getEntriesByType !== "function") {
 				BOOMR.debug("This browser does not support UserTiming", "PageVars");
 				return false;
 			}
@@ -728,6 +774,8 @@
 		initialized: false,
 		onloadfired: false,
 
+		autorun: true,
+
 		mayRetry: [],
 
 		done: function(edata, ename) {
@@ -751,7 +799,15 @@
 				return;
 			}
 
-			if (ename === "xhr") {
+			BOOMR_check_doc_domain();
+
+			//
+			// XHRs are handled differently than normal or SPA navigations (which apply
+			// all Page Groups, Timers, Metrics, Dimensions and ABs).  XHRs look at Page Groups
+			// and remove any _subresource in the name.  XHRs also only apply Timers, Metrics
+			// and Dimensions that have 'xhr_ok' set.
+			//
+			if (ename === "xhr" && edata.initiator !== "spa") {
 				limpl = impl.extractXHRParams(edata, hconfig);
 
 				if (limpl === null) {
@@ -961,7 +1017,7 @@
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
-			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
+			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions", "autorun"];
 
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
@@ -970,6 +1026,10 @@
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
+
+			if (typeof config.autorun !== "undefined") {
+				impl.autorun = config.autorun;
+			}
 
 			// Fire on the first of load or unload
 
@@ -1067,7 +1127,7 @@
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
 			}
-			else {
+			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
 				// then we just run immediately
 				BOOMR.setImmediate(impl.done, {}, "load", impl);
@@ -1092,6 +1152,10 @@
 			}
 			return true;
 		}
+
+		/* BEGIN UNIT_TEST_CODE */,
+		Handler: Handler
+		/* END UNIT_TEST_CODE */
 	};
 
 }());
