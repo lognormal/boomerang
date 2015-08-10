@@ -423,7 +423,7 @@ BOOMR_check_doc_domain();
 				}
 
 				value = this.objectToString(subcookies, "&");
-				nameval = name + "=" + value;
+				nameval = name + "=\"" + value + "\"";
 
 				c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
 				if (max_age) {
