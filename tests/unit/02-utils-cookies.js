@@ -204,6 +204,23 @@ describe("BOOMR.utils cookies", function() {
 			assert.strictEqual(o["10"], "11");
 			assert.strictEqual(o["11"], "");
 		});
+
+		it("Should validate that document.cookie contains quotes for a complex cookie", function() {
+			var c = { a: 10, b: 20, c:"foo bar" };
+			BOOMR.utils.setCookie("complex-cookie", c);
+
+			assert.match(document.cookie, /(^|; *)complex-cookie="a=10&b=20&c=foo%20bar"($| *;)/, "complex-cookie should be quoted");
+
+			var d = BOOMR.utils.getCookie("complex-cookie");
+
+			assert.equal(d, "a=10&b=20&c=foo%20bar", "getCookie should remove quotes from complex cookie");
+
+			var e = BOOMR.utils.getSubCookies(d);
+
+			assert.equal(e.a, c.a, "subcookies should match");
+			assert.equal(e.b, c.b, "subcookies should match");
+			assert.equal(e.c, c.c, "subcookies should match");
+		});
 	});
 
 	describe("BOOMR.utils.removeCookie()", function() {
