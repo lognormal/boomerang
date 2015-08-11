@@ -39,6 +39,10 @@
 		return;
 	}
 
+	var impl = {
+		enabled: false
+	};
+
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("Angular");
 
@@ -95,11 +99,15 @@
 	// Exports
 	//
 	BOOMR.plugins.Angular = {
+		init: function(config) {
+			BOOMR.utils.pluginConfig(impl, config, "Angular", ["enabled"]);
+		},
+
 		is_complete: function() {
 			return true;
 		},
 		hook: function($rootScope, hadRouteChange) {
-			if (hooked) {
+			if (hooked || !impl.enabled) {
 				return this;
 			}
 
