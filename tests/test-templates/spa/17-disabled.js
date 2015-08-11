@@ -17,11 +17,10 @@ BOOMR_test.templates.SPA["17-disabled"] = function() {
 	it("Should have only one beacon with type = navigation", function(){
 		var b = tf.beacons[0];
 
-		try {
+		if (t.isNavigationTimingSupported()) {
 			assert.equal(b["rt.start"], "navigation");
 		}
-		catch (exception) {
-			// workaround so tests don't fail because it's running in phantomjs
+		else {
 			assert.equal(b["rt.start"], "none");
 		}
 	});
