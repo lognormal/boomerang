@@ -28,22 +28,26 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 				o = {};
 				o[keys[0]] = r;
 
-				if (typeof filter === "function") {
-					try {
-						tags = [].filter.call(tags, filter);
-						if (tags.length !== r) {
-							if (keys.length > 1) {
-								o[keys[1]] = tags.length;
-							}
-							else {
-								r += "/" + tags.length;
-							}
+				if (typeof [].filter === "function") {
+					tags = tags.filter(filter);
+				}
+				else {
+					tags = BOOMR.utils.arrayFilter(tags, filter);
+				}
+				try {
+					if (tags.length !== r) {
+						if (keys.length > 1) {
+							o[keys[1]] = tags.length;
+						}
+						else {
+							r += "/" + tags.length;
 						}
 					}
-					catch(err) {
-						BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
-					}
 				}
+				catch(err) {
+					BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
+				}
+
 			}
 			return o || r;
 		}
