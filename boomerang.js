@@ -543,14 +543,13 @@ BOOMR_check_doc_domain();
 			arrayFilter: function(array, predicate) {
 				var index = -1,
 				    length = array.length,
-				    resIndex = -1,
 				    result = [],
 				    value;
 
 				while (++index < length) {
 					value = array[index];
 					if (predicate(value, index, array)) {
-						result[++resIndex] = value;
+						result[result.length] = value;
 					}
 				}
 				return result;
