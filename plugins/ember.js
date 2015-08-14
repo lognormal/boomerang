@@ -36,10 +36,6 @@
 	var hooked = false,
 	    routeHooked = false;
 
-	var impl = {
-		enabled: false
-	};
-
 	if (BOOMR.plugins.Ember || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}
@@ -144,14 +140,11 @@
 	// Exports
 	//
 	BOOMR.plugins.Ember = {
-		init: function(config) {
-			BOOMR.utils.pluginConfig(impl, config, "Ember", ["enabled"]);
-		},
 		is_complete: function() {
 			return true;
 		},
 		hook: function(App, hadRouteChange) {
-			if (hooked || !impl.enabled) {
+			if (hooked) {
 				return this;
 			}
 

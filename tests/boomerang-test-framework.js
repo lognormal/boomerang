@@ -278,10 +278,6 @@
 		        typeof window.performance.measure === "function");
 	};
 
-	t.isNavigationTimingSupported = function() {
-		return (window.performance && window.performance.navigation);
-	};
-
 	t.validateBeaconWasImg = function(done) {
 		// look for #beacon_form in the BOOMR window's IFRAME
 		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;

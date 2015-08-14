@@ -41,10 +41,6 @@
 		return;
 	}
 
-	var impl = {
-		enabled: false
-	};
-
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("Backbone");
 
@@ -93,14 +89,11 @@
 	// Exports
 	//
 	BOOMR.plugins.Backbone = {
-		init: function(config) {
-			BOOMR.utils.pluginConfig(impl, config, "Backbone", ["enabled"]);
-		},
 		is_complete: function() {
 			return true;
 		},
 		hook: function(router, hadRouteChange) {
-			if (hooked || !impl.enabled) {
+			if (hooked) {
 				return this;
 			}
 
