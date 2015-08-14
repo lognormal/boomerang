@@ -541,15 +541,21 @@ BOOMR_check_doc_domain();
 			 * @returns {Array} Returns the new filtered array.
 			 */
 			arrayFilter: function(array, predicate) {
-				var index = -1,
-				    length = array.length,
-				    result = [],
-				    value;
+				var result = [];
 
-				while (++index < length) {
-					value = array[index];
-					if (predicate(value, index, array)) {
-						result[result.length] = value;
+				if (typeof array.filter === "function") {
+					result = array.filter(predicate);
+				}
+				else {
+					var index = -1,
+					    length = array.length,
+					    value;
+
+					while (++index < length) {
+						value = array[index];
+						if (predicate(value, index, array)) {
+							result[result.length] = value;
+						}
 					}
 				}
 				return result;

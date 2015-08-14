@@ -28,14 +28,9 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 				o = {};
 				o[keys[0]] = r;
 
-				if (typeof filter === "function" ) {
+				if (typeof filter === "function") {
 					try {
-						if (typeof [].filter === "function") {
-							tags = tags.filter(filter);
-						}
-						else {
-							tags = BOOMR.utils.arrayFilter(tags, filter);
-						}
+						tags = BOOMR.utils.arrayFilter(tags, filter);
 						if (tags.length !== r) {
 							if (keys.length > 1) {
 								o[keys[1]] = tags.length;
