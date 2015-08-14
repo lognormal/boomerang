@@ -30,7 +30,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 
 				if (typeof filter === "function") {
 					try {
-						tags = [].filter.call(tags, filter);
+						tags = BOOMR.utils.arrayFilter(tags, filter);
 						if (tags.length !== r) {
 							if (keys.length > 1) {
 								o[keys[1]] = tags.length;
@@ -44,6 +44,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 						BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
 					}
 				}
+
 			}
 			return o || r;
 		}
