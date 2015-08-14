@@ -23,7 +23,6 @@ describe("BOOMR.utils filter", function() {
 		};
 
 		assert.deepEqual(BOOMR.utils.arrayFilter(input, filterFunction), expect);
-		assert.lengthOf(BOOMR.utils.arrayFilter(input, filterFunction), 1);
 	});
 
 	it("Should have the array passed in as the third value and return the complete array as passed in", function(){
@@ -41,6 +40,19 @@ describe("BOOMR.utils filter", function() {
 	it("Should return half the array of numbers as it matches the rule we defined in the filter function", function(){
 		var input = [1, 2, 3, 4],
 		    expect = [1, 2];
+
+		var filterFunction = function(value) {
+			return value <= 2;
+		};
+
+		assert.deepEqual(BOOMR.utils.arrayFilter(input, filterFunction), expect);
+	});
+
+	it("Should also work if filter has been set to null or undefined (ie. lacking [].filter support)", function(){
+		var input = [1, 2, 3, 4],
+		    expect = [1, 2];
+
+		input.filter = undefined;
 
 		var filterFunction = function(value) {
 			return value <= 2;
