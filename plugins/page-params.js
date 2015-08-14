@@ -545,7 +545,7 @@
 			var el, url, res, st, en, k;
 
 			// Require at least xpath or url
-			if (!o.parameter2 && !o.url) {
+			if (!o.parameter2 && !o.url && !o.queryselector) {
 				return false;
 			}
 
@@ -575,6 +575,14 @@
 			}
 			else if (o.parameter2) {
 				el = this.runXPath(o.parameter2);
+				if (!el) {
+					return false;
+				}
+
+				url = el.src || el.href;
+			}
+			else if (o.queryselector) {
+				el = this.runQuerySelector(o.queryselector);
 				if (!el) {
 					return false;
 				}
