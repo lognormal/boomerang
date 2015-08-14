@@ -6,7 +6,7 @@ BOOMR_test.templates.SPA["17-disabled"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	it("Should have sent two beacons one for navigation one for XHR request", function(done){
+	it("Should have sent one beacon for navigation", function(done){
 		// wait long enough that a possible second beacon may occur
 		this.timeout(4000);
 		setTimeout(function() {
@@ -14,13 +14,18 @@ BOOMR_test.templates.SPA["17-disabled"] = function() {
 		}, 2000);
 	});
 
-	it("Should have only one beacon with type = navigation", function(){
+	it("Should have only one beacon with type = navigation (if NavigationTiming is supported)", function(){
 		var b = tf.beacons[0];
 
 		if (t.isNavigationTimingSupported()) {
 			assert.equal(b["rt.start"], "navigation");
 		}
-		else {
+	});
+
+	it("Should have only one beacon with type = none (if NavigationTiming is NOT supported)", function(){
+		var b = tf.beacons[0];
+
+		if (!t.isNavigationTimingSupported()) {
 			assert.equal(b["rt.start"], "none");
 		}
 	});
