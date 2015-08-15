@@ -33,14 +33,42 @@ describe("e2e/04-page-params/06-custom-timers", function() {
 	it("Should have the custom timer 2 - XPath", function(){
 		var b = tf.lastBeacon();
 		var timers = t.parseTimers(b.t_other);
-		assert.closeTo(b["ctim.CT2_st"], 100, 20);
+		assert.closeTo(b["ctim.CT2_st"], 100, 100);
 		assert.closeTo(parseInt(timers["ctim.CT2"]), 3000, 100);
 	});
 
 	it("Should have the custom timer 3 - QuerySelector", function(){
 		var b = tf.lastBeacon();
 		var timers = t.parseTimers(b.t_other);
-		assert.closeTo(b["ctim.CT3_st"], 100, 20);
+		assert.closeTo(b["ctim.CT3_st"], 100, 100);
 		assert.closeTo(parseInt(timers["ctim.CT3"]), 3000, 100);
+	});
+
+	it("Should have the custom timer 4 - URL is Slowest", function(){
+		var b = tf.lastBeacon();
+		var timers = t.parseTimers(b.t_other);
+		assert.closeTo(b["ctim.CT4_st"], 100, 100);
+		assert.closeTo(parseInt(timers["ctim.CT4"]), 3000, 100);
+	});
+
+	it("Should have the custom timer 5 - URL empty", function(){
+		var b = tf.lastBeacon();
+		var timers = t.parseTimers(b.t_other);
+		assert.equal(b["ctim.CT5_st"], undefined);
+		assert.equal(timers["ctim.CT5"], undefined);
+	});
+
+	it("Should have the custom timer 6 - No options", function(){
+		var b = tf.lastBeacon();
+		var timers = t.parseTimers(b.t_other);
+		assert.equal(b["ctim.CT6_st"], undefined);
+		assert.equal(timers["ctim.CT6"], undefined);
+	});
+
+	it("Should have the custom timer 7 - Parameter2 is Slowest", function(){
+		var b = tf.lastBeacon();
+		var timers = t.parseTimers(b.t_other);
+		assert.closeTo(b["ctim.CT7_st"], 100, 20);
+		assert.closeTo(parseInt(timers["ctim.CT7"]), 3000, 100);
 	});
 });
