@@ -544,7 +544,7 @@
 		ResourceTiming: function(o) {
 			var el, url, res, st, en, k;
 
-			// Require at least xpath or url
+			// Require at least xpath, queryselector or url
 			if (!o.parameter2 && !o.url && !o.queryselector) {
 				return false;
 			}
