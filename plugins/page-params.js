@@ -575,19 +575,16 @@
 			}
 			else if (o.parameter2) {
 				el = this.runXPath(o.parameter2);
-				if (!el) {
-					return false;
-				}
-
-				url = el.src || el.href;
 			}
 			else if (o.queryselector) {
 				el = this.runQuerySelector(o.queryselector);
-				if (!el) {
-					return false;
-				}
+			}
 
+			if (el) {
 				url = el.src || el.href;
+			}
+			else {
+				return false;
 			}
 
 			if (!url) {
