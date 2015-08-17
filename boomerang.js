@@ -774,6 +774,11 @@ BOOMR_check_doc_domain();
 						&& config[k].enabled === false
 					) {
 						impl.disabled_plugins[k] = 1;
+
+						if (typeof this.plugins[k].disable === "function") {
+							this.plugins[k].disable();
+						}
+
 						continue;
 					}
 
@@ -786,6 +791,10 @@ BOOMR_check_doc_domain();
 							|| config[k].enabled !== true
 						) {
 							continue;
+						}
+
+						if (typeof this.plugins[k].enable === "function") {
+							this.plugins[k].enable();
 						}
 
 						// plugin is now enabled

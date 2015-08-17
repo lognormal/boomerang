@@ -35,15 +35,13 @@
 *   }]);
 */
 (function() {
-	var hooked = false;
+	var hooked = false,
+	    enabled = true,
+	    hadMissedRouteChange = false;
 
 	if (BOOMR.plugins.Backbone || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}
-
-	var impl = {
-		enabled: false
-	};
 
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("Backbone");
@@ -82,6 +80,11 @@
 		// route changes (i.e. a soft navigation, which is associated with the
 		// URL in the address bar changing)
 		router.on("route", function() {
+			if (!enabled) {
+				hadMissedRouteChange = true;
+				return;
+			}
+
 			log("route");
 			BOOMR.plugins.SPA.route_change();
 		});
@@ -93,14 +96,11 @@
 	// Exports
 	//
 	BOOMR.plugins.Backbone = {
-		init: function(config) {
-			BOOMR.utils.pluginConfig(impl, config, "Backbone", ["enabled"]);
-		},
 		is_complete: function() {
 			return true;
 		},
 		hook: function(router, hadRouteChange) {
-			if (hooked || !impl.enabled) {
+			if (hooked) {
 				return this;
 			}
 
@@ -108,6 +108,20 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 
 				hooked = true;
+			}
+
+			return this;
+		},
+		disable: function() {
+			enabled = false;
+			return this;
+		},
+		enable: function() {
+			enabled = true;
+
+			if (hooked && hadMissedRouteChange) {
+				hadMissedRouteChange = false;
+				BOOMR.plugins.SPA.route_change();
 			}
 
 			return this;
