@@ -46,6 +46,21 @@ if [ ! -d ${WORKING_DIR} ]; then
         mkdir ${WORKING_DIR}
 fi
 
+result=$(curl -X GET "https://api.cloudflare.com/client/v4/zones?name=$cfZONE&status=active" \
+	     -H "X-Auth-Email: $cfEMAIL" \
+	     -H "X-Auth-Key: $cfTOKEN" \
+	     -H "Content-Type: application/json"  \
+	  | tee -a $LOG )
+
+if echo $result | grep -q '"success":true' &>/dev/null; then
+	zoneID=$( echo $result | sed -e "s/.*\"id\":\"\\([a-z0-9]*\\)\",\"name\":\"$cfZONE\",.*/\\1/" )
+else
+	echo "Error: "
+	echo $result | sed -e 's/.*"errors":\[//; s/\].*//;'
+	echo "See https://api.cloudflare.com/#zone-errors for details"
+	exit
+fi
+
 current=1
 
 echo "Starting to purge individual file cache for zone $cfZONE" | tee $LOG
@@ -55,50 +70,39 @@ for APIKEY in $( grep -E "^[A-Z0-9]+-" "$mpAPIKEYS" | sort -n | uniq ); do
 	echo "Purging $APIKEY... ($current/$total)" | tee -a $LOG
 	current=$(( $current+1 ))
 
-	for PROTO in http https; do
-		ok=0
-		retries=3
-		while [ $ok -eq 0 ]; do
+	ok=0
+	retries=3
+	while [ $ok -eq 0 ]; do
 
-			retries=$(( $retries-1 ))
+		retries=$(( $retries-1 ))
 
-			echo "curl https://www.cloudflare.com/api_json.html -d \"a=zone_file_purge\" -d \"tkn=XXXXX\" -d \"email=$cfEMAIL\" -d \"z=$cfZONE\" -d \"url=$PROTO://$mpHOST/boomerang/$APIKEY\"" >> $LOG
-			echo -n "    $PROTO://$mpHOST/boomerang/$APIKEY - "
-			result=$( curl https://www.cloudflare.com/api_json.html \
-				  -d "a=zone_file_purge" \
-				  -d "tkn=$cfTOKEN" \
-				  -d "email=$cfEMAIL" \
-				  -d "z=$cfZONE" \
-				  -d "url=$PROTO://$mpHOST/boomerang/$APIKEY" 2>/dev/null \
-				| sed -e 's/"tkn":"[^"]*"/"tkn":"XXXXX"/' \
-				| tee -a $LOG )
+		echo "curl -X DELETE \"https://api.cloudflare.com/client/v4/zones/$zoneID/purge_cache\" \
+			  -H \"X-Auth-Email: $cfEMAIL\" \
+			  -H \"X-Auth-Key: $cfTOKEN\" \
+			  -H \"Content-Type: application/json\"  \
+			  --data \"{\\\"files\\\":[\\\"http://$mpHOST/boomerang/$APIKEY\\\",\\\"https://$mpHOST/boomerang/$APIKEY\\\"]}\"" >> $LOG
+		echo -n "    //$mpHOST/boomerang/$APIKEY - "
 
-			if echo $result | grep -q '"result":"success"' &>/dev/null; then
-				echo -e "\033[0;32mdone\033[0m"
-				echo "$PROTO - done" >> $LOG
-				ok=1
-			elif echo $result | grep -q '"err_code":"E_UNAUTH"' &>/dev/null; then
-				echo "Auth credentials are incorrect, please check and retry" | tee -a $LOG
-				exit
-			elif echo $result | grep -q '"err_code":"E_INVLDINPUT"' &>/dev/null; then
-				echo "Something went wrong, check log, and proceed manually" | tee -a $LOG
-				exit
-			elif echo $result | grep -q '"err_code":"E_MAXAPI"' &>/dev/null; then
-				if [ $retries -lt 0 ]; then
-					echo "Rate limited 3 times, aborting..." | tee -a $LOG
-					exit
-				else
-					echo "Max allowed API calls exceeded, sleeping for a 20 seconds" | tee -a $LOG
-					sleep 20
-				fi
-			elif echo $result | grep -q '"result":"error","msg":"' &>/dev/null; then
-				echo $result | sed -e 's/.*"result":"error","msg":"//;s/".*//' | tee -a $LOG
-				exit
-			else
-				echo "Something went wrong, check $LOG" | tee -a $LOG
-				exit
-			fi
-		done
+		result=$( curl -X DELETE "https://api.cloudflare.com/client/v4/zones/$zoneID/purge_cache" \
+			  -H "X-Auth-Email: $cfEMAIL" \
+			  -H "X-Auth-Key: $cfTOKEN" \
+			  -H "Content-Type: application/json"  \
+			  --data "{\"files\":[\"http://$mpHOST/boomerang/$APIKEY\",\"https://$mpHOST/boomerang/$APIKEY\"]}" 2>/dev/null \
+			| tee -a $LOG )
+
+		if echo $result | grep -q '"success":true' &>/dev/null; then
+			echo -e "\033[0;32mdone\033[0m"
+			echo "$PROTO - done" >> $LOG
+			ok=1
+		elif echo $result | grep '"errors":\[[^\]][^\]]*\]' &>/dev/null; then
+			echo "Error: "
+			echo $result | sed -e 's/.*"errors":\[//; s/\].*//;'
+			echo "See https://api.cloudflare.com/#zone-errors for details"
+			exit
+		else
+			echo "Something went wrong, check $LOG" | tee -a $LOG
+			exit
+		fi
 	done
 	if [ $total -gt 50 ]; then
 		sleep 1;

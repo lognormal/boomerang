@@ -9,11 +9,19 @@ var path = require("path");
  * Grunt Tasks - mpulse-build-repository-xml
  *
  * Builds a mPulse Repository XML for boomerang.js
+ *
+ * This automatically happens as part of the 'build' task ('mpulse-build-repository-xml:build'),
+ * but can also be re-run for other builds on the fly ('mpulse-build-repository-xml:for').
+ *
+ * To run this on demand:
+ * > grunt mpulse-build-repository-xml:from --file-prefix=build/[file] --boomerang-version=[version]
+ * e.g.:
+ * > grunt mpulse-build-repository-xml:from --file-prefix=build/boomerang-0.9.1434056918 --boomerang-version=0.9.1434056918
  */
 module.exports = function(grunt) {
 	var description = "Builds a mPulse Repository XML for boomerang.js";
 
-	grunt.registerTask("mpulse-build-repository-xml", description, function() {
+	grunt.registerMultiTask("mpulse-build-repository-xml", description, function() {
 		var options = this.options({
 			filePrefix: "",
 			template: path.join(__dirname, "mpulse-build-repository-xml.tmpl"),

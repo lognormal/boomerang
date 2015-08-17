@@ -73,11 +73,23 @@
 		},
 
 		isValidObjectMember: function(value, part) {
-			if (value === null ) {
+			if (value === null) {
 				return false;
 			}
 
-			return  typeof value === "object" || (typeof value === "function" && value.hasOwnProperty(part));
+			if (typeof value === "object") {
+				return true;
+			}
+
+			if (typeof value === "function" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			if (typeof value === "string" && value.hasOwnProperty(part)) {
+				return true;
+			}
+
+			return false;
 		},
 
 		extractFromDOMElement: function(element, o) {
@@ -532,8 +544,8 @@
 		ResourceTiming: function(o) {
 			var el, url, res, st, en, k;
 
-			// Require at least xpath or url
-			if (!o.parameter2 && !o.url) {
+			// Require at least xpath, queryselector or url
+			if (!o.parameter2 && !o.url && !o.queryselector) {
 				return false;
 			}
 
@@ -563,14 +575,15 @@
 			}
 			else if (o.parameter2) {
 				el = this.runXPath(o.parameter2);
-				if (!el) {
-					return false;
-				}
-
-				url = el.src || el.href;
+			}
+			else if (o.queryselector) {
+				el = this.runQuerySelector(o.queryselector);
 			}
 
-			if (!url) {
+			if (el) {
+				url = el.src || el.href;
+			}
+			else if (!url) {
 				return false;
 			}
 

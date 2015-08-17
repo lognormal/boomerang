@@ -532,7 +532,34 @@ BOOMR_check_doc_domain();
 
 				return (props>0);
 			},
+			/**
+			 * `filter` for arrays
+			 *
+			 * @private
+			 * @param {Array} array The array to iterate over.
+			 * @param {Function} predicate The function invoked per iteration.
+			 * @returns {Array} Returns the new filtered array.
+			 */
+			arrayFilter: function(array, predicate) {
+				var result = [];
 
+				if (typeof array.filter === "function") {
+					result = array.filter(predicate);
+				}
+				else {
+					var index = -1,
+					    length = array.length,
+					    value;
+
+					while (++index < length) {
+						value = array[index];
+						if (predicate(value, index, array)) {
+							result[result.length] = value;
+						}
+					}
+				}
+				return result;
+			},
 			/**
 			 Add a MutationObserver for a given element and terminate after `timeout`ms.
 			 @param el		DOM element to watch for mutations
@@ -679,7 +706,8 @@ BOOMR_check_doc_domain();
 				function submit() {
 					/*eslint-disable no-script-url*/
 					var iframe,
-					    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
+					    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random(),
+					    isEdge = false;
 
 					// ref: http://terminalapp.net/submitting-a-form-with-target-set-to-a-script-generated-iframe-on-ie/
 					try {
@@ -689,8 +717,22 @@ BOOMR_check_doc_domain();
 						iframe = document.createElement("iframe");				// everything else
 					}
 
+					isEdge = BOOMR.window.navigator
+						&& BOOMR.window.navigator.userAgent
+						&& BOOMR.window.navigator.userAgent.indexOf(" Edge/") !== -1;
+
 					form.action = urls.shift();
-					form.target = iframe.name = iframe.id = name;
+					iframe.name = iframe.id = name;
+
+					// IE Edge hangs for a minute on some sites when using form.submit().  This
+					// can be avoided by not setting the form.target, and adding the form to the
+					// iframe instead of the document.
+
+					// don't set form.target on Edge
+					if (!isEdge) {
+						form.target = name;
+					}
+
 					iframe.style.display = form.style.display = "none";
 					iframe.src="javascript:false";
 
@@ -698,7 +740,15 @@ BOOMR_check_doc_domain();
 					remove(form.id);
 
 					document.body.appendChild(iframe);
-					document.body.appendChild(form);
+
+					if (isEdge) {
+						// for Edge, add the form to the iframe
+						iframe.appendChild(form);
+					}
+					else {
+						// for all other browsers, add the form to the document
+						document.body.appendChild(form);
+					}
 
 					try {
 						form.submit();

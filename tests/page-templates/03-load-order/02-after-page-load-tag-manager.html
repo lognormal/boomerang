@@ -19,7 +19,7 @@ BOOMR_test.init({
 		win.attachEvent("onload", boomerangSaveLoadTime);
 	}
 
-	iframe.src = "javascript:false";
+	iframe.src = "javascript:void(0)";
 	(iframe.frameElement || iframe).style.cssText = "width:0;height:0;border:0;display:none;";
 	where = document.getElementsByTagName('script')[0];
 	where.parentNode.insertBefore(iframe, where);
