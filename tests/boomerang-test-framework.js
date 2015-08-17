@@ -271,6 +271,10 @@
 		return typeof window.document.querySelector === "function";
 	};
 
+	t.isNavigationTimingSupported = function() {
+		return typeof BOOMR.plugins.RT.navigationStart() !== "undefined";
+	};
+
 	t.isUserTimingSupported = function() {
 		return (window.performance &&
 		        typeof window.performance.getEntriesByType === "function" &&
