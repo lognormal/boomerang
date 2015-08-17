@@ -583,11 +583,7 @@
 			if (el) {
 				url = el.src || el.href;
 			}
-			else {
-				return false;
-			}
-
-			if (!url) {
+			else if (!url) {
 				return false;
 			}
 
