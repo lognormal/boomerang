@@ -532,7 +532,34 @@ BOOMR_check_doc_domain();
 
 				return (props>0);
 			},
+			/**
+			 * `filter` for arrays
+			 *
+			 * @private
+			 * @param {Array} array The array to iterate over.
+			 * @param {Function} predicate The function invoked per iteration.
+			 * @returns {Array} Returns the new filtered array.
+			 */
+			arrayFilter: function(array, predicate) {
+				var result = [];
 
+				if (typeof array.filter === "function") {
+					result = array.filter(predicate);
+				}
+				else {
+					var index = -1,
+					    length = array.length,
+					    value;
+
+					while (++index < length) {
+						value = array[index];
+						if (predicate(value, index, array)) {
+							result[result.length] = value;
+						}
+					}
+				}
+				return result;
+			},
 			/**
 			 Add a MutationObserver for a given element and terminate after `timeout`ms.
 			 @param el		DOM element to watch for mutations

@@ -271,15 +271,15 @@
 		return typeof window.document.querySelector === "function";
 	};
 
+	t.isNavigationTimingSupported = function() {
+		return typeof BOOMR.plugins.RT.navigationStart() !== "undefined";
+	};
+
 	t.isUserTimingSupported = function() {
 		return (window.performance &&
 		        typeof window.performance.getEntriesByType === "function" &&
 		        typeof window.performance.mark === "function" &&
 		        typeof window.performance.measure === "function");
-	};
-
-	t.isNavigationTimingSupported = function() {
-		return (window.performance && window.performance.navigation);
 	};
 
 	t.validateBeaconWasImg = function(done) {
