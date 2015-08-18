@@ -35,7 +35,9 @@
 *   }]);
 */
 (function() {
-	var hooked = false;
+	var hooked = false,
+	    enabled = true,
+	    hadMissedRouteChange = false;
 
 	if (BOOMR.plugins.Backbone || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -78,6 +80,11 @@
 		// route changes (i.e. a soft navigation, which is associated with the
 		// URL in the address bar changing)
 		router.on("route", function() {
+			if (!enabled) {
+				hadMissedRouteChange = true;
+				return;
+			}
+
 			log("route");
 			BOOMR.plugins.SPA.route_change();
 		});
@@ -101,6 +108,20 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 
 				hooked = true;
+			}
+
+			return this;
+		},
+		disable: function() {
+			enabled = false;
+			return this;
+		},
+		enable: function() {
+			enabled = true;
+
+			if (hooked && hadMissedRouteChange) {
+				hadMissedRouteChange = false;
+				BOOMR.plugins.SPA.route_change();
 			}
 
 			return this;

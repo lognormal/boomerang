@@ -33,7 +33,9 @@
 *   }]);
 */
 (function() {
-	var hooked = false;
+	var hooked = false,
+	    enabled = true,
+	    hadMissedRouteChange = false;
 
 	if (BOOMR.plugins.Angular || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -76,6 +78,11 @@
 		// route changes (i.e. a soft navigation, which is associated with the
 		// URL in the address bar changing)
 		$rootScope.$on("$routeChangeStart", function(event, currRoute){
+			if (!enabled) {
+				hadMissedRouteChange = true;
+				return;
+			}
+
 			log("$routeChangeStart: " + (currRoute ? currRoute.templateUrl : ""));
 
 			BOOMR.plugins.SPA.route_change();
@@ -83,6 +90,10 @@
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
 		$rootScope.$on("$locationChangeStart", function(event, newState){
+			if (!enabled) {
+				return;
+			}
+
 			log("$locationChangeStart: " + newState);
 
 			BOOMR.plugins.SPA.last_location(newState);
@@ -107,6 +118,20 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 
 				hooked = true;
+			}
+
+			return this;
+		},
+		disable: function() {
+			enabled = false;
+			return this;
+		},
+		enable: function() {
+			enabled = true;
+
+			if (hooked && hadMissedRouteChange) {
+				hadMissedRouteChange = false;
+				BOOMR.plugins.SPA.route_change();
 			}
 
 			return this;

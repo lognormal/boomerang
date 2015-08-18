@@ -34,7 +34,9 @@
 
 (function() {
 	var hooked = false,
-	    routeHooked = false;
+	    routeHooked = false,
+	    enabled = true,
+	    hadMissedRouteChange = false;
 
 	if (BOOMR.plugins.Ember || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -72,6 +74,12 @@
 			// Make sure the original beforeModel callback is called before we proceed.
 			this._super(transition);
 
+			if (!enabled) {
+				hadMissedRouteChange = true;
+
+				return true;
+			}
+
 			log("beforeModel");
 
 			if (transition && transition.intent && transition.intent.url) {
@@ -93,6 +101,12 @@
 		function willTransition(transition) {
 			this._super(transition);
 
+			if (!enabled) {
+				hadMissedRouteChange = true;
+
+				return true;
+			}
+
 			log("willTransition");
 
 			if (transition && transition.intent && transition.intent.url) {
@@ -109,6 +123,10 @@
 
 		function didTransition(transition) {
 			this._super(transition);
+
+			if (!enabled) {
+				return true;
+			}
 
 			log("didTransition");
 			routeHooked=false;
@@ -152,6 +170,20 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange);
 				hooked = true;
 			}
+			return this;
+		},
+		disable: function() {
+			enabled = false;
+			return this;
+		},
+		enable: function() {
+			enabled = true;
+
+			if (hooked && hadMissedRouteChange) {
+				hadMissedRouteChange = false;
+				BOOMR.plugins.SPA.route_change();
+			}
+
 			return this;
 		}
 	};
