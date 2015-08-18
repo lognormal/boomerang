@@ -48,10 +48,17 @@ module.exports = function() {
 	}
 
 	//
+	// Release version
+	//
+	var pkg = grunt.file.readJSON("package.json");
+	var buildNumber = grunt.option("buildNumber") || 0;
+
+	//
 	// Config
 	//
 	grunt.initConfig({
 		pkg:  grunt.file.readJSON("package.json"),
+		releaseVersion: pkg.releaseVersion + "." + buildNumber,
 		buildDate: Math.round(Date.now() / 1000),
 		concat: {
 			options: {
@@ -60,11 +67,11 @@ module.exports = function() {
 			},
 			debug: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+				dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
 			},
 			release: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+				dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
 			}
 		},
 		eslint: {
@@ -89,20 +96,20 @@ module.exports = function() {
 			all: {
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
 					}
 				],
 				options: {
 					replacements: [
 						{
-							// Replace 0.9 with 0.9.[date]
+							// Replace 1.0 with 1.[0 or jenkins build #].[date]
 							pattern: /BOOMR.version\s*=\s*".*";/,
-							replacement: "BOOMR.version = \"<%= pkg.releaseVersion %>.<%= buildDate %>\";"
+							replacement: "BOOMR.version = \"<%= releaseVersion %>.<%= buildDate %>\";"
 						},
 						{
 							// strip out BOOMR = BOOMR || {}; in plugins
@@ -119,8 +126,8 @@ module.exports = function() {
 			},
 			debug: {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js"
+					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
+					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
 				}],
 				options: {
 					replacements: [
@@ -144,8 +151,8 @@ module.exports = function() {
 			},
 			"debug-tests": {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug-tests.js"
+					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
+					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug-tests.js"
 				}],
 				options: {
 					replacements: [
@@ -164,8 +171,8 @@ module.exports = function() {
 			},
 			release: {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-					dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"
+					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
+					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
 				}],
 				options: {
 					// strip out some NOPs
@@ -195,7 +202,7 @@ module.exports = function() {
 			},
 			"release-test": {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
 					dest: "tests/build/<%= pkg.name %>-latest.js"
 				}],
 				options: {
@@ -241,7 +248,7 @@ module.exports = function() {
 				files: [
 					{
 						nonull: true,
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug-tests.js",
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug-tests.js",
 						dest: "tests/build/<%= pkg.name %>-latest-debug.js"
 					}
 				]
@@ -269,8 +276,8 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "build/",
-					src: ["<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-					      "<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js"],
+					src: ["<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
+					      "<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"],
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
@@ -300,20 +307,20 @@ module.exports = function() {
 				},
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js.gz"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.js.gz"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js.gz"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js",
-						dest: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>-debug.min.js.gz"
+						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.min.js",
+						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.min.js.gz"
 					}
 				]
 			},
@@ -334,11 +341,11 @@ module.exports = function() {
 		},
 		"mpulse-build-for": {
 				release: {
-					boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.min.js",
+					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
 					outputSuffix: ".min"
 				},
 				base: {
-					boomerang: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>.js",
+					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
 					outputSuffix: ""
 				}
 		},
@@ -537,8 +544,8 @@ module.exports = function() {
 		"mpulse-build-repository-xml": {
 			"build": {
 				options: {
-					filePrefix: "build/<%= pkg.name %>-<%= pkg.releaseVersion %>.<%= buildDate %>",
-					version: "<%= pkg.releaseVersion %>.<%= buildDate %>"
+					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
+					version: "<%= releaseVersion %>.<%= buildDate %>"
 				}
 			},
 			"from": {

@@ -25,7 +25,7 @@ module.exports = function(grunt) {
 		var options = this.options({
 			filePrefix: "",
 			template: path.join(__dirname, "mpulse-build-repository-xml.tmpl"),
-			version: "0.9",
+			version: "1.0",
 			schema_version: grunt.option("schema-version") || 1
 		});
 
