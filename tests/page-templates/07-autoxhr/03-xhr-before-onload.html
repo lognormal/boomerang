@@ -1,6 +1,6 @@
 <%= header %>
 <!--
-if XHR sends after boomerang loads and responds before body.load, we get 2 beacons (onload & XHR)
+if XHR sends after boomerang loads and responds before body.load, make sure we only get one beacon
 -->
 <%= boomerangSnippet %>
 <script src="03-xhr-before-onload.js" type="text/javascript"></script>
