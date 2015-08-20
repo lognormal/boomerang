@@ -59,12 +59,17 @@ EOF
 	exit 1
 fi
 
-DIR=$(cd `dirname $0` && pwd)
+BAD_FILES=$GIT_ROOT/.git/hooks/pre-commit-bad-files.dat
 
-for file in $(cat $DIR/pre-commit-bad-files.dat)
+if [ ! -f "$BAD_FILES" ]; then
+	echo Please ensure $BAD_FILES exists!
+	exit 1
+fi
+
+for file in $(cat $BAD_FILES)
 do
-    if [ -e "$file" ]
-    then echo "$file exists"; exit 1
+    if [ -e "$GIT_ROOT/$file" ]
+    then echo "Private SOASTA file check: $file exists"; exit 1
     fi
 done
 
