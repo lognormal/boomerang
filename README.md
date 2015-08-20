@@ -91,7 +91,7 @@ For boomerang, this is the code you'll include:
 <script>
 (function(){
   var dom,doc,where,iframe = document.createElement('iframe');
-  iframe.src = "javascript:false";
+  iframe.src = "javascript:void(0)";
   (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
   var where = document.getElementsByTagName('script')[0];
   where.parentNode.insertBefore(iframe, where);

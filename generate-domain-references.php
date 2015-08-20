@@ -19,7 +19,7 @@ $newreferences = array();
 $boomerang_reference = array(
 	"name" => "boomerang-$version",
 	"type" => "boomerang",
-	"internalID" => "rsdbref"
+	"internalID" => "boomr"
 );
 
 $set = false;

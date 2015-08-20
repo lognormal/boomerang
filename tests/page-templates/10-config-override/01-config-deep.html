@@ -1,0 +1,56 @@
+<%= header %>
+<script>
+/*eslint-disable no-unused-vars*/
+window.BOOMR_config = {
+	autorun: true,
+	PageParams: {
+		customMetrics: [
+			{
+				varName: "custom_metric_1",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_2",
+				label: "cmet2",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "missing_metric",
+				label: "cmet3",
+				type: "JavaScriptVar"
+			},
+			{
+				parameter1: "",
+				parameter2: "//div[@id='cart-total']",
+				label: "cmet4",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "",
+				parameter2: "",
+				label: "cmet5",
+				type: "URLPatternType"
+			}
+		]
+	}
+};
+</script>
+<%= boomerangScript %>
+<div id="cart-total" style="display:none;">444.44</div>
+<script src="01-config-deep.js" type="text/javascript"></script>
+<script type="text/javascript">
+/*global custom_metric_1:true, custom_metric_2:true*/
+/*eslint-disable no-unused-vars*/
+// these will be overwritten by the app
+custom_metric_1 = 11;
+custom_metric_2 = function() {
+	return 22;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	autorun: false
+});
+</script>
+<%= footer %>

@@ -1,0 +1,99 @@
+<%= header %>
+<%= boomerangScript %>
+
+<div class="cart-container" style="display: none" id="cart-container">
+	<div id="cart-total">
+		<img src="/delay?delay=3000&file=/pages/04-page-params/support/img.jpg" id="preview" />
+	</div>
+</div>
+<script src="06-custom-timers.js" type="text/javascript"></script>
+<script>
+/*global custom_metric_1:true, custom_metric_2:true*/
+/*eslint-disable no-unused-vars*/
+
+setTimeout(function() {
+	var image = document.createElement("img");
+	image.src = "/delay?delay=2000&file=/pages/04-page-params/support/img.jpg";
+	image.id = "delayed";
+
+	var container = document.querySelector(".cart-container");
+	container.appendChild(image);
+}, 1000);
+
+custom_metric_1 = 111;
+custom_metric_2 = function() {
+	return 222;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	PageParams: {
+		customTimers: [
+			{
+				name: "custom_timer_1",
+				index: 1,
+				type: "ResourceTiming",
+				label: "ctim.CT1",
+				start: "requestStart",
+				end: "responseEnd",
+				url: window.location.origin + "/delay?delay=3000&file=/pages/04-page-params/support/img.jpg"
+			},
+			{
+				name: "custom_timer_2",
+				index: 2,
+				type: "ResourceTiming",
+				label: "ctim.CT2",
+				start: "requestStart",
+				end: "responseEnd",
+				parameter2: "//div[@id='cart-total']/img"
+			},
+			{
+				name: "custom_timer_3",
+				index: 3,
+				type: "ResourceTiming",
+				label: "ctim.CT3",
+				start: "requestStart",
+				end: "responseEnd",
+				queryselector: "div.cart-container #cart-total #preview"
+			},
+			{
+				name: "custom_timer_4",
+				index: 4,
+				type: "ResourceTiming",
+				label: "ctim.CT4",
+				start: "requestStart",
+				end: "responseEnd",
+				url: "slowest"
+			},
+			{
+				name: "custom_timer_5",
+				index: 5,
+				type: "ResourceTiming",
+				label: "ctim.CT5",
+				start: "requestStart",
+				end: "responseEnd",
+				url: ""
+			},
+			{
+				name: "custom_timer_6",
+				index: 6,
+				type: "ResourceTiming",
+				label: "ctim.CT6"
+			},
+			{
+				name: "custom_timer_7",
+				index: 7,
+				type: "ResourceTiming",
+				label: "ctim.CT7",
+				start: "requestStart",
+				end: "responseEnd",
+				parameter2: "slowest"
+			}
+		]
+	}
+});
+</script>
+<%= footer %>

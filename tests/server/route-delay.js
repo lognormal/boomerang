@@ -8,12 +8,13 @@ var fs = require("fs");
 // Mime types
 //
 var mimeTypes = {
-    "html": "text/html",
-    "jpeg": "image/jpeg",
-    "jpg": "image/jpeg",
-    "png": "image/png",
-    "js": "text/javascript",
-    "css": "text/css"
+	"html": "text/html",
+	"json": "application/json",
+	"jpeg": "image/jpeg",
+	"jpg": "image/jpeg",
+	"png": "image/png",
+	"js": "text/javascript",
+	"css": "text/css"
 };
 
 //
@@ -22,7 +23,7 @@ var mimeTypes = {
 var envFile = path.resolve(path.join(__dirname, "env.json"));
 
 if (!fs.existsSync(envFile)) {
-    throw new Error("Please create " + envFile + ". There's a env.json.sample in the same dir.");
+	throw new Error("Please create " + envFile + ". There's a env.json.sample in the same dir.");
 }
 
 // load JSON
@@ -30,29 +31,33 @@ var env = require(envFile);
 
 var wwwRoot = env.www;
 if (wwwRoot.indexOf("/") !== 0) {
-    wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
+	wwwRoot = path.join(__dirname, "..", "..", wwwRoot);
+}
+
+if (!fs.existsSync(wwwRoot)) {
+	wwwRoot = path.join(__dirname, "..");
 }
 
 module.exports = function(req, res) {
-    var q = require("url").parse(req.url, true).query;
-    var delay = q.delay;
-    var file = q.file;
+	var q = require("url").parse(req.url, true).query;
+	var delay = q.delay;
+	var file = q.file;
 
-    var filePath = path.join(wwwRoot, file);
+	var filePath = path.join(wwwRoot, file);
 
-    setTimeout(function() {
-        fs.exists(filePath, function(exists) {
-            if (!exists) {
-                return res.send(404);
-            }
+	setTimeout(function() {
+		fs.exists(filePath, function(exists) {
+			if (!exists) {
+				return res.send(404);
+			}
 
-            var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
-            res.writeHead(200, {
-                "Content-Type": mimeType
-            });
+			var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
+			res.writeHead(200, {
+				"Content-Type": mimeType
+			});
 
-            var fileStream = fs.createReadStream(filePath);
-            fileStream.pipe(res);
-        });
-    }, delay);
+			var fileStream = fs.createReadStream(filePath);
+			fileStream.pipe(res);
+		});
+	}, delay);
 };

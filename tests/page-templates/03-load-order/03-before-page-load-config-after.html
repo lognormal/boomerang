@@ -1,0 +1,16 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="03-before-page-load-config-after.js" type="text/javascript"></script>
+<script>
+
+// add config.js after page load
+window.onload = function() {
+	setTimeout(function() {
+		BOOMR_test.init({
+			testAfterOnBeacon: true
+		});
+	});
+};
+
+</script>
+<%= footer %>

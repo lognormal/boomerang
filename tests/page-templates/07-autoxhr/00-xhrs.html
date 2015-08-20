@@ -1,0 +1,63 @@
+<%= header %>
+<!--
+IE9 (and older) and phantomjs do not fire 'loadend' for XHRs, no autoxhr beacon was being sent
+-->
+<script src="00-xhrs.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			var xhrNum = 0;
+			BOOMR.subscribe("onbeacon", function() {
+				setTimeout(function() {
+					var xhr;
+					if (xhrNum === 0) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 1) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js", false); //200, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 2) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js"); //404, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 3) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js", false); //404, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 4) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "http://soasta.com"); //error
+						xhr.send(null);
+					}
+					else if (xhrNum === 5) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async, abort
+						xhr.send(null);
+						xhr.abort();
+					}
+					else if (xhrNum === 6) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js"); //200, async, timeout
+						xhr.timeout = 1;
+						xhr.send(null);
+					}
+					xhrNum++;
+				}, 100);
+			});
+		}
+});
+</script>
+<%= footer %>

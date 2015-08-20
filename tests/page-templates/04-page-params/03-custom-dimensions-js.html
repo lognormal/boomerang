@@ -1,94 +1,215 @@
 <%= header %>
 <%= boomerangSnippet %>
+
+<div class="cart-container" style="display: none;">
+	<div id="cart-total">$444.44</div>
+</div>
+
+<div class="container" style="display:none ;">
+<div class="basket">
+	<ul>
+	<li class="active">
+	Item 1
+	<p custom-attr="price">$444.44</p>
+	</li>
+	<li>
+	Item 2
+	<p custom-attr="price-x2">$888.88</p>
+	</li>
+	</ul>
+</div>
+</div>
+
 <script src="03-custom-dimensions-js.js" type="text/javascript"></script>
 <script>
 /*global custom_dimension_1:true, custom_dimension_2:true, custom_dimension_3:true*/
 /*global custom_dimension_4:true, custom_dimension_5:true, custom_dimension_6:true*/
+/*global custom_dimension_15:true, custom_dimension_16:true*/
 /*eslint-disable no-unused-vars*/
 
 custom_dimension_1 = true;
 custom_dimension_2 = function() {
-    return false;
+	return false;
 };
 custom_dimension_3 = 111;
 custom_dimension_4 = function() {
-    return 222;
+	return 222;
 };
 custom_dimension_5 = "abc";
 custom_dimension_6 = function() {
-    return "def";
+	return "def";
 };
 
+custom_dimension_15 = function() {
+	return false;
+};
+
+custom_dimension_15.isTrue = function() {
+	return true;
+};
+
+var CustomDimension = function() {
+
+};
+
+CustomDimension.prototype.isTrue = function() {
+	return false;
+};
+
+CustomDimension.static_property = true;
+CustomDimension.prototype.property = false;
+
+custom_dimension_16 = new CustomDimension();
+
 BOOMR_test.init({
-    testAfterOnBeacon: true,
-    PageParams: {
-        customDimensions: [
-            {
-                "name": "CD1",
-                "index": 1,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD1",
-                "dataType": "Boolean",
-                "varName": "custom_dimension_1"
-            },
-            {
-                "name": "CD2",
-                "index": 2,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD2",
-                "dataType": "Boolean",
-                "varName": "custom_dimension_2"
-            },
-            {
-                "name": "CD3",
-                "index": 3,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD3",
-                "dataType": "Numeric",
-                "varName": "custom_dimension_3"
-            },
-            {
-                "name": "CD4",
-                "index": 4,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD4",
-                "dataType": "Numeric",
-                "varName": "custom_dimension_4"
-            },
-            {
-                "name": "CD5",
-                "index": 5,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD5",
-                "dataType": "Text",
-                "varName": "custom_dimension_5"
-            },
-            {
-                "name": "CD6",
-                "index": 6,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD6",
-                "dataType": "Text",
-                "varName": "custom_dimension_6"
-            },
-            {
-                "name": "CD7",
-                "index": 7,
-                "type": "JavaScriptVar",
-                "label": "cdim.CD7",
-                "dataType": "Boolean",
-                "varName": "custom_dimension_missing"
-            },
-            {
-                "name": "CD8",
-                "index": 8,
-                "type": "URLQueryParam",
-                "label": "cdim.CD8",
-                "dataType": "Boolean",
-                "parameter2": "query"
-            }
-        ]
-    }
+	testAfterOnBeacon: true,
+	PageParams: {
+		customDimensions: [
+			{
+				"name": "CD1",
+				"index": 1,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD1",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_1"
+			},
+			{
+				"name": "CD2",
+				"index": 2,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD2",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_2"
+			},
+			{
+				"name": "CD3",
+				"index": 3,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD3",
+				"dataType": "Numeric",
+				"varName": "custom_dimension_3"
+			},
+			{
+				"name": "CD4",
+				"index": 4,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD4",
+				"dataType": "Numeric",
+				"varName": "custom_dimension_4"
+			},
+			{
+				"name": "CD5",
+				"index": 5,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD5",
+				"dataType": "Text",
+				"varName": "custom_dimension_5"
+			},
+			{
+				"name": "CD6",
+				"index": 6,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD6",
+				"dataType": "Text",
+				"varName": "custom_dimension_6"
+			},
+			{
+				"name": "CD7",
+				"index": 7,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD7",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_missing"
+			},
+			{
+				"name": "CD8",
+				"index": 8,
+				"type": "URLQueryParam",
+				"label": "cdim.CD8",
+				"dataType": "Boolean",
+				"parameter2": "query"
+			},
+			{
+				"name": "CD9",
+				"index": 9,
+				"type": "URLPatternType",
+				"label": "cdim.CD9",
+				"dataType": "Text",
+				"queryselector": ".cart-container #cart-total"
+			},
+			{
+				"name": "CD10",
+				"index": 10,
+				"type": "URLPatternType",
+				"label": "cdim.CD10",
+				"dataType": "Numeric",
+				"queryselector": ".container .basket p[custom-attr='price']"
+			},
+			{
+				"name": "CD11",
+				"index": 11,
+				"type": "URLPatternType",
+				"label": "cdim.CD11",
+				"dataType": "Numeric",
+				"queryselector": ".container .basket  p"
+			},
+			{
+				"name": "CD12",
+				"index": 12,
+				"type": "URLPatternType",
+				"label": "cdim.CD12",
+				"dataType": "Numeric",
+				"queryselector": ".does #not [value='exist']"
+			},
+			{
+				"name": "CD13",
+				"index": 13,
+				"type": "URLPatternType",
+				"label": "cdim.CD13",
+				"dataType": "Text"
+			},
+			{
+				"name": "CD14",
+				"index": 14,
+				"type": "URLPatternType",
+				"label": "cdim.CD14",
+				"dataType": "Text",
+				"parameter1": "03-custom-dimensions-js.html$"
+			},
+			{
+				"name": "CD15",
+				"index": 15,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD15",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_15.isTrue"
+			},
+			{
+				"name": "CD16",
+				"index": 16,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD16",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_16.isTrue"
+			},
+			{
+				"name": "CD17",
+				"index": 17,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD17",
+				"dataType": "Boolean",
+				"varName": "custom_dimension_16.property"
+			},
+			{
+				"name": "CD18",
+				"index": 18,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD18",
+				"dataType": "Boolean",
+				"varName": "CustomDimension.static_property"
+			}
+		]
+	}
 });
 </script>
 <%= footer %>

@@ -1,7 +1,7 @@
 {
   "name": "boomerang",
   "main": "boomerang.js",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/lognormal/lognormal-boomerang/",
   "authors": [
     "Philip Tellis"
@@ -26,6 +26,14 @@
   "devDependencies": {
     "mocha": "~1.21.5",
     "lodash": "~3.0.0",
-    "assertive-chai": "~2.0.0"
+    "angular": "~1.3.14",
+    "angular-resource": "~1.3.14",
+    "angular-route": "~1.3.14",
+    "assertive-chai": "~2.0.0",
+    "json3": "~3.3.2",
+    "backbone": "~1.2.0",
+    "ember": "~1.12.1",
+    "jquery": "~2.1.4",
+    "handlebars": "~3.0.3"
   }
 }

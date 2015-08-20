@@ -1,0 +1,26 @@
+<%= header %>
+<!--
+if XHR sends after boomerang loads and responds before body.load, we get 2 beacons (onload & XHR)
+-->
+<%= boomerangSnippet %>
+<script src="04-xhr-before-onload-configured.js" type="text/javascript"></script>
+
+<script>
+window.BOOMR_config = {
+	AutoXHR: {
+		beforeOnload: true
+	}
+};
+BOOMR_test.init({
+	"instrument_xhr": true,
+	onBoomerangLoaded:
+		function() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "support/script200.js");
+			xhr.send(null);
+		}
+});
+</script>
+
+<script src="/delay?delay=3000&amp;file=script404.js" type="text/javascript"></script>
+<%= footer %>

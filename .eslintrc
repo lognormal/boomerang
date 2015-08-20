@@ -14,7 +14,7 @@
 		"console":false,
 		"unescape":false,
 		"BOOMR_configt":true,
-		"ActiveXObject":true
+		"BOOMR_check_doc_domain":true
 	},
 	"rules": {
 		"no-mixed-spaces-and-tabs":[2, true],
@@ -34,6 +34,9 @@
 		"no-empty":2,
 		"brace-style": [1, "stroustrup", { "allowSingleLine": true }],
 		"space-after-keywords": [2, "always"],
-		"no-space-before-semi": 0
+		"no-space-before-semi": 0,
+		"indent": [2, "tab"],
+		"space-before-function-paren": [2, "never"],
+		"no-trailing-spaces": [2, { skipBlankLines: false }]
 	}
 }
