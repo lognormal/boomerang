@@ -409,7 +409,7 @@ BOOMR_check_doc_domain();
 				cookies = " " + d.cookie + ";";
 				if ( (i=cookies.indexOf(name)) >= 0 ) {
 					i += name.length;
-					cookies = cookies.substring(i, cookies.indexOf(";", i));
+					cookies = cookies.substring(i, cookies.indexOf(";", i)).replace(/^"/, "").replace(/"$/, "");
 					return cookies;
 				}
 			},
@@ -423,7 +423,7 @@ BOOMR_check_doc_domain();
 				}
 
 				value = this.objectToString(subcookies, "&");
-				nameval = name + "=" + value;
+				nameval = name + "=\"" + value + "\"";
 
 				c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
 				if (max_age) {
