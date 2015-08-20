@@ -67,3 +67,7 @@ do
     then echo "$file exists"; exit 1
     fi
 done
+
+GRUNT_EXEC=$(which grunt || $GIT_ROOT/node_modules/.bin/grunt)
+$GRUNT_EXEC --gruntfile $GIT_ROOT/Gruntfile.js lint
+
