@@ -194,6 +194,11 @@
 
 		// initialize boomerang
 		BOOMR.init(config);
+
+		if (config.onBoomerangLoaded) {
+			config.onBoomerangLoaded();
+		}
+
 		BOOMR.addVar("h.cr", "test");
 
 		if (config.afterFirstBeacon) {
@@ -219,7 +224,7 @@
 		});
 
 		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results"]);
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results", "BOOMR_onload"]);
 		window.mocha.checkLeaks();
 
 		// set globals
@@ -425,11 +430,20 @@
 		function compareBeaconCount() {
 			return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
 		}
+
 		function testBeaconCount() {
 			if (compareBeaconCount()) {
 				setTimeout(
 					function() {
-						done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
+						// run the check again
+						var match = compareBeaconCount();
+
+						// throw an error if there were more beacons
+						if (!match) {
+							return done(new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
+						}
+
+						done();
 					}, 1000);
 			}
 			else {

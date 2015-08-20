@@ -57,6 +57,9 @@
 				abTests: true
 			},
 			instrument_xhr: true,
+			AutoXHR: {
+				beforeOnload: true
+			},
 			RT: {
 				session_exp: true
 			},
