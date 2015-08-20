@@ -142,7 +142,7 @@ for i in $(cat $tmpfile1 | awk -F "|" '{print $NF}'); do
 	echo "Checking $i... ($current/$total)" | tee -a $LOG
 	current=$(( $current+1 ))
 	result=$( curl -A 'Mozilla/5.0' -H "Cookie: boomerang_override=\"version=$VERSION\"" ${og_collector}/boomerang/$i 2>/dev/null | \
-		grep 'BOOMR.version=' | sed -e 's/.*BOOMR.version=/BOOMR.version=/;s/;.*//' )
+		grep 'BOOMR.version=' | sed -e 's/.*BOOMR.version=/BOOMR.version=/;s/[,;].*//' )
 
 	if [ -z "$result" ]; then
 		echo "Not found" | tee -a $LOG
