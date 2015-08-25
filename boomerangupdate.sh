@@ -114,7 +114,7 @@ for i in $(grep -E "^ *[0-9]+ *(\| *[^|]*){5}$" "$BUCKET" | sort -n | uniq | awk
 	echo "Checking $i... ($current/$total)" | tee -a $LOG
 	current=$(( $current+1 ))
 	result=$( curl -A 'Mozilla/5.0' ${cf_collector}/boomerang/$i 2>/dev/null | \
-		grep 'BOOMR.version=' | sed -e 's/.*BOOMR.version=/BOOMR.version=/;s/;.*//' )
+		grep 'BOOMR.version=' | sed -e 's/.*BOOMR.version=/BOOMR.version=/;s/[,;].*//' )
 
 	if [ -z "$result" ]; then
 		echo "Not found" | tee -a $LOG
