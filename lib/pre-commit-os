@@ -68,11 +68,10 @@ fi
 
 for file in $(cat $BAD_FILES)
 do
-    if [ -e "$GIT_ROOT/$file" ]
-    then echo "Private SOASTA file check: $file exists"; exit 1
+    if [ -e "$GIT_ROOT/$file" ]; then
+    	echo "Private SOASTA file check: $file exists"; exit 1
     fi
 done
 
 GRUNT_EXEC=$(which grunt || $GIT_ROOT/node_modules/.bin/grunt)
 $GRUNT_EXEC --gruntfile $GIT_ROOT/Gruntfile.js lint
-
