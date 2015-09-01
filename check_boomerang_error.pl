@@ -6,7 +6,7 @@ use warnings;
 my %lines = ();
 
 while(<>) {
-	next unless /ERROR \[.+?\] \[com\.soasta\.rum\.collector\.beacon\.(?:u\]|\w+\].*boomerang-0\.9\.\d+ )/;
+	next unless /ERROR \[.+?\] \[com\.soasta\.rum\.collector\.beacon\.(?:u\]|\w+\].*boomerang-\d+\.\d+\.\d+ )/;
 	next if /Throttled-log/;
 	s/(a frame with origin ").*?(")/$1****$2/g;
 	s/.*\[com\.soasta\.rum\.collector\.beacon\.\w+\] //;
@@ -26,7 +26,7 @@ while(<>) {
 
 	my $l = $_;
 
-	if ($l =~ /^(boomerang-0\.9\.\d+) (.*)/) {
+	if ($l =~ /^(boomerang-\d+\.\d+\.\d+) (.*)/) {
 		$b = $boomr = $1;
 
 		$l = $2;
@@ -35,7 +35,7 @@ while(<>) {
 	$l =~ s/(\(\*\d+\))(\[\D)/$1\n$2/g;
 	$l =~ s/(.)(\[[A-Za-z][\w\.:<>-]*\])/$1\n$2/g;
 
-	$b =~ s/(boomerang-0\.9\.)(\d+)/my @t=gmtime $2; sprintf "(%04d-%02d-%02d) %s%s", $t[5]+1900, $t[4]+1, $t[3], $1, $2;/e;
+	$b =~ s/(boomerang-\d+\.\d+\.)(\d+)/my @t=gmtime $2; sprintf "(%04d-%02d-%02d) %s%s", $t[5]+1900, $t[4]+1, $t[3], $1, $2;/e;
 
 	my @lines = split /\n/, $l;
 
@@ -57,7 +57,7 @@ while(<>) {
 			$line = $2;
 		}
 
-		$line =~ s/^(boomerang-0\.9\.\d+ \[.+?):\d+/$1/;
+		$line =~ s/^(boomerang-\d+\.\d+\.\d+ \[.+?):\d+/$1/;
 
 		$line =~ s/SecurityError: Blocked.*/cross-origin-iframe-access/;
 		$line =~ s/\[rt.getBoomerangTimings.*"Failure"\s*nsresult.*/Firefox 31 anonymous iframe window.performance bug/;
@@ -80,15 +80,15 @@ while(<>) {
 		$line =~ s/^\s+//;
 		$line =~ s/\s+$//;
 
-		$line = "$1 no-error-msg" if $line =~ /^(boomerang-0\.9\.\d+)\s*$/;
+		$line = "$1 no-error-msg" if $line =~ /^(boomerang-\d+\.\d+\.\d+)\s*$/;
 		$line = "no-error-msg" if $line =~ /^\s*$/;
 
-		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-0\.9\.\d+) \[[^\]]*$/;
-		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-0\.9\.\d+) \[[^\]]+\] \S{0,10}$/;
-		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-0\.9\.\d+) \[[^\]]+\] Sec.{0,11}$/;
-		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-0\.9\.\d+) \[[^\]]+\] SecurityError:.{0,7}$/;
+		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-\d+\.\d+\.\d+) \[[^\]]*$/;
+		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-\d+\.\d+\.\d+) \[[^\]]+\] \S{0,10}$/;
+		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-\d+\.\d+\.\d+) \[[^\]]+\] Sec.{0,11}$/;
+		$line = "$1 error-msg-clipped" if $line =~ /^(boomerang-\d+\.\d+\.\d+) \[[^\]]+\] SecurityError:.{0,7}$/;
 
-		$line =~ s/^boomerang-0\.9\.\d+ //;
+		$line =~ s/^boomerang-\d+\.\d+\.\d+ //;
 
 		$lines{$b} = {} unless $lines{$b};
 
@@ -111,5 +111,4 @@ print map {
 	} keys %{$lines{$boomr}};
 } sort {
 	$b cmp $a;
-} keys %lines; 
-
+} keys %lines;
