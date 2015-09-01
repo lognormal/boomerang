@@ -54,7 +54,7 @@
 	 * @return {boolean} True on success
 	 */
 	function bootstrap(router) {
-		if (typeof Backbone === "undefined" ||
+		if (typeof BOOMR.window.Backbone === "undefined" ||
 			typeof router === "undefined") {
 			return false;
 		}
