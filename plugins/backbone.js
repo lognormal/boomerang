@@ -1,4 +1,3 @@
-/*global Backbone*/
 /*
 * Installation:
 *
