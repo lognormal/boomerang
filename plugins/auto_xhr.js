@@ -279,6 +279,12 @@
 			// Use 'requestStart' as the startTime of the resource, if given
 			var startTime = ev.resource.timing ? ev.resource.timing.requestStart : undefined;
 
+			// if this was an SPA nav that triggered no additional resources, substract the
+			// SPA_TIMEOUT from now to determine the end time
+			if (ev.type === "spa" && ev.resources.length === 0) {
+				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
+			}
+
 			BOOMR.responseEnd(ev.resource, startTime, ev.resource);
 
 			this.pending_events[i] = undefined;

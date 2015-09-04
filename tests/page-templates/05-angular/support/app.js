@@ -73,6 +73,9 @@ angular.module("app", ["ngResource", "ngRoute"])
 			when("/08-no-resources.html", {
 				template: "<h1>Empty</h1>"
 			}).
+			when("/empty", {
+				template: "<h1>Empty</h1>"
+			}).
 			otherwise({
 				templateUrl: "/pages/05-angular/support/home.html",
 				controller: "mainCtrl"
