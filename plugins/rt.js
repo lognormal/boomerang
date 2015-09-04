@@ -1015,6 +1015,19 @@
 			// else, it will stop the page load timer
 			this.endTimer("t_done", t_done);
 
+			// For XHR events, ensure t_done is set with the proper start, end, and
+			// delta timestamps.  Until Issue #195 is fixed, if this XHR is firing
+			// a beacon very quickly after a previous XHR, the previous XHR might
+			// not yet have had time to fire a beacon and clear its own t_done,
+			// so the preceeding endTimer() wouldn't have set this XHR's timestamps.
+			if (edata.initiator === "xhr") {
+				impl.timers.t_done = {
+					start: edata.timing.requestStart,
+					end: edata.timing.loadEventEnd,
+					delta: edata.timing.loadEventEnd - edata.timing.requestStart
+				};
+			}
+
 			// make sure old variables don't stick around
 			BOOMR.removeVar(
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
