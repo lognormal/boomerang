@@ -78,7 +78,7 @@
 				initialRouteChangeCompleted = true;
 
 				// Tell BOOMR this is a Hard SPA navigation still
-				BOOMR.addVar("http.initiator", "spa hard");
+				BOOMR.addVar("http.initiator", "spa_hard");
 				firstSpaNav = false;
 
 				// Since we held the original beacon (autorun=false), we need to tell BOOMR
@@ -109,7 +109,7 @@
 				timing: {
 					requestStart: requestStart
 				},
-				initiator: firstSpaNav ? "spa hard" : "spa",
+				initiator: firstSpaNav ? "spa_hard" : "spa",
 				url: url
 			};
 

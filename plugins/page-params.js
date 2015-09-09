@@ -808,7 +808,7 @@
 			// and remove any _subresource in the name.  XHRs also only apply Timers, Metrics
 			// and Dimensions that have 'xhr_ok' set.
 			//
-			if (ename === "xhr" && edata.initiator !== "spa" && edata.initiator !== "spa hard") {
+			if (ename === "xhr" && edata.initiator !== "spa" && edata.initiator !== "spa_hard") {
 				limpl = impl.extractXHRParams(edata, hconfig);
 
 				if (limpl === null) {
