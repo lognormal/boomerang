@@ -208,7 +208,7 @@
 				// 3.4
 				// nothing to do
 			}
-			else if (last_ev.type === "spa") {
+			else if (last_ev.type === "spa" || last_ev.type === "spa hard") {
 				// This could occur if this event started prior to the SPA taking
 				// over, and is now completing while the SPA event is occuring.  Let
 				// the SPA event take control.
@@ -231,7 +231,7 @@
 			return null;
 		}
 		else {
-			if (ev.type !== "spa") {
+			if (ev.type !== "spa" && ev.type !== "spa hard") {
 				// Give clicks and history changes 50ms to see if they resulted
 				// in DOM mutations (and thus it is an 'interesting event').
 				this.setTimeout(50, index);
@@ -304,13 +304,16 @@
 		this.clearTimeout();
 
 		if (this.pending_events[index] &&
-			(this.pending_events[index].type === "xhr" || this.pending_events[index].type === "spa")) {
+			(this.pending_events[index].type === "xhr"
+			|| this.pending_events[index].type === "spa"
+			|| this.pending_events[index].type === "spa hard")) {
 			// XHRs or SPA page loads
 			if (this.pending_events[index].type === "xhr") {
 				// always send XHRs on timeout
 				this.sendEvent(index);
 			}
-			else if (this.pending_events[index].type === "spa" && this.pending_events[index].nodes_to_wait === 0) {
+			else if ((this.pending_events[index].type === "spa" || this.pending_events[index].type === "spa hard")
+			          && this.pending_events[index].nodes_to_wait === 0) {
 				// send page loads (SPAs) if there are no outstanding downloads
 				this.sendEvent(index);
 			}
@@ -373,7 +376,7 @@
 			// timestamp for when this load_finished(), not 1 second from now.
 
 			current_event.resource.timing.loadEventEnd = BOOMR.now();
-			if (current_event.type === "spa") {
+			if (current_event.type === "spa" || current_event.type === "spa hard") {
 				this.setTimeout(SPA_TIMEOUT, index);
 			}
 			else {

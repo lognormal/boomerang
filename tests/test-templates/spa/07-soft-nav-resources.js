@@ -13,8 +13,12 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		assert.equal(tf.beacons.length, 5);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 4; i++) {
+	it("Should have sent the first beacon as http.initiator = spa hard", function() {
+		assert.equal(tf.beacons[0]["http.initiator"], "spa hard");
+	});
+
+	it("Should have sent all subsequent beacons as http.initiator = spa", function() {
+		for (var i = 1; i < 4; i++) {
 			assert.equal(tf.beacons[i]["http.initiator"], "spa");
 		}
 	});
