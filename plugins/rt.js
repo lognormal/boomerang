@@ -927,9 +927,21 @@
 			return this;
 		},
 
-		setTimer: function(timer_name, time_delta) {
+		setTimer: function(timer_name, time_delta_or_start, timer_end) {
 			if (timer_name) {
-				impl.timers[timer_name] = { delta: time_delta };
+				if (typeof timer_end !== "undefined") {
+					// in this case, we were given three args, the name, start, and end,
+					// so time_delta_or_start is the start time
+					impl.timers[timer_name] = {
+						start: time_delta_or_start,
+						end: timer_end,
+						delta: timer_end - time_delta_or_start
+					};
+				}
+				else {
+					// in this case, we were just given two args, the name and delta
+					impl.timers[timer_name] = { delta: time_delta_or_start };
+				}
 			}
 
 			return this;
@@ -1014,6 +1026,15 @@
 			// If the dev has already called endTimer, then this call will do nothing
 			// else, it will stop the page load timer
 			this.endTimer("t_done", t_done);
+
+			// For XHR events, ensure t_done is set with the proper start, end, and
+			// delta timestamps.  Until Issue #195 is fixed, if this XHR is firing
+			// a beacon very quickly after a previous XHR, the previous XHR might
+			// not yet have had time to fire a beacon and clear its own t_done,
+			// so the preceeding endTimer() wouldn't have set this XHR's timestamps.
+			if (edata.initiator === "xhr") {
+				this.setTimer("t_done", edata.timing.requestStart, edata.timing.loadEventEnd);
+			}
 
 			// make sure old variables don't stick around
 			BOOMR.removeVar(

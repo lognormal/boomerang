@@ -1,0 +1,39 @@
+<%= header %>
+<script src="03-xhrs-overlapping.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			setTimeout(function() {
+				// on completion, send two quick XHRs
+				// Until Bug 195 is fixed, these will result in a single beacon
+				var xhr1 = new XMLHttpRequest();
+				xhr1.open("GET", "/delay?delay=10000&file=build/boomerang-latest-debug.js?1");
+
+				// start sending the first
+				xhr1.send(null);
+
+				// wait 3 seconds to start the second one
+				setTimeout(function() {
+					var xhr2 = new XMLHttpRequest();
+					xhr2.open("GET", "/delay?delay=10000&file=build/boomerang-latest-debug.js?2");
+
+					// send the second one
+					xhr2.send(null);
+
+					// abort both immediately
+					xhr1.abort();
+					xhr2.abort();
+				}, 3000);
+			}, 100);
+		}
+});
+</script>
+<%= footer %>
