@@ -927,9 +927,21 @@
 			return this;
 		},
 
-		setTimer: function(timer_name, time_delta) {
+		setTimer: function(timer_name, time_delta_or_start, timer_end) {
 			if (timer_name) {
-				impl.timers[timer_name] = { delta: time_delta };
+				if (typeof timer_end !== "undefined") {
+					// in this case, we were given three args, the name, start, and end,
+					// so time_delta_or_start is the start time
+					impl.timers[timer_name] = {
+						start: time_delta_or_start,
+						end: timer_end,
+						delta: timer_end - time_delta_or_start
+					};
+				}
+				else {
+					// in this case, we were just given two args, the name and delta
+					impl.timers[timer_name] = { delta: time_delta_or_start };
+				}
 			}
 
 			return this;
@@ -1021,11 +1033,7 @@
 			// not yet have had time to fire a beacon and clear its own t_done,
 			// so the preceeding endTimer() wouldn't have set this XHR's timestamps.
 			if (edata.initiator === "xhr") {
-				impl.timers.t_done = {
-					start: edata.timing.requestStart,
-					end: edata.timing.loadEventEnd,
-					delta: edata.timing.loadEventEnd - edata.timing.requestStart
-				};
+				this.setTimer("t_done", edata.timing.requestStart, edata.timing.loadEventEnd);
 			}
 
 			// make sure old variables don't stick around
