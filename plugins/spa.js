@@ -4,6 +4,7 @@
 	    initialRouteChangeCompleted = false,
 	    lastLocationChange = "",
 	    autoXhrEnabled = false,
+	    firstSpaNav = true,
 	    supported = [];
 
 	if (BOOMR.plugins.SPA) {
@@ -76,8 +77,9 @@
 				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
 				initialRouteChangeCompleted = true;
 
-				// Tell BOOMR this is a SPA navigation still
-				BOOMR.addVar("http.initiator", "spa");
+				// Tell BOOMR this is a Hard SPA navigation still
+				BOOMR.addVar("http.initiator", "spa_hard");
+				firstSpaNav = false;
 
 				// Since we held the original beacon (autorun=false), we need to tell BOOMR
 				// that the page has loaded OK.
@@ -107,9 +109,11 @@
 				timing: {
 					requestStart: requestStart
 				},
-				initiator: "spa",
+				initiator: firstSpaNav ? "spa_hard" : "spa",
 				url: url
 			};
+
+			firstSpaNav = false;
 
 			if (!initialRouteChangeCompleted) {
 				// if we haven't completed our initial SPA navigation yet (this is a hard nav), wait

@@ -13,8 +13,12 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		assert.equal(tf.beacons.length, 3);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 2; i++) {
+	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
+		assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+	});
+
+	it("Should have sent all subsequent beacons as http.initiator = spa", function() {
+		for (var i = 1; i < 2; i++) {
 			assert.equal(tf.beacons[i]["http.initiator"], "spa");
 		}
 	});

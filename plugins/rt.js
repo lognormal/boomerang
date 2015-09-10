@@ -568,7 +568,7 @@
 			if (data && data.timing && data.timing.loadEventEnd) {
 				return data.timing.loadEventEnd;
 			}
-			else if (ename === "xhr" && (!data || data.initiator !== "spa")) {
+			else if (ename === "xhr" && (!data || !BOOMR.utils.inArray(data.initiator, BOOMR.constants.BEACON_TYPE_SPAS))) {
 				// if this is an XHR event, trust the input end "now" timestamp
 				return t_now;
 			}
@@ -714,7 +714,7 @@
 					t_start = data.timing.requestStart;
 				}
 
-				if (typeof t_start === "undefined" && data && data.initiator === "spa") {
+				if (typeof t_start === "undefined" && data && BOOMR.utils.inArray(data.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
 					// if we don't have a start time, set to none so it can possibly be fixed up
 					BOOMR.addVar("rt.start", "none");
 				}
