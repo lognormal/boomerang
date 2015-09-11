@@ -1032,7 +1032,7 @@
 			// a beacon very quickly after a previous XHR, the previous XHR might
 			// not yet have had time to fire a beacon and clear its own t_done,
 			// so the preceeding endTimer() wouldn't have set this XHR's timestamps.
-			if (edata.initiator === "xhr") {
+			if (edata && edata.initiator === "xhr") {
 				this.setTimer("t_done", edata.timing.requestStart, edata.timing.loadEventEnd);
 			}
 
