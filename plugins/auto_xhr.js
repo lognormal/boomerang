@@ -649,6 +649,8 @@
 				}
 
 				function loadFinished() {
+					var entry, navSt;
+
 					// if we already finished via readystatechange or an error event,
 					// don't do work again
 					if (resource.timing.loadEventEnd) {
@@ -656,6 +658,22 @@
 					}
 
 					resource.timing.loadEventEnd = BOOMR.now();
+
+					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
+					entry = BOOMR.getResourceTiming(url);
+					if (entry) {
+						navSt = BOOMR.window.performance.timing.navigationStart;
+
+						if (entry.responseEnd !== 0) {
+							resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
+						}
+						if (entry.responseStart !== 0) {
+							resource.timing.responseStart = Math.round(navSt + entry.responseStart);
+						}
+						if (entry.fetchStart !== 0) {
+							resource.timing.requestStart = Math.round(navSt + entry.startTime);
+						}
+					}
 
 					if (resource.index > -1) {
 						// If this XHR was added to an existing event, fire the

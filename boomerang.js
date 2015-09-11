@@ -1330,6 +1330,31 @@ BOOMR_check_doc_domain();
 			}
 
 			return true;
+		},
+
+		/**
+		 * Gets the latest ResourceTiming entry for the specified URL
+		 * @param {string} url Resource URL
+		 * @returns {PerformanceEntry|undefined} Entry, or undefined if ResourceTiming is not
+		 *          supported or if the entry doesn't exist
+		 */
+		getResourceTiming: function(url) {
+			var entries;
+
+			try {
+				if (BOOMR.window
+					&& "performance" in BOOMR.window
+					&& BOOMR.window.performance
+					&& typeof BOOMR.window.performance.getEntriesByName === "function") {
+					entries = BOOMR.window.performance.getEntriesByName(url);
+					if (entries && entries.length) {
+						return entries[entries.length - 1];
+					}
+				}
+			}
+			catch (ignore) {
+				// empty
+			}
 		}
 
 	};
