@@ -24,7 +24,7 @@ describe("e2e/07-autoxhr/04-xhr-use-rt", function() {
 	});
 
 	it("Should have the second beacon contain t_done of at least one second", function() {
-		assert.isTrue(tf.beacons[1].t_done >= 1000, "t_done is at least 1 second");
+		assert.operator(tf.beacons[1].t_done, ">=", 1000, "t_done is at least 1 second");
 	});
 
 	it("Should have the second beacon contain t_resp of exactly the ResourceTiming time (if ResourceTiming is enabled)", function() {
@@ -37,13 +37,13 @@ describe("e2e/07-autoxhr/04-xhr-use-rt", function() {
 
 	it("Should have the second beacon contain t_resp of at least one second (if ResourceTiming not enabled)", function() {
 		if (!BOOMR.getResourceTiming(XHR_URL)) {
-			assert.isTrue(tf.beacons[1].t_resp >= 1000, "t_resp is at least 1 second");
+			assert.operator(tf.beacons[1].t_resp, ">=", 1000, "t_resp is at least 1 second");
 		}
 	});
 
 	it("Should have the second beacon contain t_page at least 1 second (if ResourceTiming is enabled)", function() {
 		if (BOOMR.getResourceTiming(XHR_URL)) {
-			assert.isTrue(tf.beacons[1].t_page >= 1000, "t_page is above 1000 ms");
+			assert.operator(tf.beacons[1].t_page, ">=", 1000, "t_page is above 1000 ms");
 		}
 	});
 
