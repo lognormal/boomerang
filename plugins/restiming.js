@@ -446,6 +446,7 @@ see: http://www.w3.org/TR/resource-timing/
 			BOOMR.sendBeacon();
 		},
 		xssBreakWords: defaultXssBreakWords,
+		clearOnBeacon: false,
 		done: function() {
 			var r;
 			if (this.complete) {
@@ -463,9 +464,21 @@ see: http://www.w3.org/TR/resource-timing/
 			BOOMR.sendBeacon();
 		},
 
-		clearMetrics: function(vars) {
+		onBeacon: function(vars) {
+			// clear metrics
 			if (vars.hasOwnProperty("restiming")) {
 				BOOMR.removeVar("restiming");
+			}
+
+			if (impl.clearOnBeacon &&
+				BOOMR.window &&
+				"performance" in BOOMR.window &&
+				BOOMR.window.performance) {
+				var p = BOOMR.window.performance;
+				var clearResourceTimings = p.clearResourceTimings || p.webkitClearResourceTimings;
+				if (clearResourceTimings && typeof clearResourceTimings === "function") {
+					clearResourceTimings.call(BOOMR.window.performance);
+				}
 			}
 		}
 	};
@@ -474,7 +487,7 @@ see: http://www.w3.org/TR/resource-timing/
 		init: function(config) {
 			var p = BOOMR.window.performance;
 
-			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords"]);
+			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords", "clearOnBeacon"]);
 
 			if (impl.initialized) {
 				return this;
@@ -483,7 +496,7 @@ see: http://www.w3.org/TR/resource-timing/
 			if (p && typeof p.getEntriesByType === "function") {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
-				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
+				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 				impl.supported = true;
 			}
