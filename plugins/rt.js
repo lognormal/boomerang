@@ -877,13 +877,14 @@
 				impl.next_beacon_url = config.beacon_url;
 			}
 
-
 			// A beacon may be fired automatically on page load or if the page dev fires
 			// it manually with their own timers.  It may not always contain a referrer
 			// (eg: XHR calls).  We set default values for these cases.
 			// This is done before reading from the cookie because the cookie overwrites
 			// impl.r
-			impl.r = impl.r2 = BOOMR.utils.hashQueryString(d.referrer, true);
+			if (typeof d !== "undefined") {
+				impl.r = impl.r2 = BOOMR.utils.hashQueryString(d.referrer, true);
+			}
 
 			// Now pull out start time information and session information from the cookie
 			// We'll do this every time init is called, and every time we call it, it will
