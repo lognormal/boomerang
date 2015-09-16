@@ -77,15 +77,15 @@
 		// Listen for AngularJS's $routeChangeStart, which is fired whenever a
 		// route changes (i.e. a soft navigation, which is associated with the
 		// URL in the address bar changing)
-		$rootScope.$on("$routeChangeStart", function(event, currRoute){
+		$rootScope.$on("$routeChangeStart", function(event, next, current){
 			if (!enabled) {
 				hadMissedRouteChange = true;
 				return;
 			}
 
-			log("$routeChangeStart: " + (currRoute ? currRoute.templateUrl : ""));
+			log("$routeChangeStart: " + (next ? next.templateUrl : ""));
 
-			BOOMR.plugins.SPA.route_change();
+			BOOMR.plugins.SPA.route_change(event, next, current);
 		});
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
@@ -109,13 +109,13 @@
 		is_complete: function() {
 			return true;
 		},
-		hook: function($rootScope, hadRouteChange) {
+		hook: function($rootScope, hadRouteChange, options) {
 			if (hooked) {
 				return this;
 			}
 
 			if (bootstrap($rootScope)) {
-				BOOMR.plugins.SPA.hook(hadRouteChange);
+				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 
 				hooked = true;
 			}

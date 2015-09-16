@@ -114,10 +114,15 @@ App.Router.map(function() {
 		});
 	}
 
+	var hookOptions = {};
+	if (window.ember_route_wait) {
+		hookOptions.routeChangeWaitFilter = window.ember_route_wait;
+	}
+
 	function hookEmberBoomerang() {
 		if (window.BOOMR && BOOMR.version) {
 			if (BOOMR.plugins && BOOMR.plugins.Ember) {
-				BOOMR.plugins.Ember.hook(App, hadRouteChange);
+				BOOMR.plugins.Ember.hook(App, hadRouteChange, hookOptions);
 			}
 			return true;
 		}
