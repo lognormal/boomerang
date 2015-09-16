@@ -5,7 +5,9 @@
 	    lastLocationChange = "",
 	    autoXhrEnabled = false,
 	    firstSpaNav = true,
-	    supported = [];
+	    routeChangeWaitFilter = false,
+	    supported = [],
+	    latestResource;
 
 	if (BOOMR.plugins.SPA) {
 		return;
@@ -59,10 +61,13 @@
 		 * Called by a framework when it has hooked into the target SPA
 		 *
 		 * @param {boolean} hadRouteChange True if a route change has already fired
+		 * @param {Object} options Additional options
 		 *
 		 * @returns {BOOMR} Boomerang object
 		 */
-		hook: function(hadRouteChange) {
+		hook: function(hadRouteChange, options) {
+			options = options || {};
+
 			if (hooked) {
 				return this;
 			}
@@ -84,6 +89,10 @@
 				// Since we held the original beacon (autorun=false), we need to tell BOOMR
 				// that the page has loaded OK.
 				BOOMR.page_ready();
+			}
+
+			if (typeof options.routeChangeWaitFilter === "function") {
+				routeChangeWaitFilter = options.routeChangeWaitFilter;
 			}
 
 			hooked = true;
@@ -123,6 +132,15 @@
 				};
 			}
 
+			// if we have a routeChangeWaitFilter, make sure AutoXHR waits on the custom event
+			if (routeChangeWaitFilter) {
+				if (routeChangeWaitFilter.apply(null, arguments)) {
+					resource.wait = true;
+
+					latestResource = resource;
+				}
+			}
+
 			// start listening for changes
 			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
 
@@ -138,6 +156,21 @@
 		 */
 		last_location: function(url) {
 			lastLocationChange = url;
+		},
+		/**
+		 * Called by the SPA consumer if they have a routeChangeWaitFilter and are manually
+		 * triggering navigation complete events.
+		 */
+		wait_complete: function() {
+			if (latestResource) {
+				latestResource.wait = false;
+
+				if (latestResource.waitComplete) {
+					latestResource.waitComplete();
+				}
+
+				latestResource = null;
+			}
 		}
 	};
 

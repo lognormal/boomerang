@@ -279,9 +279,22 @@
 			// Use 'requestStart' as the startTime of the resource, if given
 			var startTime = ev.resource.timing ? ev.resource.timing.requestStart : undefined;
 
-			BOOMR.responseEnd(ev.resource, startTime, ev.resource);
+			// send the beacon if we were not told to hold it
+			if (!ev.resource.wait) {
+				BOOMR.responseEnd(ev.resource, startTime, ev.resource);
 
-			this.pending_events[i] = undefined;
+				this.pending_events[i] = undefined;
+			}
+			else {
+				// waitComplete() should be called once the held beacon is complete
+				ev.resource.waitComplete = function() {
+					ev.resource.timing.loadEventEnd = BOOMR.now();
+
+					BOOMR.responseEnd(ev.resource, startTime, ev.resource);
+
+					self.pending_events[i] = undefined;
+				};
+			}
 		}
 		else {
 			// No crumb, so try again after 5 seconds

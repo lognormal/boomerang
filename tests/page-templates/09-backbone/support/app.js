@@ -100,7 +100,7 @@ app.WidgetView = Backbone.View.extend({
 			// startup after we fetch widgets
 			app.widgets.fetch({
 				success: function() {
-					var widget = app.widgets.get(this.model.id).toJSON();
+					var widget = app.widgets.get(that.model.id).toJSON();
 
 					var template = Handlebars.compile(widgetTemplate);
 
@@ -117,6 +117,11 @@ app.WidgetView = Backbone.View.extend({
 //
 // Boomerang snippet
 //
+var hookOptions = {};
+if (window.backbone_route_wait) {
+	hookOptions.routeChangeWaitFilter = window.backbone_route_wait;
+}
+
 var hadRouteChange = false;
 app.Router.on("route", function() {
 	hadRouteChange = true;
@@ -124,7 +129,7 @@ app.Router.on("route", function() {
 function hookBackboneBoomerang() {
 	if (window.BOOMR && BOOMR.version) {
 		if (BOOMR.plugins && BOOMR.plugins.Backbone) {
-			BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
+			BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange, hookOptions);
 		}
 		return true;
 	}

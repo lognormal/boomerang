@@ -86,10 +86,15 @@ angular.module("app", ["ngResource", "ngRoute"])
 			hadRouteChange = true;
 		});
 
+		var hookOptions = {};
+		if (window.angular_route_wait) {
+			hookOptions.routeChangeWaitFilter = window.angular_route_wait;
+		}
+
 		function hookAngularBoomerang() {
 			if (window.BOOMR && BOOMR.version) {
 				if (BOOMR.plugins && BOOMR.plugins.Angular) {
-					BOOMR.plugins.Angular.hook($rootScope, hadRouteChange);
+					BOOMR.plugins.Angular.hook($rootScope, hadRouteChange, hookOptions);
 				}
 				return true;
 			}
