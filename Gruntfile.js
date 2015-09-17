@@ -340,14 +340,14 @@ module.exports = function() {
 			}
 		},
 		"mpulse-build-for": {
-				release: {
-					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
-					outputSuffix: ".min"
-				},
-				base: {
-					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-					outputSuffix: ""
-				}
+			release: {
+				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
+				outputSuffix: ".min"
+			},
+			base: {
+				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
+				outputSuffix: ""
+			}
 		},
 		filesize: {
 			csv: {

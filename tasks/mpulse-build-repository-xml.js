@@ -53,7 +53,7 @@ module.exports = function(grunt) {
 				}});
 		}
 		catch (e) {
-			grunt.verbose.debug(JSON.stringify(e, null, 2));
+			grunt.log.debug(JSON.stringify(e, null, 2));
 			grunt.fail.error("Something went wrong during template processing (mpulse-build-repository-xml.tmpl)");
 		}
 
