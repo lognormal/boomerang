@@ -465,19 +465,17 @@ see: http://www.w3.org/TR/resource-timing/
 		},
 
 		onBeacon: function(vars) {
+			var p = BOOMR.getPerformance();
+
 			// clear metrics
 			if (vars.hasOwnProperty("restiming")) {
 				BOOMR.removeVar("restiming");
 			}
 
-			if (impl.clearOnBeacon &&
-				BOOMR.window &&
-				"performance" in BOOMR.window &&
-				BOOMR.window.performance) {
-				var p = BOOMR.window.performance;
+			if (impl.clearOnBeacon && p) {
 				var clearResourceTimings = p.clearResourceTimings || p.webkitClearResourceTimings;
 				if (clearResourceTimings && typeof clearResourceTimings === "function") {
-					clearResourceTimings.call(BOOMR.window.performance);
+					clearResourceTimings.call(p);
 				}
 			}
 		}
@@ -485,7 +483,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 	BOOMR.plugins.ResourceTiming = {
 		init: function(config) {
-			var p = BOOMR.window.performance;
+			var p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords", "clearOnBeacon"]);
 

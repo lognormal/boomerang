@@ -438,10 +438,12 @@
 				/*
 				a.href = url;
 
+				var p = BOOMR.getPerformance()
+
 				// Check ResourceTiming to see if this was already seen.  If so,
 				// we won't see a 'load' or 'error' event fire, so skip this.
-				if (BOOMR.window.performance && typeof BOOMR.window.performance.getEntriesByType === "function") {
-					entries = BOOMR.window.performance.getEntriesByName(a.href);
+				if (p && typeof p.getEntriesByType === "function") {
+					entries = p.getEntriesByName(a.href);
 					if (entries && entries.length > 0) {
 						console.error("Skipping " + a.href);
 						return false;
