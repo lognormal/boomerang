@@ -90,9 +90,17 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		assert.isTrue(b.u.indexOf("/04-route-change.html") !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of at least 3 seconds", function() {
-		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[2];
-		assert.operator(b.t_done, ">=", 3000);
+	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
+		if (window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, ">=", 3000);
+		}
+	});
+
+	it("Should have sent the third with a timestamp of under 1 second (if MutationObserver is not supported)", function() {
+		if (!window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, "<=", 1000);
+		}
 	});
 };
