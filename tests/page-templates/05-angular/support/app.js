@@ -3,7 +3,15 @@ angular.module("app", ["ngResource", "ngRoute"])
 	.factory("Widgets", ["$resource", function($resource) {
 		// NOTE: Using absolute urls instead of relative URLs otherwise IE11 has problems
 		// resolving them in html5Mode
-		return $resource("/pages/05-angular/support/widgets.json?rnd=" + Math.random(), null, {});
+		return {
+			query: function() {
+				var rnd = Math.random();
+
+				return $resource("/pages/05-angular/support/widgets.json", {}, {
+					query: { method: "GET", params: {rnd: rnd}, isArray: true }
+				}).query();
+			}
+		};
 	}])
 
 	.controller("mainCtrl", ["$scope", "Widgets", function($scope, Widgets) {
@@ -28,15 +36,11 @@ angular.module("app", ["ngResource", "ngRoute"])
 		$scope.imgs = typeof window.angular_imgs !== "undefined" ? window.angular_imgs : [0];
 		$scope.hide_imgs = $scope.imgs[0] === -1;
 
-		$scope.widgets = [];
-
-		$scope.fetchWidgets = function() {
+		if (typeof $scope.widgets === "undefined") {
 			$scope.widgets = Widgets.query(function() {
 				window.lastWidgetJsonTimestamp = +(new Date());
 			});
-		};
-
-		$scope.fetchWidgets();
+		}
 	}])
 
 	.controller("widgetDetailCtrl", ["$scope", "Widgets", "$routeParams", function($scope, Widgets, $routeParams) {
@@ -117,7 +121,12 @@ angular.module("app", ["ngResource", "ngRoute"])
 
 		if (typeof window.angular_nav_routes !== "undefined" &&
 			Object.prototype.toString.call(window.angular_nav_routes) === "[object Array]") {
-			BOOMR.subscribe("onbeacon", function() {
+			BOOMR.subscribe("onbeacon", function(beacon) {
+				// only continue for SPA beacons
+				if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
+					return;
+				}
+
 				if (window.angular_nav_routes.length > 0) {
 					var nextRoute = window.angular_nav_routes.shift();
 

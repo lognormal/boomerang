@@ -1,0 +1,18 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="01-resourcetiming-enabled-browser-supports-under-2k.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	ResourceTiming: {
+		enabled: true
+	},
+	testAfterOnBeacon: true,
+	onBoomerangLoaded: function() {
+		BOOMR.subscribe("before_beacon", function() {
+			// ensure we're not going to go over 2k, we should be around 1500
+			BOOMR.addVar("restiming", "{}");
+		});
+	}
+});
+</script>
+<%= footer %>

@@ -33,7 +33,7 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
+			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000, 0);
 		}
 	});
 
@@ -92,9 +92,9 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 		              b.u.indexOf("05-route-change-hashtags.html#/") !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of less than 1 second", function() {
+	it("Should have sent the third with a timestamp of at least 3 seconds", function() {
 		// now that the initial page is cached, it should be a quick navigation
 		var b = tf.beacons[2];
-		assert.operator(b.t_done, "<=", 1000);
+		assert.operator(b.t_done, ">=", 3000);
 	});
 };

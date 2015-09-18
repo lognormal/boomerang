@@ -68,6 +68,9 @@
 			ResourceTiming: {
 				enabled: true
 			},
+			AutoXHR: {
+				alwaysSendXhr: true
+			},
 			secondaryBeacons: true,
 			autorun: true
 		}

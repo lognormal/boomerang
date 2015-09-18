@@ -228,7 +228,7 @@ BOOMR_check_doc_domain();
 		// properties
 		beacon_url: location.protocol + "//%beacon_dest_host%%beacon_dest_path%",
 		// beacon request method, either GET, POST or AUTO. AUTO will check the
-		// request size then use GET if the request URL is less than 2000 chars
+		// request size then use GET if the request URL is less than MAX_GET_LENGTH chars
 		// otherwise it will fall back to a POST request.
 		beacon_type: "AUTO",
 		//! User's ip address determined on the server.  Used for the BA cookie
@@ -310,10 +310,16 @@ BOOMR_check_doc_domain();
 				}
 			}
 
+			// For all XHR, manual and SPA events, if we've fired all event listeners,
+			// let's also call real_sendBeacon() so if multiple events end at the same time,
+			// the beacon gets sent before the next events overwrite the data.
+			if (e_name === "xhr_load") {
+				BOOMR.real_sendBeacon();
+			}
+
 			return;// true;
 		}
 	};
-
 
 	// We create a boomr object and then copy all its properties to BOOMR so that
 	// we don't overwrite anything additional that was added to BOOMR before this
@@ -326,8 +332,13 @@ BOOMR_check_doc_domain();
 		url: myurl,
 		config_url: null,
 
+		// constants visible to the world
 		constants: {
-			BEACON_TYPE_SPAS: ["spa", "spa_hard"]
+			// SPA beacon types
+			BEACON_TYPE_SPAS: ["spa", "spa_hard"],
+			// using 2000 here as a de facto maximum URL length based on:
+			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+			MAX_GET_LENGTH: 2000
 		},
 
 		session: {
@@ -1176,7 +1187,7 @@ BOOMR_check_doc_domain();
 		},
 
 		real_sendBeacon: function() {
-			var k, form, furl, img, length=0, errors=[], url, nparams=0;
+			var k, form, furl, img, length=0, errors=[], url, nparams=0, vars = {};
 
 			if (!impl.beaconQueued) {
 				return false;
@@ -1265,40 +1276,53 @@ BOOMR_check_doc_domain();
 				return true;
 			}
 
-			if (!BOOMR.hasVar("restiming")) {
-				// Use an Image beacon if we're not sending ResourceTiming data
+			//
+			// Try to send an IMG beacon, which is lighter-weight and more compatible
+			// than FORM beacons.  We only send FORM beacons if the URL length
+			// is longer than 2,000 bytes.
+			//
 
-				// if there are already url parameters in the beacon url,
-				// change the first parameter prefix for the boomerang url parameters to &
+			// if there are already url parameters in the beacon url,
+			// change the first parameter prefix for the boomerang url parameters to &
+			url = [];
 
-				url = [];
-
-				for (k in impl.vars) {
-					if (impl.vars.hasOwnProperty(k)) {
-						nparams++;
-						url.push(encodeURIComponent(k)
-							+ "="
-							+ (
-								impl.vars[k]===undefined || impl.vars[k]===null
-								? ""
-								: encodeURIComponent(impl.vars[k])
-							)
-						);
-					}
+			for (k in impl.vars) {
+				if (impl.vars.hasOwnProperty(k)) {
+					nparams++;
+					url.push(encodeURIComponent(k)
+						+ "="
+						+ (
+							impl.vars[k]===undefined || impl.vars[k]===null
+							? ""
+							: encodeURIComponent(impl.vars[k])
+						)
+					);
 				}
-
-				furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
 			}
-			else {
+
+			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1)?"&":"?") + url.join("&");
+
+			if (furl.length > BOOMR.constants.MAX_GET_LENGTH) {
+				// switch to a FORM beacon
+				nparams = 0;
+
 				form = document.createElement("form");
 				length = BOOMR.utils.pushVars(form, impl.vars);
 			}
 
 			BOOMR.removeVar("qt");
 
+			// clone the vars object so all listeners of onbeacon get an exact clone
+			// (in case listeners are doing BOOMR.removeVar)
+			for (k in impl.vars) {
+				if (impl.vars.hasOwnProperty(k)) {
+					vars[k] = impl.vars[k];
+				}
+			}
+
 			// If we reach here, we've transferred all vars to the beacon URL.
 			// The only thing that can stop it now is if we're rate limited
-			impl.fireEvent("onbeacon", impl.vars);
+			impl.fireEvent("onbeacon", vars);
 
 			if (length === 0 && nparams === 0) {
 				// do not make the request if there is no data
@@ -1324,9 +1348,7 @@ BOOMR_check_doc_domain();
 				}
 			}
 			else {
-				// using 2000 here as a de facto maximum URL length based on:
-				// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
-				BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > 2000 ? "POST" : "GET") : "POST");
+				BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > BOOMR.constants.MAX_GET_LENGTH ? "POST" : "GET") : "POST");
 			}
 
 			return true;
