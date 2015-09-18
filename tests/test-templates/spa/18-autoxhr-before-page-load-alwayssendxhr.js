@@ -22,12 +22,6 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	var XHR_BEACONS = [0, 1];
 	var SPA_BEACONS = [2];
 
-	if (!window.MutationObserver) {
-		// Since no MO, the first beacon will be a quick spa_hard beacon
-		SPA_BEACONS = [0];
-		XHR_BEACONS = [1, 2];
-	}
-
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
