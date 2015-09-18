@@ -19,6 +19,15 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		"nt_res_st": "responseStart"
 	};
 
+	var XHR_BEACONS = [0, 1];
+	var SPA_BEACONS = [2];
+
+	if (!window.MutationObserver) {
+		// Since no MO, the first beacon will be a quick spa_hard beacon
+		SPA_BEACONS = [0];
+		XHR_BEACONS = [1, 2];
+	}
+
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
@@ -36,86 +45,110 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	});
 
 	//
-	// First two beacons
+	// XHR beacons
 	//
-	it("Should have set http.initiator = 'xhr' on the first two beacons (if AutoXHR is enabled)", function() {
+	it("Should have set http.initiator = 'xhr' on the XHR beacons (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				assert.equal(tf.beacons[i]["http.initiator"], "xhr");
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					assert.equal(tf.beacons[i]["http.initiator"], "xhr");
+				}
 			}
 		}
 	});
 
-	it("Should have set rt.start = 'manual' on the first two beacons (if AutoXHR is enabled)", function() {
+	it("Should have set rt.start = 'manual' on the XHR beacons (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				assert.equal(tf.beacons[i]["rt.start"], "manual");
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					assert.equal(tf.beacons[i]["rt.start"], "manual");
+				}
 			}
 		}
 	});
 
 	it("Should have set beacon's nt_* timestamps accurately (if AutoXHR is enabled and NavigationTiming is supported)", function() {
 		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported()) {
-			for (var i = 0; i < 1; i++) {
-				var b = tf.beacons[i];
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					var b = tf.beacons[i];
 
-				var res = t.findFirstResource(b.u);
-				var st = BOOMR.window.performance.timing.navigationStart;
+					var res = t.findFirstResource(b.u);
+					var st = BOOMR.window.performance.timing.navigationStart;
 
-				for (var beaconProp in BEACON_VAR_RT_MAP) {
-					var resTime = Math.round(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
+					for (var beaconProp in BEACON_VAR_RT_MAP) {
+						var resTime = Math.round(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
 
-					assert.equal(
-						b[beaconProp],
-						resTime,
-						"Beacon #" + i + ": " + beaconProp + "=" + b[beaconProp] + " vs " + BEACON_VAR_RT_MAP[beaconProp] + "=" + resTime);
+						assert.equal(
+							b[beaconProp],
+							resTime,
+							"Beacon #" + i + ": " + beaconProp + "=" + b[beaconProp] + " vs " + BEACON_VAR_RT_MAP[beaconProp] + "=" + resTime);
+					}
 				}
 			}
 		}
 	});
 
-	it("Should have set pgu = the page's location on the first two beacons (if AutoXHR is enabled)", function() {
+	it("Should have set pgu = the page's location on the XHR beacons (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				assert.equal(tf.beacons[i].pgu, BOOMR.window.location.href);
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					assert.equal(tf.beacons[i].pgu, BOOMR.window.location.href);
+				}
 			}
 		}
 	});
 
-	it("Should have set nt_load_end==nt_load_st==rt.end on the first two beacons (if AutoXHR is enabled)", function() {
+	it("Should have set nt_load_end==nt_load_st==rt.end on the XHR beacons (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				var b = tf.beacons[i];
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					var b = tf.beacons[i];
 
-				assert.equal(b.nt_load_end, b.nt_load_st);
-				assert.equal(b.nt_load_end, b["rt.end"]);
+					assert.equal(b.nt_load_end, b.nt_load_st);
+					assert.equal(b.nt_load_end, b["rt.end"]);
+				}
 			}
 		}
 	});
 
-	it("Should have set t_done = rt.end - nt_fet_st for the first two beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				var b = tf.beacons[i];
-				assert.equal(b.t_done, b["rt.end"] - b.nt_fet_st);
+	it("Should have set t_done = rt.end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported()) {
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					var b = tf.beacons[i];
+					assert.equal(b.t_done, b["rt.end"] - b.nt_fet_st);
+				}
 			}
 		}
 	});
 
-	it("Should have set t_resp = nt_res_end - nt_fet_st for the first two beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				var b = tf.beacons[i];
-				assert.equal(b.t_resp, b.nt_res_end - b.nt_fet_st);
+	it("Should have set t_resp = nt_res_end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported()) {
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					var b = tf.beacons[i];
+					assert.equal(b.t_resp, b.nt_res_end - b.nt_fet_st);
+				}
 			}
 		}
 	});
 
-	it("Should have set t_page = t_done - t_resp for the first two beacons (if AutoXHR is enabled)", function() {
+	it("Should have set t_page = t_done - t_resp for the XHR beacons (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			for (var i = 0; i < 1; i++) {
-				var b = tf.beacons[i];
-				assert.equal(b.t_page, b.t_done - b.t_resp);
+			for (var k in XHR_BEACONS) {
+				if (XHR_BEACONS.hasOwnProperty(k)) {
+					var i = XHR_BEACONS[k];
+					var b = tf.beacons[i];
+					assert.equal(b.t_page, b.t_done - b.t_resp);
+				}
 			}
 		}
 	});
@@ -125,7 +158,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	//
 	it("Should have contain home.html for the first beacon's URL (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			var b = tf.beacons[0];
+			var b = tf.beacons[XHR_BEACONS[0]];
 			assert.include(b.u, "home.html");
 		}
 	});
@@ -135,7 +168,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	//
 	it("Should have contain widgets.json for the first beacon's URL (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			var b = tf.beacons[1];
+			var b = tf.beacons[XHR_BEACONS[1]];
 			assert.include(b.u, "widgets.json");
 		}
 	});
@@ -144,7 +177,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	// Third beacon: SPA
 	//
 	it("Should have set http.initiator = 'spa_hard' on the last beacon", function() {
-		var b = tf.beacons[tf.beacons.length - 1];
+		var b = tf.beacons[SPA_BEACONS[0]];
 		assert.equal(b["http.initiator"], "spa_hard");
 	});
 };

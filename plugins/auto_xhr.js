@@ -224,6 +224,14 @@
 
 		// If we don't have a MutationObserver, then we just abort
 		if (!MutationHandler.observer) {
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// if we don't have an end SPA event, this is for the opening SPA,
+				// but we don't support MO so the SPA is just going to end now
+				if (!resource.timing.loadEventEnd) {
+					resource.timing.loadEventEnd = BOOMR.now();
+				}
+			}
+
 			// If we already have detailed resource we can forward the event
 			if (resource.url && resource.timing.loadEventEnd) {
 				this.sendEvent(index);

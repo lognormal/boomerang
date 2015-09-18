@@ -5,7 +5,6 @@
 <script src="../../vendor/ember/ember.debug.js"></script>
 <script src="../../vendor/handlebars/handlebars.min.js"></script>
 <script src="../../vendor/ember/ember-template-compiler.js"></script>
-<script src="support/app.js"></script>
 
 <script type="text/x-handlebars">
 	<div class="container">
@@ -23,7 +22,7 @@ window.ember_nav_routes = ["/widgets/1", ""];
 
 /*eslint-disable no-unused-vars*/
 BOOMR_test.init({
-	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 7 : 1,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 8 : 1,
 	Ember: {
 		enabled: true
 	},
@@ -34,4 +33,5 @@ BOOMR_test.init({
 	autorun: false
 });
 </script>
+<script src="support/app.js"></script>
 <%= footer %>

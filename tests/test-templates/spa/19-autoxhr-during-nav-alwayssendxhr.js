@@ -6,10 +6,34 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	var BEACONS_SENT = 7;
-	var XHR_BEACONS = [0, 2, 3, 5];
-	var SPA_HARD_BEACONS = [1];
-	var SPA_BEACONS = [4, 6];
+	//
+	// Beacon order:
+	//
+	// home.html
+	// widgets.json
+	// spa_hard
+	// widget.html
+	// widget.json
+	// spa
+	// widgets.json
+	// spa
+	//
+	// Note this scenario changes a bit if MutationObserver isn't supported.
+	//
+	var BEACONS_SENT = 8;
+
+	//
+	// Beacons probably come in in the above order, but for non-MutationObserver clients,
+	// they may be slightly out of order.  Iterate over all beacons first to bucket them.
+	//
+	var BEACONS = { "spa_hard" : {}, "spa": {}, "xhr": {}};
+	for (var type in BEACONS) {
+		if (BEACONS.hasOwnProperty(type)) {
+			for (var j = 0; j < tf.beacons.length; j++) {
+				BEACONS[tf.beacons["http.initiator"]].push(j);
+			}
+		}
+	}
 
 	var BEACON_VAR_RT_MAP = {
 		"nt_con_end": "connectEnd",
@@ -29,8 +53,8 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 7 beacons (AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
+	it("Should have sent " + BEACONS_SENT + " beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(tf.beacons.length, BEACONS_SENT);
 		}
 	});
@@ -44,33 +68,33 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	//
 	// XHR beacons
 	//
-	it("Should have set http.initiator = 'xhr' on the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
-					assert.equal(tf.beacons[i]["http.initiator"], "xhr");
+	it("Should have set http.initiator = 'xhr' on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
+					assert.equal(tf.beacons[i]["http.initiator"], "xhr", "XHR for beacon #" + i);
 				}
 			}
 		}
 	});
 
-	it("Should have set rt.start = 'manual' on the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set rt.start = 'manual' on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					assert.equal(tf.beacons[i]["rt.start"], "manual");
 				}
 			}
 		}
 	});
 
-	it("Should have set beacon's nt_* timestamps accurately (if AutoXHR is enabled and NavigationTiming is supported)", function() {
-		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported()) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set beacon's nt_* timestamps accurately (if AutoXHR is enabled and NavigationTiming is supported and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported() && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					var b = tf.beacons[i];
 
 					var res = t.findFirstResource(b.u);
@@ -91,22 +115,22 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		}
 	});
 
-	it("Should have set pgu = the page's location on the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set pgu = the page's location on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					assert.include(BOOMR.window.location.href, tf.beacons[i].pgu);
 				}
 			}
 		}
 	});
 
-	it("Should have set nt_load_end==nt_load_st==rt.end on the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set nt_load_end==nt_load_st==rt.end on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					var b = tf.beacons[i];
 
 					assert.equal(b.nt_load_end, b.nt_load_st);
@@ -116,11 +140,11 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		}
 	});
 
-	it("Should have set t_done = rt.end - nt_fet_st for the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set t_done = rt.end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported() && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					var b = tf.beacons[i];
 					assert.equal(b.t_done, b["rt.end"] - b.nt_fet_st);
 				}
@@ -128,11 +152,11 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		}
 	});
 
-	it("Should have set t_resp = nt_res_end - nt_fet_st for the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set t_resp = nt_res_end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && t.isNavigationTimingSupported() && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					var b = tf.beacons[i];
 					assert.equal(b.t_resp, b.nt_res_end - b.nt_fet_st);
 				}
@@ -140,11 +164,11 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		}
 	});
 
-	it("Should have set t_page = t_done - t_resp for the XHR beacons (if AutoXHR is enabled)", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in XHR_BEACONS) {
-				if (XHR_BEACONS.hasOwnProperty(k)) {
-					var i = XHR_BEACONS[k];
+	it("Should have set t_page = t_done - t_resp for the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.xhr) {
+				if (BEACONS.xhr.hasOwnProperty(k)) {
+					var i = BEACONS.xhr[k];
 					var b = tf.beacons[i];
 					assert.equal(b.t_page, b.t_done - b.t_resp);
 				}
@@ -155,11 +179,11 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	//
 	// Test all Hard Beacons
 	//
-	it("Should have set http.initiator = 'spa_hard' on the first SPA beacon", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in SPA_HARD_BEACONS) {
-				if (SPA_HARD_BEACONS.hasOwnProperty(k)) {
-					var i = SPA_HARD_BEACONS[k];
+	it("Should have set http.initiator = 'spa_hard' on the first SPA beacon (if MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.spa_hard) {
+				if (BEACONS.spa_hard.hasOwnProperty(k)) {
+					var i = BEACONS.spa_hard[k];
 					var b = tf.beacons[i];
 					assert.equal(b["http.initiator"], "spa_hard");
 				}
@@ -170,11 +194,11 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	//
 	// Test all Soft Beacons
 	//
-	it("Should have set http.initiator = 'spa' on the next SPA beacons", function() {
-		if (BOOMR.plugins.AutoXHR) {
-			for (var k in SPA_BEACONS) {
-				if (SPA_BEACONS.hasOwnProperty(k)) {
-					var i = SPA_BEACONS[k];
+	it("Should have set http.initiator = 'spa' on the next SPA beacons (if MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			for (var k in BEACONS.spa) {
+				if (BEACONS.spa.hasOwnProperty(k)) {
+					var i = BEACONS.spa[k];
 					var b = tf.beacons[i];
 					assert.equal(b["http.initiator"], "spa");
 				}
