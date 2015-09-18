@@ -17,12 +17,12 @@ describe("e2e/07-autoxhr/01-img-src-change", function() {
 		}
 	});
 
-	it("Should get 1 beacons: 1 onload (AutoXHR is supported but MutationObserver is not)", function(done) {
+	it("Should get 2 beacons: 1 onload, 1 spa (AutoXHR is supported but MutationObserver is not)", function(done) {
 		if (typeof window.MutationObserver === "undefined") {
 			t.ifAutoXHR(
 				done,
 				function() {
-					t.ensureBeaconCount(done, 1);
+					t.ensureBeaconCount(done, 2);
 				});
 		}
 		else {
