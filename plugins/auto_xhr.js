@@ -269,6 +269,13 @@
 		this.clearTimeout();
 		if (BOOMR.hasVar("h.cr")) {
 			ev.resource.resources = ev.resources;
+
+			// if this was an SPA nav that triggered no additional resources, substract the
+			// SPA_TIMEOUT from now to determine the end time
+			if (ev.type === "spa" && ev.resources.length === 0) {
+				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
+			}
+
 			this.sendResource(ev.resource, i);
 		}
 		else {

@@ -81,9 +81,19 @@ App.HomeRoute = Ember.Route.extend({
 	}
 });
 
+App.EmptyRoute = Ember.Route.extend({
+	beforeModel: function() {
+	},
+	model: function() {
+		return {};
+	}
+});
+
 App.Router.map(function() {
 	this.resource("widgets");
 	this.resource("widget", {path: "widgets/:id"});
+
+	this.resource("empty", { path: "empty" });
 
 	this.route("home", { path: "" });
 

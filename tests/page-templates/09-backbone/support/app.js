@@ -25,6 +25,7 @@ app.widgets = new Widgets();
 var AppRouter = Backbone.Router.extend({
 	routes: {
 		"widgets/:id": "widget",
+		"empty": "empty",
 		"*path":  "defaultRoute"
 	},
 	widget: function(id) {
@@ -34,6 +35,10 @@ var AppRouter = Backbone.Router.extend({
 	},
 	defaultRoute: function() {
 		var view = new app.HomeView();
+		view.render();
+	},
+	empty: function() {
+		var view = new app.EmptyView();
 		view.render();
 	}
 });
@@ -128,6 +133,18 @@ app.WidgetView = Backbone.View.extend({
 				}
 			});
 		}, "html");
+	}
+});
+
+//
+// View - Empty
+//
+app.EmptyView = Backbone.View.extend({
+	el: $("#content"),
+	initialize: function() {
+	},
+	render: function() {
+		this.$el.html("Empty");
 	}
 });
 
