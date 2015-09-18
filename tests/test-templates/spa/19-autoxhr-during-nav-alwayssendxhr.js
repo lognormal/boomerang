@@ -21,6 +21,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	// Note this scenario changes a bit if MutationObserver isn't supported.
 	//
 	var BEACONS_SENT = 8;
+	var BEACONS_SENT_SPA = 2;
+	var BEACONS_SENT_SPA_HARD = 1;
+	var BEACONS_SENT_XHR = 5;
 
 	//
 	// Beacons probably come in in the above order, but for non-MutationObserver clients,
@@ -56,6 +59,24 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	it("Should have sent " + BEACONS_SENT + " beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
 		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(tf.beacons.length, BEACONS_SENT);
+		}
+	});
+
+	it("Should have sent " + BEACONS_SENT_SPA + " spa beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			assert.equal(tf.beacons.length, BEACONS_SENT_SPA);
+		}
+	});
+
+	it("Should have sent " + BEACONS_SENT_SPA_HARD + " spa_hard beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			assert.equal(tf.beacons.length, BEACONS_SENT_SPA_HARD);
+		}
+	});
+
+	it("Should have sent " + BEACONS_SENT_XHR + " xhr beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
+		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
+			assert.equal(tf.beacons.length, BEACONS_SENT_XHR);
 		}
 	});
 
