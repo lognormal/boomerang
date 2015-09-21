@@ -72,4 +72,15 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.closeTo(parseInt(b.cmet11), document.cookie.length, 50);
 	});
+
+	it("Should be missing custom metric 12 - URL pattern does not match", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet12, undefined);
+	});
+
+	it("Should have custom metric 13 - URL pattern does match", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet13, 111);
+	});
+
 });

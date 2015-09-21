@@ -323,6 +323,10 @@
 		},
 
 		Custom: function(o) {
+			if (!this.checkURLPattern(o.parameter2)) {
+				return false;
+			}
+
 			return this.extractJavaScriptVariable(o.parameter1);
 		},
 
