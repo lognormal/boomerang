@@ -58,5 +58,10 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 
 	it("Should have the second beacon have a t_other parameter", function() {
 		assert.isDefined(tf.beacons[1].t_other);
+
+		assert.include(tf.beacons[1].t_other, "boomerang");
+		assert.include(tf.beacons[1].t_other, "boomr_fb");
+		assert.include(tf.beacons[1].t_other, "boomr_ld");
+		assert.include(tf.beacons[1].t_other, "boomr_lat");
 	});
 });
