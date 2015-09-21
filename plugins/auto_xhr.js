@@ -287,26 +287,26 @@
 	MutationHandler.prototype.sendResource = function(resource, eventIndex) {
 		var self = this;
 
-		// Add ResourceTiming data to the beacon, starting at when 'requestStart'
-		// was for this resource.
-		if (BOOMR.plugins.ResourceTiming &&
-			BOOMR.plugins.ResourceTiming.is_supported() &&
-			resource.timing &&
-			resource.timing.requestStart) {
-			var r = BOOMR.plugins.ResourceTiming.getResourceTiming(resource.timing.requestStart);
-			BOOMR.addVar("restiming", JSON.stringify(r));
-		}
-
-		// If the resource has an onComplete event, trigger it.
-		if (resource.onComplete) {
-			resource.onComplete();
-		}
-
 		// Use 'requestStart' as the startTime of the resource, if given
 		var startTime = resource.timing ? resource.timing.requestStart : undefined;
 
 		// called once the resource can be sent
 		var sendResponseEnd = function() {
+			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
+			// was for this resource.
+			if (BOOMR.plugins.ResourceTiming &&
+				BOOMR.plugins.ResourceTiming.is_supported() &&
+				resource.timing &&
+				resource.timing.requestStart) {
+				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(resource.timing.requestStart, resource.timing.loadEventEnd);
+				BOOMR.addVar("restiming", JSON.stringify(r));
+			}
+
+			// If the resource has an onComplete event, trigger it.
+			if (resource.onComplete) {
+				resource.onComplete();
+			}
+
 			BOOMR.responseEnd(resource, startTime, resource);
 
 			if (eventIndex) {

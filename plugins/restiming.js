@@ -356,9 +356,10 @@ see: http://www.w3.org/TR/resource-timing/
 	/**
 	 * Gathers performance entries and optimizes the result.
 	 * @param [number] since Only get timings since
+	 * @param [number] to Only get timings up to
 	 * @return Optimized performance entries trie
 	 */
-	function getResourceTiming(since) {
+	function getResourceTiming(since, to) {
 		/*eslint no-script-url:0*/
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		    i, e, results = {}, initiatorType, url, data,
@@ -383,6 +384,13 @@ see: http://www.w3.org/TR/resource-timing/
 
 			if (since && (navStart + e.startTime) < since) {
 				continue;
+			}
+
+			// If we were given a final timestamp, don't add any resources that
+			// started after it.
+			if (to && (navStart + e.startTime) > to) {
+				// We can also break at this point since the array is time sorted
+				break;
 			}
 
 			//
