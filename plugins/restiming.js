@@ -458,7 +458,8 @@ see: http://www.w3.org/TR/resource-timing/
 		done: function() {
 			var r;
 
-			// stop if we've already sent a nav beacon
+			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
+			// add restiming manually).
 			if (this.sentNavBeacon) {
 				return;
 			}

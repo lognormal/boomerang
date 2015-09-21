@@ -22,11 +22,27 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 		assert.isDefined(tf.beacons[0].restiming);
 	});
 
+	it("Should have the first beacon be missing the rt.bmr parameter", function() {
+		assert.isUndefined(tf.beacons[0]["rt.bmr"]);
+	});
+
+	it("Should have the first beacon be missing the t_other parameter", function() {
+		assert.isUndefined(tf.beacons[0].t_other);
+	});
+
 	it("Should have the second beacon be a navigation", function() {
 		assert.equal(tf.beacons[1]["rt.start"], "navigation");
 	});
 
-	it("Should have the second have a resiming parameter", function() {
+	it("Should have the second beacon have a resiming parameter", function() {
 		assert.isDefined(tf.beacons[1].restiming);
+	});
+
+	it("Should have the second beacon have a rt.bmr parameter", function() {
+		assert.isDefined(tf.beacons[1]["rt.bmr"]);
+	});
+
+	it("Should have the second beacon have a t_other parameter", function() {
+		assert.isDefined(tf.beacons[1].t_other);
 	});
 });

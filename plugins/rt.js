@@ -891,10 +891,6 @@
 			// overwrite values already set (provided there are values to read out)
 			impl.initFromCookie();
 
-			// We'll get BoomerangTimings every time init is called because it could also
-			// include config js timings which might happen on the second init.
-			impl.getBoomerangTimings();
-
 			// only initialize once.  we still collect config and check/set cookies
 			// every time init is called, but we attach event handlers only once
 			if (impl.initialized) {
@@ -1037,6 +1033,11 @@
 				if (!impl.setPageLoadTimers(ename, t_done, edata)) {
 					return this;
 				}
+			}
+
+			if (ename === "load" || ename === "visible") {
+				// Only add Boomerang timings to page load beacons
+				impl.getBoomerangTimings();
 			}
 
 			t_start = impl.determineTStart(ename, edata);
