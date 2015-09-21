@@ -57,6 +57,9 @@ see: http://www.w3.org/TR/navigation-timing/
 					for (k in data) {
 						if (data.hasOwnProperty(k) && data[k]) {
 							data[k] += w.performance.timing.navigationStart;
+
+							// don't need to send microseconds
+							data[k] = Math.round(data[k]);
 						}
 					}
 

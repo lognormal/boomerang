@@ -2,6 +2,7 @@
 	var d, handler, a,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
+	    alwaysSendXhr = false,
 	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
 
 	// Default SPA activity timeout, in milliseconds
@@ -223,6 +224,14 @@
 
 		// If we don't have a MutationObserver, then we just abort
 		if (!MutationHandler.observer) {
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// Give SPAs a bit more time to do something since we know this was
+				// an interesting event (e.g. XHRs)
+				this.setTimeout(SPA_TIMEOUT, index);
+
+				return index;
+			}
+
 			// If we already have detailed resource we can forward the event
 			if (resource.url && resource.timing.loadEventEnd) {
 				this.sendEvent(index);
@@ -261,45 +270,63 @@
 		if (BOOMR.hasVar("h.cr")) {
 			ev.resource.resources = ev.resources;
 
-			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
-			// was for this resource.
-			if (BOOMR.plugins.ResourceTiming &&
-				BOOMR.plugins.ResourceTiming.is_supported() &&
-				ev.resource.timing &&
-				ev.resource.timing.requestStart) {
-				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(ev.resource.timing.requestStart);
-				BOOMR.addVar("restiming", JSON.stringify(r));
+			// if this was an SPA nav that triggered no additional resources, substract the
+			// SPA_TIMEOUT from now to determine the end time
+			if (ev.type === "spa" && ev.resources.length === 0) {
+				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
 			}
 
-			// If the resource has an onComplete event, trigger it.
-			if (ev.resource.onComplete) {
-				ev.resource.onComplete();
-			}
-
-			// Use 'requestStart' as the startTime of the resource, if given
-			var startTime = ev.resource.timing ? ev.resource.timing.requestStart : undefined;
-
-			// send the beacon if we were not told to hold it
-			if (!ev.resource.wait) {
-				BOOMR.responseEnd(ev.resource, startTime, ev.resource);
-
-				this.pending_events[i] = undefined;
-			}
-			else {
-				// waitComplete() should be called once the held beacon is complete
-				ev.resource.waitComplete = function() {
-					ev.resource.timing.loadEventEnd = BOOMR.now();
-
-					BOOMR.responseEnd(ev.resource, startTime, ev.resource);
-
-					self.pending_events[i] = undefined;
-				};
-			}
+			this.sendResource(ev.resource, i);
 		}
 		else {
 			// No crumb, so try again after 5 seconds
 			setTimeout(function() { self.sendEvent(i); }, 5000);
 		}
+	};
+
+	MutationHandler.prototype.sendResource = function(resource, eventIndex) {
+		var self = this;
+
+		// Use 'requestStart' as the startTime of the resource, if given
+		var startTime = resource.timing ? resource.timing.requestStart : undefined;
+
+		// called once the resource can be sent
+		var sendResponseEnd = function() {
+			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
+			// was for this resource.
+			if (BOOMR.plugins.ResourceTiming &&
+				BOOMR.plugins.ResourceTiming.is_supported() &&
+				resource.timing &&
+				resource.timing.requestStart) {
+				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(resource.timing.requestStart, resource.timing.loadEventEnd);
+				BOOMR.addVar("restiming", JSON.stringify(r));
+			}
+
+			// If the resource has an onComplete event, trigger it.
+			if (resource.onComplete) {
+				resource.onComplete();
+			}
+
+			BOOMR.responseEnd(resource, startTime, resource);
+
+			if (eventIndex) {
+				self.pending_events[eventIndex] = undefined;
+			}
+		};
+
+		// send the beacon if we were not told to hold it
+		if (!resource.wait) {
+			sendResponseEnd();
+		}
+		else {
+			// waitComplete() should be called once the held beacon is complete
+			resource.waitComplete = function() {
+				resource.timing.loadEventEnd = BOOMR.now();
+
+				sendResponseEnd();
+			};
+		}
+
 	};
 
 	MutationHandler.prototype.setTimeout = function(timeout, index) {
@@ -365,10 +392,10 @@
 		target._bmr.state = ev.type;
 
 		index = target._bmr.res;
-		this.load_finished(index);
+		this.load_finished(index, target._bmr.end);
 	};
 
-	MutationHandler.prototype.load_finished = function(index) {
+	MutationHandler.prototype.load_finished = function(index, loadEventEnd) {
 		var current_event = this.pending_events[index];
 
 		// event aborted
@@ -379,6 +406,9 @@
 		current_event.nodes_to_wait--;
 
 		if (current_event.nodes_to_wait === 0) {
+			// mark the end timestamp with what was given to us, or, now
+			current_event.resource.timing.loadEventEnd = loadEventEnd || BOOMR.now();
+
 			// For Single Page Apps, when we're finished waiting on the last node,
 			// the MVC engine (eg AngularJS) might still be doing some processing (eg
 			// on an XHR) before it adds some additional content (eg IMGs) to the page.
@@ -386,8 +416,6 @@
 			// something else is added, we'll continue to wait for that content to
 			// complete.  If nothing else is added, the end event will be the
 			// timestamp for when this load_finished(), not 1 second from now.
-
-			current_event.resource.timing.loadEventEnd = BOOMR.now();
 			if (BOOMR.utils.inArray(current_event.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				this.setTimeout(SPA_TIMEOUT, index);
 			}
@@ -693,7 +721,10 @@
 					if (resource.index > -1) {
 						// If this XHR was added to an existing event, fire the
 						// load_finished handler for that event.
-						handler.load_finished(resource.index);
+						handler.load_finished(resource.index, resource.timing.responseEnd);
+					}
+					else if (alwaysSendXhr) {
+						handler.sendResource(resource);
 					}
 					else if (!singlePageApp || autoXhrEnabled) {
 						// Otherwise, if this is a SPA+AutoXHR or just plain
@@ -727,7 +758,7 @@
 					);
 				}
 
-				if (singlePageApp && handler.watch) {
+				if (singlePageApp && handler.watch && !alwaysSendXhr) {
 					// If this is a SPA and we're already watching for resources due
 					// to a route change or other interesting event, add this to the
 					// current event.
@@ -813,10 +844,17 @@
 				}
 			}
 
+			// Whether or not to always send XHRs.  If a SPA is enabled, this means it will
+			// send XHRs during the hard and soft navs.  If enabled, it will also disable
+			// listening for MutationObserver events after an XHR is complete.
+			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
+
 			if (singlePageApp) {
-				// Disable auto-xhr until the SPA has fired its first beacon.  The
-				// plugin will re-enable after it's ready.
-				autoXhrEnabled = false;
+				if (!alwaysSendXhr) {
+					// Disable auto-xhr until the SPA has fired its first beacon.  The
+					// plugin will re-enable after it's ready.
+					autoXhrEnabled = false;
+				}
 
 				BOOMR.instrumentXHR();
 			}

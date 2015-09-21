@@ -196,6 +196,10 @@
 		BOOMR.init(config);
 		BOOMR.addVar("h.cr", "test");
 
+		if (config.onBoomerangLoaded) {
+			config.onBoomerangLoaded();
+		}
+
 		if (config.afterFirstBeacon) {
 			var xhrSent = false;
 			BOOMR.subscribe(
@@ -388,6 +392,40 @@
 	};
 
 	/**
+	* Finds the nth load of the specified resource.
+	* @param {string} url Partial URL match
+	* @param {number} n Nth resource
+	* @return {PerformanceResourceTiming} Last resource to load for that URL
+	*/
+	t.findNthResource = function(url, n) {
+		if ("performance" in window &&
+			window.performance &&
+			window.performance.getEntriesByType) {
+			var entries = window.performance.getEntriesByType("resource");
+			var res = null;
+			var matches = 0;
+
+			for (var i = 0; i < entries.length; i++) {
+				if (entries[i].name.indexOf(url) !== -1) {
+					if (res === null || entries[i].responseEnd > res.responseEnd) {
+						if (matches === n) {
+							res = entries[i];
+							break;
+						}
+
+						matches++;
+					}
+				}
+			}
+
+			return res;
+		}
+		else {
+			return null;
+		}
+	};
+
+	/**
 	 * Validates the beacon was sent with a load time equal to when the specified resource
 	 * loaded.
 	 *
@@ -396,12 +434,20 @@
 	 * @param {number} closeTo Range that the load time can be off by
 	 * @param {number} fallbackMin If RT is not supported, the minimum time
 	 * @param {number} fallbackMax If RT is not supported, the maximum time
-	 * @param {boolean} useLastMatch Use the last match of the resource instead of the first
+	 * @param {boolean|number} useLastMatch Use the last match of the resource instead of the first, or, if a number, that resource
+	 * @param {number} n Check the nth resource
 	 */
 	t.validateBeaconWasSentAfter = function(beaconIndex, urlMatch, closeTo, fallbackMin, fallbackMax, useLastMatch) {
 		var tf = BOOMR.plugins.TestFramework;
 
-		var res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
+		var res;
+		if (typeof useLastMatch === "number") {
+			res = t.findNthResource(urlMatch, useLastMatch);
+		}
+		else {
+			res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
+		}
+
 		if (res != null) {
 			assert.closeTo(tf.beacons[beaconIndex].t_done, res.responseEnd, closeTo);
 		}
