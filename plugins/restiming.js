@@ -441,6 +441,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 	impl = {
 		complete: false,
+		sentNavBeacon: false,
 		initialized: false,
 		supported: false,
 		xhr_load: function() {
@@ -456,9 +457,12 @@ see: http://www.w3.org/TR/resource-timing/
 		xssBreakWords: defaultXssBreakWords,
 		done: function() {
 			var r;
-			if (this.complete) {
+
+			// stop if we've already sent a nav beacon
+			if (this.sentNavBeacon) {
 				return;
 			}
+
 			BOOMR.removeVar("restiming");
 			r = getResourceTiming();
 			if (r) {
@@ -467,7 +471,10 @@ see: http://www.w3.org/TR/resource-timing/
 					restiming: JSON.stringify(r)
 				});
 			}
+
 			this.complete = true;
+			this.sentNavBeacon = true;
+
 			BOOMR.sendBeacon();
 		},
 
