@@ -66,7 +66,8 @@
 				test_https: true
 			},
 			ResourceTiming: {
-				enabled: true
+				enabled: true,
+				clearOnBeacon: true
 			},
 			AutoXHR: {
 				alwaysSendXhr: true

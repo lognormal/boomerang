@@ -969,9 +969,10 @@ BOOMR_check_doc_domain();
 
 		now: (function() {
 			try {
-				if ("performance" in window && window.performance && window.performance.now) {
+				var p = BOOMR.getPerformance();
+				if (p && typeof p.now === "function") {
 					return function() {
-						return Math.round(window.performance.now() + window.performance.timing.navigationStart);
+						return Math.round(p.now() + p.timing.navigationStart);
 					};
 				}
 			}
@@ -981,6 +982,12 @@ BOOMR_check_doc_domain();
 
 			return Date.now || function() { return new Date().getTime(); };
 		}()),
+
+		getPerformance: function() {
+			if (BOOMR.window && "performance" in BOOMR.window && BOOMR.window.performance) {
+				return BOOMR.window.performance;
+			}
+		},
 
 		visibilityState: ( visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; } ),
 
