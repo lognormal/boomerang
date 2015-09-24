@@ -113,12 +113,12 @@
 		if (complete) {
 			// remove this node and start another after CONFIG_RELOAD_TIMEOUT
 			setTimeout(function() {
+				load();
+
 				if (s1) {
 					/* DEBUG DISABLE LINE */removeNodeIfSafe(s1);
 					s1=null;
 				}
-
-				load();
 			}, CONFIG_RELOAD_TIMEOUT);
 		}
 
