@@ -193,8 +193,8 @@
 		config = _.merge({}, t.CONFIG_DEFAULTS, config);
 
 		// initialize boomerang
-		BOOMR.init(config);
 		BOOMR.addVar("h.cr", "test");
+		BOOMR.init(config);
 
 		if (config.onBoomerangLoaded) {
 			config.onBoomerangLoaded();
