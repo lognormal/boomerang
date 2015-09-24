@@ -222,7 +222,7 @@ module.exports = function() {
 						{
 							// Add &debug key to request
 							pattern: /key=%client_apikey%/,
-							replacement: "debug=\&key=%client_apikey%"
+							replacement: "debug=\&key=API_KEY"
 						},
 						{
 							// Send beacons to null
@@ -232,7 +232,11 @@ module.exports = function() {
 						{
 							// Add config to null
 							pattern: /\/\/%config_host%%config_path%/,
-							replacement: "/blackhole"
+							replacement: "/config"
+						},
+						{
+							pattern: /%config_url_suffix%/,
+							replacement: ""
 						},
 						{
 							pattern: /CONFIG_RELOAD_TIMEOUT=5\.5\*60\*1000;/,
