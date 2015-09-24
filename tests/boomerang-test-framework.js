@@ -500,6 +500,114 @@
 		(testDegenerate || done || function(){})();
 	};
 
+
+	/**
+	 * Determines how many elements on the page match the attribute
+	 *
+	 * @param {string} tagName Tag name
+	 * @param {string} attr Attribute name
+	 * @param {RegEx} regex Regular expression matching the attribute
+	 * @returns {number} Number of elements matching
+	 */
+	t.elementsWithAttribute = function(tagName, attr, regex) {
+		var nodes = document.getElementsByTagName("script");
+
+		var matching = 0;
+
+		for (var i = 0; i < nodes.length; i++) {
+			var node = nodes[i];
+			if (node[attr] && node[attr].match(regex)) {
+				matching++;
+			}
+		}
+
+		return matching;
+	};
+
+	/**
+	 * Runs a function repeatedly the specified number of times with the
+	 * specified delay.
+	 *
+	 * @param {function} run Function to run
+	 * @param {number} times How many times to run it
+	 * @param {number} delay How often to delay between runs
+	 * @param {function} done What to run when done
+	 */
+	t.runRepeatedly = function(run, times, delay, done) {
+		var runTimes = 0;
+
+		function repeat() {
+			if (++runTimes === times) {
+				return done();
+			}
+
+			run();
+
+			setTimeout(repeat, delay);
+		}
+
+		repeat();
+	};
+
+	/**
+	 * Shows a countdown clock on the page
+	 *
+	 * @param {Object} test Mocha test case
+	 * @param {number} maxTime Maximum timeout
+	 * @param {number} expectedTime How many expected seconds
+	 *
+	 * @returns {string} Timer ID you can use to clearTimeout later
+	 */
+	t.timeout = function(test, maxTime, expectedTime) {
+		test.timeout(maxTime);
+
+		var stats = document.getElementById("mocha-stats");
+
+		var el = document.createElement("li");
+
+		stats.appendChild(el);
+
+		var startTime = +(new Date());
+		var endTimeExpected = startTime + expectedTime;
+		var endTimeMax = startTime + maxTime;
+
+		var timerID = setInterval(function(){
+			var now = +(new Date());
+			if (now > endTimeMax) {
+				clearInterval(timerID);
+
+				el.parentNode.removeChild(el);
+
+				return;
+			}
+			else if (now > endTimeExpected) {
+				el.style["font-color"] = "red";
+			}
+
+			var timeLeft = endTimeMax - now;
+
+			el.innerHTML = "timeout: <em>" + (Math.floor(timeLeft / 100) / 10).toFixed(1) + "</em>s";
+		}, 100);
+
+		el.id = "mocha-timer" + timerID;
+
+		return timerID;
+	};
+
+	/**
+	 * Clears a previously set timer ID
+	 *
+	 * @param {string} timerID TimerID
+	 */
+	t.clearTimeout = function(timerID) {
+		clearInterval(timerID);
+
+		var el = document.getElementById("mocha-timer" + timerID);
+		if (el) {
+			el.parentNode.removeChild(el);
+		}
+	};
+
 	window.BOOMR_test = t;
 
 }(window));

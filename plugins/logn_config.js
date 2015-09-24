@@ -111,11 +111,15 @@
 		}
 
 		if (complete) {
-			if (s1) {
-				/* CONFIGJSDEBUG_TOKEN */removeNodeIfSafe(s1);
-				s1=null;
-			}
-			setTimeout(load, CONFIG_RELOAD_TIMEOUT);
+			// remove this node and start another after CONFIG_RELOAD_TIMEOUT
+			setTimeout(function() {
+				load();
+
+				if (s1) {
+					/* DEBUG DISABLE LINE */removeNodeIfSafe(s1);
+					s1=null;
+				}
+			}, CONFIG_RELOAD_TIMEOUT);
 		}
 
 	};
