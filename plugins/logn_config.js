@@ -7,10 +7,12 @@
 	    t_start,
 	    load, loaded,
 	    autorun=true,
+	    alwaysRun = typeof w.BOOMR_LOGN_always !== "undefined",
 	    CONFIG_RELOAD_TIMEOUT=5.5*60*1000;
 
 	// Don't even bother creating the plugin if this is mhtml
-	if (BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
+	if (!alwaysRun &&
+		(BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//))) {
 		return;
 	}
 
