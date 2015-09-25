@@ -5,6 +5,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
+	var pathName = window.location.pathname;
+
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
@@ -26,9 +28,9 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 	//
 	// Beacon 1
 	//
-	it("Should have sent the first beacon for /04-route-change.html", function() {
+	it("Should have sent the first beacon for " + pathName, function() {
 		var b = tf.beacons[0];
-		assert.isTrue(b.u.indexOf("/04-route-change.html") !== -1);
+		assert.isTrue(b.u.indexOf(pathName) !== -1);
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
@@ -85,9 +87,9 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 	//
 	// Beacon 3
 	//
-	it("Should have sent the third beacon for /04-route-change.html", function() {
+	it("Should have sent the third beacon for " + pathName, function() {
 		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("/04-route-change.html") !== -1);
+		assert.isTrue(b.u.indexOf(pathName) !== -1);
 	});
 
 	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
