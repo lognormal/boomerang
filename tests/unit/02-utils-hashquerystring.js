@@ -16,6 +16,10 @@ describe("BOOMR.utils.hashQueryString()", function() {
 		assert.strictEqual(BOOMR.utils.hashQueryString(""), "");
 	});
 
+	it("Should return an empty string when a non-URL is passed as an argument", function() {
+		assert.strictEqual(BOOMR.utils.hashQueryString("foo"), "");
+	});
+
 	it("Should return an empty string when an a non-string is passed as argument", function() {
 		assert.strictEqual(BOOMR.utils.hashQueryString(true), "");
 		assert.strictEqual(BOOMR.utils.hashQueryString({}), "");
