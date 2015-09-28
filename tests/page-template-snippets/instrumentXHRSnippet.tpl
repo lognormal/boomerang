@@ -7,7 +7,6 @@
 	var a = document.createElement("A"), xhrNative = XMLHttpRequest, resources = [], sendResource;
 	BOOMR.xhr = {
 		stop: function(sr) {
-			console.info("outer stopped");
 			sendResource = sr;
 			for (var i = 0; i < resources.length; i++) {
 				sr(resources[i]);
@@ -20,7 +19,8 @@
 
 	var now = (function() {
 		try {
-			return function() { return Math.round(performance.now() + performance.timing.navigationStart); };
+			if ("performance" in window)
+				return function() { return Math.round(performance.now() + performance.timing.navigationStart); };
 		}
 		catch (ignore) {}
 		return Date.now || function() { return new Date().getTime(); };
@@ -29,9 +29,7 @@
 	w.XMLHttpRequest = function() {
 		var xhr = new xhrNative(), open = xhr.open;
 		xhr.open = function(method, url, async) {
-console.info("outer open:" + url);
 			function loadFinished() {
-				console.info("outer back:" + url);
 				if (!resource.timing.loadEventEnd) {
 					resource.timing.loadEventEnd = now();
 					if (sendResource) {
@@ -78,7 +76,6 @@ console.info("outer open:" + url);
 				open.apply(xhr, arguments);
 				var send = xhr.send;
 				xhr.send = function() {
-					console.info("outer send")
 					resource.timing.requestStart = now();
 					send.apply(xhr, arguments);
 				};
