@@ -1,0 +1,46 @@
+<%= header %>
+<script src="06-xhr-before-config-alwayssendxhr.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<%= instrumentXHRSnippet %>
+<script>
+
+var xhr;
+
+//opened and completed before config
+xhr = new XMLHttpRequest();
+xhr.open("GET", "/delay?delay=0&file=build/boomerang-latest-debug.js&1");
+xhr.send(null);
+
+//opened before config, completed after config, after onload
+xhr = new XMLHttpRequest();
+xhr.open("GET", "/delay?delay=2000&file=build/boomerang-latest-debug.js&3");
+xhr.send(null);
+
+BOOMR_test.init({
+	testAfterOnBeacon: window.XMLHttpRequest && (new XMLHttpRequest()).addEventListener ? 5 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	ResourceTiming: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	onBoomerangLoaded: function() {
+		//opened and completed after config, before onload
+		xhr = new XMLHttpRequest();
+		xhr.open("GET", "/delay?delay=0&file=build/boomerang-latest-debug.js&2");
+		xhr.send(null);
+	}
+});
+
+//opened and completed after config, after onload
+setTimeout(function() {
+	xhr = new XMLHttpRequest();
+	xhr.open("GET", "/delay?delay=0&file=build/boomerang-latest-debug.js&4");
+	xhr.send(null);
+}, 3000);
+
+</script>
+<!-- delay load a second -->
+<img src="/delay?delay=1000&file=/pages/07-autoxhr/support/img.jpg" style="display:none;"  />
+<%= footer %>

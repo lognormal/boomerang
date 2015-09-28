@@ -54,8 +54,7 @@
 								loadFinished();
 							}
 						},
-						false
-				);
+						false);
 			}
 
 			a.href = url;
