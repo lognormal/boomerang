@@ -301,6 +301,20 @@ module.exports = function() {
 					ext: ".min.js",
 					extDot: "first"
 				}]
+			},
+			snippets: {
+				options: {
+					preserveComments: false,
+					mangle: true
+				},
+				files: [{
+					expand: true,
+					cwd: "tests/page-template-snippets/",
+					src: ["instrumentXHRSnippet.tpl"],
+					dest: "build/snippets/",
+					ext: ".min.js",
+					extDot: "first"
+				}]
 			}
 		},
 		compress: {

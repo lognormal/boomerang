@@ -1,10 +1,9 @@
-<script>
 (function(w){
 	if (!w.BOOMR || !w.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
 		return;
 	}
 
-	var a = document.createElement("A"), xhrNative = XMLHttpRequest, resources = [], sendResource;
+	var a = document.createElement("A"), xhrNative = XMLHttpRequest, resources = [], sendResource, readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
 	BOOMR.xhr = {
 		stop: function(sr) {
 			sendResource = sr;
@@ -33,6 +32,24 @@
 			function loadFinished() {
 				if (!resource.timing.loadEventEnd) {
 					resource.timing.loadEventEnd = now();
+
+					if ("performance" in w && w.performance && typeof w.performance.getEntriesByName === "function") {
+						var entries = w.performance.getEntriesByName(resource.url);
+						var entry = entries && entries.length && entries[entries.length - 1];
+						if (entry) {
+							var navSt = w.performance.timing.navigationStart;
+							if (entry.responseEnd !== 0) {
+								resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
+							}
+							if (entry.responseStart !== 0) {
+								resource.timing.responseStart = Math.round(navSt + entry.responseStart);
+							}
+							if (entry.startTime !== 0) {
+								resource.timing.requestStart = Math.round(navSt + entry.startTime);
+							}
+						}
+					}
+
 					if (sendResource) {
 						sendResource(resource);
 					} else {
@@ -89,4 +106,3 @@
 	};
 
 })(window);
-</script>
