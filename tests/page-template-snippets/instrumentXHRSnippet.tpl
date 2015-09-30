@@ -14,6 +14,7 @@
 
 			w.XMLHttpRequest = xhrNative;
 			delete BOOMR.xhr;
+			resources = [];
 		}
 	};
 
