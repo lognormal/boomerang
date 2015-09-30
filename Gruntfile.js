@@ -310,7 +310,7 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "tests/page-template-snippets/",
-					src: ["instrumentXHRSnippet.tpl"],
+					src: ["instrumentXHRSnippetNoScript.tpl"],
 					dest: "build/snippets/",
 					ext: ".min.js",
 					extDot: "first"
