@@ -192,9 +192,25 @@
 
 		config = _.merge({}, t.CONFIG_DEFAULTS, config);
 
+		if (config.testAfterOnBeacon) {
+			// default to waiting until one beacon was sent, otherwise use
+			// the number passed in
+			if (typeof config.testAfterOnBeacon !== "number") {
+				config.testAfterOnBeacon = 1;
+			}
+
+			BOOMR.subscribe("onbeacon", function() {
+				if (++beaconsSeen === config.testAfterOnBeacon) {
+					// wait a few more ms so the beacon fires
+					// TODO: Trim this timing down if we can make it more reliable
+					setTimeout(t.runTests, 1000);
+				}
+			});
+		}
+
 		// initialize boomerang
-		BOOMR.init(config);
 		BOOMR.addVar("h.cr", "test");
+		BOOMR.init(config);
 
 		if (config.onBoomerangLoaded) {
 			config.onBoomerangLoaded();
@@ -229,22 +245,7 @@
 		// set globals
 		assert = window.assert = window.chai.assert;
 
-		if (config.testAfterOnBeacon) {
-			// default to waiting until one beacon was sent, otherwise use
-			// the number passed in
-			if (typeof config.testAfterOnBeacon !== "number") {
-				config.testAfterOnBeacon = 1;
-			}
-
-			BOOMR.subscribe("onbeacon", function() {
-				if (++beaconsSeen === config.testAfterOnBeacon) {
-					// wait a few more ms so the beacon fires
-					// TODO: Trim this timing down if we can make it more reliable
-					setTimeout(t.runTests, 1000);
-				}
-			});
-		}
-		else {
+		if (!config.testAfterOnBeacon) {
 			BOOMR.setImmediate(t.runTests);
 		}
 

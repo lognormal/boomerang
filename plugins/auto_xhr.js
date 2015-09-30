@@ -24,7 +24,7 @@
 		return;
 	}
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
 	if (BOOMR.plugins.AutoXHR) {
@@ -653,7 +653,7 @@
 			// already instrumented
 			return;
 		}
-		else if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 			// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
 			BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
@@ -850,6 +850,12 @@
 			// send XHRs during the hard and soft navs.  If enabled, it will also disable
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
+			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr) {
+				typeof BOOMR.xhr.stop === "function" && BOOMR.xhr.stop(function(resource) {
+					resource.initiator = "xhr";
+					BOOMR.responseEnd(resource);
+				});
+			}
 
 			if (singlePageApp) {
 				if (!alwaysSendXhr) {

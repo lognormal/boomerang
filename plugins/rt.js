@@ -537,13 +537,13 @@
 				source = "gtb";
 			}
 
+			BOOMR.addVar("rt.start", source || "navigation");
 			if (ti) {
 				// Always use navigationStart since it falls back to fetchStart (not with redirects)
 				// If not set, we leave t_start alone so that timers that depend
 				// on it don't get sent back.  Never use requestStart since if
 				// the first request fails and the browser retries, it will contain
 				// the value for the new request.
-				BOOMR.addVar("rt.start", source || "navigation");
 				this.navigationStart = ti.navigationStart || ti.fetchStart || undefined;
 				this.responseStart = ti.responseStart || undefined;
 
