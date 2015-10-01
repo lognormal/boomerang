@@ -572,6 +572,14 @@ module.exports = function() {
 					version: grunt.option("boomerang-version")
 				}
 			}
+		},
+		"mpulse-build-repository-xml-upload": {
+			"build": {
+				options: {
+					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
+					version: "<%= releaseVersion %>.<%= buildDate %>"
+				}
+			}
 		}
 	});
 	grunt.loadNpmTasks("grunt-eslint");
@@ -598,6 +606,7 @@ module.exports = function() {
 	// Custom aliases for configured grunt tasks
 	var aliases = {
 		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
+		"upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"build:test": ["concat:debug", "string-replace", "copy:debug"],
 		"default": ["lint", "build", "test", "filesize:default"],
 		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
