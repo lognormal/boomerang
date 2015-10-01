@@ -24,7 +24,20 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 	it("Second beacon should be the navigation beacon", function() {
 		var beacon = tf.beacons[1];
 		assert.isUndefined(beacon["http.initiator"]);
-		assert.equal(beacon["rt.start"], "navigation");
+	});
+
+	it("Second beacon (navigation) should have rt.start = 'navigation' (if NavigationTiming is supported)", function() {
+		if (t.isNavigationTimingSupported()) {
+			var beacon = tf.beacons[1];
+			assert.equal(beacon["rt.start"], "navigation");
+		}
+	});
+
+	it("Second beacon (navigation) should have rt.start = 'none' (if NavigationTiming is not supported)", function() {
+		if (!t.isNavigationTimingSupported()) {
+			var beacon = tf.beacons[1];
+			assert.equal(beacon["rt.start"], "none");
+		}
 	});
 
 	it("Third beacon should be an XHR, opened before config, completed after config", function() {

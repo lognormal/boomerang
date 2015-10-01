@@ -537,13 +537,13 @@
 				source = "gtb";
 			}
 
-			BOOMR.addVar("rt.start", source || "navigation");
 			if (ti) {
 				// Always use navigationStart since it falls back to fetchStart (not with redirects)
 				// If not set, we leave t_start alone so that timers that depend
 				// on it don't get sent back.  Never use requestStart since if
 				// the first request fails and the browser retries, it will contain
 				// the value for the new request.
+				BOOMR.addVar("rt.start", source || "navigation");
 				this.navigationStart = ti.navigationStart || ti.fetchStart || undefined;
 				this.responseStart = ti.responseStart || undefined;
 
@@ -743,24 +743,26 @@
 					BOOMR.addVar("rt.start", "manual");
 				}
 			}
-			else if (impl.navigationStart) {
-				t_start = impl.navigationStart;
-			}
-			else if (impl.t_start && impl.navigationType !== 2) {
-				t_start = impl.t_start;			// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
-				BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
-			}						// but will have time of previous page start, so t_done will be wrong
-			else if (impl.cached_t_start) {
-				t_start = impl.cached_t_start;
-			}
 			else {
-				BOOMR.addVar("rt.start", "none");
-				t_start = undefined;			// force all timers to NaN state
+				if (impl.navigationStart) {
+					t_start = impl.navigationStart;
+				}
+				else if (impl.t_start && impl.navigationType !== 2) {
+					t_start = impl.t_start;			// 2 is TYPE_BACK_FORWARD but the constant may not be defined across browsers
+					BOOMR.addVar("rt.start", "cookie");	// if the user hit the back button, referrer will match, and cookie will match
+				}						// but will have time of previous page start, so t_done will be wrong
+				else if (impl.cached_t_start) {
+					t_start = impl.cached_t_start;
+				}
+				else {
+					BOOMR.addVar("rt.start", "none");
+					t_start = undefined;			// force all timers to NaN state
+				}
+
+				impl.cached_t_start = t_start;
 			}
 
 			BOOMR.debug("Got start time: " + t_start, "rt");
-			impl.cached_t_start = t_start;
-
 			return t_start;
 		},
 
@@ -844,6 +846,7 @@
 		},
 
 		clear: function() {
+			BOOMR.removeVar("rt.start");
 			if (impl.addedVars && impl.addedVars.length > 0) {
 				BOOMR.removeVar(impl.addedVars);
 				impl.addedVars = [];
