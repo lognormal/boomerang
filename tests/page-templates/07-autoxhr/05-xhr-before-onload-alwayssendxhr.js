@@ -32,15 +32,15 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 		assert.isUndefined(tf.beacons[0].t_other);
 	});
 
-	it("Should have the second beacon be a navigation (if NavigationTiming is supported)", function() {
+	it("Should have the second beacon be 'navigation' (if NavigationTiming is supported)", function() {
 		if (t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons[1]["rt.start"], "navigation");
 		}
 	});
 
-	it("Should have the second beacon be manual (if NavigationTiming is not supported)", function() {
+	it("Should have the second beacon be 'none' (if NavigationTiming is not supported)", function() {
 		if (!t.isNavigationTimingSupported()) {
-			assert.equal(tf.beacons[1]["rt.start"], "manual");
+			assert.equal(tf.beacons[1]["rt.start"], "none");
 		}
 	});
 
@@ -60,8 +60,13 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 		assert.isDefined(tf.beacons[1].t_other);
 
 		assert.include(tf.beacons[1].t_other, "boomerang");
-		assert.include(tf.beacons[1].t_other, "boomr_fb");
-		assert.include(tf.beacons[1].t_other, "boomr_ld");
-		assert.include(tf.beacons[1].t_other, "boomr_lat");
+		if (t.isNavigationTimingSupported()) {
+			//these timers are never started, when we check to add them to beacon,
+			//because they don't have `start` on them, we check `cached_t_start` - which won't
+			//have a value becaus there's no nav timing
+			assert.include(tf.beacons[1].t_other, "boomr_fb");
+			assert.include(tf.beacons[1].t_other, "boomr_ld");
+			assert.include(tf.beacons[1].t_other, "boomr_lat");
+		}
 	});
 });
