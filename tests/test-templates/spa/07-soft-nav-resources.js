@@ -162,7 +162,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		assert.operator(b.t_done, "<=", 10000);
 	});
 
-	it("Should have sent the fifth beacon without any NavigationTiming metrics (if MutationObserver and NavigationTiming are not supported)", function() {
+	it("Should have sent the fifth beacon without any NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
 		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
 			assert.isUndefined(b.nt_red_cnt);

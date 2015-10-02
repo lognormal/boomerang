@@ -46,7 +46,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		assert.equal(b["http.initiator"], "spa_hard");
 	});
 
-	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are not supported)", function() {
+	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
 		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
 			assert.isDefined(b.nt_red_cnt);
