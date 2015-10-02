@@ -572,6 +572,14 @@ module.exports = function() {
 					version: grunt.option("boomerang-version")
 				}
 			}
+		},
+		"mpulse-build-repository-xml-upload": {
+			"build": {
+				options: {
+					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
+					version: "<%= releaseVersion %>.<%= buildDate %>"
+				}
+			}
 		}
 	});
 	grunt.loadNpmTasks("grunt-eslint");
@@ -604,6 +612,7 @@ module.exports = function() {
 		"lint": ["eslint"],
 		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
 		"mpulse:xml": ["build"],
+		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 		"test:build": ["pages-builder", "build"],
 		"test:debug": ["test:build", "build:test", "express", "watch"],
