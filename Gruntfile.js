@@ -606,13 +606,13 @@ module.exports = function() {
 	// Custom aliases for configured grunt tasks
 	var aliases = {
 		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
-		"upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"build:test": ["concat:debug", "string-replace", "copy:debug"],
 		"default": ["lint", "build", "test", "filesize:default"],
 		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
 		"lint": ["eslint"],
 		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
 		"mpulse:xml": ["build"],
+		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 		"test:build": ["pages-builder", "build"],
 		"test:debug": ["test:build", "build:test", "express", "watch"],
