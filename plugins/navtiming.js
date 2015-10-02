@@ -21,6 +21,10 @@ see: http://www.w3.org/TR/navigation-timing/
 	// A private object to encapsulate all your implementation details
 	var impl = {
 		complete: false,
+		sendBeacon: function() {
+			this.complete = true;
+			BOOMR.sendBeacon();
+		},
 		xhr_done: function(edata) {
 			if (edata && edata.initiator === "spa_hard") {
 				// Single Page App - Hard refresh: Send page's NavigationTiming data, if
@@ -32,7 +36,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				// Single Page App - Soft refresh: The original hard navigation is no longer
 				// relevant for this soft refresh, nor is the "URL" for this page, so don't
 				// add NavigationTiming or ResourceTiming metrics.
-				BOOMR.sendBeacon();
+				impl.sendBeacon();
 				return;
 			}
 
@@ -108,8 +112,7 @@ see: http://www.w3.org/TR/navigation-timing/
 			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
 			catch(ignore) { /* empty */ }
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		done: function() {
@@ -184,8 +187,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				}
 			}
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		clear: function() {
