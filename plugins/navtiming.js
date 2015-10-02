@@ -22,6 +22,19 @@ see: http://www.w3.org/TR/navigation-timing/
 	var impl = {
 		complete: false,
 		xhr_done: function(edata) {
+			if (edata && edata.initiator === "spa_hard") {
+				// Single Page App - Hard refresh: Send page's NavigationTiming data, if
+				// available.
+				impl.done(edata);
+				return;
+			}
+			else if (edata && edata.initiator === "spa") {
+				// Single Page App - Soft refresh: The original hard navigation is no longer
+				// relevant for this soft refresh, nor is the "URL" for this page, so don't
+				// add NavigationTiming or ResourceTiming metrics.
+				return;
+			}
+
 			var w = BOOMR.window, res, data = {}, k;
 
 			if (!edata) {
