@@ -506,7 +506,6 @@
 			node.addEventListener("load", function(ev) { self.load_cb(ev); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev); });
 
-
 			current_event.nodes_to_wait++;
 			current_event.resources.push(node);
 
