@@ -561,7 +561,7 @@
 	};
 
 	MutationHandler.prototype.mutation_cb = function(mutations) {
-		var self, interesting, index;
+		var self, interesting, index, evt;
 
 		if (!this.watch) {
 			return true;
@@ -578,24 +578,45 @@
 			return true;
 		}
 
+		evt = this.pending_events[index];
+
 		if (mutations && mutations.length) {
-			this.pending_events[index].resource.timing.domComplete = BOOMR.now();
+			evt.resource.timing.domComplete = BOOMR.now();
 
 			mutations.forEach(function(mutation) {
-				var i, l;
+				var i, l, node;
 				if (mutation.type === "attributes") {
 					interesting |= self.wait_for_node(mutation.target, index);
 				}
 				else if (mutation.type === "childList") {
+					// Go through any new nodes and see if we should wait for them
 					l = mutation.addedNodes.length;
 					for (i=0; i<l; i++) {
 						interesting |= self.wait_for_node(mutation.addedNodes[i], index);
+					}
+
+					// Go through any removed nodes, and for IFRAMEs, see if we were
+					// waiting for them.  If so, stop waiting, as removed IFRAMEs
+					// don't trigger load or error events.
+					l = mutation.removedNodes.length;
+					for (i=0; i<l; i++) {
+						node = mutation.removedNodes[i];
+						if (node.nodeName === "IFRAME" && node._bmr) {
+							self.load_cb({target: node, type: "removed"});
+						}
 					}
 				}
 			});
 		}
 
-		if (!interesting) {
+		if (interesting) {
+			// note we had at least one interesting node for this event
+			evt.interesting = true;
+		}
+
+		if (!evt.interesting) {
+			// if we didn't have any interesting nodes for this MO callback or
+			// any prior callbacks, timeout the event
 			this.setTimeout(SPA_TIMEOUT, index);
 		}
 
