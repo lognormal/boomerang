@@ -98,7 +98,7 @@
 		},
 
 		calc_latency: function() {
-			var	i, n,
+			var i, n,
 			    sum=0, sumsq=0,
 			    amean, median,
 			    std_dev, std_err,
@@ -140,7 +140,7 @@
 		},
 
 		calc_bw: function() {
-			var	i, j, n=0,
+			var i, j, n=0,
 			    r, bandwidths=[], bandwidths_corrected=[],
 			    sum=0, sumsq=0, sum_corrected=0, sumsq_corrected=0,
 			    amean, std_dev, std_err, median,
@@ -371,7 +371,7 @@
 			if (!this.latency) {
 				this.latency = this.calc_latency();
 			}
-			var	bw = this.calc_bw(),
+			var bw = this.calc_bw(),
 			    o = {
 				    bw:         bw.median_corrected,
 				    bw_err:     parseFloat(bw.stderr_corrected, 10),
