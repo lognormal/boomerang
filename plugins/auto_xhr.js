@@ -506,6 +506,7 @@
 			node.addEventListener("load", function(ev) { self.load_cb(ev); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev); });
 
+
 			current_event.nodes_to_wait++;
 			current_event.resources.push(node);
 
@@ -561,7 +562,7 @@
 	};
 
 	MutationHandler.prototype.mutation_cb = function(mutations) {
-		var self, interesting, index, evt;
+		var self, index, evt;
 
 		if (!this.watch) {
 			return true;
@@ -570,7 +571,6 @@
 		this.clearTimeout();
 
 		self = this;
-		interesting = false;
 		index = this.pending_events.length-1;
 
 		if (index < 0 || !this.pending_events[index]) {
@@ -579,6 +579,9 @@
 		}
 
 		evt = this.pending_events[index];
+		if (typeof evt.interesting === "undefined") {
+			evt.interesting = false;
+		}
 
 		if (mutations && mutations.length) {
 			evt.resource.timing.domComplete = BOOMR.now();
@@ -586,13 +589,13 @@
 			mutations.forEach(function(mutation) {
 				var i, l, node;
 				if (mutation.type === "attributes") {
-					interesting |= self.wait_for_node(mutation.target, index);
+					evt.interesting |= self.wait_for_node(mutation.target, index);
 				}
 				else if (mutation.type === "childList") {
 					// Go through any new nodes and see if we should wait for them
 					l = mutation.addedNodes.length;
 					for (i=0; i<l; i++) {
-						interesting |= self.wait_for_node(mutation.addedNodes[i], index);
+						evt.interesting |= self.wait_for_node(mutation.addedNodes[i], index);
 					}
 
 					// Go through any removed nodes, and for IFRAMEs, see if we were
@@ -607,11 +610,6 @@
 					}
 				}
 			});
-		}
-
-		if (interesting) {
-			// note we had at least one interesting node for this event
-			evt.interesting = true;
 		}
 
 		if (!evt.interesting) {
