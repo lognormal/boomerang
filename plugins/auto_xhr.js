@@ -868,8 +868,9 @@
 			// send XHRs during the hard and soft navs.  If enabled, it will also disable
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
-			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				BOOMR.xhr.stop(function(resource) {
+			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr) {
+				/*eslint-disable no-unused-expressions*/
+				typeof BOOMR.xhr.stop === "function" && BOOMR.xhr.stop(function(resource) {
 					resource.initiator = "xhr";
 					BOOMR.responseEnd(resource);
 				});
