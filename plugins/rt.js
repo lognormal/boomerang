@@ -49,6 +49,7 @@
 		sessionHistory: [],	// all session changes that have happened
 		t_start: undefined,	// t_start that came off the cookie
 		cached_t_start: undefined,	// cached value of t_start once we know its real value
+		cached_xhr_start: undefined,	// cached value of xhr t_start once we know its real value
 		t_fb_approx: undefined,	// approximate first byte time for browsers that don't support navtiming
 		r: undefined,		// referrer from the cookie
 		r2: undefined,		// referrer from document.referer
@@ -742,6 +743,8 @@
 				else {
 					BOOMR.addVar("rt.start", "manual");
 				}
+
+				impl.cached_xhr_start = t_start;
 			}
 			else {
 				if (impl.navigationStart) {
@@ -980,7 +983,7 @@
 					// if not, then we have to calculate it using start & end
 					if (typeof timer.delta !== "number") {
 						if (typeof timer.start !== "number") {
-							timer.start = impl.cached_t_start;
+							timer.start = source === "xhr" ? impl.cached_xhr_start : impl.cached_t_start;
 						}
 						timer.delta = timer.end - timer.start;
 					}
@@ -1074,7 +1077,7 @@
 
 			impl.setSupportingTimestamps(t_start);
 
-			this.addTimersToBeacon();
+			this.addTimersToBeacon(null, ename);
 
 			BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
 
