@@ -92,7 +92,7 @@ see: http://www.w3.org/TR/navigation-timing/
 			BOOMR.addVar(data);
 
 			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-			catch(ignore) { /* empty */ }
+			catch (ignore) { /* empty */ }
 
 			this.complete = true;
 			BOOMR.sendBeacon();
@@ -147,7 +147,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				BOOMR.addVar(data);
 
 				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-				catch(ignore) { /* empty */ }
+				catch (ignore) { /* empty */ }
 			}
 
 			// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
@@ -166,7 +166,7 @@ see: http://www.w3.org/TR/navigation-timing/
 					BOOMR.addVar(data);
 
 					try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-					catch(ignore) { /* empty */ }
+					catch (ignore) { /* empty */ }
 				}
 			}
 

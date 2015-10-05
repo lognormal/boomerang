@@ -99,10 +99,10 @@
 
 		calc_latency: function() {
 			var	i, n,
-				sum=0, sumsq=0,
-				amean, median,
-				std_dev, std_err,
-				lat_filtered;
+			    sum=0, sumsq=0,
+			    amean, median,
+			    std_dev, std_err,
+			    lat_filtered;
 
 			// We ignore the first since it paid the price of DNS lookup, TCP connect
 			// and slow start
@@ -141,11 +141,11 @@
 
 		calc_bw: function() {
 			var	i, j, n=0,
-				r, bandwidths=[], bandwidths_corrected=[],
-				sum=0, sumsq=0, sum_corrected=0, sumsq_corrected=0,
-				amean, std_dev, std_err, median,
-				amean_corrected, std_dev_corrected, std_err_corrected, median_corrected,
-				nimgs, bw, bw_c, debug_info=[];
+			    r, bandwidths=[], bandwidths_corrected=[],
+			    sum=0, sumsq=0, sum_corrected=0, sumsq_corrected=0,
+			    amean, std_dev, std_err, median,
+			    amean_corrected, std_dev_corrected, std_err_corrected, median_corrected,
+			    nimgs, bw, bw_c, debug_info=[];
 
 			for (i=0; i<this.nruns; i++) {
 				if (!this.results[i] || !this.results[i].r) {
@@ -339,12 +339,12 @@
 			}
 
 			var result = {
-					start: tstart,
-					end: BOOMR.now(),
-					t: null,
-					state: success,
-					run: run
-				};
+				start: tstart,
+				end: BOOMR.now(),
+				t: null,
+				state: success,
+				run: run
+			};
 			if (success) {
 				result.t = result.end-result.start;
 			}
@@ -372,13 +372,13 @@
 				this.latency = this.calc_latency();
 			}
 			var	bw = this.calc_bw(),
-				o = {
-					bw:		bw.median_corrected,
-					bw_err:		parseFloat(bw.stderr_corrected, 10),
-					lat:		this.latency.mean,
-					lat_err:	parseFloat(this.latency.stderr, 10),
-					bw_time:	Math.round(BOOMR.now()/1000)
-				};
+			    o = {
+				    bw:         bw.median_corrected,
+				    bw_err:     parseFloat(bw.stderr_corrected, 10),
+				    lat:        this.latency.mean,
+				    lat_err:    parseFloat(this.latency.stderr, 10),
+				    bw_time:    Math.round(BOOMR.now()/1000)
+			    };
 
 			BOOMR.addVar(o);
 			if (bw.debug_info.length > 0) {
@@ -389,16 +389,16 @@
 			// because we'll recalculate it if necessary (when the user's IP changes).
 			if (!isNaN(o.bw) && o.bw > 0) {
 				BOOMR.utils.setCookie(this.cookie,
-							{
-								ba: Math.round(o.bw),
-								be: o.bw_err,
-								l:  o.lat,
-								le: o.lat_err,
-								ip: this.user_ip,
-								t:  o.bw_time
-							},
-							(this.user_ip ? this.cookie_exp : 0)
-					);
+					{
+						ba: Math.round(o.bw),
+						be: o.bw_err,
+						l:  o.lat,
+						le: o.lat_err,
+						ip: this.user_ip,
+						t:  o.bw_time
+					},
+					(this.user_ip ? this.cookie_exp : 0)
+				);
 			}
 
 			this.complete = true;

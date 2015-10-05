@@ -48,7 +48,7 @@ describe("BOOMR.utils.cleanupURL()", function() {
 		});
 
 		var url = "/app/page?key=value",
-			expected = "/app/page?qs-redacted";
+		    expected = "/app/page?qs-redacted";
 		assert.equal(BOOMR.utils.cleanupURL(url), expected);
 
 		BOOMR = BOOMR_reset;
@@ -61,7 +61,7 @@ describe("BOOMR.utils.cleanupURL()", function() {
 		});
 
 		var url = "/app/page?key=value",
-			expected = "/app/page?key=value";
+		    expected = "/app/page?key=value";
 		assert.equal(BOOMR.utils.cleanupURL(url), expected);
 
 		BOOMR = BOOMR_reset;

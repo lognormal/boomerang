@@ -40,7 +40,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 							}
 						}
 					}
-					catch(err) {
+					catch (err) {
 						BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
 					}
 				}
@@ -48,7 +48,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			}
 			return o || r;
 		}
-		catch(err) {
+		catch (err) {
 			BOOMR.addError(err, "Memory.nodeList." + type);
 			return 0;
 		}
@@ -59,7 +59,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			try {
 				callback();
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.addError(err, "Memory.done." + component);
 			}
 		}
@@ -189,7 +189,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 					});
 				}
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.addError(err, "Memory.init");
 			}
 

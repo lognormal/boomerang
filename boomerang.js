@@ -57,7 +57,7 @@ function BOOMR_check_doc_domain(domain) {
 					BOOMR.boomerang_frame.document.domain = BOOMR.window.document.domain;
 				}
 			}
-			catch(err) {
+			catch (err) {
 				if (!BOOMR.isCrossOriginError(err)) {
 					BOOMR.addError(err, "BOOMR_check_doc_domain.domainFix");
 				}
@@ -1029,16 +1029,16 @@ BOOMR_check_doc_domain();
 					var unload_handler, evt_idx = ev.length;
 
 					unload_handler = function(evt) {
-								if (fn) {
-									fn.call(cb_scope, evt || w.event, cb_data);
-								}
+						if (fn) {
+							fn.call(cb_scope, evt || w.event, cb_data);
+						}
 
-								// If this was the last unload handler, we'll try to send the beacon immediately after it is done
-								// The beacon will only be sent if one of the handlers has queued it
-								if (e_name === "page_unload" && evt_idx === impl.events[e_name].length) {
-									BOOMR.real_sendBeacon();
-								}
-							};
+						// If this was the last unload handler, we'll try to send the beacon immediately after it is done
+						// The beacon will only be sent if one of the handlers has queued it
+						if (e_name === "page_unload" && evt_idx === impl.events[e_name].length) {
+							BOOMR.real_sendBeacon();
+						}
+					};
 
 					if (e_name === "page_unload") {
 						// pagehide is for iOS devices
