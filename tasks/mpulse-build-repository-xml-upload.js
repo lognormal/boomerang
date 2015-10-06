@@ -28,13 +28,20 @@ module.exports = function(grunt) {
 		var minFileBase64 = new Buffer(minFile).toString("base64").match(/.{1,80}/g).join("\n");
 		var debugFileBase64 = new Buffer(debugFile).toString("base64").match(/.{1,80}/g).join("\n");
 
+		//read in the feature keys
+		var features = [];
+		grunt.file.readJSON(path.join("tasks", "features.json")).forEach(function(feature) {
+			features.push(feature.key);
+		});
+
 		var xml = "";
 		try {
 			// run the template
 			xml = grunt.template.process(template, {
 				data: {
 					minified: minFileBase64,
-					debug: debugFileBase64
+					debug: debugFileBase64,
+					features: features.join(",")
 				}});
 		}
 		catch (e) {
