@@ -42,7 +42,7 @@ module.exports = function(grunt) {
 
 		//read in the feature keys
 		var features = [];
-		grunt.file.readJSON(path.join("doc", "features.json")).forEach(function(feature) {
+		grunt.file.readJSON(path.join("tasks", "features.json")).forEach(function(feature) {
 			features.push(feature.key);
 		});
 
