@@ -1,9 +1,10 @@
 (function(w){
-	if (!w.BOOMR || !w.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
+	if (!w.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
 		return;
 	}
 
 	var a = document.createElement("A"), xhrNative = XMLHttpRequest, resources = [], sendResource, readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
+	w.BOOMR = w.BOOMR || {};
 	BOOMR.xhr = {
 		stop: function(sr) {
 			sendResource = sr;
@@ -19,7 +20,7 @@
 
 	var now = (function() {
 		try {
-			if ("performance" in window)
+			if ("performance" in w)
 				return function() { return Math.round(performance.now() + performance.timing.navigationStart); };
 		}
 		catch (ignore) {}
