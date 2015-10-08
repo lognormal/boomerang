@@ -89,7 +89,7 @@ module.exports = function(grunt) {
 		try {
 			jsonConfig = grunt.file.readJSON(configFilePath);
 		}
-		catch(e) {
+		catch (e) {
 			grunt.log.warn("No file " + configFilePath + " found!");
 			jsonConfig = {};
 		}

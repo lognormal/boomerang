@@ -458,7 +458,7 @@
 					}
 				}
 			}
-			catch(e) {
+			catch (e) {
 				BOOMR.addError(e, "rt.getBoomerangTimings");
 			}
 		},
@@ -1024,7 +1024,7 @@
 			try {
 				BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.debug("Called done with " + err + ", " + ename, "rt");
 			}
 			var t_start, t_done, t_now=BOOMR.now(),

@@ -205,7 +205,7 @@ see: http://www.w3.org/TR/resource-timing/
 				navStart = frame.performance.timing.navigationStart;
 			}
 		}
-		catch(e) {
+		catch (e) {
 			// empty
 		}
 
@@ -332,7 +332,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			entries = entries.concat(frameFixedEntries);
 		}
-		catch(e) {
+		catch (e) {
 			return entries;
 		}
 

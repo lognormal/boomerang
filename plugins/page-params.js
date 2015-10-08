@@ -117,7 +117,7 @@
 						element = 1;
 					}
 				}
-				catch(err) {
+				catch (err) {
 					BOOMR.debug("Bad pattern: " + o.match, "PageVars");
 					BOOMR.debug(err, "PageVars");
 					BOOMR.addError(err, "PageVars.URLPatternType", o.match);
@@ -135,7 +135,7 @@
 				try {
 					re = new RegExp(re, "i");
 				}
-				catch(err) {
+				catch (err) {
 					BOOMR.debug("Error generating regex: " + err, "PageVars");
 					BOOMR.addError(err, "PageVars.handleRegEx", re);
 					return false;
@@ -176,7 +176,7 @@
 			try {
 				re = new RegExp("^" + re + "$", "i");
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.debug("Bad pattern: " + re, "PageVars");
 				BOOMR.debug(err, "PageVars");
 				BOOMR.addError(err, "PageVars.checkURLPattern", u);
@@ -248,7 +248,7 @@
 					tryOurs=true;
 				}
 			}
-			catch(xpath_err) {
+			catch (xpath_err) {
 				err=xpath_err;
 				tryOurs=true;
 			}
@@ -275,7 +275,7 @@
 						return null;
 					}
 				}
-				catch(xpath_err) {
+				catch (xpath_err) {
 					BOOMR.error("Error evaluating XPath: " + xpath_err, "PageVars");
 					BOOMR.addError(xpath_err, "PageVars.runXPath.ours", xpath);
 					return null;
@@ -363,7 +363,7 @@
 					value = this.extractJavaScriptVariableValue(value, parts.shift());
 				}
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "::" + parts.join("."));
 				return false;
 			}
@@ -380,7 +380,7 @@
 				try {
 					value = value.call(ctx, this.varname);
 				}
-				catch(err) {
+				catch (err) {
 					BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "()");
 					return false;
 				}
@@ -666,7 +666,7 @@
 
 				reslist = frame.performance.getEntriesByName(url);
 			}
-			catch(e) {
+			catch (e) {
 				if (BOOMR.isCrossOriginError(e)) {
 					return null;
 				}
@@ -677,7 +677,7 @@
 						return null;
 					}
 				}
-				catch(ignore) { /* empty */ }
+				catch (ignore) { /* empty */ }
 
 				BOOMR.addError(e, "PageVars.findResource");
 				return null;
@@ -795,9 +795,9 @@
 						    method: BOOMR.plugins.RT.setTimer,
 						    ctx: BOOMR.plugins.RT,
 						    preProcessor: function(val) {
-								return Math.round(typeof val === "number" ? val : parseFloat(val, 10));
-							}
-						  }
+							    return Math.round(typeof val === "number" ? val : parseFloat(val, 10));
+						    }
+						}
 			};
 
 			if (ename !== "xhr" && this.complete) {
@@ -898,7 +898,7 @@
 						o = retries[i].data;
 						handler[o.type](o);
 					}
-					catch(e) {
+					catch (e) {
 						BOOMR.addError(e, "PageVars.retry." + (o ? o.type : "?") + "." + (handler ? handler.varname : "?"));
 					}
 				}

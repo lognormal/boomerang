@@ -582,7 +582,7 @@ module.exports = function() {
 			}
 		}
 	});
-	grunt.loadNpmTasks("grunt-eslint");
+	grunt.loadNpmTasks("gruntify-eslint");
 	grunt.loadNpmTasks("grunt-express-server");
 	grunt.loadNpmTasks("grunt-karma");
 	grunt.loadNpmTasks("grunt-contrib-concat");
