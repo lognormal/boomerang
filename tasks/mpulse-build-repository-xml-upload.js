@@ -1,7 +1,7 @@
 /*eslint-env node*/
 
-var path = require("path"),
-	Repository = require("soasta-repository").SOASTA.Repository;
+var path = require("path");
+var Repository = require("soasta-repository").SOASTA.Repository;
 
 module.exports = function(grunt) {
 	var description = "Upload a version of Boomerang based on the pre-built XML for boomerang.js";
@@ -56,7 +56,7 @@ module.exports = function(grunt) {
 		try {
 			jsonConfig = grunt.file.readJSON(configFilePath);
 		}
-		catch(e) {
+		catch (e) {
 			grunt.log.warn("No file " + configFilePath + " found!");
 			jsonConfig = {};
 		}
