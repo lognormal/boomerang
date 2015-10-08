@@ -580,6 +580,13 @@ module.exports = function() {
 					version: "<%= releaseVersion %>.<%= buildDate %>"
 				}
 			}
+		},
+		"jenkins-build-properties": {
+			"build": {
+				options: {
+					version: "<%= releaseVersion %>.<%= buildDate %>"
+				}
+			}
 		}
 	});
 	grunt.loadNpmTasks("gruntify-eslint");
@@ -608,7 +615,7 @@ module.exports = function() {
 		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
 		"build:test": ["concat:debug", "string-replace", "copy:debug"],
 		"default": ["lint", "build", "test", "filesize:default"],
-		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
+		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv", "jenkins-build-properties:build", "mpulse-build-repository-xml-upload:build"],
 		"lint": ["eslint"],
 		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
 		"mpulse:xml": ["build"],
