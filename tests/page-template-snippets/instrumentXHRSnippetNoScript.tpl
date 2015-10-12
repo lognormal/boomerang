@@ -8,13 +8,13 @@
 	BOOMR.xhr = {
 		stop: function(sr) {
 			sendResource = sr;
-			for (var i = 0; i < resources.length; i++) {
-				sr(resources[i]);
-			}
 
 			w.XMLHttpRequest = xhrNative;
 			delete BOOMR.xhr;
-			resources = [];
+			setTimeout(function(){
+				resources = [];
+			});
+			return resources;
 		}
 	};
 

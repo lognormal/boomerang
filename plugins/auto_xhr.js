@@ -869,9 +869,15 @@
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				 BOOMR.xhr.stop(function(resource) {
+				function sendResource(resource) {
 					resource.initiator = "xhr";
 					BOOMR.responseEnd(resource);
+				}
+				var resources = BOOMR.xhr.stop(sendResource);
+				BOOMR.setImmediate(function() {
+					for (var i = 0; i < resources.length; i++) {
+						sendResource(resources[i]);
+					}
 				});
 			}
 
