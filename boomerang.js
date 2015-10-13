@@ -300,6 +300,10 @@ BOOMR_check_doc_domain();
 
 			handlers = this.events[e_name];
 
+			// Before we fire any event listeners, let's call real_sendBeacon() to flush
+			// any beacon that is being held by the setImmediate.
+			BOOMR.real_sendBeacon();
+
 			for (i=0; i<handlers.length; i++) {
 				try {
 					handler = handlers[i];
@@ -308,13 +312,6 @@ BOOMR_check_doc_domain();
 				catch (err) {
 					BOOMR.addError(err, "fireEvent." + e_name + "<" + i + ">");
 				}
-			}
-
-			// For all XHR, manual and SPA events, if we've fired all event listeners,
-			// let's also call real_sendBeacon() so if multiple events end at the same time,
-			// the beacon gets sent before the next events overwrite the data.
-			if (e_name === "xhr_load") {
-				BOOMR.real_sendBeacon();
 			}
 
 			return;// true;

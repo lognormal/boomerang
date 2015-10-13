@@ -14,30 +14,30 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 			});
 	});
 
-	it("First beacon should be an XHR, opened and completed before config", function() {
+	it("First beacon should be the navigation beacon", function() {
 		var beacon = tf.beacons[0];
-		assert.equal(beacon["http.initiator"], "xhr");
-		assert.equal(beacon["rt.start"], "manual");
-		assert.include(beacon.u, "boomerang-latest-debug.js&xhr1");
-	});
-
-	it("Second beacon should be the navigation beacon", function() {
-		var beacon = tf.beacons[1];
 		assert.isUndefined(beacon["http.initiator"]);
 	});
 
-	it("Second beacon (navigation) should have rt.start = 'navigation' (if NavigationTiming is supported)", function() {
+	it("First beacon (navigation) should have rt.start = 'navigation' (if NavigationTiming is supported)", function() {
 		if (t.isNavigationTimingSupported()) {
-			var beacon = tf.beacons[1];
+			var beacon = tf.beacons[0];
 			assert.equal(beacon["rt.start"], "navigation");
 		}
 	});
 
-	it("Second beacon (navigation) should have rt.start = 'none' (if NavigationTiming is not supported)", function() {
+	it("First beacon (navigation) should have rt.start = 'none' (if NavigationTiming is not supported)", function() {
 		if (!t.isNavigationTimingSupported()) {
-			var beacon = tf.beacons[1];
+			var beacon = tf.beacons[0];
 			assert.equal(beacon["rt.start"], "none");
 		}
+	});
+
+	it("Second beacon should be an XHR, opened and completed before config", function() {
+		var beacon = tf.beacons[1];
+		assert.equal(beacon["http.initiator"], "xhr");
+		assert.equal(beacon["rt.start"], "manual");
+		assert.include(beacon.u, "boomerang-latest-debug.js&xhr1");
 	});
 
 	it("Third beacon should be an XHR, opened before config, completed after config", function() {
