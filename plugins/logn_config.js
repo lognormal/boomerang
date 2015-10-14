@@ -8,7 +8,8 @@
 	    load, loaded,
 	    autorun=true,
 	    alwaysRun = typeof w.BOOMR_LOGN_always !== "undefined",
-	    CONFIG_RELOAD_TIMEOUT=5.5*60*1000;
+	    CONFIG_RELOAD_TIMEOUT=5.5*60*1000,
+	    ready=false;
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (!alwaysRun &&
@@ -26,7 +27,7 @@
 		running = false;
 
 		if (autorun) {
-			BOOMR.setImmediate(BOOMR.sendBeacon);
+			BOOMR.sendBeacon();
 		}
 	};
 
@@ -146,7 +147,8 @@
 				// We need this monstrosity because Internet Explorer is quite moody
 				// regarding whether it will or willn't fire onreadystatechange for
 				// every change of readyState
-				loaded();
+				ready = true;
+				BOOMR.setImmediate(loaded);
 				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 
 				BOOMR.addVar("t_configjs", BOOMR.now()-t_start);
@@ -170,7 +172,7 @@
 		},
 
 		is_complete: function() {
-			return complete;
+			return ready;
 		}
 	};
 
