@@ -26,7 +26,7 @@
 		running = false;
 
 		if (autorun) {
-			BOOMR.sendBeacon();
+			BOOMR.setImmediate(BOOMR.sendBeacon);
 		}
 	};
 
@@ -146,7 +146,7 @@
 				// We need this monstrosity because Internet Explorer is quite moody
 				// regarding whether it will or willn't fire onreadystatechange for
 				// every change of readyState
-				BOOMR.setImmediate(loaded);
+				loaded();
 				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 
 				BOOMR.addVar("t_configjs", BOOMR.now()-t_start);

@@ -302,7 +302,9 @@ BOOMR_check_doc_domain();
 
 			// Before we fire any event listeners, let's call real_sendBeacon() to flush
 			// any beacon that is being held by the setImmediate.
-			BOOMR.real_sendBeacon();
+			if (e_name !== "before_beacon" && e_name !== "onbeacon") {
+				BOOMR.real_sendBeacon();
+			}
 
 			for (i=0; i<handlers.length; i++) {
 				try {
