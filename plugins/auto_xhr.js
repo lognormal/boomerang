@@ -567,8 +567,6 @@
 			return true;
 		}
 
-		this.clearTimeout();
-
 		self = this;
 		index = this.pending_events.length-1;
 
