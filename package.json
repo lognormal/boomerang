@@ -18,6 +18,7 @@
     "express": "^4.11.1",
     "fs-extra": "^0.15.0",
     "grunt": "^0.4.5",
+    "eslint": "=1.6.0",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-compress": "^0.13.0",
@@ -161,7 +162,7 @@
       "email": "andreas.marschke@gmail.com"
     }
   ],
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/lognormal/boomerang/issues"
   },
