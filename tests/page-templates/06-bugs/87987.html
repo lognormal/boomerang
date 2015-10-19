@@ -1,0 +1,20 @@
+<%= header %>
+<!--
+This bug found a recursion issue with ResourceTiming if an IFRAME referenced itself.
+-->
+<script src="87987.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+// add ourself to window.frames so we get recursion
+window.frames.length++;
+window.frames[window.frames.length - 1] = window;
+
+//
+BOOMR_test.init({
+	ResourceTiming: {
+		enabled: true
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
