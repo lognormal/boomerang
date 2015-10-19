@@ -805,6 +805,13 @@ BOOMR_check_doc_domain();
 				this.log = function(/* m,l,s */) {};
 			}
 
+			// Set autorun if in config right now, as plugins that listen for page_ready
+			// event may fire when they .init() if onload has already fired, and whether
+			// or not we should fire page_ready depends on config.autorun.
+			if (typeof config.autorun !== "undefined") {
+				impl.autorun = config.autorun;
+			}
+
 			for (k in this.plugins) {
 				if (this.plugins.hasOwnProperty(k)) {
 					// config[plugin].enabled has been set to false
@@ -1013,7 +1020,7 @@ BOOMR_check_doc_domain();
 			ev.push({ "fn": fn, "cb_data": cb_data || {}, "scope": cb_scope || null });
 
 			// attaching to page_ready after onload fires, so call soon
-			if (e_name === "page_ready" && impl.onloadfired) {
+			if (e_name === "page_ready" && impl.onloadfired && impl.autorun) {
 				this.setImmediate(fn, null, cb_data, cb_scope);
 			}
 
