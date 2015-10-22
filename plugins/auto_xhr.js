@@ -290,8 +290,15 @@
 		// Use 'requestStart' as the startTime of the resource, if given
 		var startTime = resource.timing ? resource.timing.requestStart : undefined;
 
-		// called once the resource can be sent
-		var sendResponseEnd = function() {
+		/**
+		 * Called once the resource can be sent
+		 * @param markEnd Sets loadEventEnd once the function is run
+		 */
+		var sendResponseEnd = function(markEnd) {
+			if (markEnd) {
+				resource.timing.loadEventEnd = BOOMR.now();
+			}
+
 			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
 			// was for this resource.
 			if (BOOMR.plugins.ResourceTiming &&
@@ -320,23 +327,19 @@
 			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				if (d && d.readyState && d.readyState !== "complete") {
 					BOOMR.window.addEventListener("load", function() {
-						resource.timing.loadEventEnd = BOOMR.now();
-
-						sendResponseEnd();
+						sendResponseEnd(true);
 					});
 
 					return;
 				}
 			}
 
-			sendResponseEnd();
+			sendResponseEnd(false);
 		}
 		else {
 			// waitComplete() should be called once the held beacon is complete
 			resource.waitComplete = function() {
-				resource.timing.loadEventEnd = BOOMR.now();
-
-				sendResponseEnd();
+				sendResponseEnd(true);
 			};
 		}
 
