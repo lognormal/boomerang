@@ -316,6 +316,19 @@
 
 		// send the beacon if we were not told to hold it
 		if (!resource.wait) {
+			// if this is a SPA event, make sure it doesn't fire until onload
+			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				if (d && d.readyState && d.readyState !== "complete") {
+					BOOMR.window.addEventListener("load", function() {
+						resource.timing.loadEventEnd = BOOMR.now();
+
+						sendResponseEnd();
+					});
+
+					return;
+				}
+			}
+
 			sendResponseEnd();
 		}
 		else {
@@ -839,9 +852,19 @@
 		}
 	}
 
+	/**
+	 * Sends an XHR resource
+	 */
+	function sendResource(resource) {
+		resource.initiator = "xhr";
+		BOOMR.responseEnd(resource);
+	}
+
 	BOOMR.plugins.AutoXHR = {
 		is_complete: function() { return true; },
 		init: function(config) {
+			var i;
+
 			d = BOOMR.window.document;
 			a = BOOMR.window.document.createElement("A");
 
@@ -853,7 +876,7 @@
 			// check to see if any of the SPAs were enabled
 			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
 				var supported = BOOMR.plugins.SPA.supported_frameworks();
-				for (var i = 0; i < supported.length; i++) {
+				for (i = 0; i < supported.length; i++) {
 					var spa = supported[i];
 					if (config[spa] && config[spa].enabled) {
 						singlePageApp = true;
@@ -867,13 +890,9 @@
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				function sendResource(resource) {
-					resource.initiator = "xhr";
-					BOOMR.responseEnd(resource);
-				}
 				var resources = BOOMR.xhr.stop(sendResource);
 				BOOMR.setImmediate(function() {
-					for (var i = 0; i < resources.length; i++) {
+					for (i = 0; i < resources.length; i++) {
 						sendResource(resources[i]);
 					}
 				});
