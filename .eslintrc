@@ -30,7 +30,7 @@
 		"no-multi-spaces":0,
 		"dot-notation":[2, {"allowKeywords": false}],
 		"space-unary-ops":0,
-		"key-spacing":0,
+		"key-spacing":[1,{"beforeColon": false, "afterColon": true, "mode": "minimum"}],
 		"no-empty":2,
 		"brace-style": [1, "stroustrup", { "allowSingleLine": true }],
 		"space-after-keywords": [2, "always"],

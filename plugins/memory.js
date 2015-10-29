@@ -104,7 +104,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			if (m) {
 				BOOMR.addVar({
 					"mem.total": m.totalJSHeapSize,
-					"mem.used" : m.usedJSHeapSize
+					"mem.used": m.usedJSHeapSize
 				});
 			}
 
