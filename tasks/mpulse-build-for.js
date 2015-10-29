@@ -104,7 +104,7 @@ module.exports = function(grunt) {
 		var secondaryBeaconServers = "";
 		if (config.secondaryBeacons.length > 0) {
 			secondaryBeaconServers = config.secondaryBeacons.map(function(beaconServer) {
-				return "'"+ beaconServer + "'";
+				return "'" + beaconServer + "'";
 			}).join(",");
 		}
 

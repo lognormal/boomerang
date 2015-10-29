@@ -117,7 +117,7 @@
 	};
 
 	t.getTestPasses = function() {
-		return complete ? testPasses: [];
+		return complete ? testPasses : [];
 	};
 
 	t.CONFIG_DEFAULTS = {

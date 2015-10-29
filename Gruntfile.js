@@ -663,7 +663,7 @@ module.exports = function() {
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
 					var beforeTask = tasks.slice(0, index );
-					var afterTask = tasks.slice(index +1, tasks.length);
+					var afterTask = tasks.slice(index + 1, tasks.length);
 					var insertTask = aliases[aliasTask].filter(checkDuplicates);
 					tasks = [].concat(beforeTask, insertTask, afterTask);
 				}
