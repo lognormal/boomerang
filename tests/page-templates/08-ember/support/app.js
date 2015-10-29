@@ -133,6 +133,10 @@ App.Router.map(function() {
 		hookOptions.routeChangeWaitFilter = window.ember_route_wait;
 	}
 
+	if (window.ember_route_filter) {
+		hookOptions.routeFilter = window.ember_route_filter;
+	}
+
 	function hookEmberBoomerang() {
 		if (window.BOOMR && BOOMR.version) {
 			if (BOOMR.plugins && BOOMR.plugins.Ember) {
