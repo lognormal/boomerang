@@ -110,8 +110,13 @@
 		route_change: function() {
 			// if we have a routeFilter, see if they want to track this route
 			if (routeFilter) {
-				if (!routeFilter.apply(null, arguments)) {
-					return;
+				try {
+					if (!routeFilter.apply(null, arguments)) {
+						return;
+					}
+				}
+				catch (e) {
+					BOOMR.addError(e, "SPA.route_change.routeFilter");
 				}
 			}
 
@@ -146,10 +151,15 @@
 
 			// if we have a routeChangeWaitFilter, make sure AutoXHR waits on the custom event
 			if (routeChangeWaitFilter) {
-				if (routeChangeWaitFilter.apply(null, arguments)) {
-					resource.wait = true;
+				try {
+					if (routeChangeWaitFilter.apply(null, arguments)) {
+						resource.wait = true;
 
-					latestResource = resource;
+						latestResource = resource;
+					}
+				}
+				catch (e) {
+					BOOMR.addError(e, "SPA.route_change.routeChangeWaitFilter");
 				}
 			}
 
