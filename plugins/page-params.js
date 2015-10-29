@@ -131,7 +131,7 @@
 		handleRegEx: function(re, extract, operand) {
 			var value, m;
 
-			if (! (re instanceof RegExp) ) {
+			if (!(re instanceof RegExp)) {
 				try {
 					re = new RegExp(re, "i");
 				}

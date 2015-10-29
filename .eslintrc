@@ -29,7 +29,7 @@
 		"no-underscore-dangle":0,
 		"no-multi-spaces":0,
 		"dot-notation":[2, {"allowKeywords": false}],
-		"space-unary-ops":0,
+		"space-unary-ops":1,
 		"key-spacing":0,
 		"no-empty":2,
 		"brace-style": [1, "stroustrup", { "allowSingleLine": true }],
