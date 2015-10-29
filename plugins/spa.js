@@ -5,6 +5,7 @@
 	    lastLocationChange = "",
 	    autoXhrEnabled = false,
 	    firstSpaNav = true,
+	    routeFilter = false,
 	    routeChangeWaitFilter = false,
 	    supported = [],
 	    latestResource;
@@ -91,6 +92,10 @@
 				BOOMR.page_ready();
 			}
 
+			if (typeof options.routeFilter === "function") {
+				routeFilter = options.routeFilter;
+			}
+
 			if (typeof options.routeChangeWaitFilter === "function") {
 				routeChangeWaitFilter = options.routeChangeWaitFilter;
 			}
@@ -103,6 +108,13 @@
 		 * Called by a framework when a route change has happened
 		 */
 		route_change: function() {
+			// if we have a routeFilter, see if they want to track this route
+			if (routeFilter) {
+				if (!routeFilter.apply(null, arguments)) {
+					return;
+				}
+			}
+
 			// note we've had at least one route change
 			initialRouteChangeStarted = true;
 
