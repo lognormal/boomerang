@@ -1,5 +1,5 @@
 /*global angular*/
-angular.module("app", ["ngResource", "ngRoute"])
+angular.module("app", ["ngResource", "ui.router"])
 	.factory("Widgets", ["$resource", function($resource) {
 		// NOTE: Using absolute urls instead of relative URLs otherwise IE11 has problems
 		// resolving them in html5Mode
@@ -43,11 +43,11 @@ angular.module("app", ["ngResource", "ngRoute"])
 		}
 	}])
 
-	.controller("widgetDetailCtrl", ["$scope", "Widgets", "$routeParams", function($scope, Widgets, $routeParams) {
+	.controller("widgetDetailCtrl", ["$scope", "Widgets", "$stateParams", function($scope, Widgets, $stateParams) {
 		Widgets.query().$promise.then(function(widgets) {
 			$scope.rnd = Math.random();
 
-			var wid = parseInt($routeParams.widgetId);
+			var wid = parseInt($stateParams.widgetId);
 
 			for (var i = 0; i < widgets.length; i++) {
 				if (widgets[i].id === wid) {
@@ -58,52 +58,38 @@ angular.module("app", ["ngResource", "ngRoute"])
 		});
 	}])
 
-	.config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider) {
+	.config(["$stateProvider", "$urlRouterProvider", "$locationProvider", function($stateProvider, $urlRouterProvider, $locationProvider) {
 		if (typeof window.angular_html5_mode !== "undefined" && window.angular_html5_mode) {
 			$locationProvider.html5Mode(true);
 		}
 
+		$urlRouterProvider.otherwise("102-ui-router.html");
+
 		// NOTE: Using absolute urls instead of relative URLs otherwise IE11 has problems
 		// resolving them in html5Mode
-		$routeProvider.
-			when("/widgets/:widgetId", {
+		$stateProvider.
+			state("home", {
+				url: "/102-ui-router.html",
+				templateUrl: "/pages/05-angular/support/home.html",
+				controller: "mainCtrl"
+			}).
+			state("widget", {
+				url: "/widgets/:widgetId",
 				templateUrl: "/pages/05-angular/support/widget.html",
 				controller: "widgetDetailCtrl"
-			}).
-			when("/04-route-change.html", {
-				templateUrl: "/pages/05-angular/support/home.html",
-				controller: "mainCtrl"
-			}).
-			when("/24-route-filter.html", {
-				templateUrl: "/pages/05-angular/support/home.html",
-				controller: "mainCtrl"
-			}).
-			when("/08-no-resources.html", {
-				template: "<h1>Empty</h1>"
-			}).
-			when("/empty", {
-				template: "<h1>Empty</h1>"
-			}).
-			otherwise({
-				templateUrl: "/pages/05-angular/support/home.html",
-				controller: "mainCtrl"
 			});
 	}])
 
 	.run(["$rootScope", "$location", "$timeout", function($rootScope, $location, $timeout) {
 		var hadRouteChange = false;
 
-		$rootScope.$on("$routeChangeStart", function() {
+		$rootScope.$on("$stateChangeStart", function() {
 			hadRouteChange = true;
 		});
 
 		var hookOptions = {};
 		if (window.angular_route_wait) {
 			hookOptions.routeChangeWaitFilter = window.angular_route_wait;
-		}
-
-		if (window.angular_route_filter) {
-			hookOptions.routeFilter = window.angular_route_filter;
 		}
 
 		function hookAngularBoomerang() {
