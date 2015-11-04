@@ -275,7 +275,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -291,7 +294,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -305,7 +311,10 @@ module.exports = function() {
 			snippets: {
 				options: {
 					preserveComments: false,
-					mangle: true
+					mangle: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
