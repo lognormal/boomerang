@@ -1,6 +1,6 @@
 <%= header %>
 <%= boomerangScript %>
-<base href="/pages/08-ember/04-route-change.html" />
+<base href="/pages/08-ember/24-route-filter.html" />
 
 <script src="../../vendor/jquery/dist/jquery.min.js"></script>
 <script src="../../vendor/ember/ember.prod.js"></script>
@@ -14,13 +14,9 @@ window.imgs = [3000];
 window.ember_nav_routes = ["/widgets/1", ""];
 
 // ensure
-var homeNavs = 0;
-window.ember_route_filter = function(event, next, current) {
-	if (next && next.$$route && next.$$route.controller === "mainCtrl") {
-		return ++homeNavs == 1;
-	}
-
-	return true;
+var navs = 0;
+window.ember_route_filter = function() {
+	return (++navs) <= 2;
 };
 </script>
 <script src="support/app.js"></script>
@@ -37,11 +33,11 @@ window.ember_route_filter = function(event, next, current) {
 
 <script>
 BOOMR_test.init({
-	testAfterOnBeacon: 3,
+	testAfterOnBeacon: 2,
 	Ember: {
 		enabled: true
 	},
-	instrument_xhr: true,
+	instrument_xhr: false,
 	autorun: false
 });
 </script>
