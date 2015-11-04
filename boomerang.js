@@ -731,11 +731,8 @@ BOOMR_check_doc_domain();
 					}
 
 					form.action = urls.shift();
-					iframe.name = iframe.id = name;
+					form.target = iframe.name = iframe.id = name;
 
-					// IE Edge hangs for a minute on some sites when using form.submit().  This
-					// can be avoided by not setting the form.target, and adding the form to the
-					// iframe instead of the document.
 					iframe.style.display = form.style.display = "none";
 					iframe.src="javascript:false";
 
@@ -743,9 +740,7 @@ BOOMR_check_doc_domain();
 					remove(form.id);
 
 					document.body.appendChild(iframe);
-
-					// Add the form to the iframe
-					iframe.appendChild(form);
+					document.body.appendChild(form);
 
 					try {
 						form.submit();
