@@ -123,7 +123,7 @@ module.exports = function(grunt) {
 			boomerang = boomerang.replace(stringTemplates.configHost + stringTemplates.configJsonPath, config.server + defaultConfigJsonPath);
 			boomerang = boomerang.replace(stringTemplates.apikey, config.apikey);
 			boomerang = boomerang.replace(stringTemplates.configURLSuffix, config.configURLSuffix || "");
-			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
+			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log: null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
 
 			if (config.configAsJSON) {
 				boomerang = boomerang.replace(/var\s*configAsJSON\s*=\s*false;/, "var configAsJSON = true;");
