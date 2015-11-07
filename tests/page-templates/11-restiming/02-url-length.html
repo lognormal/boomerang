@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="02-url-length.js" type="text/javascript"></script>
+<script>
+// make a really long beacon
+var url = "/blackhole?";
+for (var i = 0; i < 50000; i++) {
+	url += "a";
+}
+var img = new Image();
+img.src = url;
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>
