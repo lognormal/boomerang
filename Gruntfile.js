@@ -239,7 +239,7 @@ module.exports = function() {
 							replacement: ""
 						},
 						{
-							pattern: /CONFIG_RELOAD_TIMEOUT=5\.5\*60\*1000/,
+							pattern: /CONFIG_RELOAD_TIMEOUT.*=.*5\.5.*\*.*60.*\*.*1000/,
 							replacement: "CONFIG_RELOAD_TIMEOUT=1000"
 						}
 					]
