@@ -60,6 +60,11 @@ app.post("/blackhole", function(req, res) {
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
 
+/* SOASTA PRIVATE START */
+// /config - config.js responses
+app.get("/config", require("./route-config"));
+/* SOASTA PRIVATE END */
+
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));

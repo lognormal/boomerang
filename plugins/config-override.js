@@ -57,9 +57,6 @@
 				abTests: true
 			},
 			instrument_xhr: true,
-			AutoXHR: {
-				beforeOnload: true
-			},
 			RT: {
 				session_exp: true
 			},
@@ -69,7 +66,11 @@
 				test_https: true
 			},
 			ResourceTiming: {
-				enabled: true
+				enabled: true,
+				clearOnBeacon: true
+			},
+			AutoXHR: {
+				alwaysSendXhr: true
 			},
 			secondaryBeacons: true,
 			autorun: true

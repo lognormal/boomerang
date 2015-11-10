@@ -205,7 +205,7 @@ see: http://www.w3.org/TR/resource-timing/
 				navStart = frame.performance.timing.navigationStart;
 			}
 		}
-		catch(e) {
+		catch (e) {
 			// empty
 		}
 
@@ -332,7 +332,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			entries = entries.concat(frameFixedEntries);
 		}
-		catch(e) {
+		catch (e) {
 			return entries;
 		}
 
@@ -389,9 +389,10 @@ see: http://www.w3.org/TR/resource-timing/
 	/**
 	 * Gathers performance entries and optimizes the result.
 	 * @param [number] since Only get timings since
+	 * @param [number] to Only get timings up to
 	 * @return Optimized performance entries trie
 	 */
-	function getResourceTiming(since) {
+	function getResourceTiming(since, to) {
 		/*eslint no-script-url:0*/
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		    i, e, results = {}, initiatorType, url, data,
@@ -416,6 +417,13 @@ see: http://www.w3.org/TR/resource-timing/
 
 			if (since && (navStart + e.startTime) < since) {
 				continue;
+			}
+
+			// If we were given a final timestamp, don't add any resources that
+			// started after it.
+			if (to && (navStart + e.startTime) > to) {
+				// We can also break at this point since the array is time sorted
+				break;
 			}
 
 			//
@@ -473,6 +481,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 	impl = {
 		complete: false,
+		sentNavBeacon: false,
 		initialized: false,
 		supported: false,
 		xhr_load: function() {
@@ -486,11 +495,16 @@ see: http://www.w3.org/TR/resource-timing/
 			BOOMR.sendBeacon();
 		},
 		xssBreakWords: defaultXssBreakWords,
+		clearOnBeacon: false,
 		done: function() {
 			var r;
-			if (this.complete) {
+
+			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
+			// add restiming manually).
+			if (this.sentNavBeacon) {
 				return;
 			}
+
 			BOOMR.removeVar("restiming");
 			r = getResourceTiming();
 			if (r) {
@@ -499,22 +513,35 @@ see: http://www.w3.org/TR/resource-timing/
 					restiming: JSON.stringify(r)
 				});
 			}
+
 			this.complete = true;
+			this.sentNavBeacon = true;
+
 			BOOMR.sendBeacon();
 		},
 
-		clearMetrics: function(vars) {
+		onBeacon: function(vars) {
+			var p = BOOMR.getPerformance();
+
+			// clear metrics
 			if (vars.hasOwnProperty("restiming")) {
 				BOOMR.removeVar("restiming");
+			}
+
+			if (impl.clearOnBeacon && p) {
+				var clearResourceTimings = p.clearResourceTimings || p.webkitClearResourceTimings;
+				if (clearResourceTimings && typeof clearResourceTimings === "function") {
+					clearResourceTimings.call(p);
+				}
 			}
 		}
 	};
 
 	BOOMR.plugins.ResourceTiming = {
 		init: function(config) {
-			var p = BOOMR.window.performance;
+			var p = BOOMR.getPerformance();
 
-			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords"]);
+			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords", "clearOnBeacon"]);
 
 			if (impl.initialized) {
 				return this;
@@ -523,7 +550,7 @@ see: http://www.w3.org/TR/resource-timing/
 			if (p && typeof p.getEntriesByType === "function") {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
-				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
+				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 				impl.supported = true;
 			}

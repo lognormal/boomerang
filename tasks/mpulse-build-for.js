@@ -40,10 +40,6 @@
  * Choose which app to build for with the commandline parameter --app. For the above example config file, use
  * the following to build a debug version of boomerang for mpulse:
  *
- *  $> grunt mpulse-build-for:debug --app mpulse
- *
- * To build both debug and min versions for an app:
- *
  *  $> grunt mpulse:build --app mpulse
  *
  * Values can also be partially overridden by Gruntfile.js.
@@ -60,7 +56,6 @@
 var merge = require("deepmerge");
 
 module.exports = function(grunt) {
-
 	var defaultConfig = {
 		server: "localhost:8080",
 		apikey: "11111-11111-11111-11111-11111",
@@ -94,7 +89,7 @@ module.exports = function(grunt) {
 		try {
 			jsonConfig = grunt.file.readJSON(configFilePath);
 		}
-		catch(e) {
+		catch (e) {
 			grunt.log.warn("No file " + configFilePath + " found!");
 			jsonConfig = {};
 		}
@@ -109,7 +104,7 @@ module.exports = function(grunt) {
 		var secondaryBeaconServers = "";
 		if (config.secondaryBeacons.length > 0) {
 			secondaryBeaconServers = config.secondaryBeacons.map(function(beaconServer) {
-				return "'"+ beaconServer + "'";
+				return "'" + beaconServer + "'";
 			}).join(",");
 		}
 
@@ -117,10 +112,10 @@ module.exports = function(grunt) {
 			secondaryBeacon: secondaryBeaconServers
 		});
 
-		grunt.verbose.debug("Finished building configuration: ");
-		grunt.verbose.debug(JSON.stringify(config, null, 2));
+		grunt.log.debug("Finished building configuration: ");
+		grunt.log.debug(JSON.stringify(config, null, 2));
 		try {
-			grunt.verbose.debug("Reading file: " + config.boomerang);
+			grunt.log.debug("Reading file: " + config.boomerang);
 			var boomerang = grunt.file.read(config.boomerang, { encoding: "utf8" });
 
 			boomerang = boomerang.replace(stringTemplates.beaconDestinationHost + stringTemplates.beaconDestinationPath, config.server);
@@ -128,7 +123,7 @@ module.exports = function(grunt) {
 			boomerang = boomerang.replace(stringTemplates.configHost + stringTemplates.configJsonPath, config.server + defaultConfigJsonPath);
 			boomerang = boomerang.replace(stringTemplates.apikey, config.apikey);
 			boomerang = boomerang.replace(stringTemplates.configURLSuffix, config.configURLSuffix || "");
-			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log:null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
+			boomerang = boomerang.replace(/\/\*BEGIN DEBUG TOKEN\*\/log: null, \/\*END DEBUG TOKEN\*\//, secondaryBeaconsProcessed);
 
 			if (config.configAsJSON) {
 				boomerang = boomerang.replace(/var\s*configAsJSON\s*=\s*false;/, "var configAsJSON = true;");
@@ -137,8 +132,9 @@ module.exports = function(grunt) {
 			grunt.file.write("build/" + config.apikey + config.outputSuffix + ".js", boomerang, {encoding: "utf8"});
 		}
 		catch (e) {
-			grunt.verbose.debug(JSON.stringify(e, null, 2));
+			grunt.log.debug(JSON.stringify(e, null, 2));
 			grunt.fail.error("Something went wrong during boomerang manipulation");
 		}
+
 	});
 };

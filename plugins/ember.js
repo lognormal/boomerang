@@ -129,7 +129,7 @@
 			}
 
 			log("didTransition");
-			routeHooked=false;
+			routeHooked = false;
 		}
 
 		if (App.ApplicationRoute) {
@@ -161,13 +161,13 @@
 		is_complete: function() {
 			return true;
 		},
-		hook: function(App, hadRouteChange) {
+		hook: function(App, hadRouteChange, options) {
 			if (hooked) {
 				return this;
 			}
 
 			if (hook(App)) {
-				BOOMR.plugins.SPA.hook(hadRouteChange);
+				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 				hooked = true;
 			}
 			return this;

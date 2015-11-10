@@ -21,7 +21,25 @@ see: http://www.w3.org/TR/navigation-timing/
 	// A private object to encapsulate all your implementation details
 	var impl = {
 		complete: false,
+		sendBeacon: function() {
+			this.complete = true;
+			BOOMR.sendBeacon();
+		},
 		xhr_done: function(edata) {
+			if (edata && edata.initiator === "spa_hard") {
+				// Single Page App - Hard refresh: Send page's NavigationTiming data, if
+				// available.
+				impl.done(edata);
+				return;
+			}
+			else if (edata && edata.initiator === "spa") {
+				// Single Page App - Soft refresh: The original hard navigation is no longer
+				// relevant for this soft refresh, nor is the "URL" for this page, so don't
+				// add NavigationTiming or ResourceTiming metrics.
+				impl.sendBeacon();
+				return;
+			}
+
 			var w = BOOMR.window, res, data = {}, k;
 
 			if (!edata) {
@@ -57,6 +75,9 @@ see: http://www.w3.org/TR/navigation-timing/
 					for (k in data) {
 						if (data.hasOwnProperty(k) && data[k]) {
 							data[k] += w.performance.timing.navigationStart;
+
+							// don't need to send microseconds
+							data[k] = Math.round(data[k]);
 						}
 					}
 
@@ -89,10 +110,9 @@ see: http://www.w3.org/TR/navigation-timing/
 			BOOMR.addVar(data);
 
 			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-			catch(ignore) { /* empty */ }
+			catch (ignore) { /* empty */ }
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		done: function() {
@@ -144,7 +164,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				BOOMR.addVar(data);
 
 				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-				catch(ignore) { /* empty */ }
+				catch (ignore) { /* empty */ }
 			}
 
 			// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
@@ -155,7 +175,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				pt = w.chrome.loadTimes();
 				if (pt) {
 					data = {
-						nt_spdy: (pt.wasFetchedViaSpdy?1:0),
+						nt_spdy: (pt.wasFetchedViaSpdy ? 1 : 0),
 						nt_cinf: pt.connectionInfo,
 						nt_first_paint: pt.firstPaintTime
 					};
@@ -163,12 +183,11 @@ see: http://www.w3.org/TR/navigation-timing/
 					BOOMR.addVar(data);
 
 					try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-					catch(ignore) { /* empty */ }
+					catch (ignore) { /* empty */ }
 				}
 			}
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		clear: function() {

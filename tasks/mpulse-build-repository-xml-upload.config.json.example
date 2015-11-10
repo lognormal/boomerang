@@ -1,0 +1,7 @@
+{
+    "username": "soasta",
+    "password": "password",
+    "tenant": "soasta",
+    "repository": "http://localhost:8080/concerto/services/rest/RepositoryService/v1"
+}
+

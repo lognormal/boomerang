@@ -16,7 +16,7 @@
 
 	function addEvent(element, event, funct){
 		if (element.attachEvent) {
-			return element.attachEvent("on"+event, funct);
+			return element.attachEvent("on" + event, funct);
 		}
 		else {
 			return element.addEventListener(event, funct);

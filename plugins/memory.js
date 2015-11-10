@@ -9,7 +9,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 */
 
 (function() {
-	var w, p={}, d, m, s, n, b, impl;
+	var w, p = {}, d, m, s, n, b, impl;
 	// First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
 	// you'll need this.
 	BOOMR = BOOMR || {};
@@ -40,7 +40,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 							}
 						}
 					}
-					catch(err) {
+					catch (err) {
 						BOOMR.addError(err, "Memory.nodeList." + type + ".filter");
 					}
 				}
@@ -48,7 +48,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			}
 			return o || r;
 		}
-		catch(err) {
+		catch (err) {
 			BOOMR.addError(err, "Memory.nodeList." + type);
 			return 0;
 		}
@@ -59,7 +59,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			try {
 				callback();
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.addError(err, "Memory.done." + component);
 			}
 		}
@@ -76,7 +76,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			BOOMR.removeVar("dom.res");
 			errorWrap(true,
 				function() {
-					var res, doms={}, a;
+					var res, doms = {}, a;
 
 					if (!p || typeof p.getEntriesByType !== "function") {
 						return;
@@ -92,7 +92,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 					a = BOOMR.window.document.createElement("a");
 
 					[].forEach.call(res, function(r) {
-						a.href=r.name;
+						a.href = r.name;
 						doms[a.hostname] = true;
 					});
 
@@ -104,7 +104,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			if (m) {
 				BOOMR.addVar({
 					"mem.total": m.totalJSHeapSize,
-					"mem.used" : m.usedJSHeapSize
+					"mem.used": m.usedJSHeapSize
 				});
 			}
 
@@ -189,7 +189,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 					});
 				}
 			}
-			catch(err) {
+			catch (err) {
 				BOOMR.addError(err, "Memory.init");
 			}
 

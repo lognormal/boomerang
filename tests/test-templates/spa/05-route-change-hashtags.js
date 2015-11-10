@@ -13,8 +13,12 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 		assert.equal(tf.beacons.length, 3);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 2; i++) {
+	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
+		assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+	});
+
+	it("Should have sent all subsequent beacons as http.initiator = spa", function() {
+		for (var i = 1; i < 2; i++) {
 			assert.equal(tf.beacons[i]["http.initiator"], "spa");
 		}
 	});
@@ -29,7 +33,7 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
+			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000, 0);
 		}
 	});
 
@@ -88,9 +92,17 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 		              b.u.indexOf("05-route-change-hashtags.html#/") !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of less than 1 second", function() {
-		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[2];
-		assert.operator(b.t_done, "<=", 1000);
+	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
+		if (window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, ">=", 3000);
+		}
+	});
+
+	it("Should have sent the third with a timestamp of under 1 second (if MutationObserver is not supported)", function() {
+		if (!window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, "<=", 1000);
+		}
 	});
 };

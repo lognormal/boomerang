@@ -13,8 +13,12 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		assert.equal(tf.beacons.length, 5);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 4; i++) {
+	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
+		assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+	});
+
+	it("Should have sent all subsequent beacons as http.initiator = spa", function() {
+		for (var i = 1; i < 4; i++) {
 			assert.equal(tf.beacons[i]["http.initiator"], "spa");
 		}
 	});
@@ -156,5 +160,33 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		// now that the initial page is cached, it should be a quick navigation
 		var b = tf.beacons[4];
 		assert.operator(b.t_done, "<=", 10000);
+	});
+
+	it("Should have sent the fifth beacon without any NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
+		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var b = tf.lastBeacon();
+			assert.isUndefined(b.nt_red_cnt);
+			assert.isUndefined(b.nt_nav_type);
+			assert.isUndefined(b.nt_nav_st);
+			assert.isUndefined(b.nt_red_st);
+			assert.isUndefined(b.nt_red_end);
+			assert.isUndefined(b.nt_fet_st);
+			assert.isUndefined(b.nt_dns_st);
+			assert.isUndefined(b.nt_dns_end);
+			assert.isUndefined(b.nt_con_st);
+			assert.isUndefined(b.nt_con_end);
+			assert.isUndefined(b.nt_req_st);
+			assert.isUndefined(b.nt_res_st);
+			assert.isUndefined(b.nt_res_end);
+			assert.isUndefined(b.nt_domloading);
+			assert.isUndefined(b.nt_domint);
+			assert.isUndefined(b.nt_domcontloaded_st);
+			assert.isUndefined(b.nt_domcontloaded_end);
+			assert.isUndefined(b.nt_domcomp);
+			assert.isUndefined(b.nt_load_st);
+			assert.isUndefined(b.nt_load_end);
+			assert.isUndefined(b.nt_unload_st);
+			assert.isUndefined(b.nt_unload_end);
+		}
 	});
 };

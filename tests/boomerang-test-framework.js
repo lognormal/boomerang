@@ -117,7 +117,7 @@
 	};
 
 	t.getTestPasses = function() {
-		return complete ? testPasses: [];
+		return complete ? testPasses : [];
 	};
 
 	t.CONFIG_DEFAULTS = {
@@ -192,14 +192,29 @@
 
 		config = _.merge({}, t.CONFIG_DEFAULTS, config);
 
+		if (config.testAfterOnBeacon) {
+			// default to waiting until one beacon was sent, otherwise use
+			// the number passed in
+			if (typeof config.testAfterOnBeacon !== "number") {
+				config.testAfterOnBeacon = 1;
+			}
+
+			BOOMR.subscribe("onbeacon", function() {
+				if (++beaconsSeen === config.testAfterOnBeacon) {
+					// wait a few more ms so the beacon fires
+					// TODO: Trim this timing down if we can make it more reliable
+					setTimeout(t.runTests, 1000);
+				}
+			});
+		}
+
 		// initialize boomerang
+		BOOMR.addVar("h.cr", "test");
 		BOOMR.init(config);
 
 		if (config.onBoomerangLoaded) {
 			config.onBoomerangLoaded();
 		}
-
-		BOOMR.addVar("h.cr", "test");
 
 		if (config.afterFirstBeacon) {
 			var xhrSent = false;
@@ -224,28 +239,13 @@
 		});
 
 		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results", "BOOMR_onload"]);
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results"]);
 		window.mocha.checkLeaks();
 
 		// set globals
 		assert = window.assert = window.chai.assert;
 
-		if (config.testAfterOnBeacon) {
-			// default to waiting until one beacon was sent, otherwise use
-			// the number passed in
-			if (typeof config.testAfterOnBeacon !== "number") {
-				config.testAfterOnBeacon = 1;
-			}
-
-			BOOMR.subscribe("onbeacon", function() {
-				if (++beaconsSeen === config.testAfterOnBeacon) {
-					// wait a few more ms so the beacon fires
-					// TODO: Trim this timing down if we can make it more reliable
-					setTimeout(t.runTests, 1000);
-				}
-			});
-		}
-		else {
+		if (!config.testAfterOnBeacon) {
 			BOOMR.setImmediate(t.runTests);
 		}
 
@@ -393,6 +393,40 @@
 	};
 
 	/**
+	* Finds the nth load of the specified resource.
+	* @param {string} url Partial URL match
+	* @param {number} n Nth resource
+	* @return {PerformanceResourceTiming} Last resource to load for that URL
+	*/
+	t.findNthResource = function(url, n) {
+		if ("performance" in window &&
+			window.performance &&
+			window.performance.getEntriesByType) {
+			var entries = window.performance.getEntriesByType("resource");
+			var res = null;
+			var matches = 0;
+
+			for (var i = 0; i < entries.length; i++) {
+				if (entries[i].name.indexOf(url) !== -1) {
+					if (res === null || entries[i].responseEnd > res.responseEnd) {
+						if (matches === n) {
+							res = entries[i];
+							break;
+						}
+
+						matches++;
+					}
+				}
+			}
+
+			return res;
+		}
+		else {
+			return null;
+		}
+	};
+
+	/**
 	 * Validates the beacon was sent with a load time equal to when the specified resource
 	 * loaded.
 	 *
@@ -401,12 +435,20 @@
 	 * @param {number} closeTo Range that the load time can be off by
 	 * @param {number} fallbackMin If RT is not supported, the minimum time
 	 * @param {number} fallbackMax If RT is not supported, the maximum time
-	 * @param {boolean} useLastMatch Use the last match of the resource instead of the first
+	 * @param {boolean|number} useLastMatch Use the last match of the resource instead of the first, or, if a number, that resource
+	 * @param {number} n Check the nth resource
 	 */
 	t.validateBeaconWasSentAfter = function(beaconIndex, urlMatch, closeTo, fallbackMin, fallbackMax, useLastMatch) {
 		var tf = BOOMR.plugins.TestFramework;
 
-		var res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
+		var res;
+		if (typeof useLastMatch === "number") {
+			res = t.findNthResource(urlMatch, useLastMatch);
+		}
+		else {
+			res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
+		}
+
 		if (res != null) {
 			assert.closeTo(tf.beacons[beaconIndex].t_done, res.responseEnd, closeTo);
 		}
@@ -430,20 +472,11 @@
 		function compareBeaconCount() {
 			return BOOMR.plugins.TestFramework.beaconCount() === beaconCount;
 		}
-
 		function testBeaconCount() {
 			if (compareBeaconCount()) {
 				setTimeout(
 					function() {
-						// run the check again
-						var match = compareBeaconCount();
-
-						// throw an error if there were more beacons
-						if (!match) {
-							return done(new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
-						}
-
-						done();
+						done(compareBeaconCount() ? undefined : new Error("beaconCount: " + BOOMR.plugins.TestFramework.beaconCount() + " !== " + beaconCount));
 					}, 1000);
 			}
 			else {
@@ -466,6 +499,114 @@
 			return (testXhr || done || function(){})();
 		}
 		(testDegenerate || done || function(){})();
+	};
+
+
+	/**
+	 * Determines how many elements on the page match the attribute
+	 *
+	 * @param {string} tagName Tag name
+	 * @param {string} attr Attribute name
+	 * @param {RegEx} regex Regular expression matching the attribute
+	 * @returns {number} Number of elements matching
+	 */
+	t.elementsWithAttribute = function(tagName, attr, regex) {
+		var nodes = document.getElementsByTagName("script");
+
+		var matching = 0;
+
+		for (var i = 0; i < nodes.length; i++) {
+			var node = nodes[i];
+			if (node[attr] && node[attr].match(regex)) {
+				matching++;
+			}
+		}
+
+		return matching;
+	};
+
+	/**
+	 * Runs a function repeatedly the specified number of times with the
+	 * specified delay.
+	 *
+	 * @param {function} run Function to run
+	 * @param {number} times How many times to run it
+	 * @param {number} delay How often to delay between runs
+	 * @param {function} done What to run when done
+	 */
+	t.runRepeatedly = function(run, times, delay, done) {
+		var runTimes = 0;
+
+		function repeat() {
+			if (++runTimes === times) {
+				return done();
+			}
+
+			run();
+
+			setTimeout(repeat, delay);
+		}
+
+		repeat();
+	};
+
+	/**
+	 * Shows a countdown clock on the page
+	 *
+	 * @param {Object} test Mocha test case
+	 * @param {number} maxTime Maximum timeout
+	 * @param {number} expectedTime How many expected seconds
+	 *
+	 * @returns {string} Timer ID you can use to clearTimeout later
+	 */
+	t.timeout = function(test, maxTime, expectedTime) {
+		test.timeout(maxTime);
+
+		var stats = document.getElementById("mocha-stats");
+
+		var el = document.createElement("li");
+
+		stats.appendChild(el);
+
+		var startTime = +(new Date());
+		var endTimeExpected = startTime + expectedTime;
+		var endTimeMax = startTime + maxTime;
+
+		var timerID = setInterval(function(){
+			var now = +(new Date());
+			if (now > endTimeMax) {
+				clearInterval(timerID);
+
+				el.parentNode.removeChild(el);
+
+				return;
+			}
+			else if (now > endTimeExpected) {
+				el.style["font-color"] = "red";
+			}
+
+			var timeLeft = endTimeMax - now;
+
+			el.innerHTML = "timeout: <em>" + (Math.floor(timeLeft / 100) / 10).toFixed(1) + "</em>s";
+		}, 100);
+
+		el.id = "mocha-timer" + timerID;
+
+		return timerID;
+	};
+
+	/**
+	 * Clears a previously set timer ID
+	 *
+	 * @param {string} timerID TimerID
+	 */
+	t.clearTimeout = function(timerID) {
+		clearInterval(timerID);
+
+		var el = document.getElementById("mocha-timer" + timerID);
+		if (el) {
+			el.parentNode.removeChild(el);
+		}
 	};
 
 	window.BOOMR_test = t;

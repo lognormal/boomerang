@@ -1,0 +1,33 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="../../vendor/angular/angular.js"></script>
+<script src="../../vendor/angular-resource/angular-resource.js"></script>
+<script src="../../vendor/angular-route/angular-route.js"></script>
+<script src="support/app.js"></script>
+<script>
+/*global angular*/
+document.addEventListener("DOMContentLoaded", function() {
+	angular.bootstrap(document, ["app"]);
+});
+</script>
+<div ng-view></div>
+<script src="/test-templates/spa/18-autoxhr-before-page-load-alwayssendxhr.js" type="text/javascript"></script>
+<script src="18-autoxhr-before-page-load-alwayssendxhr.js" type="text/javascript"></script>
+<script>
+// wait long enough for XHRs to come back
+window.angular_imgs = [1000];
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	Angular: {
+		enabled: true
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+
+</script>
+<%= footer %>

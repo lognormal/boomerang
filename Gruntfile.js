@@ -57,7 +57,7 @@ module.exports = function() {
 	// Config
 	//
 	grunt.initConfig({
-		pkg:  grunt.file.readJSON("package.json"),
+		pkg: grunt.file.readJSON("package.json"),
 		releaseVersion: pkg.releaseVersion + "." + buildNumber,
 		buildDate: Math.round(Date.now() / 1000),
 		concat: {
@@ -222,7 +222,7 @@ module.exports = function() {
 						{
 							// Add &debug key to request
 							pattern: /key=%client_apikey%/,
-							replacement: "debug=\&key=%client_apikey%"
+							replacement: "debug=\&key=API_KEY"
 						},
 						{
 							// Send beacons to null
@@ -232,11 +232,15 @@ module.exports = function() {
 						{
 							// Add config to null
 							pattern: /\/\/%config_host%%config_path%/,
-							replacement: "/blackhole"
+							replacement: "/config"
 						},
 						{
-							pattern: /CONFIG_RELOAD_TIMEOUT=5\.5\*60\*1000;/,
-							replacement: "CONFIG_RELOAD_TIMEOUT=1000;"
+							pattern: /%config_url_suffix%/,
+							replacement: ""
+						},
+						{
+							pattern: /CONFIG_RELOAD_TIMEOUT.*=.*5\.5.*\*.*60.*\*.*1000/,
+							replacement: "CONFIG_RELOAD_TIMEOUT=1000"
 						}
 					]
 				}
@@ -271,7 +275,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -287,13 +294,33 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
 					cwd: "plugins/",
 					src: ["./*.js"],
 					dest: "build/plugins/",
+					ext: ".min.js",
+					extDot: "first"
+				}]
+			},
+			snippets: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					compress: {
+						sequences: false
+					}
+				},
+				files: [{
+					expand: true,
+					cwd: "tests/page-template-snippets/",
+					src: ["instrumentXHRSnippetNoScript.tpl"],
+					dest: "build/snippets/",
 					ext: ".min.js",
 					extDot: "first"
 				}]
@@ -340,14 +367,14 @@ module.exports = function() {
 			}
 		},
 		"mpulse-build-for": {
-				release: {
-					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
-					outputSuffix: ".min"
-				},
-				base: {
-					boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-					outputSuffix: ""
-				}
+			release: {
+				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
+				outputSuffix: ".min"
+			},
+			base: {
+				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
+				outputSuffix: ""
+			}
 		},
 		filesize: {
 			csv: {
@@ -491,8 +518,8 @@ module.exports = function() {
 					testname: "Boomerang Unit Tests",
 					browsers: [{
 						"browserName": "internet explorer",
-						"version":     "11",
-						"platform":    "Windows 8.1"
+						"version": "11",
+						"platform": "Windows 8.1"
 					}]
 				}
 			},
@@ -554,9 +581,24 @@ module.exports = function() {
 					version: grunt.option("boomerang-version")
 				}
 			}
+		},
+		"mpulse-build-repository-xml-upload": {
+			"build": {
+				options: {
+					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
+					version: "<%= releaseVersion %>.<%= buildDate %>"
+				}
+			}
+		},
+		"jenkins-build-properties": {
+			"build": {
+				options: {
+					version: "<%= releaseVersion %>.<%= buildDate %>"
+				}
+			}
 		}
 	});
-	grunt.loadNpmTasks("grunt-eslint");
+	grunt.loadNpmTasks("gruntify-eslint");
 	grunt.loadNpmTasks("grunt-express-server");
 	grunt.loadNpmTasks("grunt-karma");
 	grunt.loadNpmTasks("grunt-contrib-concat");
@@ -582,10 +624,11 @@ module.exports = function() {
 		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
 		"build:test": ["concat:debug", "string-replace", "copy:debug"],
 		"default": ["lint", "build", "test", "filesize:default"],
-		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
+		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv", "jenkins-build-properties:build", "mpulse-build-repository-xml-upload:build"],
 		"lint": ["eslint"],
 		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
 		"mpulse:xml": ["build"],
+		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 		"test:build": ["pages-builder", "build"],
 		"test:debug": ["test:build", "build:test", "express", "watch"],
@@ -629,7 +672,7 @@ module.exports = function() {
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
 					var beforeTask = tasks.slice(0, index );
-					var afterTask = tasks.slice(index +1, tasks.length);
+					var afterTask = tasks.slice(index + 1, tasks.length);
 					var insertTask = aliases[aliasTask].filter(checkDuplicates);
 					tasks = [].concat(beforeTask, insertTask, afterTask);
 				}

@@ -2,7 +2,7 @@
 	var d, handler, a,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
-	    holdXhr = true,
+	    alwaysSendXhr = false,
 	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
 
 	// Default SPA activity timeout, in milliseconds
@@ -24,7 +24,7 @@
 		return;
 	}
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
 	if (BOOMR.plugins.AutoXHR) {
@@ -183,7 +183,7 @@
 		    last_ev,
 		    index = this.pending_events.length;
 
-		for (i=index-1; i>=0; i--) {
+		for (i = index - 1; i >= 0; i--) {
 			if (this.pending_events[i] && !this.pending_events[i].complete) {
 				last_ev = this.pending_events[i];
 				break;
@@ -209,7 +209,7 @@
 				// 3.4
 				// nothing to do
 			}
-			else if (last_ev.type === "spa") {
+			else if (BOOMR.utils.inArray(last_ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				// This could occur if this event started prior to the SPA taking
 				// over, and is now completing while the SPA event is occuring.  Let
 				// the SPA event take control.
@@ -224,6 +224,14 @@
 
 		// If we don't have a MutationObserver, then we just abort
 		if (!MutationHandler.observer) {
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// Give SPAs a bit more time to do something since we know this was
+				// an interesting event (e.g. XHRs)
+				this.setTimeout(SPA_TIMEOUT, index);
+
+				return index;
+			}
+
 			// If we already have detailed resource we can forward the event
 			if (resource.url && resource.timing.loadEventEnd) {
 				this.sendEvent(index);
@@ -232,7 +240,7 @@
 			return null;
 		}
 		else {
-			if (ev.type !== "spa") {
+			if (!BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				// Give clicks and history changes 50ms to see if they resulted
 				// in DOM mutations (and thus it is an 'interesting event').
 				this.setTimeout(50, index);
@@ -248,7 +256,7 @@
 	};
 
 	MutationHandler.prototype.sendEvent = function(i) {
-		var ev = this.pending_events[i], self=this;
+		var ev = this.pending_events[i], self = this;
 
 		if (!ev || ev.complete) {
 			return;
@@ -262,32 +270,79 @@
 		if (BOOMR.hasVar("h.cr")) {
 			ev.resource.resources = ev.resources;
 
-			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
-			// was for this resource.
-			if (BOOMR.plugins.ResourceTiming &&
-				BOOMR.plugins.ResourceTiming.is_supported() &&
-				ev.resource.timing &&
-				ev.resource.timing.requestStart) {
-				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(ev.resource.timing.requestStart);
-				BOOMR.addVar("restiming", JSON.stringify(r));
+			// if this was an SPA nav that triggered no additional resources, substract the
+			// SPA_TIMEOUT from now to determine the end time
+			if (ev.type === "spa" && ev.resources.length === 0) {
+				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
 			}
 
-			// If the resource has an onComplete event, trigger it.
-			if (ev.resource.onComplete) {
-				ev.resource.onComplete();
-			}
-
-			// Use 'requestStart' as the startTime of the resource, if given
-			var startTime = ev.resource.timing ? ev.resource.timing.requestStart : undefined;
-
-			BOOMR.responseEnd(ev.resource, startTime, ev.resource);
-
-			this.pending_events[i] = undefined;
+			this.sendResource(ev.resource, i);
 		}
 		else {
 			// No crumb, so try again after 5 seconds
 			setTimeout(function() { self.sendEvent(i); }, 5000);
 		}
+	};
+
+	MutationHandler.prototype.sendResource = function(resource, eventIndex) {
+		var self = this;
+
+		// Use 'requestStart' as the startTime of the resource, if given
+		var startTime = resource.timing ? resource.timing.requestStart : undefined;
+
+		/**
+		 * Called once the resource can be sent
+		 * @param markEnd Sets loadEventEnd once the function is run
+		 */
+		var sendResponseEnd = function(markEnd) {
+			if (markEnd) {
+				resource.timing.loadEventEnd = BOOMR.now();
+			}
+
+			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
+			// was for this resource.
+			if (BOOMR.plugins.ResourceTiming &&
+				BOOMR.plugins.ResourceTiming.is_supported() &&
+				resource.timing &&
+				resource.timing.requestStart) {
+				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(resource.timing.requestStart, resource.timing.loadEventEnd);
+				BOOMR.addVar("restiming", JSON.stringify(r));
+			}
+
+			// If the resource has an onComplete event, trigger it.
+			if (resource.onComplete) {
+				resource.onComplete();
+			}
+
+			BOOMR.responseEnd(resource, startTime, resource);
+
+			if (eventIndex) {
+				self.pending_events[eventIndex] = undefined;
+			}
+		};
+
+		// send the beacon if we were not told to hold it
+		if (!resource.wait) {
+			// if this is a SPA event, make sure it doesn't fire until onload
+			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				if (d && d.readyState && d.readyState !== "complete") {
+					BOOMR.window.addEventListener("load", function() {
+						sendResponseEnd(true);
+					});
+
+					return;
+				}
+			}
+
+			sendResponseEnd(false);
+		}
+		else {
+			// waitComplete() should be called once the held beacon is complete
+			resource.waitComplete = function() {
+				sendResponseEnd(true);
+			};
+		}
+
 	};
 
 	MutationHandler.prototype.setTimeout = function(timeout, index) {
@@ -304,14 +359,16 @@
 	MutationHandler.prototype.timedout = function(index) {
 		this.clearTimeout();
 
-		if (this.pending_events[index] &&
-			(this.pending_events[index].type === "xhr" || this.pending_events[index].type === "spa")) {
+		var ev = this.pending_events[index];
+
+		if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS.concat("xhr"))) {
 			// XHRs or SPA page loads
-			if (this.pending_events[index].type === "xhr") {
+			if (ev.type === "xhr") {
 				// always send XHRs on timeout
 				this.sendEvent(index);
 			}
-			else if (this.pending_events[index].type === "spa" && this.pending_events[index].nodes_to_wait === 0) {
+			else if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)
+			         && ev.nodes_to_wait === 0) {
 				// send page loads (SPAs) if there are no outstanding downloads
 				this.sendEvent(index);
 			}
@@ -351,10 +408,10 @@
 		target._bmr.state = ev.type;
 
 		index = target._bmr.res;
-		this.load_finished(index);
+		this.load_finished(index, target._bmr.end);
 	};
 
-	MutationHandler.prototype.load_finished = function(index) {
+	MutationHandler.prototype.load_finished = function(index, loadEventEnd) {
 		var current_event = this.pending_events[index];
 
 		// event aborted
@@ -365,6 +422,9 @@
 		current_event.nodes_to_wait--;
 
 		if (current_event.nodes_to_wait === 0) {
+			// mark the end timestamp with what was given to us, or, now
+			current_event.resource.timing.loadEventEnd = loadEventEnd || BOOMR.now();
+
 			// For Single Page Apps, when we're finished waiting on the last node,
 			// the MVC engine (eg AngularJS) might still be doing some processing (eg
 			// on an XHR) before it adds some additional content (eg IMGs) to the page.
@@ -372,9 +432,7 @@
 			// something else is added, we'll continue to wait for that content to
 			// complete.  If nothing else is added, the end event will be the
 			// timestamp for when this load_finished(), not 1 second from now.
-
-			current_event.resource.timing.loadEventEnd = BOOMR.now();
-			if (current_event.type === "spa") {
+			if (BOOMR.utils.inArray(current_event.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				this.setTimeout(SPA_TIMEOUT, index);
 			}
 			else {
@@ -397,7 +455,7 @@
 
 			node._bmr = { start: BOOMR.now(), res: index };
 
-			url=node.src || node.href;
+			url = node.src || node.href;
 
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
@@ -437,10 +495,12 @@
 				/*
 				a.href = url;
 
+				var p = BOOMR.getPerformance()
+
 				// Check ResourceTiming to see if this was already seen.  If so,
 				// we won't see a 'load' or 'error' event fire, so skip this.
-				if (BOOMR.window.performance && typeof BOOMR.window.performance.getEntriesByType === "function") {
-					entries = BOOMR.window.performance.getEntriesByName(a.href);
+				if (p && typeof p.getEntriesByType === "function") {
+					entries = p.getEntriesByName(a.href);
 					if (entries && entries.length > 0) {
 						console.error("Skipping " + a.href);
 						return false;
@@ -473,7 +533,7 @@
 		else if (node.nodeType === Node.ELEMENT_NODE) {
 			els = node.getElementsByTagName("IMG");
 			if (els && els.length) {
-				for (i=0, l=els.length; i<l; i++) {
+				for (i = 0, l = els.length; i < l; i++) {
 					interesting |= this.wait_for_node(els[i], index);
 				}
 			}
@@ -517,41 +577,57 @@
 	};
 
 	MutationHandler.prototype.mutation_cb = function(mutations) {
-		var self, interesting, index;
+		var self, index, evt;
 
 		if (!this.watch) {
 			return true;
 		}
 
-		this.clearTimeout();
-
 		self = this;
-		interesting = false;
-		index = this.pending_events.length-1;
+		index = this.pending_events.length - 1;
 
 		if (index < 0 || !this.pending_events[index]) {
 			// Nothing waiting for mutations
 			return true;
 		}
 
+		evt = this.pending_events[index];
+		if (typeof evt.interesting === "undefined") {
+			evt.interesting = false;
+		}
+
 		if (mutations && mutations.length) {
-			this.pending_events[index].resource.timing.domComplete = BOOMR.now();
+			evt.resource.timing.domComplete = BOOMR.now();
 
 			mutations.forEach(function(mutation) {
-				var i, l;
+				var i, l, node;
 				if (mutation.type === "attributes") {
-					interesting |= self.wait_for_node(mutation.target, index);
+					evt.interesting |= self.wait_for_node(mutation.target, index);
 				}
 				else if (mutation.type === "childList") {
+					// Go through any new nodes and see if we should wait for them
 					l = mutation.addedNodes.length;
-					for (i=0; i<l; i++) {
-						interesting |= self.wait_for_node(mutation.addedNodes[i], index);
+					for (i = 0; i < l; i++) {
+						evt.interesting |= self.wait_for_node(mutation.addedNodes[i], index);
+					}
+
+					// Go through any removed nodes, and for IFRAMEs, see if we were
+					// waiting for them.  If so, stop waiting, as removed IFRAMEs
+					// don't trigger load or error events.
+					l = mutation.removedNodes.length;
+					for (i = 0; i < l; i++) {
+						node = mutation.removedNodes[i];
+						if (node.nodeName === "IFRAME" && node._bmr) {
+							self.load_cb({target: node, type: "removed"});
+						}
 					}
 				}
 			});
 		}
 
-		if (!interesting) {
+		if (!evt.interesting) {
+			// if we didn't have any interesting nodes for this MO callback or
+			// any prior callbacks, timeout the event
 			this.setTimeout(SPA_TIMEOUT, index);
 		}
 
@@ -609,7 +685,7 @@
 			// already instrumented
 			return;
 		}
-		else if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 			// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
 			BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
@@ -637,7 +713,7 @@
 			req.open = function(method, url, async) {
 				a.href = url;
 
-				if (holdXhr || shouldExcludeXhr(a)) {
+				if (shouldExcludeXhr(a)) {
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -648,6 +724,8 @@
 				}
 
 				function loadFinished() {
+					var entry, navSt;
+
 					// if we already finished via readystatechange or an error event,
 					// don't do work again
 					if (resource.timing.loadEventEnd) {
@@ -656,10 +734,31 @@
 
 					resource.timing.loadEventEnd = BOOMR.now();
 
+					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
+					entry = BOOMR.getResourceTiming(resource.url);
+					if (entry) {
+						navSt = BOOMR.window.performance.timing.navigationStart;
+
+						if (entry.responseEnd !== 0) {
+							resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
+						}
+
+						if (entry.responseStart !== 0) {
+							resource.timing.responseStart = Math.round(navSt + entry.responseStart);
+						}
+
+						if (entry.startTime !== 0) {
+							resource.timing.requestStart = Math.round(navSt + entry.startTime);
+						}
+					}
+
 					if (resource.index > -1) {
 						// If this XHR was added to an existing event, fire the
 						// load_finished handler for that event.
-						handler.load_finished(resource.index);
+						handler.load_finished(resource.index, resource.timing.responseEnd);
+					}
+					else if (alwaysSendXhr) {
+						handler.sendResource(resource);
 					}
 					else if (!singlePageApp || autoXhrEnabled) {
 						// Otherwise, if this is a SPA+AutoXHR or just plain
@@ -693,7 +792,7 @@
 					);
 				}
 
-				if (singlePageApp && handler.watch) {
+				if (singlePageApp && handler.watch && !alwaysSendXhr) {
 					// If this is a SPA and we're already watching for resources due
 					// to a route change or other interesting event, add this to the
 					// current event.
@@ -756,9 +855,19 @@
 		}
 	}
 
+	/**
+	 * Sends an XHR resource
+	 */
+	function sendResource(resource) {
+		resource.initiator = "xhr";
+		BOOMR.responseEnd(resource);
+	}
+
 	BOOMR.plugins.AutoXHR = {
 		is_complete: function() { return true; },
 		init: function(config) {
+			var i;
+
 			d = BOOMR.window.document;
 			a = BOOMR.window.document.createElement("A");
 
@@ -767,14 +876,10 @@
 
 			autoXhrEnabled = config.instrument_xhr;
 
-			if (autoXhrEnabled && config.AutoXHR && config.AutoXHR.beforeOnload) {
-				holdXhr = false;
-			}
-
 			// check to see if any of the SPAs were enabled
 			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
 				var supported = BOOMR.plugins.SPA.supported_frameworks();
-				for (var i = 0; i < supported.length; i++) {
+				for (i = 0; i < supported.length; i++) {
 					var spa = supported[i];
 					if (config[spa] && config[spa].enabled) {
 						singlePageApp = true;
@@ -783,27 +888,34 @@
 				}
 			}
 
+			// Whether or not to always send XHRs.  If a SPA is enabled, this means it will
+			// send XHRs during the hard and soft navs.  If enabled, it will also disable
+			// listening for MutationObserver events after an XHR is complete.
+			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
+			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
+				var resources = BOOMR.xhr.stop(sendResource);
+				BOOMR.setImmediate(function() {
+					for (i = 0; i < resources.length; i++) {
+						sendResource(resources[i]);
+					}
+				});
+			}
+
 			if (singlePageApp) {
-				// Disable auto-xhr until the SPA has fired its first beacon.  The
-				// plugin will re-enable after it's ready.
-				autoXhrEnabled = false;
+				if (!alwaysSendXhr) {
+					// Disable auto-xhr until the SPA has fired its first beacon.  The
+					// plugin will re-enable after it's ready.
+					autoXhrEnabled = false;
+				}
 
 				BOOMR.instrumentXHR();
 			}
 			else if (autoXhrEnabled) {
 				BOOMR.instrumentXHR();
-
-				// listen to page load / etc and hold XHR until then
-				BOOMR.subscribe("page_ready", this.unholdXhr, null, this);
-				BOOMR.subscribe("onbeacon", this.unholdXhr, null, this);
-				BOOMR.subscribe("before_unload", this.unholdXhr, null, this);
 			}
 			else if (autoXhrEnabled === false) {
 				BOOMR.uninstrumentXHR();
 			}
-		},
-		unholdXhr: function() {
-			holdXhr = false;
 		},
 		getMutationHandler: function() {
 			return handler;

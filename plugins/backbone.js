@@ -1,4 +1,3 @@
-/*global Backbone*/
 /*
 * Installation:
 *
@@ -54,7 +53,7 @@
 	 * @return {boolean} True on success
 	 */
 	function bootstrap(router) {
-		if (typeof Backbone === "undefined" ||
+		if (typeof BOOMR.window.Backbone === "undefined" ||
 			typeof router === "undefined") {
 			return false;
 		}
@@ -99,13 +98,13 @@
 		is_complete: function() {
 			return true;
 		},
-		hook: function(router, hadRouteChange) {
+		hook: function(router, hadRouteChange, options) {
 			if (hooked) {
 				return this;
 			}
 
 			if (bootstrap(router)) {
-				BOOMR.plugins.SPA.hook(hadRouteChange);
+				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 
 				hooked = true;
 			}
