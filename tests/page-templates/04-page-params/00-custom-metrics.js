@@ -83,4 +83,8 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet13, 111);
 	});
 
+	it("Should have the custom metric 15 - XPath with hidden input element", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet15, 3.14);
+	});
 });
