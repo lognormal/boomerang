@@ -156,6 +156,10 @@ if (window.backbone_route_wait) {
 	hookOptions.routeChangeWaitFilter = window.backbone_route_wait;
 }
 
+if (window.backbone_route_filter) {
+	hookOptions.routeFilter = window.backbone_route_filter;
+}
+
 var hadRouteChange = false;
 app.Router.on("route", function() {
 	hadRouteChange = true;

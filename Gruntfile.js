@@ -57,7 +57,7 @@ module.exports = function() {
 	// Config
 	//
 	grunt.initConfig({
-		pkg:  grunt.file.readJSON("package.json"),
+		pkg: grunt.file.readJSON("package.json"),
 		releaseVersion: pkg.releaseVersion + "." + buildNumber,
 		buildDate: Math.round(Date.now() / 1000),
 		concat: {
@@ -275,7 +275,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -291,7 +294,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -305,7 +311,10 @@ module.exports = function() {
 			snippets: {
 				options: {
 					preserveComments: false,
-					mangle: true
+					mangle: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -509,8 +518,8 @@ module.exports = function() {
 					testname: "Boomerang Unit Tests",
 					browsers: [{
 						"browserName": "internet explorer",
-						"version":     "11",
-						"platform":    "Windows 8.1"
+						"version": "11",
+						"platform": "Windows 8.1"
 					}]
 				}
 			},
