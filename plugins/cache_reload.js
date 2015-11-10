@@ -25,9 +25,9 @@
 
 			// we use document and not BOOMR.window.document since
 			// we can run inside the boomerang iframe if any
-			var i=document.createElement("iframe");
-			i.style.display="none";
-			i.src=impl.url;
+			var i = document.createElement("iframe");
+			i.style.display = "none";
+			i.src = impl.url;
 			document.body.appendChild(i);
 
 			return this;

@@ -1,15 +1,15 @@
 /*global BOOMR_configt:true*/
 (function(w) {
-	var dc=document,
-	    s="script",
-	    dom=w.location.hostname,
+	var dc = document,
+	    s = "script",
+	    dom = w.location.hostname,
 	    complete, running,
 	    t_start,
 	    load, loaded,
-	    autorun=true,
+	    autorun = true,
 	    alwaysRun = typeof w.BOOMR_LOGN_always !== "undefined",
-	    CONFIG_RELOAD_TIMEOUT=5.5*60*1000,
-	    ready=false;
+	    CONFIG_RELOAD_TIMEOUT = 5.5 * 60 * 1000,
+	    ready = false;
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (!alwaysRun &&
@@ -19,7 +19,7 @@
 
 	running = complete = false;
 
-	loaded=function() {
+	loaded = function() {
 		if (complete) {
 			return;
 		}
@@ -35,11 +35,11 @@
 		element.parentNode.removeChild(element);
 	};
 
-	load=function() {
-		var s0=dc.getElementsByTagName(s)[0],
+	load = function() {
+		var s0 = dc.getElementsByTagName(s)[0],
 		    s1,
-		    a=dc.createElement("A"),
-		    bcn=BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
+		    a = dc.createElement("A"),
+		    bcn = BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
 		    plugins = [],
 		    pluginName,
 		    url;
@@ -50,22 +50,22 @@
 			}
 		}
 
-		t_start=BOOMR.now();
+		t_start = BOOMR.now();
 
 		var configAsJSON = false;
 		url = configAsJSON ?
 			"//%config_host%%config_json_path%" :
 			"//%config_host%%config_path%";
-		url+="?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
-			+ "&t=" + Math.round(t_start/(5*60*1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
+		url += "?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
+			+ "&t=" + Math.round(t_start / (5 * 60 * 1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 			+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
-			+ (w === window?"":"&if=")			// if this is running in an iframe, we need to look for config vars in parent window
-			+ "&sl=" + (BOOMR.session.length>0?1:0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
+			+ (w === window ? "" : "&if=")			// if this is running in an iframe, we need to look for config vars in parent window
+			+ "&sl=" + (BOOMR.session.length > 0 ? 1 : 0)		// is this a new session (0) or existing session (1).  New sessions may be rate limited
 									// We don't pass the actual session length so that the URL response can be cached
-			+ "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start/1000).toString(36)
-			+ (complete?"&r=":"")				// if this is running after complete, then we're just refreshing the crumb
-			+ (bcn?"&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
-			+ (complete?"":"&plugins=" + plugins.join(","));
+			+ "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36)
+			+ (complete ? "&r=" : "")				// if this is running after complete, then we're just refreshing the crumb
+			+ (bcn ? "&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
+			+ (complete ? "" : "&plugins=" + plugins.join(","));
 
 		if (configAsJSON) {
 			url += "&acao=";
@@ -107,10 +107,10 @@
 			xhr.send(null);
 		}
 		else {
-			s1=dc.createElement(s);
+			s1 = dc.createElement(s);
 			s1.src = url;
 			s0.parentNode.insertBefore(s1, s0);
-			s0=null;
+			s0 = null;
 		}
 
 		if (complete) {
@@ -120,7 +120,7 @@
 
 				if (s1) {
 					/* DEBUG DISABLE LINE */removeNodeIfSafe(s1);
-					s1=null;
+					s1 = null;
 				}
 			}, CONFIG_RELOAD_TIMEOUT);
 		}
@@ -134,7 +134,7 @@
 			}
 
 			if (config && config.rate_limited) {
-				BOOMR.session.rate_limited=true;
+				BOOMR.session.rate_limited = true;
 				return this;
 			}
 
@@ -151,16 +151,16 @@
 				BOOMR.setImmediate(loaded);
 				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 
-				BOOMR.addVar("t_configjs", BOOMR.now()-t_start);
+				BOOMR.addVar("t_configjs", BOOMR.now() - t_start);
 				if (typeof BOOMR_configt === "number") {
-					BOOMR.addVar("t_configfb", BOOMR_configt-t_start);
+					BOOMR.addVar("t_configfb", BOOMR_configt - t_start);
 					delete BOOMR_configt;
 				}
 				return this;
 
 			}
 
-			running=true;
+			running = true;
 			if (w === window) {
 				BOOMR.subscribe("page_ready", load, null, null);
 			}

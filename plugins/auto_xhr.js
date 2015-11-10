@@ -183,7 +183,7 @@
 		    last_ev,
 		    index = this.pending_events.length;
 
-		for (i=index-1; i>=0; i--) {
+		for (i = index - 1; i >= 0; i--) {
 			if (this.pending_events[i] && !this.pending_events[i].complete) {
 				last_ev = this.pending_events[i];
 				break;
@@ -256,7 +256,7 @@
 	};
 
 	MutationHandler.prototype.sendEvent = function(i) {
-		var ev = this.pending_events[i], self=this;
+		var ev = this.pending_events[i], self = this;
 
 		if (!ev || ev.complete) {
 			return;
@@ -455,7 +455,7 @@
 
 			node._bmr = { start: BOOMR.now(), res: index };
 
-			url=node.src || node.href;
+			url = node.src || node.href;
 
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
@@ -533,7 +533,7 @@
 		else if (node.nodeType === Node.ELEMENT_NODE) {
 			els = node.getElementsByTagName("IMG");
 			if (els && els.length) {
-				for (i=0, l=els.length; i<l; i++) {
+				for (i = 0, l = els.length; i < l; i++) {
 					interesting |= this.wait_for_node(els[i], index);
 				}
 			}
@@ -584,7 +584,7 @@
 		}
 
 		self = this;
-		index = this.pending_events.length-1;
+		index = this.pending_events.length - 1;
 
 		if (index < 0 || !this.pending_events[index]) {
 			// Nothing waiting for mutations
@@ -607,7 +607,7 @@
 				else if (mutation.type === "childList") {
 					// Go through any new nodes and see if we should wait for them
 					l = mutation.addedNodes.length;
-					for (i=0; i<l; i++) {
+					for (i = 0; i < l; i++) {
 						evt.interesting |= self.wait_for_node(mutation.addedNodes[i], index);
 					}
 
@@ -615,7 +615,7 @@
 					// waiting for them.  If so, stop waiting, as removed IFRAMEs
 					// don't trigger load or error events.
 					l = mutation.removedNodes.length;
-					for (i=0; i<l; i++) {
+					for (i = 0; i < l; i++) {
 						node = mutation.removedNodes[i];
 						if (node.nodeName === "IFRAME" && node._bmr) {
 							self.load_cb({target: node, type: "removed"});

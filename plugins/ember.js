@@ -129,7 +129,7 @@
 			}
 
 			log("didTransition");
-			routeHooked=false;
+			routeHooked = false;
 		}
 
 		if (App.ApplicationRoute) {

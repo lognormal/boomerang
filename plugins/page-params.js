@@ -131,7 +131,7 @@
 		handleRegEx: function(re, extract, operand) {
 			var value, m;
 
-			if (! (re instanceof RegExp) ) {
+			if (!(re instanceof RegExp)) {
 				try {
 					re = new RegExp(re, "i");
 				}
@@ -223,7 +223,7 @@
 				nodes = [nodes[index]];
 			}
 
-			for (index=0; index<nodes.length; index++) {
+			for (index = 0; index < nodes.length; index++) {
 				el = this.nodeWalk(nodes[index], m[3]);
 
 				if (el) {
@@ -235,7 +235,7 @@
 		},
 
 		runXPath: function(xpath) {
-			var el, m, tryOurs=false, err;
+			var el, m, tryOurs = false, err;
 
 			try {
 				if (d.evaluate) {
@@ -245,12 +245,12 @@
 					el = d.selectNodes(xpath);
 				}
 				else {
-					tryOurs=true;
+					tryOurs = true;
 				}
 			}
 			catch (xpath_err) {
-				err=xpath_err;
-				tryOurs=true;
+				err = xpath_err;
+				tryOurs = true;
 			}
 
 			if (!el && tryOurs) {
@@ -331,7 +331,7 @@
 		},
 
 		extractJavaScriptVariable: function(varname) {
-			var parts, value, ctx=w;
+			var parts, value, ctx = w;
 
 			if (!varname) {
 				return false;
@@ -443,7 +443,7 @@
 
 			BOOMR.debug("Got params: " + params, "PageVars");
 
-			for (i=0; i<params.length; i++) {
+			for (i = 0; i < params.length; i++) {
 				if (params[i]) {
 					kv = params[i].split("=");
 					if (kv.length && kv[0] === o.parameter2) {
@@ -646,7 +646,7 @@
 			BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
 
 			BOOMR.addVar(this.varname + "_st", Math.round(st));
-			return this.apply(en-st);
+			return this.apply(en - st);
 		},
 
 		findResource: function(url, frame) {
@@ -690,7 +690,7 @@
 			// no exact match, maybe it has wildcards
 			reslist = frame.performance.getEntriesByType("resource");
 			if (reslist && reslist.length > 0) {
-				for (i=0; i<reslist.length; i++) {
+				for (i = 0; i < reslist.length; i++) {
 
 					// if we want the slowest url, then iterate through all till we find it
 					if (url === "slowest") {
@@ -713,7 +713,7 @@
 			}
 
 			if (frame.frames) {
-				for (i=0; i<frame.frames.length; i++) {
+				for (i = 0; i < frame.frames.length; i++) {
 					res = this.findResource(url, frame.frames[i]);
 					if (res) {
 						return res;
@@ -739,7 +739,7 @@
 
 			// Check performance.mark
 			res = p.getEntriesByType("mark");
-			for (i=0; res && i<res.length; i++) {
+			for (i = 0; res && i < res.length; i++) {
 				if (res[i].name === o.parameter2) {
 					return this.apply(res[i].startTime);
 				}
@@ -747,7 +747,7 @@
 
 			// Check performance.measure
 			res = p.getEntriesByType("measure");
-			for (i=0; res && i<res.length; i++) {
+			for (i = 0; res && i < res.length; i++) {
 				if (res[i].name === o.parameter2) {
 					if (res[i].startTime) {
 						BOOMR.addVar(this.varname + "_st", Math.round(res[i].startTime));
@@ -784,7 +784,7 @@
 		mayRetry: [],
 
 		done: function(edata, ename) {
-			var i, v, hconfig, handler, limpl=impl, data;
+			var i, v, hconfig, handler, limpl = impl, data;
 
 			hconfig = {
 				pageGroups:       { varname: "h.pg", stopOnFirst: true },
@@ -864,7 +864,7 @@
 				if (hconfig.hasOwnProperty(v)) {
 					handler = new Handler(hconfig[v]);
 
-					for (i=0; i<limpl[v].length; i++) {
+					for (i = 0; i < limpl[v].length; i++) {
 						if (ename !== "xhr" && limpl[v][i].only_xhr) {
 							// do not process xhr only items for non-xhr requests
 							continue;
@@ -890,7 +890,7 @@
 			// go through on the retry will just re-add itself to the array
 			impl.mayRetry = [];
 
-			for (i=0; i<retries.length; i++) {
+			for (i = 0; i < retries.length; i++) {
 				if (retries[i]) {
 					o = handler = null;
 					try {
@@ -909,7 +909,7 @@
 			var i, label;
 
 			// Remove custom metrics
-			for (i=0; i<impl.customMetrics.length; i++) {
+			for (i = 0; i < impl.customMetrics.length; i++) {
 				label = impl.customMetrics[i].label;
 
 				BOOMR.removeVar(label);
@@ -919,7 +919,7 @@
 			BOOMR.removeVar("dom.res.slowest");
 
 			// Remove start time for custom timers
-			for (i=0; i<impl.customTimers.length; i++) {
+			for (i = 0; i < impl.customTimers.length; i++) {
 				label = impl.customTimers[i].label + "_st";
 
 				BOOMR.removeVar(label);
@@ -931,7 +931,7 @@
 		},
 
 		onload: function() {
-			this.onloadfired=true;
+			this.onloadfired = true;
 		},
 
 		extractXHRParams: function(edata, hconfig) {
@@ -981,7 +981,7 @@
 				if (!section.data || !section.data.length) {
 					// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
 					if (data.url) {
-						for (i=0; i<impl[section.impl].length; i++) {
+						for (i = 0; i < impl[section.impl].length; i++) {
 							// only allow timers, metrics & dimensions that are xhr_ok
 							if (impl[section.impl][i].xhr_ok) {
 								limpl[section.impl].push(impl[section.impl][i]);
@@ -992,12 +992,12 @@
 				}
 
 				// If there are data elements passed in, then check which ones we want
-				for (j=0; j<section.data.length; j++) {
+				for (j = 0; j < section.data.length; j++) {
 					m = section.data[j].split(/\s*=\s*/);
 					itemName = m[0];
 					value = m[1];	// undefined if no =, empty string if set to empty
 
-					for (i=0; i<impl[section.impl].length; i++) {
+					for (i = 0; i < impl[section.impl].length; i++) {
 						if (impl[section.impl][i].name === itemName) {
 							if (value === undefined) {
 								// If no predefined value, then go through the flow
