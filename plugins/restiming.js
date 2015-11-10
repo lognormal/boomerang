@@ -432,7 +432,7 @@ see: http://www.w3.org/TR/resource-timing/
 				trimTiming(e.redirectStart, e.startTime)
 			].map(toBase36).join(",").replace(/,+$/, "");
 
-			url = cleanUrl(e.name);
+			url = cleanUrl(e.name, impl.urlLimit);
 
 			// if this entry already exists, add a pipe as a separator
 			if (results[url] !== undefined) {
@@ -452,19 +452,19 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @param [string] url URL
 	 * @return [string] Cleaned URL
 	 */
-	function cleanUrl(url) {
+	function cleanUrl(url, urlLimit) {
 		// apply default cleanupURL logic first
 		url = BOOMR.utils.cleanupURL(url);
 
-		if (url && url.length > impl.urlLimit) {
+		if (url && url.length > urlLimit) {
 			// We need to break this URL up.  Try at the query string first.
 			var qsStart = url.indexOf("?");
-			if (qsStart < impl.urlLimit) {
+			if (qsStart !== -1 && qsStart < urlLimit) {
 				url = url.substr(0, qsStart) + "?...";
 			}
 			else {
 				// No query string, just stop at the limit
-				url = url.substr(0, impl.urlLimit) + "...";
+				url = url.substr(0, urlLimit) + "...";
 			}
 		}
 

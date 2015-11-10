@@ -393,4 +393,26 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			}
 		});
 	});
+
+	describe("cleanUrl()", function() {
+		it("should return an empty string if given an empty URL", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.cleanUrl("", 1000), "");
+		});
+
+		it("should not trim a URL underneath the limit", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.cleanUrl("http://foo.com", 1000), "http://foo.com");
+		});
+
+		it("should trim a URL with a query string over the limit at the query string", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.cleanUrl("http://foo.com?aaaaaa", 20), "http://foo.com?...");
+		});
+
+		it("should trim a URL with a query string too long over the limit at the limit", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.cleanUrl("http://foo.com?aaaaaa", 14), "http://foo.com...");
+		});
+
+		it("should trim a URL without a query string over the limit at the limit", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.cleanUrl("http://foo.com/a/b/c/d", 14), "http://foo.com...");
+		});
+	});
 });
