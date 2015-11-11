@@ -368,16 +368,21 @@ see: http://www.w3.org/TR/resource-timing/
 		x = (win.pageXOffset !== undefined) ? win.pageXOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollLeft;
 		y = (win.pageYOffset !== undefined) ? win.pageYOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollTop;
 
+		// look at each IMG and IFRAME
 		els.forEach(function(elname) {
-			var el = doc.getElementsByTagName(elname), i, rect;
+			var elements = doc.getElementsByTagName(elname), el, i, rect;
 
-			for (i = 0; i < el.length; i++) {
-				if (el[i] && el[i].src && !entries[el[i].src]) {
-					rect = el[i].getBoundingClientRect();
+			for (i = 0; i < elements.length; i++) {
+				el = elements[i];
+
+				// look at this element if it has a src attribute, and we haven't already looked at it
+				if (el && el.src && !entries[el.src]) {
+					rect = el.getBoundingClientRect();
+
 					// Require both height & width to be non-zero
 					// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
-					if ((rect.height || el[i].offsetHeight) && (rect.width || el[i].offsetWidth)) {
-						entries[el[i].src] = [el[i].offsetHeight, el[i].offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
+					if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
+						entries[el.src] = [el.offsetHeight, el.offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
 					}
 				}
 			}
@@ -396,11 +401,15 @@ see: http://www.w3.org/TR/resource-timing/
 		/*eslint no-script-url:0*/
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		    i, e, results = {}, initiatorType, url, data,
-		    navStart = getNavStartTime(BOOMR.window);
+		    navStart = getNavStartTime(BOOMR.window),
+		    visibleEntries = {};
 
 		if (!entries || !entries.length) {
 			return {};
 		}
+
+		// gather visible entries on the page
+		visibleEntries = getVisibleEntries(BOOMR.window);
 
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
@@ -465,15 +474,19 @@ see: http://www.w3.org/TR/resource-timing/
 				results[url] += "|" + data;
 			}
 			else {
-				results[url] = data;
+				// for the first time we see this URL, add resource dimensions if we have them
+				if (visibleEntries[url] !== undefined) {
+					// We use * as an additional separator to indicate it is not a new resource entry
+					// The following characters will not be URL encoded:
+					// *!-.()~_ but - and . are special to number representation so we don't use them
+					results[url] =
+						"*" + visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
+						+ "|" + data;
+				}
+				else {
+					results[url] = data;
+				}
 			}
-		}
-
-		if (visibleEntries[url] !== undefined) {
-			// We use * as an additional separator to indicate it is not a new resource entry
-			// The following characters will not be URL encoded:
-			// *!-.()~_ but - and . are special to number representation so we don't use them
-			results[url] += "|*" + visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "");
 		}
 
 		return optimizeTrie(convertToTrie(results), true);
@@ -574,7 +587,8 @@ see: http://www.w3.org/TR/resource-timing/
 		optimizeTrie: optimizeTrie,
 		findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
 		getResourceTiming: getResourceTiming,
-		toBase36: toBase36
+		toBase36: toBase36,
+		getVisibleEntries: getVisibleEntries
 	};
 
 }());
