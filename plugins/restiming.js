@@ -361,7 +361,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @return [Object] Object with URLs of visible assets as keys, and Array[height, width, top, left] as value
 	 */
 	function getVisibleEntries(win) {
-		var els = ["IMG", "IFRAME"], entries = {}, x, y, doc=win.document;
+		var els = ["IMG", "IFRAME"], entries = {}, x, y, doc = win.document;
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
@@ -371,12 +371,12 @@ see: http://www.w3.org/TR/resource-timing/
 		els.forEach(function(elname) {
 			var el = doc.getElementsByTagName(elname), i, rect;
 
-			for(i=0; i<el.length; i++) {
-				if(el[i] && el[i].src && !entries[el[i].src]) {
+			for (i = 0; i < el.length; i++) {
+				if (el[i] && el[i].src && !entries[el[i].src]) {
 					rect = el[i].getBoundingClientRect();
 					// Require both height & width to be non-zero
 					// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
-					if((rect.height || el[i].offsetHeight) && (rect.width || el[i].offsetWidth)) {
+					if ((rect.height || el[i].offsetHeight) && (rect.width || el[i].offsetWidth)) {
 						entries[el[i].src] = [el[i].offsetHeight, el[i].offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
 					}
 				}
@@ -469,7 +469,7 @@ see: http://www.w3.org/TR/resource-timing/
 			}
 		}
 
-		if(visibleEntries[url] !== undefined) {
+		if (visibleEntries[url] !== undefined) {
 			// We use * as an additional separator to indicate it is not a new resource entry
 			// The following characters will not be URL encoded:
 			// *!-.()~_ but - and . are special to number representation so we don't use them
