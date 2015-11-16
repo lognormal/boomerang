@@ -496,13 +496,36 @@ BOOMR_check_doc_domain();
 				return this.setCookie(name, {}, -86400);
 			},
 
-			cleanupURL: function(url) {
+			/**
+			 * Cleans up a URL by removing the query string (if configured), and
+			 * limits the URL to the specified size.
+			 *
+			 * @param {string} url URL to clean
+			 * @param {number} urlLimit Maximum size, in characters, of the URL
+			 *
+			 * @returns {string} Cleaned up URL
+			 */
+			cleanupURL: function(url, urlLimit) {
 				if (!url || Object.prototype.toString.call(url) === "[object Array]") {
 					return "";
 				}
+
 				if (impl.strip_query_string) {
-					return url.replace(/\?.*/, "?qs-redacted");
+					url = url.replace(/\?.*/, "?qs-redacted");
 				}
+
+				if (typeof urlLimit !== "undefined" && url && url.length > urlLimit) {
+					// We need to break this URL up.  Try at the query string first.
+					var qsStart = url.indexOf("?");
+					if (qsStart !== -1 && qsStart < urlLimit) {
+						url = url.substr(0, qsStart) + "?...";
+					}
+					else {
+						// No query string, just stop at the limit
+						url = url.substr(0, urlLimit - 3) + "...";
+					}
+				}
+
 				return url;
 			},
 
