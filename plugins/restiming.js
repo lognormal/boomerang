@@ -15,7 +15,10 @@ see: http://www.w3.org/TR/resource-timing/
 		return;
 	}
 
-	var initiatorTypes = {
+	//
+	// Constants
+	//
+	var INITIATOR_TYPES = {
 		"other": 0,
 		"img": 1,
 		"link": 2,
@@ -26,13 +29,17 @@ see: http://www.w3.org/TR/resource-timing/
 
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
 	// the whole string) in URLs, to ensure NoScript doesn't think this is an XSS attack
-	var defaultXssBreakWords = [
+	var DEFAULT_XSS_BREAK_WORDS = [
 		/(h)(ref)/gi,
 		/(s)(rc)/gi,
 		/(a)(ction)/gi
 	];
 
-	var xssBreakDelim = "\n";
+	// Delimiter to use to break a XSS word
+	var XSS_BREAK_DELIM = "\n";
+
+	// Maximum number of characters in a URL
+	var DEFAULT_URL_LIMIT = 1000;
 
 	/**
 	 * Converts entries to a Trie:
@@ -58,9 +65,9 @@ see: http://www.w3.org/TR/resource-timing/
 
 			// find any strings to break
 			for (i = 0; i < impl.xssBreakWords.length; i++) {
-				// Add a xssBreakDelim character after the first letter.  optimizeTrie will
+				// Add a XSS_BREAK_DELIM character after the first letter.  optimizeTrie will
 				// ensure this sequence doesn't get combined.
-				urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + xssBreakDelim + "$2");
+				urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + XSS_BREAK_DELIM + "$2");
 			}
 
 			if (!entries.hasOwnProperty(url)) {
@@ -127,7 +134,7 @@ see: http://www.w3.org/TR/resource-timing/
 					// swap the current leaf with compressed one
 					delete cur[node];
 
-					if (node === xssBreakDelim) {
+					if (node === XSS_BREAK_DELIM) {
 						// If this node is a newline, which can't be in a regular URL,
 						// it's due to the XSS patch.  Remove the placeholder character,
 						// and make sure this node isn't compressed by incrementing
@@ -406,7 +413,7 @@ see: http://www.w3.org/TR/resource-timing/
 			//
 
 			// prefix initiatorType to the string
-			initiatorType = initiatorTypes[e.initiatorType];
+			initiatorType = INITIATOR_TYPES[e.initiatorType];
 			if (typeof initiatorType === "undefined") {
 				initiatorType = 0;
 			}
@@ -425,7 +432,7 @@ see: http://www.w3.org/TR/resource-timing/
 				trimTiming(e.redirectStart, e.startTime)
 			].map(toBase36).join(",").replace(/,+$/, "");
 
-			url = BOOMR.utils.cleanupURL(e.name);
+			url = BOOMR.utils.cleanupURL(e.name, impl.urlLimit);
 
 			// if this entry already exists, add a pipe as a separator
 			if (results[url] !== undefined) {
@@ -454,7 +461,8 @@ see: http://www.w3.org/TR/resource-timing/
 			this.complete = true;
 			BOOMR.sendBeacon();
 		},
-		xssBreakWords: defaultXssBreakWords,
+		xssBreakWords: DEFAULT_XSS_BREAK_WORDS,
+		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
 		done: function() {
 			var r;
@@ -501,7 +509,8 @@ see: http://www.w3.org/TR/resource-timing/
 		init: function(config) {
 			var p = BOOMR.getPerformance();
 
-			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords", "clearOnBeacon"]);
+			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
+				["xssBreakWords", "clearOnBeacon", "urlLimit"]);
 
 			if (impl.initialized) {
 				return this;
