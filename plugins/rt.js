@@ -670,7 +670,17 @@
 					BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
 				}
 				else {
-					BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+					//
+					// Ensure that t_done is after t_resp_start.  If not, set a var so we
+					// knew there was an inversion.  This can happen due to bugs in NavTiming
+					// clients, where responseEnd happens after all other NavTiming events.
+					//
+					if (t_done < t_resp_start) {
+						BOOMR.addVar("t_page.inv", 1);
+					}
+					else {
+						BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+					}
 				}
 			}
 
