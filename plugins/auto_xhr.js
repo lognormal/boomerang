@@ -894,6 +894,10 @@
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
 				var resources = BOOMR.xhr.stop(sendResource);
+				if (!resources || !resources.length) {
+					return;
+				}
+
 				BOOMR.setImmediate(function() {
 					for (i = 0; i < resources.length; i++) {
 						sendResource(resources[i]);
