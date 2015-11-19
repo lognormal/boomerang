@@ -93,16 +93,26 @@
 		},
 
 		extractFromDOMElement: function(element, o) {
-			var m, re;
+			var m, re, elementValue = "";
+
+			if (element.nodeName.toUpperCase() === "INPUT" || element.nodeName.toUpperCase() === "SELECT") {
+				// either it is not a checkbox/radio button or it is checked.
+				if ((element.type.toLowerCase() !== "checkbox" && element.type.toLowerCase() !== "radio") || element.checked) {
+					elementValue = element.value;
+				}
+			}
+			else {
+				elementValue = element.textContent || element.innerText;
+			}
 
 			if ((!o.match || o.match === "numeric")) {
 				// textContent is way faster than innerText in browsers that support
 				// both, but IE8 and lower only support innerText so, we test textContent
 				// first and fallback to innerText if that fails
-				element = this.cleanUp(element.textContent || element.innerText);
+				elementValue = this.cleanUp(elementValue);
 			}
 			else if (o.match === "boolean") {
-				element = 1;
+				elementValue = 1;
 			}
 			else if (o.match.match(/^regex:/)) {
 				m = o.match.match(/^regex:(.*)/);
@@ -113,8 +123,8 @@
 				try {
 					re = new RegExp(m[1], "i");
 
-					if (re.test(element.textContent || element.innerText)) {
-						element = 1;
+					if (re.test(elementValue)) {
+						elementValue = 1;
 					}
 				}
 				catch (err) {
@@ -125,7 +135,7 @@
 				}
 			}
 
-			return element;
+			return elementValue;
 		},
 
 		handleRegEx: function(re, extract, operand) {

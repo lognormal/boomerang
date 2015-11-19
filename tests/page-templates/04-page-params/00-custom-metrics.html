@@ -2,7 +2,10 @@
 <%= boomerangSnippet %>
 <div class="cart-container" style="display: none" id="cart-container">
 	<div id="cart-total">$444.44</div>
-	<div id="a1-_:.">$555.55</div>
+	<textarea id="a1-_:.">$555.55</textarea>
+	<input id="some-input" type="hidden" value="3.14" />
+	<input id="cb" type="checkbox" checked="checked" />
+	<input id="rad" type="radio" checked="checked" />
 </div>
 <script src="00-custom-metrics.js" type="text/javascript"></script>
 <script>
@@ -64,7 +67,7 @@ BOOMR_test.init({
 			},
 			{
 				parameter1: "",
-				parameter2: "//div[@id='a1-_:.']",
+				parameter2: "//textarea[@id='a1-_:.']",
 				label: "cmet9",
 				type: "URLPatternType"
 			},
@@ -93,6 +96,36 @@ BOOMR_test.init({
 				dataType: "Number",
 				parameter1: "custom_metric_1",
 				parameter2: "*custom-metrics*"
+			},
+			{
+				parameter1: "",
+				parameter2: "//input[@id='some-input']",
+				label: "cmet14",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "",
+				parameter2: "//input[@id='cb']",
+				label: "cmet15",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "",
+				parameter2: "//input[@id='rad']",
+				label: "cmet16",
+				type: "URLPatternType"
+			},
+			{
+				match: "regex:on",
+				parameter2: "//input[@id='cb']",
+				label: "cmet17",
+				type: "URLPatternType"
+			},
+			{
+				match: "regex:on",
+				parameter2: "//input[@id='rad']",
+				label: "cmet18",
+				type: "URLPatternType"
 			}
 		]
 	}
