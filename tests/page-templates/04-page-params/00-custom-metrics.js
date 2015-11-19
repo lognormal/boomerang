@@ -83,8 +83,28 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet13, 111);
 	});
 
-	it("Should have the custom metric 15 - XPath with hidden input element", function() {
+	it("Should have the custom metric 14 - XPath with hidden input element", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b.cmet15, 3.14);
+		assert.equal(b.cmet14, 3.14);
+	});
+
+	it("Should have the custom metric 15 - XPath with hidden input checkbox element", function() {
+		var b = tf.lastBeacon();
+		assert.isUndefined(b.cmet15);
+	});
+
+	it("Should have the custom metric 16 - XPath with hidden input radio element", function() {
+		var b = tf.lastBeacon();
+		assert.isUndefined(b.cmet16);
+	});
+
+	it("Should have the custom metric 17 - XPath with hidden input checkbox element with no value specified", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet17, "1");
+	});
+
+	it("Should have the custom metric 18 - XPath with hidden input radio element with no value specified", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet18, "1");
 	});
 });
