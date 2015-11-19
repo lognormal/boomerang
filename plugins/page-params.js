@@ -269,12 +269,26 @@
 						xpath = xpath.slice(6);
 						return this.nodeWalk(d, xpath);
 					}
-					else if ((m = xpath.match(/\[@id=(["'])([^"']+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {	// matches an id somewhere, so root it there
+					else if ((m = xpath.match(/\[@id=(["'])([^"']+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {
+						// matches an id somewhere, so root it there
 						el = d.getElementById(m[2]);
 						if (!el || !m[3]) {
 							return el;
 						}
 						return this.nodeWalk(el, m[3].slice(1));
+					}
+					else if ((m = xpath.match(/\[@class="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {
+						// matches a className somewhere, so root it there
+						el = d.getElementsByClassName(m[1]);
+						if (el && el.length) {
+							el = el[0];
+						}
+
+						if (!el || !m[2]) {
+							return el;
+						}
+
+						return this.nodeWalk(el, m[2].slice(1));
 					}
 					else {
 						BOOMR.debug("Could not evaluate XPath", "PageVars");

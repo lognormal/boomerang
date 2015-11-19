@@ -107,4 +107,9 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet18, "1");
 	});
+
+	it("Should have the custom metric 19 - XPath rooted at a class (double quote) with another element name following", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet19, 444.44);
+	});
 });
