@@ -102,13 +102,13 @@
 				}
 			}
 			else {
+				// textContent is way faster than innerText in browsers that support
+				// both, but IE8 and lower only support innerText so, we test textContent
+				// first and fallback to innerText if that fails
 				elementValue = element.textContent || element.innerText;
 			}
 
 			if ((!o.match || o.match === "numeric")) {
-				// textContent is way faster than innerText in browsers that support
-				// both, but IE8 and lower only support innerText so, we test textContent
-				// first and fallback to innerText if that fails
 				elementValue = this.cleanUp(elementValue);
 			}
 			else if (o.match === "boolean") {
