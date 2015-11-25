@@ -1,0 +1,43 @@
+<%= header %>
+<%= boomerangScript %>
+
+<div id="root"></div>
+
+<script src="support/app.js"></script>
+<script>
+window.imgs = [-1];
+
+var xhr;
+
+var beaconNum = 0;
+BOOMR.subscribe("onbeacon", function() {
+	if (!BOOMR.plugins.AutoXHR) {
+		return;
+	}
+
+	setTimeout(function() {
+		if (beaconNum === 0) {
+			// first XHR
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "/delay?delay=3000&file=/pages/12-react/support/widgets.json&id=1&rnd=" + Math.random(), true);
+			xhr.send(null);
+		}
+		else if (beaconNum === 1) {
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "/delay?delay=1000&file=/pages/12-react/support/widgets.json&id=2&rnd=" + Math.random(), true);
+			xhr.send(null);
+		}
+		beaconNum++;
+	}, 100);
+});
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	History: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

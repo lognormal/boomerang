@@ -1,12 +1,13 @@
 {
     "plugins": [
-	"plugins/config-override.js",
+        "plugins/config-override.js",
         "plugins/page-params.js",
         "plugins/auto_xhr.js",
         "plugins/spa.js",
         "plugins/angular.js",
         "plugins/backbone.js",
         "plugins/ember.js",
+        "plugins/history.js",
         "plugins/rt.js",
         "plugins/bw.js",
         "plugins/navtiming.js",
