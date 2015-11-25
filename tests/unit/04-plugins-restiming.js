@@ -355,14 +355,14 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 		});
 	});
 
-	describe("getResourceTiming()", function() {
+	describe("getCompressedResourceTiming()", function() {
 		it("Should get the ResourceTiming trie", function() {
 			//
 			// NOTE: If you change the resources for this test suite (test-boomerang.html), this test will
 			// need to be updated.
 			//
 
-			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming();
+			var trie = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming();
 
 			// NOTE: what is tested depends on the environment, whether it supports ResourceTiming or not
 			if (!BOOMR.plugins.ResourceTiming.is_supported()) {
@@ -391,6 +391,140 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 				// other entries will be under vendor
 				assert.isObject(trie[baseUrl]["vendor/"]);
 			}
+		});
+	});
+
+	describe("calculateResourceTimingUnion()", function() {
+		it("Should return 0 if given an empty list", function() {
+			assert.deepEqual(0, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion());
+		});
+
+		it("Should return the duration of a single resource", function() {
+			assert.deepEqual(100, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}]));
+		});
+
+		it("Should return the duration of two resources that don't overlap", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 120,
+				responseEnd: 220
+			}]));
+		});
+
+		it("Should return the duration of three resources that don't overlap", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 120,
+				responseEnd: 220
+			}, {
+				fetchStart: 530,
+				responseEnd: 630
+			}]));
+		});
+
+		it("Should return the duration of two resources, one of which is completely within the other one", function() {
+			assert.deepEqual(100, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 50,
+				responseEnd: 100
+			}]));
+		});
+
+		it("Should return the duration of two resources, one of which is partially within the other one", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}]));
+		});
+
+		it("Should return the duration of three resources, one of which is partially within the other one", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 300,
+				responseEnd: 400
+			}]));
+		});
+
+		it("Should return the duration of three resources, two of which are completely within the other one", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 300,
+				responseEnd: 400
+			}]));
+		});
+
+		it("Should return the duration of three resources, one of which are completely within the other one, and one of which is completely within the other", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 50,
+				responseEnd: 100
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}]));
+		});
+
+		it("Should return the duration of three resources, with each overlapping the other", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 200,
+				responseEnd: 310
+			}]));
+		});
+
+		it("Should return the duration of three resources, with the later two overlapping each other partially", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 210,
+				responseEnd: 310
+			}, {
+				fetchStart: 300,
+				responseEnd: 310
+			}]));
+		});
+
+		it("Should return the duration of three resources, with the later two overlapping each other completely", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 210,
+				responseEnd: 310
+			}, {
+				fetchStart: 250,
+				responseEnd: 260
+			}]));
 		});
 	});
 });

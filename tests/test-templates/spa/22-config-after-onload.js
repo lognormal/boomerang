@@ -7,6 +7,8 @@ BOOMR_test.templates.SPA["22-config-after-onload"] = function() {
 	it("Should have sent 2 beacons (if MutationObserver is supported)", function(done) {
 		this.timeout(10000);
 
+		// 2 beacons because of the forced BOOMR.page_ready() call
+
 		t.ifAutoXHR(
 			done,
 			function() {
