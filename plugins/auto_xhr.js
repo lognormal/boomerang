@@ -31,6 +31,10 @@
 		return;
 	}
 
+	function log(msg) {
+		BOOMR.debug(msg, "AutoXHR");
+	}
+
 	function getPathName(anchor) {
 		if (!anchor) {
 			return null;
@@ -225,6 +229,9 @@
 		// If we don't have a MutationObserver, then we just abort
 		if (!MutationHandler.observer) {
 			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// try to start it, in case we haven't had the chance to yet
+				MutationHandler.start();
+
 				// Give SPAs a bit more time to do something since we know this was
 				// an interesting event (e.g. XHRs)
 				this.setTimeout(SPA_TIMEOUT, index);
