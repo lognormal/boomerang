@@ -87,7 +87,7 @@
 			}
 
 			if (hook(history)) {
-				BOOMR.plugins.SPA.hook();
+				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 				hooked = true;
 			}
 			return this;

@@ -1,17 +1,16 @@
 <%= header %>
 <%= boomerangScript %>
 
+<script type="text/javascript">
+window.imgs = [-1];
+</script>
+
 <div id="root"></div>
+<script src="../../vendor/jquery/dist/jquery.min.js" type="text/javascript"></script>
 <script src="support/app.js"></script>
-<div ng-app="app">
-	<div ng-view>
-	</div>
-</div>
 <script src="/test-templates/spa/12-autoxhr-trigger-additional-after-delay.js" type="text/javascript"></script>
 <script src="12-autoxhr-trigger-additional-after-delay.js" type="text/javascript"></script>
 <script>
-window.imgs = [-1];
-
 BOOMR_test.init({
 	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
 	afterFirstBeacon: function() {
