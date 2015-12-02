@@ -8,30 +8,27 @@ import { Router, Route, IndexRoute, Link, History } from 'react-router';
 
 var hadRouteChange = false;
 var history;
-var baseHref;
+var hookOptions = {};
 
 if (window.html5_mode === true)  {
-	baseHref = document.getElementsByTagName('base')[0].href
-	console.log("BaseHREF: ", baseHref);
-	
 	history = useBasename(createBrowserHistory)({
-		basename: baseHref
+		basename: location.pathname
 	});
 }
 else {
 	history = createHashHistory();
 }
 
-if (typeof baseHref === "undefined") {
-	baseHref = "/"
-}
-
 var subscribed = false;
+
+if (window.route_wait) {
+	hookOptions.routeChangeWaitFilter = window.route_wait;
+}
 
 function hookHistoryBoomerang() {
 	if (window.BOOMR && BOOMR.version) {
 		if (BOOMR.plugins && BOOMR.plugins.History) {
-			BOOMR.plugins.History.hook(history, hadRouteChange, {});
+			BOOMR.plugins.History.hook(history, hadRouteChange, hookOptions);
 		}
 		return true;
 	}
@@ -196,11 +193,13 @@ const Home = React.createClass({
 
 const Widget = React.createClass({
 	getInitialState() {
+		console.log("React-App: ", this.props.params);
 		return {
 			id: this.props.params.id
 		};
 	},
 	componentDidMont() {
+		console.log("React-App: ", this.props.params);
 		$.get("support/widgets.json", function (result) {
 			if(this.isMounted()) {
 				this.setState({
@@ -226,7 +225,8 @@ const Widget = React.createClass({
 			width: 300 + "px",
 			height: "auto"
 		};
-		return <div className="image" key={this.state.id}><img key={this.state.id} src={`/delay?delay=${this.state.id}000&file=pages/12-react/support/img.jpg&id=${this.state.id}&rnd=${'' + Math.random() * 1000}`} style={style}></img></div>;
+		console.log("React-App: ", this.props.params.id);
+		return <div className="image" key={this.props.params.id}><img key={this.props.params.id} src={`/delay?delay=${this.props.params.id}000&file=pages/12-react/support/img.jpg&id=${this.props.params.id}&rnd=${'' + Math.random() * 1000}`} style={style}></img></div>;
 	},
 	render() {
 		return (

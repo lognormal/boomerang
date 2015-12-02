@@ -30,30 +30,17 @@
 
 	function hook(history) {
 		var orig_history = {
-			listenBefore: history.listenBefore,
 			listen: history.listen,
 			transitionTo: history.transitionTo,
 			pushState: history.pushState,
 			replaceState: history.replaceState,
-			go: history.go,
-			goBack: history.goBack,
-			goForward: history.goForward,
-			createKey: history.createKey,
-			createPath: history.createPath,
-			createHref: history.createHref,
-			createLocation: history.createLocation,
+			go: history.go
 		};
 
 		history.listen = function() {
 			log("listen");
 			BOOMR.plugins.SPA.route_change();
 			orig_history.listen.apply(this, arguments);
-		}
-
-		history.listenBefore = function() {
-			log("listenBefore");
-			BOOMR.plugins.SPA.route_change();
-			orig_history.listenBefore.apply(this, arguments);
 		}
 
 		history.transitionTo = function() {
@@ -64,9 +51,25 @@
 
 		history.pushState = function() {
 			log("pushState");
+			console.log(arguments);
+			if (!enabled) {
+				hadMissedRouteChange = true;
+				return;
+			}
 			BOOMR.plugins.SPA.route_change();
 			orig_history.pushState.apply(this, arguments);
 		}
+
+		history.replaceState = function() {
+			log("pushState");
+			if (!enabled) {
+				hadMissedRouteChange = true;
+				return;
+			}
+			BOOMR.plugins.SPA.route_change();
+			orig_history.replaceState.apply(this, arguments);
+		}
+
 
 		history.go = function() {
 			log("go");
@@ -101,6 +104,7 @@
 
 			if (hooked && hadMissedRouteChange) {
 				hadMissedRouteChange = false;
+				BOOMR.plugins.SPA.route_change();
 			}
 
 			return this;
