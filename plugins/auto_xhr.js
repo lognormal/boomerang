@@ -409,6 +409,11 @@
 			// front-end time is anything left over
 			var frontEndTime = totalTime - backEndTime;
 
+			if (backEndTime < 0 || totalTime < 0) {
+				// some sort of error, don't put on the beacon
+				return;
+			}
+
 			// set timers on the resource so RT knows to use them
 			resource.timers = {
 				t_resp: backEndTime,

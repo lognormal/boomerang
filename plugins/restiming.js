@@ -408,7 +408,7 @@ see: http://www.w3.org/TR/resource-timing/
 			}
 
 			// if given an array of initiatorTypes to include, skip anything else
-			if (initiatorTypes && initiatorTypes !== "*" && initiatorTypes.length) {
+			if (typeof initiatorTypes !== "undefined" && initiatorTypes !== "*" && initiatorTypes.length) {
 				if (!e.initiatorType || !BOOMR.utils.inArray(e.initiatorType, initiatorTypes)) {
 					continue;
 				}
