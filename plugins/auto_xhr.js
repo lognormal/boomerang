@@ -31,6 +31,10 @@
 		return;
 	}
 
+	function log(msg) {
+		BOOMR.debug(msg, "AutoXHR");
+	}
+
 	function getPathName(anchor) {
 		if (!anchor) {
 			return null;

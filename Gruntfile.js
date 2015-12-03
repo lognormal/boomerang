@@ -652,7 +652,7 @@ module.exports = function() {
 		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 		"test:build": ["test:build:react", "pages-builder", "build"],
-		"test:build:react": ["clean:spa-react-test-templates", "babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
+		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
 		"test:debug": ["test:build", "build:test", "express", "watch"],
 		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
 		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],
