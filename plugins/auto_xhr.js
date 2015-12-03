@@ -1,5 +1,5 @@
 (function() {
-	var d, handler, a,
+	var d, handler, a, impl,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
 	    alwaysSendXhr = false,
@@ -13,6 +13,9 @@
 	var XHR_STATUS_ABORT          = -999;
 	var XHR_STATUS_ERROR          = -998;
 	var XHR_STATUS_OPEN_EXCEPTION = -997;
+
+	// Default resources to count as Back-End during a SPA nav
+	var SPA_RESOURCES_BACK_END = ["xmlhttprequest", "script"];
 
 	// If this browser cannot support XHR, we'll just skip this plugin which will
 	// save us some execution time.
@@ -305,13 +308,21 @@
 				BOOMR.plugins.ResourceTiming.is_supported() &&
 				resource.timing &&
 				resource.timing.requestStart) {
-				var r = BOOMR.plugins.ResourceTiming.getResourceTiming(resource.timing.requestStart, resource.timing.loadEventEnd);
+				var r = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming(
+					resource.timing.requestStart,
+					resource.timing.loadEventEnd);
+
 				BOOMR.addVar("restiming", JSON.stringify(r));
 			}
 
 			// If the resource has an onComplete event, trigger it.
 			if (resource.onComplete) {
 				resource.onComplete();
+			}
+
+			// For SPAs, calculate Back-End and Front-End timings
+			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				self.calculateSpaTimings(resource);
 			}
 
 			BOOMR.responseEnd(resource, startTime, resource);
@@ -342,7 +353,74 @@
 				sendResponseEnd(true);
 			};
 		}
+	};
 
+	/**
+	 * Calculates SPA Back-End and Front-End timings for Hard and Soft
+	 * SPA navigations.
+	 *
+	 * @param resource Resouce to calculate for
+	 */
+	MutationHandler.prototype.calculateSpaTimings = function(resource) {
+		var p = BOOMR.getPerformance();
+		if (!p || !p.timing) {
+			return;
+		}
+
+		//
+		// Hard Navigation:
+		// Use same timers as a traditional navigation, where the root HTML's
+		// timestamps are used for Back-End calculation.
+		//
+		if (resource.initiator === "spa_hard") {
+			// ensure RT picks up the correct timestamps
+			resource.timing.responseEnd = p.timing.responseStart;
+			resource.timing.fetchStart = p.timing.fetchStart;
+		}
+		else {
+			//
+			// Soft Navigation:
+			// We need to overwrite two timers: Back-End (t_resp) and Front-End (t_page).
+			//
+			// For Single Page Apps, we're defining these as:
+			// Back-End: Any timeslice where a XHR or JavaScript was outstanding
+			// Front-End: Total Time - Back-End
+			//
+			if (!BOOMR.plugins.ResourceTiming) {
+				return;
+			}
+
+			// first, gather all Resources that were outstanding during this SPA nav
+			var resources = BOOMR.plugins.ResourceTiming.getFilteredResourceTiming(
+				resource.timing.requestStart,
+				resource.timing.loadEventEnd,
+				impl.spaBackEndResources);
+
+			if (!resources || !resources.length) {
+				return;
+			}
+
+			// calculate the Back-End time based on any time those resources were active
+			var backEndTime = Math.round(BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion(resources));
+
+			// determine the total time based on the SPA logic
+			var totalTime = Math.round(resource.timing.loadEventEnd - resource.timing.requestStart);
+
+			// front-end time is anything left over
+			var frontEndTime = totalTime - backEndTime;
+
+			if (backEndTime < 0 || totalTime < 0) {
+				// some sort of error, don't put on the beacon
+				return;
+			}
+
+			// set timers on the resource so RT knows to use them
+			resource.timers = {
+				t_resp: backEndTime,
+				t_page: frontEndTime,
+				t_done: totalTime
+			};
+		}
 	};
 
 	MutationHandler.prototype.setTimeout = function(timeout, index) {
@@ -863,6 +941,10 @@
 		BOOMR.responseEnd(resource);
 	}
 
+	impl = {
+		spaBackEndResources: SPA_RESOURCES_BACK_END
+	};
+
 	BOOMR.plugins.AutoXHR = {
 		is_complete: function() { return true; },
 		init: function(config) {
@@ -870,6 +952,9 @@
 
 			d = BOOMR.window.document;
 			a = BOOMR.window.document.createElement("A");
+
+			// gather config and config overrides
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;

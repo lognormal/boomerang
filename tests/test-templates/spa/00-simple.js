@@ -20,6 +20,22 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		}
 	});
 
+	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.lastBeacon();
+			assert.equal(b.t_resp, pt.responseStart - pt.fetchStart);
+		}
+	});
+
+	it("Should have a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.lastBeacon();
+			assert.equal(b.t_page, b.t_done - b.t_resp);
+		}
+	});
+
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
