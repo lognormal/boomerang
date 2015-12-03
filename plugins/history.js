@@ -33,30 +33,57 @@
 			listen: history.listen,
 			transitionTo: history.transitionTo,
 			pushState: history.pushState,
+			setState: history.setState,
 			replaceState: history.replaceState,
 			go: history.go
 		};
 
+		history.setState = function() {
+			log("setState");
+			if (!enabled) {
+				log("Not enabled We've missed a routeChange");
+				hadMissedRouteChange = true;
+				return;
+			}
+			BOOMR.plugins.SPA.route_change();
+			orig_history.setState.apply(this, arguments);
+		}
+
 		history.listen = function() {
 			log("listen");
+			if (!enabled) {
+				log("Not enabled We've missed a routeChange");
+				hadMissedRouteChange = true;
+				return;
+			}
 			BOOMR.plugins.SPA.route_change();
 			orig_history.listen.apply(this, arguments);
 		}
 
 		history.transitionTo = function() {
 			log("transitionTo");
-			BOOMR.plugins.SPA.route_change();
-			orig_history.transitionTo.apply(this, arguments);
-		}
-
-		history.pushState = function() {
-			log("pushState");
-			console.log(arguments);
 			if (!enabled) {
+				log("Not enabled We've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
 			BOOMR.plugins.SPA.route_change();
+			orig_history.transitionTo.apply(this, arguments);
+		}
+
+		history.pushState = function(state, title, url) {
+			log("pushState");
+			if (!enabled) {
+				log("Not enabled We've missed a routeChange");
+				hadMissedRouteChange = true;
+				return;
+			}
+			BOOMR.plugins.SPA.route_change();
+			/*
+			 if (url || typeof title === "string") {
+			 BOOMR.plugins.SPA.last_location(url || title);
+			 }
+			 */
 			orig_history.pushState.apply(this, arguments);
 		}
 
@@ -73,6 +100,13 @@
 
 		history.go = function() {
 			log("go");
+
+			if (!enabled) {
+				log("Not enabled We've missed a routeChange");
+				hadMissedRouteChange = true;
+				return;
+			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.go.apply(this, arguments);
 		}

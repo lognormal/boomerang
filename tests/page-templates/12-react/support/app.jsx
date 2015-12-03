@@ -68,12 +68,17 @@ const App = React.createClass({
 		if ( window.nav_routes && window.nav_routes.hasOwnProperty("length") && window.nav_routes.length > 0) {
 			console.log("React-App: ", window.nav_routes);
 			if (!subscribed) {
-				BOOMR.subscribe("onbeacon", function() {
+				BOOMR.subscribe("onbeacon", function(beacon) {
+					// only continue for SPA beacons
+					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
+						return;
+					}
+
 					if(window.nav_routes.length > 0) {
-						setTimeout(function() {
-							var newRoute = window.nav_routes.shift();
+						var newRoute = window.nav_routes.shift();
+						setTimeout(function() {	
 							that.history.pushState(null, `${newRoute}`);
-						}, 1000);
+						}, 100);
 					}
 				});
 			}
@@ -193,29 +198,21 @@ const Home = React.createClass({
 
 const Widget = React.createClass({
 	getInitialState() {
-		console.log("React-App: ", this.props.params);
 		return {
 			id: this.props.params.id
 		};
 	},
-	componentDidMont() {
-		console.log("React-App: ", this.props.params);
-		$.get("support/widgets.json", function (result) {
+	componentDidMount() {
+		var widgetXHR = new XMLHttpRequest();
+		widgetXHR.addEventListener("load", function(widgetHtml) {
 			if(this.isMounted()) {
 				this.setState({
-					widgets: result,
-					rnd: '' + (Math.random() * 1000)
+					widgetHtml: widgetHtml.target.response
 				});
 			}
 		}.bind(this));
-
-		$.get("support/widget.html", function (widgetHtml) {
-			if (this.isMounted()) {
-				this.setState({
-					widgetHtml: widgetHtml
-				});
-			}
-		}.bind(this));
+		widgetXHR.open("GET", "support/widget.html");
+		widgetXHR.send();
 	},
 	widgetMarkup() {
 		return { __html: this.state.widgetHtml };
