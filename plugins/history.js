@@ -5,7 +5,6 @@
 	    enabled = true,
 	    hadMissedRouteChange = false
 
-
 	// Checking for Plugins required and if already integrated
 	if (BOOMR.plugins.History || typeof BOOMR.plugins.SPA === "undefined" || typeof BOOMR.plugins.AutoXHR === "undefined") {
 		return;
@@ -79,11 +78,6 @@
 				return;
 			}
 			BOOMR.plugins.SPA.route_change();
-			/*
-			 if (url || typeof title === "string") {
-			 BOOMR.plugins.SPA.last_location(url || title);
-			 }
-			 */
 			orig_history.pushState.apply(this, arguments);
 		}
 
@@ -96,7 +90,6 @@
 			BOOMR.plugins.SPA.route_change();
 			orig_history.replaceState.apply(this, arguments);
 		}
-
 
 		history.go = function() {
 			log("go");
