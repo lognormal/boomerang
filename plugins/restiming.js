@@ -42,6 +42,13 @@ see: http://www.w3.org/TR/resource-timing/
 	// Maximum number of characters in a URL
 	var DEFAULT_URL_LIMIT = 1000;
 
+	// Any ResourceTiming data time that starts with this character is not a time,
+	// but something else (like dimension data)
+	var SPECIAL_DATA_PREFIX = "*";
+
+	// Dimension data special type
+	var SPECIAL_DATA_DIMENSION_TYPE = "0";
+
 	/**
 	 * Converts entries to a Trie:
 	 * http://en.wikipedia.org/wiki/Trie
@@ -364,6 +371,44 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
+	 * Finds all remote resources in the selected window that are visible, and returns an object
+	 * keyed by the url with an array of height,width,top,left as the value
+	 *
+	 * @param [Window] win Window to search
+	 * @return [Object] Object with URLs of visible assets as keys, and Array[height, width, top, left] as value
+	 */
+	function getVisibleEntries(win) {
+		var els = ["IMG", "IFRAME"], entries = {}, x, y, doc = win.document;
+
+		// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+		x = (win.pageXOffset !== undefined) ? win.pageXOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollLeft;
+		y = (win.pageYOffset !== undefined) ? win.pageYOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollTop;
+
+		// look at each IMG and IFRAME
+		els.forEach(function(elname) {
+			var elements = doc.getElementsByTagName(elname), el, i, rect;
+
+			for (i = 0; i < elements.length; i++) {
+				el = elements[i];
+
+				// look at this element if it has a src attribute, and we haven't already looked at it
+				if (el && el.src && !entries[el.src]) {
+					rect = el.getBoundingClientRect();
+
+					// Require both height & width to be non-zero
+					// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
+					if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
+						entries[el.src] = [el.offsetHeight, el.offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
+					}
+				}
+			}
+		});
+
+		return entries;
+	}
+
+	/**
 	 * Gathers a filtered list of performance entries.
 	 * @param [number] from Only get timings from
 	 * @param [number] to Only get timings up to
@@ -372,15 +417,18 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function getFilteredResourceTiming(from, to, initiatorTypes) {
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
+		    i, e, results = {}, initiatorType, url, data,
 		    navStart = getNavStartTime(BOOMR.window),
-		    e, i;
+		    visibleEntries = {};
 
 		if (!entries || !entries.length) {
 			return [];
 		}
 
-		var filteredEntries = [];
+		// gather visible entries on the page
+		visibleEntries = getVisibleEntries(BOOMR.window);
 
+		var filteredEntries = [];
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
 
@@ -476,7 +524,22 @@ see: http://www.w3.org/TR/resource-timing/
 				results[url] += "|" + data;
 			}
 			else {
-				results[url] = data;
+				// for the first time we see this URL, add resource dimensions if we have them
+				if (visibleEntries[url] !== undefined) {
+					// We use * as an additional separator to indicate it is not a new resource entry
+					// The following characters will not be URL encoded:
+					// *!-.()~_ but - and . are special to number representation so we don't use them
+					// After the *, the type of special data (ResourceTiming = 0) is added
+					results[url] =
+						SPECIAL_DATA_PREFIX +
+						SPECIAL_DATA_DIMENSION_TYPE +
+						visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
+						+ "|"
+						+ data;
+				}
+				else {
+					results[url] = data;
+				}
 			}
 		}
 
@@ -633,7 +696,8 @@ see: http://www.w3.org/TR/resource-timing/
 		convertToTrie: convertToTrie,
 		optimizeTrie: optimizeTrie,
 		findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
-		toBase36: toBase36
+		toBase36: toBase36,
+		getVisibleEntries: getVisibleEntries
 		/* END UNIT_TEST_CODE */
 	};
 
