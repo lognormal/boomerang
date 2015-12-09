@@ -83,6 +83,9 @@
 				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
 				initialRouteChangeCompleted = true;
 
+				// send any queued beacons first
+				BOOMR.real_sendBeacon();
+
 				// Tell BOOMR this is a Hard SPA navigation still
 				BOOMR.addVar("http.initiator", "spa_hard");
 				firstSpaNav = false;

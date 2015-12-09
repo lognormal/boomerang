@@ -610,7 +610,7 @@
 		 * @returns true if timers were set, false if we're in a prerender state, caller should abort on false.
 		 */
 		setPageLoadTimers: function(ename, t_done, data) {
-			var t_resp_start, t_fetch_start, navSt;
+			var t_resp_start, t_fetch_start, p, navSt;
 
 			if (ename !== "xhr") {
 				impl.initFromCookie();
@@ -622,7 +622,15 @@
 			}
 
 			if (ename === "xhr") {
-				if (data && data.timing) {
+				if (data.timers) {
+					// If we were given a list of timers, set those first
+					for (var timerName in data.timers) {
+						if (data.timers.hasOwnProperty(timerName)) {
+							BOOMR.plugins.RT.setTimer(timerName, data.timers[timerName]);
+						}
+					}
+				}
+				else if (data && data.timing) {
 					// Use details from xhr object to figure out resp latency and page time
 					// t_resp will use the cookie if available or fallback to NavTiming.  Use
 					// responseEnd (instead of responseStart) since it's not until responseEnd
@@ -630,10 +638,14 @@
 					// timestamp with cross-origin XHRs if ResourceTiming is enabled.
 					t_resp_start = data.timing.responseEnd;
 
+					t_fetch_start = data.timing.fetchStart;
+
+					p = BOOMR.getPerformance();
+
 					// if ResourceTiming is available, use its timestamps for t_resp
 					var entry = BOOMR.getResourceTiming(data.url);
-					if (entry) {
-						navSt = BOOMR.window.performance.timing.navigationStart;
+					if (entry && p) {
+						navSt = p.timing.navigationStart;
 
 						// use responseEnd for XHR TTFB (instead of responseStart)
 						t_resp_start = Math.round(navSt + entry.responseEnd);
@@ -670,7 +682,17 @@
 					BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
 				}
 				else {
-					BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+					//
+					// Ensure that t_done is after t_resp_start.  If not, set a var so we
+					// knew there was an inversion.  This can happen due to bugs in NavTiming
+					// clients, where responseEnd happens after all other NavTiming events.
+					//
+					if (t_done < t_resp_start) {
+						BOOMR.addVar("t_page.inv", 1);
+					}
+					else {
+						BOOMR.plugins.RT.setTimer("t_page", t_done - t_resp_start);
+					}
 				}
 			}
 

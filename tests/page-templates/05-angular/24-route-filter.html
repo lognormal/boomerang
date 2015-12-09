@@ -16,7 +16,7 @@ window.angular_nav_routes = ["/widgets/1", "/24-route-filter.html"];
 var homeNavs = 0;
 window.angular_route_filter = function(event, next, current) {
 	if (next && next.$$route && next.$$route.controller === "mainCtrl") {
-		return ++homeNavs == 1;
+		return ++homeNavs === 1;
 	}
 
 	return true;

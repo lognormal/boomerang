@@ -15,24 +15,32 @@ see: http://www.w3.org/TR/resource-timing/
 		return;
 	}
 
-	var initiatorTypes = {
+	//
+	// Constants
+	//
+	var INITIATOR_TYPES = {
 		"other": 0,
 		"img": 1,
 		"link": 2,
 		"script": 3,
 		"css": 4,
-		"xmlhttprequest": 5
+		"xmlhttprequest": 5,
+		"html": 6
 	};
 
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
 	// the whole string) in URLs, to ensure NoScript doesn't think this is an XSS attack
-	var defaultXssBreakWords = [
+	var DEFAULT_XSS_BREAK_WORDS = [
 		/(h)(ref)/gi,
 		/(s)(rc)/gi,
 		/(a)(ction)/gi
 	];
 
-	var xssBreakDelim = "\n";
+	// Delimiter to use to break a XSS word
+	var XSS_BREAK_DELIM = "\n";
+
+	// Maximum number of characters in a URL
+	var DEFAULT_URL_LIMIT = 1000;
 
 	/**
 	 * Converts entries to a Trie:
@@ -58,9 +66,9 @@ see: http://www.w3.org/TR/resource-timing/
 
 			// find any strings to break
 			for (i = 0; i < impl.xssBreakWords.length; i++) {
-				// Add a xssBreakDelim character after the first letter.  optimizeTrie will
+				// Add a XSS_BREAK_DELIM character after the first letter.  optimizeTrie will
 				// ensure this sequence doesn't get combined.
-				urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + xssBreakDelim + "$2");
+				urlFixed = urlFixed.replace(impl.xssBreakWords[i], "$1" + XSS_BREAK_DELIM + "$2");
 			}
 
 			if (!entries.hasOwnProperty(url)) {
@@ -127,7 +135,7 @@ see: http://www.w3.org/TR/resource-timing/
 					// swap the current leaf with compressed one
 					delete cur[node];
 
-					if (node === xssBreakDelim) {
+					if (node === XSS_BREAK_DELIM) {
 						// If this node is a newline, which can't be in a regular URL,
 						// it's due to the XSS patch.  Remove the placeholder character,
 						// and make sure this node isn't compressed by incrementing
@@ -272,6 +280,7 @@ see: http://www.w3.org/TR/resource-timing/
 					entries.push({
 						name: frame.location.href,
 						startTime: 0,
+						initiatorType: "html",
 						redirectStart: navEntry.redirectStart,
 						redirectEnd: navEntry.redirectEnd,
 						fetchStart: navEntry.fetchStart,
@@ -291,6 +300,7 @@ see: http://www.w3.org/TR/resource-timing/
 					entries.push({
 						name: frame.location.href,
 						startTime: 0,
+						initiatorType: "html",
 						redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
 						redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
 						fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
@@ -392,48 +402,81 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
-	 * Gathers performance entries and optimizes the result.
-	 * @param [number] since Only get timings since
+	 * Gathers a filtered list of performance entries.
+	 * @param [number] from Only get timings from
 	 * @param [number] to Only get timings up to
-	 * @return Optimized performance entries trie
+	 * @param [string[]] initiatorTypes Array of initiator types
+	 * @return [ResourceTiming[]] Matching ResourceTiming entries
 	 */
-	function getResourceTiming(since, to) {
-		/*eslint no-script-url:0*/
+	function getFilteredResourceTiming(from, to, initiatorTypes) {
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		    i, e, results = {}, initiatorType, url, data,
 		    navStart = getNavStartTime(BOOMR.window),
 		    visibleEntries = {};
 
 		if (!entries || !entries.length) {
-			return {};
+			return [];
 		}
 
 		// gather visible entries on the page
 		visibleEntries = getVisibleEntries(BOOMR.window);
 
+		var filteredEntries = [];
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
 
+			// skip non-resource URLs
 			if (e.name.indexOf("about:") === 0 ||
-			   e.name.indexOf("javascript:") === 0) {
+			    e.name.indexOf("javascript:") === 0) {
 				continue;
 			}
 
+			// skip mPulse boomerang.js and config.js URLs
 			if (e.name.indexOf(BOOMR.url) > -1 ||
-			   e.name.indexOf(BOOMR.config_url) > -1) {
+			    e.name.indexOf(BOOMR.config_url) > -1) {
 				continue;
 			}
 
-			if (since && (navStart + e.startTime) < since) {
+			// if the user specified a "from" time, skip resources that started before then
+			if (from && (navStart + e.startTime) < from) {
 				continue;
 			}
 
-			// If we were given a final timestamp, don't add any resources that
-			// started after it.
+			// if we were given a final timestamp, don't add any resources that started after it
 			if (to && (navStart + e.startTime) > to) {
 				// We can also break at this point since the array is time sorted
 				break;
 			}
+
+			// if given an array of initiatorTypes to include, skip anything else
+			if (typeof initiatorTypes !== "undefined" && initiatorTypes !== "*" && initiatorTypes.length) {
+				if (!e.initiatorType || !BOOMR.utils.inArray(e.initiatorType, initiatorTypes)) {
+					continue;
+				}
+			}
+
+			filteredEntries.push(e);
+		}
+
+		return filteredEntries;
+	}
+	/**
+	 * Gathers performance entries and compresses the result.
+	 * @param [number] from Only get timings from
+	 * @param [number] to Only get timings up to
+	 * @return Optimized performance entries trie
+	 */
+	function getCompressedResourceTiming(from, to) {
+		/*eslint no-script-url:0*/
+		var entries = getFilteredResourceTiming(from, to),
+		    i, e, results = {}, initiatorType, url, data;
+
+		if (!entries || !entries.length) {
+			return {};
+		}
+
+		for (i = 0; i < entries.length; i++) {
+			e = entries[i];
 
 			//
 			// Compress the RT data into a string:
@@ -448,7 +491,7 @@ see: http://www.w3.org/TR/resource-timing/
 			//
 
 			// prefix initiatorType to the string
-			initiatorType = initiatorTypes[e.initiatorType];
+			initiatorType = INITIATOR_TYPES[e.initiatorType];
 			if (typeof initiatorType === "undefined") {
 				initiatorType = 0;
 			}
@@ -467,7 +510,7 @@ see: http://www.w3.org/TR/resource-timing/
 				trimTiming(e.redirectStart, e.startTime)
 			].map(toBase36).join(",").replace(/,+$/, "");
 
-			url = BOOMR.utils.cleanupURL(e.name);
+			url = BOOMR.utils.cleanupURL(e.name, impl.urlLimit);
 
 			// if this entry already exists, add a pipe as a separator
 			if (results[url] !== undefined) {
@@ -492,6 +535,50 @@ see: http://www.w3.org/TR/resource-timing/
 		return optimizeTrie(convertToTrie(results), true);
 	}
 
+	/**
+	 * Calculates the union of durations of the specified resources.  If
+	 * any resources overlap, those timeslices are not double-counted.
+	 *
+	 * @param [ResourceTiming[]] resources Resources
+	 *
+	 * @returns Duration, in milliseconds
+	 */
+	function calculateResourceTimingUnion(resources) {
+		// To do this, we're going to first iterate over all resources, adding each resources'
+		// total time to the total time calcation.  Next, we iterate over all subsequent resources
+		// and subtract any time where they overlap with this one.
+		if (!resources || !resources.length) {
+			return 0;
+		}
+
+		var totalTime = 0;
+		for (var i = 0; i < resources.length; i++) {
+			var r1 = resources[i];
+
+			// add this resource's total time
+			var r1End = r1.responseStart || r1.responseEnd;
+			totalTime += r1End - r1.fetchStart;
+
+			// iterate over all following resources, and subtract any overlapping time
+			for (var j = i + 1; j < resources.length; j++) {
+				var r2 = resources[j];
+
+				var r2End = r2.responseStart || r2.responseEnd;
+
+				if (r2.fetchStart >= r1End) {
+					// this resource started after the end of r1, and all subsequent
+					// will as well, so we can stop iterating
+					break;
+				}
+
+				// subtract the overlapping time
+				totalTime -= Math.min(r1End, r2End) - r2.fetchStart;
+			}
+		}
+
+		return totalTime;
+	}
+
 	impl = {
 		complete: false,
 		sentNavBeacon: false,
@@ -507,7 +594,8 @@ see: http://www.w3.org/TR/resource-timing/
 			this.complete = true;
 			BOOMR.sendBeacon();
 		},
-		xssBreakWords: defaultXssBreakWords,
+		xssBreakWords: DEFAULT_XSS_BREAK_WORDS,
+		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
 		done: function() {
 			var r;
@@ -519,7 +607,7 @@ see: http://www.w3.org/TR/resource-timing/
 			}
 
 			BOOMR.removeVar("restiming");
-			r = getResourceTiming();
+			r = getCompressedResourceTiming();
 			if (r) {
 				BOOMR.info("Client supports Resource Timing API", "restiming");
 				BOOMR.addVar({
@@ -554,7 +642,8 @@ see: http://www.w3.org/TR/resource-timing/
 		init: function(config) {
 			var p = BOOMR.getPerformance();
 
-			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming", ["xssBreakWords", "clearOnBeacon"]);
+			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
+				["xssBreakWords", "clearOnBeacon", "urlLimit"]);
 
 			if (impl.initialized) {
 				return this;
@@ -581,14 +670,24 @@ see: http://www.w3.org/TR/resource-timing/
 		is_supported: function() {
 			return impl.initialized && impl.supported;
 		},
-		// exports for test
+		//
+		// Public Exports
+		//
+		getCompressedResourceTiming: getCompressedResourceTiming,
+		getFilteredResourceTiming: getFilteredResourceTiming,
+		calculateResourceTimingUnion: calculateResourceTimingUnion
+
+		//
+		// Test Exports (only for debug)
+		//
+		/* BEGIN UNIT_TEST_CODE */,
 		trimTiming: trimTiming,
 		convertToTrie: convertToTrie,
 		optimizeTrie: optimizeTrie,
 		findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
-		getResourceTiming: getResourceTiming,
 		toBase36: toBase36,
 		getVisibleEntries: getVisibleEntries
+		/* END UNIT_TEST_CODE */
 	};
 
 }());

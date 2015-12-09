@@ -239,7 +239,7 @@
 		});
 
 		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results"]);
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results", "BOOMR_configt"]);
 		window.mocha.checkLeaks();
 
 		// set globals
@@ -449,7 +449,7 @@
 			res = useLastMatch ? t.findLastResource(urlMatch) : t.findFirstResource(urlMatch);
 		}
 
-		if (res != null) {
+		if (res !== null) {
 			assert.closeTo(tf.beacons[beaconIndex].t_done, res.responseEnd, closeTo);
 		}
 		else {
