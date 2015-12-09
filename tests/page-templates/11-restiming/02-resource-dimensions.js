@@ -17,7 +17,7 @@ describe("e2e/11-restiming/02-resource-dimensions", function() {
 			// 400 width  = b4
 			// 500 y      = dw
 			// 100 x      = 2s
-			assert.include(b.restiming, "*5k,b4,dw,2s");
+			assert.include(b.restiming, "*05k,b4,dw,2s");
 		}
 	});
 
@@ -29,7 +29,7 @@ describe("e2e/11-restiming/02-resource-dimensions", function() {
 			// 50 width  = 1e
 			// 800 y     = m8
 			// 200 x     = 5k
-			assert.include(b.restiming, "*1e,1e,m8,5k");
+			assert.include(b.restiming, "*01e,1e,m8,5k");
 		}
 	});
 });

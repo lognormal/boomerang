@@ -42,6 +42,13 @@ see: http://www.w3.org/TR/resource-timing/
 	// Maximum number of characters in a URL
 	var DEFAULT_URL_LIMIT = 1000;
 
+	// Any ResourceTiming data time that starts with this character is not a time,
+	// but something else (like dimension data)
+	var SPECIAL_DATA_PREFIX = "*";
+
+	// Dimension data special type
+	var SPECIAL_DATA_DIMENSION_TYPE = "0";
+
 	/**
 	 * Converts entries to a Trie:
 	 * http://en.wikipedia.org/wiki/Trie
@@ -522,9 +529,13 @@ see: http://www.w3.org/TR/resource-timing/
 					// We use * as an additional separator to indicate it is not a new resource entry
 					// The following characters will not be URL encoded:
 					// *!-.()~_ but - and . are special to number representation so we don't use them
+					// After the *, the type of special data (ResourceTiming = 0) is added
 					results[url] =
-						"*" + visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
-						+ "|" + data;
+						SPECIAL_DATA_PREFIX +
+						SPECIAL_DATA_DIMENSION_TYPE +
+						visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
+						+ "|"
+						+ data;
 				}
 				else {
 					results[url] = data;
