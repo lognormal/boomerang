@@ -1206,7 +1206,7 @@ BOOMR_check_doc_domain();
 			// This plugin wants the beacon to go somewhere else,
 			// so update the location
 			if (beacon_url_override) {
-				impl.beacon_url = beacon_url_override;
+				impl.beacon_url_override = beacon_url_override;
 			}
 
 			if (!impl.beaconQueued) {
@@ -1297,6 +1297,9 @@ BOOMR_check_doc_domain();
 
 			// If we reach here, all plugins have completed
 			impl.fireEvent("before_beacon", impl.vars);
+
+			// Use the override URL if given
+			impl.beacon_url = impl.beacon_url_override || impl.beacon_url;
 
 			// Don't send a beacon if no beacon_url has been set
 			// you would do this if you want to do some fancy beacon handling
