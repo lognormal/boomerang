@@ -35,7 +35,7 @@
 					// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
 		cookie: "RT",		//! Name of the cookie that stores the start time and referrer
 		cookie_exp: COOKIE_EXP,	//! Cookie expiry in seconds (7 days)
-		session_exp: SESSION_EXP,//! Session expiry in seconds (30 minutes)
+		session_exp: SESSION_EXP, //! Session expiry in seconds (30 minutes)
 		strict_referrer: true,	//! By default, don't beacon if referrers don't match.
 					// If set to false, beacon both referrer values and let
 					// the back end decide
