@@ -1,1 +1,1 @@
-/*Copyright (c) 2011-2015 SOASTA, Inc. All rights reserved.  Distributed under the BSD License.*/
+/*Copyright (c) 2011-2016 SOASTA, Inc. All rights reserved.  Distributed under the BSD License.*/
