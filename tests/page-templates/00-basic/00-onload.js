@@ -34,6 +34,7 @@ describe("e2e/00-basic/00-onload", function() {
 		if ((window.performance && window.performance.memory) ||
 			(window.console && window.console.memory)) {
 			assert.isNumber(tf.lastBeacon()["mem.total"], "mem.total");
+			assert.isNumber(tf.lastBeacon()["mem.limit"], "mem.limit");
 			assert.isNumber(tf.lastBeacon()["mem.used"], "mem.used");
 		}
 	});
