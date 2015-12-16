@@ -418,15 +418,11 @@ see: http://www.w3.org/TR/resource-timing/
 	function getFilteredResourceTiming(from, to, initiatorTypes) {
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
 		    i, e, results = {}, initiatorType, url, data,
-		    navStart = getNavStartTime(BOOMR.window),
-		    visibleEntries = {};
+		    navStart = getNavStartTime(BOOMR.window);
 
 		if (!entries || !entries.length) {
 			return [];
 		}
-
-		// gather visible entries on the page
-		visibleEntries = getVisibleEntries(BOOMR.window);
 
 		var filteredEntries = [];
 		for (i = 0; i < entries.length; i++) {
@@ -476,11 +472,15 @@ see: http://www.w3.org/TR/resource-timing/
 	function getCompressedResourceTiming(from, to) {
 		/*eslint no-script-url:0*/
 		var entries = getFilteredResourceTiming(from, to),
-		    i, e, results = {}, initiatorType, url, data;
+		    i, e, results = {}, initiatorType, url, data,
+		    visibleEntries = {};
 
 		if (!entries || !entries.length) {
 			return {};
 		}
+
+		// gather visible entries on the page
+		visibleEntries = getVisibleEntries(BOOMR.window);
 
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
