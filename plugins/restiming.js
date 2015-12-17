@@ -569,7 +569,7 @@ see: http://www.w3.org/TR/resource-timing/
 			var res = resources[i];
 
 			// if there is a subsequent resource with the same fetchStart, use
-			// it's value instead (since pre-sort guarantee is that it's end
+			// its value instead (since pre-sort guarantee is that it's end
 			// will be >= this one)
 			if (i !== resources.length - 1 &&
 				res.fetchStart === resources[i + 1].fetchStart) {
