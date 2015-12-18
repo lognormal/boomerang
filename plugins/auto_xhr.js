@@ -396,15 +396,25 @@
 				resource.timing.loadEventEnd,
 				impl.spaBackEndResources);
 
+			// determine the total time based on the SPA logic
+			var totalTime = Math.round(resource.timing.loadEventEnd - resource.timing.requestStart);
+
 			if (!resources || !resources.length) {
+				if (BOOMR.plugins.ResourceTiming.is_supported()) {
+					// If ResourceTiming is supported, but there were no entries,
+					// this was all Front-End time
+					resource.timers = {
+						t_resp: 0,
+						t_page: totalTime,
+						t_done: totalTime
+					};
+				}
+
 				return;
 			}
 
 			// calculate the Back-End time based on any time those resources were active
 			var backEndTime = Math.round(BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion(resources));
-
-			// determine the total time based on the SPA logic
-			var totalTime = Math.round(resource.timing.loadEventEnd - resource.timing.requestStart);
 
 			// front-end time is anything left over
 			var frontEndTime = totalTime - backEndTime;

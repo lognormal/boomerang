@@ -547,6 +547,46 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
+	 * Compresses an array of ResourceTiming-like objects (those with a fetchStart
+	 * and a responseStart/responseEnd) by reducing multiple objects with the same
+	 * fetchStart down to a single object with the longest duration.
+	 *
+	 * Array must be pre-sorted by fetchStart, then by responseStart||responseEnd
+	 *
+	 * @param [ResourceTiming[]] resources ResourceTiming-like resources, with just
+	 *  a fetchStart and responseEnd
+	 *
+	 * @returns Duration, in milliseconds
+	 */
+	function reduceFetchStarts(resources) {
+		var times = [];
+
+		if (!resources || !resources.length) {
+			return times;
+		}
+
+		for (var i = 0; i < resources.length; i++) {
+			var res = resources[i];
+
+			// if there is a subsequent resource with the same fetchStart, use
+			// its value instead (since pre-sort guarantee is that it's end
+			// will be >= this one)
+			if (i !== resources.length - 1 &&
+				res.fetchStart === resources[i + 1].fetchStart) {
+				continue;
+			}
+
+			// track just the minimum fetchStart and responseEnd
+			times.push({
+				fetchStart: res.fetchStart,
+				responseEnd: res.responseStart || res.responseEnd
+			});
+		}
+
+		return times;
+	}
+
+	/**
 	 * Calculates the union of durations of the specified resources.  If
 	 * any resources overlap, those timeslices are not double-counted.
 	 *
@@ -555,36 +595,59 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @returns Duration, in milliseconds
 	 */
 	function calculateResourceTimingUnion(resources) {
-		// To do this, we're going to first iterate over all resources, adding each resources'
-		// total time to the total time calcation.  Next, we iterate over all subsequent resources
-		// and subtract any time where they overlap with this one.
+		var i;
+
 		if (!resources || !resources.length) {
 			return 0;
 		}
 
-		var totalTime = 0;
-		for (var i = 0; i < resources.length; i++) {
-			var r1 = resources[i];
-
-			// add this resource's total time
-			var r1End = r1.responseStart || r1.responseEnd;
-			totalTime += r1End - r1.fetchStart;
-
-			// iterate over all following resources, and subtract any overlapping time
-			for (var j = i + 1; j < resources.length; j++) {
-				var r2 = resources[j];
-
-				var r2End = r2.responseStart || r2.responseEnd;
-
-				if (r2.fetchStart >= r1End) {
-					// this resource started after the end of r1, and all subsequent
-					// will as well, so we can stop iterating
-					break;
-				}
-
-				// subtract the overlapping time
-				totalTime -= Math.min(r1End, r2End) - r2.fetchStart;
+		// First, sort by start time, then end time
+		resources.sort(function(a, b) {
+			if (a.fetchStart !== b.fetchStart) {
+				return a.fetchStart - b.fetchStart;
 			}
+			else {
+				var ae = a.responseStart || a.responseEnd;
+				var be = b.responseStart || b.responseEnd;
+
+				return ae - be;
+			}
+		});
+
+		// Next, find all resources with the same start time, and reduce
+		// them to the largest end time.
+		var times = reduceFetchStarts(resources);
+
+		// Third, for every resource, if the start is less than the end of
+		// any previous resource, change its start to the end.  If the new start
+		// time is more than the end time, we can discard this one.
+		var times2 = [];
+		var furthestEnd = 0;
+
+		for (i = 0; i < times.length; i++) {
+			var res = times[i];
+
+			if (res.fetchStart < furthestEnd) {
+				res.fetchStart = furthestEnd;
+			}
+
+			// as long as this resource has > 0 duration, add it to our next list
+			if (res.fetchStart < res.responseEnd) {
+				times2.push(res);
+
+				// keep track of the furthest end point
+				furthestEnd = res.responseEnd;
+			}
+		}
+
+		// Reduce down again to same start times again, and now we should
+		// have no overlapping regions
+		var times3 = reduceFetchStarts(times2);
+
+		// Finally, calculate the overall time from our non-overlapping regions
+		var totalTime = 0;
+		for (i = 0; i < times3.length; i++) {
+			totalTime += times3[i].responseEnd - times3[i].fetchStart;
 		}
 
 		return totalTime;
@@ -697,7 +760,8 @@ see: http://www.w3.org/TR/resource-timing/
 		optimizeTrie: optimizeTrie,
 		findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
 		toBase36: toBase36,
-		getVisibleEntries: getVisibleEntries
+		getVisibleEntries: getVisibleEntries,
+		reduceFetchStarts: reduceFetchStarts
 		/* END UNIT_TEST_CODE */
 	};
 
