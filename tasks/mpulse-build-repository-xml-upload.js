@@ -17,6 +17,17 @@ module.exports = function(grunt) {
 
 		var configFilePath = "tasks/mpulse-build-repository-xml-upload.config.json";
 
+		var jsonConfig = {};
+
+		// don't break the build if the config file does not exist
+		try {
+			jsonConfig = grunt.file.readJSON(configFilePath);
+		}
+		catch (e) {
+			grunt.log.warn("No file " + configFilePath + " found, skipping...");
+			return done();
+		}
+
 		// read in the XML .tmpl file
 		var template = grunt.file.read(options.template);
 
@@ -49,17 +60,6 @@ module.exports = function(grunt) {
 			grunt.fail.fatal("Something went wrong during template processing (mpulse-build-repository-xml.tmpl)");
 		}
 
-
-		var jsonConfig = {};
-
-		// don't break the build if the config file does not exist
-		try {
-			jsonConfig = grunt.file.readJSON(configFilePath);
-		}
-		catch (e) {
-			grunt.log.warn("No file " + configFilePath + " found!");
-			jsonConfig = {};
-		}
 		var repository = new Repository(jsonConfig.repository);
 
 		repository.connect(jsonConfig.tenant, jsonConfig.username, jsonConfig.password, function(repositoryConnectError) {
