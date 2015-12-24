@@ -2,9 +2,10 @@
  * Fix issues with Function.prototype.bind not being available.
  * via: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Polyfill
  **/
-!(function() {
+(function() {
 	if (!Function.prototype.bind) {
-		Function.prototype.bind = function(oThis) {
+		/*eslint-disable no-extend-native*/
+		Function.prototype.bind = function(that) {
 			if (typeof this !== "function") {
 				// closest thing possible to the ECMAScript 5
 				// internal IsCallable function
@@ -17,7 +18,7 @@
 			    fBound  = function() {
 				    return fToBind.apply(this instanceof fNOP
 							 ? this
-							 : oThis,
+							 : that,
 							 aArgs.concat(Array.prototype.slice.call(arguments)));
 			    };
 
@@ -29,5 +30,6 @@
 
 			return fBound;
 		};
+		/*eslint-enable no-extend-native*/
 	}
 }());

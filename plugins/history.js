@@ -3,7 +3,7 @@
 	var hooked = false,
 	    routeHooked = false,
 	    enabled = true,
-	    hadMissedRouteChange = false
+	    hadMissedRouteChange = false;
 
 	// Checking for Plugins required and if already integrated
 	if (BOOMR.plugins.History || typeof BOOMR.plugins.SPA === "undefined" || typeof BOOMR.plugins.AutoXHR === "undefined") {
@@ -39,70 +39,81 @@
 
 		history.setState = function() {
 			log("setState");
+
 			if (!enabled) {
-				log("Not enabled We've missed a routeChange");
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.setState.apply(this, arguments);
-		}
+		};
 
 		history.listen = function() {
 			log("listen");
+
 			if (!enabled) {
-				log("Not enabled We've missed a routeChange");
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.listen.apply(this, arguments);
-		}
+		};
 
 		history.transitionTo = function() {
 			log("transitionTo");
+
 			if (!enabled) {
-				log("Not enabled We've missed a routeChange");
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.transitionTo.apply(this, arguments);
-		}
+		};
 
 		history.pushState = function(state, title, url) {
 			log("pushState");
+
 			if (!enabled) {
-				log("Not enabled We've missed a routeChange");
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.pushState.apply(this, arguments);
-		}
+		};
 
 		history.replaceState = function() {
 			log("pushState");
+
 			if (!enabled) {
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
+
 			BOOMR.plugins.SPA.route_change();
 			orig_history.replaceState.apply(this, arguments);
-		}
+		};
 
 		history.go = function() {
 			log("go");
 
 			if (!enabled) {
-				log("Not enabled We've missed a routeChange");
+				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
 				return;
 			}
 
 			BOOMR.plugins.SPA.route_change();
 			orig_history.go.apply(this, arguments);
-		}
+		};
 
 		return true;
 	}
@@ -120,6 +131,7 @@
 				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 				hooked = true;
 			}
+
 			return this;
 		},
 		disable: function() {
