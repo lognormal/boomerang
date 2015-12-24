@@ -57,7 +57,7 @@ module.exports = function() {
 	// Config
 	//
 	grunt.initConfig({
-		pkg:  grunt.file.readJSON("package.json"),
+		pkg: grunt.file.readJSON("package.json"),
 		releaseVersion: pkg.releaseVersion + "." + buildNumber,
 		buildDate: Math.round(Date.now() / 1000),
 		concat: {
@@ -239,7 +239,7 @@ module.exports = function() {
 							replacement: ""
 						},
 						{
-							pattern: /CONFIG_RELOAD_TIMEOUT=5\.5\*60\*1000/,
+							pattern: /CONFIG_RELOAD_TIMEOUT.*=.*5\.5.*\*.*60.*\*.*1000/,
 							replacement: "CONFIG_RELOAD_TIMEOUT=1000"
 						}
 					]
@@ -275,7 +275,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -291,7 +294,10 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -305,7 +311,10 @@ module.exports = function() {
 			snippets: {
 				options: {
 					preserveComments: false,
-					mangle: true
+					mangle: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
@@ -536,8 +545,8 @@ module.exports = function() {
 					testname: "Boomerang Unit Tests",
 					browsers: [{
 						"browserName": "internet explorer",
-						"version":     "11",
-						"platform":    "Windows 8.1"
+						"version": "11",
+						"platform": "Windows 8.1"
 					}]
 				}
 			},
@@ -659,8 +668,8 @@ module.exports = function() {
 		"test:e2e:debug": ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"],
 		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
 		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
-		"test:matrix:e2e": ["saucelabs-mocha:e2e"],
-		"test:matrix:e2e:debug": ["saucelabs-mocha:e2e-debug"],
+		"test:matrix:e2e": ["pages-builder", "saucelabs-mocha:e2e"],
+		"test:matrix:e2e:debug": ["pages-builder", "saucelabs-mocha:e2e-debug"],
 		"test:matrix:unit": ["saucelabs-mocha:unit"],
 		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
 		"test:unit": ["test:build", "build", "karma:unit"],
@@ -694,7 +703,7 @@ module.exports = function() {
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
 					var beforeTask = tasks.slice(0, index );
-					var afterTask = tasks.slice(index +1, tasks.length);
+					var afterTask = tasks.slice(index + 1, tasks.length);
 					var insertTask = aliases[aliasTask].filter(checkDuplicates);
 					tasks = [].concat(beforeTask, insertTask, afterTask);
 				}

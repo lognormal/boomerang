@@ -74,6 +74,10 @@ angular.module("app", ["ngResource", "ngRoute"])
 				templateUrl: "/pages/05-angular/support/home.html",
 				controller: "mainCtrl"
 			}).
+			when("/24-route-filter.html", {
+				templateUrl: "/pages/05-angular/support/home.html",
+				controller: "mainCtrl"
+			}).
 			when("/08-no-resources.html", {
 				template: "<h1>Empty</h1>"
 			}).
@@ -96,6 +100,10 @@ angular.module("app", ["ngResource", "ngRoute"])
 		var hookOptions = {};
 		if (window.angular_route_wait) {
 			hookOptions.routeChangeWaitFilter = window.angular_route_wait;
+		}
+
+		if (window.angular_route_filter) {
+			hookOptions.routeFilter = window.angular_route_filter;
 		}
 
 		function hookAngularBoomerang() {

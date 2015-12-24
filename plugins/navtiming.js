@@ -175,7 +175,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				pt = w.chrome.loadTimes();
 				if (pt) {
 					data = {
-						nt_spdy: (pt.wasFetchedViaSpdy?1:0),
+						nt_spdy: (pt.wasFetchedViaSpdy ? 1 : 0),
 						nt_cinf: pt.connectionInfo,
 						nt_first_paint: pt.firstPaintTime
 					};

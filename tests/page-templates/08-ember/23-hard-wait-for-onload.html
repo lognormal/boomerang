@@ -1,0 +1,35 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.prod.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="support/app.js"></script>
+
+<script>
+window.imgs = [0];
+</script>
+
+<!-- Handlebars templates for our application. -->
+<script type="text/x-handlebars">
+	<div class="container">
+		{{outlet}}
+	</div>
+</script>
+
+<script src="/test-templates/spa/23-hard-wait-for-onload.js" type="text/javascript"></script>
+<script src="23-hard-wait-for-onload.js"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Ember: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<script src="/delay?delay=5000&amp;file=/blackhole" type="text/javascript"></script>
+<%= footer %>

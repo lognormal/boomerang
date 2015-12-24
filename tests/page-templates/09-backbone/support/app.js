@@ -100,7 +100,9 @@ app.HomeView = Backbone.View.extend({
 			}, "html");
 		}
 		else {
-			that.renderTemplate();
+			// have renderTemplate run in a callback so 'route' fires first, so it
+			// ensures the widgets XHR is tracked
+			setTimeout(that.renderTemplate.call(that), 0);
 		}
 	}
 });
@@ -156,6 +158,10 @@ if (window.backbone_route_wait) {
 	hookOptions.routeChangeWaitFilter = window.backbone_route_wait;
 }
 
+if (window.backbone_route_filter) {
+	hookOptions.routeFilter = window.backbone_route_filter;
+}
+
 var hadRouteChange = false;
 app.Router.on("route", function() {
 	hadRouteChange = true;
@@ -186,10 +192,16 @@ if (!hookBackboneBoomerang()) {
 //
 // Start the app
 //
-Backbone.history.start({
-	root: "/pages/09-backbone/",
-	pushState: window.backbone_html5_mode ? true : false
-});
+window.backbone_start = function() {
+	Backbone.history.start({
+		root: "/pages/09-backbone/",
+		pushState: window.backbone_html5_mode ? true : false
+	});
+};
+
+if (!window.backbone_delay_startup) {
+	window.backbone_start();
+}
 
 if (typeof window.backbone_nav_routes !== "undefined" &&
 	Object.prototype.toString.call(window.backbone_nav_routes) === "[object Array]") {

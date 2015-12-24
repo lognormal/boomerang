@@ -355,14 +355,14 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 		});
 	});
 
-	describe("getResourceTiming()", function() {
+	describe("getCompressedResourceTiming()", function() {
 		it("Should get the ResourceTiming trie", function() {
 			//
 			// NOTE: If you change the resources for this test suite (test-boomerang.html), this test will
 			// need to be updated.
 			//
 
-			var trie = BOOMR.plugins.ResourceTiming.getResourceTiming();
+			var trie = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming();
 
 			// NOTE: what is tested depends on the environment, whether it supports ResourceTiming or not
 			if (!BOOMR.plugins.ResourceTiming.is_supported()) {
@@ -391,6 +391,437 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 				// other entries will be under vendor
 				assert.isObject(trie[baseUrl]["vendor/"]);
 			}
+		});
+	});
+
+	describe("calculateResourceTimingUnion()", function() {
+		it("Should return 0 if given an empty list", function() {
+			assert.deepEqual(0, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion());
+		});
+
+		it("Should return the duration of a single resource", function() {
+			assert.deepEqual(100, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}]));
+		});
+
+		it("Should return the duration of two resources that don't overlap", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 120,
+				responseEnd: 220
+			}]));
+		});
+
+		it("Should return the duration of three resources that don't overlap", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 120,
+				responseEnd: 220
+			}, {
+				fetchStart: 530,
+				responseEnd: 630
+			}]));
+		});
+
+		it("Should return the duration of two resources, one of which is completely within the other one", function() {
+			assert.deepEqual(100, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 50,
+				responseEnd: 100
+			}]));
+		});
+
+		it("Should return the duration of two resources, one of which is partially within the other one", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}]));
+		});
+
+		it("Should return the duration of three resources, one of which is partially within the other one", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 300,
+				responseEnd: 400
+			}]));
+		});
+
+		it("Should return the duration of three resources, two of which are completely within the other one", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 300,
+				responseEnd: 400
+			}]));
+		});
+
+		it("Should return the duration of three resources, one of which are completely within the other one, and one of which is completely within the other", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 50,
+				responseEnd: 100
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}]));
+		});
+
+		it("Should return the duration of three resources, with each overlapping the other", function() {
+			assert.deepEqual(300, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 100,
+				responseEnd: 210
+			}, {
+				fetchStart: 200,
+				responseEnd: 310
+			}]));
+		});
+
+		it("Should return the duration of three resources, with the later two overlapping each other partially", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 210,
+				responseEnd: 310
+			}, {
+				fetchStart: 300,
+				responseEnd: 310
+			}]));
+		});
+
+		it("Should return the duration of three resources, with the later two overlapping each other completely", function() {
+			assert.deepEqual(200, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 10,
+				responseStart: 110
+			}, {
+				fetchStart: 210,
+				responseEnd: 310
+			}, {
+				fetchStart: 250,
+				responseEnd: 260
+			}]));
+		});
+
+		it("Should return the duration of three resources of the same duration", function() {
+			assert.deepEqual(1, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 1
+			}, {
+				fetchStart: 0,
+				responseEnd: 1
+			}, {
+				fetchStart: 0,
+				responseEnd: 1
+			}]));
+		});
+
+		it("Should return the duration of 6 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}]));
+		});
+
+		it("Should return the duration of 7 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}]));
+		});
+
+		it("Should return the duration of 8 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}, {
+				fetchStart: 2,
+				responseEnd: 43
+			}]));
+		});
+
+		it("Should return the duration of 9 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}, {
+				fetchStart: 2,
+				responseEnd: 43
+			}, {
+				fetchStart: 3,
+				responseEnd: 42
+			}]));
+		});
+
+		it("Should return the duration of 10 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}, {
+				fetchStart: 2,
+				responseEnd: 43
+			}, {
+				fetchStart: 3,
+				responseEnd: 42
+			}, {
+				fetchStart: 4,
+				responseEnd: 44
+			}]));
+		});
+
+		it("Should return the duration of 10 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}, {
+				fetchStart: 2,
+				responseEnd: 43
+			}, {
+				fetchStart: 3,
+				responseEnd: 42
+			}, {
+				fetchStart: 4,
+				responseEnd: 44
+			}, {
+				fetchStart: 1,
+				responseEnd: 40
+			}]));
+		});
+
+		it("Should return the duration of 12 resources", function() {
+			assert.deepEqual(74, BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion([{
+				fetchStart: 0,
+				responseStart: 45
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 103
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 102
+			}, {
+				fetchStart: 100,
+				responseEnd: 129
+			}, {
+				fetchStart: 1,
+				responseEnd: 44
+			}, {
+				fetchStart: 2,
+				responseEnd: 43
+			}, {
+				fetchStart: 3,
+				responseEnd: 42
+			}, {
+				fetchStart: 4,
+				responseEnd: 41
+			}, {
+				fetchStart: 4,
+				responseEnd: 44
+			}, {
+				fetchStart: 1,
+				responseEnd: 40
+			}]));
+		});
+	});
+
+	describe("reduceFetchStarts()", function() {
+		it("Should return [] if given an empty list", function() {
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts([]));
+		});
+
+		it("Should return [] if given not a list", function() {
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts());
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(null));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(false));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(true));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(1));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(1.0));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(-1));
+			assert.deepEqual([], BOOMR.plugins.ResourceTiming.reduceFetchStarts(0));
+		});
+
+		it("Should return a single resource if given a single resource", function() {
+			assert.deepEqual([{
+				fetchStart: 10,
+				responseEnd: 10
+			}], BOOMR.plugins.ResourceTiming.reduceFetchStarts([{
+				fetchStart: 10,
+				responseEnd: 10
+			}]));
+		});
+
+		it("Should return two non-same-start resources", function() {
+			assert.deepEqual(
+				[{ fetchStart: 0, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }],
+				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
+					{ fetchStart: 0, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }
+				]));
+		});
+
+		it("Should return a single resource from two with the same start time", function() {
+			assert.deepEqual(
+				[{ fetchStart: 1, responseEnd: 10 }],
+				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
+					{ fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }
+				]));
+		});
+
+		it("Should return a single resource from two with the same start time where the second one is longer", function() {
+			assert.deepEqual(
+				[{ fetchStart: 1, responseEnd: 15 }],
+				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
+					{ fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 15 }
+				]));
+		});
+
+		it("Should return a single resource from 3 with the same start time", function() {
+			assert.deepEqual(
+				[{ fetchStart: 1, responseEnd: 10 }],
+				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
+					{ fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }
+				]));
+		});
+
+		it("Should return two resources from two with the same start time and one with a different", function() {
+			assert.deepEqual(
+				[{ fetchStart: 0, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }],
+				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
+					{ fetchStart: 0, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }
+				]));
 		});
 	});
 });

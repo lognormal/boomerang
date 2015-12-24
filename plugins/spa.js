@@ -5,6 +5,7 @@
 	    lastLocationChange = "",
 	    autoXhrEnabled = false,
 	    firstSpaNav = true,
+	    routeFilter = false,
 	    routeChangeWaitFilter = false,
 	    supported = [],
 	    latestResource;
@@ -82,6 +83,9 @@
 				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
 				initialRouteChangeCompleted = true;
 
+				// send any queued beacons first
+				BOOMR.real_sendBeacon();
+
 				// Tell BOOMR this is a Hard SPA navigation still
 				BOOMR.addVar("http.initiator", "spa_hard");
 				firstSpaNav = false;
@@ -89,6 +93,10 @@
 				// Since we held the original beacon (autorun=false), we need to tell BOOMR
 				// that the page has loaded OK.
 				BOOMR.page_ready();
+			}
+
+			if (typeof options.routeFilter === "function") {
+				routeFilter = options.routeFilter;
 			}
 
 			if (typeof options.routeChangeWaitFilter === "function") {
@@ -103,6 +111,18 @@
 		 * Called by a framework when a route change has happened
 		 */
 		route_change: function() {
+			// if we have a routeFilter, see if they want to track this route
+			if (routeFilter) {
+				try {
+					if (!routeFilter.apply(null, arguments)) {
+						return;
+					}
+				}
+				catch (e) {
+					BOOMR.addError(e, "SPA.route_change.routeFilter");
+				}
+			}
+
 			// note we've had at least one route change
 			initialRouteChangeStarted = true;
 
@@ -134,10 +154,15 @@
 
 			// if we have a routeChangeWaitFilter, make sure AutoXHR waits on the custom event
 			if (routeChangeWaitFilter) {
-				if (routeChangeWaitFilter.apply(null, arguments)) {
-					resource.wait = true;
+				try {
+					if (routeChangeWaitFilter.apply(null, arguments)) {
+						resource.wait = true;
 
-					latestResource = resource;
+						latestResource = resource;
+					}
+				}
+				catch (e) {
+					BOOMR.addError(e, "SPA.route_change.routeChangeWaitFilter");
 				}
 			}
 

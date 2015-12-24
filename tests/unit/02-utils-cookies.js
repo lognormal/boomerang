@@ -206,7 +206,7 @@ describe("BOOMR.utils cookies", function() {
 		});
 
 		it("Should validate that document.cookie contains quotes for a complex cookie", function() {
-			var c = { a: 10, b: 20, c:"foo bar" };
+			var c = { a: 10, b: 20, c: "foo bar" };
 			BOOMR.utils.setCookie("complex-cookie", c);
 
 			assert.match(document.cookie, /(^|; *)complex-cookie="a=10&b=20&c=foo%20bar"($| *;)/, "complex-cookie should be quoted");
