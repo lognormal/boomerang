@@ -367,10 +367,6 @@ module.exports = function() {
 			}
 		},
 		"babel": {
-			options: {
-				sourceMap: true,
-				nonStandard: true
-			},
 			"spa-react-test-templates": {
 				files: {
 					"tests/page-templates/12-react/support/app-component.js": "tests/page-templates/12-react/support/app.jsx"
@@ -381,7 +377,9 @@ module.exports = function() {
 			"spa-react-test-templates": {
 				files: {
 					"tests/page-templates/12-react/support/app.js": [
-						"tests/vendor/react/react.min.js",
+						"node_modules/react/dist/react.js",
+						"node_modules/react-dom/dist/react-dom.js",
+						"node_modules/react-router/umd/ReactRouter.js",
 						"tests/page-templates/12-react/support/app-component.js"
 					]
 				}
