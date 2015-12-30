@@ -77,7 +77,7 @@ const App = React.createClass({
 					if(window.nav_routes.length > 0) {
 						var newRoute = window.nav_routes.shift();
 						setTimeout(function() {	
-							that.history.pushState(null, `${newRoute}`);
+							history.pushState(null, `${newRoute}`);
 						}, 100);
 					}
 				});
@@ -87,7 +87,6 @@ const App = React.createClass({
 		
 		return {};
 	},
-	mixins: [History],
 	render(){
 		return (
 			<div>
