@@ -32,14 +32,14 @@
 	 * @desc
 	 * Hook into History Object either custom to your application or general on the window object
 	 *
-	 * This function will override the following functions if available: 
+	 * This function will override the following functions if available:
 	 *   - listen
 	 *   - transitionTo
 	 *   - pushState
 	 *   - setState
 	 *   - replaceState
 	 *   - go
-	 * 
+	 *
 	 * @param {object} history - Custom or global History object instance
 	 */
 	function hook(history) {
@@ -61,13 +61,13 @@
 			}
 			else {
 				BOOMR.plugins.SPA.route_change();
-			}	
+			}
 			orig_history.setState.apply(this, arguments);
 		};
 
 		history.listen = function() {
 			log("listen");
-			
+
 			if (!enabled) {
 				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
@@ -84,16 +84,17 @@
 			if (!enabled) {
 				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
-			} else {
+			}
+			else {
 				BOOMR.plugins.SPA.route_change();
-			}	
+			}
 
 			orig_history.setState.apply(this, arguments);
 		};
 
 		history.pushState = function(state, title, url) {
 			log("pushState");
-			
+
 			if (!enabled) {
 				log("Not enabled - we've missed a routeChange");
 				hadMissedRouteChange = true;
@@ -114,7 +115,7 @@
 			else  {
 				BOOMR.plugins.SPA.route_change();
 			}
-			
+
 			orig_history.setState.apply(this, arguments);
 		};
 
