@@ -19,6 +19,9 @@ tests/server/env.json
 npm-debug.log
 /tests/e2e/e2e.json
 /tests/e2e/e2e-debug.json
+tests/page-templates/12-react/support/app-component.js
+tests/page-templates/12-react/support/app-component.js.map
+tests/page-templates/12-react/support/app.js
 *.#*
 *#*
 *~

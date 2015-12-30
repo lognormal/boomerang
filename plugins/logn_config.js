@@ -200,5 +200,8 @@ BOOMR.addVar({"h.key": "%client_apikey%"})
 		},
 		Backbone: {
 			enabled: false
+		},
+		History: {
+			enabled: false
 		}
 	});

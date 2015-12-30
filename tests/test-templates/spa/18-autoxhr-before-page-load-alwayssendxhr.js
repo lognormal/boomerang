@@ -91,7 +91,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 			for (var k in XHR_BEACONS) {
 				if (XHR_BEACONS.hasOwnProperty(k)) {
 					var i = XHR_BEACONS[k];
-					assert.equal(tf.beacons[i].pgu, BOOMR.window.location.href);
+					assert.include(BOOMR.window.location.href, tf.beacons[i].pgu);
 				}
 			}
 		}

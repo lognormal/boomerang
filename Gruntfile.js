@@ -366,6 +366,25 @@ module.exports = function() {
 				}]
 			}
 		},
+		"babel": {
+			"spa-react-test-templates": {
+				files: {
+					"tests/page-templates/12-react/support/app-component.js": "tests/page-templates/12-react/support/app.jsx"
+				}
+			}
+		},
+		browserify: {
+			"spa-react-test-templates": {
+				files: {
+					"tests/page-templates/12-react/support/app.js": [
+						"node_modules/react/dist/react.js",
+						"node_modules/react-dom/dist/react-dom.js",
+						"node_modules/react-router/umd/ReactRouter.js",
+						"tests/page-templates/12-react/support/app-component.js"
+					]
+				}
+			}
+		},
 		"mpulse-build-for": {
 			release: {
 				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
@@ -418,6 +437,12 @@ module.exports = function() {
 				"tests/results/*.xml",
 				"tests/coverage/*",
 				"tests/pages/**/*"
+			],
+			"spa-react-test-templates": [
+				"tests/pages/12-react/support/app.js",
+				"tests/page-templates/12-react/support/app.js",
+				"tests/page-templates/12-react/support/app-component.js",
+				"tests/page-templates/12-react/support/*.map"
 			],
 			src: ["plugins/*~", "*.js~", "*.html~"]
 		},
@@ -551,7 +576,7 @@ module.exports = function() {
 					"tests/unit/**/*",
 					"tests/test-templates/**/*.js"
 				],
-				tasks: ["pages-builder"]
+				tasks: ["test:build:react", "pages-builder"]
 			},
 			boomerang: {
 				files: [
@@ -598,7 +623,10 @@ module.exports = function() {
 			}
 		}
 	});
+
 	grunt.loadNpmTasks("gruntify-eslint");
+	grunt.loadNpmTasks("grunt-babel");
+	grunt.loadNpmTasks("grunt-browserify");
 	grunt.loadNpmTasks("grunt-express-server");
 	grunt.loadNpmTasks("grunt-karma");
 	grunt.loadNpmTasks("grunt-contrib-concat");
@@ -630,7 +658,8 @@ module.exports = function() {
 		"mpulse:xml": ["build"],
 		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
-		"test:build": ["pages-builder", "build"],
+		"test:build": ["test:build:react", "pages-builder", "build"],
+		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
 		"test:debug": ["test:build", "build:test", "express", "watch"],
 		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
 		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],

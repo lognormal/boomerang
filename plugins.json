@@ -7,6 +7,7 @@
         "plugins/angular.js",
         "plugins/backbone.js",
         "plugins/ember.js",
+        "plugins/history.js",
         "plugins/rt.js",
         "plugins/bw.js",
         "plugins/navtiming.js",

@@ -1,0 +1,26 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="support/function-bind-polyfill.js" type="text/javascript"></script>
+
+<script>
+window.imgs = [3000];
+</script>
+
+<div id="root"></div>
+
+<script src="support/app.js"></script>
+
+<script src="/test-templates/spa/00-simple.js" type="text/javascript"></script>
+<script src="00-simple.js"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	History: {
+		enabled: true
+	},
+	autorun: false
+});
+</script>
+<%= footer %>
