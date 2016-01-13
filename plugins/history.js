@@ -43,6 +43,10 @@
 	 * @param {object} history - Custom or global History object instance
 	 */
 	function hook(history) {
+		if (!history) {
+			history = window.history;
+		}
+
 		var orig_history = {
 			listen: history.listen,
 			transitionTo: history.transitionTo,
