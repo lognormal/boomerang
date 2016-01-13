@@ -49,6 +49,9 @@
 			Backbone: {
 				enabled: true
 			},
+			History: {
+				enabled: true
+			},
 			PageParams: {
 				pageGroups: true,
 				customMetrics: true,
