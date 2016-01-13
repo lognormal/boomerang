@@ -49,6 +49,9 @@ see: http://www.w3.org/TR/resource-timing/
 	// Dimension data special type
 	var SPECIAL_DATA_DIMENSION_TYPE = "0";
 
+	// Dimension data special type
+	var SPECIAL_DATA_SIZE_TYPE = "1";
+
 	/**
 	 * Converts entries to a Trie:
 	 * http://en.wikipedia.org/wiki/Trie
@@ -359,15 +362,19 @@ see: http://www.w3.org/TR/resource-timing/
 	/**
 	 * Converts a number to base-36.
 	 *
-	 * If not a number, or === 0, return "". This is to facilitate
+	 * If not a number or a string, or === 0, return "". This is to facilitate
 	 * compression in the timing array, where "blanks" or 0s show as a series
 	 * of trailing ",,,," that can be trimmed.
 	 *
+	 * If a string, return a string.
+	 *
 	 * @param [number] n Number
-	 * @return Base-36 number, or empty string.
+	 * @return Base-36 number, empty string, or string
 	 */
 	function toBase36(n) {
-		return (typeof n === "number" && n !== 0) ? n.toString(36) : "";
+		return (typeof n === "number" && n !== 0) ?
+			n.toString(36) :
+			(typeof n === "string" ? n : "");
 	}
 
 	/**
@@ -463,6 +470,110 @@ see: http://www.w3.org/TR/resource-timing/
 
 		return filteredEntries;
 	}
+
+	/**
+	 * Gets compressed content and transfer size information, if available
+	 *
+	 * @param [ResourceTiming] resource ResourceTiming bject
+	 *
+	 * @returns [string] Compressed data (or empty string, if not available)
+	 */
+	function compressSize(resource) {
+		var sT, sE, sD, sizes;
+
+		// check to see if we can add content sizes
+		if (resource.encodedBodySize ||
+			resource.decodedBodySize ||
+			resource.transferSize) {
+			//
+			// transferSize: how many bytes were over the wire. It can be 0 in the case of X-O,
+			// or if it was fetched from a cache.
+			//
+			// encodedBodySize: the size after applying encoding (e.g. gzipped size).  It is 0 if X-O.
+			//
+			// decodedBodySize: the size after removing encoding (e.g. the original content size).  It is 0 if X-O.
+			//
+			// Here are the possible combinations of values: [encodedBodySize, transferSize, decodedBodySize]
+			// X-O: [0, 0, 0] -> [0, 0, 0] -> [empty]
+			// 204: [0, t, 0] -> [0, t, 0] -> [e, t-e] -> [, t]
+			// 304: [e, t: t <=> e, d: d>=e] -> [e, t-e, d-e]
+			// 200 non-gzipped: [e, t: t>=e, d: d=e] -> [e, t-e]
+			// 200 gzipped: [e, t: t>=e, d: d>=e] -> [e, t-e, d-e]
+			// retrieved from cache non-gzipped: [e, 0, d: d=e] -> [e]
+			// retrieved from cache gzipped: [e, 0, d: d>=e] -> [e, _, d-e]
+			//
+			sT = resource.transferSize;
+			sE = resource.encodedBodySize;
+			sD = resource.decodedBodySize;
+
+			// convert to an array
+			sizes = [sE, sT ? sT - sE : "_", sD ? sD - sE : 0];
+
+			// change everything to base36 and remove any trailing ,s
+			return sizes.map(toBase36).join(",").replace(/,+$/, "");
+		}
+		else {
+			return "";
+		}
+	}
+
+	/* BEGIN_DEBUG */
+	/**
+	 * Decompresses size information back into the specified resource
+	 *
+	 * @param [string] compressed Compressed string
+	 * @param [ResourceTiming] resource ResourceTiming bject
+	 */
+	function decompressSize(compressed, resource) {
+		var split, i;
+
+		if (typeof resource === "undefined") {
+			resource = {};
+		}
+
+		split = compressed.split(",");
+
+		for (i = 0; i < split.length; i++) {
+			if (split[i] === "_") {
+				// special non-delta value
+				split[i] = 0;
+			}
+			else {
+				// fill in missing numbers
+				if (split[i] === "") {
+					split[i] = 0;
+				}
+
+				// convert back from Base36
+				split[i] = parseInt(split[i], 36);
+
+				if (i > 0) {
+					// delta against first number
+					split[i] += split[0];
+				}
+			}
+		}
+
+		// fill in missing
+		if (split.length === 1) {
+			// transferSize is a delta from encodedSize
+			split.push(split[0]);
+		}
+
+		if (split.length === 2) {
+			// decodedSize is a delta from encodedSize
+			split.push(split[0]);
+		}
+
+		// re-add attributes to the resource
+		resource.encodedBodySize = split[0];
+		resource.transferSize = split[1];
+		resource.decodedBodySize = split[2];
+
+		return resource;
+	}
+	/* END_DEBUG */
+
 	/**
 	 * Gathers performance entries and compresses the result.
 	 * @param [number] from Only get timings from
@@ -516,6 +627,12 @@ see: http://www.w3.org/TR/resource-timing/
 				trimTiming(e.redirectEnd, e.startTime),
 				trimTiming(e.redirectStart, e.startTime)
 			].map(toBase36).join(",").replace(/,+$/, "");
+
+			// add content and transfer size info
+			var compSize = compressSize(e);
+			if (compSize !== "") {
+				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SIZE_TYPE + compSize;
+			}
 
 			url = BOOMR.utils.cleanupURL(e.name, impl.urlLimit);
 
@@ -761,7 +878,9 @@ see: http://www.w3.org/TR/resource-timing/
 		findPerformanceEntriesForFrame: findPerformanceEntriesForFrame,
 		toBase36: toBase36,
 		getVisibleEntries: getVisibleEntries,
-		reduceFetchStarts: reduceFetchStarts
+		reduceFetchStarts: reduceFetchStarts,
+		compressSize: compressSize,
+		decompressSize: decompressSize
 		/* END UNIT_TEST_CODE */
 	};
 
