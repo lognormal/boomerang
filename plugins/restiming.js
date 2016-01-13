@@ -479,7 +479,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @returns [string] Compressed data (or empty string, if not available)
 	 */
 	function compressSize(resource) {
-		var sT, sE, sD, sizes;
+		var sTrans, sEnc, sDec, sizes;
 
 		// check to see if we can add content sizes
 		if (resource.encodedBodySize ||
@@ -494,7 +494,8 @@ see: http://www.w3.org/TR/resource-timing/
 			// decodedBodySize: the size after removing encoding (e.g. the original content size).  It is 0 if X-O.
 			//
 			// Here are the possible combinations of values: [encodedBodySize, transferSize, decodedBodySize]
-			// X-O: [0, 0, 0] -> [0, 0, 0] -> [empty]
+			//
+			// Cross-Origin resources w/out Timing-Allow-Origin set: [0, 0, 0] -> [0, 0, 0] -> [empty]
 			// 204: [0, t, 0] -> [0, t, 0] -> [e, t-e] -> [, t]
 			// 304: [e, t: t <=> e, d: d>=e] -> [e, t-e, d-e]
 			// 200 non-gzipped: [e, t: t>=e, d: d=e] -> [e, t-e]
@@ -502,12 +503,12 @@ see: http://www.w3.org/TR/resource-timing/
 			// retrieved from cache non-gzipped: [e, 0, d: d=e] -> [e]
 			// retrieved from cache gzipped: [e, 0, d: d>=e] -> [e, _, d-e]
 			//
-			sT = resource.transferSize;
-			sE = resource.encodedBodySize;
-			sD = resource.decodedBodySize;
+			sTrans = resource.transferSize;
+			sEnc = resource.encodedBodySize;
+			sDec = resource.decodedBodySize;
 
 			// convert to an array
-			sizes = [sE, sT ? sT - sE : "_", sD ? sD - sE : 0];
+			sizes = [sEnc, sTrans ? sTrans - sEnc : "_", sDec ? sDec - sEnc : 0];
 
 			// change everything to base36 and remove any trailing ,s
 			return sizes.map(toBase36).join(",").replace(/,+$/, "");
