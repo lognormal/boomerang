@@ -89,7 +89,8 @@ module.exports = function() {
 				"tests/page-templates/**/*.js",
 				"tests/page-templates/**/*.html",
 				"tests/page-templates/**/*.js",
-				"tests/test-templates/**/*.js"
+				"tests/test-templates/**/*.js",
+				"!tests/page-templates/12-react/support/*"
 			]
 		},
 		"string-replace": {
