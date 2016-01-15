@@ -1,0 +1,18 @@
+<%= header %>
+<script>
+/*eslint-disable no-unused-vars*/
+window.BOOMR_config = {
+	RT: {
+		cookie: "BOOMR"
+	}
+};
+</script>
+<%= boomerangScript %>
+<script src="02-rt-cookie.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.session.domain = location.hostname;
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
