@@ -35,10 +35,13 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(100), "2s");
 		});
 
-		it("should return an empty string if the input is not a number", function() {
+		it("should return an empty string if the input is not a number or a number", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(), "");
+		});
+
+		it("should return the input string if given a string", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(""), "");
-			assert.equal(BOOMR.plugins.ResourceTiming.toBase36("a"), "");
+			assert.equal(BOOMR.plugins.ResourceTiming.toBase36("a"), "a");
 		});
 
 		it("should return an empty string if the input is 0", function() {
@@ -822,6 +825,252 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 				BOOMR.plugins.ResourceTiming.reduceFetchStarts([
 					{ fetchStart: 0, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }, { fetchStart: 1, responseEnd: 10 }
 				]));
+		});
+	});
+
+	describe("compressSize()", function() {
+		it("Should return an empty string if ResourceTiming2 is not supported", function() {
+			assert.equal("", BOOMR.plugins.ResourceTiming.compressSize({}));
+		});
+
+		// X-O: [0, 0, 0] -> [0, 0, 0] -> [empty]
+		it("Should return an empty string for cross-origin resources", function() {
+			assert.equal("", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 0,
+				encodedBodySize: 0,
+				decodedBodySize: 0
+			}));
+		});
+
+		// 204: [t, 0, 0] -> [t, 0, 0] -> [e, t-e]
+		it("Should return [e, t-e, d-e] -> [0, t, 0] -> ',t,0' -> ',t' for 204 responses", function() {
+			assert.equal(",a", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 10,
+				encodedBodySize: 0,
+				decodedBodySize: 0
+			}));
+		});
+
+		// 304: [t: t <=> e, e, d: d>=e] -> [e, t-e, d-e]
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,dt,0' -> 'e,dt' for 304 responses (t > e, d = e)", function() {
+			assert.equal("a,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,-dt,0' -> 'e,-dt' for 304 responses (t < e, d = e)", function() {
+			assert.equal("a,-5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 5,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,0,0' -> 'e' for 304 responses (t = e, d = e)", function() {
+			assert.equal("a", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,dt,dd' for 304 responses (t > e, d > e)", function() {
+			assert.equal("a,a,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 20,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,-dt,dd' for 304 responses (t < e, d > e)", function() {
+			assert.equal("a,-5,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 5,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, dd] -> 'e,0,dd' -> 'e,,dd' for 304 responses (t = e, d > e)", function() {
+			assert.equal("a,,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}));
+		});
+
+		// 200 non-gzipped: [t: t>=e, e, d: d=e] -> [e, t-e]
+		it("Should return [e, t-e, d-e] -> [e, dt, 0] -> 'e,0' -> 'e' for 200 non-gzipped responses (t = e)", function() {
+			assert.equal("a", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, 0] -> 'e,dt' for 200 non-gzipped responses (t > e)", function() {
+			assert.equal("a,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		// 200 gzipped: [t: t>=e, e, d: d>=e] -> [e, t-e, d-e]
+		it("Should return [e, t-e, d-e] -> [e, dt, 0] -> 'e,0,dd' -> 'e,,dd' for 200 gzipped responses (t = e, d > e)", function() {
+			assert.equal("a,,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}));
+		});
+
+		it("Should return [e, t-e, d-e] -> [e, dt, 0] -> 'e,dt,dd' for 200 gzipped responses (t > e, d > e)", function() {
+			assert.equal("a,5,a", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 20
+			}));
+		});
+
+		// retrieved from cache non-gzipped: [0, e, d: d=e] -> [e]
+		it("Should return [e, t-e, d-e] -> [e, _, dd] -> 'e,_,0' -> 'e,_' for cached non-gzipped responses", function() {
+			assert.equal("a,_", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 0,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}));
+		});
+
+		// retrieved from cache gzipped: [0, e, d: d>=e] -> [e, _, d-e]
+		it("Should return [e, t-e, d-e] -> [e, _, dd] -> 'e,_,dd' -> 'e,_,dd' for cached gzipped responses", function() {
+			assert.equal("a,_,5", BOOMR.plugins.ResourceTiming.compressSize({
+				transferSize: 0,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}));
+		});
+	});
+
+	describe("decompressSize()", function() {
+		// X-O: [0, 0, 0] -> [0, 0, 0] -> [empty]
+		it("Should reverse cross-origin resources", function() {
+			assert.deepEqual({
+				transferSize: 0,
+				encodedBodySize: 0,
+				decodedBodySize: 0
+			}, BOOMR.plugins.ResourceTiming.decompressSize(""));
+		});
+
+		// 204: [t, 0, 0] -> [t, 0, 0] -> [e, t-e]
+		it("Should reverse [e, t-e, d-e] -> [0, t, 0] -> ',t,0' -> ',t' for 204 responses", function() {
+			assert.deepEqual({
+				transferSize: 10,
+				encodedBodySize: 0,
+				decodedBodySize: 0
+			}, BOOMR.plugins.ResourceTiming.decompressSize(",a"));
+		});
+
+		// 304: [t: t <=> e, e, d: d>=e] -> [e, t-e, d-e]
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,dt,0' -> 'e,dt' for 304 responses (t > e, d = e)", function() {
+			assert.deepEqual({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,5"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,-dt,0' -> 'e,-dt' for 304 responses (t < e, d = e)", function() {
+			assert.deepEqual({
+				transferSize: 5,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,-5"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,0,0' -> 'e' for 304 responses (t = e, d = e)", function() {
+			assert.deepEqual({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,dt,dd' for 304 responses (t > e, d > e)", function() {
+			assert.deepEqual({
+				transferSize: 20,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,a,5"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,-dt,dd' for 304 responses (t < e, d > e)", function() {
+			assert.deepEqual({
+				transferSize: 5,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,-5,5"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, dd] -> 'e,0,dd' -> 'e,,dd' for 304 responses (t = e, d > e)", function() {
+			assert.deepEqual({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,,5"));
+		});
+
+		// 200 non-gzipped: [t: t>=e, e, d: d=e] -> [e, t-e]
+		it("Should reverse [e, t-e, d-e] -> [e, dt, 0] -> 'e,0' -> 'e' for 200 non-gzipped responses (t = e)", function() {
+			assert.deepEqual({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, 0] -> 'e,dt' for 200 non-gzipped responses (t > e)", function() {
+			assert.deepEqual({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,5"));
+		});
+
+		// 200 gzipped: [t: t>=e, e, d: d>=e] -> [e, t-e, d-e]
+		it("Should reverse [e, t-e, d-e] -> [e, dt, 0] -> 'e,0,dd' -> 'e,,dd' for 200 gzipped responses (t = e, d > e)", function() {
+			assert.deepEqual({
+				transferSize: 10,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,,5"));
+		});
+
+		it("Should reverse [e, t-e, d-e] -> [e, dt, 0] -> 'e,dt,dd' for 200 gzipped responses (t > e, d > e)", function() {
+			assert.deepEqual({
+				transferSize: 15,
+				encodedBodySize: 10,
+				decodedBodySize: 20
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,5,a"));
+		});
+
+		// retrieved from cache non-gzipped: [0, e, d: d=e] -> [e]
+		it("Should reverse [e, t-e, d-e] -> [e, _, dd] -> 'e,_,0' -> 'e,_' for cached non-gzipped responses", function() {
+			assert.deepEqual({
+				transferSize: 0,
+				encodedBodySize: 10,
+				decodedBodySize: 10
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,_"));
+		});
+
+		// retrieved from cache gzipped: [0, e, d: d>=e] -> [e, _, d-e]
+		it("Should reverse [e, t-e, d-e] -> [e, _, dd] -> 'e,_,dd' -> 'e,_,dd' for cached gzipped responses", function() {
+			assert.deepEqual({
+				transferSize: 0,
+				encodedBodySize: 10,
+				decodedBodySize: 15
+			}, BOOMR.plugins.ResourceTiming.decompressSize("a,_,5"));
 		});
 	});
 });
