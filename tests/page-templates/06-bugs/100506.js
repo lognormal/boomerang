@@ -9,7 +9,7 @@ describe("e2e/06-bugs/100506", function() {
 		t.ensureBeaconCount(done, 3);
 	});
 
-	it ("Should have qt on the first beacon containing the first and second requests", function() {
+	it("Should have qt on the first beacon containing the first and second requests", function() {
 		var beacon = tf.beacons[0];
 		assert.property(beacon, "qt");
 
@@ -19,23 +19,23 @@ describe("e2e/06-bugs/100506", function() {
 
 	it("Should have the first beacon with xhr.pg as image3 from the third request", function() {
 		var beacon = tf.beacons[0];
-		assert.equal("image3", beacon["xhr.pg"])
+		assert.equal("image3", beacon["xhr.pg"]);
 	});
 
 	it("Should have the first beacon with rt.start as manual beacon", function() {
 		var beacon = tf.beacons[0];
-		assert.equal("manual", beacon["rt.start"])
-	})
+		assert.equal("manual", beacon["rt.start"]);
+	});
 
 	it("Should have the first beacon with xhr.pg as image4 from the fourth request", function() {
 		var beacon = tf.beacons[1];
-		assert.equal("image4", beacon["xhr.pg"])
+		assert.equal("image4", beacon["xhr.pg"]);
 	});
 
 	it("Should have the second beacon with rt.start as manual beacon", function() {
 		var beacon = tf.beacons[1];
-		assert.equal("manual", beacon["rt.start"])
-	})
+		assert.equal("manual", beacon["rt.start"]);
+	});
 
 	it("Should have the third beacon as rt.start navigation  from the 4th request", function(){
 		var beacon = tf.beacons[2];
