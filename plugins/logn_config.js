@@ -1,14 +1,16 @@
 /*global BOOMR_configt:true*/
 (function(w) {
 	var dc = document,
+	    /* BEGIN_CONFIG_AS_JS */
 	    s = "script",
+	    /* END_CONFIG_AS_JS */
 	    dom = w.location.hostname,
-	    complete, running,
+	    complete = false,
+	    running = false,
 	    t_start,
-	    load, loaded,
 	    autorun = true,
 	    alwaysRun = typeof w.BOOMR_LOGN_always !== "undefined",
-	    CONFIG_RELOAD_TIMEOUT = 5.5 * 60 * 1000,
+	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,
 	    ready = false;
 
 	// Don't even bother creating the plugin if this is mhtml
@@ -17,28 +19,113 @@
 		return;
 	}
 
-	running = complete = false;
-
-	loaded = function() {
+	/**
+	 * Called when config.js[on] has loaded
+	 */
+	function loaded() {
 		if (complete) {
 			return;
 		}
+
 		complete = true;
 		running = false;
 
 		if (autorun) {
 			BOOMR.sendBeacon();
 		}
-	};
+	}
 
-	var removeNodeIfSafe = function(element) {
+	/* BEGIN_CONFIG_AS_JSON */
+	/**
+	 * Parses JSON from text, using JSON.parse, json_parse or eval
+	 *
+	 * @param {string} text JSON string
+	 * @returns {object} JSON object
+	 */
+	function parseJson(text) {
+		var parse = function() {
+			throw new Exception("No JSON.parse available");
+		};
+
+		/* BEGIN_CONFIG_AS_JSON_EVAL */
+		parse = function() {
+			/*eslint-disable no-eval*/
+			// fallback is `eval`
+			return eval("(" + text + ")");
+			/*eslint-enable no-eval*/
+		};
+		/* END_CONFIG_AS_JSON_EVAL */
+
+		if (window.JSON && typeof JSON.parse === "function") {
+			// native is available
+			parse = JSON.parse;
+		}
+		else if (BOOMR.window) {
+			if (BOOMR.window.JSON && typeof BOOMR.window.JSON.parse === "function") {
+				// use polyfill
+				parse = BOOMR.window.JSON.parse;
+			}
+			else if (typeof BOOMR.window.json_parse === "function") {
+				// https://github.com/douglascrockford/JSON-js
+				parse = BOOMR.window.json_parse;
+			}
+		}
+
+		try {
+			return parse(text);
+		}
+		catch (e) {
+			// NOP
+		}
+
+		return null;
+	}
+
+	/**
+	 * Handles a config.json response
+	 *
+	 * @param {string} responseText HTTP response text
+	 */
+	function handleJsonResponse(responseText) {
+		w.BOOMR_configt = BOOMR.now();
+
+		var configData = parseJson(responseText);
+		if (configData) {
+			// save the session ID first
+			BOOMR.session.ID = configData.session_id;
+			delete configData.session_id;
+
+			// addVar other key config
+			var params = ["h.key", "h.d", "h.t", "h.cr"];
+
+			for (var i = 0; i < params.length; i++) {
+				BOOMR.addVar(params[i], configData[params[i]]);
+
+				// strip from the data we give to other plugins
+				delete configData[params[i]];
+			}
+
+			BOOMR.init(configData);
+		}
+	}
+	/* END_CONFIG_AS_JSON */
+
+	/* BEGIN_CONFIG_AS_JS */
+	function removeNodeIfSafe(element) {
 		element.parentNode.removeChild(element);
-	};
+	}
+	/* END_CONFIG_AS_JS */
 
-	load = function() {
+	/**
+	 * Loads a config.js[on]
+	 */
+	function load() {
+		/* BEGIN_CONFIG_AS_JS */
 		var s0 = dc.getElementsByTagName(s)[0],
-		    s1,
-		    a = dc.createElement("A"),
+		    s1;
+		/* END_CONFIG_AS_JS */
+
+		var a = dc.createElement("A"),
 		    bcn = BOOMR.getBeaconURL ? BOOMR.getBeaconURL() : "",
 		    plugins = [],
 		    pluginName,
@@ -52,10 +139,7 @@
 
 		t_start = BOOMR.now();
 
-		var configAsJSON = false;
-		url = configAsJSON ?
-			"//%config_host%%config_json_path%" :
-			"//%config_host%%config_path%";
+		url = "//%config_host%%config_path%";
 		url += "?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
 			+ "&t=" + Math.round(t_start / (5 * 60 * 1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 			+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
@@ -67,65 +151,57 @@
 			+ (bcn ? "&bcn=" + encodeURIComponent(bcn) : "")	// Pass in the expected beacon URL so server can check if it has gone dead
 			+ (complete ? "" : "&plugins=" + plugins.join(","));
 
-		if (configAsJSON) {
-			url += "&acao=";
-		}
+		/* BEGIN_CONFIG_AS_JSON */
+		url += "&acao=";
+		/* END_CONFIG_AS_JSON */
 
 		// absolutize the url
 		a.href = url;
 		BOOMR.config_url = a.href;
 
-		if (configAsJSON) {
-			/*eslint-disable no-inner-declarations,no-empty*/
+		/* BEGIN_CONFIG_AS_JSON */
+		/*eslint-disable no-inner-declarations, no-empty*/
+		if (window.XDomainRequest) {
+			var xdr = new XDomainRequest();
+			xdr.open("GET", url);
+			xdr.onload = function() {
+				handleResponse(xdr.responseText);
+			};
+			xdr.send();
+		}
+		else {
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", url, true);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4 && xhr.status === 200) {
-					BOOMR_configt = BOOMR.now();
-					var configData;
-					try {
-						configData = JSON.parse(xhr.responseText);
-					}
-					catch (e) {}
-
-					if (configData) {
-						function stripVars(data, params) {
-							var vars = {};
-							for (var i = 0; i < params.length; i++) {
-								vars[params[i]] = data[params[i]];
-								delete data[params[i]];
-							}
-							return vars;
-						}
-						BOOMR.session.ID = configData.session_id;
-						delete configData.session_id;
-						BOOMR.addVar(stripVars(configData, ["h.key", "h.d", "h.t", "h.cr"]));
-						BOOMR.init(configData);
-					}
+					handleResponse(xhr.responseText);
 				}
 			};
 			xhr.send(null);
 		}
-		else {
-			s1 = dc.createElement(s);
-			s1.src = url;
-			s0.parentNode.insertBefore(s1, s0);
-			s0 = null;
-		}
+		/* END_CONFIG_AS_JSON */
+
+		/* BEGIN_CONFIG_AS_JS */
+		s1 = dc.createElement(s);
+		s1.src = url;
+		s0.parentNode.insertBefore(s1, s0);
+		s0 = null;
+		/* END_CONFIG_AS_JS */
 
 		if (complete) {
 			// remove this node and start another after CONFIG_RELOAD_TIMEOUT
 			setTimeout(function() {
 				load();
 
+				/* BEGIN_CONFIG_AS_JS */
 				if (s1) {
-					/* DEBUG DISABLE LINE */removeNodeIfSafe(s1);
+					removeNodeIfSafe(s1);
 					s1 = null;
 				}
+				/* END_CONFIG_AS_JS */
 			}, CONFIG_RELOAD_TIMEOUT);
 		}
-
-	};
+	}
 
 	BOOMR.plugins.LOGN = {
 		init: function(config) {
@@ -186,7 +262,7 @@
 BOOMR.addVar({"h.key": "%client_apikey%"})
 	.init({
 		primary: true,
-		/*BEGIN DEBUG TOKEN*/log: null, /*END DEBUG TOKEN*/
+		/* BEGIN_PROD */log: null, /* END_PROD */
 		wait: true,
 		site_domain: null,
 		ResourceTiming: {

@@ -16,6 +16,8 @@ module.exports = function(req, res) {
 
 	var hcr = hash.digest("hex");
 
+	res.header("Access-Control-Allow-Origin", "*");
+
 	if (r) {
 		res.send(util.format('BOOMR_configt=new Date().getTime();BOOMR.addVar({"h.t":%d,"h.cr":"%s"});', ht, hcr));
 	}

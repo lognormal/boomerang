@@ -1,11 +1,12 @@
 <%= header %>
 <script>
-/*global BOOMR_LOGN_always:true*/
+/*global BOOMR_LOGN_always:true, BOOMR_CONFIG_RELOAD_TIMEOUT:true*/
 /*eslint-disable no-unused-vars*/
 BOOMR_LOGN_always = true;
+BOOMR_CONFIG_RELOAD_TIMEOUT = 1000;
 /*eslint-enable no-unused-vars*/
 </script>
-<%= boomerangLatestScript %>
+<%= boomerangScript %>
 <script src="96883.js" type="text/javascript"></script>
 <script>
 BOOMR_test.init({

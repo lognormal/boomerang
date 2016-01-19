@@ -1182,9 +1182,9 @@
 			return true;
 		}
 
-		/* BEGIN UNIT_TEST_CODE */,
+		/* BEGIN_DEBUG */,
 		Handler: Handler
-		/* END UNIT_TEST_CODE */
+		/* END_DEBUG */
 	};
 
 }());
