@@ -92,9 +92,9 @@
 		is_complete: function() {
 			return true;
 		}
-		/* BEGIN UNIT_TEST_CODE */,
+		/* BEGIN_DEBUG */,
 		safeConfigOverride: impl.safeConfigOverride
-		/* END UNIT_TEST_CODE */
+		/* END_DEBUG */
 	};
 
 }());

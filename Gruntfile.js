@@ -1,6 +1,9 @@
 /* eslint-env node */
 "use strict";
 
+//
+// Imports
+//
 var fs = require("fs");
 var path = require("path");
 var fse = require("fs-extra");
@@ -10,25 +13,39 @@ var grunt = require("grunt");
 //
 // Constants
 //
+var BUILD_PATH = "build";
+var TEST_BUILD_PATH = path.join("tests", "build");
+var TEST_DEBUG_PORT = 4002;
+
+// mPulse
+var BEACON_HOST = "c.go-mpulse.net";
 var TEST_URL_BASE = "http://boomerang-test.soasta.com:3000/";
+var MPULSE_CONFIG_TIMEOUT = 5.5 * 60 * 1000;
+var MPULSE_CONFIG_JS = "/boomerang/config.js";
+var MPULSE_CONFIG_JSON = "/api/config.json";
 
 //
 // Grunt config
 //
 module.exports = function() {
 	//
-	// paths
+	// Paths
 	//
 	var testsDir = path.join(__dirname, "tests");
 	var pluginsDir = path.join(__dirname, "plugins");
 
-	// boomerang.js and plugins/*.js order
+	//
+	// Determine source files:
+	//  boomerang.js and plugins/*.js order
+	//
 	var src = [ "boomerang.js" ];
 	var plugins = grunt.file.readJSON("plugins.json");
 	src.push(plugins.plugins);
 	src.push(path.join(pluginsDir, "zzz_last_plugin.js"));
 
-	// ensure env.json exists
+	//
+	// Ensure env.json exists
+	//
 	var envFile = path.resolve(path.join(testsDir, "server", "env.json"));
 	if (!fs.existsSync(envFile)) {
 		var envFileSample = path.resolve(path.join(testsDir, "server", "env.json.sample"));
@@ -36,7 +53,11 @@ module.exports = function() {
 		fse.copySync(envFileSample, envFile);
 	}
 
+	var env = grunt.file.readJSON("tests/server/env.json");
+
+	//
 	// Build SauceLabs E2E test URLs
+	//
 	var e2eTests = [];
 	if (grunt.file.exists("tests/e2e/e2e.json")) {
 		e2eTests = JSON.parse(stripJsonComments(grunt.file.read("tests/e2e/e2e.json")));
@@ -48,18 +69,80 @@ module.exports = function() {
 	}
 
 	//
-	// Release version
+	// Build numbers
 	//
 	var pkg = grunt.file.readJSON("package.json");
 	var buildNumber = grunt.option("buildNumber") || 0;
+	var releaseVersion = pkg.releaseVersion + "." + buildNumber;
+	var buildDate = Math.round(Date.now() / 1000);
+	var boomerangVersion = releaseVersion + "." + buildDate;
+
+	//
+	// Output files
+	//
+
+	// build file name is based on the version number
+	var buildFilePrefix = pkg.name + "-" + boomerangVersion;
+	var buildPathPrefix = path.join(BUILD_PATH, buildFilePrefix);
+
+	var testBuildFilePrefix = pkg.name;
+	var testBuildPathPrefix = path.join(TEST_BUILD_PATH, testBuildFilePrefix);
+
+	var buildDebug = buildPathPrefix + "-debug.js";
+	var buildRelease = buildPathPrefix + ".js";
+
+	//
+	// Build configuration
+	//
+	var buildConfig = {
+		server: grunt.option("server") || "localhost"
+	};
+
+	// mPulse build config
+	buildConfig.hasApiKey = grunt.option("api-key") ? true : false;
+	buildConfig.apiKey = grunt.option("api-key") || "%client_apikey%";
+	buildConfig.secondaryBeacons = [];
+	buildConfig.configAsJson = grunt.option("config-as-json") ? true : false;
+	buildConfig.configAsJsonEval = grunt.option("config-as-json-eval") ? true : false;
+	buildConfig.configHost = grunt.option("config-host");
+	buildConfig.configPath = grunt.option("config-path") || (buildConfig.configAsJson ? MPULSE_CONFIG_JSON : MPULSE_CONFIG_JS);
+	buildConfig.beaconDestHost = grunt.option("beacon-dest-host");
+	buildConfig.beaconDestPath = grunt.option("beacon-dest-path");
+	buildConfig.configUrlSuffix = grunt.option("config-url-suffix") || "";
+
+	if (buildConfig.hasApiKey) {
+		// if defaults aren't given, use our mPulse defaults
+		buildConfig.configHost = buildConfig.configHost || BEACON_HOST;
+		buildConfig.beaconDestHost = buildConfig.beaconDestHost || BEACON_HOST;
+		buildConfig.beaconDestPath = buildConfig.beaconDestPath || "/";
+
+		// change output file names
+		buildFilePrefix = buildConfig.apiKey;
+		buildPathPrefix = path.join(BUILD_PATH, buildFilePrefix);
+
+		buildDebug = buildPathPrefix + "-debug.js";
+		buildRelease = buildPathPrefix + ".js";
+	}
 
 	//
 	// Config
 	//
 	grunt.initConfig({
-		pkg: grunt.file.readJSON("package.json"),
-		releaseVersion: pkg.releaseVersion + "." + buildNumber,
-		buildDate: Math.round(Date.now() / 1000),
+		// package info
+		pkg: pkg,
+
+		//
+		// Variables to use in tasks
+		//
+		buildConfig: buildConfig,
+		boomerangVersion: boomerangVersion,
+		buildFilePrefix: buildFilePrefix,
+		buildPathPrefix: buildPathPrefix,
+		testBuildPathPrefix: testBuildPathPrefix,
+
+		//
+		// Tasks
+		//
 		concat: {
 			options: {
 				stripBanners: false,
@@ -67,11 +150,11 @@ module.exports = function() {
 			},
 			debug: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
+				dest: buildDebug
 			},
 			release: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
+				dest: buildRelease
 			}
 		},
 		eslint: {
@@ -97,20 +180,20 @@ module.exports = function() {
 			all: {
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
+						src: buildRelease,
+						dest: buildRelease
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
+						src: buildDebug,
+						dest: buildDebug
 					}
 				],
 				options: {
 					replacements: [
 						{
 							// Replace 1.0 with 1.[0 or jenkins build #].[date]
-							pattern: /BOOMR.version\s*=\s*".*";/,
-							replacement: "BOOMR.version = \"<%= releaseVersion %>.<%= buildDate %>\";"
+							pattern: "%boomerang_version%",
+							replacement: boomerangVersion
 						},
 						{
 							// strip out BOOMR = BOOMR || {}; in plugins
@@ -125,55 +208,40 @@ module.exports = function() {
 					]
 				}
 			},
-			debug: {
-				files: [{
-					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js"
-				}],
-				options: {
-					replacements: [
-						{
-							// Add &debug key to request
-							pattern: /key=%client_apikey%/,
-							replacement: "debug=\&key=%client_apikey%"
-						},
-						{
-							// Show debug log
-							pattern: /\/\*BEGIN DEBUG TOKEN\*\/.*\/\*END DEBUG TOKEN\*\//,
-							replacement: ""
-						},
-						{
-							// Leave ConfigJS Script tag in DOM If debug
-							pattern: /\* CONFIGJSDEBUG_TOKEN \*/,
-							replacement: ""
-						}
-					]
-				}
-			},
 			"debug-tests": {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug-tests.js"
+					src: buildDebug,
+					dest: "<%= testBuildPathPrefix %>-latest-debug.js"
 				}],
 				options: {
 					replacements: [
 						{
 							// Send beacons to null
-							pattern: /location\.protocol \+ \"\/\/%beacon_dest_host%%beacon_dest_path%/,
-							replacement: "\"/blackhole"
+							pattern: /beacon_url: .*/,
+							replacement: "beacon_url: \"/blackhole\","
 						},
 						{
-							// Add config to null
-							pattern: /\/\/%config_host%%config_path%/,
-							replacement: "/blackhole"
-						}
+							// Config URL
+							pattern: "//%config_host%%config_path%",
+							replacement: "/config"
+						},
+						{
+							// Change to debug config URL
+							pattern: "%config_url_suffix%",
+							replacement: "&debug="
+						},
+						{
+							// Add a placeholder for the API key instead of %client_apikey%
+							pattern: /%client_apikey%/g,
+							replacement: "API_KEY"
+						},
 					]
 				}
 			},
 			release: {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-					dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"
+					src: buildRelease,
+					dest: buildRelease
 				}],
 				options: {
 					// strip out some NOPs
@@ -189,75 +257,116 @@ module.exports = function() {
 						{
 							pattern: /\(\)\);\(function\(/g,
 							replacement: "\(\)\);\n(function("
-						},
-						{
-							pattern: /BEGIN UNIT_TEST_CODE \*\//,
-							replacement: ""
-						},
-						{
-							pattern: /\/\* END UNIT_TEST_CODE /,
-							replacement: ""
 						}
 					]
 				}
 			},
-			"release-test": {
-				files: [{
-					src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-					dest: "tests/build/<%= pkg.name %>-latest.js"
-				}],
+			"mpulse-customer": {
+				files: [
+					{
+						src: buildRelease,
+						dest: buildRelease
+					},
+					{
+						src: buildDebug,
+						dest: buildDebug
+					}
+				],
 				options: {
 					replacements: [
 						{
-							pattern: /else{}/g,
-							replacement: ""
+							pattern: /%client_apikey%/g,
+							replacement: buildConfig.apiKey
 						},
 						{
-							pattern: /\(window\)\);/g,
-							replacement: "\(window\)\);\n"
+							pattern: /%beacon_dest_host%/g,
+							replacement: buildConfig.beaconDestHost
 						},
 						{
-							pattern: /\(\)\);\(function\(/g,
-							replacement: "\(\)\);\n(function("
+							pattern: /%beacon_dest_path%/g,
+							replacement: buildConfig.beaconDestPath
 						},
 						{
-							// Add &debug key to request
-							pattern: /key=%client_apikey%/,
-							replacement: "debug=\&key=API_KEY"
+							pattern: /%config_host%/g,
+							replacement: buildConfig.configHost
 						},
 						{
-							// Send beacons to null
-							pattern: /location\.protocol \+ \"\/\/%beacon_dest_host%%beacon_dest_path%/,
-							replacement: "\"/blackhole"
+							pattern: /%config_path%/g,
+							replacement: buildConfig.configPath
 						},
 						{
-							// Add config to null
-							pattern: /\/\/%config_host%%config_path%/,
-							replacement: "/config"
-						},
-						{
-							pattern: /%config_url_suffix%/,
-							replacement: ""
-						},
-						{
-							pattern: /CONFIG_RELOAD_TIMEOUT.*=.*5\.5.*\*.*60.*\*.*1000/,
-							replacement: "CONFIG_RELOAD_TIMEOUT=1000"
+							pattern: /%config_url_suffix%/g,
+							replacement: buildConfig.configUrlSuffix
 						}
 					]
 				}
 			}
 		},
-		copy: {
-			// copy files to tests\build\boomerang-latest.js so tests/index.html points to the latest version always
+		strip_code: {
 			debug: {
+				files: [{
+					src: buildRelease
+				}],
+				options: {
+					start_comment: "BEGIN_DEBUG",
+					end_comment: "END_DEBUG"
+				}
+			},
+			prod: {
 				files: [
 					{
-						nonull: true,
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug-tests.js",
-						dest: "tests/build/<%= pkg.name %>-latest-debug.js"
+						src: buildDebug
+					},
+					{
+						src: "<%= testBuildPathPrefix %>*.js"
 					}
-				]
+				],
+				options: {
+					start_comment: "BEGIN_PROD",
+					end_comment: "END_PROD"
+				}
 			},
+			"config-as-js": {
+				files: [
+					{
+						src: "<%= buildPathPrefix %>*.js"
+					}, {
+						src: "<%= testBuildPathPrefix %>*.js"
+					}
+				],
+				options: {
+					start_comment: "BEGIN_CONFIG_AS_JS",
+					end_comment: "END_CONFIG_AS_JS"
+				}
+			},
+			"config-as-json": {
+				files: [
+					{
+						src: "<%= buildPathPrefix %>*.js"
+					}, {
+						src: "<%= testBuildPathPrefix %>*.js"
+					}
+				],
+				options: {
+					start_comment: "BEGIN_CONFIG_AS_JSON",
+					end_comment: "END_CONFIG_AS_JSON"
+				}
+			},
+			"config-as-json-eval": {
+				files: [
+					{
+						src: "<%= buildPathPrefix %>*.js"
+					}, {
+						src: "<%= testBuildPathPrefix %>*.js"
+					}
+				],
+				options: {
+					start_comment: "BEGIN_CONFIG_AS_JSON_EVAL",
+					end_comment: "END_CONFIG_AS_JSON_EVAL"
+				}
+			}
+		},
+		copy: {
 			webserver: {
 				files: [
 					{
@@ -266,7 +375,7 @@ module.exports = function() {
 						cwd: "tests/",
 						src: "**/*",
 						force: true,
-						dest: grunt.file.readJSON("tests/server/env.json").publish + "/"
+						dest: env.publish + "/"
 					}
 				]
 			}
@@ -284,8 +393,8 @@ module.exports = function() {
 				files: [{
 					expand: true,
 					cwd: "build/",
-					src: ["<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
-					      "<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js"],
+					src: ["<%= buildFilePrefix %>-debug.js",
+					      "<%= buildFilePrefix %>.js"],
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
@@ -335,20 +444,20 @@ module.exports = function() {
 				},
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js.gz"
+						src: buildRelease,
+						dest: "<%= buildPathPrefix %>.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.js.gz"
+						src: buildDebug,
+						dest: "<%= buildPathPrefix %>-debug.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js.gz"
+						src: "<%= buildPathPrefix %>.min.js",
+						dest: "<%= buildPathPrefix %>.min.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.min.js",
-						dest: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>-debug.min.js.gz"
+						src: "<%= buildPathPrefix %>-debug.min.js",
+						dest: "<%= buildPathPrefix %>-debug.min.js.gz"
 					}
 				]
 			},
@@ -386,16 +495,6 @@ module.exports = function() {
 				}
 			}
 		},
-		"mpulse-build-for": {
-			release: {
-				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.min.js",
-				outputSuffix: ".min"
-			},
-			base: {
-				boomerang: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>.js",
-				outputSuffix: ""
-			}
-		},
 		filesize: {
 			csv: {
 				files: [{
@@ -413,7 +512,7 @@ module.exports = function() {
 					}
 				}
 			},
-			default: {
+			console: {
 				files: [{
 					expand: true,
 					cwd: "build",
@@ -513,7 +612,7 @@ module.exports = function() {
 		},
 		express: {
 			options: {
-				port: 4002,
+				port: TEST_DEBUG_PORT,
 				hostname: "0.0.0.0"
 			},
 			dev: {
@@ -597,8 +696,8 @@ module.exports = function() {
 		"mpulse-build-repository-xml": {
 			"build": {
 				options: {
-					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
-					version: "<%= releaseVersion %>.<%= buildDate %>"
+					filePrefix: "<%= buildPathPrefix %>",
+					version: "<%= boomerangVersion %>"
 				}
 			},
 			"from": {
@@ -611,15 +710,15 @@ module.exports = function() {
 		"mpulse-build-repository-xml-upload": {
 			"build": {
 				options: {
-					filePrefix: "build/<%= pkg.name %>-<%= releaseVersion %>.<%= buildDate %>",
-					version: "<%= releaseVersion %>.<%= buildDate %>"
+					filePrefix: "<%= buildPathPrefix %>",
+					version: "<%= boomerangVersion %>"
 				}
 			}
 		},
 		"jenkins-build-properties": {
 			"build": {
 				options: {
-					version: "<%= releaseVersion %>.<%= buildDate %>"
+					version: "<%= boomerangVersion %>"
 				}
 			}
 		}
@@ -641,6 +740,7 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-protractor-webdriver");
 	grunt.loadNpmTasks("grunt-template");
 	grunt.loadNpmTasks("grunt-saucelabs");
+	grunt.loadNpmTasks("grunt-strip-code");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
 	// tasks/*.js
@@ -650,35 +750,93 @@ module.exports = function() {
 
 	// Custom aliases for configured grunt tasks
 	var aliases = {
-		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default", "mpulse-build-repository-xml:build"],
-		"build:test": ["concat:debug", "string-replace", "copy:debug"],
-		"default": ["lint", "build", "test", "filesize:default"],
-		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv", "jenkins-build-properties:build", "mpulse-build-repository-xml-upload:build"],
+		"default": ["lint", "build", "test", "metrics"],
+
+		//
+		// Build
+		//
+		"build": ["concat", "build:apply-templates", "uglify", "compress", "metrics"],
+		"build:test": ["concat:debug", "build:apply-templates"],
+
+		// Build steps
+		"build:apply-templates": [
+			"string-replace:all",
+			"string-replace:debug-tests",
+			"string-replace:release",
+			"strip_code:debug",
+			"strip_code:prod"
+		],
+
+		// metrics to generate
+		"metrics": ["filesize:console"],
+
+		//
+		// Lint
+		//
 		"lint": ["eslint"],
-		"mpulse:build": ["build", "mpulse-build-for:base", "mpulse-build-for:release"],
-		"mpulse:xml": ["build"],
-		"mpulse:upload": ["build", "mpulse-build-repository-xml-upload:build"],
+
+		//
+		// mPulse tasks
+		//
+		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv", "jenkins-build-properties:build", "mpulse-build-repository-xml:build", "mpulse-build-repository-xml-upload:build"],
+
+		//
+		// Test tasks
+		//
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
+
+		// builds test files
 		"test:build": ["test:build:react", "pages-builder", "build"],
+
+		// react test files
 		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
+
+		// useful for debugging tests, leaves a webbrowser open at http://localhost:3001
 		"test:debug": ["test:build", "build:test", "express", "watch"],
-		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
-		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],
-		"test:e2e:debug": ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"],
-		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
-		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
-		"test:matrix:e2e": ["pages-builder", "saucelabs-mocha:e2e"],
-		"test:matrix:e2e:debug": ["pages-builder", "saucelabs-mocha:e2e-debug"],
-		"test:matrix:unit": ["saucelabs-mocha:unit"],
-		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
+
+		// unit tests
 		"test:unit": ["test:build", "build", "karma:unit"],
 		"test:unit:all": ["build", "karma:all"],
 		"test:unit:chrome": ["build", "karma:chrome"],
 		"test:unit:ff": ["build", "karma:ff"],
 		"test:unit:ie": ["build", "karma:ie"],
 		"test:unit:opera": ["build", "karma:opera"],
-		"test:unit:safari": ["build", "karma:safari"]
+		"test:unit:safari": ["build", "karma:safari"],
+
+		// End-to-End tests
+		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
+		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],
+		"test:e2e:debug": ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"],
+		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
+
+		// SauceLabs tests
+		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
+		"test:matrix:e2e": ["pages-builder", "saucelabs-mocha:e2e"],
+		"test:matrix:e2e:debug": ["pages-builder", "saucelabs-mocha:e2e-debug"],
+		"test:matrix:unit": ["saucelabs-mocha:unit"],
+		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
 	};
+
+	//
+	// mPulse-specific edits
+	//
+
+	if (buildConfig.hasApiKey) {
+		aliases["build:apply-templates"].push("string-replace:mpulse-customer");
+	}
+
+	// config.js vs config.json code
+	if (!buildConfig.configAsJson) {
+		aliases["build:apply-templates"].push("strip_code:config-as-json");
+	}
+	else {
+		aliases["build:apply-templates"].push("strip_code:config-as-js");
+	}
+
+	// whether or not to allow eval()
+	if (!buildConfig.configAsJsonEval) {
+		aliases["build:apply-templates"].push("strip_code:config-as-json-eval");
+	}
 
 	function isAlias(task) {
 		return aliases[task] ? true : false;

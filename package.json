@@ -37,6 +37,7 @@
     "grunt-react": "^0.12.3",
     "grunt-saucelabs": "^8.6.0",
     "grunt-string-replace": "^1.0.0",
+    "grunt-strip-code": "^0.1.2",
     "grunt-template": "^0.2.3",
     "gruntify-eslint": "^1.1.0",
     "history": "^1.12.5",
@@ -60,8 +61,8 @@
     "strip-json-comments": "^1.0.2"
   },
   "scripts": {
-    "test": "grunt test",
-    "install": "node node_modules/protractor/bin/webdriver-manager update"
+    "install": "node node_modules/protractor/bin/webdriver-manager update",
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -91,6 +92,10 @@
     {
       "name": "Ariel Barreiro",
       "email": "abarrei@gmail.com"
+    },
+    {
+      "name": "Erik Fried",
+      "email": "erikmfried@gmail.com"
     },
     {
       "name": "Buddy Brewer",
@@ -123,10 +128,6 @@
     {
       "name": "Eric Goldsmith",
       "email": "eric@ericgoldsmith.com"
-    },
-    {
-      "name": "Erik Fried",
-      "email": "erikmfried@gmail.com"
     },
     {
       "name": "Jamis Charles",

@@ -14,7 +14,6 @@ tests/results/*
 tests/pages/*
 node_modules/
 build/
-tasks/mpulse-build-for.config.json
 tests/server/env.json
 npm-debug.log
 /tests/e2e/e2e.json
