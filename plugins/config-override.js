@@ -61,6 +61,7 @@
 			},
 			instrument_xhr: true,
 			RT: {
+				cookie: true,
 				session_exp: true
 			},
 			BW: {
