@@ -37,8 +37,17 @@ describe("e2e/06-bugs/100506", function() {
 		assert.equal("manual", beacon["rt.start"]);
 	});
 
-	it("Should have the third beacon as rt.start navigation  from the 4th request", function(){
-		var beacon = tf.beacons[2];
-		assert.equal("navigation", beacon["rt.start"]);
+	it("Should have the third beacon as rt.start navigation from the 4th request (if NavigationTiming is supported)", function(){
+		if (t.isNavigationTimingSupported()) {
+			var beacon = tf.beacons[2];
+			assert.equal("navigation", beacon["rt.start"]);
+		}
+	});
+
+	it("Should have the third beacon as rt.start none from the 4th request (if NavigationTiming is not supported)", function(){
+		if (!t.isNavigationTimingSupported()) {
+			var beacon = tf.beacons[2];
+			assert.equal("none", beacon["rt.start"]);
+		}
 	});
 });
