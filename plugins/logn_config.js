@@ -165,7 +165,7 @@
 			var xdr = new XDomainRequest();
 			xdr.open("GET", url);
 			xdr.onload = function() {
-				handleResponse(xdr.responseText);
+				handleJsonResponse(xdr.responseText);
 			};
 			xdr.send();
 		}
@@ -174,7 +174,7 @@
 			xhr.open("GET", url, true);
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4 && xhr.status === 200) {
-					handleResponse(xhr.responseText);
+					handleJsonResponse(xhr.responseText);
 				}
 			};
 			xhr.send(null);
