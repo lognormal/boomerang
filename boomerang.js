@@ -1172,6 +1172,10 @@ BOOMR_check_doc_domain();
 					impl.fireEvent("xhr_load", name);
 				}
 				else {
+					// flush out any queue'd beacons before we set the Page Group
+					// and timers
+					BOOMR.real_sendBeacon();
+
 					BOOMR.addVar("xhr.pg", name);
 					BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
 					impl.fireEvent("xhr_load", {
@@ -1344,8 +1348,6 @@ BOOMR_check_doc_domain();
 				length = BOOMR.utils.pushVars(form, impl.vars);
 			}
 
-			BOOMR.removeVar("qt");
-
 			// clone the vars object so all listeners of onbeacon get an exact clone
 			// (in case listeners are doing BOOMR.removeVar)
 			for (k in impl.vars) {
@@ -1353,6 +1355,8 @@ BOOMR_check_doc_domain();
 					vars[k] = impl.vars[k];
 				}
 			}
+
+			BOOMR.removeVar("qt");
 
 			// If we reach here, we've transferred all vars to the beacon URL.
 			// The only thing that can stop it now is if we're rate limited
