@@ -1017,13 +1017,45 @@ BOOMR_check_doc_domain();
 
 		lastVisibilityEvent: {},
 
+		/**
+		 * Registers an event
+		 *
+		 * @param {string} e_name Event name
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 */
+		registerEvent: function(e_name) {
+			if (impl.events.hasOwnProperty(e_name)) {
+				// already registered
+				return this;
+			}
+
+			// create a new queue of handlers
+			impl.events[e_name] = [];
+
+			return this;
+		},
+
+		/**
+		 * Fires an event
+		 *
+		 * @param {string} e_name Event name
+		 * @param {object} data Event payload
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 */
+		fireEvent: function(e_name, data) {
+			return impl.fireEvent(e_name, data);
+		},
+
 		subscribe: function(e_name, fn, cb_data, cb_scope) {
 			var i, handler, ev;
 
 			e_name = e_name.toLowerCase();
 
 			if (!impl.events.hasOwnProperty(e_name)) {
-				return this;
+				// allow subscriptions before they're registered
+				impl.events[e_name] = [];
 			}
 
 			ev = impl.events[e_name];
