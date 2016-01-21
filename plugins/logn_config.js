@@ -220,6 +220,8 @@
 
 			// if we are called a second time while running, it means config.js has finished loading
 			if (running) {
+				BOOMR.fireEvent("onconfig", config);
+
 				// We need this monstrosity because Internet Explorer is quite moody
 				// regarding whether it will or willn't fire onreadystatechange for
 				// every change of readyState
@@ -232,8 +234,11 @@
 					BOOMR.addVar("t_configfb", BOOMR_configt - t_start);
 					delete BOOMR_configt;
 				}
-				return this;
 
+				return this;
+			}
+			else {
+				BOOMR.registerEvent("onconfig");
 			}
 
 			running = true;
