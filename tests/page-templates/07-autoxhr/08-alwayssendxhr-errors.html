@@ -1,0 +1,31 @@
+<%= header %>
+<script src="08-alwayssendxhr-errors.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		// 404 right away
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "support/script404.js", true);
+		xhr.send(null);
+
+		// aborted beacon after 1s
+		setTimeout(function() {
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "support/script200.js?aborted");
+			xhr.send(null);
+			xhr.abort();
+		}, 1000);
+	}
+});
+</script>
+<%= footer %>
