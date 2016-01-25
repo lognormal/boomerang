@@ -258,22 +258,22 @@ see: http://www.w3.org/TR/resource-timing/
 			return entries;
 		}
 
-		navStart = getNavStartTime(frame);
-
-		// get sub-frames' entries first
-		if (frame.frames) {
-			for (i = 0; i < frame.frames.length; i++) {
-				frameNavStart = getNavStartTime(frame.frames[i]);
-				frameOffset = 0;
-				if (frameNavStart > navStart) {
-					frameOffset = offset + (frameNavStart - navStart);
-				}
-
-				entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1));
-			}
-		}
-
 		try {
+			navStart = getNavStartTime(frame);
+
+			// get sub-frames' entries first
+			if (frame.frames) {
+				for (i = 0; i < frame.frames.length; i++) {
+					frameNavStart = getNavStartTime(frame.frames[i]);
+					frameOffset = 0;
+					if (frameNavStart > navStart) {
+						frameOffset = offset + (frameNavStart - navStart);
+					}
+
+					entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1));
+				}
+			}
+
 			if (!("performance" in frame) ||
 			   !frame.performance ||
 			   typeof frame.performance.getEntriesByType !== "function") {
