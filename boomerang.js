@@ -1346,6 +1346,17 @@ BOOMR_check_doc_domain();
 				return true;
 			}
 
+			// Swap h.cr to the end of impl.vars by removing it and re-adding it.
+			// We build the GET URL and hidden FORM vars (for POST) by iterating
+			// over impl.vars, so doing this ensures h.cr gets added last.  This
+			// helps with beacon corruption to make it more obvious, since h.cr
+			// will likely be bad.
+			if (typeof impl.vars["h.cr"] !== "undefined") {
+				var hcr = impl.vars["h.cr"];
+				delete impl.vars["h.cr"];
+				impl.vars["h.cr"] = hcr;
+			}
+
 			//
 			// Try to send an IMG beacon, which is lighter-weight and more compatible
 			// than FORM beacons.  We only send FORM beacons if the URL length
