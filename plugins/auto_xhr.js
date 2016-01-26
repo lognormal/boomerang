@@ -870,10 +870,17 @@
 								if (ename === "readystatechange") {
 									resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 
-									// listen here as well, as DOM changes might happen on other listeners
+									// Listen here as well, as DOM changes might happen on other listeners
 									// of readyState = 4 (complete), and we want to make sure we've
-									// started the addEvent() if so.
-									if (req.readyState === 4) {
+									// started the addEvent() if so.  Only listen if the status is non-zero,
+									// meaning the request wasn't aborted.  Aborted requests will fire the
+									// next handler.
+									if (req.readyState === 4 && req.status !== 0) {
+										if (req.status < 200 || req.status >= 400) {
+											// put the HTTP error code on the resource if it's not a success
+											resource.status = req.status;
+										}
+
 										loadFinished();
 									}
 								}
