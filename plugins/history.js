@@ -34,6 +34,30 @@
 	/**
 	 * @method
 	 * @desc
+	 * If enabled and another route change is not in progress send a route_change() event
+	 * Otherwise log a warning and set hadMissed a routeChange as missed
+	 */
+	function routeChange() {
+		if (!impl.enabled) {
+			log("Not enabled - we've missed a routeChange");
+			impl.hadMissedRouteChange = true;
+			impl.routeChangeInProgress = false;
+		}
+		else {
+			if (!impl.routeChangeInProgress) {
+				log("routeChange triggered, sending route_change() event");
+				impl.routeChangeInProgress = true;
+				BOOMR.plugins.SPA.route_change();
+			}
+			else {
+				log("routeChangeInProgress, not triggering");
+			}
+		}
+	}
+
+	/**
+	 * @method
+	 * @desc
 	 * Hook into History Object either custom to your application or general on the window object
 	 *
 	 * This function will override the following functions if available:
@@ -107,24 +131,6 @@
 		});
 
 		return true;
-	}
-
-	function routeChange() {
-		if (!impl.enabled) {
-			log("Not enabled - we've missed a routeChange");
-			impl.hadMissedRouteChange = true;
-			impl.routeChangeInProgress = false;
-		}
-		else {
-			if (!impl.routeChangeInProgress) {
-				log("routeChange triggered, sending route_change() event");
-				impl.routeChangeInProgress = true;
-				BOOMR.plugins.SPA.route_change();
-			}
-			else {
-				log("routeChangeInProgress, not triggering");
-			}
-		}
 	}
 
 	BOOMR.plugins.History = {
