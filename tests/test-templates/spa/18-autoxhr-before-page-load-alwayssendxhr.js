@@ -141,7 +141,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				if (XHR_BEACONS.hasOwnProperty(k)) {
 					var i = XHR_BEACONS[k];
 					var b = tf.beacons[i];
-					assert.equal(b.t_page, b.t_done - b.t_resp);
+					assert.closeTo(b.t_page, b.t_done - b.t_resp, 100);
 				}
 			}
 		}
@@ -175,3 +175,10 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		assert.equal(b["http.initiator"], "spa_hard");
 	});
 };
+
+
+
+
+
+
+
