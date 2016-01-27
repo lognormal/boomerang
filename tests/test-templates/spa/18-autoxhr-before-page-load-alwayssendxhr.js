@@ -175,10 +175,3 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		assert.equal(b["http.initiator"], "spa_hard");
 	});
 };
-
-
-
-
-
-
-

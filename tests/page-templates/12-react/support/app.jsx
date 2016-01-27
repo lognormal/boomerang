@@ -127,7 +127,7 @@ const Home = React.createClass({
 				});
 			}
 		}.bind(this));
-		homeXHR.open("GET", "support/home.html?rnd=" + (Math.round(Math.random() * 1000)), false);
+		homeXHR.open("GET", "support/home.html?rnd=" + (Math.round(Math.random() * 1000)));
 		homeXHR.send(null);
 
 		var widgetsXHR = new XMLHttpRequest();
@@ -138,7 +138,7 @@ const Home = React.createClass({
 				});
 			}
 		}.bind(this));
-		widgetsXHR.open("GET", "support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)), false);
+		widgetsXHR.open("GET", "support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)));
 		widgetsXHR.send(null);
 	},
 	cartMarkup() {
@@ -210,7 +210,7 @@ const Widget = React.createClass({
 				});
 			}
 		}.bind(this));
-		widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)), false);
+		widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)));
 		widgetXHR.send(null);
 	},
 	widgetMarkup() {
