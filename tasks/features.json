@@ -1,3 +1,11 @@
 [
-	{"key":"url-pat-jsvar-ct-and-cm"}
+	{"key":"url-pat-jsvar-ct-and-cm"},
+	{"key":"resourcetiming"},
+	{"key":"autoxhr"},
+	{"key":"angular"},
+	{"key":"ember"},
+	{"key":"backbone"},
+	{"key":"react"},
+	{"key":"history"},
+	{"key":"css-selectors"}
 ]
