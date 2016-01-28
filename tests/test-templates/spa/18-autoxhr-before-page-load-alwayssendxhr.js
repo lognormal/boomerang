@@ -141,7 +141,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				if (XHR_BEACONS.hasOwnProperty(k)) {
 					var i = XHR_BEACONS[k];
 					var b = tf.beacons[i];
-					assert.equal(b.t_page, b.t_done - b.t_resp);
+					assert.closeTo(b.t_page, b.t_done - b.t_resp, 100);
 				}
 			}
 		}
@@ -152,8 +152,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	//
 	it("Should have contain home.html for the first beacon's URL (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			var b = tf.beacons[XHR_BEACONS[0]];
-			assert.include(b.u, "home.html");
+			var b1 = tf.beacons[XHR_BEACONS[0]];
+			var b2 = tf.beacons[XHR_BEACONS[1]];
+			assert.equal(t.checkStringInArray("home.html", [b1.u, b2.u]).length, 1, "Neither of the 2 XHR beacons had the string we were looking for.");
 		}
 	});
 
@@ -162,8 +163,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 	//
 	it("Should have contain widgets.json for the first beacon's URL (if AutoXHR is enabled)", function() {
 		if (BOOMR.plugins.AutoXHR) {
-			var b = tf.beacons[XHR_BEACONS[1]];
-			assert.include(b.u, "widgets.json");
+			var b1 = tf.beacons[XHR_BEACONS[0]];
+			var b2 = tf.beacons[XHR_BEACONS[1]];
+			assert.equal(t.checkStringInArray("widgets.json", [b1.u, b2.u]).length, 1, "Neither of the 2 XHR beacons had the string we were looking for.");
 		}
 	});
 

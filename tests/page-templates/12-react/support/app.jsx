@@ -66,7 +66,6 @@ const App = React.createClass({
 
 		var that = this;
 		if ( window.nav_routes && window.nav_routes.hasOwnProperty("length") && window.nav_routes.length > 0) {
-			console.log("React-App: ", window.nav_routes);
 			if (!subscribed) {
 				BOOMR.subscribe("onbeacon", function(beacon) {
 					// only continue for SPA beacons
@@ -112,6 +111,10 @@ const Home = React.createClass({
 			rnd: '' + (Math.random() * 1000)
 		};
 
+		if (images[0] === -1) {
+			state.hide_imgs = true;
+		}
+
 		hadRouteChange = true;
 		return state;
 	},
@@ -124,8 +127,8 @@ const Home = React.createClass({
 				});
 			}
 		}.bind(this));
-		homeXHR.open("GET", "support/home.html");
-		homeXHR.send();
+		homeXHR.open("GET", "support/home.html?rnd=" + (Math.round(Math.random() * 1000)));
+		homeXHR.send(null);
 
 		var widgetsXHR = new XMLHttpRequest();
 		widgetsXHR.addEventListener("load", function (result) {
@@ -135,26 +138,11 @@ const Home = React.createClass({
 				});
 			}
 		}.bind(this));
-		widgetsXHR.open("GET", "support/widgets.json");
-		widgetsXHR.send();
+		widgetsXHR.open("GET", "support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)));
+		widgetsXHR.send(null);
 	},
 	cartMarkup() {
 		return { __html: this.state.home };
-	},
-	renderImages() {
-		var images = [];
-		for (var delayIndex in  this.state.imgs) {
-			var style = {
-				width: 300 + "px",
-				height: "auto"
-			};
-			var src = `/delay?delay=${this.state.imgs[delayIndex]}&file=pages/12-react/support/img.jpg&id=home&rnd=${this.state.rnd}`;
-			images.push(<div className="image-home" key={delayIndex}>
-				<img key={delayIndex} src={src} style={style}/>
-			</div>);
-		}
-
-		return images;
 	},
 	renderWidgets() {
 		var widgetsElements = [];
@@ -168,7 +156,18 @@ const Home = React.createClass({
 		var widgetsElements = this.renderWidgets();
 
 		if (!this.state.hide_imgs) {
-			var images = this.renderImages();
+			var images = [];
+			for (var delayIndex in  this.state.imgs) {
+				var style = {
+					width: 300 + "px",
+					height: "auto"
+				};
+				var src = `/delay?delay=${this.state.imgs[delayIndex]}&file=pages/12-react/support/img.jpg&id=home&rnd=${this.state.rnd}`;
+				images.push(<div className="image-home" key={delayIndex}>
+				  <img key={delayIndex} src={src} style={style}/>
+				</div>);
+			}
+			
 			return (
 				<div className="content">
 					<div dangerouslySetInnerHTML={this.cartMarkup()} />
@@ -198,6 +197,7 @@ const Home = React.createClass({
 const Widget = React.createClass({
 	getInitialState() {
 		return {
+			rnd: '' + (Math.random() * 1000),
 			id: this.props.params.id
 		};
 	},
@@ -210,25 +210,23 @@ const Widget = React.createClass({
 				});
 			}
 		}.bind(this));
-		widgetXHR.open("GET", "support/widget.html");
-		widgetXHR.send();
+		widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)));
+		widgetXHR.send(null);
 	},
 	widgetMarkup() {
 		return { __html: this.state.widgetHtml };
 	},
-	renderImage() {
+	render() {
 		var style = {
 			width: 300 + "px",
 			height: "auto"
 		};
-		console.log("React-App: ", this.props.params.id);
-		return <div className="image" key={this.props.params.id}><img key={this.props.params.id} src={`/delay?delay=${this.props.params.id}000&file=pages/12-react/support/img.jpg&id=${this.props.params.id}&rnd=${'' + Math.random() * 1000}`} style={style}></img></div>;
-	},
-	render() {
+		var image = <div className="image" key={this.props.params.id}><img key={this.props.params.id} src={`/delay?delay=${this.props.params.id}000&file=pages/12-react/support/img.jpg&id=${this.props.params.id}&rnd=${this.state.rnd}`} style={style}></img></div>;
+		
 		return (
 			<div>
 				<div dangerouslySetInnerHTML={this.widgetMarkup()} />
-				{this.renderImage()}
+				{image}
 			</div>
 		);
 	}

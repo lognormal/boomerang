@@ -50,7 +50,8 @@
 				enabled: true
 			},
 			History: {
-				enabled: true
+				enabled: true,
+				auto: true
 			},
 			PageParams: {
 				pageGroups: true,
