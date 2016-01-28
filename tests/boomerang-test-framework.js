@@ -609,6 +609,20 @@
 		}
 	};
 
+	/**
+	 * Filters list of strings for number of strings containing a string
+	 *
+	 * @param {string} string - String to search for
+	 * @param {string[]} list - array of strings to test for string
+	 *
+	 * @returns {string[]} - list of strings matching
+	 */
+	t.checkStringInArray = function(string, list) {
+		return list.filter(function(content) {
+			return content.indexOf(string) > -1;
+		});
+	};
+
 	window.BOOMR_test = t;
 
 }(window));
