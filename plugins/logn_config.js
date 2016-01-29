@@ -203,22 +203,6 @@
 		}
 	}
 
-	/**
-	 * Hook for 'before_beacon'
-	 */
-	function beforeBeacon(boomrVars) {
-		// Swap h.cr to the end of BOOMR's vars by removing it and re-adding it.
-		// We build the GET URL and hidden FORM vars (for POST) by iterating
-		// over BOOMR's vars, so doing this ensures h.cr gets added last.  This
-		// helps with beacon corruption to make it more obvious, since h.cr
-		// will likely be bad.
-		if (boomrVars && typeof boomrVars["h.cr"] !== "undefined") {
-			var hcr = boomrVars["h.cr"];
-			delete boomrVars["h.cr"];
-			boomrVars["h.cr"] = hcr;
-		}
-	}
-
 	BOOMR.plugins.LOGN = {
 		init: function(config) {
 			if (complete || BOOMR.session.rate_limited) {
@@ -257,7 +241,13 @@
 				BOOMR.registerEvent("onconfig");
 			}
 
-			BOOMR.subscribe("before_beacon", beforeBeacon, null, null);
+			// put h.d, h.key and h.t at the beginning of the beacon
+			BOOMR.setVarPriority("h.d", -1);
+			BOOMR.setVarPriority("h.key", -1);
+			BOOMR.setVarPriority("h.t", -1);
+
+			// put h.cr at the end
+			BOOMR.setVarPriority("h.cr", 1);
 
 			running = true;
 			if (w === window) {
