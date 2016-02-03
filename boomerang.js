@@ -262,6 +262,16 @@ BOOMR_check_doc_domain();
 
 		vars: {},
 
+		/**
+		 * Variable priority lists:
+		 * -1 = first
+		 *  1 = last
+		 */
+		varPriority: {
+			"-1": {},
+			"1": {}
+		},
+
 		errors: {},
 
 		disabled_plugins: {},
@@ -1187,6 +1197,25 @@ BOOMR_check_doc_domain();
 			return impl.vars.hasOwnProperty(name);
 		},
 
+		/**
+		 * Sets a variable's priority in the beacon URL.
+		 * -1 = beginning of the URL
+		 * 0  = middle of the URL (default)
+		 * 1  = end of the URL
+		 *
+		 * @param {string} name Variable name
+		 * @param {number} pri Priority (-1 or 1)
+		 */
+		setVarPriority: function(name, pri) {
+			if (typeof pri !== "number" || Math.abs(pri) !== 1) {
+				return this;
+			}
+
+			impl.varPriority[pri][name] = 1;
+
+			return this;
+		},
+
 		requestStart: function(name) {
 			var t_start = BOOMR.now();
 			BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
@@ -1254,7 +1283,8 @@ BOOMR_check_doc_domain();
 		},
 
 		real_sendBeacon: function() {
-			var k, form, furl, img, length = 0, errors = [], url, nparams = 0, vars = {};
+			var k, form, furl, img, length = 0, errors = [], url, nparams = 0,
+			    varsSent = {}, varsToSend = {}, urlFirst = [], urlLast = [];
 
 			if (!impl.beaconQueued) {
 				return false;
@@ -1352,24 +1382,27 @@ BOOMR_check_doc_domain();
 			// is longer than 2,000 bytes.
 			//
 
-			// if there are already url parameters in the beacon url,
-			// change the first parameter prefix for the boomerang url parameters to &
-			url = [];
-
+			// clone the vars object for two reasons: first, so all listeners of
+			// onbeacon get an exact clone (in case listeners are doing
+			// BOOMR.removeVar), and second, to help build our priority list of vars.
 			for (k in impl.vars) {
 				if (impl.vars.hasOwnProperty(k)) {
-					nparams++;
-					url.push(encodeURIComponent(k)
-						+ "="
-						+ (
-							impl.vars[k] === undefined || impl.vars[k] === null
-							? ""
-							: encodeURIComponent(impl.vars[k])
-						)
-					);
+					varsSent[k] = impl.vars[k];
+					varsToSend[k] = impl.vars[k];
 				}
 			}
 
+			// get high- and low-priority variables first, which remove any of
+			// those vars from varsToSend
+			urlFirst = this.getVarsOfPriority(varsToSend, -1);
+			urlLast  = this.getVarsOfPriority(varsToSend, 1);
+
+			// merge the 3 lists
+			url = urlFirst.concat(this.getVarsOfPriority(varsToSend, 0), urlLast);
+			nparams = url.length;
+
+			// if there are already url parameters in the beacon url,
+			// change the first parameter prefix for the boomerang url parameters to &
 			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + url.join("&");
 
 			if (furl.length > BOOMR.constants.MAX_GET_LENGTH) {
@@ -1380,19 +1413,11 @@ BOOMR_check_doc_domain();
 				length = BOOMR.utils.pushVars(form, impl.vars);
 			}
 
-			// clone the vars object so all listeners of onbeacon get an exact clone
-			// (in case listeners are doing BOOMR.removeVar)
-			for (k in impl.vars) {
-				if (impl.vars.hasOwnProperty(k)) {
-					vars[k] = impl.vars[k];
-				}
-			}
-
 			BOOMR.removeVar("qt");
 
 			// If we reach here, we've transferred all vars to the beacon URL.
 			// The only thing that can stop it now is if we're rate limited
-			impl.fireEvent("onbeacon", vars);
+			impl.fireEvent("onbeacon", varsSent);
 
 			if (length === 0 && nparams === 0) {
 				// do not make the request if there is no data
@@ -1422,6 +1447,65 @@ BOOMR_check_doc_domain();
 			}
 
 			return true;
+		},
+
+		/**
+		 * Gets all variables of the specified priority
+		 *
+		 * @param {object} vars Variables (will be modified for pri -1 and 1)
+		 * @param {number} pri Priority (-1, 0, or 1)
+		 *
+		 * @return {string[]} Array of URI-encoded vars
+		 */
+		getVarsOfPriority: function(vars, pri) {
+			var name, url = [];
+
+			if (pri !== 0) {
+				// if we were given a priority, iterate over that list
+				for (name in impl.varPriority[pri]) {
+					if (impl.varPriority[pri].hasOwnProperty(name)) {
+						// if this var is set, add it to our URL array
+						if (vars.hasOwnProperty(name)) {
+							url.push(this.getUriEncodedVar(name, vars[name]));
+
+							// remove this name from vars so it isn't also added
+							// to the non-prioritized list when pri=0 is called
+							delete vars[name];
+						}
+					}
+				}
+			}
+			else {
+				// if we weren't given a priority, iterate over all of the vars
+				// that are left (from not being removed via earlier pri -1 or 1)
+				for (name in vars) {
+					if (vars.hasOwnProperty(name)) {
+						url.push(this.getUriEncodedVar(name, vars[name]));
+					}
+				}
+			}
+
+			return url;
+		},
+
+		/**
+		 * Gets a URI-encoded name/value pair.
+		 *
+		 * @param {string} name Name
+		 * @param {string} value Value
+		 *
+		 * @returns {string} URI-encoded string
+		 */
+		getUriEncodedVar: function(name, value) {
+			var result = encodeURIComponent(name)
+				+ "="
+				+ (
+					value === undefined || value === null
+					? ""
+					: encodeURIComponent(value)
+				);
+
+			return result;
 		},
 
 		/**

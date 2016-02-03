@@ -241,6 +241,14 @@
 				BOOMR.registerEvent("onconfig");
 			}
 
+			// put h.d, h.key and h.t at the beginning of the beacon
+			BOOMR.setVarPriority("h.d", -1);
+			BOOMR.setVarPriority("h.key", -1);
+			BOOMR.setVarPriority("h.t", -1);
+
+			// put h.cr at the end
+			BOOMR.setVarPriority("h.cr", 1);
+
 			running = true;
 			if (w === window) {
 				BOOMR.subscribe("page_ready", load, null, null);

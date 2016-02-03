@@ -257,7 +257,17 @@
 			return null;
 		}
 
+		// if included statically, it'll be on the main window
 		var entries = BOOMR.window.performance.getEntriesByType("resource");
+		for (var i = 0; i < entries.length; i++) {
+			var e = entries[i];
+			if (e.name && e.name.indexOf(t.BEACON_URL) !== -1) {
+				return e;
+			}
+		}
+
+		// if included via snippet, it'll be in the IFRAME
+		var entries = BOOMR.boomerang_frame.performance.getEntriesByType("resource");
 		for (var i = 0; i < entries.length; i++) {
 			var e = entries[i];
 			if (e.name && e.name.indexOf(t.BEACON_URL) !== -1) {

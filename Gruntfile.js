@@ -15,6 +15,7 @@ var grunt = require("grunt");
 //
 var BUILD_PATH = "build";
 var TEST_BUILD_PATH = path.join("tests", "build");
+var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
 
 // mPulse
@@ -158,6 +159,13 @@ module.exports = function() {
 				src: src,
 				dest: buildRelease
 			}
+		},
+		mkdir: {
+			test: {
+				options: {
+					create: [TEST_RESULTS_PATH]
+				}
+			},
 		},
 		eslint: {
 			target: [
@@ -754,6 +762,7 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-compress");
 	grunt.loadNpmTasks("grunt-filesize");
+	grunt.loadNpmTasks("grunt-mkdir");
 	grunt.loadNpmTasks("grunt-protractor-runner");
 	grunt.loadNpmTasks("grunt-protractor-webdriver");
 	grunt.loadNpmTasks("grunt-template");
@@ -804,7 +813,7 @@ module.exports = function() {
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
 
 		// builds test files
-		"test:build": ["test:build:react", "pages-builder", "build"],
+		"test:build": ["mkdir:test", "test:build:react", "pages-builder", "build"],
 
 		// react test files
 		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
