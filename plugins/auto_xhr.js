@@ -948,6 +948,10 @@
 			return req;
 		};
 
+		// set our proxy's prototype to the original XHR prototype, in case anyone
+		// is using it to save state
+		BOOMR.proxy_XMLHttpRequest.prototype = BOOMR.orig_XMLHttpRequest.prototype;
+
 		BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
 	}
 
