@@ -213,13 +213,15 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @returns navigationStart time, or 0 if not accessible
 	 */
 	function getNavStartTime(frame) {
-		var navStart = 0, tmp;
+		var navStart = 0, frameLoc;
 
 		try {
 			// Try to access location.href first to trigger any Cross-Origin
 			// warnings.  There's also a bug in Chrome ~48 that might cause
 			// the browser to crash if accessing X-O frame.performance.
-			tmp = frame.location && frame.location.href;
+			// https://code.google.com/p/chromium/issues/detail?id=585871
+			// This variable is not otherwise used.
+			frameLoc = frame.location && frame.location.href;
 
 			if (("performance" in frame) &&
 			frame.performance &&
@@ -246,7 +248,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		var entries = [], i, navEntries, navStart, frameNavStart, frameOffset,
-		    navEntry, t, tmp;
+		    navEntry, t, frameLoc;
 
 		if (typeof isTopWindow === "undefined") {
 			isTopWindow = true;
@@ -284,7 +286,9 @@ see: http://www.w3.org/TR/resource-timing/
 				// Try to access location.href first to trigger any Cross-Origin
 				// warnings.  There's also a bug in Chrome ~48 that might cause
 				// the browser to crash if accessing X-O frame.performance.
-				tmp = frame.location && frame.location.href;
+				// https://code.google.com/p/chromium/issues/detail?id=585871
+				// This variable is not otherwise used.
+				frameLoc = frame.location && frame.location.href;
 
 				if (!("performance" in frame) ||
 				   !frame.performance ||
