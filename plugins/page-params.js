@@ -674,13 +674,18 @@
 		},
 
 		findResource: function(url, frame) {
-			var i, res, reslist;
+			var i, res, reslist, tmp;
 
 			if (!frame) {
 				frame = w;
 			}
 
 			try {
+				// Try to access location.href first to trigger any Cross-Origin
+				// warnings.  There's also a bug in Chrome ~48 that might cause
+				// the browser to crash if accessing X-O frame.performance.
+				tmp = frame.location && frame.location.href;
+
 				if (!("performance" in frame
 					&& frame.performance
 					&& frame.performance.getEntriesByName
