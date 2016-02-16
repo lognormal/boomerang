@@ -3,6 +3,10 @@
 Plugin to collect metrics from the W3C User Timing API.
 For more information about User Timing,
 see: http://www.w3.org/TR/user-timing/
+
+This plugin is dependent on the UserTimingCompression library
+see: https://github.com/nicjansma/usertiming-compression.js
+UserTimingCompression must be loaded before this plugin's init is called.
 */
 
 (function() {
@@ -10,11 +14,15 @@ see: http://www.w3.org/TR/user-timing/
 	BOOMR = BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
+	if (BOOMR.plugins.UserTiming) {
+		return;
+	}
+
 	/**
 	 * @returns String compressed user timing data that occurred since the last call
 	 */
 	function getUserTiming() {
-		var now = BOOMR.now();
+		var map, res, now = BOOMR.now();
 
 		map = UserTimingCompression.getCompressedUserTiming(impl.options);
 		res = UserTimingCompression.compressForUri(map);
@@ -29,7 +37,7 @@ see: http://www.w3.org/TR/user-timing/
 		supported: false,
 		options: {"from": 0},
 
-		done: function() {
+		addEntriesToBeacon: function() {
 			var r;
 
 			if (this.complete) {
@@ -39,9 +47,9 @@ see: http://www.w3.org/TR/user-timing/
 			BOOMR.removeVar("usertiming");
 			r = getUserTiming();
 			if (r) {
-				BOOMR.info("Client supports User Timing API", "usertiming");
+				BOOMR.info("User Timing API entries found since the last beacon", "usertiming");
 				BOOMR.addVar({
-					"usertiming": JSON.stringify(r)
+					"usertiming": r
 				});
 			}
 
@@ -67,12 +75,20 @@ see: http://www.w3.org/TR/user-timing/
 				return this;
 			}
 
-			if (p && typeof p.getEntriesByType === "function") {
-				BOOMR.subscribe("page_ready", impl.done, null, impl);
-				BOOMR.subscribe("xhr_load", impl.done, null, impl);
-				BOOMR.subscribe("before_unload", impl.done, null, impl);
-				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
-				impl.supported = true;
+			// Check that we have getEntriesByType and that the required UserTimingCompression library is available
+			if (p && typeof p.getEntriesByType === "function" && typeof UserTimingCompression !== "undefined") {
+				var marks = p.getEntriesByType("mark");
+				var measures = p.getEntriesByType("measure");
+				// Check that the results of getEntriesByType for marks and measures are Arrays
+				// Some polyfill libraries may incorrectly implement this
+				if (Object.prototype.toString.call(marks) === "[object Array]" && Object.prototype.toString.call(measures) === "[object Array]") {
+					BOOMR.info("Client supports User Timing API", "usertiming");
+
+					BOOMR.subscribe("before_onbeacon", impl.addEntriesToBeacon, null, impl);
+					BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
+
+					impl.supported = true;
+				}
 			}
 			else {
 				impl.complete = true;
@@ -83,6 +99,7 @@ see: http://www.w3.org/TR/user-timing/
 			return this;
 		},
 		is_complete: function() {
+			// After initialization, this plugin is ready to beacon data
 			return true;
 		},
 		is_supported: function() {
