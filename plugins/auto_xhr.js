@@ -1011,11 +1011,19 @@
 					return;
 				}
 
-				BOOMR.setImmediate(function() {
+				var sendNow = function() {
+					// wait until we have a crumb to send
+					if (!BOOMR.hasCrumb()) {
+						setTimeout(sendNow, 1000);
+						return;
+					}
+
 					for (i = 0; i < resources.length; i++) {
 						sendResource(resources[i]);
 					}
-				});
+				};
+
+				BOOMR.setImmediate(sendNow);
 			}
 
 			if (singlePageApp) {

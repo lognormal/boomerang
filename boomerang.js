@@ -1227,8 +1227,14 @@ BOOMR_check_doc_domain();
 			};
 		},
 
+		/* SOASTA PRIVATE START */
+		hasCrumb: function() {
+			return typeof impl.vars["h.cr"] !== "undefined";
+		},
+		/* SOASTA PRIVATE END */
+
 		responseEnd: function(name, t_start, data) {
-			if (impl.vars["h.cr"]) {
+			if (BOOMR.hasCrumb()) {
 				if (typeof name === "object" && name.url) {
 					impl.fireEvent("xhr_load", name);
 				}
@@ -1245,7 +1251,9 @@ BOOMR_check_doc_domain();
 					});
 				}
 			}
-			else {
+			// Only add to the QT variable for named Page Groups, not resources
+			// with a .url
+			else if (typeof name !== "object") {
 				var timer = name + "|" + (BOOMR.now() - t_start);
 				if (impl.vars.qt) {
 					impl.vars.qt += "," + timer;
@@ -1253,6 +1261,9 @@ BOOMR_check_doc_domain();
 				else {
 					impl.vars.qt = timer;
 				}
+			}
+			else {
+				BOOMR.debug("Attempt to send a resource before a crumb");
 			}
 		},
 
