@@ -810,6 +810,10 @@
 			    && visState !== "prerender"
 			    && impl.onloadfired
 			    && impl.autorun) {
+
+				// note that we transitioned from prerender on the beacon for debugging
+				BOOMR.addVar("vis.pre", "1");
+
 				BOOMR.plugins.RT.done(null, "visible");
 			}
 
