@@ -140,7 +140,9 @@
 		t_start = BOOMR.now();
 
 		url = "//%config_host%%config_path%";
-		url += "?key=%client_apikey%%config_url_suffix%&d=" + encodeURIComponent(dom)
+		url += "?key="
+			+ (w.BOOMR_LOGN_key ? w.BOOMR_LOGN_key : "%client_apikey%")
+			+ "%config_url_suffix%&d=" + encodeURIComponent(dom)
 			+ "&t=" + Math.round(t_start / (5 * 60 * 1000))	// add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 			+ "&v=" + BOOMR.version				// boomerang version so we can force a reload for old versions
 			+ (w === window ? "" : "&if=")			// if this is running in an iframe, we need to look for config vars in parent window
