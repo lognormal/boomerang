@@ -123,7 +123,7 @@
 		window.addEventListener("hashchange", function() {
 			log("hashchange");
 			routeChange();
-		}, false);
+		});
 
 		BOOMR.subscribe("onbeacon", function() {
 			log("Beacon sending, resetting routeChangeInProgress.");
