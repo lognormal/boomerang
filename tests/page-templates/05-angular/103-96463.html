@@ -20,32 +20,22 @@ document.addEventListener("DOMContentLoaded", function() {
 <div ng-view></div>
 <script src="103-96463.js" type="text/javascript"></script>
 <script type="text/javascript">
-//
-// Hack the visibilityState, so it looks like we're transitioning
-// from "prerender" to "visible" when we run fake "visibility_changed"
-// events after onload.
-//
-var visibilityStateN = 0;
-BOOMR.visibilityState = function() {
-	visibilityStateN++;
-
-	if (visibilityStateN === 2) {
-		return "prerender";
-	}
-	else {
-		return "visible";
-	}
-};
-
 setTimeout(function() {
 	BOOMR_test.init({
 		testAfterOnBeacon: 1
 	});
 }, 1000);
 
-// fire fake visibility changed events
 setTimeout(function() {
+	// fire fake visibility changed events
+	BOOMR.visibilityState = function() {
+		return "prerender";
+	};
 	BOOMR.fireEvent("visibility_changed");
+
+	BOOMR.visibilityState = function() {
+		return "visible";
+	};
 	BOOMR.fireEvent("visibility_changed");
 }, 1500);
 </script>
