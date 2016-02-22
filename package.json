@@ -36,7 +36,7 @@
     "grunt-protractor-runner": "^1.2.1",
     "grunt-protractor-webdriver": "^0.2.0",
     "grunt-react": "^0.12.3",
-    "grunt-saucelabs": "^8.6.0",
+    "grunt-saucelabs": "^8.6.2",
     "grunt-string-replace": "^1.0.0",
     "grunt-strip-code": "^0.1.2",
     "grunt-template": "^0.2.3",
