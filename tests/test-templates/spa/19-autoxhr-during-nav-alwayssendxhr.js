@@ -30,7 +30,7 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 	// they may be slightly out of order.  Iterate over all beacons first to bucket them.
 	//
 	function getBeaconByType() {
-		var beacons = { "spa_hard" : [], "spa": [], "xhr": []};
+		var beacons = { "spa_hard": [], "spa": [], "xhr": []};
 		for (var type in beacons) {
 			if (beacons.hasOwnProperty(type)) {
 				for (var j = 0; j < tf.beacons.length; j++) {

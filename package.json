@@ -14,8 +14,8 @@
     "chai": "^1.10.0",
     "compression": "^1.4.4",
     "deepmerge": "^0.2.7",
-    "eslint": "^1.9.0",
-    "eslint-plugin-html": "^1.0.4",
+    "eslint": "^2.2.0",
+    "eslint-plugin-html": "^1.4.0",
     "express": "^4.11.1",
     "fs-extra": "^0.15.0",
     "grunt": "^0.4.5",
@@ -40,7 +40,7 @@
     "grunt-string-replace": "^1.0.0",
     "grunt-strip-code": "^0.1.2",
     "grunt-template": "^0.2.3",
-    "gruntify-eslint": "^1.1.0",
+    "gruntify-eslint": "^2.0.0",
     "history": "^1.12.5",
     "jasmine-reporters": "^1.0.0",
     "karma": "^0.12.0",
@@ -87,12 +87,12 @@
   },
   "contributors": [
     {
-      "name": "Eric Goldsmith",
-      "email": "eric@ericgoldsmith.com"
-    },
-    {
       "name": "abarre",
       "email": "a@fasterize.com"
+    },
+    {
+      "name": "Ariel Barreiro",
+      "email": "abarrei@gmail.com"
     },
     {
       "name": "Erik Fried",
@@ -127,8 +127,8 @@
       "email": "edgar@ididic.com"
     },
     {
-      "name": "Ariel Barreiro",
-      "email": "abarrei@gmail.com"
+      "name": "Eric Goldsmith",
+      "email": "eric@ericgoldsmith.com"
     },
     {
       "name": "Jamis Charles",
