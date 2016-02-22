@@ -490,7 +490,12 @@
 					}, 1000);
 			}
 			else {
-				setTimeout(testBeaconCount, 100);
+				if (BOOMR.plugins.TestFramework.beaconCount() > beaconCount) {
+					done(new Error("Too many beacons!  Expected " + beaconCount + " but got " + BOOMR.plugins.TestFramework.beaconCount()));
+				}
+				else {
+					setTimeout(testBeaconCount, 100);
+				}
 			}
 		}
 

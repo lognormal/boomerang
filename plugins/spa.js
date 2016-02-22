@@ -90,6 +90,9 @@
 				BOOMR.addVar("http.initiator", "spa_hard");
 				firstSpaNav = false;
 
+				// note that we missed the route change on the beacon for debugging
+				BOOMR.addVar("spa.missed", "1");
+
 				// Since we held the original beacon (autorun=false), we need to tell BOOMR
 				// that the page has loaded OK.
 				BOOMR.page_ready();
