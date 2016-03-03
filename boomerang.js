@@ -721,76 +721,6 @@ BOOMR_check_doc_domain();
 				return l;
 			},
 
-			sendData: function(form, method) {
-				var input = document.createElement("input"),
-				    urls = [ impl.beacon_url ];
-
-				form.method = method;
-				form.id = "beacon_form";
-
-				// TODO: Determine if we want to send as JSON
-				//if (window.JSON) {
-				//	form.innerHTML = "";
-				//	form.enctype = "text/plain";
-				//	input.value = JSON.stringify(impl.vars);
-				//	form.appendChild(input);
-				//} else {
-				form.enctype = "application/x-www-form-urlencoded";
-				//}
-
-				if (impl.secondary_beacons && impl.secondary_beacons.length) {
-					urls.push.apply(urls, impl.secondary_beacons);
-				}
-
-
-				function remove(id) {
-					var el = document.getElementById(id);
-					if (el) {
-						el.parentNode.removeChild(el);
-					}
-				}
-
-				function submit() {
-					/*eslint-disable no-script-url*/
-					var iframe,
-					    name = "boomerang_post-" + encodeURIComponent(form.action) + "-" + Math.random();
-
-					// ref: http://terminalapp.net/submitting-a-form-with-target-set-to-a-script-generated-iframe-on-ie/
-					try {
-						iframe = document.createElement('<iframe name="' + name + '">');	// IE <= 8
-					}
-					catch (ignore) {
-						iframe = document.createElement("iframe");				// everything else
-					}
-
-					form.action = urls.shift();
-					form.target = iframe.name = iframe.id = name;
-
-					iframe.style.display = form.style.display = "none";
-					iframe.src = "javascript:false";
-
-					remove(iframe.id);
-					remove(form.id);
-
-					document.body.appendChild(iframe);
-					document.body.appendChild(form);
-
-					try {
-						form.submit();
-					}
-					catch (ignore) {
-						// empty
-					}
-
-					if (urls.length) {
-						BOOMR.setImmediate(submit);
-					}
-
-					setTimeout(function() { remove(iframe.id); }, 10000);
-				}
-
-				submit();
-			},
 			inArray: function(val, ary) {
 				var i;
 
@@ -1294,8 +1224,9 @@ BOOMR_check_doc_domain();
 		},
 
 		real_sendBeacon: function() {
-			var k, form, furl, img, length = 0, errors = [], url, nparams = 0,
-			    varsSent = {}, varsToSend = {}, urlFirst = [], urlLast = [];
+			var k, form, url, img, errors = [], params = [], paramsJoined, useImg = 1,
+			    varsSent = {}, varsToSend = {}, urlFirst = [], urlLast = [],
+			    xhr;
 
 			if (!impl.beaconQueued) {
 				return false;
@@ -1388,9 +1319,8 @@ BOOMR_check_doc_domain();
 			}
 
 			//
-			// Try to send an IMG beacon, which is lighter-weight and more compatible
-			// than FORM beacons.  We only send FORM beacons if the URL length
-			// is longer than 2,000 bytes.
+			// Try to send an IMG beacon if possible (which is the most compatible),
+			// otherwise send an XHR beacon if the  URL length is longer than 2,000 bytes.
 			//
 
 			// clone the vars object for two reasons: first, so all listeners of
@@ -1409,19 +1339,16 @@ BOOMR_check_doc_domain();
 			urlLast  = this.getVarsOfPriority(varsToSend, 1);
 
 			// merge the 3 lists
-			url = urlFirst.concat(this.getVarsOfPriority(varsToSend, 0), urlLast);
-			nparams = url.length;
+			params = urlFirst.concat(this.getVarsOfPriority(varsToSend, 0), urlLast);
+			paramsJoined = params.join("&");
 
 			// if there are already url parameters in the beacon url,
 			// change the first parameter prefix for the boomerang url parameters to &
-			furl = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + url.join("&");
+			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + paramsJoined;
 
-			if (furl.length > BOOMR.constants.MAX_GET_LENGTH) {
-				// switch to a FORM beacon
-				nparams = 0;
-
-				form = document.createElement("form");
-				length = BOOMR.utils.pushVars(form, impl.vars);
+			if (url.length > BOOMR.constants.MAX_GET_LENGTH) {
+				// switch to a XHR beacon if the GET length is too long
+				useImg = false;
 			}
 
 			BOOMR.removeVar("qt");
@@ -1430,7 +1357,7 @@ BOOMR_check_doc_domain();
 			// The only thing that can stop it now is if we're rate limited
 			impl.fireEvent("onbeacon", varsSent);
 
-			if (length === 0 && nparams === 0) {
+			if (params.length === 0) {
 				// do not make the request if there is no data
 				return this;
 			}
@@ -1441,20 +1368,25 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
-			if (nparams) {
+			if (useImg) {
 				img = new Image();
-				img.src = furl;
+				img.src = url;
 
 				if (impl.secondary_beacons) {
 					for (k = 0; k < impl.secondary_beacons.length; k++) {
-						furl = impl.secondary_beacons[k] + "?" + url.join("&");
+						url = impl.secondary_beacons[k] + "?" + paramsJoined;
+
 						img = new Image();
-						img.src = furl;
+						img.src = url;
 					}
 				}
 			}
 			else {
-				BOOMR.utils.sendData(form, impl.beacon_type === "AUTO" ? (length > BOOMR.constants.MAX_GET_LENGTH ? "POST" : "GET") : "POST");
+				// Send a form-encoded XHR POST beacon
+				xhr = new BOOMR.window.XMLHttpRequest();
+				xhr.open("POST", impl.beacon_url);
+				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				xhr.send(paramsJoined);
 			}
 
 			return true;

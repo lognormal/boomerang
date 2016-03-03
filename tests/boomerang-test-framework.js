@@ -298,24 +298,27 @@
 	};
 
 	t.validateBeaconWasImg = function(done) {
-		// look for #beacon_form in the BOOMR window's IFRAME
-		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
-		assert.isNull(form);
-
 		if (!t.isResourceTimingSupported()) {
-			// can't also validate via RT
+			// need RT to validate
 			return done();
 		}
+
+		// the presence of h.t on the URL means it was a GET beacon, so not an IMG
+		var res = this.findResourceTimingBeacon();
+		assert.isTrue(res.name.indexOf("h.t") !== -1);
 
 		done();
 	};
 
-	t.validateBeaconWasForm = function(done) {
-		// look for #beacon_form in the BOOMR window's IFRAME
-		var form = BOOMR.boomerang_frame ? BOOMR.boomerang_frame.document.getElementById("beacon_form") : null;
-		assert.isNotNull(form);
-		assert.equal(form.enctype, "application/x-www-form-urlencoded");
-		assert.include(form.action, t.BEACON_URL);
+	t.validateBeaconWasXhr = function(done) {
+		if (!t.isResourceTimingSupported()) {
+			// need RT to validate
+			return done();
+		}
+
+		// the presence of h.t on the URL means it was a GET beacon, so not an XHR
+		var res = this.findResourceTimingBeacon();
+		assert.isTrue(res.name.indexOf("h.t") === -1);
 
 		done();
 	};
