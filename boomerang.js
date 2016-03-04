@@ -1383,7 +1383,7 @@ BOOMR_check_doc_domain();
 			}
 			else {
 				// Send a form-encoded XHR POST beacon
-				xhr = new BOOMR.window.XMLHttpRequest();
+				xhr = new (BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
 				xhr.open("POST", impl.beacon_url);
 				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				xhr.send(paramsJoined);
