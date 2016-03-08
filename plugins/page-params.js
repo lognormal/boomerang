@@ -809,6 +809,7 @@
 		complete: false,
 		initialized: false,
 		configReceived: false,
+		unloadFired: false,
 		onloadfired: false,
 
 		autorun: true,
@@ -1052,6 +1053,14 @@
 			}
 
 			return limpl;
+		},
+
+		/**
+		 * Fired on before_unload
+		 */
+		onunload: function() {
+			impl.unloadFired = true;
+			return this;
 		}
 	};
 
@@ -1182,6 +1191,7 @@
 			if (!impl.initialized) {
 				// We do not want to subscribe to unload or onbeacon more than once
 				// because this will just create too many references
+				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
@@ -1197,8 +1207,8 @@
 				impl.retry();
 			}
 
-			// only allow beacons if we got config.js
-			return impl.configReceived;
+			// only allow beacons if we got config.js or if we're unloading
+			return impl.configReceived || impl.unloadFired;
 		}
 
 		/* BEGIN_DEBUG */,
