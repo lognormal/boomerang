@@ -808,6 +808,7 @@
 
 		complete: false,
 		initialized: false,
+		configReceived: false,
 		onloadfired: false,
 
 		autorun: true,
@@ -816,6 +817,10 @@
 
 		done: function(edata, ename) {
 			var i, v, hconfig, handler, limpl = impl, data;
+
+			if (!impl.configReceived) {
+				return;
+			}
 
 			hconfig = {
 				pageGroups:       { varname: "h.pg", stopOnFirst: true },
@@ -1067,6 +1072,11 @@
 				impl.autorun = config.autorun;
 			}
 
+			if (impl.initialized) {
+				// second init is from config.js
+				impl.configReceived = true;
+			}
+
 			// Fire on the first of load or unload
 
 			/*
@@ -1166,7 +1176,7 @@
 			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
 				// then we just run immediately
-				BOOMR.setImmediate(impl.done, {}, "load", impl);
+				impl.done("load");
 			}
 
 			if (!impl.initialized) {
@@ -1186,7 +1196,9 @@
 			if (impl.mayRetry.length > 0) {
 				impl.retry();
 			}
-			return true;
+
+			// only allow beacons if we got config.js
+			return impl.configReceived;
 		}
 
 		/* BEGIN_DEBUG */,
