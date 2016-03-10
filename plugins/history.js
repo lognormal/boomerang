@@ -72,7 +72,7 @@
 	 */
 	function hook(history) {
 		if (!history) {
-			history = window.history;
+			history = BOOMR.window.history;
 		}
 
 		var orig_history = {
@@ -120,7 +120,7 @@
 			orig_history.go.apply(this, arguments);
 		};
 
-		window.addEventListener("hashchange", function() {
+		BOOMR.window.addEventListener("hashchange", function() {
 			log("hashchange");
 			routeChange();
 		});
