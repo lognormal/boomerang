@@ -832,7 +832,7 @@
 					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
 					entry = BOOMR.getResourceTiming(resource.url);
 					if (entry) {
-						navSt = BOOMR.window.performance.timing.navigationStart;
+						navSt = BOOMR.getPerformance().timing.navigationStart;
 
 						if (entry.responseEnd !== 0) {
 							resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
