@@ -1539,8 +1539,7 @@ BOOMR_check_doc_domain();
 			var entries;
 
 			try {
-				if (BOOMR.window
-					&& BOOMR.getPerformance()
+				if (BOOMR.getPerformance()
 					&& typeof BOOMR.getPerformance().getEntriesByName === "function") {
 					entries = BOOMR.getPerformance().getEntriesByName(url);
 					if (entries && entries.length) {
