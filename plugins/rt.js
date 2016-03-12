@@ -510,7 +510,7 @@
 			// https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/Overview.html
 			// http://blogs.msdn.com/b/ie/archive/2010/06/28/measuring-web-page-performance.aspx
 			// http://blog.chromium.org/2010/07/do-you-know-how-slow-your-web-page-is.html
-			p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
+			p = BOOMR.getPerformance();
 
 			if (p && p.navigation) {
 				this.navigationType = p.navigation.type;
@@ -565,6 +565,8 @@
 		 * after onload, so in that case, if navigation timing is available, we use that instead.
 		 */
 		validateLoadTimestamp: function(t_now, data, ename) {
+			var p;
+
 			// beacon with detailed timing information
 			if (data && data.timing && data.timing.loadEventEnd) {
 				return data.timing.loadEventEnd;
@@ -575,11 +577,13 @@
 			}
 			// Boomerang loaded late and...
 			else if (BOOMR.loadedLate) {
+				p = BOOMR.getPerformance();
+
 				// We have navigation timing,
-				if (w.performance && w.performance.timing) {
+				if (p && p.timing) {
 					// and boomerang loaded after onload fired
-					if (w.performance.timing.loadEventStart && w.performance.timing.loadEventStart < BOOMR.t_end) {
-						return w.performance.timing.loadEventStart;
+					if (p.timing.loadEventStart && p.timing.loadEventStart < BOOMR.t_end) {
+						return p.timing.loadEventStart;
 					}
 				}
 				// We don't have navigation timing,

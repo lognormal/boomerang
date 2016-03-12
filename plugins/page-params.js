@@ -1058,7 +1058,7 @@
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
 			d = w.document;
-			p = w.performance || null;
+			p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
