@@ -42,7 +42,9 @@ describe("07-autoxhr/09-xhr-before-config-with-hardcoded-alwayssendxhr", functio
 	});
 
 	it("Third beacon should be an XHR, opened before config, completed after config", function() {
-		var beacon = tf.beacons[2];
+		// depending on timing, it might be the 3rd or 4th beacon
+		var beacon = tf.beacons[2].u.indexOf("xhr2") !== -1 ? tf.beacons[2] : tf.beacons[3];
+
 		assert.equal(beacon["http.initiator"], "xhr");
 		assert.equal(beacon["rt.start"], "manual");
 		assert.include(beacon.u, "boomerang-latest-debug.js&xhr2");
@@ -50,7 +52,9 @@ describe("07-autoxhr/09-xhr-before-config-with-hardcoded-alwayssendxhr", functio
 	});
 
 	it("Fourth beacon should be an XHR, opened and completed after config", function() {
-		var beacon = tf.beacons[3];
+		// depending on timing, it might be the 3rd or 4th beacon
+		var beacon = tf.beacons[3].u.indexOf("xhr3") !== -1 ? tf.beacons[3] : tf.beacons[2];
+
 		assert.equal(beacon["http.initiator"], "xhr");
 		assert.equal(beacon["rt.start"], "manual");
 		assert.include(beacon.u, "boomerang-latest-debug.js&xhr3");
