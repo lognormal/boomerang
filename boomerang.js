@@ -1368,6 +1368,12 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
+			if (!BOOMR.orig_XMLHttpRequest && (!BOOMR.window || !BOOMR.window.XMLHttpRequest)) {
+				// if we don't have XHR available, force an image beacon and hope
+				// for the best
+				useImg = true;
+			}
+
 			if (useImg) {
 				img = new Image();
 				img.src = url;
