@@ -808,6 +808,8 @@
 
 		complete: false,
 		initialized: false,
+		configReceived: false,
+		unloadFired: false,
 		onloadfired: false,
 
 		autorun: true,
@@ -816,6 +818,10 @@
 
 		done: function(edata, ename) {
 			var i, v, hconfig, handler, limpl = impl, data;
+
+			if (!impl.configReceived) {
+				return;
+			}
 
 			hconfig = {
 				pageGroups:       { varname: "h.pg", stopOnFirst: true },
@@ -1047,6 +1053,14 @@
 			}
 
 			return limpl;
+		},
+
+		/**
+		 * Fired on before_unload
+		 */
+		onunload: function() {
+			impl.unloadFired = true;
+			return this;
 		}
 	};
 
@@ -1058,13 +1072,18 @@
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
 			d = w.document;
-			p = w.performance || null;
+			p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
 
 			if (typeof config.autorun !== "undefined") {
 				impl.autorun = config.autorun;
+			}
+
+			if (impl.initialized) {
+				// second init is from config.js
+				impl.configReceived = true;
 			}
 
 			// Fire on the first of load or unload
@@ -1166,12 +1185,13 @@
 			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
 				// then we just run immediately
-				BOOMR.setImmediate(impl.done, {}, "load", impl);
+				impl.done("load");
 			}
 
 			if (!impl.initialized) {
 				// We do not want to subscribe to unload or onbeacon more than once
 				// because this will just create too many references
+				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
@@ -1186,7 +1206,9 @@
 			if (impl.mayRetry.length > 0) {
 				impl.retry();
 			}
-			return true;
+
+			// only allow beacons if we got config.js or if we're unloading
+			return impl.configReceived || impl.unloadFired;
 		}
 
 		/* BEGIN_DEBUG */,
