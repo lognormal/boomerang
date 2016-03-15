@@ -34,16 +34,18 @@ function hookHistoryBoomerang() {
 	}
 }
 
-if (!hookHistoryBoomerang()) {
-	if (document.addEventListener) {
-		document.addEventListener("onBoomerangLoaded", hookHistoryBoomerang);
-	} else if (document.attachEvent) {
-		document.attachEvent("onpropertychange", function(e) {
-			e = e || window.event;
-			if (e && e.propertyName === "onBoomerangLoaded") {
-				hookHistoryBoomerang();
-			}
-		});
+if (!window.reactDisableBoomerangHook) {
+	if (!hookHistoryBoomerang()) {
+		if (document.addEventListener) {
+			document.addEventListener("onBoomerangLoaded", hookHistoryBoomerang);
+		} else if (document.attachEvent) {
+			document.attachEvent("onpropertychange", function(e) {
+				e = e || window.event;
+				if (e && e.propertyName === "onBoomerangLoaded") {
+					hookHistoryBoomerang();
+				}
+			});
+		}
 	}
 }
 
@@ -75,7 +77,7 @@ const App = React.createClass({
 
 					if(window.nav_routes.length > 0) {
 						var newRoute = window.nav_routes.shift();
-						setTimeout(function() {	
+						setTimeout(function() {
 							history.pushState(null, `${newRoute}`);
 						}, 100);
 					}
@@ -83,7 +85,7 @@ const App = React.createClass({
 			}
 			subscribed = true;
 		}
-		
+
 		return {};
 	},
 	render(){
@@ -105,7 +107,7 @@ const Home = React.createClass({
 		} else {
 			images = [];
 		}
-		
+
 		var state =  {
 			imgs: images,
 			rnd: '' + (Math.random() * 1000)
@@ -167,7 +169,7 @@ const Home = React.createClass({
 				  <img key={delayIndex} src={src} style={style}/>
 				</div>);
 			}
-			
+
 			return (
 				<div className="content">
 					<div dangerouslySetInnerHTML={this.cartMarkup()} />
@@ -222,7 +224,7 @@ const Widget = React.createClass({
 			height: "auto"
 		};
 		var image = <div className="image" key={this.props.params.id}><img key={this.props.params.id} src={`/delay?delay=${this.props.params.id}000&file=pages/12-react/support/img.jpg&id=${this.props.params.id}&rnd=${this.state.rnd}`} style={style}></img></div>;
-		
+
 		return (
 			<div>
 				<div dangerouslySetInnerHTML={this.widgetMarkup()} />
@@ -233,11 +235,11 @@ const Widget = React.createClass({
 });
 
 var routerInstance = render((
-		<Router history={history}>	
+		<Router history={history}>
 			<Route path="/" component={App}>
 				<IndexRoute component={Home}/>
 				<Route path="widgets/:id" component={Widget}/>
-			</Route> 
+			</Route>
 		</Router>
 ), document.getElementById("root"));
 
