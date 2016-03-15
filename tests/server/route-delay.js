@@ -42,10 +42,17 @@ module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
 	var delay = q.delay;
 	var file = q.file;
-
-	var filePath = path.join(wwwRoot, file);
+	var response = q.response;
 
 	setTimeout(function() {
+		res.set("Access-Control-Allow-Origin", "*");
+
+		if (response) {
+			return res.send(response);
+		}
+
+		var filePath = path.join(wwwRoot, file);
+
 		fs.exists(filePath, function(exists) {
 			if (!exists) {
 				return res.send(404);
