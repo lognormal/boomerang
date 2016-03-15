@@ -26,6 +26,8 @@ see: http://www.w3.org/TR/navigation-timing/
 			BOOMR.sendBeacon();
 		},
 		xhr_done: function(edata) {
+			var p;
+
 			if (edata && edata.initiator === "spa_hard") {
 				// Single Page App - Hard refresh: Send page's NavigationTiming data, if
 				// available.
@@ -50,8 +52,9 @@ see: http://www.w3.org/TR/navigation-timing/
 				edata = edata.data;
 			}
 
-			if (edata.url && w.performance && w.performance.getEntriesByName) {
-				res = w.performance.getEntriesByName(edata.url);
+			p = BOOMR.getPerformance();
+			if (edata.url && p && p.getEntriesByName) {
+				res = p.getEntriesByName(edata.url);
 				if (res && res.length > 0) {
 					res = res[0];
 
@@ -74,7 +77,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 					for (k in data) {
 						if (data.hasOwnProperty(k) && data[k]) {
-							data[k] += w.performance.timing.navigationStart;
+							data[k] += p.timing.navigationStart;
 
 							// don't need to send microseconds
 							data[k] = Math.round(data[k]);
@@ -123,7 +126,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 			impl.addedVars = [];
 
-			p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
+			p = BOOMR.getPerformance();
 			if (p && p.timing && p.navigation) {
 				BOOMR.info("This user agent supports NavigationTiming.", "nt");
 				pn = p.navigation;

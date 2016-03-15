@@ -948,8 +948,18 @@ BOOMR_check_doc_domain();
 		}()),
 
 		getPerformance: function() {
-			if (BOOMR.window && "performance" in BOOMR.window && BOOMR.window.performance) {
-				return BOOMR.window.performance;
+			try {
+				if (BOOMR.window) {
+					if ("performance" in BOOMR.window && BOOMR.window.performance) {
+						return BOOMR.window.performance;
+					}
+
+					// vendor-prefixed fallbacks
+					return BOOMR.window.msPerformance || BOOMR.window.webkitPerformance || BOOMR.window.mozPerformance;
+				}
+			}
+			catch (ignore) {
+				// empty
 			}
 		},
 
@@ -1467,11 +1477,9 @@ BOOMR_check_doc_domain();
 			var entries;
 
 			try {
-				if (BOOMR.window
-					&& "performance" in BOOMR.window
-					&& BOOMR.window.performance
-					&& typeof BOOMR.window.performance.getEntriesByName === "function") {
-					entries = BOOMR.window.performance.getEntriesByName(url);
+				if (BOOMR.getPerformance()
+					&& typeof BOOMR.getPerformance().getEntriesByName === "function") {
+					entries = BOOMR.getPerformance().getEntriesByName(url);
 					if (entries && entries.length) {
 						return entries[entries.length - 1];
 					}

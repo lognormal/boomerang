@@ -177,7 +177,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			try {
 				w = BOOMR.window;
 				d = w.document;
-				p = w.performance;
+				p = BOOMR.getPerformance();
 				c = w.console;
 				s = w.screen;
 				n = w.navigator;
