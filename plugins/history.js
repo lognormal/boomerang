@@ -99,7 +99,7 @@
 		history.transitionTo = function() {
 			log("transitionTo");
 			routeChange();
-			orig_history.setState.apply(this, arguments);
+			orig_history.transitionTo.apply(this, arguments);
 		};
 
 		history.pushState = function(state, title, url) {
@@ -109,9 +109,9 @@
 		};
 
 		history.replaceState = function() {
-			log("pushState");
+			log("replaceState");
 			routeChange();
-			orig_history.setState.apply(this, arguments);
+			orig_history.replaceState.apply(this, arguments);
 		};
 
 		history.go = function() {
@@ -174,4 +174,3 @@
 		}
 	};
 }());
-
