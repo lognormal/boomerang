@@ -1,8 +1,6 @@
-Some code Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-
-Some code Copyright (c) 2012, Log-Normal Inc.  All rights reserved.
-
-Most code Copyright (c) 2012-2016 SOASTA, Inc. All rights reserved.
+Some code Copyright (c) 2011, Yahoo! Inc.  All rights reserved.  
+Some code Copyright (c) 2012, Log-Normal Inc.  All rights reserved.  
+Most code Copyright (c) 2012-2016 SOASTA, Inc. All rights reserved.  
 
 Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
