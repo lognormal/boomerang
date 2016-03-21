@@ -825,7 +825,7 @@
 		},
 
 		page_unload: function(edata) {
-			BOOMR.debug("Unload called with " + BOOMR.utils.objectToString(edata) + " when unloadfired = " + this.unloadfired, "rt");
+			BOOMR.debug("Unload called when unloadfired = " + this.unloadfired, "rt");
 			if (!this.unloadfired) {
 				// run done on abort or on page_unload to measure session length
 				BOOMR.plugins.RT.done(edata, "unload");
@@ -1059,13 +1059,8 @@
 		// onload event fires, or it could be at some other moment during/after page
 		// load when the page is usable by the user
 		done: function(edata, ename) {
-			// try/catch just in case edata contains cross-origin data and objectToString throws a security exception
-			try {
-				BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
-			}
-			catch (err) {
-				BOOMR.debug("Called done with " + err + ", " + ename, "rt");
-			}
+			BOOMR.debug("Called done: " + ename, "rt");
+
 			var t_start, t_done, t_now = BOOMR.now(),
 			    subresource = false;
 
