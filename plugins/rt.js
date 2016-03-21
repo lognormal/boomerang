@@ -1059,7 +1059,7 @@
 		// onload event fires, or it could be at some other moment during/after page
 		// load when the page is usable by the user
 		done: function(edata, ename) {
-			BOOMR.debug("Called done with " + err + ", " + ename, "rt");
+			BOOMR.debug("Called done: " + ename, "rt");
 
 			var t_start, t_done, t_now = BOOMR.now(),
 			    subresource = false;
