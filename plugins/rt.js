@@ -825,7 +825,7 @@
 		},
 
 		page_unload: function(edata) {
-			BOOMR.debug("Unload called with " + BOOMR.utils.objectToString(edata) + " when unloadfired = " + this.unloadfired, "rt");
+			BOOMR.debug("Unload called when unloadfired = " + this.unloadfired, "rt");
 			if (!this.unloadfired) {
 				// run done on abort or on page_unload to measure session length
 				BOOMR.plugins.RT.done(edata, "unload");
