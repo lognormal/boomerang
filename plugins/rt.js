@@ -1059,13 +1059,8 @@
 		// onload event fires, or it could be at some other moment during/after page
 		// load when the page is usable by the user
 		done: function(edata, ename) {
-			// try/catch just in case edata contains cross-origin data and objectToString throws a security exception
-			try {
-				BOOMR.debug("Called done with " + BOOMR.utils.objectToString(edata, undefined, 1) + ", " + ename, "rt");
-			}
-			catch (err) {
-				BOOMR.debug("Called done with " + err + ", " + ename, "rt");
-			}
+			BOOMR.debug("Called done with " + err + ", " + ename, "rt");
+
 			var t_start, t_done, t_now = BOOMR.now(),
 			    subresource = false;
 
