@@ -104,13 +104,10 @@
 			return [];
 		}
 
-		var messages = [];
+		var messages = "";
 		for (var i = 0; i < testFailures.length; i++) {
-			messages.push({
-				title: testFailures[i].titles,
-				name: testFailures[i].name,
-				message: testFailures[i].message
-			});
+			messages += "\n";
+			messages += testFailures[i].titles + ": " + testFailures[i].name + " | " + testFailures[i].message;
 		}
 
 		return messages;
