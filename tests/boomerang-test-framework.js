@@ -101,7 +101,7 @@
 
 	t.getTestFailureMessages = function() {
 		if (!complete) {
-			return [];
+			return "";
 		}
 
 		var messages = "";
