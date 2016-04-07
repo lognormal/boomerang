@@ -62,8 +62,13 @@ app.get("/delay", require("./route-delay"));
 app.post("/delay", require("./route-delay"));
 
 /* SOASTA PRIVATE START */
-// /config - config.js responses
+// potential config locations
 app.get("/config", require("./route-config"));
+app.get("/config.json", require("./route-config"));
+app.get("/api/config.json", require("./route-config"));
+app.get("/api/v2/config.json", require("./route-config"));
+app.get("/concerto/api/config.json", require("./route-config"));
+app.get("/concerto/api/v2/config.json", require("./route-config"));
 /* SOASTA PRIVATE END */
 
 // all static content follows afterwards

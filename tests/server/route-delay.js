@@ -40,7 +40,7 @@ if (!fs.existsSync(wwwRoot)) {
 
 module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
-	var delay = q.delay;
+	var delay = q.delay || 0;
 	var file = q.file;
 	var response = q.response;
 
