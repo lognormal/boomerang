@@ -121,6 +121,9 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 					if (w.devicePixelRatio > 1) {
 						BOOMR.addVar("scr.dpx", w.devicePixelRatio);
 					}
+					if (w.scrollX !== 0 || w.scrollY !== 0) {
+						BOOMR.addVar("scr.sxy", w.scrollX + "x" + w.scrollY);
+					}
 				},
 				"screen"
 			);
