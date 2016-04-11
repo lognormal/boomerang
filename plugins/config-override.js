@@ -77,6 +77,17 @@
 			AutoXHR: {
 				alwaysSendXhr: true
 			},
+			Errors: {
+				onError: true,
+				monitorGlobal: true,
+				monitorNetwork: true,
+				monitorConsole: true,
+				monitorEvents: true,
+				monitorTimeout: true,
+				sendAfterOnload: true,
+				maxErrors: true,
+				sendInterval: true
+			},
 			secondaryBeacons: true,
 			autorun: true
 		}

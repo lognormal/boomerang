@@ -294,5 +294,8 @@ BOOMR.addVar({"h.key": "%client_apikey%"})
 		},
 		History: {
 			enabled: false
+		},
+		Errors: {
+			enabled: false
 		}
 	});

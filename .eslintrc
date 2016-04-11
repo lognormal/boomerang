@@ -80,6 +80,7 @@
 		"space-before-function-paren": [2, "never"],
 		"no-trailing-spaces": [2, { "skipBlankLines": false }],
 		"linebreak-style": [2, "unix"],
+		"comma-dangle": [2, "never"],
 
 		//
 		// Disabled rules

@@ -7,5 +7,6 @@
 	{"key":"backbone"},
 	{"key":"react"},
 	{"key":"history"},
-	{"key":"css-selectors"}
+	{"key":"css-selectors"},
+	{"key":"errors"}
 ]

@@ -872,6 +872,14 @@
 			impl._iterable_click("Click", "A", etarget, function(t) { return t.href; });
 		},
 
+		onerror: function() {
+			if (this.onloadfired) {
+				// allow error beacons to send outside of page load without adding
+				// RT variables to the beacon
+				impl.complete = true;
+			}
+		},
+
 		onsubmit: function(etarget) {
 			impl._iterable_click("Submit", "FORM", etarget, function(t) {
 				var v = t.getAttribute("action") || d.URL || "";
@@ -957,7 +965,7 @@
 			BOOMR.subscribe("form_submit", impl.onsubmit, null, impl);
 			BOOMR.subscribe("before_beacon", this.addTimersToBeacon, "beacon", this);
 			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
-
+			BOOMR.subscribe("onerror", impl.onerror, null, impl);
 
 			// Override any getBeaconURL method to make sure we return the one from the
 			// cookie and not the one hardcoded into boomerang

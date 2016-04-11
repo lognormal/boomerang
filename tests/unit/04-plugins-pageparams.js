@@ -18,7 +18,7 @@ describe("BOOMR.plugins.PageParams", function() {
 		});
 	});
 
-	describe("extractJavaScriptVariableValue", function() {
+	describe("extractJavaScriptVariableValue()", function() {
 		var testObj1 = {
 			foo: 111
 		};

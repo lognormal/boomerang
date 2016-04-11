@@ -827,6 +827,11 @@
 						return;
 					}
 
+					// fire an event for anyone listening
+					if (resource.status) {
+						BOOMR.fireEvent("onxhrerror", resource);
+					}
+
 					resource.timing.loadEventEnd = BOOMR.now();
 
 					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
@@ -1041,6 +1046,8 @@
 			else if (autoXhrEnabled === false) {
 				BOOMR.uninstrumentXHR();
 			}
+
+			BOOMR.registerEvent("onxhrerror");
 		},
 		getMutationHandler: function() {
 			return handler;

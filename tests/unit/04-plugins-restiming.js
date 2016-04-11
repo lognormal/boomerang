@@ -31,20 +31,20 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 	// .toBase36
 	//
 	describe("toBase36()", function() {
-		it("should return the base 36 equivalent of 100", function() {
+		it("Should return the base 36 equivalent of 100", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(100), "2s");
 		});
 
-		it("should return an empty string if the input is not a number or a number", function() {
+		it("Should return an empty string if the input is not a number or a number", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(), "");
 		});
 
-		it("should return the input string if given a string", function() {
+		it("Should return the input string if given a string", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(""), "");
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36("a"), "a");
 		});
 
-		it("should return an empty string if the input is 0", function() {
+		it("Should return an empty string if the input is 0", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.toBase36(0), "");
 		});
 	});
@@ -53,19 +53,19 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 	// .trimTiming
 	//
 	describe("trimTiming()", function() {
-		it("should handle 0", function() {
+		it("Should handle 0", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(0), 0);
 		});
 
-		it("should handle undefined", function() {
+		it("Should handle undefined", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(), 0);
 		});
 
-		it("should handle non-numbers", function() {
+		it("Should handle non-numbers", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming("a"), 0);
 		});
 
-		it("should round to the nearest number", function() {
+		it("Should round to the nearest number", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(0, 0), 0);
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 0), 100);
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.5, 0), 101);
@@ -73,7 +73,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.99, 0), 101);
 		});
 
-		it("should round when given a navtiming offset", function() {
+		it("Should round when given a navtiming offset", function() {
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100), 100);
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100, 1), 99);
 			assert.equal(BOOMR.plugins.ResourceTiming.trimTiming(100.12, 1.12), 99);
@@ -86,7 +86,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 	// .convertToTrie
 	//
 	describe("convertToTrie()", function() {
-		it("should convert a single node", function() {
+		it("Should convert a single node", function() {
 			var data = {"abc": "abc"};
 			var expected = {
 				"a": {
@@ -98,7 +98,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should convert a two-node tree whose nodes don't intersect", function() {
+		it("Should convert a two-node tree whose nodes don't intersect", function() {
 			var data = {"abc": "abc", "xyz": "xyz"};
 			var expected = {
 				"a": {
@@ -115,7 +115,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should convert a complex tree", function() {
+		it("Should convert a complex tree", function() {
 			var data = {"abc": "abc", "abcd": "abcd", "ab": "ab"};
 			var expected = {
 				"a": {
@@ -131,7 +131,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should should break 'href' for NoScript", function() {
+		it("Should should break 'href' for NoScript", function() {
 			var data = {"href": "abc"};
 			var expected = {
 				"h": {
@@ -148,7 +148,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should should break 'src' for NoScript", function() {
+		it("Should should break 'src' for NoScript", function() {
 			var data = {"src": "abc"};
 			var expected = {
 				"s": {
@@ -163,7 +163,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should should break 'action' for NoScript", function() {
+		it("Should should break 'action' for NoScript", function() {
 			var data = {"action": "abc"};
 			var expected = {
 				"a": {
@@ -184,7 +184,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("should update XSS words from config.js", function() {
+		it("Should update XSS words from config.js", function() {
 			BOOMR.init({
 				ResourceTiming: {
 					enabled: true,
@@ -216,7 +216,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 	// .optimizeTrie
 	//
 	describe("optimizeTrie()", function() {
-		it("should optimize a single-node tree", function() {
+		it("Should optimize a single-node tree", function() {
 			var data = {"abc": "abc"};
 			var expected = {
 				"abc": "abc"
@@ -227,7 +227,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
 		});
 
-		it("should optimize a simple tree", function() {
+		it("Should optimize a simple tree", function() {
 			var data = {"abc": "abc", "xyz": "xyz"};
 			var expected = {
 				"abc": "abc",
@@ -239,7 +239,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
 		});
 
-		it("should optimize a complex tree", function() {
+		it("Should optimize a complex tree", function() {
 			var data = {"abc": "abc", "abcd": "abcd", "ab": "ab"};
 			var expected = {
 				"ab":
@@ -257,7 +257,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
 		});
 
-		it("should optimize a single-node tree with more characters", function() {
+		it("Should optimize a single-node tree with more characters", function() {
 			var data = {"abcde": "abcde"};
 			var expected = {
 				"abcde": "abcde"
@@ -268,7 +268,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.optimizeTrie(trie, true), expected);
 		});
 
-		it("should should break 'href' for NoScript", function() {
+		it("Should should break 'href' for NoScript", function() {
 			var data = {"href": "abc" };
 			var expected = {
 				"h": {
@@ -286,7 +286,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.equal(optTrieJson.indexOf("href"), -1);
 		});
 
-		it("should should break 'href', 'action' and 'src' for NoScript", function() {
+		it("Should should break 'href', 'action' and 'src' for NoScript", function() {
 			var data = {"href": "abc", "123action123": "abc", "_src_abc_action123": "abc" };
 			var expected = {
 				"_s": {

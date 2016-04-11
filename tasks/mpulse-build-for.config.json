@@ -1,0 +1,8 @@
+{
+	"target": {
+		"server": "c.go-mpulse.net",
+		"apikey": "KQTS5-4NBTD-EYGLE-64UYR-S5892",
+		"secondaryBeacons": [],
+		"configAsJSON": false
+	}
+}

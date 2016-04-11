@@ -1063,8 +1063,36 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
-		addError: function(err, src, extra) {
-			var str;
+		addError: function BOOMR_addError(err, src, extra) {
+			var str, E = BOOMR.plugins.Errors;
+
+			//
+			// Use the Errors plugin if it's enabled
+			//
+			if (E && E.is_supported()) {
+				if (typeof err === "string") {
+					E.send({
+						message: err,
+						extra: extra,
+						functionName: src,
+						noStack: true
+					}, E.VIA_APP, E.SOURCE_BOOMERANG);
+				}
+				else {
+					if (typeof src === "string") {
+						err.functionName = src;
+					}
+
+					if (typeof extra !== "undefined") {
+						err.extra = extra;
+					}
+
+					E.send(err, E.VIA_APP, E.SOURCE_BOOMERANG);
+				}
+
+				return;
+			}
+
 			if (typeof err !== "string") {
 				str = String(err);
 				if (str.match(/^\[object/)) {

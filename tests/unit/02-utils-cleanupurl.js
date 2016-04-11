@@ -67,19 +67,19 @@ describe("BOOMR.utils.cleanupURL()", function() {
 		BOOMR = BOOMR_reset;
 	});
 
-	it("should not trim a URL underneath the limit", function() {
+	it("Should not trim a URL underneath the limit", function() {
 		assert.equal(BOOMR.utils.cleanupURL("http://foo.com", 1000), "http://foo.com");
 	});
 
-	it("should trim a URL with a query string over the limit at the query string", function() {
+	it("Should trim a URL with a query string over the limit at the query string", function() {
 		assert.equal(BOOMR.utils.cleanupURL("http://foo.com?aaaaaa", 20), "http://foo.com?...");
 	});
 
-	it("should trim a URL with a query string too long over the limit at the limit", function() {
+	it("Should trim a URL with a query string too long over the limit at the limit", function() {
 		assert.equal(BOOMR.utils.cleanupURL("http://foo.com?aaaaaa", 14), "http://foo....");
 	});
 
-	it("should trim a URL without a query string over the limit at the limit", function() {
+	it("Should trim a URL without a query string over the limit at the limit", function() {
 		assert.equal(BOOMR.utils.cleanupURL("http://foo.com/a/b/c/d", 17), "http://foo.com...");
 	});
 });
