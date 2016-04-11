@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/13-logn_config/00-hcr", function() {
+describe("e2e/13-logn-config/00-hcr", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

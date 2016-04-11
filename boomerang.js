@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
- * Copyright (c) 2014, SOASTA, Inc. All rights reserved.
+ * Copyright (c) 2011-2012, Log-Normal, Inc.  All rights reserved.
+ * Copyright (c) 2012-2016, SOASTA, Inc. All rights reserved.
  * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
  */
 
@@ -336,7 +336,7 @@ BOOMR_check_doc_domain();
 	boomr = {
 		//! t_lstart: value of BOOMR_lstart set in host page
 		t_start: BOOMR_start,
-		//! t_end: value set in zzz_last_plugin.js
+		//! t_end: value set in zzz-last-plugin.js
 
 		url: myurl,
 		config_url: null,
@@ -1242,7 +1242,7 @@ BOOMR_check_doc_domain();
 		},
 		/**
 		 * Instrument all requests made via XMLHttpRequest to send beacons
-		 * This is implemented in plugins/auto_xhr.js
+		 * This is implemented in plugins/auto-xhr.js
 		 */
 		instrumentXHR: function() { },
 

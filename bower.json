@@ -1,8 +1,9 @@
 {
-  "name": "boomerang",
+  "name": "soasta-boomerang",
+  "private": true,
   "main": "boomerang.js",
   "version": "1.0.0",
-  "homepage": "https://github.com/lognormal/lognormal-boomerang/",
+  "homepage": "https://github.com/SOASTA/soasta-boomerang/",
   "authors": [
     "Philip Tellis"
   ],

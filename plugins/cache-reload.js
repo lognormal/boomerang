@@ -1,5 +1,5 @@
 /**
- * \file cache_reload.js
+ * \file cache-reload.js
  * Plugin that forces a cache reload of boomerang (assuming you have server side support)
  * Copyright (c) 2013, SOASTA, Inc. All rights reserved.
  */

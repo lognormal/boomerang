@@ -2,7 +2,7 @@
     "plugins": [
         "plugins/config-override.js",
         "plugins/page-params.js",
-        "plugins/auto_xhr.js",
+        "plugins/auto-xhr.js",
         "plugins/spa.js",
         "plugins/angular.js",
         "plugins/backbone.js",
@@ -14,10 +14,10 @@
         "plugins/restiming.js",
         "plugins/mobile.js",
         "plugins/memory.js",
-        "plugins/cache_reload.js",
+        "plugins/cache-reload.js",
         "plugins/md5.js",
         "plugins/compression.js",
         "plugins/errors.js",
-        "plugins/logn_config.js"
+        "plugins/logn.js"
     ]
 }
