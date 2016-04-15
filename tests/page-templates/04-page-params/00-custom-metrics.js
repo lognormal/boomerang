@@ -112,4 +112,62 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet19, 444.44);
 	});
+
+	it("Should have the custom metric 20 - A javascript variable with matched as boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet20, 1);
+	});
+
+	it("Should have the custom metric 21 - An element and it's content matched as boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet21, 1);
+	});
+
+	it("Should have the custom metric 22 - A custom variable matched as boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet22, 1);
+	});
+
+	it("Should have the custom metric 23 - A string matched as a boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet23, 1);
+	});
+
+	it("Should NOT have the custom metric 24 - A missing metric matched as a boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet24, undefined);
+	});
+
+	it("Should have the custom metric 25 - A numeric metric with a positive value matched as a boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet25, 1);
+	});
+
+	it("Should have the custom metric 26 - A numeric metric with a negative value matched as a boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet26, 1);
+	});
+
+	it("Should have the custom metric 27 - A numeric metric with a 0 value matched as a boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet27, undefined);
+	});
+
+	it("Should have the custom metric 28 - A NULL value metric matched as a boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet28, undefined);
+	});
+
+	it("Should have the custom metric 29 - A boolean false value metric matched as a boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet29, undefined);
+	});
+
+	it("Should have the custom metric 30 - A empty string value metric matched as a boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet30, undefined);
+	});
 });
+
+
+

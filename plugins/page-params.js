@@ -343,7 +343,7 @@
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.varName);
+			return this.extractJavaScriptVariable(o.varName, o.match);
 		},
 
 		Custom: function(o) {
@@ -351,10 +351,10 @@
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.parameter1);
+			return this.extractJavaScriptVariable(o.parameter1, o.match);
 		},
 
-		extractJavaScriptVariable: function(varname) {
+		extractJavaScriptVariable: function(varname, match) {
 			var parts, value, ctx = w;
 
 			if (!varname) {
@@ -410,11 +410,21 @@
 				}
 			}
 
-			if (value === undefined || typeof value === "object") {
+			if (value === undefined || typeof value === "object" && value !== null) {
 				return false;
 			}
 
 			BOOMR.debug("final value: " + value, "PageVars");
+
+			if (match && match === "boolean") {
+				if (value) {
+					return this.apply(1);
+				}
+				else {
+					return undefined;
+				}
+			}
+
 			// Now remove invalid characters
 			value = this.cleanUp(String(value));
 
