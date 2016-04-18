@@ -78,6 +78,7 @@
 				alwaysSendXhr: true
 			},
 			Errors: {
+				enabled: true,
 				onError: true,
 				monitorGlobal: true,
 				monitorNetwork: true,
