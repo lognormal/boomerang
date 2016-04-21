@@ -76,6 +76,10 @@ app.post("/delay", require("./route-delay"));
 app.get("/redirect", respond301);
 app.post("/redirect", respond301);
 
+// /chunked
+app.get("/chunked", require("./route-chunked"));
+app.post("/chunked", require("./route-chunked"));
+
 /* SOASTA PRIVATE START */
 // potential config locations
 app.get("/config", require("./route-config"));
