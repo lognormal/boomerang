@@ -24,6 +24,11 @@ module.exports = function(req, res) {
 	var chunkSize = q.chunkSize;
 	var chunkCount = q.chunkCount;
 	var chunkDelay = q.chunkDelay;
+	var contentLength = chunkSize * chunkCount;
+
+	// set a few headers
+	res.setHeader("Last-Modified", (new Date()).toUTCString());
+	res.setHeader("Content-Length", contentLength);
 
 	var cur = 0;
 
