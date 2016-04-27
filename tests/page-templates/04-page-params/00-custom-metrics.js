@@ -167,7 +167,106 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet30, undefined);
 	});
+
+	it("Should have the custom metric 31 - CSS selector with a value of '$123,45.67' when using comma ',' for the decimal separator and period '.' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet31, 123.45);
+	});
+
+	it("Should have the custom metric 32 - CSS selector with a value of '$123,45.67' when using period '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet32, 12345.67);
+	});
+
+	it("Should have the custom metric 33 - CSS selector with a value of '$12,345.67' when using comma ',' for the decimal separator and period '.' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet33, 12.345);
+	});
+
+	it("Should have the custom metric 34 - CSS selector with a value of '$12,345.67' when using period '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet34, 12345.67);
+	});
+
+	it("Should have the custom metric 35 - JavaScript variable with a value of '12,345.67' when using comma ',' for the decimal separator and period '.' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet35, 12.345);
+	});
+
+	it("Should have the custom metric 36 - JavaScript variable with a value of '12,345.67' when using period '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet36, 12345.67);
+	});
+
+	it("Should have the custom metric 37 - JavaScript variable with a value of 12345.67 when using comma ',' for the decimal separator and period '.' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		// note if they were using 1.000,00 format and they gave us a number like 12345.67, we should assume
+		// it's a whole number with just a weird place for the thousands separator
+		assert.equal(b.cmet37, 1234567);
+	});
+
+	it("Should have the custom metric 38 - JavaScript variable with a value of 12345.67 when using period '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet38, 12345.67);
+	});
+
+	it("Should have the custom metric 39 - JavaScript variable with a value of '123,456,789.01' when using period '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet39, 123456789.01);
+	});
+
+	it("Should have the custom metric 40 - JavaScript variable with a value of '12 345,67' when using comma ',' for the decimal separator and space ' ' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet40, 12345.67);
+	});
+
+	it("Should have the custom metric 41 - JavaScript variable with a value of '12 345.67' when using period '.' for the decimal separator and space ' ' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet41, 12345.67);
+	});
+
+	it("Should have the custom metric 42 - JavaScript variable with a value of \"12'345,67\" when using comma ',' for the decimal separator and space ' ' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet42, 12345.67);
+	});
+
+	it("Should have the custom metric 43 - JavaScript variable with a value of \"12'345.67\" when using period '.' for the decimal separator and space ' ' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet43, 12345.67);
+	});
+
+	it("Should have the custom metric 44 - JavaScript variable with a value of '123.456.789,01' when using comma ',' for the decimal separator and period '.' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet44, 123456789.01);
+	});
+
+	it("Should have the custom metric 45 - JavaScript variable with a value of '123.456.789,01' when using perdiod '.' for the decimal separator and comma ',' for the thousands separator", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet45, 123.456);
+	});
+
+	it("Should have the custom metric 46 - JavaScript variable with a value of 'abcdef' be undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet46, undefined);
+	});
+
+	it("Should have the custom metric 47 - JavaScript variable with a value of '12,.34' be 12", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet47, 12);
+	});
+
+	it("Should have the custom metric 48 - JavaScript variable with a value of ',' be undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet48, undefined);
+	});
+
+	it("Should have the custom metric 48 - JavaScript variable with a value of '12,345.6.78' be 12345.6", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet49, 12345.6);
+	});
+
+	it("Should have the custom metric 48 - JavaScript variable with a value of '12-34,567.89' be 12", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet50, 12);
+	});
 });
-
-
-

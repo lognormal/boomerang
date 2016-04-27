@@ -8,6 +8,26 @@
 		return;
 	}
 
+	//
+	// Constants
+	//
+	var DEFAULT_DECIMAL = ".";
+	var DEFAULT_THOUSANDS = ",";
+
+	var REGEX_NUMBER_US_DEFAULT = /(-?(?:[1-9][\d,]*)?[0-9](?:\.\d+)?)/;
+
+	//
+	// Cache of number regular expressions.
+	// key is "[decimal][thousands]", value is the regex
+	//
+	var regExNumberCache = { ".,": REGEX_NUMBER_US_DEFAULT };
+	var regExThousandsCache = {
+		".": /\./g,
+		",": /,/g,
+		" ": / /g,
+		"'": /'/g
+	};
+
 	Handler = function(config) {
 		this.varname = config.varname;
 		this.method = config.method || BOOMR.addVar;
@@ -53,23 +73,76 @@
 			);
 		},
 
-		cleanUp: function(s) {
-			var m;
-			if (!s) {
-				return s;
+		/**
+		 * Cleans up the specified value according to this type's settings.
+		 *
+		 * @param {string} value Value to clean up
+		 * @param {object} def Custom variable definition
+		 *
+		 * @returns {string} Cleaned-up value
+		 */
+		cleanUp: function(value, def) {
+			var match, regEx = this.cleanUpRE, decimal, thousands, cacheKey;
+			if (!value) {
+				return value;
 			}
 
-			if (this.cleanUpRE) {
-				m = s.match(this.cleanUpRE);
-				if (m && m.length > 1) {
-					return m[1];
+			if (regEx) {
+				// use the specified or page-default decimal and thousands separators
+				decimal = (def && def.decimal) ? def.decimal : impl.defaultDecimal;
+				thousands = (def && def.thousands) ? def.thousands : impl.defaultThousands;
+
+				// if the decimal or thousands are not US format, build a new regex
+				if (decimal !== DEFAULT_DECIMAL || thousands !== DEFAULT_THOUSANDS) {
+					cacheKey = decimal + thousands;
+
+					// get the regex from our cache
+					regEx = regExNumberCache[cacheKey];
+
+					if (typeof regEx === "undefined") {
+						// build one similar to: (-?(?:[1-9][\d,]*)?[0-9](?:\.\d+)?)
+						regEx = new RegExp("(-?(?:[1-9][\\d" + thousands + "]*)?[0-9](?:\\" + decimal + "\\d+)?)");
+
+						regExNumberCache[cacheKey] = regEx;
+					}
+				}
+
+				match = value.match(regEx);
+				if (match && match.length > 1) {
+					value = match[1];
+
+					//
+					// Change numbers to US-standard without a thousands separator
+					// (e.g. 1.000,00 -> 1000.00)
+					//
+
+					// get the regex from our cache
+					regEx = regExThousandsCache[thousands];
+
+					if (typeof regEx === "undefined") {
+						// strip all thousands-separators
+						regEx = new RegExp("\\" + thousands, "g");
+
+						regExThousandsCache[thousands] = regEx;
+					}
+
+					// remove the thousands separator
+					value = value.replace(regEx, "");
+
+					if (decimal !== DEFAULT_DECIMAL) {
+						// if the decimal is specified and is not a period,
+						// translate to a period for transmission
+						value = value.replace(decimal, DEFAULT_DECIMAL);
+					}
+
+					return value;
 				}
 				else {
 					return "";
 				}
 			}
 
-			return s.replace(this.sanitizeRE, "");
+			return value.replace(this.sanitizeRE, "");
 		},
 
 		isValidObjectMember: function(value, part) {
@@ -109,7 +182,7 @@
 			}
 
 			if ((!o.match || o.match === "numeric")) {
-				elementValue = this.cleanUp(elementValue);
+				elementValue = this.cleanUp(elementValue, o);
 			}
 			else if (o.match === "boolean") {
 				elementValue = 1;
@@ -343,7 +416,7 @@
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.varName, o.match);
+			return this.extractJavaScriptVariable(o.varName, o);
 		},
 
 		Custom: function(o) {
@@ -351,10 +424,10 @@
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.parameter1, o.match);
+			return this.extractJavaScriptVariable(o.parameter1, o);
 		},
 
-		extractJavaScriptVariable: function(varname, match) {
+		extractJavaScriptVariable: function(varname, o) {
 			var parts, value, ctx = w;
 
 			if (!varname) {
@@ -416,7 +489,7 @@
 
 			BOOMR.debug("final value: " + value, "PageVars");
 
-			if (match && match === "boolean") {
+			if (o && o.match === "boolean") {
 				if (value) {
 					return this.apply(1);
 				}
@@ -426,7 +499,7 @@
 			}
 
 			// Now remove invalid characters
-			value = this.cleanUp(String(value));
+			value = this.cleanUp(String(value), o);
 
 			return this.apply(value);
 		},
@@ -822,6 +895,9 @@
 		unloadFired: false,
 		onloadfired: false,
 
+		defaultDecimal: DEFAULT_DECIMAL,
+		defaultThousands: DEFAULT_THOUSANDS,
+
 		autorun: true,
 
 		mayRetry: [],
@@ -836,9 +912,9 @@
 			hconfig = {
 				pageGroups:       { varname: "h.pg", stopOnFirst: true },
 				abTests:          { varname: "h.ab", stopOnFirst: true },
-				customMetrics:    { cleanUpRE:  /(-?\d+(?:\.\d+)?)/ },
+				customMetrics:    { cleanUpRE:  REGEX_NUMBER_US_DEFAULT },
 				customDimensions: { sanitizeRE: /[^\w\. \-]/g },
-				customTimers:     { cleanUpRE:  /(-?\d+(?:\.\d+)?)/,
+				customTimers:     { cleanUpRE:  REGEX_NUMBER_US_DEFAULT,
 						    method: BOOMR.plugins.RT.setTimer,
 						    ctx: BOOMR.plugins.RT,
 						    preProcessor: function(val) {
@@ -1077,7 +1153,8 @@
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
-			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions", "autorun"];
+			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics",
+			    "customDimensions", "autorun", "defaultDecimal", "defaultThousands"];
 
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location

@@ -3,6 +3,8 @@
 <div class="cart-container" style="display: none" id="cart-container">
 	<div id="cart-total">$444.44</div>
 	<textarea id="a1-_:.">$555.55</textarea>
+	<div id="cart-total-comma">$123,45.67</div>
+	<div id="cart-total-period">$12,345.67</div>
 	<input id="some-input" type="hidden" value="3.14" />
 	<input id="cb" type="checkbox" checked="checked" />
 	<input id="rad" type="radio" checked="checked" />
@@ -15,6 +17,19 @@ custom_metric_1 = 111;
 custom_metric_2 = function() {
 	return 222;
 };
+custom_metric_comma_period = "12,345.67";
+custom_metric_comma_period_big = "123,456,789.01";
+custom_metric_period_comma = 12345.67;
+custom_metric_period_comma_big = "123.456.789,01";
+custom_metric_space_comma = "12 345,67";
+custom_metric_space_period = "12 345.67";
+custom_metric_quote_period = "12'345.67";
+custom_metric_quote_comma = "12'345,67";
+custom_metric_string = "abcdef";
+custom_metric_bad_format_1 = "12,.34";
+custom_metric_bad_format_2 = ",";
+custom_metric_bad_format_3 = "12,345.6.78";
+custom_metric_bad_format_4 = "12-34,567.89";
 custom_metric_3 = true;
 custom_metric_4 = "true";
 custom_metric_5 = -1;
@@ -227,6 +242,128 @@ BOOMR_test.init({
 				match: "boolean",
 				parameter1: "custom_metric_9",
 				parameter2: ""
+			},
+			{
+				label: "cmet31",
+				parameter1: "",
+				decimal: ",",
+				thousands: ".",
+				queryselector: "div#cart-total-comma",
+				type: "URLPatternType"
+			},
+			{
+				label: "cmet32",
+				parameter1: "",
+				queryselector: "div#cart-total-comma",
+				type: "URLPatternType"
+			},
+			{
+				label: "cmet33",
+				parameter1: "",
+				decimal: ",",
+				thousands: ".",
+				queryselector: "div#cart-total-period",
+				type: "URLPatternType"
+			},
+			{
+				label: "cmet34",
+				parameter1: "",
+				queryselector: "div#cart-total-period",
+				type: "URLPatternType"
+			},
+			{
+				label: "cmet35",
+				decimal: ",",
+				thousands: ".",
+				varName: "custom_metric_comma_period",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet36",
+				varName: "custom_metric_comma_period",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet37",
+				decimal: ",",
+				thousands: ".",
+				varName: "custom_metric_period_comma",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet38",
+				varName: "custom_metric_period_comma",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet39",
+				varName: "custom_metric_comma_period_big",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet40",
+				decimal: ",",
+				thousands: " ",
+				varName: "custom_metric_space_comma",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet41",
+				decimal: ".",
+				thousands: " ",
+				varName: "custom_metric_space_period",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet42",
+				decimal: ".",
+				thousands: "'",
+				varName: "custom_metric_quote_period",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet43",
+				decimal: ",",
+				thousands: "'",
+				varName: "custom_metric_quote_comma",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet44",
+				decimal: ",",
+				thousands: ".",
+				varName: "custom_metric_period_comma_big",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet45",
+				varName: "custom_metric_period_comma_big",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet46",
+				varName: "custom_metric_string",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet47",
+				varName: "custom_metric_bad_format_1",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet48",
+				varName: "custom_metric_bad_format_2",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet49",
+				varName: "custom_metric_bad_format_3",
+				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet50",
+				varName: "custom_metric_bad_format_4",
+				type: "JavaScriptVar"
 			}
 		]
 	}

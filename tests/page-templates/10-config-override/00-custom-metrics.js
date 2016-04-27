@@ -39,4 +39,9 @@ describe("e2e/10-config-override/00-custom-metrics", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet5, undefined);
 	});
+
+	it("Should have the custom metric 6 - JavaScript variable with a value of '12.345,67' when using comma ',' for the decimal separator and period '.' for the thousands separator via BOOMR_config page defaults", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet6, 12345.67);
+	});
 });

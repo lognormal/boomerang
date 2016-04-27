@@ -8,5 +8,6 @@
 	{"key":"react"},
 	{"key":"history"},
 	{"key":"css-selectors"},
+	{"key":"intl-currency"},
 	{"key":"errors"}
 ]

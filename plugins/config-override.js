@@ -58,7 +58,9 @@
 				customMetrics: true,
 				customDimensions: true,
 				customTimers: true,
-				abTests: true
+				abTests: true,
+				defaultDecimal: true,
+				defaultThousands: true
 			},
 			instrument_xhr: true,
 			RT: {
