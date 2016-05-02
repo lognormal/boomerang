@@ -706,9 +706,16 @@ module.exports = function() {
 					"tests/page-template-snippets/**/*",
 					"tests/page-templates/**/*",
 					"tests/unit/**/*",
-					"tests/test-templates/**/*.js"
+					"tests/test-templates/**/*.js",
+					"!tests/page-templates/12-react/support/*.jsx"
 				],
-				tasks: ["test:build:react", "pages-builder"]
+				tasks: ["pages-builder"]
+			},
+			"test-react": {
+				files: [
+					"tests/page-templates/12-react/support/*.jsx"
+				],
+				tasks: ["test:build:react"]
 			},
 			boomerang: {
 				files: [
