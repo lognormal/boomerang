@@ -40,7 +40,12 @@ describe("BOOMR.plugins.PageParams", function() {
 		});
 
 		it("Should work with regular property syntax #2", function() {
-			assert.sameMembers([0, 111, 222], getHandler().extractJavaScriptVariableValue(testObj2, "foo"));
+			var result = getHandler().extractJavaScriptVariableValue(testObj2, "foo");
+
+			// NOTE: don't use assert.sameMembers as it doesn't work on IE6/7
+			assert.equal(0, result[0]);
+			assert.equal(111, result[1]);
+			assert.equal(222, result[2]);
 		});
 
 		it("Should work with array syntax #1", function() {
