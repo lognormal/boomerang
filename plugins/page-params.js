@@ -892,6 +892,7 @@
 		complete: false,
 		initialized: false,
 		configReceived: false,
+		rerunAfterConfig: false,
 		unloadFired: false,
 		onloadfired: false,
 
@@ -906,6 +907,11 @@
 			var i, v, hconfig, handler, limpl = impl, data;
 
 			if (!impl.configReceived) {
+				// we should try to run again after config comes in
+				impl.rerunAfterConfig = {
+					edata: edata,
+					ename: ename
+				};
 				return;
 			}
 
@@ -1171,6 +1177,15 @@
 			if (impl.initialized) {
 				// second init is from config.js
 				impl.configReceived = true;
+
+				// if we had previously run before config.js came in, re-run now
+				if (impl.rerunAfterConfig) {
+					BOOMR.debug("Re-running now that config came in");
+					impl.done(impl.rerunAfterConfig.edata, impl.rerunAfterConfig.ename);
+
+					impl.rerunAfterConfig = false;
+					return;
+				}
 			}
 
 			// Fire on the first of load or unload
