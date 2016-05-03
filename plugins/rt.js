@@ -432,9 +432,10 @@
 					for (url in urls) {
 						if (urls.hasOwnProperty(url) && urls[url]) {
 							res = window.performance.getEntriesByName(urls[url]);
-							if (!res || res.length === 0) {
+							if (!res || res.length === 0 || !res[0]) {
 								continue;
 							}
+
 							res = res[0];
 
 							startTime = trimTiming(res.startTime, 0);
