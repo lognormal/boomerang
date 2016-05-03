@@ -484,26 +484,27 @@
 		}
 	};
 
-	MutationHandler.prototype.load_cb = function(ev) {
-		var target, index;
+	MutationHandler.prototype.load_cb = function(ev, resourceNum) {
+		var target, index, now = BOOMR.now();
 
 		target = ev.target || ev.srcElement;
 		if (!target || !target._bmr) {
 			return;
 		}
 
-		if (target._bmr.end) {
+		index = target._bmr.idx;
+		resourceNum = typeof resourceNum !== "undefined" ? resourceNum : (target._bmr.res || 0);
+
+		if (target._bmr.end[resourceNum]) {
 			// If we've already set the end value, don't call load_finished
 			// again.  This might occur on IMGs that are 404s, which fire
 			// 'error' then 'load' events
 			return;
 		}
 
-		target._bmr.end = BOOMR.now();
-		target._bmr.state = ev.type;
+		target._bmr.end[resourceNum] = now;
 
-		index = target._bmr.res;
-		this.load_finished(index, target._bmr.end);
+		this.load_finished(index, now);
 	};
 
 	MutationHandler.prototype.load_finished = function(index, loadEventEnd) {
@@ -537,18 +538,16 @@
 	};
 
 	MutationHandler.prototype.wait_for_node = function(node, index) {
-		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false;
+		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false, resourceNum;
 
 		// only images, scripts, iframes and links if stylesheet
 		if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 			// if the attribute change affected the src/currentSrc attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
-			if (node._bmr && node._bmr.end) {
+			if (node._bmr && node._bmr.res && node._bmr.end[node._bmr.res]) {
 				exisitingNodeSrcUrlChanged = true;
 			}
-
-			node._bmr = { start: BOOMR.now(), res: index };
 
 			url = node.src || node.href;
 
@@ -572,6 +571,16 @@
 
 			if (!current_event) {
 				return false;
+			}
+
+			// determine the resource number for this request
+			resourceNum = current_event.resources.length;
+
+			// create a placeholder ._bmr attribute
+			if (!node._bmr) {
+				node._bmr = {
+					end: {}
+				};
 			}
 
 			// keep track of all resources (URLs) seen for the root resource
@@ -614,8 +623,12 @@
 				current_event.resource.url = a.href;
 			}
 
-			node.addEventListener("load", function(ev) { self.load_cb(ev); });
-			node.addEventListener("error", function(ev) { self.load_cb(ev); });
+			// update _bmr with details about this resource
+			node._bmr.res = resourceNum;
+			node._bmr.idx = index;
+
+			node.addEventListener("load", function(ev) { self.load_cb(ev, resourceNum); });
+			node.addEventListener("error", function(ev) { self.load_cb(ev, resourceNum); });
 
 			current_event.nodes_to_wait++;
 			current_event.resources.push(node);

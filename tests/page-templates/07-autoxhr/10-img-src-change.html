@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangScript %>
+<img id="main-image" src="" />
+<script src="10-img-src-change.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	autorun: false
+});
+
+// start a route change
+BOOMR.plugins.SPA.route_change();
+
+var img = document.getElementById("main-image");
+
+// send the first image out with a delay
+img.src = "/delay?delay=5000&file=/assets/img.jpg&foo=" + Math.round(Math.random() * 100000);
+
+// update the same IMG src again after 500ms
+setTimeout(function() {
+	img.src = "/assets/img.jpg?foo=" + Math.round(Math.random() * 100000);
+}, 500);
+
+</script>
+<%= footer %>

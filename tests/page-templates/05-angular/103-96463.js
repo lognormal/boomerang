@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test*/
 
-describe("e2e/05-angular/26-bug", function() {
+describe("e2e/05-angular/103-96463", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
