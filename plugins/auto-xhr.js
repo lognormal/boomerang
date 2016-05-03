@@ -64,6 +64,10 @@
 	}
 
 	function shouldExcludeXhr(anchor) {
+		if (anchor.href && anchor.href.match(/^(about:|javascript:|data:)/i)) {
+			return true;
+		}
+
 		return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
 			BOOMR.xhr_excludes.hasOwnProperty(anchor.hostname) ||
 			BOOMR.xhr_excludes.hasOwnProperty(getPathName(anchor));
@@ -562,8 +566,8 @@
 				}
 			}
 
-			// no URL or javascript: or about: URL, so no network activity
-			if (!url || url.match(/^(about:|javascript:)/i)) {
+			// no URL or javascript: or about: or data: URL, so no network activity
+			if (!url || url.match(/^(about:|javascript:|data:)/i)) {
 				return false;
 			}
 
