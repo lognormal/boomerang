@@ -107,7 +107,7 @@ For boomerang, this is the code you'll include:
   doc.open()._l = function() {
     var js = this.createElement("script");
     if(dom) this.domain = dom;
-    js.id = "js-iframe-async";
+    js.id = "boomr-if-as";
     js.src = 'http://your-cdn.host.com/path/to/boomerang-<version>.js';
     this.body.appendChild(js);
   };
