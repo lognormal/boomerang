@@ -909,6 +909,12 @@
 			if (w !== BOOMR.window) {
 				w = BOOMR.window;
 			}
+
+			// protect against undefined window/document
+			if (!w || !w.document) {
+				return;
+			}
+
 			d = w.document;
 
 			BOOMR.utils.pluginConfig(impl, config, "RT",
