@@ -188,9 +188,17 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 					b = n.battery;
 				}
 				else if (n && n.getBattery) {
-					n.getBattery().then(function(battery) {
-						b = battery;
-					});
+					var batPromise = n.getBattery();
+
+					// some UAs implement getBattery without a promise
+					if (batPromise && typeof batPromise.then === "function") {
+						batPromise.then(function(battery) {
+							b = battery;
+						});
+					}
+					else {
+						BOOMR.addError("getBattery promise is not a function: " + JSON.stringify(batPromise), "Memory.init");
+					}
 				}
 			}
 			catch (err) {
