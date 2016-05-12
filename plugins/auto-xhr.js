@@ -1000,6 +1000,11 @@
 		init: function(config) {
 			var i;
 
+			// if we don't have window, abort
+			if (!BOOMR.window || !BOOMR.window.document) {
+				return;
+			}
+
 			d = BOOMR.window.document;
 			a = BOOMR.window.document.createElement("A");
 
