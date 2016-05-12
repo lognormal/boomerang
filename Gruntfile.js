@@ -100,6 +100,10 @@ module.exports = function() {
 		server: grunt.option("server") || "localhost"
 	};
 
+	var bannerFilePathRelative = "./lib/banner.txt";
+	var bannerFilePathAbsolute = path.resolve(bannerFilePathRelative);
+	var bannerString = grunt.file.read(bannerFilePathAbsolute);
+
 	// mPulse build config
 	buildConfig.hasApiKey = grunt.option("api-key") ? true : false;
 	buildConfig.apiKey = grunt.option("api-key") || "%client_apikey%";
@@ -407,6 +411,9 @@ module.exports = function() {
 			}
 		},
 		uglify: {
+			options: {
+				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> */\n"
+			},
 			default: {
 				options: {
 					preserveComments: false,
@@ -433,6 +440,7 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
+					banner: "",
 					sourceMap: true,
 					compress: {
 						sequences: false
@@ -451,6 +459,7 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
+					banner: "",
 					compress: {
 						sequences: false
 					}
