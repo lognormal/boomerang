@@ -1293,7 +1293,7 @@ if (!Array.isArray) {
 
 				try {
 					BOOMR.window.console.error = function BOOMR_plugins_errors_console_error() {
-						if (arguments.length === 1) {
+						if (arguments.length === 1 || !window.JSON) {
 							impl.send(arguments[0], E.VIA_CONSOLE);
 						}
 						else {
