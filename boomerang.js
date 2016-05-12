@@ -39,6 +39,10 @@ function BOOMR_check_doc_domain(domain) {
 	/*eslint no-unused-vars:0*/
 	var test;
 
+	if (!window) {
+		return;
+	}
+
 	// If domain is not passed in, then this is a global call
 	// domain is only passed in if we call ourselves, so we
 	// skip the frame check at that point
