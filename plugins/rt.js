@@ -426,7 +426,10 @@
 
 			// use window and not w because we want the inner iframe
 			try {
-				if (window.performance && window.performance.getEntriesByName) {
+				if (window
+				    && "performance" in window
+				    && window.performance
+				    && typeof window.performance.getEntriesByName === "function") {
 					urls = { "rt.bmr": BOOMR.url, "rt.cnf": BOOMR.config_url };
 
 					for (url in urls) {
