@@ -819,6 +819,11 @@ see: http://www.w3.org/TR/resource-timing/
 				return;
 			}
 
+			// Can't send if we don't support JSON
+			if (typeof JSON === "undefined") {
+				return;
+			}
+
 			BOOMR.removeVar("restiming");
 			r = getCompressedResourceTiming();
 			if (r) {
