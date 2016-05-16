@@ -1540,11 +1540,13 @@ BOOMR_check_doc_domain();
 
 		/**
 		 * Gets the latest ResourceTiming entry for the specified URL
+		 * Default sort order is chronological startTime
 		 * @param {string} url Resource URL
+		 * @param {function} [sort] Sort the entries before returning the last one
 		 * @returns {PerformanceEntry|undefined} Entry, or undefined if ResourceTiming is not
 		 *          supported or if the entry doesn't exist
 		 */
-		getResourceTiming: function(url) {
+		getResourceTiming: function(url, sort) {
 			var entries;
 
 			try {
@@ -1552,6 +1554,9 @@ BOOMR_check_doc_domain();
 					&& typeof BOOMR.getPerformance().getEntriesByName === "function") {
 					entries = BOOMR.getPerformance().getEntriesByName(url);
 					if (entries && entries.length) {
+						if (typeof sort === "function") {
+							entries.sort(sort);
+						}
 						return entries[entries.length - 1];
 					}
 				}

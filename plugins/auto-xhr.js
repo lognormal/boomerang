@@ -836,7 +836,7 @@
 				}
 
 				function loadFinished() {
-					var entry, navSt;
+					var entry, navSt, useRT = false;
 
 					// if we already finished via readystatechange or an error event,
 					// don't do work again
@@ -852,19 +852,25 @@
 					resource.timing.loadEventEnd = BOOMR.now();
 
 					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
-					entry = BOOMR.getResourceTiming(resource.url);
+					entry = BOOMR.getResourceTiming(resource.url, function(x, y) { return x.responseEnd - y.responseEnd; });
 					if (entry) {
 						navSt = BOOMR.getPerformance().timing.navigationStart;
 
+						// re-set the timestamp to make sure it's greater than values in resource timing entry
+						resource.timing.loadEventEnd = BOOMR.now();
 						if (entry.responseEnd !== 0) {
-							resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
+							// sanity check to see if the entry should be used for this resource
+							if (Math.floor(navSt + entry.responseEnd) <= resource.timing.loadEventEnd) {
+								resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
+								useRT = true;
+							}
 						}
 
-						if (entry.responseStart !== 0) {
+						if (useRT && entry.responseStart !== 0) {
 							resource.timing.responseStart = Math.round(navSt + entry.responseStart);
 						}
 
-						if (entry.startTime !== 0) {
+						if (useRT && entry.startTime !== 0) {
 							resource.timing.requestStart = Math.round(navSt + entry.startTime);
 						}
 					}

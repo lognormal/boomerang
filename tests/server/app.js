@@ -35,11 +35,18 @@ if (!fs.existsSync(wwwRoot)) {
 
 var app = express();
 var server = http.createServer(app);
+var serverCORS = http.createServer(app);
 
 // listen
 var port = process.env.PORT || env.port;
 server.listen(port, function() {
 	console.log("Server starting on port " + port + " for " + wwwRoot);
+});
+
+// secondary port for simulating cross origin xhr
+var portCORS = process.env.CORSPORT || env.corsport || (parseInt(port, 10) + 1);
+serverCORS.listen(portCORS, function() {
+	console.log("Server starting on port " + portCORS + " for " + wwwRoot);
 });
 
 // ensure content is compressed

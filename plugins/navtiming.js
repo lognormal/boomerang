@@ -53,11 +53,9 @@ see: http://www.w3.org/TR/navigation-timing/
 			}
 
 			p = BOOMR.getPerformance();
-			if (edata.url && p && p.getEntriesByName) {
-				res = p.getEntriesByName(edata.url);
-				if (res && res.length > 0) {
-					res = res[0];
-
+			if (edata.url && p) {
+				res = BOOMR.getResourceTiming(edata.url, function(a, b) { return a.responseEnd - b.responseEnd; });
+				if (res) {
 					data = {
 						nt_red_st: res.redirectStart,
 						nt_red_end: res.redirectEnd,
@@ -90,9 +88,11 @@ see: http://www.w3.org/TR/navigation-timing/
 			if (edata.timing) {
 				res = edata.timing;
 				if (!data.nt_req_st) {
+					// requestStart will be 0 if Timing-Allow-Origin header isn't set on the xhr response
 					data.nt_req_st = res.requestStart;
 				}
 				if (!data.nt_res_st) {
+					// responseStart will be 0 if Timing-Allow-Origin header isn't set on the xhr response
 					data.nt_res_st = res.responseStart;
 				}
 				if (!data.nt_res_end) {

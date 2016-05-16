@@ -1,0 +1,49 @@
+<%= header %>
+<script src="/test-templates/autoxhr/00-xhrs-duplicate.js" type="text/javascript"></script>
+<script src="23-xhrs-duplicate-tao.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 5 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			// request waterfall, requests overlap (last 3 are same url/query):
+			// ************* (~0 ms)
+			//   ********* (~2s)
+			//     ***** (~1s)
+			//       * (~0s)
+
+			// use secondary port to simulate 3rd party resource
+			var urlPrefix = "//" + window.location.hostname + ":" + (parseInt(window.location.port, 10) + 1);
+
+			// reset saved server delay to 0
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", urlPrefix + "/delay?delay=3000&file=build/boomerang-latest-debug.js&TAO=1");
+			xhr.send(null);
+
+			setTimeout(function() {
+				// send 3 XHRs with the same URL, increasing response time for each request
+				var timeout = 0;
+				for (var i = 0; i < 3; i++) {
+					setTimeout(function(delay) {
+						var xhr2 = new XMLHttpRequest();
+						// with Timing-Allow-Origin=*
+						xhr2.open("GET", urlPrefix + "/delay?delay=-1000&file=build/boomerang-latest-debug.js&TAO=1");
+						xhr2.send(null);
+					}, timeout, i * 1000);
+
+					timeout += 500;
+				}
+			}, 100);
+		}
+});
+</script>
+<%= footer %>
