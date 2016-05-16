@@ -739,6 +739,45 @@ BOOMR_check_doc_domain();
 				}
 
 				return false;
+			},
+
+			/**
+			 * Get a query parameter value from a URL's query string
+			 *
+			 * @param {string} param Query parameter name
+			 * @param {string|Object} [url] URL containing the query string, or a link object. Defaults to BOOMR.window.location
+			 *
+			 * @returns {string|null} URI decoded value or null if param isn't a query parameter
+			 */
+			getQueryParamValue: function(param, url) {
+				var l, params, i, kv;
+				if (!param) {
+					return null;
+				}
+
+				if (typeof url === "string") {
+					l = BOOMR.window.document.createElement("a");
+					l.href = url;
+				}
+				else if (typeof url === "object" && typeof url.search === "string") {
+					l = url;
+				}
+				else {
+					l = BOOMR.window.location;
+				}
+
+				// Now that we match, pull out all query string parameters
+				params = l.search.slice(1).split(/&/);
+
+				for (i = 0; i < params.length; i++) {
+					if (params[i]) {
+						kv = params[i].split("=");
+						if (kv.length && kv[0] === param) {
+							return decodeURIComponent(kv[1].replace(/\+/g, " "));
+						}
+					}
+				}
+				return null;
 			}
 		},
 

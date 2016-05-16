@@ -342,6 +342,14 @@
 		return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
 	};
 
+	t.clearCookies = function() {
+		var cookies = document.cookie.split(";");
+		for (var i = 0; i < cookies.length; i++) {
+			var name = cookies[i].split("=")[0];
+			document.cookie = [name + "=", "expires" + new Date(), "path=/", "domain=" + location.hostname].join("; ");
+		}
+	};
+
 	t.parseTimers = function(timers) {
 		var timerValues = {};
 

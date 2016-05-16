@@ -91,6 +91,9 @@
 				maxErrors: true,
 				sendInterval: true
 			},
+			TPAnalytics: {
+				enabled: true
+			},
 			secondaryBeacons: true,
 			autorun: true
 		}

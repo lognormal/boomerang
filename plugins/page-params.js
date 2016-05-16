@@ -534,7 +534,7 @@
 		},
 
 		URLPattern: function(o) {
-			var value, params, i, kv;
+			var value;
 			if (!o.parameter2) {
 				return false;
 			}
@@ -545,20 +545,11 @@
 				return false;
 			}
 
-			// Now that we match, pull out all query string parameters
-			params = l.search.slice(1).split(/&/);
-
-			BOOMR.debug("Got params: " + params, "PageVars");
-
-			for (i = 0; i < params.length; i++) {
-				if (params[i]) {
-					kv = params[i].split("=");
-					if (kv.length && kv[0] === o.parameter2) {
-						BOOMR.debug("final value: " + kv[1], "PageVars");
-						value = this.cleanUp(decodeURIComponent(kv[1]));
-						return this.apply(value);
-					}
-				}
+			value = BOOMR.utils.getQueryParamValue(o.parameter2, l);
+			if (value) {
+				BOOMR.debug("final value: " + value, "PageVars");
+				value = this.cleanUp(value);
+				return this.apply(value);
 			}
 		},
 

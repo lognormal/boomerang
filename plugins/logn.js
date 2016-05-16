@@ -297,5 +297,8 @@ BOOMR.addVar({"h.key": "%client_apikey%"})
 		},
 		Errors: {
 			enabled: false
+		},
+		TPAnalytics: {
+			enabled: false
 		}
 	});

@@ -9,5 +9,6 @@
 	{"key":"history"},
 	{"key":"css-selectors"},
 	{"key":"intl-currency"},
-	{"key":"errors"}
+	{"key":"errors"},
+	{"key":"third-party-analytics"}
 ]
