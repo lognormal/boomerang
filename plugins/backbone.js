@@ -1,38 +1,40 @@
-/*
-* Installation:
-*
-* Before you call `Backbone.history.start()`, add the following code.
-*
-* Substitute `app.Router` in the two places below with your Backbone.Router instance.
-*
-* eg:
-*     // ...Backbone startup..., eg. app.Router = Backbone.Router.extend({...});
-*     var hadRouteChange = false;
-*     app.Router.on("route", function() {
-*       hadRouteChange = true;
-*     });
-*     function hookBackboneBoomerang() {
-*       if (window.BOOMR && BOOMR.version) {
-*         if (BOOMR.plugins && BOOMR.plugins.Backbone) {
-*           BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
-*         }
-*         return true;
-*       }
-*     }
-*
-*     if (!hookBackboneBoomerang()) {
-*       if (document.addEventListener) {
-*         document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
-*       } else if (document.attachEvent) {
-*         document.attachEvent("onpropertychange", function(e) {
-*           e = e || window.event;
-*           if (e && e.propertyName === "onBoomerangLoaded") {
-*             hookBackboneBoomerang();
-*           }
-*         });
-*       }
-*   }]);
-*/
+/**
+ * @module Backbone
+ * @desc
+ * Installation:
+ *
+ * Before you call `Backbone.history.start()`, add the following code.
+ *
+ * Substitute `app.Router` in the two places below with your Backbone.Router instance.
+ *
+ * @example
+ *     // ...Backbone startup..., eg. app.Router = Backbone.Router.extend({...});
+ *     var hadRouteChange = false;
+ *     app.Router.on("route", function() {
+ *       hadRouteChange = true;
+ *     });
+ *     function hookBackboneBoomerang() {
+ *       if (window.BOOMR && BOOMR.version) {
+ *         if (BOOMR.plugins && BOOMR.plugins.Backbone) {
+ *           BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
+ *         }
+ *         return true;
+ *       }
+ *     }
+ *
+ *     if (!hookBackboneBoomerang()) {
+ *       if (document.addEventListener) {
+ *         document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
+ *       } else if (document.attachEvent) {
+ *         document.attachEvent("onpropertychange", function(e) {
+ *           e = e || window.event;
+ *           if (e && e.propertyName === "onBoomerangLoaded") {
+ *             hookBackboneBoomerang();
+ *           }
+ *         });
+ *       }
+ *   }]);
+ */
 (function() {
 	var hooked = false,
 	    enabled = true,

@@ -1,18 +1,8 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-<title>boomerang off the press</title>
-<link rel="stylesheet" type="text/css" href="boomerang-docs.css">
-</head>
-<body>
-<span style="float:right;"><a href="./">All Docs</a></span>
-<h1>articles talking about boomerang</h1>
-<p>
+#### Articles Talking about Boomerang!
+
 This is a list of articles (that we are aware of) that speak about boomerang.  If you write one,
 or know of one that isn't here, let us know, and we'll add it.
-</p>
-<ul>
+
 <li>June 24, 2010 &mdash; <a href="http://developer.yahoo.net/blog/archives/2010/06/performance_testing_with_boomerang.html">Performance testing with boomerang</a> at YDN</li>
 <li>June 24, 2010 &mdash; <a href="http://www.readwriteweb.com/archives/yahoo_lets_loose_with_a_boomerang_-_automatic_webs.php">Yahoo! Lets Loose With a Boomerang</a> at ReadWriteWeb</li>
 <li>June 30, 2010 &mdash; <a href="http://dailyjs.com/2010/06/30/site-performance-with-boomerang/">Measuring Performance with Boomerang</a> at DailyJS</li>
@@ -26,11 +16,3 @@ or know of one that isn't here, let us know, and we'll add it.
 <li>July 31, 2010 &mdash; <a href="http://loquenecesita.com/2010/07/boomerang-analiza-el-redimiento-de-un-sitio-web-en-el-lado-del-cliente/">Boomerang: Analiza el redimiento de un sitio Web en el lado del cliente</a> at Loque Necesita</li>
 <li>August 13, 2010 &mdash; <a href="http://www.sitepoint.com/blogs/2010/08/13/boomerang-user-web-performance-testing/">Performance Testing Comes Back With Boomerang</a> at SitePoint</li>
 <li>August 23, 2010 &mdash; <a href="http://razorfast.com/2010/08/23/monitoring-your-sites-performance-using-boomerang/">Monitoring your site's performance using boomerang</a> at Razor Fast</li>
-</ul>
-
-</body>
-</html>
-<!--
-    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
--->

@@ -1,39 +1,47 @@
-/*
- * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyright (c) 2011-2012, Log-Normal, Inc.  All rights reserved.
- * Copyright (c) 2012-2016, SOASTA, Inc. All rights reserved.
+/**
+ * @copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+ * @copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
+ * @copyright (c) 2012-2016, SOASTA, Inc. All rights reserved.
  * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
  */
 
 /**
-\file boomerang.js
-boomerang measures various performance characteristics of your user's browsing
-experience and beacons it back to your server.
-
-\details
-To use this you'll need a web site, lots of users and the ability to do
-something with the data you collect.  How you collect the data is up to
-you, but we have a few ideas.
+ * @namespace Boomerang
+ * @desc
+ * boomerang measures various performance characteristics of your user's browsing
+ * experience and beacons it back to your server.
+ *
+ * To use this you'll need a web site, lots of users and the ability to do
+ * something with the data you collect.  How you collect the data is up to
+ * you, but we have a few ideas.
 */
 
-// Measure the time the script started
-// This has to be global so that we don't wait for the entire
-// BOOMR function to download and execute before measuring the
-// time.  We also declare it without `var` so that we can later
-// `delete` it.  This is the only way that works on Internet Explorer
+/**
+ * @memberof Boomerang
+ * @type {TimeStamp}
+ * @desc
+ * Measure the time the script started
+ * This has to be global so that we don't wait for the entire
+ * BOOMR function to download and execute before measuring the
+ * time.  We also declare it without `var` so that we can later
+ * `delete` it.  This is the only way that works on Internet Explorer
+*/
 BOOMR_start = new Date().getTime();
 
 /**
- Check the value of document.domain and fix it if incorrect.
- This function is run at the top of boomerang, and then whenever
- init() is called.  If boomerang is running within an iframe, this
- function checks to see if it can access elements in the parent
- iframe.  If not, it will fudge around with document.domain until
- it finds a value that works.
-
- This allows customers to change the value of document.domain at
- any point within their page's load process, and we will adapt to
- it.
+ * @function
+ * @desc
+ * Check the value of document.domain and fix it if incorrect.
+ * This function is run at the top of boomerang, and then whenever
+ * init() is called.  If boomerang is running within an iframe, this
+ * function checks to see if it can access elements in the parent
+ * iframe.  If not, it will fudge around with document.domain until
+ * it finds a value that works.
+ *
+ * This allows customers to change the value of document.domain at
+ * any point within their page's load process, and we will adapt to
+ * it.
+ * @param {string} domain - domain name as retrieved from page url
  */
 function BOOMR_check_doc_domain(domain) {
 	/*eslint no-unused-vars:0*/
@@ -612,30 +620,31 @@ BOOMR_check_doc_domain();
 				return result;
 			},
 			/**
-			 Add a MutationObserver for a given element and terminate after `timeout`ms.
-			 @param el		DOM element to watch for mutations
-			 @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
-			 @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
-						If set to a falsy value, the observer will wait indefinitely for Mutations.
-			 @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
-							function(mutations, callback_data)
-						Where:
-							mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
-							callback_data is the passed in `callback_data` parameter without modifications
-
-						The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
-						keep watching for mutations. If the return value is numeric and greater than 0, then this will be the new timeout
-						if it is boolean instead, then the timeout will not fire any more so the caller MUST call disconnect() at some point
-			 @param callback_data	Any data to be passed to the callback function as its second parameter
-			 @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
-
-			 @returns	- `null` if a MutationObserver could not be created OR
-					- An object containing the observer and the timer object:
-					  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
-
-					The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
-					Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
-					have been cleared automatically.
+			 * @desc
+			 * Add a MutationObserver for a given element and terminate after `timeout`ms.
+			 * @param el		DOM element to watch for mutations
+			 * @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
+			 * @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
+			 * 			If set to a falsy value, the observer will wait indefinitely for Mutations.
+			 * @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
+			 * 				function(mutations, callback_data)
+			 * 			Where:
+			 * 				mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
+			 * 				callback_data is the passed in `callback_data` parameter without modifications
+			 *
+			 * 						The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
+			 * 			keep watching for mutations. If the return value is numeric and greater than 0, then this will be the new timeout
+			 * 			if it is boolean instead, then the timeout will not fire any more so the caller MUST call disconnect() at some point
+			 * @param callback_data	Any data to be passed to the callback function as its second parameter
+			 * @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
+			 *
+			 * @returns {?object} - `null` if a MutationObserver could not be created OR
+			 * 		- An object containing the observer and the timer object:
+			 * 		  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
+			 *
+			 * 		The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
+			 * 		Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
+			 * 		have been cleared automatically.
 			 */
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 				var o = {observer: null, timer: null};

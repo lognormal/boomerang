@@ -1,0 +1,211 @@
+{
+	"about": {
+		"title": "About Boomerang",
+		"children": {
+			"methodology": {
+				"title": "The Boomerang Methodology"
+			},
+			"community": {
+				"title": "Community"
+			},
+			"press": {
+				"title": "Boomerang in the News and Blogs"
+			},
+			"TODO": {
+				"title": "Things TO DO!"
+			},
+			"use-cases": {
+				"title": "Use cases for Boomerang"
+			}
+		}
+	},
+	"howtos": {
+		"title": "HOW TOs",
+		"children": {
+			"howto-0": {
+				"title": "How to get data out of a beacon/before_beacon event handler"
+			},
+			"howto-1a-page#1": {
+				"title": "User clicks a link on a page we control and page is usable when onload fires"
+			},
+			"howto-1a-page#2": {
+				"title": "User clicks a link on a page we control and page is usable when onload fires (cont.)"
+			},
+			"howto-1b-page#1": {
+				"title": "User clicks a link on a page we control and page is usable at some developer determined point"
+			},
+			"howto-1b-page#2": {
+				"title": "User clicks a link on a page we control and page is usable at some developer determined point (cont.)"
+			},
+			"howto-2": {
+				"title": "Measure perceived performance of content loaded dynamically"
+			},
+			"howto-3": {
+				"title": "Measure a user's bandwidth/latency along with page load time"
+			},
+			"howto-4": {
+				"title": "Measure more than just page load time"
+			},
+			"howto-5": {
+				"title": "Request/page tagging"
+			},
+			"howto-6": {
+				"title": "Configuring boomerang"
+			},
+			"howto-7": {
+				"title": "Protecting the beacon from abuse"
+			},
+			"howto-8": {
+				"title": "Measure DNS latency"
+			},
+			"howto-9": {
+				"title": "Collect performance data from the W3C Navigation Timing API"
+			},
+			"howto-10-page#1": {
+				"title": "Load time of a page prerendered by Google Chrome"
+			},
+			"howto-10-page#2": {
+				"title": "Load time of a page prerendered by Google Chrome (cont.)"
+			}
+		}
+	},
+	"api": {
+		"title": "API Documentation",
+		"children": {
+			"BOOMR": {
+				"title": "BOOMR Object"
+			},
+			"BOOMR.utils": {
+				"title": "BOOMR.utils - Utility Functions"
+			},
+			"BW": {
+				"title": "BW - The Bandwidth testing plugin"
+			},
+			"DNS": {
+				"title": "DNS - DNS Latency testing plugin"
+			},
+			"RT": {
+				"title": "RT - Roundtrip plugin"
+			},
+			"SPA": {
+				"title": "Single Page Application Plugins"
+			},
+			"cache_reload": {
+				"title": "Cache Reload plugin"
+			},
+			"ipv6": {
+				"title": "IPv6 - Plugin to check if the client is on IPv6"
+			},
+			"navtiming": {
+				"title": "NavigationTiming API Support"
+			},
+			"restiming": {
+				"title": "ResourceTiming API"
+			},
+			"AutoXHR": {
+				"title": "Instrumenting XMLHttpRequests and More"
+			}
+		}
+	},
+	"ja": {
+		"title": "Japanese Translation of the Documentation",
+		"children": {
+			"ja_about": {
+				"title": "About Boomerang",
+				"children": {
+					"ja_methodology": {
+						"title": "The Boomerang Methodology"
+					},
+					"ja_community": {
+						"title": "Community"
+					},
+					"ja_press": {
+						"title": "Boomerang in the News and Blogs"
+					},
+					"ja_use-cases": {
+						"title": "Use cases for Boomerang"
+					}
+				}
+			},
+			"ja_howtos": {
+				"title": "HOW TOs",
+				"children": {
+					"ja_howtos_index": {
+						"title": "HOW TOs"
+					},
+					"ja_howto-0": {
+						"title": "How to get data out of a beacon/before_beacon event handler"
+					},
+					"ja_howto-1a-page#1": {
+						"title": "User clicks a link on a page we control and page is usable when onload fires"
+					},
+					"ja_howto-1a-page#2": {
+						"title": "User clicks a link on a page we control and page is usable when onload fires (cont.)"
+					},
+					"ja_howto-1b-page#1": {
+						"title": "User clicks a link on a page we control and page is usable at some developer determined point"
+					},
+					"ja_howto-1b-page#2": {
+						"title": "User clicks a link on a page we control and page is usable at some developer determined point (cont.)"
+					},
+					"ja_howto-2": {
+						"title": "Measure perceived performance of content loaded dynamically"
+					},
+					"ja_howto-3": {
+						"title": "Measure a user's bandwidth/latency along with page load time"
+					},
+					"ja_howto-4": {
+						"title": "Measure more than just page load time"
+					},
+					"ja_howto-5": {
+						"title": "Request/page tagging"
+					},
+					"ja_howto-6": {
+						"title": "Configuring boomerang"
+					},
+					"ja_howto-7": {
+						"title": "Protecting the beacon from abuse"
+					},
+					"ja_howto-8": {
+						"title": "Measure DNS latency"
+					},
+					"ja_howto-9": {
+						"title": "Collect performance data from the W3C Navigation Timing API"
+					},
+					"ja_howto-10-page#1": {
+						"title": "Load time of a page prerendered by Google Chrome"
+					},
+					"ja_howto-10-page#2": {
+						"title": "Load time of a page prerendered by Google Chrome (cont.)"
+					}
+				}
+			},
+			"ja_api": {
+				"title": "API Documentation",
+				"children": {
+					"ja_BOOMR": {
+						"title": "BOOMR Object"
+					},
+					"ja_BOOMR.utils": {
+						"title": "BOOMR.utils - Utility Functions"
+					},
+					"ja_BW": {
+						"title": "BW - The Bandwidth testing plugin"
+					},
+					"ja_DNS": {
+						"title": "DNS - DNS Latency testing plugin"
+					},
+					"ja_RT": {
+						"title": "RT - Roundtrip plugin"
+					},
+					"ja_ipv6": {
+						"title": "IPv6 - Plugin to check if the client is on IPv6"
+					},
+					"ja_navtiming": {
+						"title": "NavigationTiming API Support"
+					}
+				}
+			}
+		}
+	}
+}

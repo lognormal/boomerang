@@ -1,8 +1,15 @@
 /*global BOOMR*/
 
 /**
+ * @namespace Ember
+ * @desc
  * Add this to the end of your route definitions, substituting App for your Ember
+ * BOOMR.plugins.Ember will take your Application and test if it has ApplicationRoute setup at this point.
+ * If that isn't the case it will extend() Ember.Route to with the action didTransition and activate
+ * Once didTransition has triggered we set our selfs up for the Run-Loop coming to 'afterRender' at which
+ * point we configure our Beacon data and run BOOMR.responseEnd should this not be the first beacon we send.
  *
+ * @example
  * function hookEmberBoomerang() {
  *   if (window.BOOMR && BOOMR.version) {
  *     if (BOOMR.plugins && BOOMR.plugins.Ember) {
@@ -26,10 +33,6 @@
  *   }
  * }
  *
- * BOOMR.plugins.Ember will take your Application and test if it has ApplicationRoute setup at this point.
- * If that isn't the case it will extend() Ember.Route to with the action didTransition and activate
- * Once didTransition has triggered we set our selfs up for the Run-Loop coming to 'afterRender' at which
- * point we configure our Beacon data and run BOOMR.responseEnd should this not be the first beacon we send.
  */
 
 (function() {

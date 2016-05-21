@@ -1,0 +1,33 @@
+{
+	"tags": {
+		"allowUnknownTags": true
+	},
+	"plugins": [
+		"./node_modules/jsdoc/plugins/eventDumper",
+		"./node_modules/jsdoc/plugins/markdown"
+	],
+	"templates": {
+		"cleverLinks": true,
+		"monospaceLinks": true,
+		"dateFormat": "ddd MMM Do YYYY",
+		"outputSourceFiles": false,
+		"outputSourcePath": false,
+		"systemName": "Boomerang",
+		"footer": "",
+		"copyright": "Boomerang Team © 2010-2016 The contributors to the Open Source Boomerang project and SOASTA Inc. .",
+		"theme": "cosmo",
+		"linenums": true,
+		"collapseSymbols": false,
+		"inverseNav": false,
+		"highlightTutorialCode": true,
+		"protocol": "html://"
+	},
+	"markdown": {
+		"parser": "gfm",
+		"hardwrap": true
+	},
+	"opts": {
+		"tutorials": "doc/",
+		"recurse": true
+	}
+}

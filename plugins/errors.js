@@ -747,7 +747,7 @@ if (!Array.isArray) {
 		/**
 		 * Retrieves the current errors
 		 *
-		 * @returns {Array[BoomerangError]}
+		 * @returns {BoomerangError[]}
 		 */
 		getErrors: function() {
 			if (impl.errors.length === 0) {
@@ -760,7 +760,7 @@ if (!Array.isArray) {
 		/**
 		 * Gets errors suitable for transmission in a URL
 		 *
-		 * @param {Array[BoomerangError]} errors BoomerangErrors array
+		 * @param {BoomerangError[]} errors BoomerangErrors array
 		 *
 		 * @returns {string} String for URL
 		 */
