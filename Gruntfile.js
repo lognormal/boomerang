@@ -661,6 +661,12 @@ module.exports = function() {
 					script: "tests/server/app.js"
 				}
 			},
+			"secondary": {
+				options: {
+					script: "tests/server/app.js",
+					port: (TEST_DEBUG_PORT + 1)
+				}
+			},
 			doc: {
 				options: {
 					port: 4002,
@@ -756,7 +762,7 @@ module.exports = function() {
 				files: [
 					"tests/server/*.js"
 				],
-				tasks: ["express:dev"]
+				tasks: ["express:dev", "express:secondary"]
 			},
 			doc: {
 				files: [
@@ -868,7 +874,7 @@ module.exports = function() {
 		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
 
 		// useful for debugging tests, leaves a webbrowser open at http://localhost:3001
-		"test:debug": ["test:build", "build:test", "express:dev", "watch"],
+		"test:debug": ["test:build", "build:test", "express:dev", "express:secondary", "watch"],
 
 		// open your browser to http://localhost:4000/debug.html to debug
 		"test:karma:debug": ["test:build", "build:test", "karma:debug"],
@@ -884,9 +890,9 @@ module.exports = function() {
 
 		// End-to-End tests
 		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
-		"test:e2e:chrome": ["build", "express:dev", "protractor_webdriver", "protractor:chrome"],
-		"test:e2e:debug": ["build", "test:build", "build:test", "express:dev", "protractor_webdriver", "protractor:debug"],
-		"test:e2e:phantomjs": ["build", "express:dev", "protractor_webdriver", "protractor:phantomjs"],
+		"test:e2e:chrome": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:chrome"],
+		"test:e2e:debug": ["build", "test:build", "build:test", "express:dev", "express:secondary", "protractor_webdriver", "protractor:debug"],
+		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
 
 		"test:doc": ["clean", "jsdoc", "express:doc", "watch:doc"],
 

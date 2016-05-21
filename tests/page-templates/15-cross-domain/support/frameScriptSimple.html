@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!--[if IE 8]>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 1.0 Transitional//EN" "http://www.w3.org/TR/html1/DTD/html1-transitional.dtd">
+<![endif]-->
+<html>
+<head>
+	<!--[if IE 8]>
+	<meta http-equiv="X-UA-Compatible" content="EmulateIE8">
+	<![endif]-->
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script src="../../../boomerang-test-framework.js" type="text/javascript"></script>
+	</head>
+<body>	  
+	<script src="../../../build/boomerang-latest-debug.js" type="text/javascript"></script>
+	<!-- We don't want this page to beacon just give us the session content -->
+	<script>
+	BOOMR.init({
+		autorun: false,
+		CrossDomain: {
+			sending: true
+		}
+	});
+	</script>
+</body>
+</html>

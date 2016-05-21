@@ -9,6 +9,7 @@
         "plugins/ember.js",
         "plugins/history.js",
         "plugins/rt.js",
+        "plugins/cross-domain.js",
         "plugins/bw.js",
         "plugins/navtiming.js",
         "plugins/restiming.js",

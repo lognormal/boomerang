@@ -8,6 +8,7 @@
 	{"key":"react"},
 	{"key":"history"},
 	{"key":"css-selectors"},
+	{"key":"cross-domain-session"},
 	{"key":"intl-currency"},
 	{"key":"errors"},
 	{"key":"third-party-analytics"}

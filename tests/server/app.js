@@ -35,18 +35,11 @@ if (!fs.existsSync(wwwRoot)) {
 
 var app = express();
 var server = http.createServer(app);
-var serverCORS = http.createServer(app);
 
 // listen
 var port = process.env.PORT || env.port;
 server.listen(port, function() {
 	console.log("Server starting on port " + port + " for " + wwwRoot);
-});
-
-// secondary port for simulating cross origin xhr
-var portCORS = process.env.CORSPORT || env.corsport || (parseInt(port, 10) + 1);
-serverCORS.listen(portCORS, function() {
-	console.log("Server starting on port " + portCORS + " for " + wwwRoot);
 });
 
 // ensure content is compressed
@@ -90,6 +83,7 @@ app.post("/chunked", require("./route-chunked"));
 /* SOASTA PRIVATE START */
 // potential config locations
 app.get("/config", require("./route-config"));
+app.get("/pages/*/support/*", require("./headers"));
 app.get("/config.json", require("./route-config"));
 app.get("/api/config.json", require("./route-config"));
 app.get("/api/v2/config.json", require("./route-config"));

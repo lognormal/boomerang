@@ -62,6 +62,11 @@
 				defaultDecimal: true,
 				defaultThousands: true
 			},
+			CrossDomain: {
+				cross_domain_url: true,
+				sending: true,
+				session_transfer_timeout: true
+			},
 			instrument_xhr: true,
 			RT: {
 				cookie: true,

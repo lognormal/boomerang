@@ -1,0 +1,7 @@
+{
+    "frameScriptSimple.html": {
+	"headers": {
+	    "Access-Control-Allow-Origin": "*"
+	}
+    }
+}
