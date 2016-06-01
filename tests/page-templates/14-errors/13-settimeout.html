@@ -16,6 +16,11 @@ setTimeout(function errorFunction() {
 	// will throw an error
 	a.foo = false;
 }, 0);
+
+// will work, but can't be tracked
+/*eslint-disable no-implied-eval*/
+setTimeout("window.bar = 1", 0);
+/*eslint-enable no-implied-eval*/
 </script>
 <!-- delay the page by 1second so an error can fire -->
 <img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />

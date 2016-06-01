@@ -106,4 +106,8 @@ describe("e2e/14-errors/13-settimeout", function() {
 			assert.closeTo(err.lineNumber, 42, 5);
 		}
 	});
+
+	it("Should have had 'bar' set on window", function() {
+		assert.equal(window.bar, 1);
+	});
 });

@@ -837,8 +837,11 @@ if (!Array.isArray) {
 		 */
 		wrap: function(fn, that, via) {
 			if (typeof fn !== "function") {
-				// return an empty function
-				return function() {};
+				// Return the input argument as-is.  This might happen if the argument
+				// to setTimeout/setInterval is a string, which is deprecated but supported
+				// by all browsers, however it isn't something we can wrap (we don't want to have
+				// eval statements in the code).
+				return fn;
 			}
 
 			via = via || BOOMR.plugins.Errors.VIA_APP;
