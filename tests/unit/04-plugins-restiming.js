@@ -1073,4 +1073,26 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			}, BOOMR.plugins.ResourceTiming.decompressSize("a,_,5"));
 		});
 	});
+
+	describe("trimUrl()", function() {
+		it("Should not change the URL if given an empty second argument", function() {
+			assert.equal("http://foo.com/bar", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar"));
+		});
+
+		it("Should not change the URL if given no URLs to trim", function() {
+			assert.equal("http://foo.com/bar", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar", []));
+		});
+
+		it("Should not change the URL if the list of URLs to trim doesn't contain a match", function() {
+			assert.equal("http://foo.com/bar", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar", ["http://other.com"]));
+		});
+
+		it("Should trim a URL that is contained as a string in the trim list", function() {
+			assert.equal("http://foo.com/...", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar", ["http://foo.com/"]));
+		});
+
+		it("Should trim a URL that is contained as a regex in the trim list", function() {
+			assert.equal("http://foo.com/...", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar", [/(http:\/\/foo.com\/).*/]));
+		});
+	});
 });

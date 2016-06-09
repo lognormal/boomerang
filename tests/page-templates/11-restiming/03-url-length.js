@@ -19,7 +19,25 @@ describe("e2e/11-restiming/03-url-length", function() {
 	it("Should have trimmed the long URL (if ResourceTiming is supported)", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
-			assert.include(b.restiming, "khole?...");
+
+			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
+
+			// find our img
+			assert.isDefined(resources.find(function(r) {
+				return r.name.indexOf("blackhole?...") !== -1;
+			}), "Find blackhole?...");
+		}
+	});
+
+	it("Should have trimmed the pixel URL (if ResourceTiming is supported)", function() {
+		if (t.isResourceTimingSupported()) {
+			var b = tf.lastBeacon();
+			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
+
+			// find our img
+			assert.isDefined(resources.find(function(r) {
+				return r.name.indexOf("/foo/...") !== -1;
+			}), "Find /foo/...");
 		}
 	});
 });

@@ -40,7 +40,7 @@ see: http://www.w3.org/TR/resource-timing/
 	var XSS_BREAK_DELIM = "\n";
 
 	// Maximum number of characters in a URL
-	var DEFAULT_URL_LIMIT = 1000;
+	var DEFAULT_URL_LIMIT = 500;
 
 	// Any ResourceTiming data time that starts with this character is not a time,
 	// but something else (like dimension data)
@@ -608,6 +608,42 @@ see: http://www.w3.org/TR/resource-timing/
 	/* END_DEBUG */
 
 	/**
+	 * Trims the URL according to the specified URL trim patterns,
+	 * then applies a length limit.
+	 *
+	 * @param {string} url URL to trim
+	 * @param {string} urlsToTrim List of URLs (strings or regexs) to trim
+	 * @return {string} Trimmed URL
+	 */
+	function trimUrl(url, urlsToTrim) {
+		var i, urlIdx, trim;
+
+		if (url && urlsToTrim) {
+			// trim the payload from any of the specified URLs
+			for (i = 0; i < urlsToTrim.length; i++) {
+				trim = urlsToTrim[i];
+
+				if (typeof trim === "string") {
+					urlIdx = url.indexOf(trim);
+					if (urlIdx !== -1) {
+						url = url.substr(0, urlIdx + trim.length) + "...";
+						break;
+					}
+				}
+				else if (trim instanceof RegExp) {
+					if (trim.test(url)) {
+						// replace the URL with the first capture group
+						url = url.replace(trim, "$1") + "...";
+					}
+				}
+			}
+		}
+
+		// apply limits
+		return BOOMR.utils.cleanupURL(url, impl.urlLimit);
+	}
+
+	/**
 	 * Gathers performance entries and compresses the result.
 	 * @param [number] from Only get timings from
 	 * @param [number] to Only get timings up to
@@ -667,7 +703,7 @@ see: http://www.w3.org/TR/resource-timing/
 				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SIZE_TYPE + compSize;
 			}
 
-			url = BOOMR.utils.cleanupURL(e.name, impl.urlLimit);
+			url = trimUrl(e.name, impl.trimUrls);
 
 			// if this entry already exists, add a pipe as a separator
 			if (results[url] !== undefined) {
@@ -821,6 +857,7 @@ see: http://www.w3.org/TR/resource-timing/
 		xssBreakWords: DEFAULT_XSS_BREAK_WORDS,
 		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
+		trimUrls: [],
 		done: function() {
 			var r;
 
@@ -881,7 +918,7 @@ see: http://www.w3.org/TR/resource-timing/
 			var p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
-				["xssBreakWords", "clearOnBeacon", "urlLimit"]);
+				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls"]);
 
 			if (impl.initialized) {
 				return this;
@@ -928,7 +965,8 @@ see: http://www.w3.org/TR/resource-timing/
 		getVisibleEntries: getVisibleEntries,
 		reduceFetchStarts: reduceFetchStarts,
 		compressSize: compressSize,
-		decompressSize: decompressSize
+		decompressSize: decompressSize,
+		trimUrl: trimUrl
 		/* END_DEBUG */
 	};
 
