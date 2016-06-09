@@ -325,25 +325,35 @@ see: http://www.w3.org/TR/resource-timing/
 						responseEnd: navEntry.responseEnd
 					});
 				}
-				else if (frame.performance.timing){
+				else if (frame.performance.timing) {
 					// add a fake entry from the timing object
 					t = frame.performance.timing;
-					entries.push({
-						name: frame.location.href,
-						startTime: 0,
-						initiatorType: "html",
-						redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
-						redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
-						fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
-						domainLookupStart: t.domainLookupStart ? (t.domainLookupStart - t.navigationStart) : 0,
-						domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd - t.navigationStart) : 0,
-						connectStart: t.connectStart ? (t.connectStart - t.navigationStart) : 0,
-						secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart - t.navigationStart) : 0,
-						connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
-						requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
-						responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
-						responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0
-					});
+
+					//
+					// Avoid browser bugs:
+					// 1. navigationStart being 0 in some cases
+					// 2. responseEnd being ~2x what navigationStart is
+					//    (ensure the end is within 60 minutes of start)
+					//
+					if (t.navigationStart !== 0 &&
+						t.responseEnd <= (t.navigationStart + (60 * 60 * 1000))) {
+						entries.push({
+							name: frame.location.href,
+							startTime: 0,
+							initiatorType: "html",
+							redirectStart: t.redirectStart ? (t.redirectStart - t.navigationStart) : 0,
+							redirectEnd: t.redirectEnd ? (t.redirectEnd - t.navigationStart) : 0,
+							fetchStart: t.fetchStart ? (t.fetchStart - t.navigationStart) : 0,
+							domainLookupStart: t.domainLookupStart ? (t.domainLookupStart - t.navigationStart) : 0,
+							domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd - t.navigationStart) : 0,
+							connectStart: t.connectStart ? (t.connectStart - t.navigationStart) : 0,
+							secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart - t.navigationStart) : 0,
+							connectEnd: t.connectEnd ? (t.connectEnd - t.navigationStart) : 0,
+							requestStart: t.requestStart ? (t.requestStart - t.navigationStart) : 0,
+							responseStart: t.responseStart ? (t.responseStart - t.navigationStart) : 0,
+							responseEnd: t.responseEnd ? (t.responseEnd - t.navigationStart) : 0
+						});
+					}
 				}
 			}
 
