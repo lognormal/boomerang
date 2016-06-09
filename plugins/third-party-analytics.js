@@ -260,6 +260,7 @@ Captures session ids and campaign information from third party analytic vendors 
 			if (!impl.initialized) {
 				BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
 				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
+				BOOMR.subscribe("prerender_to_visible", impl.pageReady, null, impl);
 				impl.initialized = true;
 			}
 

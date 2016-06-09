@@ -932,7 +932,7 @@
 			// and remove any _subresource in the name.  XHRs also only apply Timers, Metrics
 			// and Dimensions that have 'xhr_ok' set.
 			//
-			if (ename === "xhr" && !BOOMR.utils.inArray(edata.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
+			if (ename === "xhr" && edata && !BOOMR.utils.inArray(edata.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				limpl = impl.extractXHRParams(edata, hconfig);
 
 				if (limpl === null) {
@@ -1144,6 +1144,15 @@
 		onunload: function() {
 			impl.unloadFired = true;
 			return this;
+		},
+
+		prerenderToVisible: function() {
+			// ensure we add our data to the beacon even if we had added it
+			// during prerender (in case another beacon went out in between)
+			this.complete = false;
+
+			// add our data to the beacon
+			this.done({}, "load");
 		}
 	};
 
@@ -1274,6 +1283,7 @@
 			if (!impl.onloadfired) {
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
+				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
 			}
 			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,

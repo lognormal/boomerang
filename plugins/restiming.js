@@ -854,6 +854,15 @@ see: http://www.w3.org/TR/resource-timing/
 					clearResourceTimings.call(p);
 				}
 			}
+		},
+
+		prerenderToVisible: function() {
+			// ensure we add our data to the beacon even if we had added it
+			// during prerender (in case another beacon went out in between)
+			this.sentNavBeacon = false;
+
+			// add our data to the beacon
+			this.done();
 		}
 	};
 
@@ -870,6 +879,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			if (p && typeof p.getEntriesByType === "function") {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
+				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
 				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);

@@ -259,6 +259,7 @@ BOOMR_check_doc_domain();
 			"before_unload": [],
 			"dom_loaded": [],
 			"visibility_changed": [],
+			"prerender_to_visible": [],
 			"before_beacon": [],
 			"onbeacon": [],
 			"xhr_load": [],
@@ -902,9 +903,26 @@ BOOMR_check_doc_domain();
 				if (visibilityChange !== undefined) {
 					BOOMR.utils.addListener(d, visibilityChange, function() { impl.fireEvent("visibility_changed"); });
 
-					// record the last time each visibility state occurred
+					// save the current visibility state
+					impl.lastVisibilityState = BOOMR.visibilityState();
+
 					BOOMR.subscribe("visibility_changed", function() {
-						BOOMR.lastVisibilityEvent[BOOMR.visibilityState()] = BOOMR.now();
+						var visState = BOOMR.visibilityState();
+
+						// record the last time each visibility state occurred
+						BOOMR.lastVisibilityEvent[visState] = BOOMR.now();
+
+						// if we transitioned from prerender to hidden or visible, fire the prerender_to_visible event
+						if (impl.lastVisibilityState === "prerender"
+						    && visState !== "prerender") {
+							// note that we transitioned from prerender on the beacon for debugging
+							BOOMR.addVar("vis.pre", "1");
+
+							// let all listeners know
+							impl.fireEvent("prerender_to_visible");
+						}
+
+						impl.lastVisibilityState = visState;
 					});
 				}
 

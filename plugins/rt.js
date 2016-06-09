@@ -807,25 +807,23 @@
 		},
 
 		check_visibility: function() {
-			var visState = BOOMR.visibilityState();
-
 			// we care if the page became visible at some point
-			if (visState === "visible") {
+			if (BOOMR.visibilityState() === "visible") {
 				impl.visiblefired = true;
 			}
+		},
 
-			if (impl.visibilityState === "prerender"
-			    && visState !== "prerender"
-			    && impl.onloadfired
-			    && impl.autorun) {
+		prerenderToVisible: function() {
+			if (impl.onloadfired
+				&& impl.autorun) {
+				BOOMR.debug("Transitioned from prerender to " + BOOMR.visibilityState(), "rt");
 
 				// note that we transitioned from prerender on the beacon for debugging
 				BOOMR.addVar("vis.pre", "1");
 
+				// send a beacon
 				BOOMR.plugins.RT.done(null, "visible");
 			}
-
-			impl.visibilityState = visState;
 		},
 
 		page_unload: function(edata) {
@@ -967,6 +965,7 @@
 
 			BOOMR.subscribe("page_ready", impl.page_ready, null, impl);
 			BOOMR.subscribe("visibility_changed", impl.check_visibility, null, impl);
+			BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 			BOOMR.subscribe("page_ready", this.done, "load", this);
 			BOOMR.subscribe("xhr_load", this.done, "xhr", this);
 			BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
