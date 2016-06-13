@@ -180,18 +180,25 @@ Captures session ids and campaign information from third party analytic vendors 
 		 * off-site campaign information for "Marketing Management Center" (MMC), if available, is stored in a query parameter named "cm_mmc"
 		 * ref: https://www.ibm.com/support/knowledgecenter/SSPG9M/Analytics/MarketingReports/cm_mmcparameter.html
 		 *
-		 * on-site "cm_sp" (Site Promotions Analysis) and "cm_re" (Real Estate Analysis) query parameters aren't captured.
+		 * on-site "Site Promotions Analysis", if available, is stored in a query paramter named "cm_sp"
+		 * ref: https://www.ibm.com/support/knowledgecenter/SSPG9M/Implementation/impl_sitepromo.html
+		 *
+		 * on-site "Real Estate Analysis", if available, is stored in a query parameter named "cm_re"
+		 * ref: https://www.ibm.com/support/knowledgecenter/SSPG9M/Implementation/impl_realestate.html
 		 *
 		 * @return {Object} captured metrics
 		 */
 		ibmAnalytics: function() {
 			var data = {};
 			var w = BOOMR.window;
-			var mmc, m, i;
+			var param, m, i, k, regex, fieldnames;
 
-			// regex to parse the MMC "cm_mmc" query parameter into it's parts
-			var MMC_FIELDS = ["mmc_vendor", "mmc_category", "mmc_placement", "mmc_item"];
-			var MMC_REGEX = /([^&#]+)-_-([^&#]+)-_-([^&#]+)-_-([^&#]+)/;
+			// regexs to parse the query parameters into their fields
+			var metrics = {
+				"cm_mmc": [/([^&#]+?)-_-([^&#]+?)-_-([^&#]+?)-_-([^&#]+)/, ["mmc_vendor", "mmc_category", "mmc_placement", "mmc_item"]],
+				"cm_sp": [/([^&#]+?)-_-([^&#]+?)-_-([^&#]+)/, ["sp_type", "sp_promotion", "sp_link"]],
+				"cm_re": [/([^&#]+?)-_-([^&#]+?)-_-([^&#]+)/, ["re_version", "re_pagearea", "re_link"]]
+			};
 
 			if (typeof w.cmRetrieveUserID === "function") {
 				try {
@@ -206,15 +213,21 @@ Captures session ids and campaign information from third party analytic vendors 
 				}
 			}
 
-			// capture MMC campaign params in the url
-			mmc = BOOMR.utils.getQueryParamValue("cm_mmc");
-			if (mmc) {
-				m = MMC_REGEX.exec(mmc);
-				if (m && m.length > MMC_FIELDS.length) {
-					for (i = 0; i < MMC_FIELDS.length; i++) {
-						if (m[i + 1]) {
-							// value might be "null" or "na" but send it anyways
-							data[MMC_FIELDS[i]] = m[i + 1];
+			// capture analytics data from url query params
+			for (k in metrics) {
+				if (metrics.hasOwnProperty(k)) {
+					param = BOOMR.utils.getQueryParamValue(k);
+					if (param) {
+						regex = metrics[k][0];
+						fieldnames = metrics[k][1];
+						m = regex.exec(param);
+						if (m && m.length > fieldnames.length) {
+							for (i = 0; i < fieldnames.length; i++) {
+								if (m[i + 1]) {
+									// value might be "null" or "na" but send it anyways
+									data[fieldnames[i]] = decodeURIComponent(m[i + 1]);
+								}
+							}
 						}
 					}
 				}
