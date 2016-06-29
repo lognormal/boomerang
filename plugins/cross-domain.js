@@ -24,6 +24,9 @@
 		BOOMR.debug(msg, "CrossDomain");
 	}
 
+	// 24h in ms
+	var maxSessionExpiry = 24 * 60 * 60 * 1000;
+
 	var impl = {
 		/**
 		 * Flag setting this plugin enabled or disabled
@@ -40,6 +43,12 @@
 		 * main domain or if postMessage is not supported on the browser.
 		 */
 		session_transferred: false,
+
+		/**
+		 * Set to true to keep iframe on the page for debugging purposes, default is to remove iframe.
+		 * Cannot be overridden by the page.
+		 */
+		debug: false,
 
 		/**
 		 * Name of the iframe added to the document
@@ -138,7 +147,10 @@
 				// and are blocking the beacon Try to retrigger is_complete checking
 				BOOMR.sendBeacon();
 				setTimeout(function() {
-					d.body.removeChild(d.getElementById(impl.iframe_name));
+					// If we're debugging keep the iframe around, if not (default) remove it
+					if (!impl.debug) {
+						d.body.removeChild(d.getElementById(impl.iframe_name));
+					}
 				}, 0);
 			}
 		},
@@ -184,7 +196,7 @@
 				impl.enabled = true;
 			}
 
-			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout"]);
+			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
 			impl.plugin_start = BOOMR.now();
 			log("Plugin started at: " + impl.plugin_start);
 
@@ -217,11 +229,22 @@
 			if (impl.sending && impl.enabled) {
 				log("Client preparing to send postMessage");
 
+				// Make sure Session Start is available
+				var start = BOOMR.session.start;
+				if (!start) {
+					if (BOOMR.plugins.RT) {
+						start = BOOMR.plugins.RT.navigationStart();
+					}
+					else {
+						start = BOOMR.t_lstart || BOOMR.t_start;
+					}
+				}
+
 				var messageObject = {
 					session: {
 						ID: BOOMR.session.ID,
 						length: BOOMR.session.length,
-						start: BOOMR.session.start
+						start: start
 					}
 				};
 
@@ -238,13 +261,26 @@
 				impl.session_transferred = true;
 			}
 		},
-		updateSession: function() {
-			BOOMR.session.ID = impl.session.ID;
-			BOOMR.session.start = impl.session.start;
-			BOOMR.session.length = impl.session.length + 1;
-			BOOMR.session.domain = impl.session.domain;
-			log("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
-			BOOMR.addVar("rt.sstr_dur", impl.session_transferred_time - impl.plugin_start);
+		updateSession: function(session) {
+			// Make sure that we are only updating the session start time if the following criteria match:
+			//  - session.start is less than 24h old (maxSessionExpiry)
+			//  - BOOMR.session.start is not defined
+			//  - session.start is an older timestamp than BOOMR.session.start
+			if (!isNaN(session.start) &&
+			    session.start > (BOOMR.now() - maxSessionExpiry) &&
+			    (isNaN(BOOMR.session.start) || BOOMR.session.start > session.start)) {
+				BOOMR.session.start = session.start;
+			}
+			else {
+				return;
+			}
+
+			BOOMR.session.ID = session.ID;
+
+			// Since we're on a different page than the
+			// session originated from we need to increment
+			// session length
+			BOOMR.session.length = session.length + 1;
 
 			if (BOOMR.plugins.RT) {
 				BOOMR.plugins.RT.updateCookie();
@@ -257,7 +293,9 @@
 			// Since this is before session data is set we override
 			// session data here before it's put on the beacon
 			if (impl.session && !impl.session_transfer_timedout && impl.enabled && impl.session_transferred) {
-				this.updateSession();
+				this.updateSession(impl.session);
+				log("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
+				BOOMR.addVar("rt.sstr_dur", impl.session_transferred_time - impl.plugin_start);
 			}
 
 			if (impl.session_transfer_timedout) {
