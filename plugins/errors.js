@@ -813,14 +813,112 @@ if (!Array.isArray) {
 				try {
 					var args = Array.prototype.slice.call(arguments);
 					var callbackFn = args[callbackIndex];
+					var targetObj = useCallingObject ? this : that;
+					var wrappedFn = impl.wrap(callbackFn, targetObj, via);
 
-					args[callbackIndex] = impl.wrap(callbackFn, useCallingObject ? this : that, via);
+					args[callbackIndex] = wrappedFn;
 
-					return origFn.apply(useCallingObject ? this : that, args);
+					if (functionName === "addEventListener") {
+						// for removeEventListener we need to keep track of this
+						// unique tuple of target object, event name (arg0), original function
+						// and capture (arg2)
+						impl.trackFn(targetObj, args[0], callbackFn, args[2], wrappedFn);
+					}
+
+					return origFn.apply(targetObj, args);
 				}
 				catch (e) {
 					// error during original callback setup
 					impl.send(e, via);
+				}
+			};
+		},
+
+		/**
+		 * Tracks the specified function for removeEventListener.
+		 *
+		 * @param {object} target Target element (window, element, etc)
+		 * @param {string} type Event type (name)
+		 * @param {function} listener Original listener
+		 * @param {boolean} useCapture Use capture
+		 * @param {function} wrapped Wrapped function
+		 */
+		trackFn: function(target, type, listener, useCapture, wrapped) {
+			if (!target) {
+				return;
+			}
+
+			if (impl.trackedFnIdx(target, type, listener, useCapture) !== -1) {
+				// already tracked
+				return;
+			}
+
+			if (!target._bmrEvents) {
+				target._bmrEvents = [];
+			}
+
+			target._bmrEvents.push([type, listener, !!useCapture, wrapped]);
+		},
+
+		/**
+		 * Gets the index of the tracked function.
+		 *
+		 * @param {object} target Target element (window, element, etc)
+		 * @param {string} type Event type (name)
+		 * @param {function} listener Original listener
+		 * @param {boolean} useCapture Use capture
+		 *
+		 * @returns {number} Index of already tracked function, or -1 if it doesn't exist
+		 */
+		trackedFnIdx: function(target, type, listener, useCapture) {
+			var i, f;
+
+			if (!target) {
+				return;
+			}
+
+			if (!target._bmrEvents) {
+				target._bmrEvents = [];
+			}
+
+			for (i = 0; i < target._bmrEvents.length; i++) {
+				f = target._bmrEvents[i];
+				if (f[0] === type &&
+				    f[1] === listener &&
+				    f[2] === !!useCapture) {
+					return i;
+				}
+			}
+
+			return -1;
+		},
+
+		/**
+		 * Wraps removeEventListener to work with our wrapFn
+		 *
+		 * @param {object} that Target object
+		 */
+		wrapRemoveEventListener: function(that) {
+			var fn = "removeEventListener", origFn = that[fn], idx, wrappedFn;
+
+			if (typeof origFn !== "function") {
+				return;
+			}
+
+			that[fn] = function(type, listener, useCapture) {
+				idx = impl.trackedFnIdx(this, type, listener, useCapture);
+				if (idx !== -1) {
+					wrappedFn = this._bmrEvents[idx][3];
+
+					// remove our wrapped function instead
+					origFn.call(this, type, wrappedFn, useCapture);
+
+					// remove bookkeeping
+					this._bmrEvents.splice(idx, 1);
+				}
+				else {
+					// unknown, pass original args
+					origFn.call(this, type, listener, useCapture);
 				}
 			};
 		},
@@ -1322,6 +1420,10 @@ if (!Array.isArray) {
 				impl.wrapFn("addEventListener", BOOMR.window, false, 1, E.VIA_EVENTHANDLER);
 				impl.wrapFn("addEventListener", BOOMR.window.Element.prototype, true, 1, E.VIA_EVENTHANDLER);
 				impl.wrapFn("addEventListener", BOOMR.window.XMLHttpRequest.prototype, true, 1, E.VIA_EVENTHANDLER);
+
+				impl.wrapRemoveEventListener(BOOMR.window);
+				impl.wrapRemoveEventListener(BOOMR.window.Element.prototype);
+				impl.wrapRemoveEventListener(BOOMR.window.XMLHttpRequest.prototype);
 			}
 
 			if (impl.monitorTimeout) {
