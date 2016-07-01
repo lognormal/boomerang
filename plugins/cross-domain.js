@@ -101,6 +101,12 @@
 		session_transfer_timeout: 1500,
 
 		/**
+		 * If we're done updating the session info we set this to true
+		 * to avoid re updating the session info should is_complete be called twice.
+		 */
+		session_transfer_complete: false,
+
+		/**
 		 * Opens a new hidden IFrame to the url passed in and fetches
 		 * the session data via postMessage and messageEvents to
 		 * communicate between frames.
@@ -108,6 +114,9 @@
 		 * @param {string} url - URL to point to for the main domain URL
 		 */
 		setup: function(url) {
+			var urlQueryParams = BOOMR.utils.objectToString(BOOMR.session, "&");
+			url = url + "?" + urlQueryParams;
+
 			d.body.appendChild(impl.buildIFrame(url, impl.iframe_name));
 
 			if (w.addEventListener) {
@@ -220,6 +229,11 @@
 
 					impl.session_transfer_timedout = true;
 					impl.session_transferred = true;
+
+					if (!impl.debug) {
+						d.body.removeChild(d.getElementById(impl.iframe_name));
+					}
+
 					log("Session transfer timedout. Setting transferred and setting timedout flag!");
 
 				}, impl.session_transfer_timeout);
@@ -228,6 +242,30 @@
 			// If sending is enabled we know that we're on the primary domain
 			if (impl.sending && impl.enabled) {
 				log("Client preparing to send postMessage");
+
+				var query = w.location.search;
+				var querySession = {
+					start: BOOMR.utils.getQueryParamValue("start", query),
+					length: BOOMR.utils.getQueryParamValue("length", query),
+					ID: BOOMR.utils.getQueryParamValue("ID", query)
+				};
+
+				try {
+					querySession.start = parseInt(querySession.start);
+					querySession.length = parseInt(querySession.length);
+
+					// If the session passed in via query string is
+					// longer and started earlier than the session on
+					// the primary domain we're updating primary domain
+					if (querySession.start < BOOMR.session.start &&
+						querySession.length > BOOMR.session.length &&
+						querySession.start > (BOOMR.now() - maxSessionExpiry)) {
+						this.updateSession(querySession);
+					}
+				}
+				catch (ignore) {
+					/* not doing anything with the passed session info if not valid */
+				}
 
 				// Make sure Session Start is available
 				var start = BOOMR.session.start;
@@ -266,9 +304,7 @@
 			//  - session.start is less than 24h old (maxSessionExpiry)
 			//  - BOOMR.session.start is not defined
 			//  - session.start is an older timestamp than BOOMR.session.start
-			if (!isNaN(session.start) &&
-			    session.start > (BOOMR.now() - maxSessionExpiry) &&
-			    (isNaN(BOOMR.session.start) || BOOMR.session.start > session.start)) {
+			if (!isNaN(session.start) && session.start > (BOOMR.now() - maxSessionExpiry)) {
 				BOOMR.session.start = session.start;
 			}
 			else {
@@ -290,12 +326,18 @@
 			if (impl.sending) {
 				return true;
 			}
+
+			if (impl.session_transfer_complete) {
+				return true;
+			}
+
 			// Since this is before session data is set we override
 			// session data here before it's put on the beacon
 			if (impl.session && !impl.session_transfer_timedout && impl.enabled && impl.session_transferred) {
 				this.updateSession(impl.session);
 				log("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
 				BOOMR.addVar("rt.sstr_dur", impl.session_transferred_time - impl.plugin_start);
+				impl.session_transfer_complete = true;
 			}
 
 			if (impl.session_transfer_timedout) {
