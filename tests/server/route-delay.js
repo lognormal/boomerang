@@ -42,7 +42,15 @@ if (!fs.existsSync(wwwRoot)) {
 var previousDelay = 0;
 
 module.exports = function(req, res) {
-	var q = require("url").parse(req.url, true).query;
+	// keep query strings on files if requested that way
+	var url = req.url;
+	var querySplit = req.url.split(/\?/);
+	if (querySplit.length === 3) {
+		querySplit.pop();
+		url = querySplit.join("?");
+	}
+
+	var q = require("url").parse(url, true).query;
 	var delay = q.delay || 0;
 	var file = q.file;
 	var response = q.response;
