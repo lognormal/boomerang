@@ -64,9 +64,11 @@ function respond301(req, res) {
 // Routes
 //
 
+
 // /blackhole and /204: returns a 204
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);
+
 
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
@@ -89,8 +91,12 @@ app.get("/api/config.json", require("./route-config"));
 app.get("/api/v2/config.json", require("./route-config"));
 app.get("/concerto/api/config.json", require("./route-config"));
 app.get("/concerto/api/v2/config.json", require("./route-config"));
+app.get("/blackhole/no-op", respond204);
+app.post("/blackhole/no-op", respond204);
 /* SOASTA PRIVATE END */
 
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));
+
+

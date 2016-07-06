@@ -264,7 +264,8 @@ BOOMR_check_doc_domain();
 			"onbeacon": [],
 			"xhr_load": [],
 			"click": [],
-			"form_submit": []
+			"form_submit": [],
+			"onconfig": []
 		},
 
 		public_events: {
@@ -897,6 +898,12 @@ BOOMR_check_doc_domain();
 			}
 
 			BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
+			BOOMR.fireEvent("onconfig", config);
+			BOOMR.subscribe("onconfig", function(beaconConfig) {
+				if (beaconConfig.beacon_url) {
+					impl.beacon_url = beaconConfig.beacon_url;
+				}
+			});
 
 			(function() {
 				var forms, iterator;

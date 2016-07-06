@@ -75,6 +75,11 @@
 		},
 
 		/**
+		 * Beacon destination URL, passed over when updating session info
+		 */
+		beacon_url: "",
+
+		/**
 		 * Time stamp of when the session was transferred
 		 */
 		session_transferred_time: 0,
@@ -114,6 +119,16 @@
 		 * @param {string} url - URL to point to for the main domain URL
 		 */
 		setup: function(url) {
+			var queryObject = BOOMR.session;
+
+			if (BOOMR.plugins.RT) {
+				var cookie = BOOMR.plugins.RT.getCookie();
+				if (cookie) {
+					queryObject.obo = cookie.obo;
+					queryObject.tt = cookie.tt;
+				}
+			}
+
 			var urlQueryParams = BOOMR.utils.objectToString(BOOMR.session, "&");
 			url = url + "?" + urlQueryParams;
 
@@ -146,9 +161,19 @@
 
 			if (data
 			    && impl.cross_domain_url.indexOf(event.origin) >= -1
-			    && data.session) {
+			    && data.session && data.cookie) {
 				impl.session = data.session;
 				impl.session_transferred_time = BOOMR.now();
+
+				if (data.cookie.bcn) {
+					BOOMR.fireEvent("onconfig", {
+						beacon_url: data.cookie.bcn,
+						RT: {
+							obo: data.cookie.obo,
+							tt: data.cookie.tt
+						}
+					});
+				}
 				log("Session transferred at: " + impl.session_transferred_time + " session data is: " + BOOMR.utils.objectToString(impl.session));
 				impl.session_transferred = true;
 
@@ -197,6 +222,11 @@
 	};
 
 	BOOMR.plugins.CrossDomain = {
+		onConfigCb: function(config) {
+			if (config.beacon_url) {
+				impl.beacon_url = config.beacon_url;
+			}
+		},
 		init: function(config) {
 			if (config.primary) {
 				return;
@@ -250,6 +280,11 @@
 					ID: BOOMR.utils.getQueryParamValue("ID", query)
 				};
 
+				var queryCookie = {
+					obo: BOOMR.utils.getQueryParamValue("obo", query),
+					tt: BOOMR.utils.getQueryParamValue("tt", query)
+				};
+
 				try {
 					querySession.start = parseInt(querySession.start);
 					querySession.length = parseInt(querySession.length);
@@ -262,6 +297,10 @@
 						querySession.start > (BOOMR.now() - maxSessionExpiry)) {
 						this.updateSession(querySession);
 					}
+
+					queryCookie.obo = parseInt(queryCookie.obo);
+					queryCookie.tt = parseInt(queryCookie.tt);
+					this.updateCookie(queryCookie);
 				}
 				catch (ignore) {
 					/* not doing anything with the passed session info if not valid */
@@ -282,8 +321,9 @@
 					session: {
 						ID: BOOMR.session.ID,
 						length: BOOMR.session.length,
-						start: start
-					}
+						beacon_url: impl.beacon_url
+					},
+					cookie: BOOMR.plugins.RT ? BOOMR.plugins.RT.getCookie() : false
 				};
 
 				// Working around IE8 sending postMessage content as [object Object]
@@ -320,6 +360,16 @@
 
 			if (BOOMR.plugins.RT) {
 				BOOMR.plugins.RT.updateCookie();
+			}
+		},
+		updateCookie: function(queryCookie) {
+			if (BOOMR.plugins.RT) {
+				BOOMR.fireEvent("onconfig", {
+					RT: {
+						oboError: queryCookie.obo,
+						loadTime: queryCookie.tt
+					}
+				});
 			}
 		},
 		is_complete: function() {
