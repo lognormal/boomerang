@@ -686,6 +686,22 @@
 			});
 		},
 
+		onconfig: function(config) {
+			if (config.beacon_url) {
+				impl.beacon_url = config.beacon_url;
+			}
+
+			if (config.RT) {
+				if (config.RT.obo && !isNaN(config.RT.obo) && config.RT.obo > impl.oboError) {
+					impl.oboError = config.RT.obo;
+				}
+
+				if (config.RT.tt && !isNaN(config.RT.tt) && config.RT.tt > impl.loadTime) {
+					impl.loadTime = config.RT.tt;
+				}
+			}
+		},
+
 		domloaded: function() {
 			BOOMR.plugins.RT.endTimer("t_domloaded");
 		},
@@ -759,6 +775,7 @@
 			BOOMR.subscribe("before_beacon", this.addTimersToBeacon, "beacon", this);
 			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 			BOOMR.subscribe("onerror", impl.onerror, null, impl);
+			BOOMR.subscribe("onconfig", impl.onconfig, null, impl);
 
 			// Override any getBeaconURL method to make sure we return the one from the
 			// cookie and not the one hardcoded into boomerang
@@ -981,6 +998,10 @@
 
 		is_complete: function() { return impl.complete; },
 
+		/**
+		 * @desc
+		 * Publicly accessible function to updating implementation private data of the RT plugin on the RT cookie
+		 */
 		updateCookie: function() {
 			impl.updateCookie();
 		},

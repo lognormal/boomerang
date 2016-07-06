@@ -64,9 +64,11 @@ function respond301(req, res) {
 // Routes
 //
 
+
 // /blackhole and /204: returns a 204
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);
+
 
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
@@ -82,6 +84,8 @@ app.post("/chunked", require("./route-chunked"));
 
 // add CORS headers
 app.get("/pages/*/support/*", require("./headers"));
+app.get("/blackhole/no-op", respond204);
+app.post("/blackhole/no-op", respond204);
 
 // all static content follows afterwards
 /*eslint dot-notation:0*/
