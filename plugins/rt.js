@@ -692,12 +692,16 @@
 			}
 
 			if (config.RT) {
-				if (config.RT.obo && !isNaN(config.RT.obo) && config.RT.obo > impl.oboError) {
-					impl.oboError = config.RT.obo;
+				if (config.RT.oboError && !isNaN(config.RT.oboError) && config.RT.oboError > impl.oboError) {
+					impl.oboError = config.RT.oboError;
 				}
 
-				if (config.RT.tt && !isNaN(config.RT.tt) && config.RT.tt > impl.loadTime) {
-					impl.loadTime = config.RT.tt;
+				if (config.RT.loadTime && !isNaN(config.RT.loadTime) && config.RT.loadTime > impl.loadTime) {
+					impl.loadTime = config.RT.loadTime;
+
+					if (!isNaN(impl.timers.t_done.delta)) {
+						impl.loadTime += impl.timers.t_done.delta;
+					}
 				}
 			}
 		},

@@ -287,6 +287,8 @@ BOOMR_check_doc_domain();
 			"onboomerangloaded": "onBoomerangLoaded"
 		},
 
+		listenerCallbacks: {},
+
 		vars: {},
 
 		/**
@@ -320,6 +322,35 @@ BOOMR_check_doc_domain();
 				}
 				impl.fireEvent(type, target);
 			};
+		},
+
+		clearEvents: function() {
+			var eventName;
+
+			for (eventName in this.events) {
+				if (this.events.hasOwnProperty(eventName)) {
+					this.events[eventName] = [];
+				}
+			}
+		},
+
+		clearListeners: function() {
+			var type, i;
+
+			for (type in impl.listenerCallbacks) {
+				if (impl.listenerCallbacks.hasOwnProperty(type)) {
+					// remove all callbacks -- removeListener is guaranteed
+					// to remove the element we're calling with
+					while (impl.listenerCallbacks[type].length) {
+						BOOMR.utils.removeListener(
+						    impl.listenerCallbacks[type][0].el,
+						    type,
+						    impl.listenerCallbacks[type][0].fn);
+					}
+				}
+			}
+
+			impl.listenerCallbacks = {};
 		},
 
 		fireEvent: function(e_name, data) {
@@ -703,14 +734,32 @@ BOOMR_check_doc_domain();
 				else if (el.attachEvent) {
 					el.attachEvent( "on" + type, fn );
 				}
+
+				// ensure the type arry exists
+				impl.listenerCallbacks[type] = impl.listenerCallbacks[type] || [];
+
+				// save a reference to the target object and function
+				impl.listenerCallbacks[type].push({ el: el, fn: fn});
 			},
 
 			removeListener: function(el, type, fn) {
+				var i;
+
 				if (el.removeEventListener) {
 					el.removeEventListener(type, fn, false);
 				}
 				else if (el.detachEvent) {
 					el.detachEvent("on" + type, fn);
+				}
+
+				if (impl.listenerCallbacks.hasOwnProperty(type)) {
+					for (var i = 0; i < impl.listenerCallbacks[type].length; i++) {
+						if (fn === impl.listenerCallbacks[type][i].fn &&
+						    el === impl.listenerCallbacks[type][i].el) {
+							impl.listenerCallbacks[type].splice(i, 1);
+							return;
+						}
+					}
 				}
 			},
 
@@ -1071,6 +1120,16 @@ BOOMR_check_doc_domain();
 			impl.events[e_name] = [];
 
 			return this;
+		},
+
+		/**
+		 * Disables boomerang from doing anything further:
+		 * 1. Clears event handlers (such as onload)
+		 * 2. Clears all event listeners
+		 */
+		disable: function() {
+			impl.clearEvents();
+			impl.clearListeners();
 		},
 
 		/**
