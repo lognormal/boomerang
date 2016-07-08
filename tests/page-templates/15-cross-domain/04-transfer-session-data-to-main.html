@@ -13,8 +13,8 @@ window.sessionMock = {
 <script type="text/javascript">
 function handler(event) {
 	var data = JSON.parse(event.data);
-	if (data.session) {
-		window.childSessionData = data.session;
+	if (data) {
+		window.childSessionData = data;
 	}
 }
 

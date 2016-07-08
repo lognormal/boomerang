@@ -67,14 +67,14 @@
 			impl = BOOMR.window.sessionMock;
 
 			BOOMR.utils.removeCookie("RT");
-			var sessionStart = impl.start;
+			BOOMR.session.start = impl.start;
 			BOOMR.session.ID = impl.ID;
 			BOOMR.session.length = impl.length;
 			BOOMR.session.domain = w.document.domain;
 			var cookieObject = {
 				"dm": BOOMR.session.domain,
 				"si": BOOMR.session.ID,
-				"ss": sessionStart,
+				"ss": BOOMR.session.start,
 				"sl": BOOMR.session.length,
 				"tt": impl.loadTime ? impl.loadTime : 433,
 				"obo": impl.offByOne ? impl.offByOne : 0,
@@ -122,7 +122,7 @@
 						+ "="
 						+ ((baseLength ? baseLength : 0) + shIndex + 1)
 						+ ":"
-						+ sessionHistoryEntries[shIndex].OffByOne
+						+ sessionHistoryEntries[shIndex].offByOne
 						+ ":"
 						+ sessionHistoryEntries[shIndex].loadTime;
 

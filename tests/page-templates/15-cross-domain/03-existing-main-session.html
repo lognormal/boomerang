@@ -4,8 +4,8 @@
 <script type="text/javascript">
 function handler(event) {
 	var data = JSON.parse(event.data);
-	if (data.session) {
-		window.childSessionData = data.session;
+	if (data) {
+		window.childSessionData = data;
 	}
 }
 
@@ -26,7 +26,8 @@ BOOMR_test.init({
 	testAfterOnBeacon: true,
 	CrossDomain: {
 		cross_domain_url: "http://" + host + ":" + port + "/pages/15-cross-domain/support/frameWithExistingSession.html",
-		sending: false
+		sending: false,
+		debug: true
 	}
 });
 </script>

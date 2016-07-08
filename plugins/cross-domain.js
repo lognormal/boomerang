@@ -124,8 +124,13 @@
 			if (BOOMR.plugins.RT) {
 				var cookie = BOOMR.plugins.RT.getCookie();
 				if (cookie) {
-					queryObject.obo = cookie.obo;
-					queryObject.tt = cookie.tt;
+					if (cookie.obo) {
+						queryObject.obo = cookie.obo;
+					}
+
+					if (cookie.tt) {
+						queryObject.tt = cookie.tt;
+					}
 				}
 			}
 
@@ -160,20 +165,31 @@
 			}
 
 			if (data
-			    && impl.cross_domain_url.indexOf(event.origin) >= -1
-			    && data.session && data.cookie) {
-				impl.session = data.session;
+			    && impl.cross_domain_url.indexOf(event.origin) >= -1) {
+				// convert cookie parameters to our own session
+				impl.session = {
+					ID: data.si,
+					start: parseInt(data.ss, 10),
+					length: parseInt(data.sl, 10)
+				};
+
 				impl.session_transferred_time = BOOMR.now();
 
-				if (data.cookie.bcn) {
+				if (data.bcn) {
 					BOOMR.fireEvent("onconfig", {
-						beacon_url: data.cookie.bcn,
+						beacon_url: data.bcn,
 						RT: {
-							obo: data.cookie.obo,
-							tt: data.cookie.tt
+							oboError: data.obo ? parseInt(data.obo, 10) : 0,
+							loadTime: data.tt ? parseInt(data.tt, 10) : 0
 						}
 					});
 				}
+				else {
+					BOOMR.fireEvent("onconfig", {
+						beacon_url: BOOMR.getBeaconURL()
+					});
+				}
+
 				log("Session transferred at: " + impl.session_transferred_time + " session data is: " + BOOMR.utils.objectToString(impl.session));
 				impl.session_transferred = true;
 
@@ -235,6 +251,10 @@
 				impl.enabled = true;
 			}
 
+			if (!BOOMR.plugins.RT) {
+				return;
+			}
+
 			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
 			impl.plugin_start = BOOMR.now();
 			log("Plugin started at: " + impl.plugin_start);
@@ -292,14 +312,18 @@
 					// If the session passed in via query string is
 					// longer and started earlier than the session on
 					// the primary domain we're updating primary domain
-					if (querySession.start < BOOMR.session.start &&
-						querySession.length > BOOMR.session.length &&
+					if ((typeof BOOMR.session.start !== "number" || querySession.start < BOOMR.session.start) &&
+						querySession.length >= BOOMR.session.length &&
 						querySession.start > (BOOMR.now() - maxSessionExpiry)) {
-						this.updateSession(querySession);
+						BOOMR.session.start = querySession.start;
 					}
+
+					BOOMR.session.length++;
+					BOOMR.plugins.RT.updateCookie();
 
 					queryCookie.obo = parseInt(queryCookie.obo);
 					queryCookie.tt = parseInt(queryCookie.tt);
+
 					this.updateCookie(queryCookie);
 				}
 				catch (ignore) {
@@ -309,57 +333,29 @@
 				// Make sure Session Start is available
 				var start = BOOMR.session.start;
 				if (!start) {
-					if (BOOMR.plugins.RT) {
-						start = BOOMR.plugins.RT.navigationStart();
-					}
-					else {
-						start = BOOMR.t_lstart || BOOMR.t_start;
-					}
+					start = BOOMR.plugins.RT.navigationStart() || BOOMR.t_lstart || BOOMR.t_start;
 				}
 
-				var messageObject = {
-					session: {
-						ID: BOOMR.session.ID,
-						length: BOOMR.session.length,
-						beacon_url: impl.beacon_url
-					},
-					cookie: BOOMR.plugins.RT ? BOOMR.plugins.RT.getCookie() : false
-				};
+				// the cookie should be set by now since we've run .updateCookie()
+				var messageObject = BOOMR.plugins.RT.getCookie();
 
 				// Working around IE8 sending postMessage content as [object Object]
 				if (!w.JSON) {
 					log("JSON not available, not going to try and serialize message!");
+					return;
 				}
+
 				var messageString = w.JSON.stringify(messageObject);
 
 				w.parent.postMessage(messageString, "*");
 				log("Sending data: session " + messageString);
+
 				// Since we're not required to do anything else, other than sending a postMessage
 				// we don't need to block boomerang
 				impl.session_transferred = true;
-			}
-		},
-		updateSession: function(session) {
-			// Make sure that we are only updating the session start time if the following criteria match:
-			//  - session.start is less than 24h old (maxSessionExpiry)
-			//  - BOOMR.session.start is not defined
-			//  - session.start is an older timestamp than BOOMR.session.start
-			if (!isNaN(session.start) && session.start > (BOOMR.now() - maxSessionExpiry)) {
-				BOOMR.session.start = session.start;
-			}
-			else {
-				return;
-			}
 
-			BOOMR.session.ID = session.ID;
-
-			// Since we're on a different page than the
-			// session originated from we need to increment
-			// session length
-			BOOMR.session.length = session.length + 1;
-
-			if (BOOMR.plugins.RT) {
-				BOOMR.plugins.RT.updateCookie();
+				// make sure boomerang doesn't do anything at this point
+				BOOMR.disable();
 			}
 		},
 		updateCookie: function(queryCookie) {
@@ -383,8 +379,27 @@
 
 			// Since this is before session data is set we override
 			// session data here before it's put on the beacon
-			if (impl.session && !impl.session_transfer_timedout && impl.enabled && impl.session_transferred) {
-				this.updateSession(impl.session);
+			if (impl.session
+			    && !impl.session_transfer_timedout
+			    && impl.enabled
+			    && impl.session_transferred) {
+				// Make sure that we are only updating the session start time if the following criteria match:
+				//  - session.start is less than 24h old (maxSessionExpiry)
+				if (!isNaN(impl.session.start) && impl.session.start > (BOOMR.now() - maxSessionExpiry)) {
+					BOOMR.session.start = impl.session.start;
+
+					// if we're given a session length greater than our own, use it instead
+					if (!isNaN(impl.session.length) && impl.session.length > BOOMR.session.length) {
+						BOOMR.session.length = impl.session.length;
+					}
+
+					BOOMR.session.ID = impl.session.ID;
+
+					if (BOOMR.plugins.RT) {
+						BOOMR.plugins.RT.updateCookie();
+					}
+				}
+
 				log("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
 				BOOMR.addVar("rt.sstr_dur", impl.session_transferred_time - impl.plugin_start);
 				impl.session_transfer_complete = true;

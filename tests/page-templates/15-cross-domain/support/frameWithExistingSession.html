@@ -9,7 +9,6 @@
 	<meta http-equiv="X-UA-Compatible" content="EmulateIE8">
 	<![endif]-->
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script src="../../../boomerang-test-framework.js" type="text/javascript"></script>
 	<script type="text/javascript">
 	window.sessionMock = {
 		ID: "mocked-id",
@@ -21,12 +20,10 @@
 		beacon_url: "/blackhole/no-op"
 	};
 	</script>
-
 	<script src="session-mock.js" type="text/javascript"></script>
 	</head>
 	<body>
 	<script src="../../../build/boomerang-latest-debug.js" type="text/javascript"></script>
-	<script src="session-mock.js" type="text/javascript"></script>
 	<!-- We don't want this page to beacon just give us the session content -->
 	<script>
 	BOOMR.init({
