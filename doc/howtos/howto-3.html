@@ -13,28 +13,71 @@ See <a href="../use-cases.html#uc-3">use cases #3</a> &amp; <a href="../use-case
 </p>
 
 <p>
-By default, boomerang always measures the user's bandwidth and HTTP latency and adds these numbers to the beacon
-that it sends back.  In reality, the bandwidth plugin (<code>BOOMR.plugins.BW</code>) does this, but since that's
-bundled along with boomerang, the difference is purely academic.  There are a few things you need to know in order
-to use the bandwidth detection code effectively.
+Boomerang's bandwidth plugin (<code>BOOMR.plugins.BW</code>) measures the user's network throughput and network latency
+and adds this to the beacon. You will either need to build boomerang with this plugin or include it as part of your HTML
+page.  Both methods will be described below.
 </p>
 
 <p>
-First, bandwidth detection through javascsript is not accurate.  If the user's network is lossy or is shared with
+Also note that, bandwidth detection through javascsript is not accurate.  If the user's network is lossy or is shared with
 other users, or network traffic is bursty, real bandwidth can vary over time.  The measurement we take is based
 over a short period of time, and this may not be representative of the best or worst cases.  We try to cover for
 that by measuring not just the bandwidth, but also the error value in that measurement.
 </p>
 
+<h2>Option 1: Including boomerang and the bandwidth plugin</h2>
+
 <p>
-Simply adding boomerang to a page and calling the <code>init()</code> method is sufficient to start the bandwidth
-test. If you want the beacon results to include the results of the bandwidth test, setting <code>block_beacon</code>
-to <code>true</code> will force boomerang to wait for the test to complete before sending the beacon. If you do not
-turn on the <code>block_beacon</code> feature, you will only receive bandwidth results if they were cached in a
-cookie by a previous test run.
+To include boomerang and the bandwidth plugin on your page, use the following code in your HTML (assuming the <code>bw.js</code>
+file is in a directory called <code>plugins/</code> under the current directory):
 </p>
 <pre>
 &lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="plugins/bw.js" type="text/javascript"&gt;&lt;/script&gt;
+</pre>
+
+<h2>Option 2: Building boomerang to include the bandwidth plugin</h2>
+
+<p>
+To build a version of boomerang with the bandwidth plugin included, run the following command on your command line inside the boomerang directory:
+</p>
+
+<pre>
+make PLUGINS=plugins/bw.js
+</pre>
+
+<p>
+This will create a file called <code>boomerang-0.9.XXXXXXXX.js</code> (where XXXXXXXX is a numeric timestamp) in the current directory and you
+will include that file in your HTML:
+</p>
+<pre>
+&lt;script src="boomerang-0.9.XXXXXXXX.js" type="text/javascript"&gt;&lt;/script&gt;
+</pre>
+
+<p>
+Note that the default for the <code>make</code> command is to build boomerang with the <code>rt.js</code> and <code>bw.js</code> plugins,
+so simply running <code>make</code> is sufficient, although that will get you the extra <code>rt.js</code> plugin that you may not want.
+</p>
+
+<h2>Copy the bandwidth images to your server</h2>
+
+<p>
+The bandwidth images are located in the <a href="https://github.com/SOASTA/boomerang/tree/master/images">images/</a> folder of your local boomerang
+git repository.  You need to copy all of these images to a location on your HTTP server.  Some people choose to put these images on their CDN, but
+be aware that this could result in increased CDN charges. You will need to configure your CDN to ignore the query string when caching these images.
+</p>
+
+<h2>Using the bandwidth plugin</h2>
+
+<p>
+Add boomerang to your page using one of the two methods outlined above, and then call the <code>init()</code> method.  This will start the bandwidth
+test once the page loads. If you want the beacon results to include the results of the bandwidth test, setting <code>block_beacon</code> to <code>true</code>
+will force boomerang to wait for the test to complete before sending the beacon. If you do not turn on the <code>block_beacon</code> feature, you will
+only receive bandwidth results if they were cached in a cookie by a previous test run.
+</p>
+
+<pre>
+&lt;!-- Include boomerang as outlined above --&gt;
 &lt;script type="text/javascript"&gt;
 BOOMR.init({
 	beacon_url: "http://yoursite.com/path/to/beacon.php",
@@ -64,7 +107,7 @@ to tell boomerang what the user's IP address is.  You do this through the <code>
 </p>
 
 <pre>
-&lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;!-- Include boomerang as outlined above --&gt;
 &lt;script type="text/javascript"&gt;
 BOOMR.init({
 	beacon_url: "http://yoursite.com/path/to/beacon.php",
@@ -95,7 +138,7 @@ set to <code>BA</code>, but you can change it using the <code>BW.cookie</code> p
 </p>
 
 <pre>
-&lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;!-- Include boomerang as outlined above --&gt;
 &lt;script type="text/javascript"&gt;
 BOOMR.init({
 	beacon_url: "http://yoursite.com/path/to/beacon.php",
@@ -151,7 +194,7 @@ a mobile device that cannot handle the load.  In such cases you have two options
 <li>Set the <code>BW.enabled</code> parameter to <code>false</code>:</li>
 </ol>
 <pre>
-&lt;script src="boomerang.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;!-- Include boomerang as outlined above --&gt;
 &lt;script type="text/javascript"&gt;
 BOOMR.init({
 	BW: { enabled: false  }
@@ -160,7 +203,7 @@ BOOMR.init({
 </pre>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/SOASTA/boomerang/">github.com/SOASTA/boomerang</a>
 </p>
 
 <p id="results">
@@ -187,5 +230,6 @@ BOOMR.init({
 </html>
 <!--
     Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+    Copyright (c) 2015, SOASTA, Inc. All rights reserved.
     Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 -->

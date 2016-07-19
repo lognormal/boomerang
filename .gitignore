@@ -1,10 +1,8 @@
 *.gz
 *.swp
 /boomerang-*.js
-Default_Boomerang.xml
-boomerang-build.*
-BoomerangUpdate
-./[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]-[A-Z0-9]*.js
+build/*
+*.log
 *.diff
 .project
 .settings/

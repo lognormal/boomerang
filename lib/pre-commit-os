@@ -8,7 +8,6 @@
 # After that, the script will run before every call to git commit and
 # check if grunt is installed and if `grunt lint` comes back successfully.
 
-
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
 	against=HEAD
@@ -18,7 +17,7 @@ else
 fi
 
 # If you want to allow non-ASCII filenames set this variable to true.
-allownonascii=$(git config --bool hooks.allownonascii)
+allownonascii=false
 
 # Redirect output to stderr.
 exec 1>&2
@@ -50,7 +49,7 @@ fi
 GIT_ROOT="$(git rev-parse --show-toplevel)"
 if [ ! -x $GIT_ROOT/node_modules/.bin/grunt ] || [ ! -x $(which grunt) ]; then
 	cat <<\EOF
-Error: You are trying to commit code or changes to the repository without the abillity to
+Error: You are trying to commit code or changes to the repository without the ability to
 lint or validate prior to commit.
 
 Please make sure you have grunt installed in your local or global path!
@@ -59,6 +58,9 @@ EOF
 	exit 1
 fi
 
+#
+# Bad files
+#
 BAD_FILES=$GIT_ROOT/.git/hooks/pre-commit-bad-files.dat
 
 if [ ! -f "$BAD_FILES" ]; then
@@ -73,5 +75,36 @@ do
     fi
 done
 
+#
+# BOOMR.session
+#
+grep -i BOOMR.session $GIT_ROOT/*.js | grep -v .git && echo BOOMR.session exists && exit 1
+grep -iR BOOMR.session $GIT_ROOT/plugins/ | grep -v .git && echo BOOMR.session exists && exit 1
+grep -iR BOOMR.session $GIT_ROOT/tests/ | grep -v .git && echo BOOMR.session exists && exit 1
+
+#
+# SOASTA PRIVATE
+#
+grep -i "SOASTA PRIVATE" $GIT_ROOT/*.js | grep -v .git && echo "SOASTA PRIVATE" exists && exit 1
+grep -iR "SOASTA PRIVATE" $GIT_ROOT/plugins/ | grep -v .git && echo "SOASTA PRIVATE" exists && exit 1
+grep -iR "SOASTA PRIVATE" $GIT_ROOT/tests/ | grep -v .git && echo "SOASTA PRIVATE" exists && exit 1
+
+#
+# go-mpulse
+#
+grep -i go-mpulse $GIT_ROOT/*.js | grep -v .git && echo go-mpulse exists && exit 1
+grep -iR go-mpulse $GIT_ROOT/plugins/ | grep -v .git && echo go-mpulse exists && exit 1
+grep -iR go-mpulse $GIT_ROOT/tests/ | grep -v .git && echo go-mpulse exists && exit 1
+
+#
+# API_KEY
+#
+grep -i API_KEY $GIT_ROOT/*.js | grep -v .git && echo API_KEY exists && exit 1
+grep -iR API_KEY $GIT_ROOT/plugins/ | grep -v .git && echo API_KEY exists && exit 1
+grep -iR API_KEY $GIT_ROOT/tests/ | grep -v .git && echo API_KEY exists && exit 1
+
+#
+# Lint
+#
 GRUNT_EXEC=$(which grunt || $GIT_ROOT/node_modules/.bin/grunt)
 $GRUNT_EXEC --gruntfile $GIT_ROOT/Gruntfile.js lint

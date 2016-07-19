@@ -238,11 +238,18 @@ BOOMR_check_doc_domain();
 	// users can set properties by passing in to the init() method
 	impl = {
 		// properties
-		beacon_url: location.protocol + "//%beacon_dest_host%%beacon_dest_path%",
+		beacon_url: "",
 		// beacon request method, either GET, POST or AUTO. AUTO will check the
 		// request size then use GET if the request URL is less than MAX_GET_LENGTH chars
 		// otherwise it will fall back to a POST request.
 		beacon_type: "AUTO",
+		// strip out everything except last two parts of hostname.
+		// This doesn't work well for domains that end with a country tld,
+		// but we allow the developer to override site_domain for that.
+		// You can disable all cookies by setting site_domain to a falsy value
+		site_domain: w.location.hostname.
+					replace(/.*?([^.]+\.[^.]+)\.?$/, "$1").
+					toLowerCase(),
 		//! User's ip address determined on the server.  Used for the BA cookie
 		user_ip: "",
 		// Whether or not to send beacons on page load
@@ -384,7 +391,10 @@ BOOMR_check_doc_domain();
 		//! t_end: value set in zzz-last-plugin.js
 
 		url: myurl,
+
+		/* SOASTA PRIVATE START */
 		config_url: null,
+		/* SOASTA PRIVATE END */
 
 		// constants visible to the world
 		constants: {
@@ -395,6 +405,7 @@ BOOMR_check_doc_domain();
 			MAX_GET_LENGTH: 2000
 		},
 
+		/* SOASTA PRIVATE START */
 		session: {
 			// You can disable all cookies by setting site_domain to a falsy value
 			domain: null,
@@ -402,6 +413,7 @@ BOOMR_check_doc_domain();
 			start: undefined,
 			length: 0
 		},
+		/* SOASTA PRIVATE END */
 
 		// Utility functions
 		utils: {
@@ -486,6 +498,9 @@ BOOMR_check_doc_domain();
 			setCookie: function(name, subcookies, max_age) {
 				var value, nameval, savedval, c, exp;
 
+				/* SOASTA PRIVATE START */
+				// NOTE: Private repo has session.domain instead of site_domain
+				/* SOASTA PRIVATE END */
 				if (!name || !BOOMR.session.domain) {
 					BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
 					return null;
@@ -494,6 +509,9 @@ BOOMR_check_doc_domain();
 				value = this.objectToString(subcookies, "&");
 				nameval = name + "=\"" + value + "\"";
 
+				/* SOASTA PRIVATE START */
+				// NOTE: Private repo has session.domain instead of site_domain
+				/* SOASTA PRIVATE END */
 				c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
 				if (max_age) {
 					exp = new Date();
@@ -843,7 +861,16 @@ BOOMR_check_doc_domain();
 
 		init: function(config) {
 			var i, k,
-			    properties = ["beacon_url", "beacon_type", "user_ip", "strip_query_string", "secondary_beacons", "autorun"];
+			    properties = [
+				    "beacon_url",
+				    "beacon_type",
+				    "site_domain",
+				    "user_ip",
+				    "strip_query_string",
+				    "secondary_beacons",
+				    "autorun",
+				    "site_domain"
+			    ];
 
 			BOOMR_check_doc_domain();
 
@@ -855,9 +882,11 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
+			/* SOASTA PRIVATE START */
 			if (config.site_domain !== undefined) {
 				this.session.domain = config.site_domain;
 			}
+			/* SOASTA PRIVATE END */
 
 			if (config.log !== undefined) {
 				this.log = config.log;
@@ -1003,8 +1032,8 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Sends the page_ready beacon only if 'autorun' is still true after config.js
-		 * arrives.
+		 * Sends the page_ready beacon only if 'autorun' is still true after init
+		 * is called.
 		 */
 		page_ready_autorun: function(ev) {
 			if (impl.autorun) {
@@ -1331,14 +1360,38 @@ BOOMR_check_doc_domain();
 			};
 		},
 
-		/* SOASTA PRIVATE START */
-		hasCrumb: function() {
-			return typeof impl.vars["h.cr"] !== "undefined";
+		/**
+		 * Determines is Boomerang can send a beacon.
+		 *
+		 * Queryies all plugins to see if they implement readyToSend(),
+		 * and if so, that they return true;
+		 *
+		 * If not, the beacon cannot be sent.
+		 *
+		 * @returns {boolean} True if Boomerang can send a beacon
+		 */
+		readyToSend: function() {
+			var plugin;
+
+			for (plugin in this.plugins) {
+				if (this.plugins.hasOwnProperty(plugin)) {
+					if (impl.disabled_plugins[plugin]) {
+						continue;
+					}
+
+					if (typeof this.plugins[plugin].readyToSend === "function"
+					    && this.plugins[plugin].readyToSend() === false) {
+						BOOMR.debug("Plugin " + plugin + " is not ready to send");
+						return false;
+					}
+				}
+			}
+
+			return true;
 		},
-		/* SOASTA PRIVATE END */
 
 		responseEnd: function(name, t_start, data) {
-			if (BOOMR.hasCrumb()) {
+			if (BOOMR.readyToSend()) {
 				if (typeof name === "object" && name.url) {
 					impl.fireEvent("xhr_load", name);
 				}
@@ -1367,10 +1420,14 @@ BOOMR_check_doc_domain();
 				}
 			}
 			else {
-				BOOMR.debug("Attempt to send a resource before a crumb");
+				BOOMR.debug("Attempt to send a resource before a security token");
 			}
 		},
 
+		//
+		// uninstrumentXHR and instrumentXHR are stubs that will be replaced
+		// by auto-xhr.js if active.
+		//
 		/**
 		 * Undo XMLHttpRequest instrumentation and reset the original
 		 */
@@ -1444,9 +1501,11 @@ BOOMR_check_doc_domain();
 
 			impl.vars.v = BOOMR.version;
 
+			/* SOASTA PRIVATE START */
 			impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36);
 			impl.vars["rt.ss"] = BOOMR.session.start;
 			impl.vars["rt.sl"] = BOOMR.session.length;
+			/* SOASTA PRIVATE END */
 
 			if (BOOMR.visibilityState()) {
 				impl.vars["vis.st"] = BOOMR.visibilityState();
@@ -1536,11 +1595,13 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
+			/* SOASTA PRIVATE START */
 			// Stop at this point if we are rate limited
 			if (BOOMR.session.rate_limited) {
 				BOOMR.debug("Skipping because we're rate limited");
 				return this;
 			}
+			/* SOASTA PRIVATE END */
 
 			if (!BOOMR.orig_XMLHttpRequest && (!BOOMR.window || !BOOMR.window.XMLHttpRequest)) {
 				// if we don't have XHR available, force an image beacon and hope

@@ -14,7 +14,7 @@ xhr.addEventListener(
 	function() {
 		if (xhr.readyState === 4) {
 
-			//opened before config, completed after config
+			//opened before init, completed after init
 			xhr = new XMLHttpRequest();
 			xhr.open("GET", "/delay?delay=1000&file=build/boomerang-latest-debug.js&xhr2", true);
 			xhr.send(null);

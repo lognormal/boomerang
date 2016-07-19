@@ -1,6 +1,19 @@
 <%= header %>
 <%= boomerangScript %>
+<script>
+window.BOOMR = window.BOOMR || {};
+window.BOOMR.plugins = window.BOOMR.plugins || {};
 
+var readyToSend = false;
+window.BOOMR.plugins.Hold = {
+	readyToSend: function() {
+		return readyToSend;
+	},
+	is_complete: function() {
+		return true;
+	}
+};
+</script>
 <script src="100506.js" type="text/javascript"></script>
 
 <!--
@@ -34,6 +47,7 @@ image2.send(null);
      Initializing Boomerang now as if config.json came down later
 -->
 <script>
+readyToSend = true;
 BOOMR_test.init({
 	testAfterOnBeacon: 3
 });

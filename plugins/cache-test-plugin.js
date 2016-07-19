@@ -18,7 +18,7 @@
 		    s1 = dc.createElement(s);
 
 		s1.onload = BOOMR.plugins.CT.loaded;
-		s1.src = "//lognormal.net/boomerang/cache-test-v2.js";
+		s1.src = cached_url;
 		t_start = new Date().getTime();
 		BOOMR.addVar("cch.ce", t_start);
 
@@ -31,8 +31,16 @@
 	};
 
 	BOOMR.plugins.CT = {
-		init: function() {
+		init: function(config) {
 			if (complete) {
+				return this;
+			}
+
+			if (config && config.CT && config.CT.cached_url) {
+				cached_url = config.CT.cached_url;
+			}
+			else {
+				complete = true;
 				return this;
 			}
 

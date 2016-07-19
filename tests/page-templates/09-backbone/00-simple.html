@@ -7,7 +7,7 @@
 <script>
 window.backbone_imgs = [3000];
 
-// Since we're using boomerangScript, Boomerang may need some time to load
+// Since we're using boomerangSnippet, Boomerang may need some time to load
 // so it can hook its MutationObserver in.  Let's tell the Backbone app
 // not to startup until we say, so we can ensure we're monitoring properly
 // for this test case.
@@ -25,7 +25,10 @@ BOOMR_test.init({
 	instrument_xhr: true,
 	autorun: false,
 	onBoomerangLoaded: function() {
-		window.backbone_start();
+		// ensure the app hooks first
+		BOOMR.setImmediate(function() {
+			window.backbone_start();
+		});
 	}
 });
 </script>

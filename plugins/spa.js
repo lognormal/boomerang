@@ -35,7 +35,7 @@
 			if (config && config.instrument_xhr) {
 				autoXhrEnabled = config.instrument_xhr;
 
-				// if AutoXHR is enabled via config.js, and we've already had
+				// if AutoXHR is enabled, and we've already had
 				// a route change, make sure to turn AutoXHR back on
 				if (initialRouteChangeStarted && autoXhrEnabled) {
 					BOOMR.plugins.AutoXHR.enableAutoXhr();
@@ -75,7 +75,7 @@
 
 			if (hadRouteChange) {
 				if (autoXhrEnabled) {
-					// re-enable AutoXHR if it's enabled in config.js
+					// re-enable AutoXHR if it's enabled
 					BOOMR.plugins.AutoXHR.enableAutoXhr();
 				}
 
@@ -172,7 +172,7 @@
 			// start listening for changes
 			resource.index = BOOMR.plugins.AutoXHR.getMutationHandler().addEvent(resource);
 
-			// re-enable AutoXHR if it's enabled in config.js
+			// re-enable AutoXHR if it's enabled
 			if (autoXhrEnabled) {
 				BOOMR.plugins.AutoXHR.enableAutoXhr();
 			}

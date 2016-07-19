@@ -24,14 +24,19 @@
 	// bytes respectively
 	// See https://spreadsheets.google.com/ccc?key=0AplxPyCzmQi6dDRBN2JEd190N1hhV1N5cHQtUVdBMUE&hl=en_GB
 	// for a spreadsheet with the details
+	//
+	// The images were generated with ImageMagic, using random uncompressed data.
+	// As input data (image-3.bin) I used the original images that were encrypted using AES256.
+	// The IM command used was : convert -size 618x618 -depth 8 gray:image-3.bin image-3.png
+	// Vary the image dimensions to change the filesize. The image dimensions are more or less the square of the desired filesize.
 	images = [
-		{ name: "image-0.png", size: 11483, timeout: 1400 },
-		{ name: "image-1.png", size: 40658, timeout: 1200 },
-		{ name: "image-2.png", size: 164897, timeout: 1300 },
-		{ name: "image-3.png", size: 381756, timeout: 1500 },
-		{ name: "image-4.png", size: 1234664, timeout: 1200 },
-		{ name: "image-5.png", size: 4509613, timeout: 1200 },
-		{ name: "image-6.png", size: 9084559, timeout: 1200 }
+		{ name: "image-0.png", size: 11773, timeout: 1400 },
+		{ name: "image-1.png", size: 40836, timeout: 1200 },
+		{ name: "image-2.png", size: 165544, timeout: 1300 },
+		{ name: "image-3.png", size: 382946, timeout: 1500 },
+		{ name: "image-4.png", size: 1236278, timeout: 1200 },
+		{ name: "image-5.png", size: 4511798, timeout: 1200 },
+		{ name: "image-6.png", size: 9092136, timeout: 1200 }
 	];
 
 	images.end = images.length;

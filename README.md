@@ -9,6 +9,8 @@ boomerang always comes back, except when it hits something.
 summary
 ---
 
+[![Join the chat at https://gitter.im/SOASTA/boomerang](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SOASTA/boomerang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 boomerang is a JavaScript library that measures the page load time experienced by real users, commonly called RUM.
 
 Apart from page load time, boomerang measures a whole bunch of performance characteristics of your user's web browsing experience.  All you have to do is stick it into your web pages and call the
@@ -152,18 +154,18 @@ Boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon` event
 docs
 ---
 Documentation is in the docs/ sub directory, and is written in HTML.  Your best bet is to check it out and view it locally, though it works best through a web server (you'll need cookies).
-Thanks to github's awesome `gh-pages` feature, we're able to host the boomerang docs right here on github.  Visit http://lognormal.github.com/boomerang/doc/ for a browsable version where all
+Thanks to github's awesome `gh-pages` feature, we're able to host the boomerang docs right here on github.  Visit http://soasta.github.com/boomerang/doc/ for a browsable version where all
 the examples work.
 
 In case you're browsing this elsewhere, the latest development version of the code and docs are available at https://github.com/bluesmoon/boomerang/, while the latest stable version is
-at https://github.com/lognormal/boomerang/
+at https://github.com/SOASTA/boomerang/
 
 support
 ---
-We use github issues for discussions, feature requests and bug reports.  Get in touch at https://github.com/lognormal/boomerang/issues
+We use github issues for discussions, feature requests and bug reports.  Get in touch at https://github.com/SOASTA/boomerang/issues
 You'll need a github account to participate, but then you'll need one to check out the code as well :)
 
 Thanks for dropping by, and please leave us a message telling us if you use boomerang.
 
-boomerang is supported by the devs at <a href="http://www.lognormal.com/">LogNormal</a>, and the awesome community of opensource developers that use
+boomerang is supported by the devs at <a href="http://soasta.com/">SOASTA</a>, and the awesome community of opensource developers that use
 and hack it.  That's you.  Thank you!

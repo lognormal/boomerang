@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # git pre-commit hook
-# 
+#
 # This script should be copied into your local clones .git/hooks/
 # directory and made executable (`chmod +x`).
 #
@@ -50,7 +50,7 @@ fi
 GIT_ROOT="$(git rev-parse --show-toplevel)"
 if [ ! -x $GIT_ROOT/node_modules/.bin/grunt ] || [ ! -x $(which grunt) ]; then
 	cat <<\EOF
-Error: You are trying to commit code or changes to the repository without the abillity to 
+Error: You are trying to commit code or changes to the repository without the ability to
 lint or validate prior to commit.
 
 Please make sure you have grunt installed in your local or global path!

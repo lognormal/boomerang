@@ -1312,6 +1312,10 @@
 
 			// only allow beacons if we got config.js or if we're unloading
 			return impl.configReceived || impl.unloadFired;
+		},
+
+		readyToSend: function() {
+			return impl.configReceived || impl.unloadFired;
 		}
 
 		/* BEGIN_DEBUG */,

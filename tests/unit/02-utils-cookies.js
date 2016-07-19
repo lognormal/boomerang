@@ -40,10 +40,12 @@ describe("BOOMR.utils cookies", function() {
 	// need to skip some tests this isn't on a TLD (eg localhost), because cookies can't get set
 	var canSetCookies = window.location.host.indexOf(".") !== -1;
 
+	/* SOASTA PRIVATE START */
 	// cookie domain can't have a port
 	var cookieDomain = window.location.host.indexOf(":") === -1 ?
 		window.location.host :
 		window.location.host.substring(0, window.location.host.indexOf(":"));
+	/* SOASTA PRIVATE END */
 
 	describe("BOOMR.utils.getCookie()", function() {
 		it("Should have an exisiting BOOMR.utils.getCookie function", function() {
@@ -67,6 +69,7 @@ describe("BOOMR.utils cookies", function() {
 		});
 	});
 
+	/* SOASTA PRIVATE START */
 	describe("BOOMR.utils.setCookie()", function() {
 		it("Should have an exisiting BOOMR.utils.setCookie function", function() {
 			BOOMR.session.domain = cookieDomain;
@@ -134,6 +137,7 @@ describe("BOOMR.utils cookies", function() {
 			assert.isFalse(BOOMR.utils.setCookie("failCookie", value));
 		});
 	});
+	/* SOASTA PRIVATE END */
 
 	describe("BOOMR.utils.getSubCookies()", function() {
 		it("Should have an exisiting BOOMR.utils.getSubCookies function", function() {
@@ -223,6 +227,7 @@ describe("BOOMR.utils cookies", function() {
 		});
 	});
 
+	/* SOASTA PRIVATE START */
 	describe("BOOMR.utils.removeCookie()", function() {
 		it("Should return null when given no argurments", function() {
 			BOOMR.session.domain = cookieDomain;
@@ -245,4 +250,5 @@ describe("BOOMR.utils cookies", function() {
 			});
 		}
 	});
+	/* SOASTA PRIVATE END */
 });

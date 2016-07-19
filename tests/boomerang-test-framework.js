@@ -170,20 +170,7 @@
 		}
 
 		if (!window.BOOMR || !window.BOOMR.version) {
-			if (window.document.addEventListener) {
-				window.document.addEventListener("onBoomerangLoaded", function() {
-					t.init(config);
-				});
-			}
-			else if (window.document.attachEvent) {
-				document.attachEvent("onpropertychange", function(e) {
-					e = e || window.event;
-					if (e && e.propertyName === "onBoomerangLoaded") {
-						t.init(config);
-					}
-				});
-			}
-
+			window.BOOMR_test_config = config;
 			return;
 		}
 
@@ -381,6 +368,44 @@
 		}
 
 		return null;
+	};
+
+	/**
+	 * Finds the first beacon with the specified parameter
+	 *
+	 * @param {string} prop Property name
+	 * @param {string} val Property value
+	 *
+	 * @returns {object} Matching beacon
+	 */
+	t.findMatchingBeacon = function(prop, val) {
+		var tf = BOOMR.plugins.TestFramework;
+
+		for (var i = 0; i < tf.beacons.length; i++) {
+			if (tf.beacons[i][prop] === val) {
+				return tf.beacons[i];
+			}
+		}
+	};
+
+	/**
+	 * Finds the first XHR beacon
+	 *
+	 * @returns {object} XHR beacon
+	 */
+	t.findXhrBeacon = function() {
+		return t.findMatchingBeacon("http.initiator", "xhr");
+	};
+
+	/**
+	 * Finds the first navigation beacon
+	 *
+	 * @returns {object} navigation beacon
+	 */
+	t.findNavBeacon = function() {
+		return t.isNavigationTimingSupported() ?
+		    t.findMatchingBeacon("rt.start", "navigation") :
+		    t.findMatchingBeacon("rt.start", "none");
 	};
 
 	/**

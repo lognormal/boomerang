@@ -3,7 +3,12 @@
 		return;
 	}
 
-	var a = document.createElement("A"), xhrNative = XMLHttpRequest, resources = [], sendResource, readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
+	var a = document.createElement("A"),
+	    xhrNative = XMLHttpRequest,
+	    resources = [],
+	    sendResource,
+	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
+
 	w.BOOMR = w.BOOMR || {};
 	BOOMR.xhr = {
 		stop: function(sr) {

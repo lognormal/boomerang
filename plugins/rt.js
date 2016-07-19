@@ -11,8 +11,11 @@
 /*eslint no-underscore-dangle:0*/
 
 	var d, impl,
-	    SESSION_EXP = 60 * 30,
 	    COOKIE_EXP = 60 * 60 * 24 * 7;
+
+	/* SOASTA PRIVATE START */
+	var SESSION_EXP = 60 * 30;
+	/* SOASTA PRIVATE END */
 
 	BOOMR = BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -35,7 +38,9 @@
 					// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
 		cookie: "RT",		//! Name of the cookie that stores the start time and referrer
 		cookie_exp: COOKIE_EXP,	//! Cookie expiry in seconds (7 days)
+		/* SOASTA PRIVATE START */
 		session_exp: SESSION_EXP, //! Session expiry in seconds (30 minutes)
+		/* SOASTA PRIVATE END */
 		strict_referrer: true,	//! By default, don't beacon if referrers don't match.
 					// If set to false, beacon both referrer values and let
 					// the back end decide
@@ -44,17 +49,21 @@
 					// since cookie time will be incorrect in that case
 		navigationStart: undefined,
 		responseStart: undefined,
+		/* SOASTA PRIVATE START */
 		loadTime: 0,		// Total load time for the user session
 		oboError: 0,		// Number of pages in the session that had no load time
 		sessionHistory: [],	// all session changes that have happened
+		/* SOASTA PRIVATE END */
 		t_start: undefined,	// t_start that came off the cookie
 		cached_t_start: undefined,	// cached value of t_start once we know its real value
 		cached_xhr_start: undefined,	// cached value of xhr t_start once we know its real value
 		t_fb_approx: undefined,	// approximate first byte time for browsers that don't support navtiming
 		r: undefined,		// referrer from the cookie
 		r2: undefined,		// referrer from document.referer
+		/* SOASTA PRIVATE START */
 		beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
 		next_beacon_url: undefined,	// beacon_url to use when session expires
+		/* SOASTA PRIVATE END */
 
 		// These timers are added directly as beacon variables
 		basic_timers: { t_done: 1, t_resp: 1, t_page: 1},
@@ -80,6 +89,7 @@
 
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie)) || {};
 
+			/* SOASTA PRIVATE START */
 			// Numeric indices were a bug, we need to clean it up
 			for (k in subcookies) {
 				if (subcookies.hasOwnProperty(k)) {
@@ -88,6 +98,7 @@
 					}
 				}
 			}
+			/* SOASTA PRIVATE END */
 
 			if (typeof params === "object") {
 				for (k in params) {
@@ -108,6 +119,7 @@
 				}
 			}
 
+			/* SOASTA PRIVATE START */
 			subcookies.dm = BOOMR.session.domain;
 			subcookies.si = BOOMR.session.ID;
 			subcookies.ss = BOOMR.session.start;
@@ -123,6 +135,8 @@
 			if (this.sessionHistory) {
 				subcookies.sh = this.sessionHistory.join(",");
 			}
+			/* SOASTA PRIVATE END */
+
 			t_start = BOOMR.now();
 
 			if (timer) {
@@ -130,10 +144,12 @@
 				impl.lastActionTime = t_start;
 			}
 
+			/* SOASTA PRIVATE START */
 			// If we got a beacon_url from config, set it into the cookie
 			if (this.beacon_url) {
 				subcookies.bcn = this.beacon_url;
 			}
+			/* SOASTA PRIVATE END */
 
 			BOOMR.debug("Setting cookie (timer=" + timer + ")\n" + BOOMR.utils.objectToString(subcookies), "rt");
 			if (!BOOMR.utils.setCookie(this.cookie, subcookies, this.cookie_exp)) {
@@ -157,6 +173,7 @@
 			return true;
 		},
 
+		/* SOASTA PRIVATE START */
 		/**
 		 * Update in memory session with values from the cookie.  Many of these values might come through
 		 * on config.js, but we need them before config.js comes through, or in cases where we're rate
@@ -294,6 +311,7 @@
 			BOOMR.debug("New session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
 			BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError, "rt");
 		},
+		/* SOASTA PRIVATE END */
 
 		/**
 		 * Read initial values from cookie and clear out cookie values it cares about after reading.
@@ -352,6 +370,7 @@
 				}
 			}
 
+			/* SOASTA PRIVATE START */
 			// regardless of whether the start time was usable or not, it's the last action that
 			// we measured, so use that for the session
 			if (subcookies.s) {
@@ -359,6 +378,7 @@
 			}
 
 			this.refreshSession(subcookies);
+			/* SOASTA PRIVATE END */
 
 			// Now that we've pulled out the timers, we'll clear them so they don't pollute future calls
 			this.updateCookie({
@@ -372,9 +392,12 @@
 				rl: undefined
 			});
 
+			/* SOASTA PRIVATE START */
 			this.maybeResetSession(BOOMR.now());
+			/* SOASTA PRIVATE END */
 		},
 
+		/* SOASTA PRIVATE START */
 		/**
 		 * Increment session length, and either session.obo or session.loadTime whichever is appropriate for this page
 		 */
@@ -391,9 +414,11 @@
 				impl.sessionHistory.length = 5;
 			}
 		},
+		/* SOASTA PRIVATE END */
 
 		/**
-		 * Figure out how long boomerang and config.js took to load using resource timing if available, or built in timestamps
+		 * Figure out how long boomerang and other URLs took to load using
+		 * ResourceTiming if available, or built in timestamps.
 		 */
 		getBoomerangTimings: function() {
 			var res, urls, url, startTime, data;
@@ -430,7 +455,11 @@
 				    && "performance" in window
 				    && window.performance
 				    && typeof window.performance.getEntriesByName === "function") {
-					urls = { "rt.bmr": BOOMR.url, "rt.cnf": BOOMR.config_url };
+					urls = { "rt.bmr": BOOMR.url };
+
+					/* SOASTA PRIVATE START */
+					urls["rt.cnf"] = BOOMR.config_url;
+					/* SOASTA PRIVATE END */
 
 					for (url in urls) {
 						if (urls.hasOwnProperty(url) && urls[url]) {
@@ -854,10 +883,12 @@
 			if (etarget && etarget.nodeName.toUpperCase() === element) {
 				BOOMR.debug("passing through", "rt");
 
+				/* SOASTA PRIVATE START */
 				// we might need to reset the session first, as updateCookie()
 				// below sets the lastActionTime
 				this.refreshSession();
 				this.maybeResetSession(BOOMR.now());
+				/* SOASTA PRIVATE END */
 
 				// user event, they may be going to another page
 				// if this page is being opened in a different tab, then
@@ -945,6 +976,7 @@
 				impl.autorun = config.autorun;
 			}
 
+			/* SOASTA PRIVATE START */
 			// If we received a beacon URL from the server, we'll use it, unless of course
 			// we already had a beacon URL, in which case we'll hold on to it until our session
 			// expires, and then use it.
@@ -957,6 +989,7 @@
 				}
 				impl.next_beacon_url = config.beacon_url;
 			}
+			/* SOASTA PRIVATE END */
 
 			// A beacon may be fired automatically on page load or if the page dev fires
 			// it manually with their own timers.  It may not always contain a referrer
@@ -1122,9 +1155,11 @@
 
 			t_start = impl.determineTStart(ename, edata);
 
+			/* SOASTA PRIVATE START */
 			impl.refreshSession();
 
 			impl.maybeResetSession(t_done, t_start);
+			/* SOASTA PRIVATE END */
 
 			// If the dev has already called endTimer, then this call will do nothing
 			// else, it will stop the page load timer
@@ -1144,7 +1179,9 @@
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
 				"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
 				"http.errno", "http.method", "xhr.sync",
+				/* SOASTA PRIVATE START */
 				"rt.ss", "rt.sl", "rt.tt", "rt.lt"
+				/* SOASTA PRIVATE END */
 			);
 
 			impl.setSupportingTimestamps(t_start);
@@ -1200,6 +1237,7 @@
 				impl.addedVars.push("rt.subres");
 			}
 
+			/* SOASTA PRIVATE START */
 			if (ename === "load" || ename === "visible"	// we're in onload
 			   || (ename === "xhr" && !subresource)		// xhr beacon and this is not a subresource
 			   || !impl.onloadfired) {			// unload fired before onload
@@ -1216,6 +1254,7 @@
 			});
 
 			impl.addedVars.push("rt.tt", "rt.obo", "rt.sh");
+			/* SOASTA PRIVATE END */
 
 			impl.updateCookie();
 

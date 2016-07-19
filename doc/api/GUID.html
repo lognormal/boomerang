@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>The GUID API</title>
+  <link rel="stylesheet" type="text/css" href="../boomerang-docs.css"
+</head>
+<body>
+  <span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
+  <h1>The Clicks Plugin</h1>
+  <p>The <code>GUID</code> Plugin adds a tracking cookie to the user that will be sent to the beacon-server as cookie</p>
+  <p>The <code>GUID</code> API is encapsulated in the <code>BOOMR.plugins.GUID</code> namespace </p>
+
+  <h2 id="config">Configuration</h2>
+  <p>
+    The GUID plugin configuration is contained in the <code>GUID</code> namespace in the initial Boomerang configuration Object. 
+  </p>
+  <p>See <a href="../howtos/howto-6.html">"Howto #6 &mdash; Configuring boomerang"</a> for more information on how to configure Boomerang</p>
+  
+  <dl>
+    <dt>cookieName</dt>
+    <dd>
+      <strong>[required]</strong>
+      The name of the cookie to be set in the browser session
+    </dd>
+    <dt>expires</dt>
+    <dd>
+      <strong>[optional]</strong>
+      An expiry time for the cookie in seconds. By default 7 days.      
+    </dd>
+  </dl>
+
+<h2 id="methods">Methods</h2>
+
+<dl class="api">
+
+  <dt>init(oConfig)</dt>
+  <dd>
+    <p>
+      Called by the <a href="BOOMR.html#init">BOOMR.init()</a> method to configure the clicks plugin.
+    </p>
+    <pre>
+      BOOMR.init({
+        GUID: {
+          cookieName: "boomerang-guid",
+	  expires: 6000
+        }
+      });
+    </pre>
+    <h3>Parameters</h3>
+    <dl>
+      <dt>oConfig</dt>
+      <dd>The configuration object passed in via <code>BOOMR.init()</code>.  See the <a href="#config">Configuration section</a> for details.
+    </dl>
+    <h3>Returns</h3>
+    <p>
+      a reference to the <code>BOOMR.plugins.GUID</code> object, so you can chain methods.
+    </p>
+  </dd>
+  
+
+  <h2 id="beacon">Beacon Parameters</h2>
+  <p>
+    None: no beacon parameters will be set cookies will be sent in the HTTP Header
+  </p>
+
+  <p class="perma-link">
+    The latest code and docs is available on <a href="http://github.com/SOASTA/boomerang/">github.com/SOASTA/boomerang</a>
+  </p>
+</body>
+</html>

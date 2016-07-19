@@ -31,8 +31,8 @@ BOOMR.init({
 </pre>
 
 <p>
-Next fetch your content.  Right before the call to fetch content, start the timer.  The load time timer is called
-<code>t_done</code>.  In the callback function where the content has been fetched, call the <code>done()</code>
+Next fetch your content.  Right before the call to fetch content, call <code>var timer = BOOMR.requestStart("page-name")</code>.
+In the callback function where the content has been fetched, call the <code>timer.loaded()</code>
 method.  This measures and beacons back the response time.  I use YUI 3 in the code below, but you could use
 anything you like.
 </p>
@@ -40,22 +40,23 @@ anything you like.
 <pre>
 YUI().use("io-base", function(Y) {
     var uri = "dynamic-content.txt";
+    var timer;
 
     function complete(id, o) {
         var html = o.responseText;
 	document.getElementById("dynamic-content").innerHTML = html;
-	<em>BOOMR.plugins.RT.done();	// Tell boomerang to measure time and fire a beacon</em>
+	<em>if(timer) timer.loaded();	// Tell boomerang to measure time and fire a beacon</em>
     };
 
     Y.on('io:complete', complete);
 
-    <em>BOOMR.plugins.RT.startTimer("t_done");	// Start measuring download time</em>
+    <em>timer = BOOMR.requestStart("my-timer");	// Start measuring download time</em>
     var request = Y.io(uri);
 });
  </pre>
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/SOASTA/boomerang/">github.com/SOASTA/boomerang</a>
 </p>
 
 <p id="results">
@@ -84,16 +85,17 @@ BOOMR.init({
 
 YUI().use("io-base", function(Y) {
     var uri = "dynamic-content.txt?" + new Date().getTime();
+    var timer;
 
     function complete(id, o) {
         var html = "<p>\n" + o.responseText.replace(/^$/mg, '</p>\n<p>') + "\n</p>";
 	document.getElementById("dynamic-content").innerHTML = html;
-	BOOMR.plugins.RT.done();
+	if(timer) timer.loaded();
     };
 
     Y.on('io:complete', complete);
 
-    BOOMR.plugins.RT.startTimer("t_done");
+    timer = BOOMR.requestStart("my-timer");
     var request = Y.io(uri);
 });
 

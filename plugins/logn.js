@@ -264,6 +264,16 @@
 
 		is_complete: function() {
 			return ready;
+		},
+
+		/**
+		 * Determines if Boomerang can send a beacon.  Waits for
+		 * h.cr to be available
+		 *
+		 * @returns {boolean} True once h.cr is available
+		 */
+		readyToSend: function() {
+			return BOOMR.hasVar("h.cr");
 		}
 	};
 
@@ -278,6 +288,7 @@ BOOMR.addVar({"h.key": "%client_apikey%"})
 	.init({
 		primary: true,
 		/* BEGIN_PROD */log: null, /* END_PROD */
+		site_domain: "",
 		wait: true,
 		site_domain: null,
 		ResourceTiming: {

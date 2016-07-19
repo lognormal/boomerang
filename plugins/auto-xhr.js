@@ -311,7 +311,7 @@
 		this.watch--;
 
 		this.clearTimeout();
-		if (BOOMR.hasVar("h.cr")) {
+		if (BOOMR.readyToSend()) {
 			ev.resource.resources = ev.resources;
 
 			// if this was an SPA nav that triggered no additional resources, substract the
@@ -1283,24 +1283,35 @@
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				var resources = BOOMR.xhr.stop(sendResource);
-				if (!resources || !resources.length) {
-					return;
+				var resources = BOOMR.xhr.stop(function(res) {
+					// any resource callbacks should happen in an setImmediate in case the rest
+					// of the plugins haven't yet been initialized
+					BOOMR.setImmediate(function sendAgain() {
+						// wait until we have a crumb to send
+						if (!BOOMR.readyToSend()) {
+							setTimeout(sendAgain, 1000);
+							return;
+						}
+
+						sendResource(res);
+					});
+				});
+
+				if (resources && resources.length) {
+					var sendNow = function() {
+						// wait until we have a crumb to send
+						if (!BOOMR.readyToSend()) {
+							setTimeout(sendNow, 1000);
+							return;
+						}
+
+						for (i = 0; i < resources.length; i++) {
+							sendResource(resources[i]);
+						}
+					};
+
+					BOOMR.setImmediate(sendNow);
 				}
-
-				var sendNow = function() {
-					// wait until we have a crumb to send
-					if (!BOOMR.hasCrumb()) {
-						setTimeout(sendNow, 1000);
-						return;
-					}
-
-					for (i = 0; i < resources.length; i++) {
-						sendResource(resources[i]);
-					}
-				};
-
-				BOOMR.setImmediate(sendNow);
 			}
 
 			if (singlePageApp) {

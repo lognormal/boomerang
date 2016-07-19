@@ -82,10 +82,12 @@ app.post("/redirect", respond301);
 app.get("/chunked", require("./route-chunked"));
 app.post("/chunked", require("./route-chunked"));
 
+// add CORS headers
+app.get("/pages/*/support/*", require("./headers"));
+
 /* SOASTA PRIVATE START */
 // potential config locations
 app.get("/config", require("./route-config"));
-app.get("/pages/*/support/*", require("./headers"));
 app.get("/config.json", require("./route-config"));
 app.get("/api/config.json", require("./route-config"));
 app.get("/api/v2/config.json", require("./route-config"));

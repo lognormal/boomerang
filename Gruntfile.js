@@ -17,13 +17,15 @@ var BUILD_PATH = "build";
 var TEST_BUILD_PATH = path.join("tests", "build");
 var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
+var TEST_URL_BASE = grunt.option("test-url") || "http://localhost:4002";
 
+/* SOASTA PRIVATE START */
 // mPulse
 var BEACON_HOST = "c.go-mpulse.net";
-var TEST_URL_BASE = "http://boomerang-test.soasta.com:3000/";
 var MPULSE_CONFIG_TIMEOUT = 5.5 * 60 * 1000;
 var MPULSE_CONFIG_JS = "/boomerang/config.js";
 var MPULSE_CONFIG_JSON = "/api/config.json";
+/* SOASTA PRIVATE END */
 
 //
 // Grunt config
@@ -92,6 +94,7 @@ module.exports = function() {
 	var buildDebug = buildPathPrefix + "-debug.js";
 	var buildRelease = buildPathPrefix + ".js";
 	var buildReleaseMin = buildPathPrefix + ".min.js";
+	var buildTest = testBuildPathPrefix + "-latest-debug.js";
 
 	//
 	// Build configuration
@@ -104,6 +107,7 @@ module.exports = function() {
 	var bannerFilePathAbsolute = path.resolve(bannerFilePathRelative);
 	var bannerString = grunt.file.read(bannerFilePathAbsolute);
 
+	/* SOASTA PRIVATE START */
 	// mPulse build config
 	buildConfig.hasApiKey = grunt.option("api-key") ? true : false;
 	buildConfig.apiKey = grunt.option("api-key") || "%client_apikey%";
@@ -130,6 +134,7 @@ module.exports = function() {
 		buildRelease = buildPathPrefix + ".js";
 		buildReleaseMin = buildPathPrefix + ".min.js";
 	}
+	/* SOASTA PRIVATE END */
 
 	//
 	// Config
@@ -158,6 +163,10 @@ module.exports = function() {
 			debug: {
 				src: src,
 				dest: buildDebug
+			},
+			"debug-tests": {
+				src: [src, "tests/boomerang-test-plugin.js"],
+				dest: buildTest
 			},
 			release: {
 				src: src,
@@ -200,6 +209,10 @@ module.exports = function() {
 					{
 						src: buildDebug,
 						dest: buildDebug
+					},
+					{
+						src: buildTest,
+						dest: buildTest
 					}
 				],
 				options: {
@@ -224,8 +237,8 @@ module.exports = function() {
 			},
 			"debug-tests": {
 				files: [{
-					src: buildDebug,
-					dest: "<%= testBuildPathPrefix %>-latest-debug.js"
+					src: buildTest,
+					dest: buildTest
 				}],
 				options: {
 					replacements: [
@@ -234,6 +247,7 @@ module.exports = function() {
 							pattern: /beacon_url: .*/,
 							replacement: "beacon_url: \"/blackhole\","
 						},
+						/* SOASTA PRIVATE START */
 						{
 							// Config URL
 							pattern: "//%config_host%%config_path%",
@@ -249,6 +263,7 @@ module.exports = function() {
 							pattern: /%client_apikey%/g,
 							replacement: "API_KEY"
 						}
+						/* SOASTA PRIVATE END */
 					]
 				}
 			},
@@ -275,6 +290,7 @@ module.exports = function() {
 					]
 				}
 			},
+			/* SOASTA PRIVATE START */
 			"mpulse-customer": {
 				files: [
 					{
@@ -315,6 +331,7 @@ module.exports = function() {
 					]
 				}
 			},
+			/* SOASTA PRIVATE END */
 			"remove-sourcemappingurl": {
 				files: [
 					{
@@ -356,6 +373,7 @@ module.exports = function() {
 					end_comment: "END_PROD"
 				}
 			},
+			/* SOASTA PRIVATE START */
 			"config-as-js": {
 				files: [
 					{
@@ -395,6 +413,7 @@ module.exports = function() {
 					end_comment: "END_CONFIG_AS_JSON_EVAL"
 				}
 			}
+			/* SOASTA PRIVATE END */
 		},
 		copy: {
 			webserver: {
@@ -773,6 +792,7 @@ module.exports = function() {
 				tasks: ["clean", "jsdoc"]
 			}
 		},
+		/* SOASTA PRIVATE START */
 		"mpulse-build-repository-xml": {
 			"build": {
 				options: {
@@ -802,6 +822,7 @@ module.exports = function() {
 				}
 			}
 		}
+		/* SOASTA PRIVATE END */
 	});
 
 	grunt.loadNpmTasks("gruntify-eslint");
@@ -826,7 +847,9 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-jsdoc");
 
 	// tasks/*.js
-	grunt.loadTasks("tasks");
+	if (grunt.file.exists("tasks")) {
+		grunt.loadTasks("tasks");
+	}
 
 	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
 
@@ -857,10 +880,21 @@ module.exports = function() {
 		//
 		"lint": ["eslint"],
 
+		/* SOASTA PRIVATE START */
 		//
 		// mPulse tasks
 		//
-		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv", "jenkins-build-properties:build", "mpulse-build-repository-xml:build", "mpulse-build-repository-xml-upload:build"],
+		"jenkins": [
+			"lint",
+			"build",
+			"test",
+			"copy:webserver",
+			"filesize:csv",
+			"jenkins-build-properties:build",
+			"mpulse-build-repository-xml:build",
+			"mpulse-build-repository-xml-upload:build"
+		],
+		/* SOASTA PRIVATE END */
 
 		//
 		// Test tasks
@@ -892,7 +926,7 @@ module.exports = function() {
 		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
 		"test:e2e:chrome": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:chrome"],
 		"test:e2e:debug": ["build", "test:build", "build:test", "express:dev", "express:secondary", "protractor_webdriver", "protractor:debug"],
-		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
+		"test:e2e:phantomjs": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:phantomjs"],
 
 		"test:doc": ["clean", "jsdoc", "express:doc", "watch:doc"],
 
@@ -904,6 +938,7 @@ module.exports = function() {
 		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"]
 	};
 
+	/* SOASTA PRIVATE START */
 	//
 	// mPulse-specific edits
 	//
@@ -924,6 +959,7 @@ module.exports = function() {
 	if (!buildConfig.configAsJsonEval) {
 		aliases["build:apply-templates"].push("strip_code:config-as-json-eval");
 	}
+	/* SOASTA PRIVATE END */
 
 	function isAlias(task) {
 		return aliases[task] ? true : false;

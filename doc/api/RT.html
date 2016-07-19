@@ -227,13 +227,23 @@ This plugin adds the following parameters to the beacon:
 <dt>t_postrender</dt> <dd><strong>[optional]</strong> If the page were prerendered, this is the time from prerender finish to actual page display.  It may only be useful for debugging.</dd>
 <dt>r</dt> <dd>URL of page that set the start time of the beacon.</dd>
 <dt>r2</dt> <dd><strong>[optional]</strong> URL of referrer of current page.  Only set if different from <code>r</code> and <code>strict_referrer</code> has been explicitly turned off.</dd>
+<dt>nu</dt> <dd><strong>[optional]</strong> URL of next page if the user clicked a link or submitted a form</dd>
 <dt>rt.start</dt> <dd>Specifies where the start time came from.  May be one of <code>cookie</code> for the start cookie, <code>navigation</code> for the W3C navigation timing API, <code>csi</code> for older versions of Chrome or <code>gtb</code> for the Google Toolbar.</dd>
+<dt>rt.tstart</dt> <dd>The start time timestamp.</dd>
+<dt>rt.cstart</dt> <dd><strong>[optional]</strong> The start time stored in the cookie if different from rt.tstart</dd>
+<dt>rt.bstart</dt> <dd>The timestamp when boomerang started executing</dd>
+<dt>rt.end</dt> <dd>The timestamp when the t_done timer ended (rt.end - rt.tstart === t_done)</dd>
+<dt>rt.bmr.{...}</dt> <dd><strong>[optional]</strong> Several parameters that include resource timing information for boomerang itself, ie, how long did boomerang take to load</dd>
+<dt>rt.subres</dt> <dd><strong>[optional]</strong> Set to 1 if this beacon is for a sub-resource of a primary page beacon.  This is typically set by XHR beacons, and you will need to use a separate identifier to tie the primary beacon and the subresource beacon together on the server-side.</dd>
+<dt>rt.quit</dt> <dd><strong>[optional]</strong> This parameter will exist (but have no value) if the beacon was fired as part of the <code>onbeforeunload</code> event.  This is typically used to find out how much time the user spent on the page before leaving, and is not guaranteed to fire.</dd>
+<dt>rt.abld</dt> <dd><strong>[optional]</strong> This parameter will exist (but have no value) if the <code>onbeforeunload</code> event fires before the <code>onload</code> event fires.  This can happen, for example, if the user left the page before it completed loading.</dd>
+<dt>rt.ntvu</dt> <dd><strong>[optional]</strong> This parameter will exist (but have no value) if the <code>onbeforeunload</code> event fires before the page ever became visible.  This can happen if the user opened the page in a background tab, and closed it without viewing it, and also if the page was pre-rendered, but never made visible.  Use this to check your pre-render success ratio.</dd>
 </dl>
 
 
 
 <p class="perma-link">
-The latest code and docs is available on <a href="http://github.com/lognormal/boomerang/">github.com/lognormal/boomerang</a>
+The latest code and docs is available on <a href="http://github.com/SOASTA/boomerang/">github.com/SOASTA/boomerang</a>
 </p>
 
 </body>

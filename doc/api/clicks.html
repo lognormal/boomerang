@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>The clicks API</title>
+  <link rel="stylesheet" type="text/css" href="../boomerang-docs.css"
+</head>
+<body>
+  <span style="float:right;"><a href="../">All Docs</a> | <a href="index.html">Index</a></span>
+  <h1>The Clicks Plugin</h1>
+  <p>The <code>clicks</code> Plugin tracks all clicks on a page and beacons them to a dedicated endpoint on your beacon-server.</p>
+  <p>The <code>clicks</code> API is encapsulated in the <code>BOOMR.plugins.clicks</code> namespace </p>
+
+  <h2 id="config">Configuration</h2>
+  <p>
+    The clicks plugin configuration is contained in the <code>clicks</code> namespace in the initial Boomerang configuration Object. 
+  </p>
+  <p>See <a href="../howtos/howto-6.html">"Howto #6 &mdash; Configuring boomerang"</a> for more information on how to configure Boomerang</p>
+  
+  <dl>
+    <dt>click_url</dt>
+    <dd>
+      <strong>[required]</strong>
+      The Url the click events are supposed to be sent to. You need to specify this.
+    </dd>
+    <dt>onbeforeunload</dt>
+    <dd>
+      <strong>[optional]</strong>
+      A boolean value for when to send click events. If this is <code>true</code> clicks will be sent when the site is being closed 
+      so as to not interfere with the normal control flow and network events sent during the lifecycle of the page.
+      
+      Otherwise click events are sent immediately as they occur
+    </dd>
+  </dl>
+
+<h2 id="methods">Methods</h2>
+
+<dl class="api">
+
+  <dt>init(oConfig)</dt>
+  <dd>
+    <p>
+      Called by the <a href="BOOMR.html#init">BOOMR.init()</a> method to configure the clicks plugin.
+    </p>
+    <pre>
+      BOOMR.init({
+        clicks: {
+          click_url: "http://&lt;your beacon server&gt;/clicks",
+	  onbeforeunload: false
+        }
+      });
+    </pre>
+    <h3>Parameters</h3>
+    <dl>
+      <dt>oConfig</dt>
+      <dd>The configuration object passed in via <code>BOOMR.init()</code>.  See the <a href="#config">Configuration section</a> for details.
+    </dl>
+    <h3>Returns</h3>
+    <p>
+      a reference to the <code>BOOMR.plugins.clicks</code> object, so you can chain methods.
+    </p>
+  </dd>
+  
+
+  <h2 id="beacon">Beacon Parameters</h2>
+  <p>
+    The following parameters are sent when a click event is triggered. 
+  </p>
+  <dl>
+    <dt>element</dt> <dd>The "nodeName" of the element that has been clicked (ie. "A", "BUTTON", "NAV", etc.)</dd>
+    <dt>id</dt> <dd>The <code>id</code> of the element if specified otherwise <code>""</code>. </dd>
+    <dt>class</dt> <dd>The class attribute of the element otherwise <code>""</code>. </dd>
+    <dt>document_height</dt><dd>The height of the generated document as present in the browser.</dd>
+    <dt>document_width</dt><dd>The width of the generated document as present in the browser.</dd>
+    <dt>viewport_height</dt><dd>The height of the viewport when the "click" event has been triggered</dd>
+    <dt>viewport_width</dt><dd>The width of the viewport when the "click" event has been triggered</dd>
+  </dl>
+
+
+  <p class="perma-link">
+    The latest code and docs is available on <a href="http://github.com/SOASTA/boomerang/">github.com/SOASTA/boomerang</a>
+  </p>
+</body>
+</html>
