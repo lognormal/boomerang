@@ -811,7 +811,8 @@ module.exports = function() {
 			"build": {
 				options: {
 					filePrefix: "<%= buildPathPrefix %>",
-					version: "<%= boomerangVersion %>"
+					version: "<%= boomerangVersion %>",
+					failOnError: false
 				}
 			}
 		},

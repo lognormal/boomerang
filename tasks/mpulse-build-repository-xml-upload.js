@@ -12,7 +12,8 @@ module.exports = function(grunt) {
 			filePrefix: "",
 			template: path.join(__dirname, "mpulse-build-repository-xml-upload.tmpl"),
 			version: "1.0",
-			schema_version: grunt.option("schema-version") || 1
+			schema_version: grunt.option("schema-version") || 1,
+			failOnError: true
 		});
 
 		var configFilePath = "tasks/mpulse-build-repository-xml-upload.config.json";
@@ -64,7 +65,13 @@ module.exports = function(grunt) {
 
 		repository.connect(jsonConfig.tenant, jsonConfig.username, jsonConfig.password, function(repositoryConnectError) {
 			if (repositoryConnectError) {
-				grunt.fail.fatal("Repository Fault: " + repositoryConnectError.message);
+				if (options.failOnError) {
+					grunt.fail.fatal("Repository Fault: " + repositoryConnectError.message);
+				}
+				else {
+					grunt.verbose.ok("Ignoring Repository Fault: " + repositoryConnectError.message);
+					return done();
+				}
 			}
 
 			repository.createObject({
