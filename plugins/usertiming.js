@@ -18,24 +18,24 @@ UserTimingCompression must be loaded before this plugin's init is called.
 		return;
 	}
 
-	/**
-	 * @returns String compressed user timing data that occurred since the last call
-	 */
-	function getUserTiming() {
-		var map, res, now = BOOMR.now();
-
-		map = UserTimingCompression.getCompressedUserTiming(impl.options);
-		res = UserTimingCompression.compressForUri(map);
-		impl.options["from"] = now;
-
-		return res;
-	}
-
 	var impl = {
 		complete: false,
 		initialized: false,
 		supported: false,
 		options: {"from": 0},
+
+		/**
+		 * @returns String compressed user timing data that occurred since the last call
+		 */
+		getUserTiming: function() {
+			var timings, res, now = BOOMR.now();
+
+			timings = UserTimingCompression.getCompressedUserTiming(impl.options);
+			res = UserTimingCompression.compressForUri(timings);
+			this.options.from = now;
+
+			return res;
+		},
 
 		addEntriesToBeacon: function() {
 			var r;
@@ -45,7 +45,7 @@ UserTimingCompression must be loaded before this plugin's init is called.
 			}
 
 			BOOMR.removeVar("usertiming");
-			r = getUserTiming();
+			r = this.getUserTiming();
 			if (r) {
 				BOOMR.info("User Timing API entries found since the last beacon", "usertiming");
 				BOOMR.addVar({
@@ -54,7 +54,6 @@ UserTimingCompression must be loaded before this plugin's init is called.
 			}
 
 			this.complete = true;
-			BOOMR.sendBeacon();
 		},
 
 		clearMetrics: function(vars) {
@@ -66,10 +65,8 @@ UserTimingCompression must be loaded before this plugin's init is called.
 	};
 
 	BOOMR.plugins.UserTiming = {
-		init: function(config) {
+		init: function() {
 			var p = BOOMR.window.performance;
-
-			BOOMR.utils.pluginConfig(impl, config, "UserTiming");
 
 			if (impl.initialized) {
 				return this;
@@ -84,7 +81,7 @@ UserTimingCompression must be loaded before this plugin's init is called.
 				if (Object.prototype.toString.call(marks) === "[object Array]" && Object.prototype.toString.call(measures) === "[object Array]") {
 					BOOMR.info("Client supports User Timing API", "usertiming");
 
-					BOOMR.subscribe("before_onbeacon", impl.addEntriesToBeacon, null, impl);
+					BOOMR.subscribe("before_beacon", impl.addEntriesToBeacon, null, impl);
 					BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 
 					impl.supported = true;
@@ -104,7 +101,7 @@ UserTimingCompression must be loaded before this plugin's init is called.
 		},
 		is_supported: function() {
 			return impl.initialized && impl.supported;
-		},
+		}
 	};
 
 }());
