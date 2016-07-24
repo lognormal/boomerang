@@ -9,6 +9,8 @@ see: https://github.com/nicjansma/usertiming-compression.js
 UserTimingCompression must be loaded before this plugin's init is called.
 */
 
+/*global UserTimingCompression*/
+
 (function() {
 
 	BOOMR = BOOMR || {};
