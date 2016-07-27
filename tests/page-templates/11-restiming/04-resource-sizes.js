@@ -15,16 +15,18 @@ describe("e2e/11-restiming/04-resource-sizes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			// find our img
-			var img = resources.find(function(r) {
-				return r.name.indexOf("assets/img.jpg") !== -1;
-			});
-
-			assert.isDefined(img);
-
-			if (img.encodedSize) {
-				assert.equal(296341, img.encodedSize);
+			// find our 3 img entries
+			var cnt = 0;
+			for (var i = resources.length - 1; i >= 0; i--) {
+				var img = resources[i];
+				if (img.name.indexOf("assets/img.jpg") !== -1) {
+					cnt += 1;
+					if (img.encodedBodySize) {
+						assert.equal(296341, img.encodedBodySize);
+					}
+				}
 			}
+			assert.equal(3, cnt);
 		}
 	});
 });

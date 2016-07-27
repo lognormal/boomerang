@@ -248,7 +248,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
 		var entries = [], i, navEntries, navStart, frameNavStart, frameOffset,
-		    navEntry, t, frameLoc;
+		    navEntry, t, frameLoc, rtEntry;
 
 		if (typeof isTopWindow === "undefined") {
 			isTopWindow = true;
@@ -363,7 +363,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			for (i = 0; frameEntries && i < frameEntries.length; i++) {
 				t = frameEntries[i];
-				frameFixedEntries.push({
+				rtEntry = {
 					name: t.name,
 					initiatorType: t.initiatorType,
 					startTime: t.startTime + offset,
@@ -378,7 +378,13 @@ see: http://www.w3.org/TR/resource-timing/
 					requestStart: t.requestStart ? (t.requestStart + offset) : 0,
 					responseStart: t.responseStart ? (t.responseStart + offset) : 0,
 					responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0
-				});
+				};
+				if (t.encodedBodySize || t.decodedBodySize || t.transferSize) {
+					rtEntry.encodedBodySize = t.encodedBodySize;
+					rtEntry.decodedBodySize = t.decodedBodySize;
+					rtEntry.transferSize = t.transferSize;
+				}
+				frameFixedEntries.push(rtEntry);
 			}
 
 			entries = entries.concat(frameFixedEntries);
