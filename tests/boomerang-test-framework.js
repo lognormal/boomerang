@@ -106,7 +106,7 @@
 
 		var messages = "";
 		for (var i = 0; i < testFailures.length; i++) {
-			messages += "\n";
+			messages += i > 0 ? "\n" : "";
 			messages += testFailures[i].titles + ": " + testFailures[i].name + " | " + testFailures[i].message;
 		}
 
