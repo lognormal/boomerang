@@ -1373,7 +1373,12 @@ BOOMR_check_doc_domain();
 
 		responseEnd: function(name, t_start, data) {
 			if (BOOMR.readyToSend()) {
-				if (typeof name === "object" && name.url) {
+				if (typeof name === "object") {
+					if (!name.url) {
+						BOOMR.debug("BOOMR.responseEnd: First argument must have a url property if it's an object");
+						return;
+					}
+
 					impl.fireEvent("xhr_load", name);
 				}
 				else {
