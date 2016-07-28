@@ -12,6 +12,9 @@ BOOMR_test.init({
 
 function errorFunction() {
 	console.error("Console error!");
+	console.error("Console error 2!", "second arg");
+
+	console.error.apply(console, ["Console error 3!", "second arg"]);
 }
 errorFunction();
 </script>

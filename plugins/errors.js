@@ -565,6 +565,10 @@ if (!Array.isArray) {
 		send: function(error, via, source) {
 			var now = BOOMR.now();
 
+			if (!error) {
+				return;
+			}
+
 			// defaults, if not specified
 			via = via || BOOMR.plugins.Errors.VIA_APP;
 			source = source ||  BOOMR.plugins.Errors.SOURCE_APP;
@@ -770,8 +774,13 @@ if (!Array.isArray) {
 			if (BOOMR.utils.Compression.jsUrl) {
 				return BOOMR.utils.Compression.jsUrl(errors);
 			}
-			else {
+			else if (window.JSON) {
 				url += JSON.stringify(errors);
+			}
+			else {
+				// not supported
+				BOOMR.debug("JSON is not supported", "Errors");
+				return "";
 			}
 		},
 
@@ -780,7 +789,11 @@ if (!Array.isArray) {
 		 */
 		addErrorsToBeacon: function() {
 			if (impl.q.length) {
-				BOOMR.addVar("err", this.getErrorsForUrl(impl.q));
+				var err = this.getErrorsForUrl(impl.q);
+				if (err) {
+					BOOMR.addVar("err", err);
+				}
+
 				impl.q = [];
 			}
 		},
@@ -982,6 +995,42 @@ if (!Array.isArray) {
 
 			// run the fn
 			return impl.wrap(fn, that).apply(that, args);
+		},
+
+		/**
+		 * Normalizes an object to a string
+		 *
+		 * @param {object} obj Object
+		 * @returns {string} String version of the object
+		 */
+		normalizeToString: function(obj) {
+			if (obj === undefined) {
+				return "undefined";
+			}
+			else if (obj === null) {
+				return "null";
+			}
+			else if (typeof obj === "number" && isNaN(obj)) {
+				return "NaN";
+			}
+			else if (obj === "") {
+				return "(empty string)";
+			}
+			else if (obj === 0) {
+				return "0";
+			}
+			else if (!obj) {
+				return "false";
+			}
+			else if (typeof obj === "function") {
+				return "(function)";
+			}
+			else if (obj && typeof obj.toString === "function") {
+				return obj.toString();
+			}
+			else {
+				return "(unknown)";
+			}
 		},
 
 		/**
@@ -1394,19 +1443,24 @@ if (!Array.isArray) {
 
 				try {
 					BOOMR.window.console.error = function BOOMR_plugins_errors_console_error() {
-						if (arguments.length === 1 || !window.JSON) {
-							impl.send(arguments[0], E.VIA_CONSOLE);
+						// get a copy of the args
+						var args = Array.prototype.slice.call(arguments);
+
+						if (args.length === 1) {
+							// send just the first argument
+							impl.send(impl.normalizeToString(args[0]), E.VIA_CONSOLE);
 						}
 						else {
-							impl.send(JSON.stringify(message), E.VIA_CONSOLE);
+							// get the array of arguments
+							impl.send(impl.normalizeToString(args), E.VIA_CONSOLE);
 						}
 
 						if (typeof globalConsole === "function") {
 							if (typeof globalConsole.apply === "function") {
-								globalConsole.apply(this, arguments);
+								globalConsole.apply(this, args);
 							}
 							else {
-								globalConsole(arguments[0], arguments[1], arguments[2]);
+								globalConsole(args[0], args[1], args[2]);
 							}
 						}
 					};
@@ -1473,7 +1527,8 @@ if (!Array.isArray) {
 		findDuplicateError: impl.findDuplicateError,
 		mergeDuplicateErrors: impl.mergeDuplicateErrors,
 		compressErrors: impl.compressErrors,
-		decompressErrors: impl.decompressErrors
+		decompressErrors: impl.decompressErrors,
+		normalizeToString: impl.normalizeToString
 		/* END_DEBUG */
 	};
 

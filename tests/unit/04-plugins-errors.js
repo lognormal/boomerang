@@ -278,6 +278,69 @@ describe("BOOMR.plugins.Errors", function() {
 		});
 	});
 
+	describe("normalizeToString()", function() {
+		it("Should return 'undefined' for undefined", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(), "undefined");
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(undefined), "undefined");
+		});
+
+		it("Should return 'null' for null", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(null), "null");
+		});
+
+		it("Should return '(empty string)' for an empty string", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(""), "(empty string)");
+		});
+
+		it("Should return the string for a string", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString("a"), "a");
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString("abc"), "abc");
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString("abc123"), "abc123");
+		});
+
+		it("Should return a number for a number", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(1), "1");
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(1.2), "1.2");
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(1000), "1000");
+		});
+
+		it("Should return '0' for 0", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(0), "0");
+		});
+
+		it("Should return 'false' for false", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(false), "false");
+		});
+
+		it("Should return 'NaN' for NaN", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(NaN), "NaN");
+		});
+
+		it("Should return '(function)' for a function", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(function(){}), "(function)");
+		});
+
+		it("Should return '' for an empty array", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString([]), "");
+		});
+
+		it("Should return '1' for an array with one element", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString([1]), "1");
+		});
+
+		it("Should return '1,2' for a an array with two elements", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString([1, 2]), "1,2");
+		});
+
+		it("Should return 'a' for a a string array", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(["a"]), "a");
+		});
+
+		it("Should return 'a,bc' for a a string array with two elements", function() {
+			assert.strictEqual(BOOMR.plugins.Errors.normalizeToString(["a", "bc"]), "a,bc");
+		});
+	});
+
 	describe("BoomerangError", function() {
 		it("Should create an empty object when given no properties", function() {
 			var be = new BOOMR.plugins.Errors.BoomerangError();
