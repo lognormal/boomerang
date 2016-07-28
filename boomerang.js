@@ -1468,6 +1468,12 @@ BOOMR_check_doc_domain();
 				}
 			}
 
+			// Sanity test that the browser is still available (and not shutting down)
+			if (!window.Image || !window.navigator) {
+				BOOMR.debug("DOM not fully available, not sending a beacon");
+				return false;
+			}
+
 			// For SPA apps, don't strip hashtags as some SPA frameworks use #s for tracking routes
 			// instead of History pushState() APIs. Use d.URL instead of location.href because of a
 			// Safari bug.
@@ -1582,7 +1588,15 @@ BOOMR_check_doc_domain();
 			}
 
 			if (useImg) {
-				img = new Image();
+				// just in case Image isn't a valid constructor
+				try {
+					img = new Image();
+				}
+				catch (e) {
+					BOOMR.debug("Image is not a constructor, not sending a beacon");
+					return false;
+				}
+
 				img.src = url;
 
 				if (impl.secondary_beacons) {
