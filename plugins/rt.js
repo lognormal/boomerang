@@ -922,7 +922,7 @@
 			// make sure old variables don't stick around
 			BOOMR.removeVar(
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
-				"r", "r2", "rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+				"rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
 				"http.errno", "http.method", "xhr.sync"
 			);
 
@@ -930,11 +930,7 @@
 
 			this.addTimersToBeacon(null, ename);
 
-			BOOMR.addVar("r", BOOMR.utils.cleanupURL(impl.r));
-
-			if (impl.r2 !== impl.r) {
-				BOOMR.addVar("r2", BOOMR.utils.cleanupURL(impl.r2));
-			}
+			BOOMR.setReferrer(impl.r, impl.r2);
 
 			if (ename === "xhr" && edata) {
 				if (edata && edata.data) {
