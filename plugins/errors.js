@@ -253,6 +253,11 @@ if (!Array.isArray) {
 	];
 
 	/**
+	 * Maximum size, in characters, of stack to capture
+	 */
+	var MAX_STACK_SIZE = 5000;
+
+	/**
 	 * BoomerangError object
 	 *
 	 * @param {object} config Configuration
@@ -398,6 +403,10 @@ if (!Array.isArray) {
 
 		// parse the stack
 		if (error.stack) {
+			if (error.stack.length > MAX_STACK_SIZE) {
+				error.stack = error.stack.substr(0, MAX_STACK_SIZE);
+			}
+
 			frames = ErrorStackParser.parse(error);
 			if (frames && frames.length) {
 				if (error.generatedStack) {
