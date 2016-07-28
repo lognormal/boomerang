@@ -255,6 +255,12 @@ BOOMR_check_doc_domain();
 		// Whether or not to send beacons on page load
 		autorun: true,
 
+		// cookie referrer
+		r: undefined,
+
+		// document.referrer
+		r2: undefined,
+
 		//! strip_query_string: false,
 
 		//! onloadfired: false,
@@ -1353,6 +1359,24 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
+		/**
+		 * Sets the Referrers
+		 * @param {string} r Referrer from the cookie
+		 * @param {string} [r2] Referrer from document.referrer, if different
+		 */
+		setReferrer: function(r, r2) {
+			// cookie referrer
+			impl.r = r;
+
+			// document.referrer, if different
+			if (r2 && r !== r2) {
+				impl.r2 = r2;
+			}
+			else {
+				impl.r2 = undefined;
+			}
+		},
+
 		requestStart: function(name) {
 			var t_start = BOOMR.now();
 			BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
@@ -1512,6 +1536,21 @@ BOOMR_check_doc_domain();
 
 			if (impl.vars.pgu === impl.vars.u) {
 				delete impl.vars.pgu;
+			}
+
+			// Add cleaned-up referrer URLs to the beacon, if available
+			if (impl.r) {
+				impl.vars.r = BOOMR.utils.cleanupURL(impl.r);
+			}
+			else {
+				delete impl.vars.r;
+			}
+
+			if (impl.r2) {
+				impl.vars.r2 = BOOMR.utils.cleanupURL(impl.r2);
+			}
+			else {
+				delete impl.vars.r2;
 			}
 
 			impl.vars.v = BOOMR.version;

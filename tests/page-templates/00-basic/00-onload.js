@@ -44,8 +44,6 @@ describe("e2e/00-basic/00-onload", function() {
 	});
 
 	it("Should have set RT properties", function() {
-		assert.isString(tf.lastBeacon().r, "r");
-
 		assert.isString(tf.lastBeacon().u, "u");
 
 		assert.isNumber(tf.lastBeacon()["rt.bstart"], "rt.bstart");
