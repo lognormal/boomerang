@@ -718,13 +718,16 @@
 				 */
 			}
 
-			if (!current_event.resource.url && (node.nodeName === "SCRIPT" || node.nodeName === "IMG")) {
+			// if we don't have a URL yet (i.e. a click started this), use
+			// this element's URL
+			if (!current_event.resource.url) {
 				a.href = url;
 
 				if (shouldExcludeXhr(a)) {
 					// excluded resource, so abort
 					return false;
 				}
+
 				current_event.resource.url = a.href;
 			}
 
