@@ -789,6 +789,10 @@ BOOMR_check_doc_domain();
 				return l;
 			},
 
+			isArray: function(ary) {
+				return Object.prototype.toString.call(ary) === "[object Array]";
+			},
+
 			inArray: function(val, ary) {
 				var i;
 
