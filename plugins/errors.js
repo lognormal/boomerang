@@ -1,16 +1,6 @@
 /*eslint-disable*/
 
 //
-// Via https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-//
-// polyfill for Array.isArray
-if (!Array.isArray) {
-	Array.isArray = function(arg) {
-		return Object.prototype.toString.call(arg) === '[object Array]';
-	};
-}
-
-//
 // Via https://github.com/stacktracejs/error-stack-parser
 // Modifications:
 // * Removed UMD
@@ -325,14 +315,14 @@ if (!Array.isArray) {
 			this.via = parseInt(config.via, 10);
 		}
 
-		if (Array.isArray(config.frames)) {
+		if (BOOMR.utils.isArray(config.frames)) {
 			this.frames = config.frames;
 		}
 		else {
 			this.frames = [];
 		}
 
-		if (Array.isArray(config.events)) {
+		if (BOOMR.utils.isArray(config.events)) {
 			this.events = config.events;
 		}
 		else {
@@ -699,7 +689,7 @@ if (!Array.isArray) {
 		 * @returns {BoomerangError} BoomerangErrors that was duped against, if any
 		 */
 		findDuplicateError: function(errors, err) {
-			if (!Array.isArray(errors) || typeof err === "undefined") {
+			if (!BOOMR.utils.isArray(errors) || typeof err === "undefined") {
 				return undefined;
 			}
 
@@ -722,7 +712,7 @@ if (!Array.isArray) {
 		 * @returns {BoomerangError} BoomerangErrors that was duped against, if any
 		 */
 		mergeDuplicateErrors: function(errors, err, bumpCount) {
-			if (!Array.isArray(errors) || typeof err === "undefined") {
+			if (!BOOMR.utils.isArray(errors) || typeof err === "undefined") {
 				return undefined;
 			}
 
