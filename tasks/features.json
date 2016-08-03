@@ -11,6 +11,7 @@
 	{"key":"cross-domain-session"},
 	{"key":"intl-currency"},
 	{"key":"errors"},
+	{"key":"errors-monitor-other"},
 	{"key":"third-party-analytics"},
 	{"key":"third-party-analytics-cid"}
 ]
