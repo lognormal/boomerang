@@ -1096,19 +1096,16 @@ BOOMR_check_doc_domain();
 			}
 		},
 
+		/**
+		 * Gets the current time in milliseconds since the Unix Epoch (Jan 1 1970).
+		 *
+		 * In browsers that support DOMHighResTimeStamp, this will be replaced
+		 * by a function that adds BOOMR.now() to navigationStart
+		 * (with milliseconds.microseconds resolution).
+		 *
+		 * @returns {Number} Milliseconds since Unix Epoch
+		 */
 		now: (function() {
-			try {
-				var p = BOOMR.getPerformance();
-				if (p && typeof p.now === "function") {
-					return function() {
-						return Math.round(p.now() + p.timing.navigationStart);
-					};
-				}
-			}
-			catch (ignore) {
-				// empty
-			}
-
 			return Date.now || function() { return new Date().getTime(); };
 		}()),
 
@@ -1818,7 +1815,21 @@ BOOMR_check_doc_domain();
 		boomr.error = make_logger("error");
 	}());
 
-
+	// If the browser supports performance.now(), swap that in for BOOMR.now
+	try {
+		var p = boomr.getPerformance();
+		if (p
+		    && typeof p.now === "function"
+		    && p.timing
+		    && p.timing.navigationStart) {
+			boomr.now = function() {
+				return Math.round(p.now() + p.timing.navigationStart);
+			};
+		}
+	}
+	catch (ignore) {
+		// empty
+	}
 
 	(function() {
 		var ident;
