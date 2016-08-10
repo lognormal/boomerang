@@ -960,7 +960,8 @@
 		 *                          to synchronous. If true or undefined will be automatically set to asynchronous
 		 */
 		BOOMR.proxy_XMLHttpRequest = function() {
-			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
+			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send,
+			    opened = false;
 
 			req = new BOOMR.orig_XMLHttpRequest();
 
@@ -1083,21 +1084,26 @@
 					);
 				}
 
-				if (singlePageApp && handler.watch && !alwaysSendXhr) {
-					// If this is a SPA and we're already watching for resources due
-					// to a route change or other interesting event, add this to the
-					// current event.
-					handler.add_event_resource(resource);
-				}
+				// .open() can be called multiple times (before .send()) - just make
+				// sure that we don't track this as a new request, or add additional
+				// event listeners
+				if (!opened) {
+					if (singlePageApp && handler.watch && !alwaysSendXhr) {
+						// If this is a SPA and we're already watching for resources due
+						// to a route change or other interesting event, add this to the
+						// current event.
+						handler.add_event_resource(resource);
+					}
 
-				if (async) {
-					addListener("readystatechange");
-				}
+					if (async) {
+						addListener("readystatechange");
+					}
 
-				addListener("load");
-				addListener("timeout", XHR_STATUS_TIMEOUT);
-				addListener("error",   XHR_STATUS_ERROR);
-				addListener("abort",   XHR_STATUS_ABORT);
+					addListener("load");
+					addListener("timeout", XHR_STATUS_TIMEOUT);
+					addListener("error",   XHR_STATUS_ERROR);
+					addListener("abort",   XHR_STATUS_ABORT);
+				}
 
 				resource.url = a.href;
 				resource.method = method;
@@ -1108,6 +1114,9 @@
 				if (!async) {
 					resource.synchronous = true;
 				}
+
+				// note we've called .open
+				opened = true;
 
 				// call the original open method
 				try {
