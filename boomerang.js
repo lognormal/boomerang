@@ -706,7 +706,7 @@ BOOMR_check_doc_domain();
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 				var o = {observer: null, timer: null};
 
-				if (!window.MutationObserver || !callback || !el) {
+				if (!BOOMR.window || !BOOMR.window.MutationObserver || !callback || !el) {
 					return null;
 				}
 
@@ -736,7 +736,7 @@ BOOMR_check_doc_domain();
 					}
 				}
 
-				o.observer = new MutationObserver(done);
+				o.observer = new BOOMR.window.MutationObserver(done);
 
 				if (timeout) {
 					o.timer = setTimeout(done, o.timeout);
