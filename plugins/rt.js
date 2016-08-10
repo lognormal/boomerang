@@ -488,7 +488,8 @@
 					BOOMR.plugins.RT.endTimer("t_resp", t_resp_start);
 				}
 
-				if (impl.timers.t_load) {	// t_load is the actual time load completed if using prerender
+				// t_load is the actual time load completed if using prerender
+				if (ename === "load" && impl.timers.t_load) {
 					BOOMR.plugins.RT.setTimer("t_page", impl.timers.t_load.end - t_resp_start);
 				}
 				else {
@@ -507,7 +508,7 @@
 			}
 
 			// If a prerender timer was started, we can end it now as well
-			if (impl.timers.hasOwnProperty("t_postrender")) {
+			if (ename === "load" && impl.timers.hasOwnProperty("t_postrender")) {
 				BOOMR.plugins.RT.endTimer("t_postrender");
 				BOOMR.plugins.RT.endTimer("t_prerender");
 			}

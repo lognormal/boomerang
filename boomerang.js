@@ -987,6 +987,7 @@ BOOMR_check_doc_domain();
 
 						// record the last time each visibility state occurred
 						BOOMR.lastVisibilityEvent[visState] = BOOMR.now();
+						BOOMR.debug("Visibility changed from " + impl.lastVisibilityState + " to " + visState);
 
 						// if we transitioned from prerender to hidden or visible, fire the prerender_to_visible event
 						if (impl.lastVisibilityState === "prerender"
