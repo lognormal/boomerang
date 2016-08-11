@@ -27,31 +27,70 @@ Captures session ids and campaign information from third party analytic vendors 
 
 		/**
 		 * Google Analytics
-		 * by default the clientid is stored in a cookie named "_ga" for 2 years
-		 * there is a function named "ga" which is used to retreive it
+		 * For Universal Analytics there is a function named "ga" which is used to retreive the clientid
+		 * ref: https://developers.google.com/analytics/devguides/collection/analyticsjs/command-queue-reference
+		 * By default the clientid is stored in a cookie named "_ga" for 2 years
 		 * ref: https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
+		 * For Classic GA, we'll parse the "__utma" cookie
 		 *
 		 * @return {Object} captured metrics
 		 */
 		googleAnalytics: function() {
 			var data = {};
 			var w = BOOMR.window;
-			var i, param, value;
+			var i, param, value, cid, trackers;
 
 			// list of query params that we want to capture
 			// ref: https://support.google.com/analytics/answer/1033863
 			var QUERY_PARAMS = ["utm_source", "utm_medium", "utm_term", "utm_content", "utm_campaign"];
 
-			// check for google's global "ga" function then get the clientId
-			if (impl.clientids && typeof w.ga === "function") {
-				try {
-					w.ga(function(tracker) {
-						data["clientid"] = tracker.get("clientId");
-					});
+			if (impl.clientids) {
+				// check for google's global "ga" function then get the clientId
+				if (typeof w.ga === "function") {
+					try {
+						w.ga(function(tracker) {
+							// tracker may be undefined if using GTM or named trackers
+							if (tracker) {
+								data["clientid"] = tracker.get("clientId");
+							}
+						});
+						if (!data["clientid"]) {
+							// we may have named trackers, the clientid should be the same for all of them
+							trackers = w.ga.getAll();
+							if (trackers && trackers.length > 0) {
+								data["clientid"] = trackers[0].get("clientId");
+							}
+						}
+					}
+					catch (err) {
+						// "ga" wasn't google analytics?
+						BOOMR.addError(err, "TPAnalytics googleAnalytics");
+					}
 				}
-				catch (err) {
-					// "ga" wasn't google analytics?
-					BOOMR.addError(err, "TPAnalytics googleAnalytics");
+				// if we still don't have the clientid then fallback to cookie parsing
+				if (!data["clientid"]) {
+					// cookie parsing for "Universal" GA
+					// _ga cookie format : GA1.2.XXXXXXXXXX.YYYYYYYYYY
+					// where XXXXXXXXXX.YYYYYYYYYY is the clientid
+					cid = BOOMR.utils.getCookie("_ga");
+					if (cid) {
+						cid = cid.split(".");
+						if (cid && cid.length === 4) {
+							data["clientid"] = cid[2] + "." + cid[3];
+						}
+					}
+					else {
+						// cookie parsing for "Classic" GA
+						// __utma #########.XXXXXXXXXX.YYYYYYYYYY.##########.##########.#
+						// where XXXXXXXXXX.YYYYYYYYYY is the clientid
+						cid = BOOMR.utils.getCookie("__utma");
+						if (cid) {
+							cid = cid.split(".");
+							if (cid && cid.length === 6) {
+								data["clientid"] = cid[1] + "." + cid[2];
+							}
+						}
+					}
 				}
 			}
 
