@@ -19,9 +19,8 @@ you, but we have a few ideas.
 // Measure the time the script started
 // This has to be global so that we don't wait for the entire
 // BOOMR function to download and execute before measuring the
-// time.  We also declare it without `var` so that we can later
-// `delete` it.  This is the only way that works on Internet Explorer
-BOOMR_start = new Date().getTime();
+// time.
+window.BOOMR_start = new Date().getTime();
 
 /**
  Check the value of document.domain and fix it if incorrect.
@@ -1303,11 +1302,11 @@ BOOMR_check_doc_domain();
 
 	};
 
-	delete BOOMR_start;
+	delete window.BOOMR_start;
 
 	if (typeof BOOMR_lstart === "number") {
 		boomr.t_lstart = BOOMR_lstart;
-		delete BOOMR_lstart;
+		delete window.BOOMR_lstart;
 	}
 	else if (typeof BOOMR.window.BOOMR_lstart === "number") {
 		boomr.t_lstart = BOOMR.window.BOOMR_lstart;

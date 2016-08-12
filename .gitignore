@@ -6,6 +6,7 @@ build/
 hint.log
 *.log
 *.diff
+.idea
 .project
 .settings/
 tests/vendor/
@@ -20,3 +21,4 @@ npm-debug.log
 *.#*
 *#*
 *~
+
