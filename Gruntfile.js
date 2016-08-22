@@ -724,7 +724,16 @@ module.exports = function() {
 		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
 
 		// useful for debugging tests, leaves a webbrowser open at http://localhost:3001
-		"test:debug": ["test:build", "build:test", "express:dev", "express:secondary", "watch"],
+		"test:debug": [
+			"test:build",
+			"build:test",
+			"express:dev",
+			"express:secondary",
+			"watch:test",
+			"watch:test-react",
+			"watch:boomerang",
+			"watch:express"
+		],
 
 		// open your browser to http://localhost:4000/debug.html to debug
 		"test:karma:debug": ["test:build", "build:test", "karma:debug"],
