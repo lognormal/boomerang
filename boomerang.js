@@ -194,11 +194,16 @@ BOOMR_check_doc_domain();
 		}
 
 		function dispatch() {
-			if (d.dispatchEvent) {
-				d.dispatchEvent(ev);
+			try {
+				if (d.dispatchEvent) {
+					d.dispatchEvent(ev);
+				}
+				else if (d.fireEvent) {
+					d.fireEvent("onpropertychange", ev);
+				}
 			}
-			else if (d.fireEvent) {
-				d.fireEvent("onpropertychange", ev);
+			catch (e) {
+				BOOMR.debug("Error when dispatching " + e_name);
 			}
 		}
 
