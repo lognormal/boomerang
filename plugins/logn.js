@@ -30,7 +30,7 @@
 		complete = true;
 		running = false;
 
-		if (autorun) {
+		if (autorun || (BOOMR.onloadFired() && BOOMR.visibilityState() !== "prerender")) {
 			BOOMR.sendBeacon();
 		}
 	}

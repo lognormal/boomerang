@@ -14,6 +14,11 @@ window.BOOMR_LOGN_key = "05-angular-103-96463";
 <script>
 /*global angular*/
 document.addEventListener("DOMContentLoaded", function() {
+	// start out in prerender state
+	BOOMR.visibilityState = function() {
+		return "prerender";
+	};
+
 	angular.bootstrap(document, ["app"]);
 });
 </script>
@@ -28,9 +33,6 @@ setTimeout(function() {
 
 setTimeout(function() {
 	// fire fake visibility changed events
-	BOOMR.visibilityState = function() {
-		return "prerender";
-	};
 	BOOMR.fireEvent("visibility_changed");
 
 	BOOMR.visibilityState = function() {

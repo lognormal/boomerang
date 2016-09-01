@@ -1070,6 +1070,16 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
+		/**
+		 * Determines whether or not the page's `onload` event has fired, or
+		 * if `autorun` is false, whether `BOOMR.page_ready()` was called.
+		 *
+		 * @returns {boolean} True if onload or page_ready() were called
+		 */
+		onloadFired: function() {
+			return impl.onloadfired;
+		},
+
 		setImmediate: function(fn, data, cb_data, cb_scope) {
 			var cb, cstack;
 

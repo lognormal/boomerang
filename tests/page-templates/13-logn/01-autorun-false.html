@@ -1,0 +1,26 @@
+<%= header %>
+<script>
+window.BOOMR_LOGN_always = true;
+window.BOOMR_LOGN_key = "13-logn-01-autorun-false";
+</script>
+<%= boomerangScript %>
+<script src="01-autorun-false.js" type="text/javascript"></script>
+<script>
+function run() {
+	BOOMR.page_ready();
+	BOOMR_test.runTests();
+}
+
+if (document.addEventListener) {
+	document.addEventListener("onBoomerangLoaded", run);
+}
+else if (document.attachEvent) {
+	document.attachEvent("onpropertychange", function(e) {
+		e = e || window.event;
+		if (e && e.propertyName === "onBoomerangLoaded") {
+			run();
+		}
+	});
+}
+</script>
+<%= footer %>
