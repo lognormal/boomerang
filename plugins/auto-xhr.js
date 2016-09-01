@@ -525,12 +525,7 @@
 
 		if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS.concat("xhr"))) {
 			// XHRs or SPA page loads
-			if (ev.type === "xhr") {
-				// always send XHRs on timeout
-				this.sendEvent(index);
-			}
-			else if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)
-				 && ev.nodes_to_wait === 0) {
+			if (ev.nodes_to_wait === 0) {
 				// send page loads (SPAs) if there are no outstanding downloads
 				this.sendEvent(index);
 			}
