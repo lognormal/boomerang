@@ -54,7 +54,7 @@ Captures session ids and campaign information from third party analytic vendors 
 								data["clientid"] = tracker.get("clientId");
 							}
 						});
-						if (!data["clientid"]) {
+						if (!data["clientid"] && typeof w.ga.getAll === "function") {
 							// we may have named trackers, the clientid should be the same for all of them
 							trackers = w.ga.getAll();
 							if (trackers && trackers.length > 0) {
