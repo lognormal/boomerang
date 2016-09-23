@@ -24,7 +24,7 @@ UserTimingCompression must be loaded before this plugin's init is called.
 		complete: false,
 		initialized: false,
 		supported: false,
-		options: {"from": 0},
+		options: {"from": 0, "window": BOOMR.window},
 
 		/**
 		 * @returns String compressed user timing data that occurred since the last call

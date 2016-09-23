@@ -8,7 +8,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "usertiming-compression": "^0.1.2"
+    "usertiming-compression": "^0.1.4"
   },
   "devDependencies": {
     "async": "^0.9.0",

@@ -34,6 +34,7 @@
     "backbone": "~1.2.0",
     "ember": "~1.12.1",
     "jquery": "~2.1.4",
-    "handlebars": "~3.0.3"
+    "handlebars": "~3.0.3",
+    "usertiming-compression": "~0.1.4"
   }
 }
