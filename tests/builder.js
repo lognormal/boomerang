@@ -210,7 +210,7 @@ module.exports = function() {
 				grunt.file.write(rootIndexFile, rootIndexHtml);
 
 				// test definitions
-				grunt.file.write(e2eJsonPath, JSON.stringify(testDefinitions));
+				grunt.file.write(e2eJsonPath, JSON.stringify(testDefinitions, null, 2));
 
 				cb(err, opts);
 			});
