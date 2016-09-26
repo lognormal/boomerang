@@ -19,9 +19,9 @@ describe("e2e/17-usertiming/01-usertiming-basic", function() {
 			for (var i = 0; i < data.length; i++) {
 				usertiming[data[i].name] = data[i];
 			}
-			assert.equal("mark1" in usertiming, true);
-			assert.equal("mark1" in usertiming, true);
-			assert.equal("measure1" in usertiming, true);
+			assert.isTrue("mark1" in usertiming);
+			assert.isTrue("mark2" in usertiming);
+			assert.isTrue("measure1" in usertiming);
 		}
 	});
 });
