@@ -1529,7 +1529,7 @@ BOOMR_check_doc_domain();
 			}
 
 			// Sanity test that the browser is still available (and not shutting down)
-			if (!window.Image || !window.navigator) {
+			if (!window || !window.Image || !window.navigator || !BOOMR.window) {
 				BOOMR.debug("DOM not fully available, not sending a beacon");
 				return false;
 			}
