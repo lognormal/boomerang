@@ -1235,9 +1235,9 @@
 			}
 
 			/* SOASTA PRIVATE START */
-			if (ename === "load" || ename === "visible"	// we're in onload
-			   || (ename === "xhr" && !subresource)		// xhr beacon and this is not a subresource
-			   || !impl.onloadfired) {			// unload fired before onload
+			if (ename === "load" || ename === "visible" // we're in onload
+			   || (ename === "xhr" && !subresource) // xhr beacon and this is not a subresource
+			   || (ename === "unload" && !impl.onloadfired && impl.autorun)) { // unload fired before onload
 				impl.incrementSessionDetails();
 
 				// save a last-loaded timestamp in the cookie
