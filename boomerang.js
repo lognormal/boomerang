@@ -289,7 +289,8 @@ BOOMR_check_doc_domain();
 			"xhr_load": [],
 			"click": [],
 			"form_submit": [],
-			"onconfig": []
+			"onconfig": [],
+			"spa_navigation": []
 		},
 
 		public_events: {
@@ -396,6 +397,11 @@ BOOMR_check_doc_domain();
 			}
 
 			return;// true;
+		},
+
+		spaNavigation: function() {
+			// a SPA navigation occured, force onloadfired to true
+			impl.onloadfired = true;
 		}
 	};
 
@@ -978,6 +984,8 @@ BOOMR_check_doc_domain();
 					impl.beacon_url = beaconConfig.beacon_url;
 				}
 			});
+
+			BOOMR.subscribe("spa_navigation", impl.spaNavigation, null, impl);
 
 			(function() {
 				var forms, iterator;
