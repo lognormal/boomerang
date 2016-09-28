@@ -14,8 +14,20 @@ BOOMR_test.init({
 			},
 			{
 				type: "Regexp",
-				parameter1: "/blackhole",
-				parameter2: "XHR Test Pages_subresource"
+				parameter1: "/blackhole#subresource",
+				parameter2: "XHR subresource",
+				subresource: true
+			},
+			{
+				type: "Regexp",
+				parameter1: "/blackhole#not-subresource",
+				parameter2: "XHR not subresource"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/blackhole#passive-subresource",
+				// endswith "_subresource" will be flagged as passive subresource
+				parameter2: "XHR_subresource"
 			}
 		]
 	},
@@ -25,9 +37,29 @@ BOOMR_test.init({
 				return;
 			}
 
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/blackhole", true);
-			xhr.send(null);
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/blackhole#subresource", true);
+				xhr.send(null);
+			}, 0);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/blackhole#not-subresource", true);
+				xhr.send(null);
+			}, 1000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/blackhole#not-pagegroup", true);
+				xhr.send(null);
+			}, 2000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/blackhole#passive-subresource", true);
+				xhr.send(null);
+			}, 3000);
 		}
 });
 </script>

@@ -951,6 +951,11 @@
 				BOOMR.removeVar(impl.addedVars);
 				impl.addedVars = [];
 			}
+		},
+
+		spaNavigation: function() {
+			// a SPA navigation occured, force onloadfired to true
+			impl.onloadfired = true;
 		}
 	};
 
@@ -1030,6 +1035,7 @@
 			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 			BOOMR.subscribe("onerror", impl.onerror, null, impl);
 			BOOMR.subscribe("onconfig", impl.onconfig, null, impl);
+			BOOMR.subscribe("spa_navigation", impl.spaNavigation, null, impl);
 
 			// Override any getBeaconURL method to make sure we return the one from the
 			// cookie and not the one hardcoded into boomerang

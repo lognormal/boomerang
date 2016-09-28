@@ -152,6 +152,9 @@
 				// for all of the resources to be downloaded
 				resource.onComplete = function() {
 					initialRouteChangeCompleted = true;
+
+					// fire a SPA navigation completed event so that other plugins can act on it
+					BOOMR.fireEvent("spa_navigation");
 				};
 			}
 
