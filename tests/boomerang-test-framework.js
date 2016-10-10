@@ -294,6 +294,10 @@
 		done();
 	};
 
+	t.isMutationObserverSupported = function() {
+		return (window.MutationObserver && typeof window.MutationObserver === "function");
+	};
+
 	t.validateBeaconWasXhr = function(done) {
 		if (!t.isResourceTimingSupported()) {
 			// need RT to validate

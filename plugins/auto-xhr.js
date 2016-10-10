@@ -976,6 +976,8 @@
 					async = true;
 				}
 
+				BOOMR.fireEvent("xhr_init", "xhr");
+
 				/**
 				 * @memberof ProxyXHRImplementation
 				 * @desc

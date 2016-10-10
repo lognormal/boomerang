@@ -14,8 +14,150 @@
 	var DEFAULT_DECIMAL = ".";
 	var DEFAULT_THOUSANDS = ",";
 
+	/**
+	 * @constant
+	 * Regular Expression to extract a number under en-US internationalization from a body of text
+	 * @type {RegExp}
+	 */
 	var REGEX_NUMBER_US_DEFAULT = /(-?(?:[1-9][\d,]*)?[0-9](?:\.\d+)?)/;
 
+	/**
+	 * @constant
+	 * Time in milliseconds to keep the observer alive during runtime
+	 * @type {number}
+	 */
+	var RESOURCE_GROUPS_MO_TIMEOUT = 2000;
+
+	/**
+	 * @constant
+	 * Maximum time in milliseconds to keep the timer alive for constant checking
+	 * for new resources being added to a container on the page
+	 * @type {number}
+	 */
+	var RESOURCE_GROUPS_CHILDLISTENER_TIMEOUT = 500;
+
+	/**
+	 * @constant
+	 * Sets the priority of trying to run PageParam evaluation types.
+	 * Based on these priorities we can decide whether or not to run
+	 * these evaluation types to retrieve the right value for this
+	 * type of page param.
+	 *
+	 * Keys correspond to the type of page params under either
+	 * - custom timers, metrics, dimensions
+	 * - abTests
+	 * - pageGroups
+	 *
+	 * The value defines if the type is supposed to be evaluated
+	 * immediately (1) or evaluated when a subscribed event is
+	 * triggered (2) which are:
+	 * - page_ready
+	 * - before_unload
+	 * - xhr_load
+	 * @type {object}
+	 */
+	var PAGE_PARAM_TRY_PRIORITY = {
+		ResourceGroup: 1,
+		JavaScriptVar: 2,
+		Custom: 2,
+		URLPattern: 1,
+		URLSubstringEndOfText: 1,
+		URLSubstringTrailingText: 1,
+		UserAgentRegex: 1,
+		CookieRegex: 1,
+		URLRegex: 1,
+		Regexp: 1,
+		URLPatternType: 2,
+		ResourceTiming: 2,
+		UserTiming: 2
+	};
+
+	/**
+	 * @constant
+	 * Tag names matching element types that have a onload event
+	 * @type {string[]}
+	 */
+	var PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES = ["img", "iframe", "script", "link", "object", "svg", "video"];
+
+	/**
+	 * @private
+	 * Each handler config has a basic configuration. The configuration is used when initializing the Handler.
+	 * The configuration is may be modified for initialization purposes of the specific Handler.
+	 *
+	 * This needs to be a function as otherwise the BOOMR.RT.setTimer
+	 * is not accessible.
+	 *
+	 * @returns {HandlerConfig} - object containing basic Handler Configuration
+	 */
+	var PAGE_PARAMS_BASE_HANDLER_CONFIG = function() {
+		return {
+			pageGroups: {
+				varname: "h.pg",
+				stopOnFirst: true
+			},
+			abTests: {
+				varname: "h.ab",
+				stopOnFirst: true
+			},
+			customMetrics: {
+				cleanUpRE:  REGEX_NUMBER_US_DEFAULT
+			},
+			customDimensions: {
+				sanitizeRE: /[^\w\. \-]/g
+			},
+			customTimers: {
+				cleanUpRE:  REGEX_NUMBER_US_DEFAULT,
+				method: BOOMR.plugins.RT && BOOMR.plugins.RT.setTimer,
+				ctx: BOOMR.plugins.RT,
+				preProcessor: function(val) {
+					return Math.round(typeof val === "number" ? val : parseFloat(val, 10));
+				}
+			}
+		};
+	};
+
+	/**
+	 * @typedef HandlerConfig
+	 * @property {object} pageGroups - PageGroups specific configuration
+	 * @property {string} pageGroups.varname - Name of the beacon param storing the retrieved page group
+	 * @property {boolean} pageGroups.stopOnFirst - If true the first found value for the page group will be taken as the page group name
+	 * @property {object} abTests - A/B tests specific configuration
+	 * @property {string} abTests.varname - Name of the beacon param storing the retrieved A/B test value
+	 * @property {boolean} abTests.stopOnFirst - If true the first found value for the A/B test name will be taken as the A/B test name
+	 * @property {object} customMetrics - Custom Metrics configuration
+	 * @property {RegExp} customMetrics.cleanUpRE - Regular Expression for filtering out numeric values from a string of text
+	 * @property {object} customDimensions - Custom Dimension specific configuration
+	 * @property {RegExp} customDimensions.sanitizeRE - Regular Expression to clean body of text for a custom dimension value
+	 * @property {object} customTimers - Custom Timers specific configuration
+	 * @property {RegExp} customTimers.cleanUpRE - Regular Expression to clean up a numeric value to receive a numeric value from a body of text
+	 * @property {function} customTimers.method - Function used to set the timer on the beacon
+	 * @property {PluginContext} customTimers.ctx - Instance of Plugin to call {@link HandlerConfig#customTimers~method} in
+	 * @property {function} customTimers.preProcessor - Method to pre process the custom timers value before setting the timer with {@link HandlerConfig#customTimers~method}
+	 */
+
+	/**
+	 * @constant
+	 * Names of PageParams types collected by this plugin
+	 * @type {string[]}
+	 */
+	var PAGE_PARAMS_NAMES = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
+
+	/**
+	 * @constant
+	 * Nodes or Document element fetching new resources on a page may have one of these attributes and should be
+	 * classified as resources in case resource groups are used in the page param configuration as a type
+	 * @type {string[]}
+	 */
+	var RESOURCE_GROUPS_URL_SRC_PROPERTIES = [
+		// img,script,svg,video
+		"src",
+		// link,iframe
+		"href",
+		// object (flash)
+		"data",
+		// object (flash)
+		"codebase"
+	];
 	//
 	// Cache of number regular expressions.
 	// key is "[decimal][thousands]", value is the regex
@@ -28,6 +170,22 @@
 		"'": /'/g
 	};
 
+	/**
+	 * @typedef {Object} Resource
+	 * A resource is an object with a type and a value.
+	 * Valid types for a resource are:
+	 *  - `queryselector`: A CSS QuerySelector pointing to one or more elements in a document
+	 *  - `xpath`: An XPath pointing to one or multiple elements in a document
+	 *  - `resource`: A fully qualified URL to a resource on a page referenced in a href,src or other way resulting in an entry in ResourceTiming
+	 * @property {string} type - a type definition for the resource (possible values: `queryselector`, `xpath`, `resource`) see description for more information
+	 * @property {string} value - a value mapping to the type of the resource
+	 */
+
+	/**
+	 * @class
+	 * @name BOOMR.plugins.PageParams.impl.Handler
+	 * A PageVar Handler taking care of mapping a type of PageVar to its result
+	 */
 	Handler = function(config) {
 		this.varname = config.varname;
 		this.method = config.method || BOOMR.addVar;
@@ -35,6 +193,10 @@
 		this.preProcessor = config.preProcessor;
 		this.sanitizeRE = config.sanitizeRE || /[^\w \-]/g;
 		this.cleanUpRE = config.cleanUpRE;
+		this.resourceTime = {};
+		this.resources = [];
+		this.RTSupport = false;
+		this.MOSupport = false;
 
 		return this;
 	};
@@ -51,7 +213,7 @@
 			return true;
 		},
 
-		handle: function(o) {
+		handle: function(o, eventSrc) {
 			var h = this;
 			if (!this.isValid(o)) {
 				return false;
@@ -60,7 +222,7 @@
 				h = new Handler(this);
 				h.varname = o.label;
 			}
-			return h[o.type](o);
+			return h[o.type](o, eventSrc);
 		},
 
 		isValid: function(o) {
@@ -145,6 +307,13 @@
 			return value.replace(this.sanitizeRE, "");
 		},
 
+		/**
+		 * Checks if {@link part} is a valid object-member of {@link value}
+		 *
+		 * @param {object} value - value to check if it has {@link part} as a member
+		 * @param {string} part - member part name to validate if it is a member of the {@link value} object
+		 * @returns {boolean} - True if {@link part} is a property of {@link value} else false
+		 */
 		isValidObjectMember: function(value, part) {
 			if (value === null) {
 				return false;
@@ -246,7 +415,7 @@
 			return this.apply(value);
 		},
 
-		checkURLPattern: function(u, urlToCheck) {
+		checkURLPattern: function(u, urlToCheck, doLog) {
 			var re;
 
 			// Empty pattern matches all URLs
@@ -272,7 +441,9 @@
 
 			// Check if URL matches
 			if (!re.exec(urlToCheck)) {
-				BOOMR.debug("No match " + re + " on " + urlToCheck, "PageVars");
+				if (doLog) {
+					BOOMR.debug("No match " + re + " on " + urlToCheck, "PageVars");
+				}
 				return false;
 			}
 
@@ -405,7 +576,7 @@
 			}
 
 			if (!el) {
-				BOOMR.debug("QuerySelector '" + queryselector + "'yielded no result!");
+				BOOMR.debug("QuerySelector '" + queryselector + "' yielded no result!");
 			}
 
 			return el;
@@ -747,12 +918,40 @@
 			return this.apply(en - st);
 		},
 
+		/**
+		 * Finds first resource matching slowest, a url or a URLPattern in all available frames
+		 * if we have access to them.
+		 * This function masks usage of {@link Handler.prototype.findResources} but pre-sets limit to 1
+		 *
+		 * @param {String} url - Full URL, a URL pattern Regex or "slowest"
+		 * @param {Window} frame - Frame to query for Resource Timings
+		 *
+		 * @returns {(PerformanceResourceTiming|null)} - First ResourceTiming entity matching url in any frame or null if none found
+		 */
 		findResource: function(url, frame) {
-			var i, res, reslist, frameLoc;
+			var resources = this.findResources(url, frame);
 
-			if (!frame) {
-				frame = w;
+			if (resources === null) {
+				return null;
 			}
+
+			if (resources && resources.length > 0) {
+				return resources[0];
+			}
+			else {
+				return null;
+			}
+		},
+		/**
+		 * Check if we are allowed to access perfomance timing information on a given frame
+		 *
+		 * @param {string} url - URL of a given Resource Timing entry
+		 * @param {HTMLFrameElement} frame - Frame to access performance timing on
+		 *
+		 * @return {(PerformanceResourceTiming[]|null)} - Either the PerformanceResourceTiming object associated with the URL or null if access is denied
+		 */
+		getFrameResourcesForUrl: function(url, frame) {
+			var frameLoc;
 
 			try {
 				// Try to access location.href first to trigger any Cross-Origin
@@ -763,13 +962,13 @@
 				frameLoc = frame.location && frame.location.href;
 
 				if (!("performance" in frame
-					&& frame.performance
-					&& frame.performance.getEntriesByName
-					&& frame.performance.getEntriesByType)) {
+					  && frame.performance
+					  && frame.performance.getEntriesByName
+					  && frame.performance.getEntriesByType)) {
 					return null;
 				}
 
-				reslist = frame.performance.getEntriesByName(url);
+				return frame.performance.getEntriesByName(url);
 			}
 			catch (e) {
 				if (BOOMR.isCrossOriginError(e)) {
@@ -784,12 +983,46 @@
 				}
 				catch (ignore) { /* empty */ }
 
-				BOOMR.addError(e, "PageVars.findResource");
+				BOOMR.addError(e, "PageVars.getFrameResourcesForUrl");
 				return null;
+			}
+		},
+
+		/**
+		 * Finds all resources matching slowest or a url or a URLPattern in all available frames
+		 * if we have access to them.
+		 *
+		 * @param {String} url - Full URL, a URL pattern Regex or "slowest"
+		 * @param {Window} frame - Frame to query for Resource Timings
+		 * @param {Number} limit - the maximum number of resources to look for
+		 *
+		 * @returns {PerformanceResourceTiming[]} - Resources found matching a URL Pattern
+		 */
+		findResources: function(url, frame, limit) {
+			var i, res, reslist, foundList = [], tempReslist, tempResListIndex;
+
+			if (typeof frame === "number") {
+				limit = frame;
+				frame = null;
+			}
+
+			if (!frame) {
+				frame = w;
+			}
+
+			reslist = this.getFrameResourcesForUrl(url, frame);
+
+			if (reslist === null) {
+				return reslist;
 			}
 
 			if (reslist && reslist.length > 0) {
-				return reslist[0];
+				if (limit && limit === 1 && reslist.length > 1) {
+					return [reslist[0]];
+				}
+				else {
+					return reslist;
+				}
 			}
 
 			// no exact match, maybe it has wildcards
@@ -805,26 +1038,34 @@
 					}
 
 					// else stop at the first that matches the pattern
-					else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name)) {
-						res = reslist[i];
-						url = res.name;
-						break;
+					else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name, false)) {
+						foundList.push(reslist[i]);
+						if (limit && foundList.length === limit) {
+							return foundList;
+						}
 					}
 				}
 			}
 
 			if (res) {
-				return res;
+				return [res];
 			}
 
 			if (frame.frames) {
 				for (i = 0; i < frame.frames.length; i++) {
-					res = this.findResource(url, frame.frames[i]);
-					if (res) {
-						return res;
+					tempReslist = this.findResources(url, frame.frames[i]);
+					if (tempReslist) {
+						for (tempResListIndex = 0; tempResListIndex < tempReslist.length; tempResListIndex++) {
+							foundList.push(tempReslist[tempResListIndex]);
+							if (limit && foundList.length === limit) {
+								return foundList;
+							}
+						}
 					}
 				}
 			}
+
+			return foundList;
 		},
 
 		UserTiming: function(o) {
@@ -864,6 +1105,746 @@
 			// If we reach here, that means the mark/measure wasn't found.  We'll save it for retrying because it's
 			// possible that it will be added later in the page, but before we beacon
 			impl.mayRetry.push({ handler: this, data: o });
+		},
+		/**
+		 * @desc
+		 * Resource Groups is a Handler Type listening to the fetchStart and stop of a resource or set of
+		 * resources on the page initiated by either a SPA navigation type or XHR event we are listening to.
+		 *
+		 * A resource-set here describes a set of type and value pairs designating a queriable element on the page
+		 * An event source is an event on the page we are listening for that we are expecting to correlate with the
+		 * resource set element arrival on the page.
+		 *
+		 * Furthermore these Resource Groups can be delimited in their occurence by the page they appear on.
+		 *
+		 * For example if we have a page in our app `/app/overview` where we expect to be navigated to and it
+		 * is a simple onload procedure on this page we expect there to be an image generated by a previously set
+		 * configuration. The image URL would be: `/app/generated/image.gif`
+		 *
+		 * We can address this image by it's URL or the DOM element via a selector (XPath or CSS).
+		 * So, our configuration may look like this:
+		 *
+		 * @example
+		 * {
+		 *   name: "Resource Group for generated GIF",
+		 *   index: 0,
+		 *   label: "ctim.CT0",
+		 *   type: "ResourceGroup",
+		 *   value: {
+		 *     "/app/overview": {
+		 *       on: ["onload"],
+		 *       resource: [{
+		 *         type: "resource",
+		 *         value: "/app/generated/image.gif"
+		 *       }]
+		 *     }
+		 *   }
+		 * }
+		 *
+		 * If we wanted to address it by it's CSS Selector:
+		 * @example
+		 * {
+		 *   name: "Resource Group for generated GIF",
+		 *   index: 0,
+		 *   label: "ctim.CT0",
+		 *   type: "ResourceGroup",
+		 *   value: {
+		 *     "/app/overview": {
+		 *       on: ["onload"],
+		 *       resource: [{
+		 *         type: "queryselector",
+		 *         value: "#generated-gif"
+		 *       }]
+		 *     }
+		 *   }
+		 * }
+		 */
+		ResourceGroup: function(config, params) {
+			var resourceSet = [], path, resource, performance, resourceSetIndex, listener, obs, src, eventsrc, url, onindex;
+
+			if (BOOMR.utils.isArray(params)) {
+				eventsrc = params[0];
+				url = params[1];
+			}
+			else {
+				eventsrc = params;
+				url = BOOMR.window.document.URL;
+			}
+
+			// assume events are onload and need to be run immediately if no eventsrc is given
+			src = (typeof eventsrc !== "undefined" ? eventsrc : "onload");
+			src = (src === "load" ? "onload" : eventsrc);
+
+			if (!config.value) {
+				return;
+			}
+			this.config = config;
+			// Validate that the value keys match the URL we're loaded on
+			for (path in config.value) {
+				if (config.value.hasOwnProperty(path)) {
+
+					// Match the URL against current location if that matches check resource property is available and is populated
+					if (this.checkURLPattern(path, url) &&
+						(config.value[path].resources &&
+						 config.value[path].resources.length > 0)) {
+
+						// Check the event this resource is supposed to be tracked on (spa_hard, spa, xhr, onload)
+						// If we are running on init and resources are `onload` include them as well as they might be added after boomerang is loaded via JavaScript
+						if (config.value[path].on &&
+							config.value[path].on.length > 0 &&
+							(BOOMR.utils.inArray(src, config.value[path].on) || src === "init" && BOOMR.utils.inArray("onload", config.value[path].on))) {
+
+							// For each Resource in resource[]
+							for (var resourceIndex in config.value[path].resources) {
+
+								if (config.value[path].resources.hasOwnProperty(resourceIndex)) {
+									// If `on` is defined and has more than one element in it we check against the eventsrc
+									// Otherwise expect the onload and immediate evaluation
+									resourceSet.push(config.value[path].resources[resourceIndex]);
+								}
+							}
+						}
+
+						// Skip the Rest of the URLs if the first URL matches!
+						break;
+					}
+				}
+			}
+
+			// No Matching resourceSets found
+			if (resourceSet.length === 0) {
+				return null;
+			}
+
+			this.resourceSet = resourceSet;
+			performance = BOOMR.getPerformance();
+
+			if (performance && typeof performance.getEntriesByType === "function") {
+				this.RTSupport = true;
+			}
+
+			if (BOOMR.window && BOOMR.window.MutationObserver) {
+				this.MOSupport = true;
+			}
+
+			this.eventsrc = src;
+
+			if (this.RTSupport) {
+				// iterate through resources finding URLs
+				for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
+					// If the type is `init` this is after the Handler was initialized so don't check Resource Groups now
+					if (src !== "init" && src !== "xhr") {
+						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex));
+					}
+
+					if (this.MOSupport && (src === "init" || this.isOnPageEvent())) {
+						this.obs = this.setupMutationObserver(resourceSetIndex);
+					}
+				}
+			}
+			else if (!this.RTSupport && this.MOSupport && (src === "init" || this.isOnPageEvent())) {
+				for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
+					obs = this.setupMutationObserver(resourceSetIndex);
+					if (obs) {
+						this.observer = obs;
+					}
+				}
+			}
+			else if (!this.RTSupport && !this.MOSupport && (src === "init" || this.isOnPageEvent())) {
+				for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
+					listener = this.setupListener(resourceSetIndex);
+					if (listener) {
+						this.listener = listener;
+					}
+				}
+			}
+
+			var self = this;
+			BOOMR.subscribe("before_beacon", function(vars) {
+				// not applying on unload beacon
+				if (vars.hasOwnProperty("rt.quit")) {
+					return;
+				}
+
+				if (!self.attached) {
+					self.applyTimedResources(true);
+					self.attached = true;
+				}
+				return;
+			});
+
+			return this;
+		},
+		/**
+		 * @desc
+		 * Setup a mutation observer watching nodes referenced by the Resource passed in
+		 * This will only work if the Resource in question also is a container. Otherwise we are returning null.
+		 *
+		 * @param {Resource} resource - resource to potentially watch
+		 */
+		setupMutationObserver: function(index) {
+			var resource = this.resourceSet[index], node = this.getNode(index), obsConfig = {
+				childList: true,
+				attributes: true,
+				subtree: true,
+				attributeFilter: RESOURCE_GROUPS_URL_SRC_PROPERTIES
+			};
+
+			if (!this.isOnPageEvent() && this.eventsrc === "onload") {
+				return;
+			}
+
+			if (resource.type === "resource") {
+				node = BOOMR.window.document.body;
+			}
+
+			if (!node && node === null) {
+				this.resourceSet[index].found = false;
+				this.resourceSet[index].fallback = true;
+
+				// node may be null because the element hasn't been added yet so we are waiting for it on the document;
+				node = BOOMR.window.document.body;
+			}
+
+			if (node && !this.isContainer(node)) {
+				this.resourceSet[index].found = true;
+				// Don't setup an MO if this is not a container
+				return null;
+			}
+
+			// Even if we expect new elements to arrive via MO we need to check the already added elements
+			this.traverseElements(node, index);
+
+			BOOMR.debug("Starting a Mutation observer for Resource: " + this.config.label + "", "PageVars.ResourceGroup");
+			return BOOMR.utils.addObserver(node, obsConfig, null, this.mutationCb.bind(this), index, this);
+		},
+		/**
+		 * @desc
+		 * Attaches `onload`-listeners to elements matching resource set. Will start an interval with a callback checking our found node and if it has new elements
+		 * @param {number} index - Array index of resource set element to use
+		 */
+		setupListener: function(index) {
+			var resource = this.resourceSet[index], node = this.getNode(index), timeout = null, runtime = 0, that = this, lastRun = BOOMR.now();
+
+			if (resource.type === "resource") {
+				node = BOOMR.window.document.body;
+			}
+
+			if ((!node || node === null) && BOOMR.window.document.body) {
+				this.resourceSet[index].found = false;
+				this.resourceSet[index].fallback = true;
+
+				// node may be null because the element hasn't been added yet so we are waiting for it on the document;
+				node = BOOMR.window.document.body;
+			}
+
+			// Body might still be null if we run in IE8 returning
+			// waiting for a later run.
+			if (BOOMR.window.document.body === node && node === null) {
+				return null;
+			}
+
+			// If the node is not a container attach to it
+			if (node && !this.isContainer(node)) {
+				this.resourceSet[index].found = true;
+				this.initResourceGroupListener(node, index);
+				return null;
+			}
+
+			this.traverseElements(node, index);
+
+			function timeoutCb() {
+				if (runtime >= RESOURCE_GROUPS_CHILDLISTENER_TIMEOUT) {
+					clearInterval(timeout);
+					return;
+				}
+
+				that.traverseElements(node, index);
+				runtime += BOOMR.now() - lastRun;
+				lastRun = BOOMR.now();
+			}
+			timeout = setInterval(timeoutCb, 100);
+
+		},
+		/**
+		 * @desc
+		 * Finds all child elements that are network bound
+		 * @param {Node} node - Node with child elements
+		 *
+		 * @returns {Node[]} - All network-bound nodes with in @param{node}
+		 */
+		findResourceChildren: function(node) {
+			var nodeChildren = [], networkResourceIndex, foundIndex, foundElements;
+			if (!node || !node.getElementsByTagName) {
+				return nodeChildren;
+			}
+
+			for (networkResourceIndex = 0; networkResourceIndex < PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES.length; networkResourceIndex++) {
+				foundElements = node.getElementsByTagName(PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES[networkResourceIndex]);
+				for (foundIndex = 0; foundIndex < foundElements.length; foundIndex++) {
+					nodeChildren.push(foundElements[foundIndex]);
+				}
+			}
+
+			return nodeChildren;
+		},
+		/**
+		 * @desc
+		 * Finds all network-bound elements in a container and attaches a listener to them if matching our resource group
+		 * @param {Node} node - A container element to search
+		 * @param {number} index - resourceSet array index to search for
+		 */
+		attachContainerElements: function(node, index) {
+			var resource = this.resourceSet[index], nodeChildren = [], childIndex, nodeURL;
+			nodeChildren = this.findResourceChildren(node);
+			for (childIndex in nodeChildren) {
+				nodeURL = this.getNodeURL(nodeChildren[childIndex]);
+				// If we're looking for only one resource check that we are looking at the right URL
+				// otherwise attach to all elements matching
+				if (resource.type === "resource" && nodeURL && this.checkURLPattern(resource.value, nodeURL)) {
+					this.resourceSet[index].found = true;
+					this.initResourceGroupListener(nodeChildren[childIndex], index);
+					break;
+				}
+				else if (resource.type === "resource" && !(nodeURL && this.checkURLPattern(resource.value, nodeURL))) {
+					if (!nodeURL && this.isOnPageEvent()) {
+						// Some SPAs don't attach a src value to the node when mutationCb was called and needs to
+						// attach. So we're checking that this eventsrc was spa/spa_hard/xhr and make sure to still attach
+						// to the element
+						this.initResourceGroupListener(nodeChildren[childIndex], index);
+					}
+					continue;
+				}
+				else {
+					this.initResourceGroupListener(nodeChildren[childIndex], index);
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Search node and child nodes for elements we need to attach ourselves to if required by resourceSet element
+		 */
+		traverseElements: function(node, index) {
+			var resource = this.resourceSet[index], nodes = [], nodeURL;
+			nodeURL = this.getNodeURL(node);
+
+			if (resource.type === "resource") {
+				if (nodeURL && this.checkURLPattern(resource.value, nodeURL)) {
+					this.resourceSet[index].found = true;
+					this.initResourceGroupListener(node, index);
+				}
+				else if (this.isContainer(node)) {
+					this.attachContainerElements(node, index);
+				}
+			}
+			else {
+				if (this.isContainer(node) && !resource.fallback) {
+					this.resourceSet[index].found = true;
+					this.attachContainerElements(node, index);
+				}
+				else if (!this.isContainer(node)) {
+					this.resourceSet[index].found = true;
+					this.initResourceGroupListener(node, index);
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Called when the mutation observer sees a new set of resources added to the page
+		 * @callback Handler~mutationCb
+		 * @param {MutationRecord[]} mutation - Mutation
+		 */
+		mutationCb: function(mutations, index) {
+			var resource = this.resourceSet[index], node, nodes = [], mutation, mutationIndex, nodeIndex, addedNodes, addedIndex;
+			if (mutations && mutations.length > 0) {
+				for (mutationIndex = 0; mutationIndex < mutations.length; mutationIndex++) {
+					mutation = mutations[mutationIndex];
+					if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+						addedNodes = mutation.addedNodes;
+						for (addedIndex = 0; addedIndex < addedNodes.length; addedIndex++) {
+							nodes.push(addedNodes[addedIndex]);
+						}
+					}
+				}
+
+				if (nodes && nodes.length > 0) {
+					node = this.getNode(index);
+
+					if (this.RTSupport) {
+						this.refreshResourceGroupTimings(this.lookupResources(index), this.config);
+					}
+
+					for (nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++) {
+						this.traverseElements(nodes[nodeIndex], index);
+					}
+
+					// Re-Start MO on node since we found it now!
+					if (node && !node.hasOwnProperty("length")) {
+						if (this.obs && this.obs.observer && this.resourceSet[index].fallback) {
+							BOOMR.debug("Re-Starting MO since we found the node for the ResourceSet", "PageVars.ResourceGroup");
+							this.resourceSet[index].fallback = false;
+
+							this.obs.observer.disconnect();
+							clearTimeout(this.obs.timer);
+							this.setupMutationObserver(index);
+						}
+					}
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Test if current event source is an on-page event such as SPA soft/hard navigation or XHR
+		 * @returns {bool} - True if the current event source is an on-page event
+		 */
+		isOnPageEvent: function(src) {
+			if (!src) {
+				return (this.eventsrc === "spa" ||
+						this.eventsrc === "spa_hard" ||
+						this.eventsrc === "xhr");
+			}
+			else {
+				return (src === "spa" ||
+						src === "spa_hard" ||
+						src === "xhr");
+			}
+		},
+		/**
+		 * @desc
+		 * Check if all resource sets assigned to this handler have been resolved
+		 * @returns {boolean} - True if all resourceSet elements have been found
+		 */
+		resourceSetIsResolved: function() {
+			var index = this.getUnresolvedIndex();
+			// If we get a number we know that RG failed!
+			if (typeof index === "boolean") {
+				return true;
+			}
+			else if (typeof index === "number"){
+				return false;
+			}
+		},
+		/**
+		 * @desc
+		 * Return the Resource Set array index of the element that has not been resolved to an element on the page
+		 * @returns {number} - Index of the Resource Set element in resource set Array for this configured item
+		 */
+		getUnresolvedIndex: function() {
+			var resourceSetIndex = 0;
+			for (resourceSetIndex; resourceSetIndex < this.resourceSet.length; resourceSetIndex++) {
+				if (!this.resourceSet[resourceSetIndex].found) {
+					return resourceSetIndex;
+				}
+			}
+			return false;
+		},
+		/**
+		 * @desc
+		 * If there are resourceSet elements that have not been resolved add them to the beacon as a param if all are
+		 * resolved return true.
+		 */
+		hasUnresolvedAddVar: function() {
+			if (!this.resourceSetIsResolved()) {
+				var unresolvedIndex = this.getUnresolvedIndex();
+				BOOMR.addVar(this.varname + "_rg.err", "nf|" + unresolvedIndex);
+				this.resolved = false;
+				BOOMR.debug("Resource Group '" + this.config.label + "' has not been resolved fully, not going to apply timer!", "PageVars.ResourceGroup");
+
+				return true;
+			}
+			return false;
+		},
+		/**
+		 * @desc
+		 * Takes the delta of the stored {@link resourceTime} objects `start` and `stop` and applies it as a current custom timer value
+		 * If the resource group was not fully resolved add a var to the beacon pointing to the varname that was not found
+		 */
+		applyTimedResources: function(log) {
+			if (isNaN(this.resourceTime.start) || isNaN(this.resourceTime.stop)) {
+				BOOMR.debug("Start or stop time for this resource group were not numeric (" + this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars");
+				return false;
+			}
+
+			if (this.resourceTime.stop === 0) {
+				BOOMR.debug("Stop time was 0, this should not happen!", "PageVars");
+				BOOMR.addVar(this.varname + "_rg.err", "ne|-");
+				return false;
+			}
+
+			if (this.hasUnresolvedAddVar()) {
+				// Not applying anything to the beacon until everything is resolved!
+				return false;
+			}
+			else {
+				this.resolved = true;
+				BOOMR.removeVar(this.varname + "_rg.err");
+			}
+
+			if (log) {
+				BOOMR.debug("Resource Group '" + this.config.label + "' final values: " + (this.resourceTime.stop - this.resourceTime.start), "PageVars.ResourceGroup");
+			}
+			BOOMR.addVar(this.varname + "_st", Math.round(this.resourceTime.start));
+			if (this.obs && this.obs.observer) {
+				this.obs.observer.disconnect();
+				clearTimeout(this.obs.timer);
+			}
+			return this.apply(this.resourceTime.stop - this.resourceTime.start);
+		},
+		/**
+		 * @desc
+		 * Resolves a node or resource to an array of resources if ResourceTiming is supported
+		 *
+		 * @param {Resource} resource - a resource that is part of a resource group
+		 * @return {Object[]} - An array of resources mapping to the found ResourceTiming entries found referring to the Resource passed in
+		 */
+		lookupResources: function(index) {
+			var resource = this.resourceSet[index], ret = this.getNode(index), resources = [], url, children;
+
+			// check that returned value is a node type
+			if (ret && !ret.hasOwnProperty("length")) {
+				this.resourceSet[index].found = true;
+				url = this.getNodeURL(ret);
+				// if url is a string
+				if (url) {
+					// We have a qualified URL time to find it in resource timing
+					resources = this.findResources(url);
+				}
+				else {
+					children = this.findChildElements(ret);
+					for (var childIndex = 0; childIndex < children.length; childIndex++) {
+						// we know it's a exact URL so it's fine to call findResource instead of the plural equivalent
+						resources.push(this.findResource(this.getNodeURL(children[childIndex])));
+					}
+				}
+			}
+			else if (ret && ret.hasOwnProperty("length")) {
+				if (ret.length > 0) {
+					this.resourceSet[index].found = true;
+				}
+				// we have an array from findResources
+				return ret;
+			}
+
+			// ret had an unexpected value hoping resources was filled by the first if-branch
+			return resources;
+		},
+		/**
+		 * @desc
+		 * Takes an array of resources and applies their timing to the current ResourceGroup timing
+		 */
+		refreshResourceGroupTimings: function(resources) {
+			if (resources.length > 0) {
+				// We found resources for this RG time to map
+				for (var resourceIndex = 0; resourceIndex < resources.length; resourceIndex++) {
+					this.updateResourceGroupDelta(resources[resourceIndex]);
+				}
+
+				// if applying the timer failed we will try again at a later point
+				if (!this.applyTimedResources()) {
+					BOOMR.debug("Applying timed Resources failed", "PageParams.ResourceGroup");
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * If node passed in as only param does not return with a src URL or a URL of any kind we
+		 * define it as a container element
+		 *
+		 * @param {HTMLElement} node - Node to test if it's a node or not
+		 * @return {boolean}
+		 */
+		isContainer: function(node) {
+			var url;
+			if (node && typeof node.nodeName === "string") {
+				url = this.getNodeURL(node);
+				if (!url) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Get's node from {@link Resource}
+		 *
+		 * @param {Resource} resource - a resource that is part of a resource group
+		 * @return {(Node|PerformanceResourceTiming[])} - Either a node or a PerformanceResourceTiming object referring to a Resource
+		 */
+		getNode: function(index) {
+			var ret, resource = this.resourceSet[index];
+			switch (resource.type) {
+			case "xpath":
+				ret = this.runXPath(resource.value);
+				break;
+			case "queryselector":
+				ret = this.runQuerySelector(resource.value);
+				break;
+			case "resource":
+				if (this.RTSupport) {
+					ret = this.findResources(resource.value);
+				}
+				break;
+			default:
+				BOOMR.debug("Found Item of unknown type (" + resource.type + "), skipping...", "PageVars");
+				break;
+			}
+
+			if (!ret) {
+				this.resourceSet[index].found = false;
+			}
+
+			return ret;
+		},
+		/**
+		 * @desc
+		 * Find child elements of a node that can trigger a network request
+		 *
+		 * @param {HTMLElement} node - Parent node that is a container that may contain elements that can trigger network requests
+		 * @return {HTMLElement[]} - Array of child nodes
+		 */
+		findChildElements: function(node) {
+			var nodes = [], foundNodes, nodeIndex, tagIndex;
+			for (tagIndex in PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES) {
+				foundNodes = node.getElementsByTagName(PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES[tagIndex]);
+				for (nodeIndex = 0; nodeIndex < foundNodes.length; nodeIndex++) {
+					nodes.push(foundNodes[nodeIndex]);
+				}
+			}
+			return nodes;
+		},
+		/**
+		 * @desc
+		 * Extract URL from a node that can have a resource bound to it
+		 *
+		 * @param {HTMLElement} node - DOM node element with a possible URL attribute triggering network requests
+		 * @return {string|null} - will return URL referring to a downloadable resource or null if it did not match a node-type
+		 */
+		getNodeURL: function(node) {
+			var nodeProp, nodeName;
+
+			if (!node) {
+				return null;
+			}
+
+			switch (node.nodeName) {
+			case "IMG":
+			case "IFRAME":
+			case "SCRIPT":
+			case "LINK":
+			case "OBJECT":
+			case "SVG":
+				for (var srcPropertiesIndex = 0; srcPropertiesIndex < RESOURCE_GROUPS_URL_SRC_PROPERTIES.length; srcPropertiesIndex++) {
+					nodeProp = node[RESOURCE_GROUPS_URL_SRC_PROPERTIES[srcPropertiesIndex]];
+					if (typeof nodeProp === "string" && nodeProp.length > 0) {
+						return nodeProp;
+					}
+				}
+				break;
+			default:
+				return null;
+				break;
+			}
+		},
+		/**
+		 * @desc
+		 * Update the distance between start and end of a set of resources start and end times
+		 * @param {ResourceEntry} resource - a resource with a fetchStart and responseEnd entry to match against the current earliest start timestamp and last response ending time.
+		 */
+		updateResourceGroupDelta: function(resource) {
+			if (!resource || (resource && !resource.responseEnd)) {
+				BOOMR.debug("Tried to update ResourceGroup delta with unfinished resource!", "PageVars");
+				return;
+			}
+
+			if (!this.resourceTime.start || this.resourceTime.start > resource.fetchStart) {
+				this.resourceTime.start = resource.fetchStart;
+			}
+
+			if (!this.resourceTime.stop || this.resourceTime.stop < resource.responseEnd) {
+				this.resourceTime.stop = resource.responseEnd;
+			}
+
+			BOOMR.debug("New Resource Times for resource: '" + this.config.label + "' start(" + this.resourceTime.start + ") , stop (" + this.resourceTime.stop + ") delta(" + (this.resourceTime.stop - this.resourceTime.start) + ")", "PageVars.ResourceGroup");
+		},
+		/**
+		 * @desc
+		 * Attaches a resource group listener to a node and adds attributes to the Node object to set fetchStart and responseEnd
+		 * These attributes are only used when ResourceTiming is not available
+		 */
+		initResourceGroupListener: function(nodeChild, index) {
+			var resource = this.resourceSet[index], tempRG;
+
+			nodeChild._bmr_rg = nodeChild._bmr_rg || {};
+			nodeChild._bmr_rg.fetchStart = nodeChild._bmr_rg.fetchStart ? nodeChild._bmr_rg.fetchStart : BOOMR.now();
+
+			// this may be run twice on the same element if the resource is part of multiple overlapping resource groups
+			if (!nodeChild._bmr_rg_resource) {
+				nodeChild._bmr_rg_resource = resource;
+				this.addResourceGroupListener(nodeChild, index);
+				return;
+			}
+			else if (nodeChild._bmr_rg_resource && !nodeChild._bmr_rg_resource.hasOwnProperty("length")) {
+				tempRG = nodeChild._bmr_rg_resource;
+				nodeChild._bmr_rg_resource = [];
+			}
+
+			nodeChild._bmr_rg_resource.push(tempRG, resource);
+			this.addResourceGroupListener(nodeChild, index);
+		},
+		/**
+		 * @desc
+		 * Add an EventListener to the node found to listen to
+		 */
+		addResourceGroupListener: function(node, index) {
+			var that = this, resource = this.resourceSet[index];
+
+			function nodeLoaded(event) {
+				// event.targeg is not defined on IE8, but srcElement is
+				var nodeTarget = event.target ? event.target : event.srcElement, nodeURL = that.getNodeURL(nodeTarget), resources;
+
+				if (that.RTSupport) {
+					// Since in SPA navigations image resources may have been initially added to the
+					// page without a src URL we're checking here if the resource now has a URL and if it matches the resource we're looking for
+					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
+						resources = that.findResources(nodeURL);
+						if (resources.length > 0) {
+							that.resourceSet[index].found = true;
+							that.refreshResourceGroupTimings(resources, that.config);
+						}
+					}
+					else {
+						that.refreshResourceGroupTimings(that.findResources(that.getNodeURL(nodeTarget)), that.config);
+					}
+				}
+				else {
+					nodeURL = that.getNodeURL(nodeTarget);
+					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
+						nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
+						that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+					}
+					else {
+						// Multiple eventlisteners due to multiple resource groups overlapping
+						if (nodeTarget._bmr_rg && nodeTarget._bmr_rg.responseEnd && nodeTarget._bmr_rg.fetchStart) {
+							that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+						}
+						else {
+							// Prevent overlapping elements to update the end value
+							nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
+							that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+						}
+					}
+				}
+				that.applyTimedResources();
+			}
+
+			if (node.addEventListener) {
+				node.addEventListener("load", nodeLoaded);
+			}
+			else if (node.attachEvent) {
+				node.attachEvent("onload", nodeLoaded);
+			}
 		}
 	};
 
@@ -879,6 +1860,8 @@
 		customTimers: [],
 		customMetrics: [],
 		customDimensions: [],
+
+		priorityHandler: {},
 
 		complete: false,
 		initialized: false,
@@ -906,19 +1889,7 @@
 				return;
 			}
 
-			hconfig = {
-				pageGroups:       { varname: "h.pg", stopOnFirst: true },
-				abTests:          { varname: "h.ab", stopOnFirst: true },
-				customMetrics:    { cleanUpRE:  REGEX_NUMBER_US_DEFAULT },
-				customDimensions: { sanitizeRE: /[^\w\. \-]/g },
-				customTimers:     { cleanUpRE:  REGEX_NUMBER_US_DEFAULT,
-						    method: BOOMR.plugins.RT.setTimer,
-						    ctx: BOOMR.plugins.RT,
-						    preProcessor: function(val) {
-							    return Math.round(typeof val === "number" ? val : parseFloat(val, 10));
-						    }
-						}
-			};
+			hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
 
 			if (ename !== "xhr" && this.complete) {
 				return;
@@ -990,7 +1961,7 @@
 							continue;
 						}
 
-						if ( handler.handle(limpl[v][i]) && hconfig[v].stopOnFirst ) {
+						if ( handler.handle(limpl[v][i], ename) && hconfig[v].stopOnFirst ) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";
 							}
@@ -1024,7 +1995,76 @@
 				}
 			}
 		},
+		/**
+		 * @desc
+		 * If configuration for PageParams contains a page param Handler type with a value of 1 in
+		 * {@link PAGE_PARAM_TRY_PRIORITY} run them and run their handle. This allows us to listen for later
+		 * changes to the page via EventListeners and fetch data to attach to the beacon as early as possible.
+		 */
+		checkPrioritizedPageParams: function(type) {
+			var highPriorityParams = impl.checkHighPriorityParams(), hconfig, handleConfig, handler, handlerInstance, hpPpNameIndex, ppName, ppNameIndex;
+			if (highPriorityParams) {
+				for (ppNameIndex = 0; ppNameIndex < PAGE_PARAMS_NAMES.length; ppNameIndex++) {
+					ppName = PAGE_PARAMS_NAMES[ppNameIndex];
 
+					if (!highPriorityParams[ppName]) {
+						continue;
+					}
+
+					for (hpPpNameIndex = 0; hpPpNameIndex < highPriorityParams[ppName].length; hpPpNameIndex++) {
+						hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
+						handleConfig = highPriorityParams[ppName][hpPpNameIndex];
+
+						if (hconfig.hasOwnProperty(ppName) && !impl.priorityHandler.hasOwnProperty(handleConfig.label)) {
+							handler = new Handler(hconfig[ppName]);
+							handlerInstance = handler.handle(handleConfig, type);
+							if (handlerInstance) {
+								impl.priorityHandler[handleConfig.label] = handlerInstance;
+							}
+						}
+					}
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Handlers that we returned an instance for when running prioritized and stuck around are removed from impl object onbeacon
+		 */
+		removeDoneHandlers: function()  {
+			var label;
+			for (label in impl.priorityHandler) {
+				if (impl.priorityHandler.hasOwnProperty(label) && impl.priorityHandler[label].resolved) {
+					delete impl.priorityHandler[label];
+				}
+			}
+		},
+		/**
+		 * @desc
+		 * Iterate through page params and find elements that match the {@link PAGE_PARAM_TRY_PRIORITY}
+		 * high priority values (value = 1) thus being able to be run at an earlier time
+		 *
+		 * @return {object} - Returns an object with keys corresponding to page params and array holding
+		 * objects containing the page param
+		 */
+		checkHighPriorityParams: function() {
+			var collected = {};
+
+			for (var ppIndex = 0; ppIndex < PAGE_PARAMS_NAMES.length; ppIndex++) {
+				var param = impl[PAGE_PARAMS_NAMES[ppIndex]];
+				if (param && param.hasOwnProperty("length") && param.length > 0) {
+					for (var paramIndex = 0; paramIndex < param.length; paramIndex++) {
+						if (param[paramIndex].type &&
+							PAGE_PARAM_TRY_PRIORITY[param[paramIndex].type] &&
+							PAGE_PARAM_TRY_PRIORITY[param[paramIndex].type] === 1) {
+
+							collected[PAGE_PARAMS_NAMES[ppIndex]] = collected[PAGE_PARAMS_NAMES[ppIndex]] || [];
+							collected[PAGE_PARAMS_NAMES[ppIndex]].push(param[paramIndex]);
+						}
+					}
+				}
+			}
+			return collected;
+		},
 		clearMetrics: function() {
 			var i, label;
 
@@ -1178,6 +2218,8 @@
 				// second init is from config.js
 				impl.configReceived = true;
 
+				impl.checkPrioritizedPageParams("init");
+
 				// if we had previously run before config.js came in, re-run now
 				if (impl.rerunAfterConfig) {
 					BOOMR.debug("Re-running now that config came in");
@@ -1284,6 +2326,8 @@
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
+				BOOMR.subscribe("spa_init", impl.checkPrioritizedPageParams);
+				BOOMR.subscribe("xhr_init", impl.checkPrioritizedPageParams);
 			}
 			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
@@ -1297,7 +2341,9 @@
 				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
+				BOOMR.subscribe("onbeacon", impl.removeDoneHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
+
 				impl.initialized = true;
 			}
 

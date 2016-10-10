@@ -85,6 +85,8 @@
 				return;
 			}
 
+			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
+
 			log("route");
 			BOOMR.plugins.SPA.route_change();
 		});

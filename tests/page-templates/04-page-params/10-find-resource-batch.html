@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="10-find-resource-batch.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/delay?delay=2000&file=/pages/04-page-params/support/stylesheet.css" type="text/css" media="screen" />
+
+<div id="element">
+  <img style="max-width:240px;max-height:100px;" src="/delay?delay=1000&id=single&file=/pages/04-page-params/support/img.jpg"/>
+</div>
+
+<div id="element">
+  <img style="max-width:240px;max-height:100px;" src="/delay?delay=1000&id=1&file=/pages/04-page-params/support/img.jpg"/>
+  <img style="max-width:240px;max-height:100px;" src="/delay?delay=1000&id=2&file=/pages/04-page-params/support/img.jpg"/>
+  <img style="max-width:240px;max-height:100px;" src="/delay?delay=1500&id=3&file=/pages/04-page-params/support/img.jpg"/>
+</div>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>

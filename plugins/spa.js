@@ -188,6 +188,9 @@
 		last_location: function(url) {
 			lastLocationChange = url;
 		},
+		current_spa_nav: function() {
+			return !initialRouteChangeCompleted ? "spa_hard" : "spa";
+		},
 		/**
 		 * Called by the SPA consumer if they have a routeChangeWaitFilter and are manually
 		 * triggering navigation complete events.

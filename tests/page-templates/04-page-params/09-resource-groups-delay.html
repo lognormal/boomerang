@@ -1,0 +1,51 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="09-resource-groups-delay.js" type="text/javascript"></script>
+<div id="element"></div>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	PageParams: {
+		customTimers: [
+			{
+				name: "ResourceGroup Element contains element that is inserted in JS and loaded 1000ms before onload",
+				index: 1,
+				label: "ctim.CT1",
+				type: "ResourceGroup",
+				value: {
+					"*/09-resource-groups-delay.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']"
+						}]
+					}
+				}
+			},
+			{
+				name: "Element appears late in load",
+				index: 1,
+				label: "ctim.CT2",
+				type: "ResourceGroup",
+				value: {
+					"*/09-resource-groups-delay.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']/img"
+						}]
+					}
+				}
+			}
+		]
+	}
+});
+var imgSrc = "/delay?delay=1000&file=/pages/04-page-params/support/img.jpg";
+var img = document.createElement("img");
+img.src = imgSrc;
+var container = document.getElementById("element");
+container.appendChild(img);
+</script>
+<%= footer %>

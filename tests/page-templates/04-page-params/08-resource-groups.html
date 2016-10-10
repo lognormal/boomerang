@@ -1,0 +1,227 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="08-resource-groups.js" type="text/javascript"></script>
+<div id="wrapper">
+  <div id="element">
+	<img src="/delay?delay=1000&id=abc&file=/pages/04-page-params/support/img.jpg"/>
+  </div>
+  <div id="extra">
+	<img src="/delay?delay=2000&id=def&file=/pages/04-page-params/support/img.jpg"/>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	PageParams: {
+		customTimers: [
+			{
+				name: "ResourceGroup Element selected via XPath",
+				index: 1,
+				label: "ctim.CT1",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']/img"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element selected via QuerySelector",
+				index: 2,
+				label: "ctim.CT2",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: "#element img"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element selected via Resource URL",
+				index: 3,
+				label: "ctim.CT3",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*id=abc*"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container selected via XPath",
+				index: 4,
+				label: "ctim.CT4",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container selected via QuerySelector",
+				index: 5,
+				label: "ctim.CT5",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: "#element"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element does not exist as XPath",
+				index: 6,
+				label: "ctim.CT6",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='doesNotExist']"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element does not exist as QuerySelector",
+				index: 7,
+				label: "ctim.CT7",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: "#doesNotExist"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element does not exist as Resource",
+				index: 8,
+				label: "ctim.CT8",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "doesnotexist.jpg"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup URLPattern doesn't match",
+				index: 9,
+				label: "ctim.CT9",
+				type: "ResourceGroup",
+				value: {
+					"*does_not_exist": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']/img"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container with multiple resources selected via XPath",
+				index: 10,
+				label: "ctim.CT10",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='wrapper']"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container with multiple resources selected via QuerySelector",
+				index: 11,
+				label: "ctim.CT11",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: "#wrapper"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container with multiple resources selected via resource URL",
+				index: 12,
+				label: "ctim.CT12",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*img.jpg"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Container with multiple resources selected via resource URL",
+				index: 13,
+				label: "ctim.CT13",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*id=abc*"
+						}]
+					},
+					"*/*": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*id=def*"
+						}]
+					}
+				}
+			}
+		]
+	}
+});
+</script>

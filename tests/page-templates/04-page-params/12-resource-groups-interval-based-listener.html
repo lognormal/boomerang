@@ -1,0 +1,70 @@
+<%= header %>
+<script type="text/javascript">
+// Disabling ResourceTiming and MutationObserver for this TestCase
+window.performance = null;
+window.MutationObserver = null;
+</script>
+<%= boomerangScript %>
+
+<div id="element"></div>
+
+<img id="image" src="/delay?delay=1500&file=/pages/04-page-params/support/img.jpg"/>
+<script src="12-resource-groups-interval-based-listener.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	PageParams: {
+		customTimers: [
+			{
+				name: "Resource Group with element where neither MO nor ResourceTiming is available",
+				index: 1,
+				label: "ctim.CT1",
+				type: "ResourceGroup",
+				value: {
+					"*/12-resource-groups-interval-based-listener.html": {
+						on: ["onload"],
+						resources: [{
+							type: "xpath",
+							value: "//div[@id='element']"
+						}]
+					}
+				}
+			},
+			{
+				name: "Resource Group with resource fetched after BOOMR is loaded",
+				index: 2,
+				label: "ctim.CT2",
+				type: "ResourceGroup",
+				value: {
+					"*/12-resource-groups-interval-based-listener.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*id=delayed*"
+						}]
+					}
+				}
+			},
+			{
+				name: "Resource Group with resource element",
+				index: 3,
+				label: "ctim.CT3",
+				type: "ResourceGroup",
+				value: {
+					"*/12-resource-groups-interval-based-listener.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: "#image"
+						}]
+					}
+				}
+			}
+		]
+	}
+});
+var element = document.getElementById("element");
+var img = document.createElement("img");
+img.src = "/delay?delay=1000&id=delayed&file=/pages/04-page-params/support/img.jpg";
+element.appendChild(img);
+</script>
