@@ -290,6 +290,8 @@ BOOMR_check_doc_domain();
 			"click": [],
 			"form_submit": [],
 			"onconfig": [],
+			"xhr_init": [],
+			"spa_init": [],
 			"spa_navigation": []
 		},
 

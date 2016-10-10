@@ -102,6 +102,7 @@
 
 			log("$locationChangeStart: " + newState);
 
+			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), newState]);
 			BOOMR.plugins.SPA.last_location(newState);
 		});
 

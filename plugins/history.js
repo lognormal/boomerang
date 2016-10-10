@@ -84,6 +84,17 @@
 			go: history.go
 		};
 
+		function spa_init(title, url) {
+			if (!impl.routeChangeInProgress) {
+				if (title && url) {
+					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), url]);
+				}
+				else if (title && !url) {
+					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), title]);
+				}
+			}
+		}
+
 		history.setState = function() {
 			log("setState");
 			routeChange();
@@ -104,12 +115,14 @@
 
 		history.pushState = function(state, title, url) {
 			log("pushState");
+			spa_init(title, url);
 			routeChange();
 			orig_history.pushState.apply(this, arguments);
 		};
 
-		history.replaceState = function() {
+		history.replaceState = function(state, title, url) {
 			log("replaceState");
+			spa_init(title, url);
 			routeChange();
 			orig_history.replaceState.apply(this, arguments);
 		};
@@ -120,8 +133,11 @@
 			orig_history.go.apply(this, arguments);
 		};
 
-		BOOMR.window.addEventListener("hashchange", function() {
+		BOOMR.window.addEventListener("hashchange", function(event) {
 			log("hashchange");
+			if (!impl.routeChangeInProgress && event) {
+				BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), event.newURL]);
+			}
 			routeChange();
 		});
 
