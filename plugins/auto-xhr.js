@@ -316,7 +316,7 @@
 
 			// if this was an SPA nav that triggered no additional resources, substract the
 			// SPA_TIMEOUT from now to determine the end time
-			if (ev.type === "spa" && ev.resources.length === 0) {
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS) && ev.resources.length === 0) {
 				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
 			}
 
@@ -353,6 +353,9 @@
 				resource.timing.loadEventEnd = BOOMR.now();
 			}
 
+			// send any queued beacons first
+			BOOMR.real_sendBeacon();
+
 			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
 			// was for this resource.
 			if (BOOMR.plugins.ResourceTiming &&
@@ -368,7 +371,7 @@
 
 			// If the resource has an onComplete event, trigger it.
 			if (resource.onComplete) {
-				resource.onComplete();
+				resource.onComplete(resource);
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings
@@ -519,9 +522,10 @@
 	 * @param {number} index - Index of the event in pending_events array
 	 */
 	MutationHandler.prototype.timedout = function(index) {
+		var ev;
 		this.clearTimeout();
 
-		var ev = this.pending_events[index];
+		ev = this.pending_events[index];
 
 		if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS.concat("xhr"))) {
 			// XHRs or SPA page loads
@@ -529,6 +533,7 @@
 				// send page loads (SPAs) if there are no outstanding downloads
 				this.sendEvent(index);
 			}
+
 			// if there are outstanding downloads left, they will trigger a sendEvent for the SPA once complete
 		}
 		else {

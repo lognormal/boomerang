@@ -759,7 +759,8 @@ module.exports = function() {
 					"tests/page-templates/**/*",
 					"tests/unit/**/*",
 					"tests/test-templates/**/*.js",
-					"!tests/page-templates/12-react/support/*.jsx"
+					"!tests/page-templates/12-react/support/*.jsx",
+					"!*.#*"
 				],
 				tasks: ["pages-builder"]
 			},
@@ -862,7 +863,7 @@ module.exports = function() {
 		// Build
 		//
 		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
-		"build:test": ["concat:debug", "build:apply-templates"],
+		"build:test": ["concat:debug", "concat:debug-tests", "build:apply-templates"],
 
 		// Build steps
 		"build:apply-templates": [
@@ -914,10 +915,7 @@ module.exports = function() {
 			"build:test",
 			"express:dev",
 			"express:secondary",
-			"watch:test",
-			"watch:test-react",
-			"watch:boomerang",
-			"watch:express"
+			"test:debug:watch"
 		],
 
 		// open your browser to http://localhost:4000/debug.html to debug
@@ -1007,5 +1005,11 @@ module.exports = function() {
 		var resolved = resolveAlias(alias);
 		grunt.log.debug("Resolving task alias: " + alias + " to " + JSON.stringify(resolved));
 		grunt.registerTask(alias, resolved);
+	});
+
+	// Don't re-generate Docs during test:debug builds running
+	grunt.registerTask("test:debug:watch", function() {
+		delete grunt.config.data.watch.doc;
+		grunt.task.run("watch");
 	});
 };

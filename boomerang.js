@@ -1058,6 +1058,26 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
+		 * Attach a callback to the onload event if the onload has not
+		 * been fired yet
+		 *
+		 * @param {function} cb - Callback to run when onload fires or page is visible (pageshow)
+		 */
+		attach_page_ready: function(cb) {
+			if (d.readyState && d.readyState === "complete") {
+				this.setImmediate(cb, null, null, BOOMR);
+			}
+			else {
+				if (w.onpagehide || w.onpagehide === null) {
+					BOOMR.utils.addListener(w, "pageshow", cb);
+				}
+				else {
+					BOOMR.utils.addListener(w, "load", cb);
+				}
+			}
+		},
+
+		/**
 		 * Sends the page_ready beacon only if 'autorun' is still true after init
 		 * is called.
 		 */

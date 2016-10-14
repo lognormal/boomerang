@@ -1,0 +1,16 @@
+<%= header %>
+<%= boomerangScript %>
+<!-- Fires onload with no XHR after onload should fire hard nav -->
+<script src="101-hard-nav-onload-no-xhr.js" type="text/javascript"></script>
+<img src="/delay?delay=1000&file=pages/12-react/support/img.jpg&id=home"/>
+<script>
+BOOMR_test.init({
+	autorun: false,
+	History: {
+		enabled: true,
+		auto: true
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
