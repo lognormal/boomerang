@@ -169,7 +169,7 @@
 			BOOMR.utils.pluginConfig(impl, config, "History", ["auto", "enabled"]);
 
 			if (impl.auto && impl.enabled) {
-				this.hook(undefined, false, {});
+				this.hook(undefined, true, {});
 			}
 		},
 		disable: function() {
