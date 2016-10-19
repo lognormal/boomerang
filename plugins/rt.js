@@ -115,8 +115,8 @@
 				BOOMR.utils.removeCookie(this.cookie);
 
 				// at some point we may want to log this info on the server side
-				BOOMR.error("took more than 50ms to set cookie... aborting: "
-						+ t_start + " -> " + t_end, "rt");
+				BOOMR.error("took more than 50ms to set cookie... aborting: " +
+					t_start + " -> " + t_end, "rt");
 			}
 
 			return true;
@@ -227,10 +227,10 @@
 
 			// use window and not w because we want the inner iframe
 			try {
-				if (window
-				    && "performance" in window
-				    && window.performance
-				    && typeof window.performance.getEntriesByName === "function") {
+				if (window &&
+				    "performance" in window &&
+				    window.performance &&
+				    typeof window.performance.getEntriesByName === "function") {
 					urls = { "rt.bmr": BOOMR.url };
 
 
@@ -617,8 +617,8 @@
 		},
 
 		prerenderToVisible: function() {
-			if (impl.onloadfired
-				&& impl.autorun) {
+			if (impl.onloadfired &&
+			    impl.autorun) {
 				BOOMR.debug("Transitioned from prerender to " + BOOMR.visibilityState(), "rt");
 
 				// note that we transitioned from prerender on the beacon for debugging

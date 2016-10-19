@@ -725,9 +725,9 @@ see: http://www.w3.org/TR/resource-timing/
 					results[url] =
 						SPECIAL_DATA_PREFIX +
 						SPECIAL_DATA_DIMENSION_TYPE +
-						visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
-						+ "|"
-						+ data;
+						visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "") +
+						"|" +
+						data;
 				}
 				else {
 					results[url] = data;

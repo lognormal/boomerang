@@ -113,9 +113,9 @@ BOOMR_check_doc_domain();
 	var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
 	// This is the only block where we use document without the w. qualifier
-	if (w.parent !== w
-			&& document.getElementById("boomr-if-as")
-			&& document.getElementById("boomr-if-as").nodeName.toLowerCase() === "script") {
+	if (w.parent !== w &&
+	    document.getElementById("boomr-if-as") &&
+	    document.getElementById("boomr-if-as").nodeName.toLowerCase() === "script") {
 		w = w.parent;
 		myurl = document.getElementById("boomr-if-as").src;
 	}
@@ -909,10 +909,9 @@ BOOMR_check_doc_domain();
 			for (k in this.plugins) {
 				if (this.plugins.hasOwnProperty(k)) {
 					// config[plugin].enabled has been set to false
-					if ( config[k]
-						&& config[k].hasOwnProperty("enabled")
-						&& config[k].enabled === false
-					) {
+					if (config[k] &&
+					    config[k].hasOwnProperty("enabled") &&
+					    config[k].enabled === false) {
 						impl.disabled_plugins[k] = 1;
 
 						if (typeof this.plugins[k].disable === "function") {
@@ -926,10 +925,9 @@ BOOMR_check_doc_domain();
 					if (impl.disabled_plugins[k]) {
 
 						// and has not been explicitly re-enabled
-						if ( !config[k]
-							|| !config[k].hasOwnProperty("enabled")
-							|| config[k].enabled !== true
-						) {
+						if (!config[k] ||
+						    !config[k].hasOwnProperty("enabled") ||
+						    config[k].enabled !== true) {
 							continue;
 						}
 
@@ -1005,8 +1003,8 @@ BOOMR_check_doc_domain();
 						BOOMR.debug("Visibility changed from " + impl.lastVisibilityState + " to " + visState);
 
 						// if we transitioned from prerender to hidden or visible, fire the prerender_to_visible event
-						if (impl.lastVisibilityState === "prerender"
-						    && visState !== "prerender") {
+						if (impl.lastVisibilityState === "prerender" &&
+						    visState !== "prerender") {
 							// note that we transitioned from prerender on the beacon for debugging
 							BOOMR.addVar("vis.pre", "1");
 
@@ -1343,8 +1341,8 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
-			if (arguments.length === 1
-					&& Object.prototype.toString.apply(arg0) === "[object Array]") {
+			if (arguments.length === 1 &&
+			    Object.prototype.toString.apply(arg0) === "[object Array]") {
 				params = arg0;
 			}
 			else {
@@ -1431,8 +1429,8 @@ BOOMR_check_doc_domain();
 						continue;
 					}
 
-					if (typeof this.plugins[plugin].readyToSend === "function"
-					    && this.plugins[plugin].readyToSend() === false) {
+					if (typeof this.plugins[plugin].readyToSend === "function" &&
+					    this.plugins[plugin].readyToSend() === false) {
 						BOOMR.debug("Plugin " + plugin + " is not ready to send");
 						return false;
 					}
@@ -1759,12 +1757,12 @@ BOOMR_check_doc_domain();
 		 * @returns {string} URI-encoded string
 		 */
 		getUriEncodedVar: function(name, value) {
-			var result = encodeURIComponent(name)
-				+ "="
-				+ (
-					value === undefined || value === null
-					? ""
-					: encodeURIComponent(value)
+			var result = encodeURIComponent(name) +
+				"=" +
+				(
+					value === undefined || value === null ?
+						"" :
+						encodeURIComponent(value)
 				);
 
 			return result;
@@ -1782,8 +1780,8 @@ BOOMR_check_doc_domain();
 			var entries;
 
 			try {
-				if (BOOMR.getPerformance()
-					&& typeof BOOMR.getPerformance().getEntriesByName === "function") {
+				if (BOOMR.getPerformance() &&
+				    typeof BOOMR.getPerformance().getEntriesByName === "function") {
 					entries = BOOMR.getPerformance().getEntriesByName(url);
 					if (entries && entries.length) {
 						if (typeof sort === "function") {
@@ -1837,10 +1835,10 @@ BOOMR_check_doc_domain();
 	// If the browser supports performance.now(), swap that in for BOOMR.now
 	try {
 		var p = boomr.getPerformance();
-		if (p
-		    && typeof p.now === "function"
-		    && p.timing
-		    && p.timing.navigationStart) {
+		if (p &&
+		    typeof p.now === "function" &&
+		    p.timing &&
+		    p.timing.navigationStart) {
 			boomr.now = function() {
 				return Math.round(p.now() + p.timing.navigationStart);
 			};

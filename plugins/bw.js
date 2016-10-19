@@ -252,8 +252,8 @@
 				n = bandwidths_corrected.length - 1;
 				median_corrected = Math.round(
 							(
-								bandwidths_corrected[Math.floor(n / 2)]
-								+ bandwidths_corrected[Math.ceil(n / 2)]
+								bandwidths_corrected[Math.floor(n / 2)] +
+								bandwidths_corrected[Math.ceil(n / 2)]
 							) / 2
 						);
 			}
@@ -275,8 +275,8 @@
 		},
 
 		load_img: function(i, run, callback) {
-			var url = this.base_url + images[i].name
-				+ "?t=" + BOOMR.now() + Math.random(),	// Math.random() is slow, but we get it before we start the timer
+			var url = this.base_url + images[i].name +
+			    "?t=" + BOOMR.now() + Math.random(),
 			    timer = 0, tstart = 0,
 			    img = new Image(),
 			    that = this;
