@@ -81,6 +81,7 @@
 		"no-trailing-spaces": [2, { "skipBlankLines": false }],
 		"linebreak-style": [2, "unix"],
 		"comma-dangle": [2, "never"],
+		"operator-linebreak": [2, "after"],
 
 		//
 		// Disabled rules

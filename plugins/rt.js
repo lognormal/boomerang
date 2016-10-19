@@ -166,8 +166,8 @@
 				BOOMR.utils.removeCookie(this.cookie);
 
 				// at some point we may want to log this info on the server side
-				BOOMR.error("took more than 50ms to set cookie... aborting: "
-						+ t_start + " -> " + t_end, "rt");
+				BOOMR.error("took more than 50ms to set cookie... aborting: " +
+					t_start + " -> " + t_end, "rt");
 			}
 
 			return true;
@@ -264,21 +264,26 @@
 			// if session hasn't started yet, or if it's been more than thirty minutes since the last beacon,
 			// reset the session (note 30 minutes is an industry standard limit on idle time for session expiry)
 
-			if (!BOOMR.session.start									// no start time
-			   || (t_start && BOOMR.session.start > t_start)					// or we have a better start time
-			   || t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp			// or it's been more than session_exp since the last action
-			   || (avgSessionLength > sessionExp) 							// or the average page session length is longer than the session exp
+			// no start time
+			if (!BOOMR.session.start ||
+			    // or we have a better start time
+			    (t_start && BOOMR.session.start > t_start) ||
+			    // or it's been more than session_exp since the last action
+			    t_done - (impl.lastActionTime || BOOMR.t_start) > sessionExp ||
+			    // or the average page session length is longer than the session exp
+			    (avgSessionLength > sessionExp)
 			) {
 				// First we write the old session values to the beacon to help debug session resets on the server-side
-				BOOMR.addVar("rt.srst",
-						BOOMR.session.ID + "-" + BOOMR.session.start
-						+ ":" + BOOMR.session.length
-						+ ":" + impl.oboError
-						+ ":" + impl.loadTime
-						+ ":" + t_start
-						+ ":" + impl.lastActionTime
-						+ ":" + t_done
-						+ ":" + impl.sessionHistory.join(",")
+				BOOMR.addVar(
+					"rt.srst",
+					BOOMR.session.ID + "-" + BOOMR.session.start +
+						":" + BOOMR.session.length +
+						":" + impl.oboError +
+						":" + impl.loadTime +
+						":" + t_start +
+						":" + impl.lastActionTime +
+						":" + t_done +
+						":" + impl.sessionHistory.join(",")
 				);
 
 				impl.addedVars.push("rt.srst");
@@ -451,10 +456,10 @@
 
 			// use window and not w because we want the inner iframe
 			try {
-				if (window
-				    && "performance" in window
-				    && window.performance
-				    && typeof window.performance.getEntriesByName === "function") {
+				if (window &&
+				    "performance" in window &&
+				    window.performance &&
+				    typeof window.performance.getEntriesByName === "function") {
 					urls = { "rt.bmr": BOOMR.url };
 
 					/* SOASTA PRIVATE START */
@@ -844,8 +849,8 @@
 		},
 
 		prerenderToVisible: function() {
-			if (impl.onloadfired
-				&& impl.autorun) {
+			if (impl.onloadfired &&
+			    impl.autorun) {
 				BOOMR.debug("Transitioned from prerender to " + BOOMR.visibilityState(), "rt");
 
 				// note that we transitioned from prerender on the beacon for debugging
@@ -1241,9 +1246,12 @@
 			}
 
 			/* SOASTA PRIVATE START */
-			if (ename === "load" || ename === "visible" // we're in onload
-			   || (ename === "xhr" && !subresource) // xhr beacon and this is not a subresource
-			   || (ename === "unload" && !impl.onloadfired && impl.autorun)) { // unload fired before onload
+			// we're in onload
+			if (ename === "load" || ename === "visible" ||
+			    // xhr beacon and this is not a subresource
+			    (ename === "xhr" && !subresource) ||
+			    // unload fired before onload
+			    (ename === "unload" && !impl.onloadfired && impl.autorun)) {
 				impl.incrementSessionDetails();
 
 				// save a last-loaded timestamp in the cookie

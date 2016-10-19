@@ -487,8 +487,8 @@
 		}
 
 		// fixup some old browser types
-		if (error.message.indexOf("ReferenceError:") !== -1
-			&& error.name === "Error") {
+		if (error.message.indexOf("ReferenceError:") !== -1 &&
+		    error.name === "Error") {
 			error.name = "ReferenceError";
 		}
 

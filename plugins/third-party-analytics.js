@@ -145,8 +145,10 @@ Captures session ids and campaign information from third party analytic vendors 
 				if (impl.clientids) {
 					// We'll try to fetch the "organization id" by using the global "s.visitor" object
 					// "s" isn't reliably Adobe's SiteCatalyst object, the site owner might have renamed it
-					if (typeof w.s === "object" && typeof w.s.visitor === "object"
-						&& typeof w.s.visitor.getAnalyticsVisitorID === "function" && typeof w.s.visitor.getMarketingCloudVisitorID === "function") {
+					if (typeof w.s === "object" &&
+					    typeof w.s.visitor === "object" &&
+					    typeof w.s.visitor.getAnalyticsVisitorID === "function" &&
+					    typeof w.s.visitor.getMarketingCloudVisitorID === "function") {
 						try {
 							mid = w.s.visitor.getMarketingCloudVisitorID();
 							if (mid) {

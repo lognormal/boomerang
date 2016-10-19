@@ -164,8 +164,8 @@
 				return;
 			}
 
-			if (data
-			    && impl.cross_domain_url.indexOf(event.origin) >= -1) {
+			if (data &&
+			    impl.cross_domain_url.indexOf(event.origin) >= -1) {
 				// convert cookie parameters to our own session
 				impl.session = {
 					ID: data.si,
@@ -379,10 +379,10 @@
 
 			// Since this is before session data is set we override
 			// session data here before it's put on the beacon
-			if (impl.session
-			    && !impl.session_transfer_timedout
-			    && impl.enabled
-			    && impl.session_transferred) {
+			if (impl.session &&
+			    !impl.session_transfer_timedout &&
+			    impl.enabled &&
+			    impl.session_transferred) {
 				// Make sure that we are only updating the session start time if the following criteria match:
 				//  - session.start is less than 24h old (maxSessionExpiry)
 				if (!isNaN(impl.session.start) && impl.session.start > (BOOMR.now() - maxSessionExpiry)) {

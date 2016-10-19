@@ -118,13 +118,13 @@
 				// organize the temporary string based on index as the current session length
 				// plus 1 since session length will never be 0. If passed in take a base Length
 				// to apply
-				var tmp = sessionHistoryEntries[shIndex].timestamp
-						+ "="
-						+ ((baseLength ? baseLength : 0) + shIndex + 1)
-						+ ":"
-						+ sessionHistoryEntries[shIndex].offByOne
-						+ ":"
-						+ sessionHistoryEntries[shIndex].loadTime;
+				var tmp = sessionHistoryEntries[shIndex].timestamp +
+					"=" +
+					((baseLength ? baseLength : 0) + shIndex + 1) +
+					":" +
+					sessionHistoryEntries[shIndex].offByOne +
+					":" +
+					sessionHistoryEntries[shIndex].loadTime;
 
 				sessionHistoryCollection.push(tmp);
 			}

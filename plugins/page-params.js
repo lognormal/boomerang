@@ -226,12 +226,18 @@
 		},
 
 		isValid: function(o) {
-			return (						// Valid iff
-				o						// object is non-falsy
-				&& typeof o === "object"			// and object is an object
-				&& o.hasOwnProperty("type")			// and object has a type attribute
-				&& typeof this[o.type] === "function"		// and object's type attribute is a valid handler type
-				&& (this.varname || o.label)			// and handler has a varname or object has a label
+			// Valid iff
+			return (
+				// object is non-falsy
+				o &&
+				// and object is an object
+				typeof o === "object" &&
+				// and object has a type attribute
+				o.hasOwnProperty("type") &&
+				// and object's type attribute is a valid handler type
+				typeof this[o.type] === "function" &&
+				// and handler has a varname or object has a label
+				(this.varname || o.label)
 			);
 		},
 
@@ -734,13 +740,16 @@
 			}
 			BOOMR.debug("Got URL Substring: " + o.parameter1 + ", " + o.parameter2, "PageVars");
 
-			return this.handleRegEx("^"
-						+ o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*?").replace(/^\*/, ".*")
-						+ "(.*)"
-						+ (o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*")
-						+ "$",
-					"$1",
-					l.href);
+			return this.handleRegEx(
+				(
+					"^" +
+					o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*?").replace(/^\*/, ".*") +
+					"(.*)" +
+					(o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*") +
+					"$"
+				),
+				"$1",
+				l.href);
 		},
 
 		UserAgentRegex: function(o) {
@@ -961,10 +970,10 @@
 				// This variable is not otherwise used.
 				frameLoc = frame.location && frame.location.href;
 
-				if (!("performance" in frame
-					  && frame.performance
-					  && frame.performance.getEntriesByName
-					  && frame.performance.getEntriesByType)) {
+				if (!("performance" in frame &&
+				    frame.performance &&
+				    frame.performance.getEntriesByName &&
+				    frame.performance.getEntriesByType)) {
 					return null;
 				}
 
@@ -2107,10 +2116,10 @@
 				data = edata;
 			}
 
-			if (  !data.url
-			  && (!data.timers     || !data.timers.length)
-			  && (!data.metrics    || !data.metrics.length)
-			  && (!data.dimensions || !data.dimensions.length)
+			if ( !data.url &&
+			    (!data.timers     || !data.timers.length) &&
+			    (!data.metrics    || !data.metrics.length) &&
+			    (!data.dimensions || !data.dimensions.length)
 			) {
 				return null;
 			}
