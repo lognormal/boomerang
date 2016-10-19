@@ -356,6 +356,11 @@
 			// send any queued beacons first
 			BOOMR.real_sendBeacon();
 
+			// If the resource has an onComplete event, trigger it.
+			if (resource.onComplete) {
+				resource.onComplete(resource);
+			}
+
 			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
 			// was for this resource.
 			if (BOOMR.plugins.ResourceTiming &&
@@ -367,11 +372,6 @@
 					resource.timing.loadEventEnd);
 
 				BOOMR.addVar("restiming", JSON.stringify(r));
-			}
-
-			// If the resource has an onComplete event, trigger it.
-			if (resource.onComplete) {
-				resource.onComplete(resource);
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings
