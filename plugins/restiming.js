@@ -468,6 +468,11 @@ see: http://www.w3.org/TR/resource-timing/
 			return [];
 		}
 
+		// sort entries by start time
+		entries.sort(function(a, b) {
+			return a.startTime - b.startTime;
+		});
+
 		var filteredEntries = [];
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
