@@ -518,17 +518,21 @@
 
 		/**
 		 * Writes a bunch of timestamps onto the beacon that help in request tracing on the server
-		 * 	- rt.tstart: The value of t_start that we determined was appropriate
-		 *	- rt.cstart: The value of t_start from the cookie if different from rt.tstart
-		 *	- rt.bstart: The timestamp when boomerang started
-		 *	- rt.blstart:The timestamp when boomerang was added to the host page
-		 *	- rt.end:    The timestamp when the t_done timer ended
+		 * - rt.tstart: The value of t_start that we determined was appropriate
+		 * - rt.nstart: The value of navigationStart if different from rt.tstart
+		 * - rt.cstart: The value of t_start from the cookie if different from rt.tstart
+		 * - rt.bstart: The timestamp when boomerang started
+		 * - rt.blstart:The timestamp when boomerang was added to the host page
+		 * - rt.end:    The timestamp when the t_done timer ended
 		 *
 		 * @param t_start The value of t_start that we plan to use
 		 */
 		setSupportingTimestamps: function(t_start) {
 			if (t_start) {
 				BOOMR.addVar("rt.tstart", t_start);
+			}
+			if (typeof impl.navigationStart === "number" && impl.navigationStart !== t_start) {
+				BOOMR.addVar("rt.nstart", impl.navigationStart);
 			}
 			if (typeof impl.t_start === "number" && impl.t_start !== t_start) {
 				BOOMR.addVar("rt.cstart", impl.t_start);
@@ -929,7 +933,7 @@
 			// make sure old variables don't stick around
 			BOOMR.removeVar(
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
-				"rt.tstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+				"rt.tstart", "rt.nstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
 				"http.errno", "http.method", "xhr.sync"
 			);
 
