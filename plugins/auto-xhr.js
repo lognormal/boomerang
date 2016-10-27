@@ -3,7 +3,8 @@
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
 	    alwaysSendXhr = false,
-	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
+	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ],
+	    ie10or11;
 
 	/**
 	 * @constant
@@ -56,6 +57,12 @@
 		// Nothing to instrument
 		return;
 	}
+
+	// User-agent sniff IE 10 and IE 11 to apply a workaround for an XHR bug (see below when
+	// this variable is used).  We can only detect this bug by UA sniffing.  IE 11 requires a
+	// different way of detection than IE 11.
+	ie10or11 = (window.navigator && navigator.appVersion && navigator.appVersion.indexOf("MSIE 10") !== -1) ||
+	           (window.navigator && navigator.userAgent && navigator.userAgent.match(/Trident.*rv[ :]*11\./));
 
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -149,9 +156,41 @@
 	 * Disable internal MutationObserver instance. Use this when uninstrumenting the site we're on.
 	 */
 	MutationHandler.stop = function() {
-		if (MutationHandler.observer && MutationHandler.observer.observer) {
+		MutationHandler.pause();
+		MutationHandler.observer = null;
+	};
+
+	/**
+	 * @method
+	 * @memberof MutationHandler
+	 * @static
+	 *
+	 * @desc
+	 * Pauses the MutationObserver.  Call [resume]{@link handler#resume} to start it back up.
+	 */
+	MutationHandler.pause = function() {
+		if (MutationHandler.observer &&
+		    MutationHandler.observer.observer &&
+		    !MutationHandler.isPaused) {
+			MutationHandler.isPaused = true;
 			MutationHandler.observer.observer.disconnect();
-			MutationHandler.observer = null;
+		}
+	};
+
+	/**
+	 * @method
+	 * @memberof MutationHandler
+	 * @static
+	 *
+	 * @desc
+	 * Resumes the MutationObserver after a [pause]{@link handler#pause}.
+	 */
+	MutationHandler.resume = function() {
+		if (MutationHandler.observer &&
+		    MutationHandler.observer.observer &&
+		    MutationHandler.isPaused) {
+			MutationHandler.isPaused = false;
+			MutationHandler.observer.observer.observe(d, MutationHandler.observer.config);
 		}
 	};
 
@@ -166,22 +205,28 @@
 	 * will be called if something happens
 	 */
 	MutationHandler.start = function() {
+		var config = {
+			childList: true,
+			attributes: true,
+			subtree: true,
+			attributeFilter: ["src", "href"]
+		};
+
 		// Add a perpetual observer
 		MutationHandler.observer = BOOMR.utils.addObserver(
 			d,
-			{
-				childList: true,
-				attributes: true,
-				subtree: true,
-				attributeFilter: ["src", "href"]
-			},
+			config,
 			null, // no timeout
 			handler.mutation_cb, // will always return true
 			null, // no callback data
 			handler
 		);
 
-		BOOMR.subscribe("page_unload", MutationHandler.stop, null, MutationHandler);
+		if (MutationHandler.observer) {
+			MutationHandler.observer.config = config;
+
+			BOOMR.subscribe("page_unload", MutationHandler.stop, null, MutationHandler);
+		}
 	};
 
 	/**
@@ -1062,6 +1107,19 @@
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 
+								// For IE 10 and 11, we need to turn off the MutationObserver before responseXML
+								// is first referenced, otherwise responseXML might be malformed due to a browser
+								// bug (where extra newlines get added in nodes with UTF-8 content)
+								if (impl.ie1011fix && ie10or11 && req.readyState === 4) {
+									MutationHandler.pause();
+
+									// this reference to responseXML with MO off is enough to ensure the browser
+									// bug is not triggered
+									var nop = req.responseXML;
+
+									MutationHandler.resume();
+								}
+
 								// Listen here as well, as DOM changes might happen on other listeners
 								// of readyState = 4 (complete), and we want to make sure we've
 								// started the addEvent() if so.  Only listen if the status is non-zero,
@@ -1181,7 +1239,8 @@
 	}
 
 	impl = {
-		spaBackEndResources: SPA_RESOURCES_BACK_END
+		spaBackEndResources: SPA_RESOURCES_BACK_END,
+		ie1011fix: true
 	};
 
 	/**
@@ -1273,7 +1332,7 @@
 			a = BOOMR.window.document.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "ie1011fix"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;

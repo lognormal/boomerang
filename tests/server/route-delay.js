@@ -14,7 +14,8 @@ var mimeTypes = {
 	"jpg": "image/jpeg",
 	"png": "image/png",
 	"js": "text/javascript",
-	"css": "text/css"
+	"css": "text/css",
+	"xml": "text/xml"
 };
 
 //
@@ -56,6 +57,7 @@ module.exports = function(req, res) {
 	var response = q.response;
 	var sendACAO = !(q.noACAO === "1"); // send by default
 	var sendTAO = (q.TAO === "1"); // don't send by default
+	var responseHeaders = q.headers;
 
 	// if we get a '+' or '-' delay prefix, add/sub its value with the delay used on the
 	// previous request. This is usefull in cases where we need to hit the
@@ -76,16 +78,35 @@ module.exports = function(req, res) {
 	previousDelay = delay;
 
 	setTimeout(function() {
+		var headers = {};
+
 		if (sendACAO) {
-			res.set("Access-Control-Allow-Origin", "*");
+			headers["Access-Control-Allow-Origin"] = "*";
 		}
 
 		if (sendTAO) {
-			res.set("Timing-Allow-Origin", "*");
+			headers["Timing-Allow-Origin"] = "*";
+		}
+
+		if (responseHeaders) {
+			var responseHeadersObj = null;
+			try {
+				responseHeadersObj = JSON.parse(responseHeaders);
+			}
+			catch (e) {
+				// nop
+			}
+
+			for (var headerName in responseHeadersObj) {
+				if (responseHeadersObj.hasOwnProperty(headerName) && responseHeadersObj[headerName]) {
+					headers[headerName] = responseHeadersObj[headerName];
+				}
+			}
 		}
 
 		if (response) {
-			return res.send(response);
+			res.writeHead(200, headers);
+			return res.end(response);
 		}
 
 		var filePath = path.join(wwwRoot, file);
@@ -95,10 +116,16 @@ module.exports = function(req, res) {
 				return res.send(404);
 			}
 
-			var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
-			res.writeHead(200, {
-				"Content-Type": mimeType
-			});
+			// determine MIME type
+			if (!headers["Content-Type"]) {
+				var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
+
+				if (mimeType) {
+					headers["Content-Type"] = mimeType;
+				}
+			}
+
+			res.writeHead(200, headers);
 
 			var fileStream = fs.createReadStream(filePath);
 			fileStream.pipe(res);

@@ -64,11 +64,9 @@ function respond301(req, res) {
 // Routes
 //
 
-
 // /blackhole and /204: returns a 204
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);
-
 
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
