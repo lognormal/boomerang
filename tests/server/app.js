@@ -64,11 +64,9 @@ function respond301(req, res) {
 // Routes
 //
 
-
 // /blackhole and /204: returns a 204
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);
-
 
 // /delay - delays a response
 app.get("/delay", require("./route-delay"));
@@ -100,5 +98,3 @@ app.post("/blackhole/no-op", respond204);
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));
-
-

@@ -223,7 +223,7 @@
 		});
 
 		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results", "BOOMR_configt"]);
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt"]);
 		window.mocha.checkLeaks();
 
 		// set globals
