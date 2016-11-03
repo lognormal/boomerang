@@ -87,6 +87,21 @@ is used, meaning that the request body will look like <code>data={"foo":"bar","b
 or <code>data=foo%3Dbar%26baz%3Dqux</code>, depending on the content type.
 </dd>
 
+<dt>beacon_auth_key</dt>
+<dd>
+<strong>[optional]</strong>
+Specify the HTTP authentication key for beacon requests.  This key will default to <code>'Authorization'</code>, but may be explicitly set using this
+setting.  Some services use specialized authentication keys such as <code>'X-API-KEY'</code>. 
+</dd>
+
+<dt>beacon_auth_token</dt>
+<dd>
+<strong>[optional]</strong>
+Specify the HTTP authentication token for beacon requests.  This token is generally supplied by the service accepting the beacon request and will take 
+a form similar to<code>'SPLUNK 4F00X7AF-B3D3-4E07-8C6C-12345678901'</code>.  The value supplied here will be contatenated with the beacon_auth_key to 
+form a complete HTTP request header field such as <code>'Authorization':'SPLUNK 4F00X7AF-B3D3-4E07-8C6C-12345678901'</code>.
+</dd>
+
 <dt>site_domain</dt>
 <dd>
 <strong>[recommended]</strong>
