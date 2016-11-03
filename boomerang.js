@@ -243,9 +243,12 @@ BOOMR_check_doc_domain();
 		// request size then use GET if the request URL is less than MAX_GET_LENGTH chars
 		// otherwise it will fall back to a POST request.
 		beacon_type: "AUTO",
-        //  beacon authorization token.  This is only needed if your are using a POST and
-        //  the beacon requires an Authorization token to accept your data
-        beacon_auth_token: "",
+		//  beacon authorization key value.  Most systems will use the 'Authentication' keyword, but some
+		//  some services use keys like 'X-Auth-Token' or other custom keys
+		beacon_auth_key: "Authorization",
+		//  beacon authorization token.  This is only needed if your are using a POST and
+		//  the beacon requires an Authorization token to accept your data
+		beacon_auth_token: "",
 		// strip out everything except last two parts of hostname.
 		// This doesn't work well for domains that end with a country tld,
 		// but we allow the developer to override site_domain for that.
@@ -797,7 +800,8 @@ BOOMR_check_doc_domain();
 			    properties = [
 				    "beacon_url",
 				    "beacon_type",
-                    "beacon_auth_token",
+				    "beacon_auth_key",
+				    "beacon_auth_token",
 				    "site_domain",
 				    "user_ip",
 				    "strip_query_string",
@@ -1484,8 +1488,8 @@ BOOMR_check_doc_domain();
 			// change the first parameter prefix for the boomerang url parameters to &
 			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + paramsJoined;
 
-			if (url.length > BOOMR.constants.MAX_GET_LENGTH) {
-				// switch to a XHR beacon if the GET length is too long
+			if (impl.beacon_type === "POST" || url.length > BOOMR.constants.MAX_GET_LENGTH) {
+				// switch to a XHR beacon if the the user has specified a POST OR GET length is too long
 				useImg = false;
 			}
 
@@ -1506,7 +1510,7 @@ BOOMR_check_doc_domain();
 				useImg = true;
 			}
 
-			if (useImg  && impl.beacon_type !== "POST" ) {
+			if (useImg) {
 				img = new Image();
 				img.src = url;
 
@@ -1524,9 +1528,10 @@ BOOMR_check_doc_domain();
 				xhr = new (BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
 				xhr.open("POST", impl.beacon_url);
 				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				if( impl.beacon_auth_token !== "")
-                    xhr.setRequestHeader ("Authorization", impl.beacon_auth_token );
-                xhr.send(paramsJoined);
+				if( impl.beacon_auth_token !== "") {
+					xhr.setRequestHeader (impl.beacon_auth_key, impl.beacon_auth_token );
+				}
+				xhr.send(paramsJoined);
 			}
 
 			return true;
