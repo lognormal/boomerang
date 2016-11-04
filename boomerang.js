@@ -249,9 +249,6 @@ BOOMR_check_doc_domain();
 		//  beacon authorization token.  This is only needed if your are using a POST and
 		//  the beacon requires an Authorization token to accept your data
 		beacon_auth_token: "",
-		//  beacon POST format.   By default any POST will be sent as parameters separated by '&'. 
-		//  if a user would rather post this data to the beacon as JSON, simply set this paramter to "JSON".
-		beacon_post_format: "", 
 		// strip out everything except last two parts of hostname.
 		// This doesn't work well for domains that end with a country tld,
 		// but we allow the developer to override site_domain for that.
@@ -805,7 +802,6 @@ BOOMR_check_doc_domain();
 				    "beacon_type",
 				    "beacon_auth_key",
 				    "beacon_auth_token",
-				    "beacon_post_format",
 				    "site_domain",
 				    "user_ip",
 				    "strip_query_string",
@@ -1432,7 +1428,6 @@ BOOMR_check_doc_domain();
 
 			impl.vars["ua.plt"] = navigator.platform;
 			impl.vars["ua.vnd"] = navigator.vendor;
-			impl.vars["ua.raw"] = navigator.userAgent;
 
 			if (w !== window) {
 				impl.vars["if"] = "";
@@ -1539,13 +1534,7 @@ BOOMR_check_doc_domain();
 					}
 					xhr.setRequestHeader (impl.beacon_auth_key, impl.beacon_auth_token );
 				}
-				// If the user has opted to post as JSON, then create JSON from the parameters
-				//     otherwise send it as parameters separated by & 
-				if(impl.beacon_post_format !== ""  && impl.beacon_post_format === "JSON") {
-					xhr.send(JSON.stringify(JSON.parse('{"' + decodeURI(paramsJoined).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')));  
-				}  else {
-					xhr.send(paramsJoined);
-				}
+				xhr.send(paramsJoined);
 			}
 
 			return true;
