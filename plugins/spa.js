@@ -103,6 +103,15 @@
 		 * to monitor for additional resources for a SPA Hard navigation
 		 */
 		onLoadSpaHardMissed: function() {
+			// We missed the initial route change (we loaded too slowly), so we're too
+			// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
+			initialRouteChangeCompleted = true;
+
+			if (autoXhrEnabled) {
+				// re-enable AutoXHR if it's enabled
+				BOOMR.plugins.AutoXHR.enableAutoXhr();
+			}
+
 			// Trigger a route change
 			BOOMR.plugins.SPA.route_change(impl.spaHardMissedOnComplete);
 		},
@@ -122,15 +131,6 @@
 			}
 
 			if (hadRouteChange) {
-				if (autoXhrEnabled) {
-					// re-enable AutoXHR if it's enabled
-					BOOMR.plugins.AutoXHR.enableAutoXhr();
-				}
-
-				// We missed the initial route change (we loaded too slowly), so we're too
-				// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
-				initialRouteChangeCompleted = true;
-
 				// kick off onLoadSpaHardMissed once onload has fired, or immediately
 				// if onload has already fired
 				BOOMR.attach_page_ready(this.onLoadSpaHardMissed);
