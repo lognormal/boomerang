@@ -205,6 +205,11 @@
 	 * will be called if something happens
 	 */
 	MutationHandler.start = function() {
+		if (MutationHandler.observer) {
+			// don't start twice
+			return;
+		}
+
 		var config = {
 			childList: true,
 			attributes: true,
@@ -1394,7 +1399,9 @@
 					autoXhrEnabled = false;
 				}
 
-				BOOMR.instrumentXHR();
+				if (autoXhrEnabled) {
+					BOOMR.instrumentXHR();
+				}
 			}
 			else if (autoXhrEnabled) {
 				BOOMR.instrumentXHR();
@@ -1410,6 +1417,10 @@
 		},
 		getPathname: getPathName,
 		enableAutoXhr: function() {
+			if (!autoXhrEnabled) {
+				BOOMR.instrumentXHR();
+			}
+
 			autoXhrEnabled = true;
 		}
 	};
