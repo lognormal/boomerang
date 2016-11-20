@@ -45,7 +45,7 @@ Decompressing the above value will give us the original data for the marks and m
 ### Compatibility and Browser Support
 
 
-Many browsers support(http://caniuse.com/#feat=user-timing) the UserTiming API, e.g.:
+Many browsers [support](http://caniuse.com/#feat=user-timing) the UserTiming API, e.g.:
 * Chrome 25+
 * Edge
 * Firefox 38+
