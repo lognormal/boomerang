@@ -20,6 +20,22 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		}
 	});
 
+	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.lastBeacon();
+			assert.equal(b.t_resp, pt.responseStart - pt.fetchStart);
+		}
+	});
+
+	it("Should have a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.lastBeacon();
+			assert.equal(b.t_page, b.t_done - b.t_resp);
+		}
+	});
+
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
@@ -41,8 +57,36 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		}
 	});
 
-	it("Should have sent the http.initiator as 'spa'", function() {
+	it("Should have sent the http.initiator as 'spa_hard'", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["http.initiator"], "spa");
+		assert.equal(b["http.initiator"], "spa_hard");
+	});
+
+	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
+		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var b = tf.lastBeacon();
+			assert.isDefined(b.nt_red_cnt);
+			assert.isDefined(b.nt_nav_type);
+			assert.isDefined(b.nt_nav_st);
+			assert.isDefined(b.nt_red_st);
+			assert.isDefined(b.nt_red_end);
+			assert.isDefined(b.nt_fet_st);
+			assert.isDefined(b.nt_dns_st);
+			assert.isDefined(b.nt_dns_end);
+			assert.isDefined(b.nt_con_st);
+			assert.isDefined(b.nt_con_end);
+			assert.isDefined(b.nt_req_st);
+			assert.isDefined(b.nt_res_st);
+			assert.isDefined(b.nt_res_end);
+			assert.isDefined(b.nt_domloading);
+			assert.isDefined(b.nt_domint);
+			assert.isDefined(b.nt_domcontloaded_st);
+			assert.isDefined(b.nt_domcontloaded_end);
+			assert.isDefined(b.nt_domcomp);
+			assert.isDefined(b.nt_load_st);
+			assert.isDefined(b.nt_load_end);
+			assert.isDefined(b.nt_unload_st);
+			assert.isDefined(b.nt_unload_end);
+		}
 	});
 };

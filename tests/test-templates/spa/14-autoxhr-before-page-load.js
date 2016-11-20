@@ -41,8 +41,8 @@ BOOMR_test.templates.SPA["14-autoxhr-before-page-load"] = function() {
 		}
 	});
 
-	it("Should have sent the http.initiator as 'spa'", function() {
+	it("Should have sent the http.initiator as 'spa_hard'", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["http.initiator"], "spa");
+		assert.equal(b["http.initiator"], "spa_hard");
 	});
 };

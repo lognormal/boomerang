@@ -1,4 +1,5 @@
 {
   "directory": "tests/vendor",
-  "color" : false
+  "color" : false,
+  "interactive": false
 }

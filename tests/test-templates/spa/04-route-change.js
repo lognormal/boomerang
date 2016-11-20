@@ -5,6 +5,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
+	var pathName = window.location.pathname;
+
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
@@ -13,8 +15,12 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		assert.equal(tf.beacons.length, 3);
 	});
 
-	it("Should have sent all beacons as http.initiator = SPA", function() {
-		for (var i = 0; i < 2; i++) {
+	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
+		assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+	});
+
+	it("Should have sent all subsequent beacons as http.initiator = spa", function() {
+		for (var i = 1; i < 2; i++) {
 			assert.equal(tf.beacons[i]["http.initiator"], "spa");
 		}
 	});
@@ -22,14 +28,14 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 	//
 	// Beacon 1
 	//
-	it("Should have sent the first beacon for /04-route-change.html", function() {
+	it("Should have sent the first beacon for " + pathName, function() {
 		var b = tf.beacons[0];
-		assert.isTrue(b.u.indexOf("/04-route-change.html") !== -1);
+		assert.isTrue(b.u.indexOf(pathName) !== -1);
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
+			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000, 0);
 		}
 	});
 
@@ -51,6 +57,22 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+	});
+
+	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[0];
+			assert.equal(b.t_resp, pt.responseStart - pt.fetchStart);
+		}
+	});
+
+	it("Should have a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[0];
+			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}
 	});
 
@@ -78,17 +100,59 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
+	it("Should have sent the second beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[1];
+
+			assert.operator(b.t_resp, ">=", 0);
+		}
+	});
+
+	it("Should have sent the second beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[1];
+			assert.equal(b.t_page, b.t_done - b.t_resp);
+		}
+	});
+
 	//
 	// Beacon 3
 	//
-	it("Should have sent the third beacon for /04-route-change.html", function() {
+	it("Should have sent the third beacon for " + pathName, function() {
 		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("/04-route-change.html") !== -1);
+		assert.isTrue(b.u.indexOf(pathName) !== -1);
 	});
 
-	it("Should have sent the third with a timestamp of less than 1 second", function() {
-		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[2];
-		assert.operator(b.t_done, "<=", 1000);
+	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
+		if (window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, ">=", 3000);
+		}
+	});
+
+	it("Should have sent the third with a timestamp of under 1 second (if MutationObserver is not supported)", function() {
+		if (!window.MutationObserver) {
+			var b = tf.beacons[2];
+			assert.operator(b.t_done, "<=", 1000);
+		}
+	});
+
+	it("Should have sent the third beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[2];
+
+			assert.operator(b.t_resp, ">=", 0);
+		}
+	});
+
+	it("Should have sent the third beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
+		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			var pt = window.performance.timing;
+			var b = tf.beacons[2];
+			assert.equal(b.t_page, b.t_done - b.t_resp);
+		}
 	});
 };

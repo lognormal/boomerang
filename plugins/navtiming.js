@@ -21,7 +21,27 @@ see: http://www.w3.org/TR/navigation-timing/
 	// A private object to encapsulate all your implementation details
 	var impl = {
 		complete: false,
+		sendBeacon: function() {
+			this.complete = true;
+			BOOMR.sendBeacon();
+		},
 		xhr_done: function(edata) {
+			var p;
+
+			if (edata && edata.initiator === "spa_hard") {
+				// Single Page App - Hard refresh: Send page's NavigationTiming data, if
+				// available.
+				impl.done(edata);
+				return;
+			}
+			else if (edata && edata.initiator === "spa") {
+				// Single Page App - Soft refresh: The original hard navigation is no longer
+				// relevant for this soft refresh, nor is the "URL" for this page, so don't
+				// add NavigationTiming or ResourceTiming metrics.
+				impl.sendBeacon();
+				return;
+			}
+
 			var w = BOOMR.window, res, data = {}, k;
 
 			if (!edata) {
@@ -32,11 +52,10 @@ see: http://www.w3.org/TR/navigation-timing/
 				edata = edata.data;
 			}
 
-			if (edata.url && w.performance && w.performance.getEntriesByName) {
-				res = w.performance.getEntriesByName(edata.url);
-				if (res && res.length > 0) {
-					res = res[0];
-
+			p = BOOMR.getPerformance();
+			if (edata.url && p) {
+				res = BOOMR.getResourceTiming(edata.url, function(a, b) { return a.responseEnd - b.responseEnd; });
+				if (res) {
 					data = {
 						nt_red_st: res.redirectStart,
 						nt_red_end: res.redirectEnd,
@@ -56,7 +75,10 @@ see: http://www.w3.org/TR/navigation-timing/
 
 					for (k in data) {
 						if (data.hasOwnProperty(k) && data[k]) {
-							data[k] += w.performance.timing.navigationStart;
+							data[k] += p.timing.navigationStart;
+
+							// don't need to send microseconds
+							data[k] = Math.round(data[k]);
 						}
 					}
 
@@ -66,9 +88,11 @@ see: http://www.w3.org/TR/navigation-timing/
 			if (edata.timing) {
 				res = edata.timing;
 				if (!data.nt_req_st) {
+					// requestStart will be 0 if Timing-Allow-Origin header isn't set on the xhr response
 					data.nt_req_st = res.requestStart;
 				}
 				if (!data.nt_res_st) {
+					// responseStart will be 0 if Timing-Allow-Origin header isn't set on the xhr response
 					data.nt_res_st = res.responseStart;
 				}
 				if (!data.nt_res_end) {
@@ -89,10 +113,9 @@ see: http://www.w3.org/TR/navigation-timing/
 			BOOMR.addVar(data);
 
 			try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-			catch(ignore) { /* empty */ }
+			catch (ignore) { /* empty */ }
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		done: function() {
@@ -103,7 +126,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 			impl.addedVars = [];
 
-			p = w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance;
+			p = BOOMR.getPerformance();
 			if (p && p.timing && p.navigation) {
 				BOOMR.info("This user agent supports NavigationTiming.", "nt");
 				pn = p.navigation;
@@ -144,7 +167,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				BOOMR.addVar(data);
 
 				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-				catch(ignore) { /* empty */ }
+				catch (ignore) { /* empty */ }
 			}
 
 			// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
@@ -155,7 +178,7 @@ see: http://www.w3.org/TR/navigation-timing/
 				pt = w.chrome.loadTimes();
 				if (pt) {
 					data = {
-						nt_spdy: (pt.wasFetchedViaSpdy?1:0),
+						nt_spdy: (pt.wasFetchedViaSpdy ? 1 : 0),
 						nt_cinf: pt.connectionInfo,
 						nt_first_paint: pt.firstPaintTime
 					};
@@ -163,12 +186,11 @@ see: http://www.w3.org/TR/navigation-timing/
 					BOOMR.addVar(data);
 
 					try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-					catch(ignore) { /* empty */ }
+					catch (ignore) { /* empty */ }
 				}
 			}
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+			impl.sendBeacon();
 		},
 
 		clear: function() {
@@ -177,6 +199,15 @@ see: http://www.w3.org/TR/navigation-timing/
 				impl.addedVars = [];
 			}
 			this.complete = false;
+		},
+
+		prerenderToVisible: function() {
+			// ensure we add our data to the beacon even if we had added it
+			// during prerender (in case another beacon went out in between)
+			this.complete = false;
+
+			// add our data to the beacon
+			this.done();
 		}
 	};
 
@@ -185,6 +216,7 @@ see: http://www.w3.org/TR/navigation-timing/
 			if (!impl.initialized) {
 				// we'll fire on whichever happens first
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
+				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 				BOOMR.subscribe("onbeacon", impl.clear, null, impl);

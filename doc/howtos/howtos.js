@@ -25,12 +25,12 @@ BOOMR.subscribe("before_beacon", function(o) {
 	if (o.t_other) {
 		t_other = o.t_other.replace(/^,/, "").replace(/\|/g, " = ").split(",");
 		html += "Other timers measured: <br>";
-		for (var i=0; i<t_other.length; i++) {
+		for (var i = 0; i < t_other.length; i++) {
 			html += "&nbsp;&nbsp;&nbsp;" + t_other[i] + " ms<br>";
 		}
 	}
 	if (o.bw) {
-		html += "Your bandwidth to this server is " + parseInt(o.bw*8/1024) + "kbps (&#x00b1;" + parseInt(o.bw_err*100/o.bw) + "%)<br>";
+		html += "Your bandwidth to this server is " + parseInt(o.bw * 8 / 1024) + "kbps (&#x00b1;" + parseInt(o.bw_err * 100 / o.bw) + "%)<br>";
 	}
 
 	if (o.lat) {
@@ -43,7 +43,7 @@ BOOMR.subscribe("before_beacon", function(o) {
 	if (others.length) {
 		r.innerHTML += "Other parameters:<br>";
 
-		for (i=0; i<others.length; i++) {
+		for (i = 0; i < others.length; i++) {
 			var t = document.createTextNode(others[i]);
 			r.innerHTML += "&nbsp;&nbsp;&nbsp;";
 			r.appendChild(t);

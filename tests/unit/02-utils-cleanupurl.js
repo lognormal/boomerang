@@ -48,7 +48,7 @@ describe("BOOMR.utils.cleanupURL()", function() {
 		});
 
 		var url = "/app/page?key=value",
-			expected = "/app/page?qs-redacted";
+		    expected = "/app/page?qs-redacted";
 		assert.equal(BOOMR.utils.cleanupURL(url), expected);
 
 		BOOMR = BOOMR_reset;
@@ -61,9 +61,25 @@ describe("BOOMR.utils.cleanupURL()", function() {
 		});
 
 		var url = "/app/page?key=value",
-			expected = "/app/page?key=value";
+		    expected = "/app/page?key=value";
 		assert.equal(BOOMR.utils.cleanupURL(url), expected);
 
 		BOOMR = BOOMR_reset;
+	});
+
+	it("Should not trim a URL underneath the limit", function() {
+		assert.equal(BOOMR.utils.cleanupURL("http://foo.com", 1000), "http://foo.com");
+	});
+
+	it("Should trim a URL with a query string over the limit at the query string", function() {
+		assert.equal(BOOMR.utils.cleanupURL("http://foo.com?aaaaaa", 20), "http://foo.com?...");
+	});
+
+	it("Should trim a URL with a query string too long over the limit at the limit", function() {
+		assert.equal(BOOMR.utils.cleanupURL("http://foo.com?aaaaaa", 14), "http://foo....");
+	});
+
+	it("Should trim a URL without a query string over the limit at the limit", function() {
+		assert.equal(BOOMR.utils.cleanupURL("http://foo.com/a/b/c/d", 17), "http://foo.com...");
 	});
 });

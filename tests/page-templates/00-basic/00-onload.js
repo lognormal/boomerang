@@ -35,6 +35,11 @@ describe("e2e/00-basic/00-onload", function() {
 			(window.console && window.console.memory)) {
 			assert.isNumber(tf.lastBeacon()["mem.total"], "mem.total");
 			assert.isNumber(tf.lastBeacon()["mem.used"], "mem.used");
+
+			// Might not exist except recent builds
+			if (tf.lastBeacon()["mem.limit"]) {
+				assert.isNumber(tf.lastBeacon()["mem.limit"], "mem.limit");
+			}
 		}
 	});
 

@@ -7,30 +7,30 @@ describe("BOOMR.utils cookies", function() {
 	var cookieName = "myCookie";
 
 	/*
-	   NOTE:
+		NOTE:
 
-	   These tests can only run in a client-server setup with a properly
-	   configured FQDN for the server.
+		These tests can only run in a client-server setup with a properly
+		configured FQDN for the server.
 
-	   Please read:
-		 RFC 2109 (https://www.ietf.org/rfc/rfc2109.txt)
-	   and this thread on the chromium bugtracker:
-		 https://code.google.com/p/chromium/issues/detail?id=535
+		Please read:
+			RFC 2109 (https://www.ietf.org/rfc/rfc2109.txt)
+		and this thread on the chromium bugtracker:
+			https://code.google.com/p/chromium/issues/detail?id=535
 
-	   In your development environment please configure your localhost with a fully
-	   qualified domain name locally:
+		In your development environment please configure your localhost with a fully
+		qualified domain name locally:
 
-	   In a UNIX/Mac/Linux environment you can add a name for 127.0.0.1 to
-	   your /etc/hosts such as:
-		 127.0.0.1	www.example.org  www
+		In a UNIX/Mac/Linux environment you can add a name for 127.0.0.1 to
+		your /etc/hosts such as:
+			127.0.0.1	www.example.org  www
 
-	   You can do the same under windows, however the path to the file is a
-	   little different:
+		You can do the same under windows, however the path to the file is a
+		little different:
 
-	   Valid for Windown Vista/7/2008/2012: C:\Windows\System32\drivers\etc\hosts
+		Valid for Windown Vista/7/2008/2012: C:\Windows\System32\drivers\etc\hosts
 
-	   We (as in the boomerang team) are not responsible for any accidental or
-	   direct damages and or damage claims. See LICENSE for further information.
+		We (as in the boomerang team) are not responsible for any accidental or
+		direct damages and or damage claims. See LICENSE for further information.
 	*/
 
 	if (window.location.protocol === "file:") {
@@ -39,11 +39,6 @@ describe("BOOMR.utils cookies", function() {
 
 	// need to skip some tests this isn't on a TLD (eg localhost), because cookies can't get set
 	var canSetCookies = window.location.host.indexOf(".") !== -1;
-
-	// cookie domain can't have a port
-	var cookieDomain = window.location.host.indexOf(":") === -1 ?
-		window.location.host :
-		window.location.host.substring(0, window.location.host.indexOf(":"));
 
 	describe("BOOMR.utils.getCookie()", function() {
 		it("Should have an exisiting BOOMR.utils.getCookie function", function() {
@@ -60,6 +55,10 @@ describe("BOOMR.utils cookies", function() {
 
 		it("Should return null when calling with null as first argument", function() {
 			assert.isNull(BOOMR.utils.getCookie(null));
+		});
+
+		it("Should return undefined when calling with not existing cookie", function() {
+			assert.isUndefined(BOOMR.utils.getCookie("some-none-existing-cooke"));
 		});
 	});
 
@@ -134,7 +133,7 @@ describe("BOOMR.utils cookies", function() {
 		});
 
 		it("Should validate that document.cookie contains quotes for a complex cookie", function() {
-			var c = { a: 10, b: 20, c:"foo bar" };
+			var c = { a: 10, b: 20, c: "foo bar" };
 			BOOMR.utils.setCookie("complex-cookie", c);
 
 			assert.match(document.cookie, /(^|; *)complex-cookie="a=10&b=20&c=foo%20bar"($| *;)/, "complex-cookie should be quoted");

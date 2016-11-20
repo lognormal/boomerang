@@ -35,7 +35,7 @@
 	*/
 	function safe_add(x, y) {
 		var lsw = (x & 0xFFFF) + (y & 0xFFFF),
-			msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+		    msw = (x >> 16) + (y >> 16) + (lsw >> 16);
 		return (msw << 16) | (lsw & 0xFFFF);
 	}
 
@@ -74,10 +74,10 @@
 		x[(((len + 64) >>> 9) << 4) + 14] = len;
 
 		var i, olda, oldb, oldc, oldd,
-			a =  1732584193,
-			b = -271733879,
-			c = -1732584194,
-			d =  271733878;
+		    a =  1732584193,
+		    b = -271733879,
+		    c = -1732584194,
+		    d =  271733878;
 
 		for (i = 0; i < x.length; i += 16) {
 			olda = a;
@@ -166,7 +166,7 @@
 	*/
 	function binl2rstr(input) {
 		var i,
-			output = "";
+		    output = "";
 		for (i = 0; i < input.length * 32; i += 8) {
 			output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
 		}
@@ -179,7 +179,7 @@
 	*/
 	function rstr2binl(input) {
 		var i,
-			output = [];
+		    output = [];
 		output[(input.length >> 2) - 1] = undefined;
 		for (i = 0; i < output.length; i += 1) {
 			output[i] = 0;
@@ -202,10 +202,10 @@
 	*/
 	function rstr_hmac_md5(key, data) {
 		var i,
-			bkey = rstr2binl(key),
-			ipad = [],
-			opad = [],
-			hash;
+		    bkey = rstr2binl(key),
+		    ipad = [],
+		    opad = [],
+		    hash;
 		ipad[15] = opad[15] = undefined;
 		if (bkey.length > 16) {
 			bkey = binl_md5(bkey, key.length * 8);
@@ -223,9 +223,9 @@
 	*/
 	function rstr2hex(input) {
 		var hex_tab = "0123456789abcdef",
-			output = "",
-			x,
-			i;
+		    output = "",
+		    x,
+		    i;
 		for (i = 0; i < input.length; i += 1) {
 			x = input.charCodeAt(i);
 			output += hex_tab.charAt((x >>> 4) & 0x0F) +

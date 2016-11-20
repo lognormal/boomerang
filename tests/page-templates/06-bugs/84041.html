@@ -1,0 +1,26 @@
+<%= header %>
+<!--
+This bug found Boomerang being loaded several times
+-->
+<script src="84041.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+BOOMR.plugins.Test = {
+	initCount: 0,
+	init: function() {
+		this.initCount++;
+	},
+	is_complete: function() {
+		return true;
+	}
+};
+
+BOOMR_test.init({
+	ResourceTiming: {
+		enabled: true
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= boomerangScript %>
+<%= footer %>

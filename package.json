@@ -1,6 +1,7 @@
 {
   "name": "boomerang",
-  "version": "0.9.0",
+  "version": "1.0.0",
+  "releaseVersion": "1",
   "description": "boomerang always comes back, except when it hits something",
   "main": "boomerang.js",
   "directories": {
@@ -14,42 +15,58 @@
     "async": "^0.9.0",
     "bower": "*",
     "chai": "^1.10.0",
+    "color-convert": "^1.3.1",
     "compression": "^1.4.4",
     "deepmerge": "^0.2.7",
-    "eslint-plugin-html": "^1.0.0",
+    "eslint": "^2.2.0",
+    "eslint-plugin-html": "^1.5.1",
     "express": "^4.11.1",
     "fs-extra": "^0.15.0",
     "grunt": "^0.4.5",
+    "grunt-babel": "^5.0.3",
+    "grunt-browserify": "^4.0.1",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-connect": "^0.9.0",
     "grunt-contrib-copy": "^0.7.0",
-    "grunt-contrib-uglify": "^0.6.0",
+    "grunt-contrib-uglify": "^0.9.2",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-eslint": "^10.0.0",
     "grunt-express-server": "^0.5.1",
     "grunt-filesize": "0.0.7",
-    "grunt-karma": "^0.9.0",
+    "grunt-jsdoc": "^2.0.0",
+    "grunt-karma": "^0.12.1",
+    "grunt-mkdir": "^0.1.2",
     "grunt-protractor-runner": "^1.2.1",
     "grunt-protractor-webdriver": "^0.2.0",
-    "grunt-saucelabs": "^8.6.0",
+    "grunt-react": "^0.12.3",
+    "grunt-saucelabs": "^8.6.2",
     "grunt-string-replace": "^1.0.0",
+    "grunt-strip-code": "^0.1.2",
     "grunt-template": "^0.2.3",
+    "jsdoc": "git+ssh://git@github.com:SOASTA/jsdoc.git#b567ed6",
+    "gruntify-eslint": "^2.0.0",
+    "history": "^1.12.5",
     "jasmine-reporters": "^1.0.0",
-    "karma": "^0.12.0",
+    "karma": "^0.13.0",
     "karma-chrome-launcher": "^0.1.5",
     "karma-coverage": "^0.2.6",
     "karma-firefox-launcher": "^0.1.4",
     "karma-ie-launcher": "^0.1.5",
     "karma-mocha": "^0.1.9",
+    "karma-mocha-reporter": "^2.0.0",
     "karma-opera-launcher": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
     "karma-tap-reporter": "0.0.3",
+    "mocha": "3.0.2",
     "phantomjs": "^1.9.13",
     "protractor": "^1.3.1",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "react-router": "^1.0.0-rc3",
+    "soasta-repository": "0.0.1",
     "strip-json-comments": "^1.0.2"
   },
   "scripts": {
@@ -61,19 +78,19 @@
     "url": "https://github.com/SOASTA/boomerang.git"
   },
   "keywords": [
-    "rum",
-    "boomerang",
-    "performance",
     "NavigationTiming",
+    "PerformanceTimeline",
     "ResourceTiming",
     "UserTiming",
-    "PerformanceTimeline",
+    "analytics",
+    "boomerang",
     "performance",
-    "analytics"
+    "performance",
+    "rum"
   ],
   "author": {
-    "name": "Philip Tellis",
     "email": "philip@bluesmoon.info",
+    "name": "Philip Tellis",
     "url": "http://bluesmoon.info"
   },
   "contributors": [
@@ -84,6 +101,10 @@
     {
       "name": "Ariel Barreiro",
       "email": "abarrei@gmail.com"
+    },
+    {
+      "name": "Erik Fried",
+      "email": "erikmfried@gmail.com"
     },
     {
       "name": "Buddy Brewer",
@@ -116,10 +137,6 @@
     {
       "name": "Eric Goldsmith",
       "email": "eric@ericgoldsmith.com"
-    },
-    {
-      "name": "Erik Fried",
-      "email": "erikmfried@gmail.com"
     },
     {
       "name": "Jamis Charles",
@@ -162,7 +179,7 @@
       "email": "andreas.marschke@gmail.com"
     }
   ],
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/SOASTA/boomerang/issues"
   },

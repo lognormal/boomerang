@@ -1,0 +1,18 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="02-events.js" type="text/javascript"></script>
+<script>
+window.myevent = false;
+
+// subscribe before it's even registered
+BOOMR.subscribe("myevent", function(data) {
+	window.myevent = data;
+});
+
+BOOMR.registerEvent("myevent");
+
+BOOMR.fireEvent("myevent", "a");
+
+BOOMR_test.init();
+</script>
+<%= footer %>

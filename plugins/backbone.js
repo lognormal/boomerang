@@ -1,39 +1,40 @@
-/*global Backbone*/
-/*
-* Installation:
-*
-* Before you call `Backbone.history.start()`, add the following code.
-*
-* Substitute `app.Router` in the two places below with your Backbone.Router instance.
-*
-* eg:
-*     // ...Backbone startup..., eg. app.Router = Backbone.Router.extend({...});
-*     var hadRouteChange = false;
-*     app.Router.on("route", function() {
-*       hadRouteChange = true;
-*     });
-*     function hookBackboneBoomerang() {
-*       if (window.BOOMR && BOOMR.version) {
-*         if (BOOMR.plugins && BOOMR.plugins.Backbone) {
-*           BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
-*         }
-*         return true;
-*       }
-*     }
-*
-*     if (!hookBackboneBoomerang()) {
-*       if (document.addEventListener) {
-*         document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
-*       } else if (document.attachEvent) {
-*         document.attachEvent("onpropertychange", function(e) {
-*           e = e || window.event;
-*           if (e && e.propertyName === "onBoomerangLoaded") {
-*             hookBackboneBoomerang();
-*           }
-*         });
-*       }
-*   }]);
-*/
+/**
+ * @module Backbone
+ * @desc
+ * Installation:
+ *
+ * Before you call `Backbone.history.start()`, add the following code.
+ *
+ * Substitute `app.Router` in the two places below with your Backbone.Router instance.
+ *
+ * @example
+ *     // ...Backbone startup..., eg. app.Router = Backbone.Router.extend({...});
+ *     var hadRouteChange = false;
+ *     app.Router.on("route", function() {
+ *       hadRouteChange = true;
+ *     });
+ *     function hookBackboneBoomerang() {
+ *       if (window.BOOMR && BOOMR.version) {
+ *         if (BOOMR.plugins && BOOMR.plugins.Backbone) {
+ *           BOOMR.plugins.Backbone.hook(app.Router, hadRouteChange);
+ *         }
+ *         return true;
+ *       }
+ *     }
+ *
+ *     if (!hookBackboneBoomerang()) {
+ *       if (document.addEventListener) {
+ *         document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
+ *       } else if (document.attachEvent) {
+ *         document.attachEvent("onpropertychange", function(e) {
+ *           e = e || window.event;
+ *           if (e && e.propertyName === "onBoomerangLoaded") {
+ *             hookBackboneBoomerang();
+ *           }
+ *         });
+ *       }
+ *   }]);
+ */
 (function() {
 	var hooked = false,
 	    enabled = true,
@@ -54,7 +55,7 @@
 	 * @return {boolean} True on success
 	 */
 	function bootstrap(router) {
-		if (typeof Backbone === "undefined" ||
+		if (typeof BOOMR.window.Backbone === "undefined" ||
 			typeof router === "undefined") {
 			return false;
 		}
@@ -99,13 +100,13 @@
 		is_complete: function() {
 			return true;
 		},
-		hook: function(router, hadRouteChange) {
+		hook: function(router, hadRouteChange, options) {
 			if (hooked) {
 				return this;
 			}
 
 			if (bootstrap(router)) {
-				BOOMR.plugins.SPA.hook(hadRouteChange);
+				BOOMR.plugins.SPA.hook(hadRouteChange, options);
 
 				hooked = true;
 			}

@@ -38,14 +38,50 @@ if (!fs.existsSync(wwwRoot)) {
 	wwwRoot = path.join(__dirname, "..");
 }
 
+// save previous 'delay' query param value
+var previousDelay = 0;
+
 module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
-	var delay = q.delay;
+	var delay = q.delay || 0;
 	var file = q.file;
+	var response = q.response;
+	var sendACAO = !(q.noACAO === "1"); // send by default
+	var sendTAO = (q.TAO === "1"); // don't send by default
 
-	var filePath = path.join(wwwRoot, file);
+	// if we get a '+' or '-' delay prefix, add/sub its value with the delay used on the
+	// previous request. This is usefull in cases where we need to hit the
+	// same url and query params for multiple requests with differing delay times.
+	if (typeof delay === "string" && delay) {
+		if (delay[0] === "+") {
+			delay = previousDelay + parseInt(delay.slice(1), 10);
+		}
+		else if (delay[0] === "-") {
+			delay = previousDelay - parseInt(delay.slice(1), 10);
+		}
+		else {
+			delay = parseInt(delay, 10);
+		}
+	}
+	delay = delay >= 0 ? delay : 0;
+
+	previousDelay = delay;
 
 	setTimeout(function() {
+		if (sendACAO) {
+			res.set("Access-Control-Allow-Origin", "*");
+		}
+
+		if (sendTAO) {
+			res.set("Timing-Allow-Origin", "*");
+		}
+
+		if (response) {
+			return res.send(response);
+		}
+
+		var filePath = path.join(wwwRoot, file);
+
 		fs.exists(filePath, function(exists) {
 			if (!exists) {
 				return res.send(404);

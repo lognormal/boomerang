@@ -1,0 +1,34 @@
+<%= header %>
+<script src="10-non-network-urls.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			// open a few XHRs with non-network URLs
+			var xhr1 = new XMLHttpRequest();
+			/*eslint-disable no-script-url */
+			xhr1.open("GET", "javascript:;");
+			xhr1.send(null);
+			/*eslint-enable no-script-url */
+
+			var xhr2 = new XMLHttpRequest();
+			xhr2.open("GET", "about:blank");
+			xhr2.send(null);
+
+			var xhr3 = new XMLHttpRequest();
+			xhr3.open("GET", "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
+			xhr3.send(null);
+		}
+});
+</script>
+<%= footer %>

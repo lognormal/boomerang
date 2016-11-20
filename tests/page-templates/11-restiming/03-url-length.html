@@ -1,0 +1,33 @@
+<%= header %>
+<script>
+window.BOOMR_config = {
+	ResourceTiming: {
+		trimUrls: [
+			"/foo/"
+		]
+	}
+};
+</script>
+<%= boomerangSnippet %>
+<script src="03-url-length.js" type="text/javascript"></script>
+<script src="../../vendor/resourcetiming-compression/src/resourcetiming-decompression.js" type="text/javascript"></script>
+<script>
+// make a really long beacon
+var url = "/blackhole?";
+for (var i = 0; i < 50000; i++) {
+	url += "a";
+}
+var img = new Image();
+img.src = url;
+
+var img2 = new Image();
+img2.src = "/blackhole?/foo/bar/baz";
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

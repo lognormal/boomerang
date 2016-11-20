@@ -1,0 +1,59 @@
+<%= header %>
+<%= boomerangScript %>
+<base href="/pages/08-ember/22-config-after-onload.html" />
+
+<script src="../../vendor/jquery/dist/jquery.min.js"></script>
+<script src="../../vendor/ember/ember.prod.js"></script>
+<script src="../../vendor/handlebars/handlebars.min.js"></script>
+<script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script>
+window.imgs = [3000];
+</script>
+<script src="support/app.js"></script>
+
+<!-- Handlebars templates for our application. -->
+<script type="text/x-handlebars">
+	<div class="container">
+		{{outlet}}
+	</div>
+</script>
+
+<script src="/test-templates/spa/22-config-after-onload.js" type="text/javascript"></script>
+<script src="22-config-after-onload.js"></script>
+
+<script>
+BOOMR = BOOMR || {};
+BOOMR.plugins = BOOMR.plugins || {};
+BOOMR.plugins.hold = {
+	complete: false,
+	fired: false,
+	is_complete: function() {
+		return this.complete;
+	},
+	page_ready: function() {
+		this.fired = true;
+	},
+	init: function() {
+		if (this.complete) {
+			return;
+		}
+
+		// trigger it to run once (overwrite autorun)
+		BOOMR.page_ready();
+
+		// this callback should not fire because autorun is false
+		BOOMR.subscribe("page_ready", this.page_ready, null, this);
+
+		this.complete = true;
+	}
+};
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Ember: {
+		enabled: true
+	},
+	autorun: false
+});
+</script>
+
+<%= footer %>

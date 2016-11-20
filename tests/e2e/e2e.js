@@ -8,6 +8,7 @@ var chai = require("chai");
 var assert = chai.assert;
 
 var tests = require("./e2e.json");
+var disabledTests = require("./e2e.disabled.json");
 
 //
 // Functions
@@ -25,7 +26,12 @@ function run(path, file) {
 			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
 				assert.equal(complete, true, "BOOMR_test.isComplete()");
 				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
-					assert.equal(testFailures.length, 0, "BOOMR_test.getTestFailures(): " + JSON.stringify(testFailures));
+					// log testFailures only if they exist
+					if (testFailures.length > 0) {
+						console.log("BOOMR_test.getTestFailures():\n" + testFailures);
+					}
+
+					assert.equal(testFailures.length, 0);
 					done();
 				});
 			});
@@ -33,10 +39,21 @@ function run(path, file) {
 	});
 }
 
+var disabledTestLookup = {};
+for (var i = 0; i < disabledTests.length; i++) {
+	var key = disabledTests[i].path + "-" + disabledTests[i].file;
+	disabledTestLookup[key] = 1;
+}
+
 //
 // Run the tests in e2e.json
 //
-for (var i = 0; i < tests.length; i++) {
+for (i = 0; i < tests.length; i++) {
 	var data = tests[i];
+	key = data.path + "-" + data.file;
+	if (disabledTestLookup[key]) {
+		continue;
+	}
+
 	run(data.path, data.file);
 }

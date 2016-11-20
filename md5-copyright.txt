@@ -1,1 +1,0 @@
-/*MD5 plugin is derived from JavaScript-MD5, Copyright 2011, Sebastian Tschan. https://blueimp.net. Distributed under the MIT license: http://www.opensource.org/licenses/MIT*/

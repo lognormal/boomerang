@@ -1,6 +1,9 @@
 /* eslint-env node */
 "use strict";
 
+//
+// Imports
+//
 var fs = require("fs");
 var path = require("path");
 var fse = require("fs-extra");
@@ -10,25 +13,34 @@ var grunt = require("grunt");
 //
 // Constants
 //
-var TEST_URL_BASE = "http://localhost:4002";
+var BUILD_PATH = "build";
+var TEST_BUILD_PATH = path.join("tests", "build");
+var TEST_RESULTS_PATH = path.join("tests", "results");
+var TEST_DEBUG_PORT = 4002;
+var TEST_URL_BASE = grunt.option("test-url") || "http://localhost:4002";
 
 //
 // Grunt config
 //
 module.exports = function() {
 	//
-	// paths
+	// Paths
 	//
 	var testsDir = path.join(__dirname, "tests");
 	var pluginsDir = path.join(__dirname, "plugins");
 
-	// boomerang.js and plugins/*.js order
+	//
+	// Determine source files:
+	//  boomerang.js and plugins/*.js order
+	//
 	var src = [ "boomerang.js" ];
 	var plugins = grunt.file.readJSON("plugins.json");
 	src.push(plugins.plugins);
-	src.push(path.join(pluginsDir, "zzz_last_plugin.js"));
+	src.push(path.join(pluginsDir, "zzz-last-plugin.js"));
 
-	// ensure env.json exists
+	//
+	// Ensure env.json exists
+	//
 	var envFile = path.resolve(path.join(testsDir, "server", "env.json"));
 	if (!fs.existsSync(envFile)) {
 		var envFileSample = path.resolve(path.join(testsDir, "server", "env.json.sample"));
@@ -36,7 +48,11 @@ module.exports = function() {
 		fse.copySync(envFileSample, envFile);
 	}
 
+	var env = grunt.file.readJSON("tests/server/env.json");
+
+	//
 	// Build SauceLabs E2E test URLs
+	//
 	var e2eTests = [];
 	if (grunt.file.exists("tests/e2e/e2e.json")) {
 		e2eTests = JSON.parse(stripJsonComments(grunt.file.read("tests/e2e/e2e.json")));
@@ -48,11 +64,60 @@ module.exports = function() {
 	}
 
 	//
+	// Build numbers
+	//
+	var pkg = grunt.file.readJSON("package.json");
+	var buildNumber = grunt.option("buildNumber") || 0;
+	var releaseVersion = pkg.releaseVersion + "." + buildNumber;
+	var buildDate = Math.round(Date.now() / 1000);
+	var boomerangVersion = releaseVersion + "." + buildDate;
+
+	//
+	// Output files
+	//
+
+	// build file name is based on the version number
+	var buildFilePrefix = pkg.name + "-" + boomerangVersion;
+	var buildPathPrefix = path.join(BUILD_PATH, buildFilePrefix);
+
+	var testBuildFilePrefix = pkg.name;
+	var testBuildPathPrefix = path.join(TEST_BUILD_PATH, testBuildFilePrefix);
+
+	var buildDebug = buildPathPrefix + "-debug.js";
+	var buildRelease = buildPathPrefix + ".js";
+	var buildReleaseMin = buildPathPrefix + ".min.js";
+	var buildTest = testBuildPathPrefix + "-latest-debug.js";
+
+	//
+	// Build configuration
+	//
+	var buildConfig = {
+		server: grunt.option("server") || "localhost"
+	};
+
+	var bannerFilePathRelative = "./lib/banner.txt";
+	var bannerFilePathAbsolute = path.resolve(bannerFilePathRelative);
+	var bannerString = grunt.file.read(bannerFilePathAbsolute);
+
+	//
 	// Config
 	//
 	grunt.initConfig({
-		pkg:  grunt.file.readJSON("package.json"),
-		buildDate: Math.round(Date.now() / 1000),
+		// package info
+		pkg: pkg,
+
+		//
+		// Variables to use in tasks
+		//
+		buildConfig: buildConfig,
+		boomerangVersion: boomerangVersion,
+		buildFilePrefix: buildFilePrefix,
+		buildPathPrefix: buildPathPrefix,
+		testBuildPathPrefix: testBuildPathPrefix,
+
+		//
+		// Tasks
+		//
 		concat: {
 			options: {
 				stripBanners: false,
@@ -60,11 +125,22 @@ module.exports = function() {
 			},
 			debug: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= buildDate %>-debug.js"
+				dest: buildDebug
+			},
+			"debug-tests": {
+				src: [src, "tests/boomerang-test-plugin.js"],
+				dest: buildTest
 			},
 			release: {
 				src: src,
-				dest: "build/<%= pkg.name %>-<%= buildDate %>.js"
+				dest: buildRelease
+			}
+		},
+		mkdir: {
+			test: {
+				options: {
+					create: [TEST_RESULTS_PATH]
+				}
 			}
 		},
 		eslint: {
@@ -82,27 +158,32 @@ module.exports = function() {
 				"tests/page-templates/**/*.js",
 				"tests/page-templates/**/*.html",
 				"tests/page-templates/**/*.js",
-				"tests/test-templates/**/*.js"
+				"tests/test-templates/**/*.js",
+				"!tests/page-templates/12-react/support/*"
 			]
 		},
 		"string-replace": {
 			all: {
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>.js"
+						src: buildRelease,
+						dest: buildRelease
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>-debug.js"
+						src: buildDebug,
+						dest: buildDebug
+					},
+					{
+						src: buildTest,
+						dest: buildTest
 					}
 				],
 				options: {
 					replacements: [
 						{
-							// Replace 0.9 with 0.9.[date]
-							pattern: /BOOMR.version\s*=\s*".*";/,
-							replacement: "BOOMR.version = \"<%= buildDate %>\";"
+							// Replace 1.0 with 1.[0 or jenkins build #].[date]
+							pattern: "%boomerang_version%",
+							replacement: boomerangVersion
 						},
 						{
 							// strip out BOOMR = BOOMR || {}; in plugins
@@ -119,28 +200,23 @@ module.exports = function() {
 			},
 			"debug-tests": {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= buildDate %>-debug.js",
-					dest: "build/<%= pkg.name %>-<%= buildDate %>-debug-tests.js"
+					src: buildTest,
+					dest: buildTest
 				}],
 				options: {
 					replacements: [
 						{
 							// Send beacons to null
-							pattern: /location\.protocol \+ \"\/\/%beacon_dest_host%%beacon_dest_path%/,
-							replacement: "\"/blackhole"
-						},
-						{
-							// Add config to null
-							pattern: /\/\/%config_host%%config_path%/,
-							replacement: "/blackhole"
+							pattern: /beacon_url: .*/,
+							replacement: "beacon_url: \"/blackhole\","
 						}
 					]
 				}
 			},
 			release: {
 				files: [{
-					src: "build/<%= pkg.name %>-<%= buildDate %>.js",
-					dest: "build/<%= pkg.name %>-<%= buildDate %>.js"
+					src: buildRelease,
+					dest: buildRelease
 				}],
 				options: {
 					// strip out some NOPs
@@ -159,19 +235,50 @@ module.exports = function() {
 						}
 					]
 				}
+			},
+			"remove-sourcemappingurl": {
+				files: [
+					{
+						src: buildReleaseMin,
+						dest: buildReleaseMin
+					}
+				],
+				options: {
+					replacements: [
+						{
+							pattern: /\/\/# sourceMappingURL=.*/g,
+							replacement: ""
+						}
+					]
+				}
+			}
+		},
+		strip_code: {
+			debug: {
+				files: [{
+					src: buildRelease
+				}],
+				options: {
+					start_comment: "BEGIN_DEBUG",
+					end_comment: "END_DEBUG"
+				}
+			},
+			prod: {
+				files: [
+					{
+						src: buildDebug
+					},
+					{
+						src: "<%= testBuildPathPrefix %>*.js"
+					}
+				],
+				options: {
+					start_comment: "BEGIN_PROD",
+					end_comment: "END_PROD"
+				}
 			}
 		},
 		copy: {
-			// copy files to tests\build\boomerang-latest.js so tests/index.html points to the latest version always
-			debug: {
-				files: [
-					{
-						nonull: true,
-						src: "build/<%= pkg.name %>-<%= buildDate %>-debug-tests.js",
-						dest: "tests/build/<%= pkg.name %>-latest-debug.js"
-					}
-				]
-			},
 			webserver: {
 				files: [
 					{
@@ -180,23 +287,32 @@ module.exports = function() {
 						cwd: "tests/",
 						src: "**/*",
 						force: true,
-						dest: grunt.file.readJSON("tests/server/env.json").publish + "/"
+						dest: env.publish + "/"
 					}
 				]
 			}
 		},
 		uglify: {
+			options: {
+				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> */\n"
+			},
 			default: {
 				options: {
 					preserveComments: false,
-					mangle: true,
-					sourceMap: true
+					mangle: {
+						// for errors.js
+						except: ["createStackForSend", "loadFinished"]
+					},
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
 					cwd: "build/",
-					src: ["<%= pkg.name %>-<%= buildDate %>-debug.js",
-					      "<%= pkg.name %>-<%= buildDate %>.js"],
+					src: ["<%= buildFilePrefix %>-debug.js",
+					      "<%= buildFilePrefix %>.js"],
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
@@ -206,13 +322,35 @@ module.exports = function() {
 				options: {
 					preserveComments: false,
 					mangle: true,
-					sourceMap: true
+					banner: "",
+					sourceMap: true,
+					compress: {
+						sequences: false
+					}
 				},
 				files: [{
 					expand: true,
 					cwd: "plugins/",
 					src: ["./*.js"],
 					dest: "build/plugins/",
+					ext: ".min.js",
+					extDot: "first"
+				}]
+			},
+			snippets: {
+				options: {
+					preserveComments: false,
+					mangle: true,
+					banner: "",
+					compress: {
+						sequences: false
+					}
+				},
+				files: [{
+					expand: true,
+					cwd: "tests/page-template-snippets/",
+					src: ["instrumentXHRSnippetNoScript.tpl"],
+					dest: "build/snippets/",
 					ext: ".min.js",
 					extDot: "first"
 				}]
@@ -226,20 +364,20 @@ module.exports = function() {
 				},
 				files: [
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>.js.gz"
+						src: buildRelease,
+						dest: "<%= buildPathPrefix %>.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>-debug.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>-debug.js.gz"
+						src: buildDebug,
+						dest: "<%= buildPathPrefix %>-debug.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>.min.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>.min.js.gz"
+						src: "<%= buildPathPrefix %>.min.js",
+						dest: "<%= buildPathPrefix %>.min.js.gz"
 					},
 					{
-						src: "build/<%= pkg.name %>-<%= buildDate %>-debug.min.js",
-						dest: "build/<%= pkg.name %>-<%= buildDate %>-debug.min.js.gz"
+						src: "<%= buildPathPrefix %>-debug.min.js",
+						dest: "<%= buildPathPrefix %>-debug.min.js.gz"
 					}
 				]
 			},
@@ -256,6 +394,25 @@ module.exports = function() {
 					ext: ".min.js.gz",
 					extDot: "first"
 				}]
+			}
+		},
+		"babel": {
+			"spa-react-test-templates": {
+				files: {
+					"tests/page-templates/12-react/support/app-component.js": "tests/page-templates/12-react/support/app.jsx"
+				}
+			}
+		},
+		browserify: {
+			"spa-react-test-templates": {
+				files: {
+					"tests/page-templates/12-react/support/app.js": [
+						"node_modules/react/dist/react.js",
+						"node_modules/react-dom/dist/react-dom.js",
+						"node_modules/react-router/umd/ReactRouter.js",
+						"tests/page-templates/12-react/support/app-component.js"
+					]
+				}
 			}
 		},
 		filesize: {
@@ -275,7 +432,7 @@ module.exports = function() {
 					}
 				}
 			},
-			default: {
+			console: {
 				files: [{
 					expand: true,
 					cwd: "build",
@@ -300,6 +457,12 @@ module.exports = function() {
 				"tests/results/*.xml",
 				"tests/coverage/*",
 				"tests/pages/**/*"
+			],
+			"spa-react-test-templates": [
+				"tests/pages/12-react/support/app.js",
+				"tests/page-templates/12-react/support/app.js",
+				"tests/page-templates/12-react/support/app-component.js",
+				"tests/page-templates/12-react/support/*.map"
 			],
 			src: ["plugins/*~", "*.js~", "*.html~"]
 		},
@@ -342,6 +505,9 @@ module.exports = function() {
 			},
 			safari: {
 				browsers: ["Safari"]
+			},
+			debug: {
+				singleRun: false
 			}
 		},
 		protractor: {
@@ -369,12 +535,24 @@ module.exports = function() {
 		},
 		express: {
 			options: {
-				port: 4002,
+				port: TEST_DEBUG_PORT,
 				hostname: "0.0.0.0"
 			},
 			dev: {
 				options: {
 					script: "tests/server/app.js"
+				}
+			},
+			"secondary": {
+				options: {
+					script: "tests/server/app.js",
+					port: (TEST_DEBUG_PORT + 1)
+				}
+			},
+			doc: {
+				options: {
+					port: TEST_DEBUG_PORT - 1,
+					script: "tests/server/doc-server.js"
 				}
 			}
 		},
@@ -382,7 +560,7 @@ module.exports = function() {
 			all: {
 				options: {
 					// username: "", // SAUCE_USERNAME
-					// key: "",	  // SAUCE_ACCESS_KEY
+					// key: "",      // SAUCE_ACCESS_KEY
 					build: process.env.CI_BUILD_NUMBER,
 					tunneled: false
 				}
@@ -400,8 +578,8 @@ module.exports = function() {
 					testname: "Boomerang Unit Tests",
 					browsers: [{
 						"browserName": "internet explorer",
-						"version":	 "11",
-						"platform":	"Windows 8.1"
+						"version": "11",
+						"platform": "Windows 8.1"
 					}]
 				}
 			},
@@ -418,9 +596,21 @@ module.exports = function() {
 					testname: "Boomerang E2E Tests",
 					browsers: [{
 						"browserName": "internet explorer",
-						"version":	 "11",
-						"platform":	"Windows 8.1"
+						"version":     "11",
+						"platform":    "Windows 8.1"
 					}]
+				}
+			}
+		},
+		jsdoc: {
+			dist: {
+				src: ["boomerang.js", "plugins/*.js"],
+				jsdoc: "./node_modules/jsdoc/jsdoc.js",
+				options: {
+					destination: "build/doc",
+					package: "package.json",
+					readme: "README.md",
+					configure: "jsdoc.conf.json"
 				}
 			}
 		},
@@ -431,9 +621,16 @@ module.exports = function() {
 					"tests/page-template-snippets/**/*",
 					"tests/page-templates/**/*",
 					"tests/unit/**/*",
-					"tests/test-templates/**/*.js"
+					"tests/test-templates/**/*.js",
+					"!tests/page-templates/12-react/support/*.jsx"
 				],
 				tasks: ["pages-builder"]
+			},
+			"test-react": {
+				files: [
+					"tests/page-templates/12-react/support/*.jsx"
+				],
+				tasks: ["test:build:react"]
 			},
 			boomerang: {
 				files: [
@@ -447,11 +644,22 @@ module.exports = function() {
 				files: [
 					"tests/server/*.js"
 				],
-				tasks: ["express"]
+				tasks: ["express:dev", "express:secondary"]
+			},
+			doc: {
+				files: [
+					"boomerang.js",
+					"plugins/*.js",
+					"doc/**/**"
+				],
+				tasks: ["clean", "jsdoc"]
 			}
 		}
 	});
-	grunt.loadNpmTasks("grunt-eslint");
+
+	grunt.loadNpmTasks("gruntify-eslint");
+	grunt.loadNpmTasks("grunt-babel");
+	grunt.loadNpmTasks("grunt-browserify");
 	grunt.loadNpmTasks("grunt-express-server");
 	grunt.loadNpmTasks("grunt-karma");
 	grunt.loadNpmTasks("grunt-contrib-concat");
@@ -461,11 +669,14 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-compress");
 	grunt.loadNpmTasks("grunt-filesize");
+	grunt.loadNpmTasks("grunt-mkdir");
 	grunt.loadNpmTasks("grunt-protractor-runner");
 	grunt.loadNpmTasks("grunt-protractor-webdriver");
 	grunt.loadNpmTasks("grunt-template");
 	grunt.loadNpmTasks("grunt-saucelabs");
+	grunt.loadNpmTasks("grunt-strip-code");
 	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks("grunt-jsdoc");
 
 	// tasks/*.js
 	if (grunt.file.exists("tasks")) {
@@ -476,30 +687,71 @@ module.exports = function() {
 
 	// Custom aliases for configured grunt tasks
 	var aliases = {
-		"build": ["concat", "string-replace", "uglify", "compress", "copy:debug", "filesize:default"],
-		"build:test": ["concat:debug", "string-replace", "copy:debug"],
-		"default": ["lint", "build", "test", "filesize:default"],
-		"jenkins": ["lint", "build", "test", "copy:webserver", "filesize:csv"],
+		"default": ["lint", "build", "test", "metrics"],
+
+		//
+		// Build
+		//
+		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
+		"build:test": ["concat:debug", "build:apply-templates"],
+
+		// Build steps
+		"build:apply-templates": [
+			"string-replace:all",
+			"string-replace:debug-tests",
+			"string-replace:release",
+			"strip_code:debug",
+			"strip_code:prod"
+		],
+
+		// metrics to generate
+		"metrics": ["filesize:console"],
+
+		//
+		// Lint
+		//
 		"lint": ["eslint"],
+
+		//
+		// Test tasks
+		//
 		"test": ["build", "test:build", "test:unit", "test:e2e"],
-		"test:build": ["pages-builder", "build"],
-		"test:debug": ["test:build", "build:test", "express", "watch"],
-		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
-		"test:e2e:chrome": ["build", "express", "protractor_webdriver", "protractor:chrome"],
-		"test:e2e:debug": ["build", "test:build", "build:test", "express", "protractor_webdriver", "protractor:debug"],
-		"test:e2e:phantomjs": ["build", "express", "protractor_webdriver", "protractor:phantomjs"],
-		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
-		"test:matrix:e2e": ["saucelabs-mocha:e2e"],
-		"test:matrix:e2e:debug": ["saucelabs-mocha:e2e-debug"],
-		"test:matrix:unit": ["saucelabs-mocha:unit"],
-		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
+
+		// builds test files
+		"test:build": ["mkdir:test", "test:build:react", "pages-builder", "build"],
+
+		// react test files
+		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
+
+		// useful for debugging tests, leaves a webbrowser open at http://localhost:3001
+		"test:debug": ["test:build", "build:test", "express:dev", "express:secondary", "watch"],
+
+		// open your browser to http://localhost:4000/debug.html to debug
+		"test:karma:debug": ["test:build", "build:test", "karma:debug"],
+
+		// unit tests
 		"test:unit": ["test:build", "build", "karma:unit"],
 		"test:unit:all": ["build", "karma:all"],
 		"test:unit:chrome": ["build", "karma:chrome"],
 		"test:unit:ff": ["build", "karma:ff"],
 		"test:unit:ie": ["build", "karma:ie"],
 		"test:unit:opera": ["build", "karma:opera"],
-		"test:unit:safari": ["build", "karma:safari"]
+		"test:unit:safari": ["build", "karma:safari"],
+
+		// End-to-End tests
+		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
+		"test:e2e:chrome": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:chrome"],
+		"test:e2e:debug": ["build", "test:build", "build:test", "express:dev", "express:secondary", "protractor_webdriver", "protractor:debug"],
+		"test:e2e:phantomjs": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:phantomjs"],
+
+		"test:doc": ["clean", "jsdoc", "express:doc", "watch:doc"],
+
+		// SauceLabs tests
+		"test:matrix": ["test:matrix:unit", "test:matrix:e2e"],
+		"test:matrix:e2e": ["pages-builder", "saucelabs-mocha:e2e"],
+		"test:matrix:e2e:debug": ["pages-builder", "saucelabs-mocha:e2e-debug"],
+		"test:matrix:unit": ["saucelabs-mocha:unit"],
+		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"]
 	};
 
 	function isAlias(task) {
@@ -524,7 +776,7 @@ module.exports = function() {
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
 					var beforeTask = tasks.slice(0, index );
-					var afterTask = tasks.slice(index +1, tasks.length);
+					var afterTask = tasks.slice(index + 1, tasks.length);
 					var insertTask = aliases[aliasTask].filter(checkDuplicates);
 					tasks = [].concat(beforeTask, insertTask, afterTask);
 				}

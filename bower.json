@@ -1,8 +1,9 @@
 {
-  "name": "boomerang",
+  "name": "soasta-boomerang",
+  "private": true,
   "main": "boomerang.js",
-  "version": "0.9.0",
-  "homepage": "http://soasta.github.com/boomerang/doc/",
+  "version": "1.0.0",
+  "homepage": "https://github.com/SOASTA/boomerang/",
   "authors": [
     "Philip Tellis"
   ],
@@ -24,17 +25,28 @@
     "tests"
   ],
   "devDependencies": {
-    "mocha": "~1.21.5",
-    "lodash": "~3.0.0",
-    "angular": "~1.3.14",
-    "angular-resource": "~1.3.14",
-    "angular-route": "~1.3.14",
+    "angular-resource": "~1.3.16",
+    "angular-resource-1.4": "angular-resource#1.4.6",
+    "angular-resource-1.5": "angular-resource#1.5.0-beta.0",
+    "angular-route": "~1.3.16",
+    "angular-route-1.4": "angular-route#1.4.6",
+    "angular-route-1.5": "angular-route#1.5.0-beta.0",
+    "angular-ui-router": "~0.2.15",
+    "angular": "~1.3.16",
+    "angular-1.4": "angular#1.4.6",
+    "angular-1.5": "angular#1.5.0-beta.0",
     "assertive-chai": "~2.0.0",
-    "json3": "~3.3.2",
     "backbone": "~1.2.0",
     "ember": "~1.12.1",
-    "jquery": "~2.1.4",
     "handlebars": "~3.0.3",
+    "jquery": "~2.1.4",
+    "json3": "~3.3.2",
+    "lodash": "~3.0.0",
+    "mocha": "~1.21.5",
+    "resourcetiming-compression": "*",
     "usertiming-compression": "~0.1.4"
+  },
+  "resolutions": {
+    "angular": "1.4.6"
   }
 }

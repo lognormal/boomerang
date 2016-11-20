@@ -1,0 +1,22 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="03-resourcetiming-enabled-browser-supports-over-2k.js" type="text/javascript"></script>
+<script>
+var len = 2000;
+var str = "";
+
+BOOMR_test.init({
+	ResourceTiming: {
+		enabled: true
+	},
+	testAfterOnBeacon: true,
+	onBoomerangLoaded: function() {
+		BOOMR.addVar("long", str);
+	}
+});
+
+for (var i = 0; i < len; i++) {
+	str += "a";
+}
+</script>
+<%= footer %>

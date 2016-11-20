@@ -189,7 +189,11 @@ module.exports = function() {
 						// Index.html
 						//
 						indexHtml += "<p><a href='" + templateFileName + "'>" + templateFileName + "</a></p>";
-						indexHtml += "<iframe src='" + templateFileName + "' style='width: 100%'></iframe>\n";
+
+						// only show IFRAMEs if there's not a ton of htem
+						if (files.length <= 5) {
+							indexHtml += "<iframe src='" + templateFileName + "' style='width: 100%'></iframe>\n";
+						}
 
 						// if the .js file exists, copy that too
 						if (grunt.file.exists(jsFile)) {

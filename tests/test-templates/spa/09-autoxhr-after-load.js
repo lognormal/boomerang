@@ -32,7 +32,7 @@ BOOMR_test.templates.SPA["09-autoxhr-after-load"] = function() {
 			done,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000);
+					t.validateBeaconWasSentAfter(0, "support/widgets.json", 500, 0, 30000, 0);
 				}
 				done();
 			});

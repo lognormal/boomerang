@@ -44,8 +44,8 @@ describe("e2e/05-angular/03-ng-app", function() {
 		}
 	});
 
-	it("Should have sent the http.initiator as 'spa'", function() {
+	it("Should have sent the http.initiator as 'spa_hard'", function() {
 		var b = tf.lastBeacon();
-		assert.equal(b["http.initiator"], "spa");
+		assert.equal(b["http.initiator"], "spa_hard");
 	});
 });

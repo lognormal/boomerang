@@ -1,7 +1,4 @@
 /*global Ember,App*/
-
-var rnd = Math.random();
-
 window.App = Ember.Application.create({
 	LOG_TRANSITIONS: true,
 	LOG_TRANSITIONS_INTERNAL: true
@@ -17,7 +14,12 @@ App.ApplicationRoute = Ember.Route.extend({
 		Ember.run.scheduleOnce("afterRender", function() {
 			if (typeof window.ember_nav_routes !== "undefined" &&
 			    Object.prototype.toString.call(window.ember_nav_routes) === "[object Array]") {
-				BOOMR.subscribe("onbeacon", function() {
+				BOOMR.subscribe("onbeacon", function(beacon) {
+					// only continue for SPA beacons
+					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
+						return;
+					}
+
 					if (window.ember_nav_routes.length > 0) {
 						var nextRoute = window.ember_nav_routes.shift();
 						setTimeout(function() {
@@ -58,11 +60,13 @@ App.WidgetsWidgetRoute = Ember.Route.extend({
 
 App.WidgetRoute = App.WidgetsWidgetRoute;
 
-App.MetricRoute = Ember.Route.extend({
+App.HomeRoute = Ember.Route.extend({
 	beforeModel: function() {
-		return Ember.$.get("support/metric.html?rnd=" + Math.random()).then(function(data) {
-			Ember.TEMPLATES.metric = Ember.Handlebars.compile(data);
-		});
+		if (!Ember.TEMPLATES.home) {
+			return Ember.$.get("support/home.html?rnd=" + Math.random()).then(function(data) {
+				Ember.TEMPLATES.home = Ember.Handlebars.compile(data);
+			});
+		}
 	},
 	model: function() {
 		return Ember.$.getJSON("support/widgets.json?rnd=" + Math.random()).then(function(data) {
@@ -71,9 +75,17 @@ App.MetricRoute = Ember.Route.extend({
 			model.imgs = typeof window.imgs !== "undefined" ? window.imgs : [0];
 			console.log(model.imgs);
 			model.hide = model.imgs[0] === -1;
-			model.rnd = rnd;
+			model.rnd = Math.random();
 			return model;
 		});
+	}
+});
+
+App.EmptyRoute = Ember.Route.extend({
+	beforeModel: function() {
+	},
+	model: function() {
+		return {};
 	}
 });
 
@@ -81,7 +93,9 @@ App.Router.map(function() {
 	this.resource("widgets");
 	this.resource("widget", {path: "widgets/:id"});
 
-	this.route("metric", { path: "" });
+	this.resource("empty", { path: "empty" });
+
+	this.route("home", { path: "" });
 
 	window.custom_metric_1 = 11;
 	window.custom_metric_2 = function() {
@@ -114,10 +128,19 @@ App.Router.map(function() {
 		});
 	}
 
+	var hookOptions = {};
+	if (window.ember_route_wait) {
+		hookOptions.routeChangeWaitFilter = window.ember_route_wait;
+	}
+
+	if (window.ember_route_filter) {
+		hookOptions.routeFilter = window.ember_route_filter;
+	}
+
 	function hookEmberBoomerang() {
 		if (window.BOOMR && BOOMR.version) {
 			if (BOOMR.plugins && BOOMR.plugins.Ember) {
-				BOOMR.plugins.Ember.hook(App, hadRouteChange);
+				BOOMR.plugins.Ember.hook(App, hadRouteChange, hookOptions);
 			}
 			return true;
 		}

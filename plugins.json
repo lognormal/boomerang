@@ -1,22 +1,23 @@
 {
-	"plugins" :	[
-		"plugins/auto_xhr.js",
-		"plugins/spa.js",
-		"plugins/angular.js",
-		"plugins/backbone.js",
-		"plugins/ember.js",
-		"plugins/rt.js",
-		"plugins/bw.js",
-		"plugins/navtiming.js",
-		"plugins/restiming.js",
-		"plugins/ipv6.js",
-		"plugins/clicks.js",
-		"plugins/mobile.js",
-		"plugins/memory.js",
-		"plugins/cache-test-plugin.js",
-		"plugins/cache_reload.js",
-		"plugins/md5.js",
-		"node_modules/usertiming-compression/src/usertiming-compression.js",
-		"plugins/usertiming.js"
-	]
+    "plugins": [
+        "plugins/auto-xhr.js",
+        "plugins/spa.js",
+        "plugins/angular.js",
+        "plugins/backbone.js",
+        "plugins/ember.js",
+        "plugins/history.js",
+        "plugins/rt.js",
+        "plugins/bw.js",
+        "plugins/navtiming.js",
+        "plugins/restiming.js",
+        "plugins/mobile.js",
+        "plugins/memory.js",
+        "plugins/cache-reload.js",
+        "plugins/md5.js",
+        "plugins/compression.js",
+        "plugins/errors.js",
+        "plugins/third-party-analytics.js",
+        "node_modules/usertiming-compression/src/usertiming-compression.js",
+        "plugins/usertiming.js"
+    ]
 }
