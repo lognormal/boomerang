@@ -214,11 +214,20 @@ Captures session ids and campaign information from third party analytic vendors 
 					}
 				}
 
-				// get adobe campaign id
-				if (typeof w.s === "object" && typeof w.s.campaign === "string" && w.s.campaign) {
-					data["campaign"] = w.s.campaign;
+				if (typeof w.s === "object") {
+					// get adobe campaign id
+					// ref: https://marketing.adobe.com/resources/help/en_US/sc/implement/campaign.html
+					if (typeof w.s.campaign === "string" && w.s.campaign) {
+						data["campaign"] = w.s.campaign;
+					}
+					// get adobe purchase id
+					// ref: https://marketing.adobe.com/resources/help/en_US/sc/implement/purchaseID.html
+					if (typeof w.s.purchaseID === "string" && w.s.purchaseID) {
+						data["purchaseid"] = w.s.purchaseID;
+					}
 				}
 			}
+
 			return data;
 		},
 
