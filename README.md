@@ -50,13 +50,14 @@ You could also include any other code you need.  For example, I include a timer 
 
 I call my plugin `zzz_init.js` to remind me to include it last in the plugin list
 
-### 2. Build boomerang using this plugin as the last one
+### 2. Build boomerang
+The build process picks up all the plugins referenced in the `plugins.json` file. To change the plugins included in the boomerang build, change the contents of the file to your needs.
 
 ```bash
-make PLUGINS="list.js of.js plugins.js zzz_init.js" MINIFIER="/path/to/your/js-minifier"
+grunt clean build
 ```
 
-This should create `boomerang-<version>.js`
+This creates deployable boomerang versions in the `build` directory, e.g. `build/boomerang-<version>.min.js`.
 
 Install this file on your web server or origin server where your CDN can pick it up.  Set a far future max-age header for it.  This file will never change.
 
