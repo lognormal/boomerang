@@ -292,7 +292,8 @@ BOOMR_check_doc_domain();
 			"onconfig": [],
 			"xhr_init": [],
 			"spa_init": [],
-			"spa_navigation": []
+			"spa_navigation": [],
+			"xhr_send": []
 		},
 
 		public_events: {
