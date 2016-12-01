@@ -1,12 +1,85 @@
 <%= header %>
 <%= boomerangSnippet %>
 <script src="02-page-group-xhrs.js" type="text/javascript"></script>
+
+<script>
+function onXhrSend(req) {
+	var m = req.resource.url.match(/id=xhr$/g);
+	if (m && m.length) {
+		req.resource.pg = "XHRPageGroupSendPayload";
+		return;
+	}
+
+	if (req.resource.requestPayload) {
+		try {
+			var data = JSON.parse(req.resource.requestPayload);
+			if (data && data.operationName) {
+				req.resource.pg = data.operationName;
+				return;
+			}
+		}
+		catch (ex) {
+			return;
+		}
+	}
+	return;
+};
+
+function hookXhrSend() {
+	if (window.BOOMR && BOOMR.version) {
+		if (BOOMR.plugins && BOOMR.plugins.AutoXHR) {
+			BOOMR.subscribe("xhr_send", onXhrSend);
+		}
+		return true;
+	}
+}
+
+if (!hookXhrSend()) {
+	var eventName = "onBoomerangLoaded";
+	if (document.addEventListener) {
+		document.addEventListener(eventName, hookXhrSend);
+	}
+	else if (document.attachEvent) {
+		document.attachEvent("onpropertychange", function(e) {
+			e = e || window.event;
+			if (e && e.propertyName === eventName) {
+				hookXhrSend();
+			}
+		});
+	}
+}
+</script>
+
 <script>
 BOOMR_test.init({
 	instrument_xhr: true,
 	testAfterOnBeacon: true,
 	PageParams: {
 		pageGroups: [
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "queryselector",
+				parameter2: "elem content queryselector"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "xpath",
+				parameter2: "//elem/content/xpath"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "json",
+				parameter2: "operationName"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "substring",
+				parameter2: "PageGroupText"
+			},
 			{
 				type: "Regexp",
 				parameter1: "/pages/.*",
@@ -60,6 +133,42 @@ BOOMR_test.init({
 				xhr.open("GET", "/blackhole#passive-subresource", true);
 				xhr.send(null);
 			}, 3000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload-queryselector.xml", true);
+				xhr.send(null);
+			}, 4000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload-xpath.xml", true);
+				xhr.send(null);
+			}, 5000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload.json", true);
+				xhr.send(null);
+			}, 6000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload.txt", true);
+				xhr.send(null);
+			}, 7000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "/blackhole?id=xhr", true);
+				xhr.send(null);
+			}, 8000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "/blackhole?id=xhr_post", true);
+				xhr.send("{ \"operationName\": \"PageXHRPOST\"}");
+			}, 9000);
 		}
 });
 </script>

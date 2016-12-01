@@ -213,7 +213,7 @@
 			return true;
 		},
 
-		handle: function(o, eventSrc) {
+		handle: function(o, eventSrc, edata) {
 			var h = this;
 			if (!this.isValid(o)) {
 				return false;
@@ -222,7 +222,7 @@
 				h = new Handler(this);
 				h.varname = o.label;
 			}
-			return h[o.type](o, eventSrc);
+			return h[o.type](o, eventSrc, edata);
 		},
 
 		isValid: function(o) {
@@ -343,13 +343,13 @@
 		extractFromDOMElement: function(element, o) {
 			var m, re, elementValue = "";
 
-			if (element.nodeName.toUpperCase() === "INPUT" || element.nodeName.toUpperCase() === "SELECT") {
+			if (element !== null && element.nodeName && (element.nodeName.toUpperCase() === "INPUT" || element.nodeName.toUpperCase() === "SELECT")) {
 				// either it is not a checkbox/radio button or it is checked.
 				if ((element.type.toLowerCase() !== "checkbox" && element.type.toLowerCase() !== "radio") || element.checked) {
 					elementValue = element.value;
 				}
 			}
-			else {
+			else if (element !== null) {
 				// textContent is way faster than innerText in browsers that support
 				// both, but IE8 and lower only support innerText so, we test textContent
 				// first and fallback to innerText if that fails
@@ -386,9 +386,7 @@
 			return elementValue;
 		},
 
-		handleRegEx: function(re, extract, operand) {
-			var value, m;
-
+		execSafeRegEx: function(re, operand) {
 			if (!(re instanceof RegExp)) {
 				try {
 					re = new RegExp(re, "i");
@@ -404,8 +402,13 @@
 				return false;
 			}
 
-			m = re.exec(operand);
+			return re.exec(operand);
+		},
 
+		handleRegEx: function(re, extract, operand) {
+			var value, m;
+
+			m = this.execSafeRegEx(re, operand);
 			if (!m || !m.length) {
 				return false;
 			}
@@ -494,15 +497,15 @@
 			return null;
 		},
 
-		runXPath: function(xpath) {
+		runXPath: function(xpath, element) {
 			var el, m, tryOurs = false, err;
-
+			element = element || d;
 			try {
-				if (d.evaluate) {
-					el = d.evaluate(xpath, d, null, 9, null);
+				if (element.evaluate) {
+					el = element.evaluate(xpath, element, null, 9, null);
 				}
-				else if (d.selectNodes) {
-					el = d.selectNodes(xpath);
+				else if (element.selectNodes) {
+					el = element.selectNodes(xpath);
 				}
 				else {
 					tryOurs = true;
@@ -521,7 +524,7 @@
 					}
 					else if ((m = xpath.match(/\[@id=(["'])([^"']+)\1\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {
 						// matches an id somewhere, so root it there
-						el = d.getElementById(m[2]);
+						el = element.getElementById(m[2]);
 						if (!el || !m[3]) {
 							return el;
 						}
@@ -529,7 +532,7 @@
 					}
 					else if ((m = xpath.match(/\[@class="([^"]+)"\]((?:\/\w+(?:\[\d+\])?)*)$/)) !== null) {
 						// matches a className somewhere, so root it there
-						el = d.getElementsByClassName(m[1]);
+						el = element.getElementsByClassName(m[1]);
 						if (el && el.length) {
 							el = el[0];
 						}
@@ -564,12 +567,12 @@
 			return el.singleNodeValue;
 		},
 
-		runQuerySelector: function(queryselector) {
+		runQuerySelector: function(queryselector, element) {
 			var el;
-
+			element = element || d;
 			try {
-				if (d.querySelector) {
-					el = d.querySelector(queryselector);
+				if (element.querySelector) {
+					el = element.querySelector(queryselector);
 				}
 				else {
 					return null;
@@ -604,8 +607,8 @@
 			return this.extractJavaScriptVariable(o.parameter1, o);
 		},
 
-		extractJavaScriptVariable: function(varname, o) {
-			var parts, value, ctx = w;
+		extractJavaScriptVariable: function(varname, o, parent) {
+			var parts, value, ctx = parent || w;
 
 			if (!varname) {
 				return false;
@@ -621,7 +624,7 @@
 			}
 
 			// Top part needs to be global in the primary window
-			value = this.extractJavaScriptVariableValue(w, parts.shift());
+			value = this.extractJavaScriptVariableValue(ctx, parts.shift());
 
 			// Then we navigate down the object looking at each part
 			// until:
@@ -1114,6 +1117,91 @@
 			// If we reach here, that means the mark/measure wasn't found.  We'll save it for retrying because it's
 			// possible that it will be added later in the page, but before we beacon
 			impl.mayRetry.push({ handler: this, data: o });
+		},
+		Payload: function(o, ename, data) {
+			var element, parser, dom, m, value, content, DP = BOOMR.window.DOMParser, JSON = BOOMR.window.JSON;
+			// If no data was passed in we're not the main audience for this request
+			if (!data) {
+				return null;
+			}
+
+			if (o.url && !this.checkURLPattern(o.url, data.url)) {
+				return null;
+			}
+
+			if (o.parameter1 && o.parameter2) {
+				// If no actual content was given we can stop right away
+				if (!data.response || !data.response.raw) {
+					return null;
+				}
+
+				if (o.parameter1 === "queryselector" || o.parameter1 === "xpath") {
+					// if xml was passed in we can attempt to use it as DOM, otherwise we'll fallback to DOMParsing
+					if (data.response.xml) {
+						if (o.parameter1 === "queryselector") {
+							element = this.runQuerySelector(o.parameter2, data.response.xml);
+						}
+						else if (o.parameter1 === "xpath") {
+							element = this.runXPath(o.parameter2, data.response.xml);
+						}
+						if (!element) {
+							try {
+								// Only run this if DOMParser is supported by the browser
+								if (DP) {
+									parser = new DP();
+									dom = parser.parseFromString(data.response.raw);
+									if (o.parameter1 === "queryselector") {
+										element = this.runQuerySelector(o.parameter2, dom);
+									}
+									else if (o.parameter1 === "xpath") {
+										element = this.runXPath(o.parameter2, dom);
+									}
+								}
+							}
+							catch (ex) {
+								// Parsing failed
+								return null;
+							}
+						}
+						return this.apply(this.extractFromDOMElement(element, o));
+					}
+				}
+				else if (o.parameter1 === "json") {
+					if (data.response.json) {
+						return this.extractJavaScriptVariable(o.parameter2, o, data.response.json);
+					}
+					else if (data.response.raw) {
+						try {
+							if (JSON && typeof JSON.parse === "function") {
+								var parsed = JSON.parse(data.response.raw);
+								return this.extractJavaScriptVariable(o.parameter2, o, parsed);
+							}
+						}
+						catch (ex) {
+							return null;
+						}
+					}
+				}
+				else if (o.parameter1 === "substring") {
+					content = data.response.text || data.response.raw;
+
+					m = this.execSafeRegEx(o.parameter2, data.response.text);
+					if (!m || !m.length) {
+						return false;
+					}
+
+					value = this.cleanUp(m[0]);
+
+					if (!value) {
+						return false;
+					}
+
+					return this.apply(value);
+				}
+
+			}
+
+			return null;
 		},
 		/**
 		 * @desc
@@ -1887,7 +1975,7 @@
 		mayRetry: [],
 
 		done: function(edata, ename) {
-			var i, v, hconfig, handler, limpl = impl, data;
+			var i, v, hconfig, handler, limpl = impl, data, pg;
 
 			if (!impl.configReceived) {
 				// we should try to run again after config comes in
@@ -1964,13 +2052,18 @@
 				if (hconfig.hasOwnProperty(v)) {
 					handler = new Handler(hconfig[v]);
 
+					// if data.pg (hard set page group from xhr_send/xhr_load/...) just skip the pageGroups config and move on
+					if (ename === "xhr" && v === "pageGroups" && data && data.pg && typeof data.pg === "string") {
+						BOOMR.debug("Found data.pg on data param " + data.pg, "PageParams");
+						handler.apply(data.pg);
+						continue;
+					}
 					for (i = 0; i < limpl[v].length; i++) {
 						if (ename !== "xhr" && limpl[v][i].only_xhr) {
 							// do not process xhr only items for non-xhr requests
 							continue;
 						}
-
-						if ( handler.handle(limpl[v][i], ename) && hconfig[v].stopOnFirst ) {
+						if (handler.handle(limpl[v][i], ename, data) && hconfig[v].stopOnFirst) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";
 							}

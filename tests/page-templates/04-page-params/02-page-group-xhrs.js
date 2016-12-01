@@ -14,8 +14,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				_this.timeout(10000);
-				t.ensureBeaconCount(done,  5);
+				_this.timeout(11000);
+				t.ensureBeaconCount(done, 11);
 			});
 	});
 
@@ -108,4 +108,66 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				done();
 			});
 	});
+
+	it("Should have a sixth beacon matching QuerySelector based payload validation", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[5];
+				assert.equal(b["xhr.pg"], "PageGroupQuerySelector");
+				done();
+			});
+	});
+
+	it("Should have a seventh beacon matching XPath based payload validation", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[6];
+				assert.equal(b["xhr.pg"], "PageGroupXPath");
+				done();
+			});
+	});
+
+	it("Should have a eigth beacon matching JSON based payload validation", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[7];
+				assert.equal(b["xhr.pg"], "PageGroupJson");
+				done();
+			});
+	});
+
+	it("Should have a ninth beacon matching text based payload validation", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[8];
+				assert.equal(b["xhr.pg"], "PageGroupText");
+				done();
+			});
+	});
+
+	it("Should have a tenth beacon matching onSendXHRPageGroup function based validation", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[9];
+				assert.equal(b["xhr.pg"], "XHRPageGroupSendPayload");
+				done();
+			});
+	});
+
+	it("Should have an eleventh beacon matching onSendXHRPageGroup function based validation with POST data", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var b = tf.beacons[10];
+				assert.equal(b["xhr.pg"], "PageXHRPOST");
+				done();
+			});
+	});
+
 });
+

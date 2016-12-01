@@ -1135,13 +1135,18 @@
 										// put the HTTP error code on the resource if it's not a success
 										resource.status = req.status;
 									}
+									resource.response = {
+										text: req.responseText,
+										xml: req.responseXML,
+										raw: req.response,
+										json: req.responseJSON
+									};
 
 									loadFinished();
 								}
 							}
 							else {// load, timeout, error, abort
 								resource.status = (stat === undefined ? req.status : stat);
-
 								loadFinished();
 							}
 						},
@@ -1201,7 +1206,9 @@
 			 * Mark requestStart timestamp and start the request unless the resource has already been marked as having an error code or a result to itself.
 			 * @returns {Object} The data normal XHR.send() would return
 			 */
-			req.send = function() {
+			req.send = function(data) {
+				req.resource.requestPayload = data;
+				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
 
 				// call the original send method unless there was an error
