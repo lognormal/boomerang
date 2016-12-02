@@ -1,0 +1,29 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="111096-1.js" type="text/javascript"></script>
+<script>
+//
+// The host page has an invalid XMLHttpRequest object -- use the IFRAME object instead
+//
+window.XMLHttpRequest = function() {
+	return {
+		open: function() {
+			throw new Error("Access is denied.");
+		}
+	};
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	onBoomerangLoaded: function() {
+		// force a large payload so XHR is used
+		var largeVar = "";
+		for (var i = 0; i < 3000; i++) {
+			largeVar += "a";
+		}
+		BOOMR.addVar("largeVar", largeVar);
+	}
+});
+</script>
+<div id="content"></div>
+<%= footer %>

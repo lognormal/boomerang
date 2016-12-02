@@ -984,7 +984,8 @@
 			return;
 		}
 
-		BOOMR.orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest;
+		// if there's a orig_XMLHttpRequest on the window, use that first (if another lib is overwriting XHR)
+		BOOMR.orig_XMLHttpRequest = BOOMR.window.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest;
 
 		MutationHandler.start();
 

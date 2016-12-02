@@ -1695,19 +1695,40 @@ BOOMR_check_doc_domain();
 			}
 			else {
 				// Send a form-encoded XHR POST beacon
-				xhr = new (BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
-				xhr.open("POST", impl.beacon_url);
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				if (typeof impl.beacon_auth_token !== "undefined") {
-					if (typeof impl.beacon_auth_key === "undefined") {
-						impl.beacon_auth_key = "Authorization";
-					}
-					xhr.setRequestHeader(impl.beacon_auth_key, impl.beacon_auth_token);
+				xhr = new (BOOMR.window.orig_XMLHttpRequest || BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
+				try {
+					this.sendXhrPostBeacon(xhr, paramsJoined);
 				}
-				xhr.send(paramsJoined);
+				catch (e) {
+					// if we had an exception with the window XHR object, try our IFRAME XHR
+					xhr = new BOOMR.boomerang_frame.XMLHttpRequest();
+					this.sendXhrPostBeacon(xhr, paramsJoined);
+				}
 			}
 
 			return true;
+		},
+
+		/**
+		 * Sends an XHR beacon
+		 *
+		 * @param {object} xhr XMLHttpRequest object
+		 * @param {object} [paramsJoined] XMLHttpRequest.send() argument
+		 */
+		sendXhrPostBeacon: function(xhr, paramsJoined) {
+			xhr.open("POST", impl.beacon_url);
+
+			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+			if (typeof impl.beacon_auth_token !== "undefined") {
+				if (typeof impl.beacon_auth_key === "undefined") {
+					impl.beacon_auth_key = "Authorization";
+				}
+
+				xhr.setRequestHeader(impl.beacon_auth_key, impl.beacon_auth_token);
+			}
+
+			xhr.send(paramsJoined);
 		},
 
 		/**
