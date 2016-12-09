@@ -14,5 +14,6 @@
 	{"key":"resource-groups"},
 	{"key":"errors-monitor-other"},
 	{"key":"third-party-analytics"},
-	{"key":"third-party-analytics-cid"}
+	{"key":"third-party-analytics-cid"},
+	{"key":"js-var-string-property-access"}
 ]

@@ -608,7 +608,7 @@
 		},
 
 		extractJavaScriptVariable: function(varname, o, parent) {
-			var parts, value, ctx = parent || w;
+			var parts, parts_str_prop, value, ctx = parent || w, partIndex;
 
 			if (!varname) {
 				return false;
@@ -617,14 +617,25 @@
 			BOOMR.debug("Got variable: " + varname, "PageVars");
 
 			// Split variable into its parts
-			parts = varname.split(/\./);
+			parts = varname.split(/\[((["'])[\w,.-]*\2|\d*)\]|\./);
+
+			// prevent undefined interfering
+			for (partIndex = 0; partIndex < parts.length; partIndex++) {
+				if (parts[partIndex]) {
+					parts[partIndex] = parts[partIndex].replace(/("|')/g, "");
+				}
+			}
+
+			// Prevent parts from containing "" when splitting ["abc"][0] and similar
+			parts = BOOMR.utils.arrayFilter(parts, function(v) {
+				return v && v.length > 0;
+			});
 
 			if (!parts || parts.length === 0) {
 				return false;
 			}
 
-			// Top part needs to be global in the primary window
-			value = this.extractJavaScriptVariableValue(ctx, parts.shift());
+			value = ctx[parts.shift()];
 
 			// Then we navigate down the object looking at each part
 			// until:
@@ -634,10 +645,9 @@
 			// - there are no more parts left (so we can stop)
 			try {
 				while (parts.length && this.isValidObjectMember(value, parts[0])) {
-
 					BOOMR.debug("looking at " + parts[0], "PageVars");
 					ctx = value;
-					value = this.extractJavaScriptVariableValue(value, parts.shift());
+					value = value[parts.shift()];
 				}
 			}
 			catch (err) {
@@ -682,35 +692,6 @@
 			value = this.cleanUp(String(value), o);
 
 			return this.apply(value);
-		},
-
-		extractJavaScriptVariableValue: function(value, part) {
-			// regex to extract array subscript index
-			var match, index, re = /(.+?)\[(\d+)\]((?:\[\d+\])+)*/;
-
-			if ((match = re.exec(part)) === null) {
-				// no subscript, return value.part
-				return value[part];
-			}
-
-			// split into js var name, or subscripts
-			re = /([a-zA-Z_$][\w$]*|\[(\d+)\])/g;
-
-			// We'll match either a variable name (the first part of the regex),
-			// or an array subsript (the second option in the | in the regex).
-			while ((match = re.exec(part)) !== null && typeof value !== "undefined") {
-				if (match.length === 3 && match[2]) {
-					// when we matched an array subscript, such as '[1]'
-					index = parseInt(match[2], 10);
-					value = value[index];
-				}
-				else {
-					// when we matched a JavaScript variable name
-					value = value[match[1]];
-				}
-			}
-
-			return value;
 		},
 
 		URLPattern: function(o) {

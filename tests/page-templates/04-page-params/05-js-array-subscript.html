@@ -27,6 +27,20 @@ custom_metric_4 = [
 	}
 ];
 
+custom_metric_5 = {
+	"chart.value.key": 555,
+	"special-prop": 200,
+	"a,b,c": 100
+};
+
+custom_metric_6 = {
+	foo: [0, 111, 222]
+};
+
+custom_metric_7 = {
+	foo: [0, [111, [222, [333, [444]]]]]
+};
+
 BOOMR_test.init({
 	testAfterOnBeacon: true,
 	PageParams: {
@@ -60,6 +74,46 @@ BOOMR_test.init({
 			{
 				varName: "custom_metric_3[0].foo.moo[3].woo[2][3]",
 				label: "cmet5",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_3[0].foo[\"moo\"][3][\"woo\"][2][3]",
+				label: "cmet6",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_3[0].foo['moo'][3]['woo'][2][3]",
+				label: "cmet7",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_5['chart.value.key']",
+				label: "cmet8",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_5['special-prop']",
+				label: "cmet9",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_5['a,b,c']",
+				label: "cmet10",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_5['a,b,c']",
+				label: "cmet10",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_6.foo[10][10]",
+				label: "cmet11",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_7.foo[-a]",
+				label: "cmet12",
 				type: "JavaScriptVar"
 			}
 		],
@@ -103,6 +157,62 @@ BOOMR_test.init({
 				"label": "cdim.JS5",
 				"dataType": "Text",
 				"varName": "custom_metric_3[0].foo.moo[3].woo[2][3]"
+			},
+			{
+				"name": "JS6",
+				"index": 5,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS6",
+				"dataType": "Text",
+				"varName": "custom_metric_3[0].foo[\"moo\"][3][\"woo\"][2][3]"
+			},
+			{
+				"name": "JS7",
+				"index": 6,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS7",
+				"dataType": "Text",
+				"varName": "custom_metric_3[0].foo['moo'][3]['woo'][2][3]"
+			},
+			{
+				"name": "JS8",
+				"index": 7,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS8",
+				"dataType": "Text",
+				"varName": "custom_metric_5['chart.value.key']"
+			},
+			{
+				"name": "JS9",
+				"index": 8,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS9",
+				"dataType": "Text",
+				"varName": "custom_metric_5['special-prop']"
+			},
+			{
+				"name": "JS10",
+				"index": 9,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS10",
+				"dataType": "Text",
+				"varName": "custom_metric_5['a,b,c']"
+			},
+			{
+				"name": "JS11",
+				"index": 10,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS11",
+				"dataType": "Text",
+				"varName": "custom_metric_6.foo[10][10]"
+			},
+			{
+				"name": "JS12",
+				"index": 11,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS12",
+				"dataType": "Text",
+				"varName": "custom_metric_7.foo[-a]"
 			}
 		],
 		customTimers: [
@@ -140,6 +250,55 @@ BOOMR_test.init({
 				"type": "Custom",
 				"label": "custom4",
 				"parameter1": "custom_metric_3[0].foo.moo[3].woo[2][3]"
+			},
+			{
+				"name": "JS6",
+				"index": 5,
+				"type": "JavaScriptVar",
+				"label": "custom5",
+				"varName": "custom_metric_3[0].foo[\"moo\"][3][\"woo\"][2][3]"
+			},
+			{
+				"name": "JS7",
+				"index": 6,
+				"type": "JavaScriptVar",
+				"label": "custom6",
+				"varName": "custom_metric_3[0].foo['moo'][3]['woo'][2][3]"
+			},
+			{
+				"name": "JS8",
+				"index": 7,
+				"type": "JavaScriptVar",
+				"label": "custom7",
+				"varName": "custom_metric_5['chart.value.key']"
+			},
+			{
+				"name": "JS9",
+				"index": 8,
+				"type": "JavaScriptVar",
+				"label": "custom8",
+				"varName": "custom_metric_5['special-prop']"
+			},
+			{
+				"name": "JS10",
+				"index": 9,
+				"type": "JavaScriptVar",
+				"label": "custom9",
+				"varName": "custom_metric_5['a,b,c']"
+			},
+			{
+				"name": "JS11",
+				"index": 10,
+				"type": "JavaScriptVar",
+				"label": "custom10",
+				"varName": "custom_metric_6.foo[10][10]"
+			},
+			{
+				"name": "JS12",
+				"index": 11,
+				"type": "JavaScriptVar",
+				"label": "custom11",
+				"varName": "custom_metric_7.foo[-a]"
 			}
 		]
 	}
