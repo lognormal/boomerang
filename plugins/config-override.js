@@ -83,7 +83,8 @@
 				trimUrls: true
 			},
 			AutoXHR: {
-				alwaysSendXhr: true
+				alwaysSendXhr: true,
+				filters: true
 			},
 			Errors: {
 				enabled: true,

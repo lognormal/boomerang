@@ -15,5 +15,6 @@
 	{"key":"errors-monitor-other"},
 	{"key":"third-party-analytics"},
 	{"key":"third-party-analytics-cid"},
-	{"key":"js-var-string-property-access"}
+	{"key":"js-var-string-property-access"},
+	{"key":"autoxhr-filters"}
 ]
