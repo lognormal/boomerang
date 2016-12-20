@@ -773,7 +773,7 @@
 			if (!current_event.resource.url) {
 				a.href = url;
 
-				if (shouldExcludeXhr(a)) {
+				if (impl.excludeFilter(a)) {
 					// excluded resource, so abort
 					return false;
 				}
@@ -1022,7 +1022,7 @@
 			req.open = function(method, url, async) {
 				a.href = url;
 
-				if (shouldExcludeXhr(a)) {
+				if (impl.excludeFilter(a)) {
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -1244,16 +1244,61 @@
 	}
 
 	/**
-	  * Sends an XHR resource
+	 * Sends an XHR resource
 	 */
 	function sendResource(resource) {
 		resource.initiator = "xhr";
 		BOOMR.responseEnd(resource);
 	}
 
+	/**
+	 * Container for AutoXHR plugin Closure specific state configuration data
+	 * @property {string[]} spaBackendResources - Default resources to count as Back-End during a SPA nav
+	 * @property {boolean} ie1011fix - If true, the MutationObserver  will be paused on IE10/11 to avoid delayed processing, see {@link ProxyXHRImplementation#addListener} for more info
+	 * @property {FilterObject[]} filters - Array of {@link FilterObject} that is used to apply filters on XHR Requests
+	 * @property {boolean} initialized - Set to true after the first run of {@link BOOMR.plugins.AutoXHR#init}
+	 */
 	impl = {
 		spaBackEndResources: SPA_RESOURCES_BACK_END,
-		ie1011fix: true
+		ie1011fix: true,
+		excludeFilters: [],
+		initialized: false,
+		/**
+		 * Filter function iterating over all available {@link FilterObject}s if returns true will not instrument an XHR
+		 * @param {HTMLAnchorElement} anchor - HTMLAnchorElement node created with the XHRs URL as `href` to evaluate by {@link FilterObject}s and passed to {@link FilterObject#cb} callbacks.
+		 *                                     NOTE: The anchor needs to be created from the host document (ie. BOOMR.window.document) to enable us to resolve relative
+		 *                                     URLs to a full valid path and BASE HREF mechanics can take effect.
+		 * @return {boolean} true if the XHR should not be instrumented false if it should be instrumented
+		 */
+		excludeFilter: function(anchor) {
+			var idx, ret, ctx;
+
+			// If anchor is null we just throw it out period
+			if (!anchor || !anchor.href) {
+				return false;
+			}
+
+			for (idx = 0; idx < impl.excludeFilters.length; idx++) {
+				if (typeof impl.excludeFilters[idx].cb === "function") {
+					ctx = impl.excludeFilters[idx].ctx;
+					if (impl.excludeFilters[idx].name) {
+						log("Running filter: " + impl.excludeFilters[idx].name + " on URL: " + anchor.href);
+					}
+
+					try {
+						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
+						if (ret) {
+							return true;
+						}
+					}
+					catch (exception) {
+						BOOMR.addError(exception, "BOOMR.plugins.AutoXHR.impl.excludeFilter()");
+					}
+				}
+			}
+
+			return false;
+		}
 	};
 
 	/**
@@ -1334,7 +1379,7 @@
 	BOOMR.plugins.AutoXHR = {
 		is_complete: function() { return true; },
 		init: function(config) {
-			var i;
+			var i, idx;
 
 			// if we don't have window, abort
 			if (!BOOMR.window || !BOOMR.window.document) {
@@ -1349,6 +1394,20 @@
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
+
+			// Ensure we're only once adding the shouldExcludeXhr
+			if (!impl.initialized) {
+				this.addExcludeFilter(shouldExcludeXhr, null, "shouldExcludeXhr");
+
+				impl.initialized = true;
+			}
+
+			// Add filters from config
+			if (config && config.AutoXHR && config.AutoXHR.excludeFilters && config.AutoXHR.excludeFilters.length > 0) {
+				for (idx = 0; idx < config.AutoXHR.excludeFilters.length; idx++) {
+					impl.excludeFilters.push(config.AutoXHR.excludeFilters[idx]);
+				}
+			}
 
 			autoXhrEnabled = config.instrument_xhr;
 
@@ -1430,6 +1489,27 @@
 			}
 
 			autoXhrEnabled = true;
+		},
+		/**
+		 * Add a filter function to the list of functions to run to validate if an XHR should be instrumented
+		 * For a description of the params see properties of the {@link AutoXHR#FilterObject} type definition
+		 *
+		 * @example
+		 * BOOMR.plugins.AutoXHR.addExcludeFilter(function(anchor) {
+		 *   var m = anchor.href.match(/some-page\.html/g);
+		 *
+		 *   // If matching flag to not instrument
+		 *   if (m && m.length > 0) {
+		 *     return true;
+		 *   }
+		 *   return false;
+		 * }, null, "exampleFilter");
+		 * @param {function} cb - Callback to run to validate filtering of an XHR Request
+		 * @param {Object} ctx - Context to run {@param cb} in
+		 * @param {string} [name] - Optional name for the filter, called out when running exclude filters for debugging purposes
+		 */
+		addExcludeFilter: function(cb, ctx, name) {
+			impl.excludeFilters.push({cb: cb, ctx: ctx, name: name});
 		}
 	};
 
@@ -1477,5 +1557,13 @@
 	 *
 	 * @property {TimeStamp} loadEventEnd - Timestamp when the resource arrived in the browser
 	 * @property {TimeStamp} requestStart - High resolution timestamp when the resource was started to be loaded
+	 */
+
+	/**
+	 * @typedef FilterObject
+	 * @property {function} cb - Callback called with context accepts one param which is: AnchorElement referring
+	 *                           to the fully qualified URL of the XHR Request BOOMR is determining to instrument
+	 * @property {Object} ctx - Execution context to use when running `cb`
+	 * @property {string} [name] - Name of the filter used for logging and debugging purposes (This is an entirely optional property)
 	 */
 })();
