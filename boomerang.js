@@ -1528,11 +1528,11 @@ BOOMR_check_doc_domain();
 				xhr = new (BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
 				xhr.open("POST", impl.beacon_url);
 				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				if( impl.beacon_auth_token !== "") {
-					if( impl.beacon_auth_key === "") {
-						impl.beacon_auth_key == "Authorization";
+				if ( impl.beacon_auth_token !== "") {
+					if ( impl.beacon_auth_key === "") {
+						impl.beacon_auth_key = "Authorization";
 					}
-					xhr.setRequestHeader (impl.beacon_auth_key, impl.beacon_auth_token );
+					xhr.setRequestHeader(impl.beacon_auth_key, impl.beacon_auth_token);
 				}
 				xhr.send(paramsJoined);
 			}
