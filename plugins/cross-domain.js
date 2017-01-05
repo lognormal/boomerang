@@ -165,7 +165,7 @@
 			}
 
 			if (data &&
-			    impl.cross_domain_url.indexOf(event.origin) >= -1) {
+			    impl.cross_domain_url.indexOf(event.origin) > -1) {
 				// convert cookie parameters to our own session
 				impl.session = {
 					ID: data.si,
@@ -198,7 +198,7 @@
 				BOOMR.sendBeacon();
 				setTimeout(function() {
 					// If we're debugging keep the iframe around, if not (default) remove it
-					if (!impl.debug) {
+					if (!impl.debug && d.getElementById(impl.iframe_name) !== null) {
 						d.body.removeChild(d.getElementById(impl.iframe_name));
 					}
 				}, 0);
