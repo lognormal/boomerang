@@ -152,7 +152,7 @@
 		 */
 		onIFrameMessage: function(event) {
 			var data;
-			if (!w.JSON) {
+			if (!w.JSON || impl.cross_domain_url.indexOf(event.origin) === -1) {
 				return;
 			}
 
@@ -164,8 +164,7 @@
 				return;
 			}
 
-			if (data &&
-			    impl.cross_domain_url.indexOf(event.origin) > -1) {
+			if (data) {
 				// convert cookie parameters to our own session
 				impl.session = {
 					ID: data.si,
