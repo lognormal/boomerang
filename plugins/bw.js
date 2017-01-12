@@ -129,7 +129,7 @@
 
 			amean = Math.round(sum / n);
 
-			std_dev = Math.sqrt( sumsq / n - sum * sum / (n * n));
+			std_dev = Math.sqrt(sumsq / n - sum * sum / (n * n));
 
 			// See http://en.wikipedia.org/wiki/1.96 and http://en.wikipedia.org/wiki/Standard_error_%28statistics%29
 			std_err = (1.96 * std_dev / Math.sqrt(n)).toFixed(2);
@@ -519,7 +519,7 @@
 			a = BOOMR.window.document.createElement("a");
 			a.href = impl.base_url;
 
-			if ( !impl.test_https && a.protocol === "https:") {
+			if (!impl.test_https && a.protocol === "https:") {
 				// we don't run the test for https because SSL stuff will mess up b/w
 				// calculations we could run the test itself over HTTP, but then IE
 				// will complain about insecure resources, so the best is to just bail

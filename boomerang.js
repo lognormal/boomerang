@@ -150,11 +150,11 @@ BOOMR_check_doc_domain();
 		}
 
 		try {
-			if (!createCustomEvent && d.createEvent && d.createEvent( "CustomEvent" )) {
+			if (!createCustomEvent && d.createEvent && d.createEvent("CustomEvent")) {
 				createCustomEvent = function(e_name, params) {
-					var evt = d.createEvent( "CustomEvent" );
+					var evt = d.createEvent("CustomEvent");
 					params = params || { cancelable: false, bubbles: false };
-					evt.initCustomEvent( e_name, params.bubbles, params.cancelable, params.detail );
+					evt.initCustomEvent(e_name, params.bubbles, params.cancelable, params.detail);
 
 					return evt;
 				};
@@ -500,7 +500,7 @@ BOOMR_check_doc_domain();
 
 				var i, cookies;
 				cookies = " " + d.cookie + ";";
-				if ( (i = cookies.indexOf(name)) >= 0 ) {
+				if ((i = cookies.indexOf(name)) >= 0) {
 					i += name.length;
 					cookies = cookies.substring(i, cookies.indexOf(";", i)).replace(/^"/, "").replace(/"$/, "");
 					return cookies;
@@ -526,7 +526,7 @@ BOOMR_check_doc_domain();
 					c.push("expires=" + exp);
 				}
 
-				if ( nameval.length < 500 ) {
+				if (nameval.length < 500) {
 					d.cookie = c.join("; ");
 					// confirm cookie was set (could be blocked by user's settings, etc.)
 					savedval = this.getCookie(name);
@@ -752,7 +752,7 @@ BOOMR_check_doc_domain();
 					el.addEventListener(type, fn, false);
 				}
 				else if (el.attachEvent) {
-					el.attachEvent( "on" + type, fn );
+					el.attachEvent("on" + type, fn);
 				}
 
 				// ensure the type arry exists
@@ -1151,7 +1151,7 @@ BOOMR_check_doc_domain();
 			}
 		},
 
-		visibilityState: ( visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; } ),
+		visibilityState: (visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; }),
 
 		lastVisibilityEvent: {},
 
@@ -1883,7 +1883,7 @@ BOOMR_check_doc_domain();
 		}
 	}());
 
-	dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR }, true );
+	dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR }, true);
 
 }(window));
 

@@ -77,7 +77,7 @@
 			if (typeof params === "object") {
 				for (k in params) {
 					if (params.hasOwnProperty(k)) {
-						if (params[k] === undefined ) {
+						if (params[k] === undefined) {
 							if (subcookies.hasOwnProperty(k)) {
 								delete subcookies[k];
 							}
@@ -666,7 +666,7 @@
 				// our unload handler won't fire, so we need to set our
 				// cookie on click or submit
 				value = value_cb(etarget);
-				this.updateCookie({ "nu": value }, "cl" );
+				this.updateCookie({ "nu": value }, "cl");
 				BOOMR.addVar("nu", BOOMR.utils.cleanupURL(value));
 				impl.addedVars.push("nu");
 			}
