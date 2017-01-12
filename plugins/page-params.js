@@ -970,7 +970,7 @@
 
 				try {
 					// PDFs in IE will throw this exception
-					if ( e.name === "TypeError" && e.message === "Invalid calling object" && frame.document.location.pathname.match(/\.pdf$/)) {
+					if (e.name === "TypeError" && e.message === "Invalid calling object" && frame.document.location.pathname.match(/\.pdf$/)) {
 						return null;
 					}
 				}
@@ -2190,7 +2190,7 @@
 				data = edata;
 			}
 
-			if ( !data.url &&
+			if (!data.url &&
 			    (!data.timers     || !data.timers.length) &&
 			    (!data.metrics    || !data.metrics.length) &&
 			    (!data.dimensions || !data.dimensions.length)
