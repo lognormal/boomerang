@@ -1753,8 +1753,8 @@ BOOMR_check_doc_domain();
 
 			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-			if (impl.beacon_auth_token !== "") {
-				if (impl.beacon_auth_key === "") {
+			if (typeof impl.beacon_auth_token !== "undefined") {
+				if (typeof impl.beacon_auth_key === "undefined") {
 					impl.beacon_auth_key = "Authorization";
 				}
 
