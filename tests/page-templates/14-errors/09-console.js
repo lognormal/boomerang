@@ -63,6 +63,12 @@ describe("e2e/14-errors/09-console", function() {
 		assert.isDefined(err.stack);
 	});
 
+	it("Should not have BOOMR.window.console.error on the stack", function() {
+		var b = tf.lastBeacon();
+		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
+		assert.notInclude(err.stack, "BOOMR.window.console.error");
+	});
+
 	it("Should not have the wrapped function in the stack for the first error", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];

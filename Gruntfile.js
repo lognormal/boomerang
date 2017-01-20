@@ -19,6 +19,26 @@ var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
 var TEST_URL_BASE = grunt.option("test-url") || "http://localhost:4002";
 
+var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
+	preserveComments: false,
+	mangle: {
+		// for errors.js
+		except: [
+			"createStackForSend",
+			"loadFinished",
+			"BOOMR_addError",
+			"BOOMR_plugins_errors_onerror",
+			"BOOMR_plugins_errors_onxhrerror",
+			"BOOMR_plugins_errors_console_error",
+			"BOOMR_plugins_errors_wrap"
+		]
+	},
+	sourceMap: true,
+	compress: {
+		sequences: false
+	}
+};
+
 //
 // Grunt config
 //
@@ -87,6 +107,7 @@ module.exports = function() {
 	var buildRelease = buildPathPrefix + ".js";
 	var buildReleaseMin = buildPathPrefix + ".min.js";
 	var buildTest = testBuildPathPrefix + "-latest-debug.js";
+	var buildTestMin = testBuildPathPrefix + "-latest-debug.min.js";
 
 	//
 	// Build configuration
@@ -297,17 +318,7 @@ module.exports = function() {
 				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> */\n"
 			},
 			default: {
-				options: {
-					preserveComments: false,
-					mangle: {
-						// for errors.js
-						except: ["createStackForSend", "loadFinished"]
-					},
-					sourceMap: true,
-					compress: {
-						sequences: false
-					}
-				},
+				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
 				files: [{
 					expand: true,
 					cwd: "build/",
@@ -316,6 +327,13 @@ module.exports = function() {
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
+				}]
+			},
+			"debug-test-min": {
+				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
+				files: [{
+					src: buildTest,
+					dest: buildTestMin
 				}]
 			},
 			plugins: {
@@ -694,7 +712,7 @@ module.exports = function() {
 		// Build
 		//
 		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
-		"build:test": ["concat:debug", "concat:debug-tests", "build:apply-templates"],
+		"build:test": ["concat:debug", "concat:debug-tests", "uglify:debug-test-min", "build:apply-templates"],
 
 		// Build steps
 		"build:apply-templates": [
