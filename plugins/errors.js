@@ -972,6 +972,9 @@
 
 			via = via || BOOMR.plugins.Errors.VIA_APP;
 
+			// ensure the document.domain is OK before we wrap the function
+			BOOMR_check_doc_domain();
+
 			return function BOOMR_plugins_errors_wrap() {
 				try {
 					return fn.apply(that, arguments);
