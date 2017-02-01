@@ -101,7 +101,7 @@
 			TPAnalytics: {
 				enabled: true
 			},
-			secondaryBeacons: true,
+			secondary_beacons: true,
 			autorun: true
 		}
 	};
