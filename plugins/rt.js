@@ -251,8 +251,6 @@
 			BOOMR.debug("Current session meta:\n" + BOOMR.utils.objectToString(BOOMR.session), "rt");
 			BOOMR.debug("Timers: t_start=" + t_start + ", sessionLoad=" + impl.loadTime + ", sessionError=" + impl.oboError + ", lastAction=" + impl.lastActionTime, "rt");
 
-			BOOMR.removeVar("rt.srst");
-
 			// determine the average page session length, which is the session length over # of pages
 			var avgSessionLength = 0;
 			if (BOOMR.session.start && BOOMR.session.length) {
@@ -273,21 +271,6 @@
 			    // or the average page session length is longer than the session exp
 			    (avgSessionLength > sessionExp)
 			) {
-				// First we write the old session values to the beacon to help debug session resets on the server-side
-				BOOMR.addVar(
-					"rt.srst",
-					BOOMR.session.ID + "-" + BOOMR.session.start +
-						":" + BOOMR.session.length +
-						":" + impl.oboError +
-						":" + impl.loadTime +
-						":" + t_start +
-						":" + impl.lastActionTime +
-						":" + t_done +
-						":" + impl.sessionHistory.join(",")
-				);
-
-				impl.addedVars.push("rt.srst");
-
 				// Now we reset the session
 				BOOMR.session.start = t_start || BOOMR.t_lstart || BOOMR.t_start;
 				BOOMR.session.length = 0;
@@ -1249,11 +1232,10 @@
 
 			BOOMR.addVar({
 				"rt.tt": impl.loadTime,
-				"rt.obo": impl.oboError,
-				"rt.sh": impl.sessionHistory.join(",")
+				"rt.obo": impl.oboError
 			});
 
-			impl.addedVars.push("rt.tt", "rt.obo", "rt.sh");
+			impl.addedVars.push("rt.tt", "rt.obo");
 			/* SOASTA PRIVATE END */
 
 			impl.updateCookie();
