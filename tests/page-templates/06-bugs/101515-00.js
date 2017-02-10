@@ -23,7 +23,9 @@ describe("e2e/06-bugs/101515-00", function() {
 	});
 
 	it("Should have the first beacon with non negative t_page", function() {
-		assert.operator(parseInt(tf.beacons[0].t_page, 10), ">=", 0, "t_page is not negative");
+		if (tf.beacons[0].t_page) {
+			assert.operator(parseInt(tf.beacons[0].t_page, 10), ">=", 0, "t_page is not negative");
+		}
 	});
 
 });

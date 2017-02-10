@@ -675,6 +675,34 @@
 		});
 	};
 
+	/**
+	 * Creates a copy of window.performance that can be modified by the caller.
+	 */
+	t.getPerformanceCopy = function() {
+		if (!("performance" in window)) {
+			return;
+		}
+
+		var copy = {};
+
+		// copy over all values
+		var objs = ["timing", "navigation"];
+		for (var i = 0; i < objs.length; i++) {
+			var objName = objs[i];
+			var subObj = window.performance[objName];
+
+			copy[objName] = {};
+
+			if (subObj) {
+				for (var subObjAttr in subObj) {
+					copy[objName][subObjAttr] = subObj[subObjAttr];
+				}
+			}
+		}
+
+		return copy;
+	};
+
 	window.BOOMR_test = t;
 
 }(window));

@@ -660,15 +660,22 @@
 					// responseEnd (instead of responseStart) since it's not until responseEnd
 					// that the browser can consume the data, and responseEnd is the only guarateed
 					// timestamp with cross-origin XHRs if ResourceTiming is enabled.
-					t_resp_start = data.timing.responseEnd;
 
 					t_fetch_start = data.timing.fetchStart;
+
+					if (typeof t_fetch_start === "undefined" || data.timing.responseEnd >= t_fetch_start) {
+						t_resp_start = data.timing.responseEnd;
+					}
 				}
 			}
 			else if (impl.responseStart) {
 				// Use NavTiming API to figure out resp latency and page time
 				// t_resp will use the cookie if available or fallback to NavTiming
-				t_resp_start = impl.responseStart;
+
+				// only use if the time looks legit (after navigationStart)
+				if (impl.responseStart >= impl.cached_t_start) {
+					t_resp_start = impl.responseStart;
+				}
 			}
 			else if (impl.timers.hasOwnProperty("t_page")) {
 				// If the dev has already started t_page timer, we can end it now as well
