@@ -58,6 +58,7 @@ module.exports = function(req, res) {
 	var sendACAO = !(q.noACAO === "1"); // send by default
 	var sendTAO = (q.TAO === "1"); // don't send by default
 	var responseHeaders = q.headers;
+	var redir = q.redir;
 
 	// if we get a '+' or '-' delay prefix, add/sub its value with the delay used on the
 	// previous request. This is usefull in cases where we need to hit the
@@ -73,12 +74,21 @@ module.exports = function(req, res) {
 			delay = parseInt(delay, 10);
 		}
 	}
+
 	delay = delay >= 0 ? delay : 0;
 
 	previousDelay = delay;
 
 	setTimeout(function() {
 		var headers = {};
+
+		if (redir) {
+			res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+			res.header("Pragma", "no-cache");
+			res.header("Expires", 0);
+
+			return res.redirect(302, file);
+		}
 
 		if (sendACAO) {
 			headers["Access-Control-Allow-Origin"] = "*";
