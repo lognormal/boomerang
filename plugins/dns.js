@@ -33,8 +33,7 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 				return;
 			}
 
-			var random = Math.random().toString(36),
-			    cache_bust = (new Date().getTime()) + "." + (Math.random());
+			var random = BOOMR.utils.generateId(10);
 
 			impl.gen_url = impl.base_url.replace(/\*/, random);
 
@@ -42,20 +41,19 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 			impl.img.onload = impl.A_loaded;
 
 			impl.t_start = new Date().getTime();
-			impl.img.src = impl.gen_url + "image-l.gif?t=" + cache_bust;
+			impl.img.src = impl.gen_url + "image-l.gif?t=" + random;
 		},
 
 		A_loaded: function() {
-			var cache_bust;
-			impl.t_dns = new Date().getTime() - impl.t_start;
+			var random = BOOMR.utils.generateId(10);
 
-			cache_bust = (new Date().getTime()) + "." + (Math.random());
+			impl.t_dns = new Date().getTime() - impl.t_start;
 
 			impl.img = new Image();
 			impl.img.onload = impl.B_loaded;
 
 			impl.t_start = new Date().getTime();
-			impl.img.src = impl.gen_url + "image-l.gif?t=" + cache_bust;
+			impl.img.src = impl.gen_url + "image-l.gif?t=" + random;
 		},
 
 		B_loaded: function() {

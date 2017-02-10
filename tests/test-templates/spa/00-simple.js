@@ -89,4 +89,8 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			assert.isDefined(b.nt_unload_end);
 		}
 	});
+
+	it("Should have set Page ID (pid)", function() {
+		assert.isString(tf.lastBeacon().pid, "pid");
+	});
 };

@@ -880,6 +880,41 @@ BOOMR_check_doc_domain();
 					}
 				}
 				return null;
+			},
+
+			/**
+			 * Generates a pseudo-random UUID (Version 4):
+			 * https://en.wikipedia.org/wiki/Universally_unique_identifier
+			 *
+			 * @returns {string} UUID
+			 */
+			generateUUID: function() {
+				return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+					var r = Math.random() * 16 | 0;
+					var v = c === "x" ? r : (r & 0x3 | 0x8);
+					return v.toString(16);
+				});
+			},
+
+			/**
+			 * Generates a random ID based on the specified number of characters.  Uses
+			 * characters a-z0-9.
+			 *
+			 * @param {number} chars Number of characters (max 40)
+			 * @returns {string} Random ID
+			 */
+			generateId: function(chars) {
+				return "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".substr(0, chars || 40).replace(/x/g, function(c) {
+					var c = (Math.random() || 0.01).toString(36);
+
+					// some implementations may return "0" for small numbers
+					if (c === "0") {
+						return "0";
+					}
+					else {
+						return c.substr(2, 1);
+					}
+				});
 			}
 		},
 
@@ -900,6 +935,11 @@ BOOMR_check_doc_domain();
 
 			if (!config) {
 				config = {};
+			}
+
+			if (!this.pageId) {
+				// generate a random page ID for this page's lifetime
+				this.pageId = BOOMR.utils.generateId(8);
 			}
 
 			if (config.primary && impl.handlers_attached) {
@@ -1615,6 +1655,10 @@ BOOMR_check_doc_domain();
 
 			impl.vars["ua.plt"] = navigator.platform;
 			impl.vars["ua.vnd"] = navigator.vendor;
+
+			if (this.pageId) {
+				impl.vars.pid = this.pageId;
+			}
 
 			if (w !== window) {
 				impl.vars["if"] = "";

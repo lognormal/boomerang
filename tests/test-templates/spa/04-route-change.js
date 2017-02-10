@@ -163,4 +163,12 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}
 	});
+
+	it("Should have set the same Page ID (pid) on all beacons", function() {
+		var pid = tf.beacons[0].pid;
+		for (var i = 0; i <= 2; i++) {
+			var b = tf.beacons[i];
+			assert.equal(b.pid, pid);
+		}
+	});
 };
