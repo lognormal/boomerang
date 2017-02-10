@@ -53,35 +53,34 @@ see: http://www.w3.org/TR/navigation-timing/
 			}
 
 			p = BOOMR.getPerformance();
-			if (edata.url && p) {
-				res = BOOMR.getResourceTiming(edata.url, function(a, b) { return a.responseEnd - b.responseEnd; });
-				if (res) {
-					data = {
-						nt_red_st: res.redirectStart,
-						nt_red_end: res.redirectEnd,
-						nt_fet_st: res.fetchStart,
-						nt_dns_st: res.domainLookupStart,
-						nt_dns_end: res.domainLookupEnd,
-						nt_con_st: res.connectStart,
-						nt_con_end: res.connectEnd,
-						nt_req_st: res.requestStart,
-						nt_res_st: res.responseStart,
-						nt_res_end: res.responseEnd
-					};
-					if (res.secureConnectionStart) {
-						// secureConnectionStart is OPTIONAL in the spec
-						data.nt_ssl_st = res.secureConnectionStart;
+
+			// if we previous saved the correct ResourceTiming entry, use it
+			if (p && edata.restiming) {
+				data = {
+					nt_red_st: edata.restiming.redirectStart,
+					nt_red_end: edata.restiming.redirectEnd,
+					nt_fet_st: edata.restiming.fetchStart,
+					nt_dns_st: edata.restiming.domainLookupStart,
+					nt_dns_end: edata.restiming.domainLookupEnd,
+					nt_con_st: edata.restiming.connectStart,
+					nt_con_end: edata.restiming.connectEnd,
+					nt_req_st: edata.restiming.requestStart,
+					nt_res_st: edata.restiming.responseStart,
+					nt_res_end: edata.restiming.responseEnd
+				};
+
+				if (edata.restiming.secureConnectionStart) {
+					// secureConnectionStart is OPTIONAL in the spec
+					data.nt_ssl_st = edata.restiming.secureConnectionStart;
+				}
+
+				for (k in data) {
+					if (data.hasOwnProperty(k) && data[k]) {
+						data[k] += p.timing.navigationStart;
+
+						// don't need to send microseconds
+						data[k] = Math.floor(data[k]);
 					}
-
-					for (k in data) {
-						if (data.hasOwnProperty(k) && data[k]) {
-							data[k] += p.timing.navigationStart;
-
-							// don't need to send microseconds
-							data[k] = Math.round(data[k]);
-						}
-					}
-
 				}
 			}
 
