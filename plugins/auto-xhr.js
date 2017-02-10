@@ -479,7 +479,10 @@
 		if (resource.initiator === "spa_hard") {
 			// ensure RT picks up the correct timestamps
 			resource.timing.responseEnd = p.timing.responseStart;
-			resource.timing.fetchStart = p.timing.fetchStart;
+
+			// use navigationStart instead of fetchStart to ensure Back-End time
+			// includes any redirects
+			resource.timing.fetchStart = p.timing.navigationStart;
 		}
 		else {
 			//
