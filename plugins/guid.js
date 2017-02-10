@@ -5,14 +5,7 @@
 
 	var impl = {
 		expires:  604800,
-		cookieName: "GUID",
-		generate: function() {
-			function s4() {
-				return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-			}
-
-			return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
-		}
+		cookieName: "GUID"
 	};
 
 	BOOMR.plugins.GUID = {
@@ -24,7 +17,7 @@
 			if (!BOOMR.utils.getCookie(impl.cookieName)) {
 				BOOMR.info("Could not find a cookie for " + impl.cookieName, "GUID");
 
-				var guid = impl.generate();
+				var guid = BOOMR.utils.generateUUID();
 
 				if (!BOOMR.utils.setCookie(impl.cookieName, guid, impl.expires)) {
 					BOOMR.subscribe("before_beacon", function() {

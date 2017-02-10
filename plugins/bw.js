@@ -276,7 +276,7 @@
 
 		load_img: function(i, run, callback) {
 			var url = this.base_url + images[i].name +
-			    "?t=" + BOOMR.now() + Math.random(),
+			    "?t=" + BOOMR.utils.generateId(10),
 			    timer = 0, tstart = 0,
 			    img = new Image(),
 			    that = this;

@@ -507,6 +507,7 @@ describe("BOOMR.plugins.Errors", function() {
 				// not all browsers will emit functionName
 				if (be.functionName) {
 					assert.isTrue(be.functionName.indexOf("Context.<anonymous>") !== -1 ||
+						be.functionName.indexOf("context.<anonymous>") !== -1 ||
 						be.functionName.indexOf("Anonymous") !== -1);
 				}
 
