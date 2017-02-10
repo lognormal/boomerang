@@ -1149,7 +1149,7 @@
 
 			if (ename === "load" ||
 			    ename === "visible" ||
-				(ename === "xhr" && edata && BOOMR.utils.inArray(edata.initiator, BOOMR.constants.BEACON_TYPE_SPAS))) {
+				(ename === "xhr" && edata && edata.initiator === "spa_hard")) {
 				// Only add Boomerang timings to page load and SPA beacons
 				impl.getBoomerangTimings();
 			}

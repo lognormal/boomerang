@@ -33,6 +33,21 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
+	it("Should not have Boomerang timings on SPA Soft beacons", function() {
+		for (var i = 1; i < 2; i++) {
+			if (tf.beacons[i].t_other) {
+				assert.equal(tf.beacons[i].t_other.indexOf("boomr_fb"), -1, "should not have boomr_fb");
+				assert.equal(tf.beacons[i].t_other.indexOf("boomr_ld"), -1, "should not have boomr_ld");
+				assert.equal(tf.beacons[i].t_other.indexOf("boomr_lat"), -1, "should not have boomr_lat");
+				assert.equal(tf.beacons[i].t_other.indexOf("boomerang"), -1, "should not have boomerang");
+			}
+
+			// Boomerang and config timing parameters
+			assert.isUndefined(tf.beacons[i]["rt.bmr"]);
+			assert.isUndefined(tf.beacons[i]["rt.cnf"]);
+		}
+	});
+
 	//
 	// Beacon 1
 	//

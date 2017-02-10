@@ -211,6 +211,15 @@
 		}
 	}
 
+	/**
+	 * Fired 'onbeacon'
+	 */
+	function onBeacon() {
+		// remove config timing vars
+		BOOMR.removeVar("t_configjs");
+		BOOMR.removeVar("t_configfb");
+	}
+
 	BOOMR.plugins.LOGN = {
 		init: function(config) {
 			if (complete || BOOMR.session.rate_limited) {
@@ -256,6 +265,8 @@
 
 			// put h.cr at the end
 			BOOMR.setVarPriority("h.cr", 1);
+
+			BOOMR.subscribe("onbeacon", onBeacon, null, null);
 
 			running = true;
 			if (w === window) {
