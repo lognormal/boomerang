@@ -520,14 +520,28 @@
 				return;
 			}
 
+			// we currently can't reliably tell when a SCRIPT has loaded
+			// set an upper bound on responseStart/responseEnd for the resources to the SPA's loadEventEnd
+			var maxResponseEnd = resource.timing.loadEventEnd - p.timing.navigationStart;
+			for (var i = 0; i < resources.length; i++) {
+				if (resources[i].responseStart > maxResponseEnd) {
+					resources[i].responseStart = maxResponseEnd;
+					resources[i].responseEnd = maxResponseEnd;
+				}
+				else if (resources[i].responseEnd > maxResponseEnd) {
+					resources[i].responseEnd = maxResponseEnd;
+				}
+			}
+
 			// calculate the Back-End time based on any time those resources were active
 			var backEndTime = Math.round(BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion(resources));
 
 			// front-end time is anything left over
 			var frontEndTime = totalTime - backEndTime;
 
-			if (backEndTime < 0 || totalTime < 0) {
+			if (backEndTime < 0 || totalTime < 0 || frontEndTime < 0) {
 				// some sort of error, don't put on the beacon
+				BOOMR.addError("Incorrect SPA time calculation");
 				return;
 			}
 
