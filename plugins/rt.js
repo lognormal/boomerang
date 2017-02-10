@@ -673,28 +673,13 @@
 					}
 				}
 				else if (data && data.timing) {
-					// Use details from xhr object to figure out resp latency and page time
-					// t_resp will use the cookie if available or fallback to NavTiming.  Use
+					// Use details from XHR object to figure out responce latency and page time. Use
 					// responseEnd (instead of responseStart) since it's not until responseEnd
 					// that the browser can consume the data, and responseEnd is the only guarateed
 					// timestamp with cross-origin XHRs if ResourceTiming is enabled.
 					t_resp_start = data.timing.responseEnd;
 
 					t_fetch_start = data.timing.fetchStart;
-
-					p = BOOMR.getPerformance();
-
-					// if ResourceTiming is available, use its timestamps for t_resp
-					var entry = BOOMR.getResourceTiming(data.url);
-					if (entry && p) {
-						navSt = p.timing.navigationStart;
-
-						// use responseEnd for XHR TTFB (instead of responseStart)
-						t_resp_start = Math.round(navSt + entry.responseEnd);
-
-						// get fetch start too
-						t_fetch_start = Math.round(navSt + entry.startTime);
-					}
 				}
 			}
 			else if (impl.responseStart) {

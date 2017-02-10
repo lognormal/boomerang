@@ -1042,7 +1042,7 @@
 				 * Otherwise add this call to the lise of Events that occured.
 				 */
 				function loadFinished() {
-					var entry, navSt, useRT = false;
+					var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
 
 					// if we already finished via readystatechange or an error event,
 					// don't do work again
@@ -1055,29 +1055,58 @@
 						BOOMR.fireEvent("onxhrerror", resource);
 					}
 
-					resource.timing.loadEventEnd = BOOMR.now();
+					// set the loadEventEnd timestamp to when this callback fired
+					resource.timing.loadEventEnd = now;
 
-					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
+					// if ResourceTiming is available, fix-up the .timings with ResourceTiming data, as it will be more accurate
 					entry = BOOMR.getResourceTiming(resource.url, function(x, y) { return x.responseEnd - y.responseEnd; });
 					if (entry) {
 						navSt = BOOMR.getPerformance().timing.navigationStart;
 
-						// re-set the timestamp to make sure it's greater than values in resource timing entry
+						// re-set the loadEventEnd timestamp to make sure it's greater than values in ResourceTiming entry
 						resource.timing.loadEventEnd = BOOMR.now();
-						if (entry.responseEnd !== 0) {
-							// sanity check to see if the entry should be used for this resource
-							if (Math.floor(navSt + entry.responseEnd) <= resource.timing.loadEventEnd) {
-								resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
-								useRT = true;
+
+						// convert the start time to Epoch
+						entryStartTime = Math.floor(navSt + entry.startTime);
+
+						// validate the start time to make sure it's not from another entry
+						if (resource.timing.requestStart - entryStartTime >= 2) {
+							// if the ResourceTiming startTime is more than 2ms earlier
+							// than when we thought the XHR started, this is probably
+							// an entry for a different fetch
+							useRT = false;
+						}
+						else {
+							// set responseEnd as long as it looks sane
+							if (entry.responseEnd !== 0) {
+								// convert to Epoch
+								entryResponseEnd = Math.floor(navSt + entry.responseEnd);
+
+								// sanity check to see if the entry should be used for this resource
+								if (entryResponseEnd <= resource.timing.loadEventEnd) {
+									resource.timing.responseEnd = entryResponseEnd;
+
+									// use this entry's other timestamps
+									useRT = true;
+
+									// save the entry for later use
+									resource.restiming = entry;
+								}
 							}
-						}
 
-						if (useRT && entry.responseStart !== 0) {
-							resource.timing.responseStart = Math.round(navSt + entry.responseStart);
-						}
+							// set more timestamps if we think the entry is valid
+							if (useRT) {
+								// use the startTime from ResourceTiming instead
+								resource.timing.requestStart = entryStartTime;
 
-						if (useRT && entry.startTime !== 0) {
-							resource.timing.requestStart = Math.round(navSt + entry.startTime);
+								// also track it as the fetchStart time
+								resource.timing.fetchStart = entryStartTime;
+
+								// use responseStart if it's valid
+								if (entry.responseStart !== 0) {
+									resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
+								}
+							}
 						}
 					}
 
