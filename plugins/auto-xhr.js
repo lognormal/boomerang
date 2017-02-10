@@ -699,7 +699,8 @@
 		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false, resourceNum;
 
 		// only images, scripts, iframes and links if stylesheet
-		if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+		// nodeName for SVG:IMAGE returns `image` in lowercase
+		if (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 			// if the attribute change affected the src/currentSrc attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
@@ -707,7 +708,8 @@
 				exisitingNodeSrcUrlChanged = true;
 			}
 
-			url = node.src || node.href;
+			// we put xlink:href before href because node.href works for <SVG:IMAGE> elements, but does not return a string
+			url = node.src || node.getAttribute("xlink:href") || node.href;
 
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
@@ -800,12 +802,14 @@
 			interesting = true;
 		}
 		else if (node.nodeType === Node.ELEMENT_NODE) {
-			els = node.getElementsByTagName("IMG");
-			if (els && els.length) {
-				for (i = 0, l = els.length; i < l; i++) {
-					interesting |= this.wait_for_node(els[i], index);
+			["IMAGE", "IMG"].forEach(function(tagName) {
+				els = node.getElementsByTagName(tagName);
+				if (els && els.length) {
+					for (i = 0, l = els.length; i < l; i++) {
+						interesting |= this.wait_for_node(els[i], index);
+					}
 				}
-			}
+			});
 		}
 
 		return interesting;

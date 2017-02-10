@@ -25,7 +25,9 @@ see: http://www.w3.org/TR/resource-timing/
 		"script": 3,
 		"css": 4,
 		"xmlhttprequest": 5,
-		"html": 6
+		"html": 6,
+		// IMAGE element inside a SVG
+		"image": 7
 	};
 
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
@@ -422,7 +424,8 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @return [Object] Object with URLs of visible assets as keys, and Array[height, width, top, left] as value
 	 */
 	function getVisibleEntries(win) {
-		var els = ["IMG", "IFRAME"], entries = {}, x, y, doc = win.document;
+		// lower-case tag names should be used: https://developer.mozilla.org/en-US/docs/Web/API/Element/getElementsByTagName
+		var els = ["img", "iframe", "image"], entries = {}, x, y, doc = win.document, a = doc.createElement("A");
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
@@ -431,19 +434,33 @@ see: http://www.w3.org/TR/resource-timing/
 
 		// look at each IMG and IFRAME
 		els.forEach(function(elname) {
-			var elements = doc.getElementsByTagName(elname), el, i, rect;
+			var elements = doc.getElementsByTagName(elname), el, i, rect, src;
 
 			for (i = 0; i < elements.length; i++) {
 				el = elements[i];
 
-				// look at this element if it has a src attribute, and we haven't already looked at it
-				if (el && el.src && !entries[el.src]) {
-					rect = el.getBoundingClientRect();
+				// look at this element if it has a src attribute or xlink:href, and we haven't already looked at it
+				if (el) {
+					// src = IMG, IFRAME
+					// xlink:href = svg:IMAGE
+					src = el.src || el.getAttribute("src") || el.getAttribute("xlink:href");
 
-					// Require both height & width to be non-zero
-					// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
-					if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
-						entries[el.src] = [el.offsetHeight, el.offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
+					// change src to be relative
+					a.href = src;
+					src = a.href;
+
+					if (src && !entries[src]) {
+						rect = el.getBoundingClientRect();
+
+						// Require both height & width to be non-zero
+						// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
+						if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
+							entries[src] = [
+								rect.height || el.offsetHeight,
+								rect.width || el.offsetWidth,
+								Math.round(rect.top + y),
+								Math.round(rect.left + x)];
+						}
 					}
 				}
 			}
