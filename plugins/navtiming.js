@@ -119,6 +119,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 		done: function() {
 			var w = BOOMR.window, p, pn, pt, data;
+
 			if (this.complete) {
 				return this;
 			}
@@ -154,16 +155,30 @@ see: http://www.w3.org/TR/navigation-timing/
 					nt_unload_st: pt.unloadEventStart,
 					nt_unload_end: pt.unloadEventEnd
 				};
+
 				if (pt.secureConnectionStart) {
 					// secureConnectionStart is OPTIONAL in the spec
 					data.nt_ssl_st = pt.secureConnectionStart;
 				}
+
 				if (pt.msFirstPaint) {
 					// msFirstPaint is IE9+ http://msdn.microsoft.com/en-us/library/ff974719
 					data.nt_first_paint = pt.msFirstPaint;
 				}
 
 				BOOMR.addVar(data);
+
+				//
+				// Basic browser bug detection for known cases where NavigationTiming
+				// timestamps might not be trusted.
+				//
+				if ((pt.requestStart && pt.navigationStart && pt.requestStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.navigationStart && pt.responseStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.fetchStart && pt.responseStart < pt.fetchStart) ||
+				    (pt.navigationStart && pt.fetchStart < pt.navigationStart)) {
+					BOOMR.addVar("nt_bad", 1);
+					impl.addedVar.push("nt_bad");
+				}
 
 				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
 				catch (ignore) { /* empty */ }
