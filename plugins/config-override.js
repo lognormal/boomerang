@@ -60,7 +60,8 @@
 				customTimers: true,
 				abTests: true,
 				defaultDecimal: true,
-				defaultThousands: true
+				defaultThousands: true,
+				xhr: true
 			},
 			CrossDomain: {
 				cross_domain_url: true,

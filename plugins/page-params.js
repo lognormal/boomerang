@@ -750,8 +750,18 @@
 		},
 
 		// Old method for page groups
-		Regexp: function(o) {
-			return this._Regex(null, o.parameter1, o.parameter2, l.href);
+		Regexp: function(o, url) {
+			var m;
+			if (url && typeof url === "string") {
+				m = url.match("http(|s)://");
+			}
+
+			if (m && m.length > 0) {
+				return this._Regex(null, o.parameter1, o.parameter2, url);
+			}
+			else {
+				return this._Regex(null, o.parameter1, o.parameter2, l.href);
+			}
 		},
 
 		_Regex: function(url, regex, replacement, operand) {
@@ -1938,7 +1948,7 @@
 		customTimers: [],
 		customMetrics: [],
 		customDimensions: [],
-
+		xhrPageGroups: [],
 		priorityHandler: {},
 
 		complete: false,
@@ -1950,13 +1960,80 @@
 
 		defaultDecimal: DEFAULT_DECIMAL,
 		defaultThousands: DEFAULT_THOUSANDS,
-
+		hasXhrOn: false,
+		hasXhrIgnore: false,
 		autorun: true,
 
 		mayRetry: [],
+		matchPageGroupList: function(url, list, handler) {
+			var xhrPgIndex = 0, ret;
+			for (xhrPgIndex = 0; xhrPgIndex < list.length; xhrPgIndex++) {
+				ret = handler.handle(list[xhrPgIndex], url);
+				BOOMR.debug("Found XHR PageParam matching URL: " + BOOMR.utils.objectToString(ret), "PageParams");
+				if (ret) {
+					return true;
+				}
+			}
+			return false;
+		},
+		excludeXhrFilter: function(anchor) {
+			var xhrPgIndex = 0, hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), pgArray, ret;
 
+			hconfig.pageGroups.varname = "xhr.pg";
+
+			// Only iterate over xhrPageroups if on:["xhr"] was set on the pageGroups
+			if (impl.hasXhrOn) {
+				pgArray = impl.xhrPageGroups;
+			}
+			else {
+				pgArray = impl.pageGroups;
+			}
+
+			var handler = new Handler(hconfig.pageGroups);
+			// only run the filter if we have an xhr flag in the config
+			if (typeof impl.xhr !== "undefined") {
+				/*
+				 - match: Only instrument matching filters
+				 - none: Do not instrument at all
+				 - all: Instrument all XHRs
+				 - subresource: to be flagged as subresource
+				 */
+				// Match against the PageGroups
+				if (impl.xhr === "match") {
+					for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
+						ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
+						if (!ret) {
+							BOOMR.debug("Found XHR PageParam matching URL: " + BOOMR.utils.objectToString(ret), "PageParams");
+							return true;
+						}
+					}
+
+					return false;
+				}
+				else {
+					if (impl.xhr === "none") {
+						return true;
+					}
+					else if (impl.xhr === "all" || impl.xhr === "subresource") {
+						// Even though our xhr flag was set to instrument all XHRs we need to honor ignore flags
+						// If we find an entry with ignore and the Handler matches throw away that XHR
+						for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
+							if (pgArray[xhrPgIndex].ignore) {
+								ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
+								if (ret) {
+									BOOMR.debug("Found XHR PageParam matching URL: " + BOOMR.utils.objectToString(ret), "PageParams");
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			// If the config did not contain xhr flag, we're expecting not to filter out anything
+			return false;
+		},
 		done: function(edata, ename) {
-			var i, v, hconfig, handler, limpl = impl, data, pg;
+			var i, v, hconfig, handler, limpl = impl, data, pg, match;
 
 			if (!impl.configReceived) {
 				// we should try to run again after config comes in
@@ -2002,7 +2079,19 @@
 					l = d.createElement("a");
 					l.href = data.url;
 
-					limpl.pageGroups = impl.pageGroups;
+					// Flag this resource as subresource if it wasn't explicitly called out in the configuration to be a instrumented XHR
+					match = impl.matchPageGroupList(l.href, impl.hasXhrOn ? impl.xhrPageGroups : impl.pageGroups, new Handler(hconfig.pageGroups));
+					if (impl.xhr === "subresource" && !match) {
+						edata.subresource = "active";
+					}
+
+					// Use XHR PG List if it's available
+					if (impl.hasXhrOn) {
+						limpl.pageGroups = impl.xhrPageGroups;
+					}
+					else {
+						limpl.pageGroups = impl.pageGroups;
+					}
 
 					hconfig.pageGroups.varname = "xhr.pg";
 
@@ -2282,8 +2371,18 @@
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
-			var properties = ["pageGroups", "abTests", "customTimers", "customMetrics",
-			    "customDimensions", "autorun", "defaultDecimal", "defaultThousands"];
+			var properties = [
+				"pageGroups",
+				"abTests",
+				"customTimers",
+				"customMetrics",
+				"customDimensions",
+				"autorun",
+				"defaultDecimal",
+				"defaultThousands",
+				"xhr"
+			];
+			var pgIndex = 0, pgList = [];
 
 			w = BOOMR.window;
 			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
@@ -2292,6 +2391,33 @@
 
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
+
+			if (impl.pageGroups && impl.pageGroups.length > 0) {
+				for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
+					if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.indexOf("xhr") > -1) || impl.pageGroups[pgIndex].ignore) {
+
+						impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
+						impl.hasXhrOn = true;
+
+						if (impl.pageGroups[pgIndex].ignore) {
+							impl.hasXhrIgnore = true;
+						}
+
+						// Ensure PGs definitions only matching XHRs are removed from PG List
+						if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.length === 1) || impl.pageGroups[pgIndex].ignore) {
+							delete impl.pageGroups[pgIndex];
+						}
+					}
+				}
+			}
+
+			// Remove undefined array indices from pageGroups array
+			for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
+				if (impl.pageGroups[pgIndex]) {
+					pgList.push(impl.pageGroups[pgIndex]);
+				}
+			}
+			impl.pageGroups = pgList;
 
 			if (typeof config.autorun !== "undefined") {
 				impl.autorun = config.autorun;
@@ -2426,7 +2552,9 @@
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 				BOOMR.subscribe("onbeacon", impl.removeDoneHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
-
+				if (BOOMR.plugins.AutoXHR) {
+					BOOMR.plugins.AutoXHR.addExcludeFilter(impl.excludeXhrFilter, impl, "BOOMR.plugins.PageParams.PageGroups");
+				}
 				impl.initialized = true;
 			}
 

@@ -779,6 +779,7 @@
 				a.href = url;
 
 				if (impl.excludeFilter(a)) {
+					BOOMR.debug("Exclude for " + a.href + " matched. Excluding", "AutoXHR");
 					// excluded resource, so abort
 					return false;
 				}
@@ -1030,6 +1031,7 @@
 				a.href = url;
 
 				if (impl.excludeFilter(a)) {
+					BOOMR.debug("Exclude found for resource: " + a.href + " Skipping instrumentation!", "AutoXHR");
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -1261,6 +1263,11 @@
 			return req;
 		};
 
+		BOOMR.proxy_XMLHttpRequest.UNSENT = 0;
+		BOOMR.proxy_XMLHttpRequest.OPENED = 1;
+		BOOMR.proxy_XMLHttpRequest.HEADERS_RECEIVED = 2;
+		BOOMR.proxy_XMLHttpRequest.LOADING = 3;
+		BOOMR.proxy_XMLHttpRequest.DONE = 4;
 		// set our proxy's prototype to the original XHR prototype, in case anyone
 		// is using it to save state
 		BOOMR.proxy_XMLHttpRequest.prototype = BOOMR.orig_XMLHttpRequest.prototype;
@@ -1324,6 +1331,7 @@
 					try {
 						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
 						if (ret) {
+							BOOMR.debug("Found matching filter at: " + impl.excludeFilters[idx].name + " for URL: " + anchor.href, "AutoXHR");
 							return true;
 						}
 					}
@@ -1332,7 +1340,6 @@
 					}
 				}
 			}
-
 			return false;
 		}
 	};

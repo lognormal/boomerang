@@ -1,0 +1,47 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="17-page-params-xhr-ignore.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+		setTimeout(function() {
+			setTimeout(function() {
+				var xhr1 = new XMLHttpRequest();
+				xhr1.open("GET", "/delay?id=1&delay=1000&file=/pages/04-page-params/support/img.jpg");
+				xhr1.send(null);
+			}, 0);
+			setTimeout(function() {
+				var xhr2 = new XMLHttpRequest();
+				xhr2.open("GET", "/delay?id=2&delay=1000&file=/pages/04-page-params/support/img.jpg");
+				xhr2.send(null);
+			}, 1000);
+		}, 100);
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	PageParams: {
+		xhr: "all",
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: ".*/17-page-params-xhr-ignore.html",
+				parameter2: "Test Page",
+				on: ["navigation"]
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*id=1.*",
+				parameter2: "XHR Test Page 1",
+				ignore: true
+			}
+		]
+	},
+	instrument_xhr: true
+});
+</script>
+<%= footer %>
