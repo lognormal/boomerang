@@ -100,10 +100,10 @@
 		 * via postMessage. If this timeout is reached:
 		 *  - Session Transfer fails
 		 *  - Current session data is used
-		 *  - Plugin is flagged as complete
+		 *  - Plugin is flagged as complete and a beacon is sent
 		 *  - Session from main Domain is not used on this session
 		 */
-		session_transfer_timeout: 1500,
+		session_transfer_timeout: 5000,
 
 		/**
 		 * If we're done updating the session info we set this to true
@@ -284,6 +284,9 @@
 					}
 
 					log("Session transfer timedout. Setting transferred and setting timedout flag!");
+
+					// trigger a beacon
+					BOOMR.sendBeacon();
 
 				}, impl.session_transfer_timeout);
 			}
