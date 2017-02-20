@@ -1,5 +1,5 @@
 /**
-\file restiming.js
+file restiming.js
 Plugin to collect metrics from the W3C Resource Timing API.
 For more information about Resource Timing,
 see: http://www.w3.org/TR/resource-timing/
@@ -651,7 +651,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function getCompressedResourceTiming(from, to) {
 		/*eslint no-script-url:0*/
-		var entries = getFilteredResourceTiming(from, to),
+	    var entries = getFilteredResourceTiming(from, to, impl.trackedResourceTypes || INITIATOR_TYPES),
 		    i, e, results = {}, initiatorType, url, data,
 		    visibleEntries = {};
 
@@ -858,6 +858,8 @@ see: http://www.w3.org/TR/resource-timing/
 		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
 		trimUrls: [],
+	    // [array of strings] Resource types to track via Resource Timing API
+		trackedResourceTypes: null,
 		done: function() {
 			var r;
 
@@ -918,7 +920,7 @@ see: http://www.w3.org/TR/resource-timing/
 			var p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
-				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls"]);
+				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls", "trackedResourceTypes"]);
 
 			if (impl.initialized) {
 				return this;
