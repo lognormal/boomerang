@@ -635,6 +635,7 @@ module.exports = function() {
 					"vendor/mocha/mocha.css",
 					"vendor/mocha/mocha.js",
 					"vendor/assertive-chai/dist/assertive-chai.js",
+					"boomerang-test-framework.js",
 					"unit/*.js",
 					"build/*.js"
 				]
