@@ -824,7 +824,7 @@
 						interesting |= this.wait_for_node(els[i], index);
 					}
 				}
-			});
+			}, this);
 		}
 
 		return interesting;
