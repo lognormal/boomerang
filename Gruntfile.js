@@ -713,15 +713,15 @@ module.exports = function() {
 		// Build
 		//
 		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
-		"build:test": ["concat:debug", "concat:debug-tests", "uglify:debug-test-min", "build:apply-templates"],
+		"build:test": ["concat:debug", "concat:debug-tests", "uglify:debug-test-min", "!build:apply-templates"],
 
 		// Build steps
 		"build:apply-templates": [
 			"string-replace:all",
-			"string-replace:debug-tests",
+			"!string-replace:debug-tests",
 			"string-replace:release",
-			"strip_code:debug",
-			"strip_code:prod"
+			"!strip_code:debug",
+			"!strip_code:prod"
 		],
 
 		// metrics to generate
@@ -784,12 +784,19 @@ module.exports = function() {
 		return aliases[task] ? true : false;
 	}
 
+	// tasks that need to be run more than once (denoted by starting with !)
+	var rerunTasks = {};
+
 	function resolveAlias(task) {
-		var tasks = [],
+		var tasks = aliases[task],
 		    resolved = false;
-		tasks = aliases[task];
 
 		function checkDuplicates(insertableTask) {
+			if (rerunTasks[insertableTask]) {
+				// always return true for tasks that were marked as rerun
+				return true;
+			}
+
 			return tasks.indexOf(insertableTask) === -1;
 		}
 
@@ -799,6 +806,15 @@ module.exports = function() {
 			}
 
 			for (var index = 0; index < tasks.length; index++) {
+				// if the task starts with !, it should be run more than once
+				if (tasks[index].startsWith("!")) {
+					// trim back to the real name
+					tasks[index] = tasks[index].substr(1);
+
+					// keep track of this task
+					rerunTasks[tasks[index]] = true;
+				}
+
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
 					var beforeTask = tasks.slice(0, index);
