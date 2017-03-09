@@ -139,6 +139,7 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 
 			errorWrap(s,
 				function() {
+					var sx, sy;
 					BOOMR.addVar({
 						"scr.xy": s.width + "x" + s.height,
 						"scr.bpp": s.colorDepth + "/" + (s.pixelDepth || "")
@@ -150,7 +151,13 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 						BOOMR.addVar("scr.dpx", w.devicePixelRatio);
 					}
 					if (w.scrollX || w.scrollY) {
-						BOOMR.addVar("scr.sxy", w.scrollX + "x" + w.scrollY);
+						// Apparently some frameworks set scrollX and scrollY to functions that return the actual values
+						sx = typeof w.scrollX === "function" ? w.scrollX() : w.scrollX;
+						sy = typeof w.scrollY === "function" ? w.scrollY() : w.scrollY;
+
+						if (typeof sx === "number" && typeof sy === "number") {
+							BOOMR.addVar("scr.sxy", sx + "x" + sy);
+						}
 					}
 				},
 				"screen"
