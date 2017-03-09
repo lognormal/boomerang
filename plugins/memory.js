@@ -261,7 +261,9 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 				if (n && n.battery) {
 					b = n.battery;
 				}
-				else if (n && n.getBattery) {
+				// There are cases where getBattery exists but is not a function
+				// No need to check for existence because typeof will return undefined anyway
+				else if (n && typeof n.getBattery === "function") {
 					var batPromise = n.getBattery();
 
 					// some UAs implement getBattery without a promise
@@ -270,9 +272,11 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 							b = battery;
 						});
 					}
-					else {
-						BOOMR.addError("getBattery promise is not a function: " + JSON.stringify(batPromise), "Memory.init");
+					// If batPromise is an object and it has a `level` property, then it's probably the battery object
+					else if (typeof batPromise === "object" && batPromise.hasOwnProperty("level")) {
+						b = batPromise;
 					}
+					// else do nothing
 				}
 			}
 			catch (err) {
