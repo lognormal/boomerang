@@ -496,7 +496,8 @@ see: http://www.w3.org/TR/resource-timing/
 
 			// skip non-resource URLs
 			if (e.name.indexOf("about:") === 0 ||
-			    e.name.indexOf("javascript:") === 0) {
+			    e.name.indexOf("javascript:") === 0 ||
+			    e.name.indexOf("res:") === 0) {
 				continue;
 			}
 
