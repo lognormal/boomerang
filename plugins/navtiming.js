@@ -175,7 +175,8 @@ see: http://www.w3.org/TR/navigation-timing/
 				if ((pt.requestStart && pt.navigationStart && pt.requestStart < pt.navigationStart) ||
 				    (pt.responseStart && pt.navigationStart && pt.responseStart < pt.navigationStart) ||
 				    (pt.responseStart && pt.fetchStart && pt.responseStart < pt.fetchStart) ||
-				    (pt.navigationStart && pt.fetchStart < pt.navigationStart)) {
+				    (pt.navigationStart && pt.fetchStart < pt.navigationStart) ||
+				    (pt.responseEnd && pt.responseEnd > BOOMR.now() + 8.64e+7)) {
 					BOOMR.addVar("nt_bad", 1);
 					impl.addedVar.push("nt_bad");
 				}
