@@ -243,6 +243,8 @@
 			}
 		},
 		init: function(config) {
+			var a;
+
 			if (config.primary) {
 				return;
 			}
@@ -257,6 +259,11 @@
 			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
 			impl.plugin_start = BOOMR.now();
 			log("Plugin started at: " + impl.plugin_start);
+
+			// Normalize the URL
+			a = d.createElement("a");
+			a.href = impl.cross_domain_url;
+			impl.cross_domain_url = a.href;
 
 			// if postMessage is not supported bail and don't block the beacon
 			if (!impl.hasPostMessageSupport()) {
