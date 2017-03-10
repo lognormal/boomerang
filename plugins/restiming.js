@@ -868,6 +868,31 @@ see: http://www.w3.org/TR/resource-timing/
 		return totalTime;
 	}
 
+	/**
+	 * Adds 'restiming' to the beacon
+	 *
+	 * @param [number] from Only get timings from
+	 * @param [number] to Only get timings up to
+	 */
+	function addResourceTimingToBeacon(from, to) {
+		var r;
+
+		// Can't send if we don't support JSON
+		if (typeof JSON === "undefined") {
+			return;
+		}
+
+		BOOMR.removeVar("restiming");
+		r = getCompressedResourceTiming(from, to);
+		if (r) {
+			BOOMR.info("Client supports Resource Timing API", "restiming");
+
+			BOOMR.addVar({
+				restiming: JSON.stringify(r)
+			});
+		}
+	}
+
 	impl = {
 		complete: false,
 		sentNavBeacon: false,
@@ -888,27 +913,13 @@ see: http://www.w3.org/TR/resource-timing/
 		clearOnBeacon: false,
 		trimUrls: [],
 		done: function() {
-			var r;
-
 			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
 			// add restiming manually).
 			if (this.sentNavBeacon) {
 				return;
 			}
 
-			// Can't send if we don't support JSON
-			if (typeof JSON === "undefined") {
-				return;
-			}
-
-			BOOMR.removeVar("restiming");
-			r = getCompressedResourceTiming();
-			if (r) {
-				BOOMR.info("Client supports Resource Timing API", "restiming");
-				BOOMR.addVar({
-					restiming: JSON.stringify(r)
-				});
-			}
+			addResourceTimingToBeacon();
 
 			this.complete = true;
 			this.sentNavBeacon = true;
@@ -980,7 +991,8 @@ see: http://www.w3.org/TR/resource-timing/
 		//
 		getCompressedResourceTiming: getCompressedResourceTiming,
 		getFilteredResourceTiming: getFilteredResourceTiming,
-		calculateResourceTimingUnion: calculateResourceTimingUnion
+		calculateResourceTimingUnion: calculateResourceTimingUnion,
+		addResourceTimingToBeacon: addResourceTimingToBeacon
 
 		//
 		// Test Exports (only for debug)
