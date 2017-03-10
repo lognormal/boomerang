@@ -13,8 +13,13 @@ Plugin to capture navigator.connection.type on browsers that support it
 	if (!connection) {
 		return;
 	}
-	BOOMR.addVar("mob.ct", connection.type);
-	BOOMR.addVar("mob.bw", connection.bandwidth);
-	BOOMR.addVar("mob.mt", connection.metered);
+	BOOMR.addVar({
+		"mob.ct": connection.type,
+		"mob.bw": connection.bandwidth,
+		"mob.mt": connection.metered
+	});
 
+	if (connection.downlinkMax) {
+		BOOMR.addVar("mob.lm", connection.downlinkMax);
+	}
 }());
