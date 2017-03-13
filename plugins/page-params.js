@@ -592,19 +592,37 @@
 		},
 
 		JavaScriptVar: function(o) {
+			var res;
+
 			if (!this.checkURLPattern(o.parameter1)) {
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.varName, o);
+			res = this.extractJavaScriptVariable(o.varName, o);
+			if (!res) {
+				impl.mayRetry.push({ handler: this, data: o });
+
+				return false;
+			}
+
+			return res;
 		},
 
 		Custom: function(o) {
+			var res;
+
 			if (!this.checkURLPattern(o.parameter2)) {
 				return false;
 			}
 
-			return this.extractJavaScriptVariable(o.parameter1, o);
+			res = this.extractJavaScriptVariable(o.parameter1, o);
+			if (!res) {
+				impl.mayRetry.push({ handler: this, data: o });
+
+				return false;
+			}
+
+			return res;
 		},
 
 		extractJavaScriptVariable: function(varname, o, parent) {

@@ -1,0 +1,128 @@
+<%= header %>
+<%= boomerangSnippet %>
+<!--
+	Adds ResourceTiming, UserTiming and a JS var after onload but before the beacon.
+
+	Tests Custom Timers, Metrics, Dimensions, Page Group and AB test
+-->
+<script src="20-retry.js" type="text/javascript"></script>
+<script>
+(function() {
+	window.BOOMR_config = window.BOOMR_config || {};
+	var BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	var ready = false;
+
+	BOOMR.plugins.HoldBeacon = {
+		is_complete: function() {
+			return ready;
+		}
+	};
+
+	function onLoad() {
+		// trigger 0.5s after onload
+		setTimeout(function() {
+			// 1. Add UserTiming
+			if (BOOMR_test.isUserTimingSupported()) {
+				window.performance.mark("test");
+			}
+
+			// 2. Add a JavaScript var
+			window.testTimer = 1000;
+			window.testMetric = 100;
+			window.testDimension = true;
+			window.pageGroup = "PG1";
+			window.abTest = "A";
+
+			// 3. Send an XHR
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/assets/img.jpg");
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState !== 4) {
+					return;
+				}
+
+				ready = true;
+
+				// send the beacon
+				BOOMR.sendBeacon();
+			};
+			xhr.send(null);
+		}, 500);
+	}
+
+	if (window.addEventListener) {
+		window.addEventListener("load", onLoad, false);
+	}
+	else if (window.attachEvent) {
+		window.attachEvent("onLoad", onLoad);
+	}
+}());
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	PageParams: {
+		customTimers: [
+			{
+				name: "custom_timer_1",
+				index: 1,
+				type: "ResourceTiming",
+				label: "ctim.CT1",
+				start: "requestStart",
+				end: "responseEnd",
+				url: window.location.origin + "/assets/img.jpg"
+			},
+			{
+				name: "custom_timer_2",
+				index: 2,
+				type: "UserTiming",
+				label: "ctim.CT2",
+				parameter2: "test"
+			},
+			{
+				name: "custom_timer_3",
+				index: 3,
+				type: "Custom",
+				label: "ctim.CT3",
+				parameter1: "testTimer"
+			}
+		],
+		customMetrics: [
+			{
+				name: "custom_metric_1",
+				index: 1,
+				type: "Custom",
+				label: "cmet.CM1",
+				parameter1: "testMetric"
+			}
+		],
+		customDimensions: [
+			{
+				"name": "CD1",
+				"index": 1,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD1",
+				"dataType": "Boolean",
+				"varName": "testDimension"
+			}
+		],
+		pageGroups: [
+			{
+				type: "Custom",
+				parameter1: "pageGroup"
+			}
+		],
+		abTests: [
+			{
+				type: "Custom",
+				parameter1: "abTest"
+			}
+		]
+	}
+});
+</script>
+<%= footer %>
