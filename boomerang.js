@@ -1130,6 +1130,17 @@ BOOMR_check_doc_domain();
 			return impl.onloadfired;
 		},
 
+		/**
+		 * Defer the function `fn` until the next instant the browser is free from user tasks
+		 * @param [Function] fn The callback function.  This function accepts the following arguments:
+		 *     - data: The passed in data object
+		 *     - cb_data: The passed in cb_data object
+		 *     - call stack: An Error object that holds the callstack for when setImmediate was called, used to determine what called the callback
+		 * @param [object] data Any data to pass to the callback function
+		 * @param [object] cb_data Any passthrough data for the callback function. This differs from `data` when setImmediate is called via an event handler and `data` is the Event object
+		 * @param [object] cb_scope The scope of the callback function if it is a method of an object
+		 * @returns nothing
+		 */
 		setImmediate: function(fn, data, cb_data, cb_scope) {
 			var cb, cstack;
 
@@ -1145,17 +1156,11 @@ BOOMR_check_doc_domain();
 				cb = null;
 			};
 
-			if (w.setImmediate) {
+			if (w.requestIdleCallback) {
+				w.requestIdleCallback(cb);
+			}
+			else if (w.setImmediate) {
 				w.setImmediate(cb);
-			}
-			else if (w.msSetImmediate) {
-				w.msSetImmediate(cb);
-			}
-			else if (w.webkitSetImmediate) {
-				w.webkitSetImmediate(cb);
-			}
-			else if (w.mozSetImmediate) {
-				w.mozSetImmediate(cb);
 			}
 			else {
 				setTimeout(cb, 10);
