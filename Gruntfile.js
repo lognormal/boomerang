@@ -713,7 +713,7 @@ module.exports = function() {
 		// Build
 		//
 		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
-		"build:test": ["concat:debug", "concat:debug-tests", "uglify:debug-test-min", "!build:apply-templates"],
+		"build:test": ["concat:debug", "concat:debug-tests", "!build:apply-templates", "uglify:debug-test-min"],
 
 		// Build steps
 		"build:apply-templates": [
