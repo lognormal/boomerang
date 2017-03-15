@@ -8,7 +8,8 @@
 	    routeFilter = false,
 	    routeChangeWaitFilter = false,
 	    supported = [],
-	    latestResource;
+	    latestResource,
+	    waitingOnHardMissedComplete = false;
 
 	if (BOOMR.plugins.SPA) {
 		return;
@@ -29,6 +30,8 @@
 		 * resource.
 		 */
 		spaHardMissedOnComplete: function(resource) {
+			waitingOnHardMissedComplete = false;
+
 			var p = BOOMR.getPerformance(), startTime, stopTime;
 
 			// gather start times from NavigationTiming if available
@@ -42,6 +45,9 @@
 
 			// note that we missed the route change on the beacon for debugging
 			BOOMR.addVar("spa.missed", "1");
+
+			// ensure t_done is the time we've specified
+			BOOMR.plugins.RT.clearTimer("t_done");
 
 			// always use the start time of navigationStart
 			resource.timing.requestStart = startTime;
@@ -64,7 +70,7 @@
 		 * @returns {boolean} True if the plugin is complete
 		 */
 		is_complete: function() {
-			return true;
+			return !waitingOnHardMissedComplete;
 		},
 		/**
 		 * Called to initialize the plugin via BOOMR.init()
@@ -103,6 +109,12 @@
 		 * to monitor for additional resources for a SPA Hard navigation
 		 */
 		onLoadSpaHardMissed: function() {
+			if (initialRouteChangeStarted) {
+				// we were told the History event was missed, but it happened anyways
+				// before onload
+				return;
+			}
+
 			// We missed the initial route change (we loaded too slowly), so we're too
 			// late to monitor for new DOM elements.  Don't hold the initial page load beacon.
 			initialRouteChangeCompleted = true;
@@ -111,6 +123,9 @@
 				// re-enable AutoXHR if it's enabled
 				BOOMR.plugins.AutoXHR.enableAutoXhr();
 			}
+
+			// ensure the beacon is held until this SPA hard beacon is ready
+			waitingOnHardMissedComplete = true;
 
 			// Trigger a route change
 			BOOMR.plugins.SPA.route_change(impl.spaHardMissedOnComplete);

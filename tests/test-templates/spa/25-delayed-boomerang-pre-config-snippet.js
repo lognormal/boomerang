@@ -15,8 +15,15 @@ BOOMR_test.templates.SPA["25-delayed-boomerang-pre-config-snippet"] = function()
 			});
 	});
 
-	it("Should have had the first beacon was an xhr beacon", function() {
+	it("Should have had the first beacon be a spa_hard beacon", function() {
 		var b = tf.beacons[0];
+		assert.equal(b["http.initiator"], "spa_hard");
+		assert.include(b.u, "25-delayed-boomerang-pre-config-snippet.html");
+		assert.isUndefined(b.pgu);
+	});
+
+	it("Should have had the second beacon was an xhr beacon", function() {
+		var b = tf.beacons[1];
 		assert.equal(b["http.initiator"], "xhr");
 		assert.equal(b["rt.tstart"], 5);
 		assert.equal(b["rt.start"], "manual");
@@ -24,12 +31,5 @@ BOOMR_test.templates.SPA["25-delayed-boomerang-pre-config-snippet"] = function()
 		assert.equal(b.t_done, 5);
 		assert.equal(b.u, "http://foo.com/xhr/");
 		assert.include(b.pgu, "25-delayed-boomerang-pre-config-snippet.html");
-	});
-
-	it("Should have had the second beacon was an spa_hard beacon", function() {
-		var b = tf.beacons[1];
-		assert.equal(b["http.initiator"], "spa_hard");
-		assert.include(b.u, "25-delayed-boomerang-pre-config-snippet.html");
-		assert.isUndefined(b.pgu);
 	});
 };

@@ -222,18 +222,22 @@
 			"h.cr": "abc"
 		});
 
-		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt"]);
-		window.mocha.checkLeaks();
-
-		// set globals
-		assert = window.assert = window.chai.assert;
+		t.configureTestEnvironment();
 
 		if (!config.testAfterOnBeacon) {
 			BOOMR.setImmediate(t.runTests);
 		}
 
 		initialized = true;
+	};
+
+	t.configureTestEnvironment = function() {
+		// setup Mocha
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt"]);
+		window.mocha.checkLeaks();
+
+		// set globals
+		assert = window.assert = window.chai.assert;
 	};
 
 	t.findResourceTimingBeacon = function() {

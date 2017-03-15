@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="06-responseend-before-pageload-beacon.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	autorun: false,
+	testAfterOnBeacon: 2
+});
+
+window.onload = function() {
+	// fire a beacon
+	BOOMR.responseEnd("foo");
+
+	// wait a second before the page is ready
+	setTimeout(function() {
+		BOOMR.page_ready();
+	}, 1000);
+};
+</script>
+<%= footer %>

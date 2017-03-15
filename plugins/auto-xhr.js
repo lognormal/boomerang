@@ -17,6 +17,14 @@
 	var SPA_TIMEOUT = 1000;
 
 	/**
+	 * How long to wait if we're not ready to send a beacon to try again.
+	 * @constant
+	 * @type {number}
+	 * @default
+	 */
+	var READY_TO_SEND_WAIT = 500;
+
+	/**
 	 * @constant
 	 * @desc Timeout event fired for XMLHttpRequest resource
 	 * @type {number}
@@ -356,12 +364,12 @@
 			return;
 		}
 
-		ev.complete = true;
-
-		this.watch--;
-
 		this.clearTimeout();
 		if (BOOMR.readyToSend()) {
+			ev.complete = true;
+
+			this.watch--;
+
 			ev.resource.resources = ev.resources;
 
 			// if this was an SPA nav that triggered no additional resources, substract the
@@ -373,8 +381,8 @@
 			this.sendResource(ev.resource, i);
 		}
 		else {
-			// No crumb, so try again after 5 seconds
-			setTimeout(function() { self.sendEvent(i); }, 5000);
+			// No crumb, so try again after 500ms seconds
+			setTimeout(function() { self.sendEvent(i); }, READY_TO_SEND_WAIT);
 		}
 	};
 
@@ -1489,34 +1497,22 @@
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				var resources = BOOMR.xhr.stop(function(res) {
-					// any resource callbacks should happen in an setImmediate in case the rest
-					// of the plugins haven't yet been initialized
-					BOOMR.setImmediate(function sendAgain() {
-						// wait until we have a crumb to send
-						if (!BOOMR.readyToSend()) {
-							setTimeout(sendAgain, 1000);
-							return;
-						}
-
-						sendResource(res);
-					});
-				});
-
-				if (resources && resources.length) {
-					var sendNow = function() {
-						// wait until we have a crumb to send
-						if (!BOOMR.readyToSend()) {
-							setTimeout(sendNow, 1000);
-							return;
-						}
-
+				function sendXhrs(resources) {
+					if (resources.length) {
 						for (i = 0; i < resources.length; i++) {
 							sendResource(resources[i]);
 						}
-					};
+					}
+					else {
+						// single resoruce
+						sendResource(resources);
+					}
+				};
 
-					BOOMR.setImmediate(sendNow);
+				var resources = BOOMR.xhr.stop(sendXhrs);
+
+				if (resources && resources.length) {
+					BOOMR.setImmediate(sendXhrs, resources);
 				}
 			}
 

@@ -1052,6 +1052,19 @@
 			return this;
 		},
 
+		/**
+		 * Clears (removes) the specified timer
+		 *
+		 * @param {string} timer_name Timer name
+		 */
+		clearTimer: function(timer_name) {
+			if (timer_name) {
+				delete impl.timers[timer_name];
+			}
+
+			return this;
+		},
+
 		setTimer: function(timer_name, time_delta_or_start, timer_end) {
 			if (timer_name) {
 				if (typeof timer_end !== "undefined") {
