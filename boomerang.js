@@ -266,6 +266,9 @@ BOOMR_check_doc_domain();
 		// Whether or not to send beacons on page load
 		autorun: true,
 
+		// Whether or not we've sent a page load beacon
+		hasSentPageLoadBeacon: false,
+
 		// cookie referrer
 		r: undefined,
 
@@ -286,6 +289,7 @@ BOOMR_check_doc_domain();
 			"prerender_to_visible": [],
 			"before_beacon": [],
 			"onbeacon": [],
+			"page_load_beacon": [],
 			"xhr_load": [],
 			"click": [],
 			"form_submit": [],
@@ -369,7 +373,7 @@ BOOMR_check_doc_domain();
 		},
 
 		fireEvent: function(e_name, data) {
-			var i, handler, handlers;
+			var i, handler, handlers, handlersLen;
 
 			e_name = e_name.toLowerCase();
 
@@ -389,13 +393,25 @@ BOOMR_check_doc_domain();
 				BOOMR.real_sendBeacon();
 			}
 
-			for (i = 0; i < handlers.length; i++) {
+			// only call handlers at the time of fireEvent (and not handlers that are
+			// added during this callback to avoid an infinite loop)
+			handlersLen = handlers.length;
+			for (i = 0; i < handlersLen; i++) {
 				try {
 					handler = handlers[i];
 					handler.fn.call(handler.scope, data, handler.cb_data);
 				}
 				catch (err) {
 					BOOMR.addError(err, "fireEvent." + e_name + "<" + i + ">");
+				}
+			}
+
+			// remove any 'once' handlers now that we've fired all of them
+			for (i = 0; i < handlersLen; i++) {
+				if (handlers[i].once) {
+					handlers.splice(i, 1);
+					handlersLen--;
+					i--;
 				}
 			}
 
@@ -1241,7 +1257,7 @@ BOOMR_check_doc_domain();
 			return impl.fireEvent(e_name, data);
 		},
 
-		subscribe: function(e_name, fn, cb_data, cb_scope) {
+		subscribe: function(e_name, fn, cb_data, cb_scope, once) {
 			var i, handler, ev;
 
 			e_name = e_name.toLowerCase();
@@ -1260,7 +1276,13 @@ BOOMR_check_doc_domain();
 					return this;
 				}
 			}
-			ev.push({ "fn": fn, "cb_data": cb_data || {}, "scope": cb_scope || null });
+
+			ev.push({
+				fn: fn,
+				cb_data: cb_data || {},
+				scope: cb_scope || null,
+				once: once || false
+			});
 
 			// attaching to page_ready after onload fires, so call soon
 			if (e_name === "page_ready" && impl.onloadfired && impl.autorun) {
@@ -1486,42 +1508,56 @@ BOOMR_check_doc_domain();
 			return true;
 		},
 
-		responseEnd: function(name, t_start, data) {
-			if (BOOMR.readyToSend()) {
-				if (typeof name === "object") {
-					if (!name.url) {
-						BOOMR.debug("BOOMR.responseEnd: First argument must have a url property if it's an object");
-						return;
-					}
+		responseEnd: function(name, t_start, data, t_end) {
+			// take the now timestamp for start and end, if unspecified, in case we delay this beacon
+			t_start = typeof t_start === "number" ? t_start : BOOMR.now();
+			t_end = typeof t_end === "number" ? t_end : BOOMR.now();
 
-					impl.fireEvent("xhr_load", name);
-				}
-				else {
-					// flush out any queue'd beacons before we set the Page Group
-					// and timers
-					BOOMR.real_sendBeacon();
+			// wait until all plugins are ready to send
+			if (!BOOMR.readyToSend()) {
+				BOOMR.debug("Attempted to call responseEnd before all plugins were Ready to Send, trying again...");
 
-					BOOMR.addVar("xhr.pg", name);
-					BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
-					impl.fireEvent("xhr_load", {
-						"name": "xhr_" + name,
-						"data": data
-					});
-				}
+				// try again later
+				setTimeout(function() {
+					BOOMR.responseEnd(name, t_start, data, t_end);
+				}, 1000);
+
+				return;
 			}
-			// Only add to the QT variable for named Page Groups, not resources
-			// with a .url
-			else if (typeof name !== "object") {
-				var timer = name + "|" + (BOOMR.now() - t_start);
-				if (impl.vars.qt) {
-					impl.vars.qt += "," + timer;
+
+			// Wait until we've sent the Page Load beacon first
+			if (!BOOMR.hasSentPageLoadBeacon() &&
+			    !BOOMR.utils.inArray(name.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// wait for a beacon, then try again
+				BOOMR.subscribe("page_load_beacon", function() {
+					BOOMR.responseEnd(name, t_start, data, t_end);
+				}, null, BOOMR, true);
+
+				return;
+			}
+
+			if (typeof name === "object") {
+				if (!name.url) {
+					BOOMR.debug("BOOMR.responseEnd: First argument must have a url property if it's an object");
+					return;
 				}
-				else {
-					impl.vars.qt = timer;
-				}
+
+				impl.fireEvent("xhr_load", name);
 			}
 			else {
-				BOOMR.debug("Attempt to send a resource before a security token");
+				// flush out any queue'd beacons before we set the Page Group
+				// and timers
+				BOOMR.real_sendBeacon();
+
+				BOOMR.addVar("xhr.pg", name);
+				BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
+				impl.fireEvent("xhr_load", {
+					name: "xhr_" + name,
+					data: data,
+					timing: {
+						loadEventEnd: t_end
+					}
+				});
 			}
 		},
 
@@ -1593,6 +1629,8 @@ BOOMR_check_doc_domain();
 			// instead of History pushState() APIs. Use d.URL instead of location.href because of a
 			// Safari bug.
 			var isSPA = BOOMR.utils.inArray(impl.vars["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS);
+			var isPageLoad = typeof impl.vars["http.initiator"] === "undefined" || isSPA;
+
 			var pgu = isSPA ? d.URL : d.URL.replace(/#.*/, "");
 			impl.vars.pgu = BOOMR.utils.cleanupURL(pgu);
 
@@ -1710,6 +1748,16 @@ BOOMR_check_doc_domain();
 			// The only thing that can stop it now is if we're rate limited
 			impl.fireEvent("onbeacon", varsSent);
 
+			// keep track of page load beacons
+			if (!impl.hasSentPageLoadBeacon && isPageLoad) {
+				impl.hasSentPageLoadBeacon = true;
+
+				// let this beacon go out first
+				BOOMR.setImmediate(function() {
+					impl.fireEvent("page_load_beacon", varsSent);
+				});
+			}
+
 			if (params.length === 0) {
 				// do not make the request if there is no data
 				return this;
@@ -1756,6 +1804,15 @@ BOOMR_check_doc_domain();
 			}
 
 			return true;
+		},
+
+		/**
+		 * Determines whether or not a Page Load beacon has been sent.
+		 *
+		 * @returns {boolean} True if a Page Load beacon has been sent.
+		 */
+		hasSentPageLoadBeacon: function() {
+			return impl.hasSentPageLoadBeacon;
 		},
 
 		/**
