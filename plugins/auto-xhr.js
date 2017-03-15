@@ -418,10 +418,14 @@
 			    resource.timing &&
 			    resource.timing.requestStart) {
 				var r = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming(
-					resource.timing.requestStart,
-					resource.timing.loadEventEnd);
+						resource.timing.requestStart,
+						resource.timing.loadEventEnd
+					);
 
-				BOOMR.addVar("restiming", JSON.stringify(r));
+				BOOMR.addVar({
+					restiming: JSON.stringify(r.restiming),
+					timepoints: r.timepoints
+				});
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings

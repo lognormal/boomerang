@@ -123,7 +123,7 @@ module.exports = function(req, res) {
 
 		fs.exists(filePath, function(exists) {
 			if (!exists) {
-				return res.send(404);
+				return res.sendStatus(404);
 			}
 
 			// determine MIME type
