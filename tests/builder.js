@@ -22,6 +22,7 @@ function getFiles(dir, nameMatch, callback) {
 				return path.join(dir, match);
 			}).filter(function(match) {
 				return fs.statSync(match).isFile() &&
+					!match.endsWith(".swp") &&
 					(nameMatch === "" || match.indexOf(nameMatch) !== -1);
 			});
 

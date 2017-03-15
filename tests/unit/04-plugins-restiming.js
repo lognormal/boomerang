@@ -375,24 +375,24 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
 			// get the first key, which is our base URL
 			var baseUrl = "";
-			for (var key in trie) {
+			for (var key in trie.restiming) {
 				baseUrl = key;
 			}
 
 			// first entry is faked navigationTiming data
-			assert.isObject(trie[baseUrl]);
+			assert.isObject(trie.restiming[baseUrl]);
 
 			//
 			// NOTE: this test doesn't work in Karma in C/IE/FF, only in real C/IE/FF and PhantomJS
 			// This is due to different RT entries getting downloaded in the different environment
 			//
-			if (typeof trie[baseUrl]["build/boomerang-latest-debug.js"] === "string") {
+			if (typeof trie.restiming[baseUrl]["build/boomerang-latest-debug.js"] === "string") {
 				// build/ boomerang .js file
-				assert.isString(trie[baseUrl]["build/boomerang-latest-debug.js"]);
-				assert.equal("3", trie[baseUrl]["build/boomerang-latest-debug.js"][0]);
+				assert.isString(trie.restiming[baseUrl]["build/boomerang-latest-debug.js"]);
+				assert.equal("3", trie.restiming[baseUrl]["build/boomerang-latest-debug.js"][0]);
 
 				// other entries will be under vendor
-				assert.isObject(trie[baseUrl]["vendor/"]);
+				assert.isObject(trie.restiming[baseUrl]["vendor/"]);
 			}
 		});
 	});
@@ -1093,6 +1093,176 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
 		it("Should trim a URL that is contained as a regex in the trim list", function() {
 			assert.equal("http://foo.com/...", BOOMR.plugins.ResourceTiming.trimUrl("http://foo.com/bar", [/(http:\/\/foo.com\/).*/]));
+		});
+	});
+
+	describe("getVisibleEntries()", function() {
+		it("Should get all visible entries for this page", function() {
+			//
+			// NOTE: If you change the resources for this test suite (index.html), this test will
+			// need to be updated.
+			//
+
+			var entries = BOOMR.plugins.ResourceTiming.getVisibleEntries(window);
+
+			// Running on the command line, so no images on the page
+			if (document.getElementsByTagName("img").length === 0) {
+				assert.strictEqual(Object.keys(entries).length, 0);
+				return;
+			}
+
+			var host = location.protocol + "//" + location.host;
+			var entriesToFind = [
+				{ url: "/assets/img.jpg?0", top: 50, left: 50, height: 107, width: 107, naturalHeight: 742, naturalWidth: 2000 },
+				{ url: "/assets/img.jpg?1", top: 120, left: 120, height: 201, width: 201, naturalHeight: 742, naturalWidth: 2000 },
+				{ url: "/assets/img.jpg?2", top: 400, left: -15, height: 742, width: 2000 }
+			];
+
+			assert.strictEqual(Object.keys(entries).length, entriesToFind.length);
+
+			for (var i = 0; i < entriesToFind.length; i++) {
+				var entryToFind = entriesToFind[i];
+
+				assert.isTrue(entries.hasOwnProperty(host + entryToFind.url));
+
+				var foundEntry = entries[host + entryToFind.url];
+
+				assert.strictEqual(foundEntry[0], entryToFind.height);
+				assert.strictEqual(foundEntry[1], entryToFind.width);
+				assert.strictEqual(foundEntry[2], entryToFind.top);
+				assert.strictEqual(foundEntry[3], entryToFind.left);
+				if (entryToFind.naturalHeight) {
+					assert.strictEqual(foundEntry[4], entryToFind.naturalHeight);
+					assert.strictEqual(foundEntry[5], entryToFind.naturalWidth);
+				}
+				else {
+					assert.strictEqual(foundEntry.length, 4);
+				}
+			}
+		});
+	});
+
+	describe("getResourceLatestTime()", function() {
+		it("Should get the latest available timestamp for the resource", function() {
+			var resources = [
+				{ expected: 125, responseEnd: 125 },
+				{ expected: 100110.4, responseEnd: 0, responseStart: 100092, startTime: 100000 },
+				{ expected: Infinity, responseEnd: 0, responseStart: 0, startTime: 100050 },
+				{ expected: Infinity,  responseEnd: 0, responseStart: 0, startTime: 0 }
+			];
+
+			for (var i = 0; i < resources.length; i++) {
+				var res = resources[i];
+				var lat = BOOMR.plugins.ResourceTiming.getResourceLatestTime(res);
+
+				if (res.expected < 0) {
+					assert.closeTo(lat, window.performance.now(), Math.abs(res.expected));
+				}
+				else {
+					assert.strictEqual(lat, res.expected);
+				}
+			}
+		});
+	});
+
+	describe("mergePixels()/countPixels()", function() {
+		var currentPixels;
+		var resourceGroups = [
+			[
+				[ 100, 100, 50, 50 ],
+				[ 100, 100, 75, 75 ]
+			],
+			[
+				[ 150, 100, 250, 50 ],
+				[ 100, 150, 275, 75 ]
+			],
+			[
+				[ 300, 100, 450, 50 ],
+				[ 100, 300, 475, 75 ]
+			],
+			[
+				[ 600, 50, 75, 80 ]
+			]
+		];
+
+		var pixelCounts = [ 14375, 36875, 89375, 95625 ];
+		var finalCounts = [  9375, 24375, 65625, 95625 ];
+
+		it("Should set pixels based on the passed in resources", function() {
+			var scr = BOOMR.window.screen;
+			BOOMR.window.screen = { height: 768, width: 1024 };
+
+			assert.isUndefined(currentPixels, undefined);
+
+			for (var i = 0; i < resourceGroups.length; i++) {
+				currentPixels = BOOMR.plugins.ResourceTiming.mergePixels(currentPixels, resourceGroups[i], i + 1);
+				var npixels = BOOMR.plugins.ResourceTiming.countPixels(currentPixels);
+
+				assert.strictEqual(npixels, pixelCounts[i]);
+			}
+
+			BOOMR.window.screen = scr;
+		});
+
+		it("Should count finalized pixels for each timePoint", function() {
+			for (var i = 0; i < finalCounts.length; i++) {
+				var npixels = BOOMR.plugins.ResourceTiming.countPixels(currentPixels, 0, i + 1);
+
+				assert.strictEqual(npixels, finalCounts[i]);
+			}
+		});
+
+	});
+
+	describe("getOptimizedTimepoints", function() {
+		var timePoints = {
+			10: [
+				[ 100, 100, 50, 50 ],
+				[ 100, 100, 75, 75 ]
+			],
+			200: [
+				[ 150, 100, 250, 50 ],
+				[ 100, 150, 275, 75 ]
+			],
+			350: [
+				[ 300, 100, 450, 50 ],
+				[ 100, 300, 475, 75 ]
+			],
+			400: [
+				[ 600, 50, 75, 80 ]
+			],
+			450: [
+				[ 600, 50, 75, 80 ]
+			],
+			Infinity: [
+				[ 10, 10, 10, 400 ]
+			]
+		};
+
+		var pixelCounts = [ 14375, 36875, 89375, 95625, 95625, 95725 ];
+		var finalCounts = [  9375, 24375, 65625, 65625, 95625, 95725 ];
+
+		var opt;
+
+		it("Should get compressed & optimized timepoints", function() {
+			opt = BOOMR.plugins.ResourceTiming.getOptimizedTimepoints(timePoints);
+
+			assert.strictEqual(opt, "a~b3b~3uw!5a~hd0~9n8!46~14ic~ibq!1e~4tm~n5c!1e-!~2s");
+		});
+
+		it("Should decompress optimized timings", function() {
+			var tp = BOOMR.plugins.ResourceTiming.decompressTimePoints(opt);
+
+			var ks = Object.keys(timePoints);
+
+			assert.strictEqual(Object.keys(tp).length, ks.length);
+
+			for (var i = 0; i < ks.length; i++) {
+				assert.isTrue(tp.hasOwnProperty(ks[i]));
+
+				assert.strictEqual(tp[ks[i]][0], pixelCounts[i]);
+				assert.strictEqual(tp[ks[i]][1], finalCounts[i]);
+			}
 		});
 	});
 });
