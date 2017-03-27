@@ -25,4 +25,9 @@ describe("e2e/06-bugs/03-non-epoch-navtiming", function() {
 			assert.isDefined(b.nt_bad);
 		}
 	});
+
+	it("Should not have an error param on the beacon", function() {
+		var b = tf.lastBeacon();
+		assert.isUndefined(b.errors);
+	});
 });
