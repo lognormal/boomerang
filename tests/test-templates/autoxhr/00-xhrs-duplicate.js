@@ -16,8 +16,8 @@ BOOMR_test.templates.XHR["00-xhrs-duplicate"] = function() {
 	});
 
 	function check(b, secs) {
-		assert.closeTo(b.t_done, secs * 1000, 200);
-		assert.closeTo(b.nt_res_end - b.nt_req_st, secs * 1000, 200, "response should be close to " + secs + " seconds");
+		assert.closeTo(b.t_done, secs * 1000, 250);
+		assert.closeTo(b.nt_res_end - b.nt_req_st, secs * 1000, 250, "response should be close to " + secs + " seconds");
 		if (b.nt_fet_st) {
 			// not avail in PhantomJS
 			assert.ok(b.nt_fet_st <= b.nt_req_st, "nt_fet_st should be at most nt_req_st");
