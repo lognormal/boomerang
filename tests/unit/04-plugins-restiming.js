@@ -1220,8 +1220,10 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 				[ 100, 100, 50, 50 ],
 				[ 100, 100, 75, 75 ]
 			],
-			200: [
-				[ 150, 100, 250, 50 ],
+			"200.1": [
+				[ 150, 100, 250, 50 ]
+			],
+			"200.2": [
 				[ 100, 150, 275, 75 ]
 			],
 			350: [
@@ -1253,15 +1255,21 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 		it("Should decompress optimized timings", function() {
 			var tp = BOOMR.plugins.ResourceTiming.decompressTimePoints(opt);
 
-			var ks = Object.keys(timePoints);
+			var uks = {};
+
+			Object.keys(timePoints).forEach(function(t) { uks[Math.round(Number(t))] = true; });
+
+			var ks = Object.keys(uks);
 
 			assert.strictEqual(Object.keys(tp).length, ks.length);
 
 			for (var i = 0; i < ks.length; i++) {
-				assert.isTrue(tp.hasOwnProperty(ks[i]));
+				var k = ks[i];
 
-				assert.strictEqual(tp[ks[i]][0], pixelCounts[i]);
-				assert.strictEqual(tp[ks[i]][1], finalCounts[i]);
+				assert.isTrue(tp.hasOwnProperty(k));
+
+				assert.strictEqual(tp[k][0], pixelCounts[i]);
+				assert.strictEqual(tp[k][1], finalCounts[i]);
 			}
 		});
 	});
