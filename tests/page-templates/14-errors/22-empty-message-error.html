@@ -1,0 +1,19 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="22-empty-message-error.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true
+	},
+	afterFirstBeacon: function() {
+		var err = new Error();
+		err.message = null;
+		throw err;
+	}
+});
+</script>
+<%= footer %>
