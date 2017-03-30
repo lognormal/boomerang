@@ -431,8 +431,7 @@
 					);
 
 				BOOMR.addVar({
-					restiming: JSON.stringify(r.restiming),
-					timepoints: r.timepoints
+					restiming: JSON.stringify(r.restiming)
 				});
 			}
 

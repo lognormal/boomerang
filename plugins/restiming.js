@@ -856,7 +856,6 @@ see: http://www.w3.org/TR/resource-timing/
 		rangeMax = rangeMax || Infinity;
 
 		return pixels
-			.filter(Boolean)
 			.reduce(function(acc, val) {
 				return acc +
 					val.filter(function(v) {
@@ -876,12 +875,25 @@ see: http://www.w3.org/TR/resource-timing/
 	 * @return {string} The serialized compressed timepoint object with ! separating individual triads and ~ separating timepoint and pixels within the triad. The elements of the triad are the timePoint, number of pixels painted at that point, and the number of pixels finalized at that point (ie, no further paints). If the third part of the triad is 0, it is omitted, if the second part of the triad is 0, it is omitted and the repeated ~~ is replaced with a -
 	 */
 	function getOptimizedTimepoints(timePoints) {
-		var i, timeSequence, tPixels,
+		var i, roundedTimePoints = {}, timeSequence, tPixels,
 		    t_prev, t, p_prev, p, f_prev, f,
 		    comp, result = [];
 
-		// Get all unique timepoints sorted in ascending order
-		timeSequence = Object.keys(timePoints).map(Number).sort(function(a, b) { return a - b; });
+		// Round timepoints to the nearest integral ms
+		timeSequence = Object.keys(timePoints);
+
+		for (i = 0; i < timeSequence.length; i++) {
+			t = Math.round(Number(timeSequence[i]));
+			if (typeof roundedTimePoints[t] === "undefined") {
+				roundedTimePoints[t] = [];
+			}
+
+			// Merge
+			Array.prototype.push.apply(roundedTimePoints[t], timePoints[timeSequence[i]]);
+		}
+
+		// Get all unique timepoints nearest ms sorted in ascending order
+		timeSequence = Object.keys(roundedTimePoints).map(Number).sort(function(a, b) { return a - b; });
 
 		if (timeSequence.length === 0) {
 			return {};
@@ -890,7 +902,7 @@ see: http://www.w3.org/TR/resource-timing/
 		// First loop identifies pixel first paints
 		for (i = 0; i < timeSequence.length; i++) {
 			t = timeSequence[i];
-			tPixels = mergePixels(tPixels, timePoints[t], t);
+			tPixels = mergePixels(tPixels, roundedTimePoints[t], t);
 
 			p = countPixels(tPixels);
 			timeSequence[i] = [t, p];
@@ -1014,7 +1026,7 @@ see: http://www.w3.org/TR/resource-timing/
 			}
 		}
 
-		return { restiming: optimizeTrie(convertToTrie(results), true), timepoints: getOptimizedTimepoints(timePoints) };
+		return { restiming: optimizeTrie(convertToTrie(results), true) };
 	}
 
 	/**
@@ -1144,8 +1156,7 @@ see: http://www.w3.org/TR/resource-timing/
 			BOOMR.info("Client supports Resource Timing API", "restiming");
 
 			BOOMR.addVar({
-				restiming: JSON.stringify(r.restiming),
-				timepoints: r.timepoints
+				restiming: JSON.stringify(r.restiming)
 			});
 		}
 	}

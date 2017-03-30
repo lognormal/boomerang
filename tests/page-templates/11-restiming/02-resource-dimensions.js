@@ -35,12 +35,13 @@ describe("e2e/11-restiming/02-resource-dimensions", function() {
 		}
 	});
 
-	it("Should have timepoints for resources on the page (if ResourceTiming is supported)", function() {
+	it("Should not have timepoints for resources on the page (even if ResourceTiming is supported)", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.beacons[0];
 
-			assert.isDefined(b.timepoints);
+			assert.isUndefined(b.timepoints);
 
+			/*
 			var decompressed = BOOMR.plugins.ResourceTiming.decompressTimePoints(b.timepoints);
 			var tp = Object.keys(decompressed).map(Number).sort(function(a1, a2) { return a1 - a2; });
 
@@ -48,6 +49,7 @@ describe("e2e/11-restiming/02-resource-dimensions", function() {
 
 			assert.strictEqual(decompressed[tp[0]][0], 80000);
 			assert.strictEqual(decompressed[tp[0]][1], 21400);
+			*/
 		}
 	});
 });
