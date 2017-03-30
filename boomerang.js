@@ -1998,6 +1998,7 @@ BOOMR_check_doc_domain();
 		var p = boomr.getPerformance();
 		if (p &&
 		    typeof p.now === "function" &&
+		    /\[native code\]/.test(String(p.now)) &&		// #545 handle bogus performance.now from broken shims
 		    p.timing &&
 		    p.timing.navigationStart) {
 			boomr.now = function() {
