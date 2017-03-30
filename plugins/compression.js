@@ -75,7 +75,7 @@
 				return "~null";
 			}
 
-			if (Array.isArray(v)) {
+			if (BOOMR.utils.isArray(v)) {
 				// iterate instead of Array.map for compat
 				for (var i = 0; i < v.length; i++) {
 					if (i in v) {
