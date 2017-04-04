@@ -1,0 +1,45 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="36-response-type.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: (typeof window.XMLHttpRequest !== "undefined") ? 3 : 1,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		setTimeout(function() {
+			var xhrJson = new XMLHttpRequest();
+			xhrJson.open("GET", "support/data.json");
+
+			if (xhrJson.responseType) {
+				xhrJson.responseType = "json";
+			}
+
+			xhrJson.addEventListener("load", function() {
+				setTimeout(function() {
+					var xhrXml = new XMLHttpRequest();
+					xhrXml.open("GET", "support/data.xml");
+
+					if (xhrXml.responseType) {
+						xhrXml.responseType = "document";
+					}
+
+					xhrXml.send();
+				}, 500);
+			});
+			xhrJson.send();
+		}, 500);
+	},
+	instrument_xhr: true
+});
+
+window.errorCount = 0;
+window.onerror = function() {
+	window.errorCount++;
+};
+
+</script>
+
+<%= footer %>
