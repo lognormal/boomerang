@@ -1199,9 +1199,10 @@
 										// put the HTTP error code on the resource if it's not a success
 										resource.status = req.status;
 									}
+
 									resource.response = {
-										text: req.responseText,
-										xml: req.responseXML,
+										text: (req.responseType === "" || req.responseType === "text") ? req.responseText : null,
+										xml: (req.responseType === "" || req.responseType === "document") ? req.responseXML : null,
 										raw: req.response,
 										json: req.responseJSON
 									};
