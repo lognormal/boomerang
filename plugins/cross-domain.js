@@ -135,7 +135,7 @@
 			}
 
 			var urlQueryParams = BOOMR.utils.objectToString(BOOMR.session, "&");
-			url = url + "?" + urlQueryParams;
+			url = url + "#" + urlQueryParams;
 
 			d.body.appendChild(impl.buildIFrame(url, impl.iframe_name));
 
@@ -302,7 +302,7 @@
 			if (impl.sending && impl.enabled) {
 				log("Client preparing to send postMessage");
 
-				var query = w.location.search;
+				var query = w.location.hash;
 				var querySession = {
 					start: BOOMR.utils.getQueryParamValue("start", query),
 					length: BOOMR.utils.getQueryParamValue("length", query),
