@@ -1007,7 +1007,7 @@
 
 			impl.complete = true;
 
-			BOOMR.sendBeacon();
+			BOOMR.sendBeacon(impl.beacon_url);
 
 			return this;
 		},
