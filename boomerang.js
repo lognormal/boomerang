@@ -931,7 +931,8 @@ BOOMR_check_doc_domain();
 				    "user_ip",
 				    "strip_query_string",
 				    "secondary_beacons",
-				    "autorun"
+				    "autorun",
+				    "site_domain"
 			    ];
 
 			BOOMR_check_doc_domain();
