@@ -848,10 +848,16 @@
 					args[callbackIndex] = wrappedFn;
 
 					if (functionName === "addEventListener") {
-						// for removeEventListener we need to keep track of this
+						// For removeEventListener we need to keep track of this
 						// unique tuple of target object, event name (arg0), original function
 						// and capture (arg2)
-						impl.trackFn(targetObj, args[0], callbackFn, args[2], wrappedFn);
+						// Since we wrap the origFn with a new anonymous function we can't rely on
+						// the browser's addEventListener to dedup multiple additions of the same
+						// callback.
+						if (!impl.trackFn(targetObj, args[0], callbackFn, args[2], wrappedFn)) {
+							// if the callback is already tracked, we won't call addEventListener
+							return;
+						}
 					}
 
 					return origFn.apply(targetObj, args);
@@ -871,15 +877,17 @@
 		 * @param {function} listener Original listener
 		 * @param {boolean} useCapture Use capture
 		 * @param {function} wrapped Wrapped function
+		 *
+		 * @returns {boolean} - `true` if function is not already tracked, false otherwise
 		 */
 		trackFn: function(target, type, listener, useCapture, wrapped) {
 			if (!target) {
-				return;
+				return false;
 			}
 
 			if (impl.trackedFnIdx(target, type, listener, useCapture) !== -1) {
 				// already tracked
-				return;
+				return false;
 			}
 
 			if (!target._bmrEvents) {
@@ -887,6 +895,7 @@
 			}
 
 			target._bmrEvents.push([type, listener, !!useCapture, wrapped]);
+			return true;
 		},
 
 		/**
