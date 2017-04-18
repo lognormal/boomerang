@@ -1,6 +1,7 @@
-Some code Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-Some code Copyright (c) 2011-2012, Log-Normal Inc.  All rights reserved.
-Most code Copyright (c) 2012-2016 SOASTA, Inc. All rights reserved.
+Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
+Copyright (c) 2011-2012, Log-Normal Inc.  All rights reserved.
+Copyright (c) 2012-2017 SOASTA, Inc. All rights reserved.
+Copyright (c) 2017, Akamai Technologies, Inc. All rights reserved.
 
 Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
 
@@ -168,5 +169,5 @@ You'll need a github account to participate, but then you'll need one to check o
 
 Thanks for dropping by, and please leave us a message telling us if you use boomerang.
 
-boomerang is supported by the devs at <a href="http://soasta.com/">SOASTA</a>, and the awesome community of opensource developers that use
+boomerang is supported by the devs at <a href="http://akamai.com/">Akamai</a>, and the awesome community of opensource developers that use
 and hack it.  That's you.  Thank you!
