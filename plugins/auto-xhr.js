@@ -278,7 +278,7 @@
 				// 3.1 & 3.3
 				if (last_ev.nodes_to_wait === 0 || !last_ev.resource.url) {
 					this.pending_events[i] = undefined;
-					return null;// abort
+					// continue with new event
 				}
 				// last_ev will no longer receive watches as ev will receive them
 				// last_ev will wait fall interesting nodes and then send event
