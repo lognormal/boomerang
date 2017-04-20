@@ -1632,7 +1632,7 @@ BOOMR_check_doc_domain();
 					if (impl.disabled_plugins[k]) {
 						continue;
 					}
-					if (!this.plugins[k].is_complete()) {
+					if (!this.plugins[k].is_complete(impl.vars)) {
 						BOOMR.debug("Plugin " + k + " is not complete, deferring beacon send");
 						return false;
 					}

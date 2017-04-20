@@ -1279,7 +1279,10 @@
 			return this;
 		},
 
-		is_complete: function() { return impl.complete; },
+		is_complete: function(vars) {
+			// allow error beacons to go through even if we're not complete
+			return impl.complete || (vars && vars["http.initiator"] === "error");
+		},
 
 		/**
 		 * @desc

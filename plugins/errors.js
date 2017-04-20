@@ -547,13 +547,17 @@
 		sendAfterOnload: false,
 		isDuringLoad: true,
 		maxErrors: 10,
+		// How often to send an error beacon after onload
 		sendInterval: 1000,
+		// How often to send a beacon during onload if autorun=false
+		sendIntervalDuringLoad: 2500,
 		sendIntervalId: -1,
 		maxEvents: 10,
 
 		// state
 		initialized: false,
 		supported: false,
+		autorun: true,
 
 		/**
 		 * All errors
@@ -633,7 +637,7 @@
 		 * @param {number} source SOURCE_* constant
 		 */
 		addError: function(error, via, source) {
-			var onErrorResult, err, dup = false;
+			var onErrorResult, err, dup = false, now = BOOMR.now();
 
 			// only track post-load errors if configured
 			if (!impl.isDuringLoad && !impl.sendAfterOnload) {
@@ -671,7 +675,14 @@
 			// add to our current queue
 			impl.mergeDuplicateErrors(impl.q, err, true);
 
-			if (!impl.isDuringLoad && impl.sendIntervalId === -1) {
+			//
+			// There are a few reasons we'll send an error beacon on its own:
+			// 1. If this is after onload, and sendAfterOnload is set.
+			// 2. If this is during onload, but autorun is false.  In that case,
+			//    we want to send out errors (after a small delay) in case the
+			//    page never loads (e.g. due to the error).
+			//
+			if ((!impl.isDuringLoad || !impl.autorun) && impl.sendIntervalId === -1) {
 				if (dup) {
 					// If this is not during a load, and it's a duplicate of
 					// a previous error, don't send a beacon just for itself
@@ -682,6 +693,13 @@
 				impl.sendIntervalId = setTimeout(function() {
 					impl.sendIntervalId = -1;
 
+					// Don't send a beacon if we've already flushed the queue.  This
+					// might happen for pre-onload becaons if the onload beacon was
+					// sent after queueing
+					if (impl.q.length === 0) {
+						return;
+					}
+
 					// change this to an 'error' beacon
 					BOOMR.addVar("http.initiator", "error");
 
@@ -691,9 +709,17 @@
 					// add our errors to the beacon
 					impl.addErrorsToBeacon();
 
+					// ensure start/end timestamps are on the beacon since the RT
+					// plugin won't run until onload
+					if (impl.isDuringLoad) {
+						BOOMR.addVar("rt.tstart", now);
+						BOOMR.addVar("rt.end", now);
+						BOOMR.addVar("rt.start", "manual");
+					}
+
 					// send it!
 					BOOMR.sendBeacon();
-				}, impl.sendInterval);
+				}, impl.isDuringLoad ? impl.sendIntervalDuringLoad : impl.sendInterval);
 			}
 		},
 
@@ -1402,6 +1428,10 @@
 
 			if (impl.initialized) {
 				return this;
+			}
+
+			if (config && typeof config.autorun !== "undefined") {
+				impl.autorun = config.autorun;
 			}
 
 			impl.initialized = true;

@@ -1,0 +1,23 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<!--
+For this test, we'll turn autorun off and trigger an error.
+
+BOOMR.page_ready() happens right afterward, and should send the normal page load beacon with the error.
+-->
+<script src="25-autorun-false-onload-happens.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true
+	},
+	autorun: false
+});
+
+var a = badFunction();
+</script>
+<script>
+BOOMR.page_ready();
+</script>
+<%= footer %>
