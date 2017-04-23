@@ -8,9 +8,7 @@
 </div>
 <script src="06-custom-timers.js" type="text/javascript"></script>
 <script>
-/*global custom_metric_1:true, custom_metric_2:true*/
 /*eslint-disable no-unused-vars*/
-
 setTimeout(function() {
 	var image = document.createElement("img");
 	image.src = "/delay?delay=2000&file=/assets/img.jpg";
@@ -19,11 +17,6 @@ setTimeout(function() {
 	var container = document.querySelector(".cart-container");
 	container.appendChild(image);
 }, 1000);
-
-custom_metric_1 = 111;
-custom_metric_2 = function() {
-	return 222;
-};
 
 BOOMR_test.init({
 	testAfterOnBeacon: true,

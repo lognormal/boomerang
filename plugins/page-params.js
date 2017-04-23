@@ -93,17 +93,20 @@
 		return {
 			pageGroups: {
 				varname: "h.pg",
-				stopOnFirst: true
+				stopOnFirst: true,
+				isDimension: true
 			},
 			abTests: {
 				varname: "h.ab",
-				stopOnFirst: true
+				stopOnFirst: true,
+				isDimension: true
 			},
 			customMetrics: {
 				cleanUpRE:  REGEX_NUMBER_US_DEFAULT
 			},
 			customDimensions: {
-				sanitizeRE: /[^\w\. \-]/g
+				sanitizeRE: /[^\w\. \-]/g,
+				isDimension: true
 			},
 			customTimers: {
 				cleanUpRE:  REGEX_NUMBER_US_DEFAULT,
@@ -2051,7 +2054,7 @@
 			return false;
 		},
 		done: function(edata, ename) {
-			var i, v, hconfig, handler, limpl = impl, data, pg, match;
+			var i, v, hconfig, handler, limpl = impl, data, pg, match, onlyDimensions = false;
 
 			if (!impl.configReceived) {
 				// we should try to run again after config comes in
@@ -2064,7 +2067,7 @@
 
 			hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
 
-			if (ename !== "xhr" && this.complete) {
+			if (ename !== "xhr" && ename !== "error" && this.complete) {
 				return;
 			}
 
@@ -2129,6 +2132,11 @@
 				this.complete = true;
 			}
 
+			if (ename === "error") {
+				// for error beacons, only include dimensions, not metrics or timers
+				onlyDimensions = true;
+			}
+
 			// Since we're going to write new stuff, clear out anything that we've previously written but couldn't be beaconed
 			impl.clearMetrics();
 
@@ -2139,6 +2147,11 @@
 			for (v in hconfig) {
 				if (hconfig.hasOwnProperty(v)) {
 					handler = new Handler(hconfig[v]);
+
+					if (onlyDimensions && !hconfig[v].isDimension) {
+						// skip this type if we're only asking for dimensions and this isn't a dimension
+						continue;
+					}
 
 					// if data.pg (hard set page group from xhr_send/xhr_load/...) just skip the pageGroups config and move on
 					if (ename === "xhr" && v === "pageGroups" && data && data.pg && typeof data.pg === "string") {
@@ -2376,6 +2389,15 @@
 			return this;
 		},
 
+		/**
+		 * Fired on before_beacon
+		 */
+		onBeforeBeacon: function(vars) {
+			if (vars && vars["http.initiator"] === "error") {
+				impl.done({}, "error");
+			}
+		},
+
 		prerenderToVisible: function() {
 			// ensure we add our data to the beacon even if we had added it
 			// during prerender (in case another beacon went out in between)
@@ -2570,6 +2592,7 @@
 				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
 				BOOMR.subscribe("onbeacon", impl.removeDoneHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
+				BOOMR.subscribe("before_beacon", impl.onBeforeBeacon, null, impl);
 				if (BOOMR.plugins.AutoXHR) {
 					BOOMR.plugins.AutoXHR.addExcludeFilter(impl.excludeXhrFilter, impl, "BOOMR.plugins.PageParams.PageGroups");
 				}
