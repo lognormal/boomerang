@@ -51,7 +51,8 @@
 			},
 			History: {
 				enabled: true,
-				auto: true
+				auto: true,
+				disableHardNav: true
 			},
 			PageParams: {
 				pageGroups: true,

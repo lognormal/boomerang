@@ -71,7 +71,7 @@ const App = React.createClass({
 			if (!subscribed) {
 				BOOMR.subscribe("onbeacon", function(beacon) {
 					// only continue for SPA beacons
-					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
+					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS) && !window.call_page_ready) {
 						return;
 					}
 
@@ -154,6 +154,12 @@ const Home = React.createClass({
 		}
 		return widgetsElements;
 	},
+	imageOnload() {
+		if (window.call_page_ready && !window.boomr_t_done) {
+			window.boomr_t_done = BOOMR.now();
+			BOOMR.page_ready();
+		}
+	},
 	render() {
 		var widgetsElements = this.renderWidgets();
 
@@ -166,7 +172,7 @@ const Home = React.createClass({
 				};
 				var src = `/delay?delay=${this.state.imgs[delayIndex]}&file=pages/12-react/support/img.jpg&id=home&rnd=${this.state.rnd}`;
 				images.push(<div className="image-home" key={delayIndex}>
-				  <img key={delayIndex} src={src} style={style}/>
+				  <img onLoad={this.imageOnload} key={delayIndex} src={src} style={style}/>
 				</div>);
 			}
 

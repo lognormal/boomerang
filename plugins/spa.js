@@ -7,6 +7,7 @@
 	    firstSpaNav = true,
 	    routeFilter = false,
 	    routeChangeWaitFilter = false,
+	    disableHardNav = false,
 	    supported = [],
 	    latestResource,
 	    waitingOnHardMissedComplete = false;
@@ -127,8 +128,13 @@
 			// ensure the beacon is held until this SPA hard beacon is ready
 			waitingOnHardMissedComplete = true;
 
-			// Trigger a route change
-			BOOMR.plugins.SPA.route_change(impl.spaHardMissedOnComplete);
+			if (!disableHardNav) {
+				// Trigger a route change
+				BOOMR.plugins.SPA.route_change(impl.spaHardMissedOnComplete);
+			}
+			else {
+				waitingOnHardMissedComplete = false;
+			}
 		},
 		/**
 		 * Called by a framework when it has hooked into the target SPA
@@ -145,18 +151,22 @@
 				return this;
 			}
 
-			if (hadRouteChange) {
-				// kick off onLoadSpaHardMissed once onload has fired, or immediately
-				// if onload has already fired
-				BOOMR.attach_page_ready(this.onLoadSpaHardMissed);
-			}
-
 			if (typeof options.routeFilter === "function") {
 				routeFilter = options.routeFilter;
 			}
 
 			if (typeof options.routeChangeWaitFilter === "function") {
 				routeChangeWaitFilter = options.routeChangeWaitFilter;
+			}
+
+			if (options.disableHardNav) {
+				disableHardNav = options.disableHardNav;
+			}
+
+			if (hadRouteChange) {
+				// kick off onLoadSpaHardMissed once onload has fired, or immediately
+				// if onload has already fired
+				BOOMR.attach_page_ready(this.onLoadSpaHardMissed);
 			}
 
 			hooked = true;
@@ -196,7 +206,7 @@
 				timing: {
 					requestStart: requestStart
 				},
-				initiator: firstSpaNav ? "spa_hard" : "spa",
+				initiator: firstSpaNav && !disableHardNav ? "spa_hard" : "spa",
 				url: url
 			};
 

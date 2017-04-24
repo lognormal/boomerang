@@ -6,7 +6,8 @@
 		hooked: false,
 		routeHooked: false,
 		hadMissedRouteChange: false,
-		routeChangeInProgress: false
+		routeChangeInProgress: false,
+		disableHardNav: false
 	};
 
 	// Checking for Plugins required and if already integrated
@@ -154,6 +155,9 @@
 			return true;
 		},
 		hook: function(history, hadRouteChange, options) {
+			options = options || {};
+			options.disableHardNav = impl.disableHardNav;
+
 			if (impl.hooked) {
 				return this;
 			}
@@ -166,7 +170,7 @@
 			return this;
 		},
 		init: function(config) {
-			BOOMR.utils.pluginConfig(impl, config, "History", ["auto", "enabled"]);
+			BOOMR.utils.pluginConfig(impl, config, "History", ["auto", "enabled", "disableHardNav"]);
 
 			if (impl.auto && impl.enabled) {
 				this.hook(undefined, true, {});

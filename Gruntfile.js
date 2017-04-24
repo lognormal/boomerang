@@ -779,7 +779,9 @@ module.exports = function() {
 					"tests/unit/**/*",
 					"tests/test-templates/**/*.js",
 					"!tests/page-templates/12-react/support/*.jsx",
-					"!*.#*"
+					"!*.#*",
+					"!*~",
+					"!#*#"
 				],
 				tasks: ["pages-builder"]
 			},
