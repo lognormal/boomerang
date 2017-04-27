@@ -780,11 +780,11 @@ if (!Array.isArray) {
 		getErrorsForUrl: function(errors) {
 			errors = impl.compressErrors(errors);
 
-			if (BOOMR.utils.Compression.jsUrl) {
+			if (BOOMR.utils.Compression && BOOMR.utils.Compression.jsUrl) {
 				return BOOMR.utils.Compression.jsUrl(errors);
 			}
 			else if (window.JSON) {
-				url += JSON.stringify(errors);
+				return JSON.stringify(errors);
 			}
 			else {
 				// not supported
