@@ -5,11 +5,11 @@ describe("e2e/17-usertiming/01-usertiming-basic", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
-	it("Should pass basic beacon validation", function(done){
+	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have usertiming (if UserTiming is supported)", function(){
+	it("Should have usertiming (if UserTiming is supported)", function() {
 		if (t.isUserTimingSupported()) {
 			var b = tf.beacons[0];
 			assert.isString(b.usertiming);
