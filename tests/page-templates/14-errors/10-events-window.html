@@ -15,13 +15,27 @@ BOOMR_test.init({
 	}
 });
 
+window.callCount = 0;
+
 if (window.addEventListener && window.postMessage) {
-	window.addEventListener("message", function errorFunction() {
+	function errorFunction() {
+		window.callCount++;
+
 		// will throw an error
 		a.foo = false;
-	});
+	}
+
+	window.addEventListener("message", errorFunction);
 
 	window.postMessage("foo", "*");
+
+	setTimeout(function() {
+		// remove event listener
+		window.removeEventListener("message", errorFunction);
+
+		// event listener shouldn't fire
+		window.postMessage("foo", "*");
+	}, 100);
 }
 </script>
 <!-- delay the page by 1second so an error can fire -->

@@ -98,7 +98,11 @@ describe("e2e/14-errors/10-events-window", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 42, 5);
+			assert.closeTo(err.lineNumber, 50, 10);
 		}
+	});
+
+	it("Should have only been called once after removeEventListener was called", function() {
+		assert.equal(1, window.callCount);
 	});
 });

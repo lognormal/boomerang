@@ -12,6 +12,7 @@ BOOMR_test.init({
 		monitorGlobal: false
 	}
 });
+
 var img = new Image();
 
 if (window.addEventListener) {
@@ -22,6 +23,24 @@ if (window.addEventListener) {
 }
 
 img.src = "/assets/img.jpg";
+
+// Also test adding/removing listener from an element.  this errorFunction2
+// shouldn't be called so our overall error count is only 1 from the above
+// errorFunction
+var img2 = new Image();
+
+if (window.addEventListener) {
+	function errorFunction2() {
+		// this should never be called since we remove right away
+		a.foo = false;
+	}
+
+	img.addEventListener("load", errorFunction2, true);
+	img.removeEventListener("load", errorFunction2, true);
+}
+
+img2.src = "/assets/img.jpg";
+
 </script>
 <!-- delay the page by 1second so an error can fire -->
 <img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />

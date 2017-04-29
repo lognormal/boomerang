@@ -78,13 +78,23 @@ There is no default value for this parameter.  If not set, no beacon will be sen
 <strong>[optional]</strong>
 Specify the HTTP method for beacon requests, may be <code>'GET'</code>, <code>'POST'</code> or <code>'AUTO'</code> (the default).
 The AUTO setting will make a GET request unless the combined beacon URL plus query string
-exceeds 2000 characters, in which case it will issue a POST. In modern browsers, POST requests
-will encode the data as JSON, with a <code>Content-Type</code> of <code>text/plain</code>.
-In browsers where <code>JSON.stringify</code> is not available, the data will be
-<code>application/x-www-form-urlencoded</code>. To ensure reliable POST behaviour in old browsers, a
-<a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript">hidden form submission</a>
-is used, meaning that the request body will look like <code>data={"foo":"bar","baz":"qux"}</code>
-or <code>data=foo%3Dbar%26baz%3Dqux</code>, depending on the content type.
+exceeds 2000 characters, in which case it will issue a POST. The data will be
+<code>application/x-www-form-urlencoded</code>.
+</dd>
+
+<dt>beacon_auth_key</dt>
+<dd>
+<strong>[optional]</strong>
+Specify the HTTP authentication key for beacon requests.  This key will default to <code>'Authorization'</code>, but may be explicitly set using this
+setting.  Some services use specialized authentication keys such as <code>'X-API-KEY'</code>.
+</dd>
+
+<dt>beacon_auth_token</dt>
+<dd>
+<strong>[optional]</strong>
+Specify the HTTP authentication token for beacon requests.  This token is generally supplied by the service accepting the beacon request and will take
+a form similar to<code>'SPLUNK 4F00X7AF-B3D3-4E07-8C6C-12345678901'</code>.  The value supplied here will be contatenated with the beacon_auth_key to
+form a complete HTTP request header field such as <code>'Authorization':'SPLUNK 4F00X7AF-B3D3-4E07-8C6C-12345678901'</code>.
 </dd>
 
 <dt>site_domain</dt>

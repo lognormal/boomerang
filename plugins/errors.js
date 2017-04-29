@@ -253,6 +253,11 @@ if (!Array.isArray) {
 	];
 
 	/**
+	 * Maximum size, in characters, of stack to capture
+	 */
+	var MAX_STACK_SIZE = 5000;
+
+	/**
 	 * BoomerangError object
 	 *
 	 * @param {object} config Configuration
@@ -398,6 +403,10 @@ if (!Array.isArray) {
 
 		// parse the stack
 		if (error.stack) {
+			if (error.stack.length > MAX_STACK_SIZE) {
+				error.stack = error.stack.substr(0, MAX_STACK_SIZE);
+			}
+
 			frames = ErrorStackParser.parse(error);
 			if (frames && frames.length) {
 				if (error.generatedStack) {
@@ -564,6 +573,10 @@ if (!Array.isArray) {
 		 */
 		send: function(error, via, source) {
 			var now = BOOMR.now();
+
+			if (!error) {
+				return;
+			}
 
 			// defaults, if not specified
 			via = via || BOOMR.plugins.Errors.VIA_APP;
@@ -770,8 +783,13 @@ if (!Array.isArray) {
 			if (BOOMR.utils.Compression.jsUrl) {
 				return BOOMR.utils.Compression.jsUrl(errors);
 			}
-			else {
+			else if (window.JSON) {
 				url += JSON.stringify(errors);
+			}
+			else {
+				// not supported
+				BOOMR.debug("JSON is not supported", "Errors");
+				return "";
 			}
 		},
 
@@ -780,7 +798,11 @@ if (!Array.isArray) {
 		 */
 		addErrorsToBeacon: function() {
 			if (impl.q.length) {
-				BOOMR.addVar("err", this.getErrorsForUrl(impl.q));
+				var err = this.getErrorsForUrl(impl.q);
+				if (err) {
+					BOOMR.addVar("err", err);
+				}
+
 				impl.q = [];
 			}
 		},
@@ -813,14 +835,112 @@ if (!Array.isArray) {
 				try {
 					var args = Array.prototype.slice.call(arguments);
 					var callbackFn = args[callbackIndex];
+					var targetObj = useCallingObject ? this : that;
+					var wrappedFn = impl.wrap(callbackFn, targetObj, via);
 
-					args[callbackIndex] = impl.wrap(callbackFn, useCallingObject ? this : that, via);
+					args[callbackIndex] = wrappedFn;
 
-					return origFn.apply(useCallingObject ? this : that, args);
+					if (functionName === "addEventListener") {
+						// for removeEventListener we need to keep track of this
+						// unique tuple of target object, event name (arg0), original function
+						// and capture (arg2)
+						impl.trackFn(targetObj, args[0], callbackFn, args[2], wrappedFn);
+					}
+
+					return origFn.apply(targetObj, args);
 				}
 				catch (e) {
 					// error during original callback setup
 					impl.send(e, via);
+				}
+			};
+		},
+
+		/**
+		 * Tracks the specified function for removeEventListener.
+		 *
+		 * @param {object} target Target element (window, element, etc)
+		 * @param {string} type Event type (name)
+		 * @param {function} listener Original listener
+		 * @param {boolean} useCapture Use capture
+		 * @param {function} wrapped Wrapped function
+		 */
+		trackFn: function(target, type, listener, useCapture, wrapped) {
+			if (!target) {
+				return;
+			}
+
+			if (impl.trackedFnIdx(target, type, listener, useCapture) !== -1) {
+				// already tracked
+				return;
+			}
+
+			if (!target._bmrEvents) {
+				target._bmrEvents = [];
+			}
+
+			target._bmrEvents.push([type, listener, !!useCapture, wrapped]);
+		},
+
+		/**
+		 * Gets the index of the tracked function.
+		 *
+		 * @param {object} target Target element (window, element, etc)
+		 * @param {string} type Event type (name)
+		 * @param {function} listener Original listener
+		 * @param {boolean} useCapture Use capture
+		 *
+		 * @returns {number} Index of already tracked function, or -1 if it doesn't exist
+		 */
+		trackedFnIdx: function(target, type, listener, useCapture) {
+			var i, f;
+
+			if (!target) {
+				return;
+			}
+
+			if (!target._bmrEvents) {
+				target._bmrEvents = [];
+			}
+
+			for (i = 0; i < target._bmrEvents.length; i++) {
+				f = target._bmrEvents[i];
+				if (f[0] === type &&
+				    f[1] === listener &&
+				    f[2] === !!useCapture) {
+					return i;
+				}
+			}
+
+			return -1;
+		},
+
+		/**
+		 * Wraps removeEventListener to work with our wrapFn
+		 *
+		 * @param {object} that Target object
+		 */
+		wrapRemoveEventListener: function(that) {
+			var fn = "removeEventListener", origFn = that[fn], idx, wrappedFn;
+
+			if (typeof origFn !== "function") {
+				return;
+			}
+
+			that[fn] = function(type, listener, useCapture) {
+				idx = impl.trackedFnIdx(this, type, listener, useCapture);
+				if (idx !== -1) {
+					wrappedFn = this._bmrEvents[idx][3];
+
+					// remove our wrapped function instead
+					origFn.call(this, type, wrappedFn, useCapture);
+
+					// remove bookkeeping
+					this._bmrEvents.splice(idx, 1);
+				}
+				else {
+					// unknown, pass original args
+					origFn.call(this, type, listener, useCapture);
 				}
 			};
 		},
@@ -884,6 +1004,42 @@ if (!Array.isArray) {
 
 			// run the fn
 			return impl.wrap(fn, that).apply(that, args);
+		},
+
+		/**
+		 * Normalizes an object to a string
+		 *
+		 * @param {object} obj Object
+		 * @returns {string} String version of the object
+		 */
+		normalizeToString: function(obj) {
+			if (obj === undefined) {
+				return "undefined";
+			}
+			else if (obj === null) {
+				return "null";
+			}
+			else if (typeof obj === "number" && isNaN(obj)) {
+				return "NaN";
+			}
+			else if (obj === "") {
+				return "(empty string)";
+			}
+			else if (obj === 0) {
+				return "0";
+			}
+			else if (!obj) {
+				return "false";
+			}
+			else if (typeof obj === "function") {
+				return "(function)";
+			}
+			else if (obj && typeof obj.toString === "function") {
+				return obj.toString();
+			}
+			else {
+				return "(unknown)";
+			}
 		},
 
 		/**
@@ -1296,19 +1452,24 @@ if (!Array.isArray) {
 
 				try {
 					BOOMR.window.console.error = function BOOMR_plugins_errors_console_error() {
-						if (arguments.length === 1 || !window.JSON) {
-							impl.send(arguments[0], E.VIA_CONSOLE);
+						// get a copy of the args
+						var args = Array.prototype.slice.call(arguments);
+
+						if (args.length === 1) {
+							// send just the first argument
+							impl.send(impl.normalizeToString(args[0]), E.VIA_CONSOLE);
 						}
 						else {
-							impl.send(JSON.stringify(message), E.VIA_CONSOLE);
+							// get the array of arguments
+							impl.send(impl.normalizeToString(args), E.VIA_CONSOLE);
 						}
 
 						if (typeof globalConsole === "function") {
 							if (typeof globalConsole.apply === "function") {
-								globalConsole.apply(this, arguments);
+								globalConsole.apply(this, args);
 							}
 							else {
-								globalConsole(arguments[0], arguments[1], arguments[2]);
+								globalConsole(args[0], args[1], args[2]);
 							}
 						}
 					};
@@ -1322,6 +1483,10 @@ if (!Array.isArray) {
 				impl.wrapFn("addEventListener", BOOMR.window, false, 1, E.VIA_EVENTHANDLER);
 				impl.wrapFn("addEventListener", BOOMR.window.Element.prototype, true, 1, E.VIA_EVENTHANDLER);
 				impl.wrapFn("addEventListener", BOOMR.window.XMLHttpRequest.prototype, true, 1, E.VIA_EVENTHANDLER);
+
+				impl.wrapRemoveEventListener(BOOMR.window);
+				impl.wrapRemoveEventListener(BOOMR.window.Element.prototype);
+				impl.wrapRemoveEventListener(BOOMR.window.XMLHttpRequest.prototype);
 			}
 
 			if (impl.monitorTimeout) {
@@ -1371,7 +1536,8 @@ if (!Array.isArray) {
 		findDuplicateError: impl.findDuplicateError,
 		mergeDuplicateErrors: impl.mergeDuplicateErrors,
 		compressErrors: impl.compressErrors,
-		decompressErrors: impl.decompressErrors
+		decompressErrors: impl.decompressErrors,
+		normalizeToString: impl.normalizeToString
 		/* END_DEBUG */
 	};
 
