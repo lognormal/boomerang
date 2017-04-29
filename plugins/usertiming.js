@@ -15,7 +15,6 @@ UserTimingCompression must be loaded before this plugin's init is called.
 
 	BOOMR = BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
-
 	if (BOOMR.plugins.UserTiming) {
 		return;
 	}
@@ -31,9 +30,10 @@ UserTimingCompression must be loaded before this plugin's init is called.
 		 */
 		getUserTiming: function() {
 			var timings, res, now = BOOMR.now();
+			var utc = UserTimingCompression || BOOMR.window.UserTimingCompression;
 
-			timings = UserTimingCompression.getCompressedUserTiming(impl.options);
-			res = UserTimingCompression.compressForUri(timings);
+			timings = utc.getCompressedUserTiming(impl.options);
+			res = utc.compressForUri(timings);
 			this.options.from = now;
 
 			return res;
@@ -80,8 +80,15 @@ UserTimingCompression must be loaded before this plugin's init is called.
 				return true;
 			}
 
+			// Check that the required UserTimingCompression library is available
+			var utc = UserTimingCompression || BOOMR.window.UserTimingCompression;
+			if (typeof utc === "undefined") {
+				BOOMR.warn("UserTimingCompression library not found", "usertiming");
+				return false;
+			}
+
 			var p = BOOMR.getPerformance();
-			// Check that we have getEntriesByType and that the required UserTimingCompression library is available
+			// Check that we have getEntriesByType
 			if (p && typeof p.getEntriesByType === "function" &&
 			    typeof UserTimingCompression !== "undefined") {
 				var marks = p.getEntriesByType("mark");
@@ -109,7 +116,8 @@ UserTimingCompression must be loaded before this plugin's init is called.
 				impl.subscribe();
 			}
 			else {
-				// usertiming isn't supported by the browser. Let's check again when the page is ready to see if a polyfill was loaded.
+				// usertiming isn't supported by the browser or the UserTimingCompression library isn't loaded.
+				// Let's check again when the page is ready to see if a polyfill was loaded.
 				BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
 			}
 
