@@ -1,0 +1,37 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="02-usertiming-polyfill.js" type="text/javascript"></script>
+<script src="../../vendor/usertiming-compression/src/usertiming-decompression.js" type="text/javascript"></script>
+<script>
+//
+// Not really polyfill, we'll hide window.performance.getEntriesByType
+// then bring it back later
+//
+if (BOOMR_test.isUserTimingSupported()) {
+	window.getEntriesByTypeCopy = window.performance.getEntriesByType;
+	window.performance.getEntriesByType = undefined;
+
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		UserTiming: {
+			enabled: true
+		},
+		onBoomerangLoaded: function() {
+			window.performance.getEntriesByType = window.getEntriesByTypeCopy;
+			window.performance.mark("mark1");
+			window.performance.mark("mark2");
+			window.performance.measure("measure1", "mark1", "mark2");
+		}
+	});
+}
+else {
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		UserTiming: {
+			enabled: true
+		}
+	});
+}
+</script>
+<div id="content"></div>
+<%= footer %>

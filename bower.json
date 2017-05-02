@@ -43,7 +43,8 @@
     "json3": "~3.3.2",
     "lodash": "~3.0.0",
     "mocha": "~1.21.5",
-    "resourcetiming-compression": "^0.3.3"
+    "resourcetiming-compression": "^0.3.3",
+    "usertiming-compression": "~0.1.4"
   },
   "resolutions": {
     "angular": "1.4.6"
