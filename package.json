@@ -67,8 +67,8 @@
     "strip-json-comments": "^1.0.2"
   },
   "scripts": {
-    "install": "node node_modules/protractor/bin/webdriver-manager update",
-    "test": "grunt test"
+    "test": "grunt test",
+    "install": "test -e node_modules/protractor/bin/webdriver-manager && node node_modules/protractor/bin/webdriver-manager update"
   },
   "repository": {
     "type": "git",

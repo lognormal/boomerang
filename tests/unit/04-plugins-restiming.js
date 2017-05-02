@@ -184,7 +184,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 			assert.deepEqual(BOOMR.plugins.ResourceTiming.convertToTrie(data), expected);
 		});
 
-		it("Should update XSS words from config.js", function() {
+		it("Should update XSS words from config", function() {
 			BOOMR.init({
 				ResourceTiming: {
 					enabled: true,

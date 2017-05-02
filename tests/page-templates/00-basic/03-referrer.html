@@ -4,7 +4,7 @@
 <script>
 var beaconHandler = function(data) {
 	if (!window.lastReferrer) {
-		window.lastReferrer = data.r;
+		window.lastReferrer = data.r2 || data.r;
 
 		BOOMR_test.runTests();
 	}

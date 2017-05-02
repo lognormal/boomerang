@@ -91,9 +91,10 @@ app.get("/api/config.json", require("./route-config"));
 app.get("/api/v2/config.json", require("./route-config"));
 app.get("/concerto/api/config.json", require("./route-config"));
 app.get("/concerto/api/v2/config.json", require("./route-config"));
+/* SOASTA PRIVATE END */
+
 app.get("/blackhole/no-op", respond204);
 app.post("/blackhole/no-op", respond204);
-/* SOASTA PRIVATE END */
 
 // all static content follows afterwards
 /*eslint dot-notation:0*/
