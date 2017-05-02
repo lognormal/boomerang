@@ -34,7 +34,7 @@
 		 */
 		getUserTiming: function() {
 			var timings, res, now = BOOMR.now();
-			var utc = UserTimingCompression || BOOMR.window.UserTimingCompression;
+			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
 
 			timings = utc.getCompressedUserTiming(impl.options);
 			res = utc.compressForUri(timings);
@@ -106,7 +106,7 @@
 			}
 
 			// Check that the required UserTimingCompression library is available
-			var utc = UserTimingCompression || BOOMR.window.UserTimingCompression;
+			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
 			if (typeof utc === "undefined") {
 				BOOMR.warn("UserTimingCompression library not found", "usertiming");
 				return false;
