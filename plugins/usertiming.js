@@ -89,14 +89,12 @@ UserTimingCompression must be loaded before this plugin's init is called.
 
 			var p = BOOMR.getPerformance();
 			// Check that we have getEntriesByType
-			if (p && typeof p.getEntriesByType === "function" &&
-			    typeof UserTimingCompression !== "undefined") {
+			if (p && typeof p.getEntriesByType === "function") {
 				var marks = p.getEntriesByType("mark");
 				var measures = p.getEntriesByType("measure");
 				// Check that the results of getEntriesByType for marks and measures are Arrays
 				// Some polyfill libraries may incorrectly implement this
-				if (Object.prototype.toString.call(marks) === "[object Array]" &&
-				    Object.prototype.toString.call(measures) === "[object Array]") {
+				if (BOOMR.utils.isArray(marks) && BOOMR.utils.isArray(measures)) {
 					BOOMR.info("Client supports User Timing API", "usertiming");
 					this.supported = true;
 					return true;
