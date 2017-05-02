@@ -651,7 +651,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function getCompressedResourceTiming(from, to) {
 		/*eslint no-script-url:0*/
-	    var entries = getFilteredResourceTiming(from, to, impl.trackedResourceTypes || INITIATOR_TYPES),
+		    var entries = getFilteredResourceTiming(from, to, impl.trackedResourceTypes),
 		    i, e, results = {}, initiatorType, url, data,
 		    visibleEntries = {};
 
@@ -858,8 +858,11 @@ see: http://www.w3.org/TR/resource-timing/
 		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
 		trimUrls: [],
-	    // [array of strings] Resource types to track via Resource Timing API
-		trackedResourceTypes: null,
+		/**
+		 * Array of resource types to track, or "*" for all.
+		 *  @type {string[]|string}
+		 */
+		trackedResourceTypes: "*",
 		done: function() {
 			var r;
 
