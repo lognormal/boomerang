@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global assert*/
 
-describe("e2e/07-autoxhr/00-xhrs", function() {
+describe("e2e/07-autoxhr/07-iframes", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 

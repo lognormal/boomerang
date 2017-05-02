@@ -21,8 +21,10 @@ function getFiles(dir, nameMatch, callback) {
 			var files = matches.map(function(match) {
 				return path.join(dir, match);
 			}).filter(function(match) {
-				return fs.statSync(match).isFile()
-					&& (nameMatch === "" || match.indexOf(nameMatch) !== -1);
+				return fs.statSync(match).isFile() &&
+					!match.endsWith(".swp") &&
+					!match.endsWith("~") &&
+					(nameMatch === "" || match.indexOf(nameMatch) !== -1);
 			});
 
 			cb(null, files);

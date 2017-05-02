@@ -1,0 +1,18 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="105-hard-redirect.js" type="text/javascript"></script>
+<iframe id="boomer_test_frame" src="/delay?delay=3000&amp;redir=1&amp;file=/pages/05-angular/00-simple.html"></iframe>
+<script>
+function onBeaconHandler(b) {
+	window.beacon = b;
+	BOOMR_test.runTests();
+}
+
+// have the test IFRAME load a page that will redirect to an Angular app
+var testFrame = document.getElementById("boomer_test_frame");
+
+testFrame.onload = function() {
+	testFrame.contentWindow.BOOMR.subscribe("onbeacon", onBeaconHandler);
+};
+</script>
+<%= footer %>

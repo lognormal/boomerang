@@ -1,4 +1,4 @@
-/* eslint-env node */
+/*eslint-env node*/
 /*global jasmine*/
 exports.config = {
 	seleniumAddress: "http://localhost:4444/wd/hub",

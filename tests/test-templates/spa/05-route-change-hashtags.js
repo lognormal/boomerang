@@ -23,6 +23,14 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 		}
 	});
 
+	it("Should have sent all subsequent beacons have rt.nstart = navigationTiming (if NavigationTiming is supported)", function() {
+		if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			for (var i = 1; i < 2; i++) {
+				assert.equal(tf.beacons[i]["rt.nstart"], BOOMR.plugins.RT.navigationStart());
+			}
+		}
+	});
+
 	//
 	// Beacon 1
 	//

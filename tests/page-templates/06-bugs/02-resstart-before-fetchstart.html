@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangScript %>
+<!--
+responseStart happening before fetchStart:
+https://bugs.webkit.org/show_bug.cgi?id=168055
+-->
+<script src="02-resstart-before-fetchstart.js" type="text/javascript"></script>
+<script>
+// Patch getPerformance to return our buggy data instead
+BOOMR.getPerformance = function() {
+	var data = BOOMR_test.getPerformanceCopy();
+
+	if (!data) {
+		return data;
+	}
+
+	// move navigationStart back a bit so there's room before fetchStart
+	data.timing.navigationStart = data.timing.navigationStart - 1000;
+
+	// change responseStart to be before fetchStart
+	data.timing.responseStart = Math.floor((data.timing.navigationStart + data.timing.fetchStart) / 2);
+
+	return data;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

@@ -1,0 +1,36 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script type="text/javascript">
+(function(w, d) {
+	w.BOOMR = w.BOOMR || {};
+	w.BOOMR.xhr_excludes = {
+		"/pages/07-autoxhr/support/img.jpg": true
+	};
+}(this, this.document));
+</script>
+<script src="31-xhr-excludes.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	instrument_xhr: true,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+		setTimeout(function() {
+			var xhr1 = new XMLHttpRequest();
+			xhr1.open("GET", "/pages/07-autoxhr/support/img.jpg");
+			xhr1.send(null);
+
+			xhr1.addEventListener("load", function() {
+				var xhr2 = new XMLHttpRequest();
+				xhr2.open("GET", "/pages/07-autoxhr/support/script200.js");
+				xhr2.send(null);
+			});
+		}, 100);
+	}
+});
+</script>

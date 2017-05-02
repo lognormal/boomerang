@@ -17,33 +17,80 @@ Captures session ids and campaign information from third party analytic vendors 
 	var impl = {
 		addedVars: [],
 
+		// collect client IDs, default to false
+		// overridable by config
+		clientids: false,
+
+		// list of params we won't beacon
+		// overridable by config
+		dropParams: [],
+
 		/**
 		 * Google Analytics
-		 * by default the clientid is stored in a cookie named "_ga" for 2 years
-		 * there is a function named "ga" which is used to retreive it
+		 * For Universal Analytics there is a function named "ga" which is used to retreive the clientid
+		 * ref: https://developers.google.com/analytics/devguides/collection/analyticsjs/command-queue-reference
+		 * By default the clientid is stored in a cookie named "_ga" for 2 years
 		 * ref: https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
+		 * For Classic GA, we'll parse the "__utma" cookie
 		 *
 		 * @return {Object} captured metrics
 		 */
 		googleAnalytics: function() {
 			var data = {};
 			var w = BOOMR.window;
-			var i, param, value;
+			var i, param, value, cid, trackers;
 
 			// list of query params that we want to capture
 			// ref: https://support.google.com/analytics/answer/1033863
 			var QUERY_PARAMS = ["utm_source", "utm_medium", "utm_term", "utm_content", "utm_campaign"];
 
-			// check for google's global "ga" function then get the clientId
-			if (typeof w.ga === "function") {
-				try {
-					w.ga(function(tracker) {
-						data["clientid"] = tracker.get("clientId");
-					});
+			if (impl.clientids) {
+				// check for google's global "ga" function then get the clientId
+				if (typeof w.ga === "function") {
+					try {
+						w.ga(function(tracker) {
+							// tracker may be undefined if using GTM or named trackers
+							if (tracker) {
+								data["clientid"] = tracker.get("clientId");
+							}
+						});
+						if (!data["clientid"] && typeof w.ga.getAll === "function") {
+							// we may have named trackers, the clientid should be the same for all of them
+							trackers = w.ga.getAll();
+							if (trackers && trackers.length > 0) {
+								data["clientid"] = trackers[0].get("clientId");
+							}
+						}
+					}
+					catch (err) {
+						// "ga" wasn't google analytics?
+						BOOMR.addError(err, "TPAnalytics googleAnalytics");
+					}
 				}
-				catch (err) {
-					// "ga" wasn't google analytics?
-					BOOMR.addError(err, "TPAnalytics googleAnalytics");
+				// if we still don't have the clientid then fallback to cookie parsing
+				if (!data["clientid"]) {
+					// cookie parsing for "Universal" GA
+					// _ga cookie format : GA1.2.XXXXXXXXXX.YYYYYYYYYY
+					// where XXXXXXXXXX.YYYYYYYYYY is the clientid
+					cid = BOOMR.utils.getCookie("_ga");
+					if (cid) {
+						cid = cid.split(".");
+						if (cid && cid.length === 4) {
+							data["clientid"] = cid[2] + "." + cid[3];
+						}
+					}
+					else {
+						// cookie parsing for "Classic" GA
+						// __utma #########.XXXXXXXXXX.YYYYYYYYYY.##########.##########.#
+						// where XXXXXXXXXX.YYYYYYYYYY is the clientid
+						cid = BOOMR.utils.getCookie("__utma");
+						if (cid) {
+							cid = cid.split(".");
+							if (cid && cid.length === 6) {
+								data["clientid"] = cid[1] + "." + cid[2];
+							}
+						}
+					}
 				}
 			}
 
@@ -95,41 +142,21 @@ Captures session ids and campaign information from third party analytic vendors 
 			// or Adobe/Omniture's Test&Target global "mboxCreate" function
 			// or Adobe's Marketing Cloud ID Service's (AMCV) global "Visitor" function
 			if (typeof w._satellite !== "undefined" || typeof w.mboxCreate === "function" || typeof w.Visitor === "function" || typeof w.s === "object") {
-				// We'll try to fetch the "organization id" by using the global "s.visitor" object
-				// "s" isn't reliably Adobe's SiteCatalyst object, the site owner might have renamed it
-				if (typeof w.s === "object" && typeof w.s.visitor === "object"
-					&& typeof w.s.visitor.getAnalyticsVisitorID === "function" && typeof w.s.visitor.getMarketingCloudVisitorID === "function") {
-					try {
-						mid = w.s.visitor.getMarketingCloudVisitorID();
-						if (mid) {
-							data["mid"] = mid;
-						}
-						aid = w.s.visitor.getAnalyticsVisitorID();
-						if (aid) {
-							data["aid"] = w.s.visitor.getAnalyticsVisitorID();
-						}
-					}
-					catch (err) {
-						BOOMR.addError(err, "TPAnalytics adobeAnalytics");
-					}
-				}
-				else {
-					// Try extracting the "organization id" from the AMCV_ cookie instead
-					// the result of Vistor.getInstance should be the same as if we did have "s.visitor"
-					amcv = AMCV_REGEX.exec(w.document.cookie);
-					if (amcv && typeof w.Visitor === "function" && typeof w.Visitor.getInstance === "function") {
-						// we might have more than one AMCV_ cookie but we just take the first match for now
+				if (impl.clientids) {
+					// We'll try to fetch the "organization id" by using the global "s.visitor" object
+					// "s" isn't reliably Adobe's SiteCatalyst object, the site owner might have renamed it
+					if (typeof w.s === "object" &&
+					    typeof w.s.visitor === "object" &&
+					    typeof w.s.visitor.getAnalyticsVisitorID === "function" &&
+					    typeof w.s.visitor.getMarketingCloudVisitorID === "function") {
 						try {
-							visitor = w.Visitor.getInstance(amcv[1] + "@AdobeOrg");
-							if (visitor && typeof visitor.getAnalyticsVisitorID === "function" && typeof visitor.getMarketingCloudVisitorID === "function") {
-								mid = visitor.getMarketingCloudVisitorID();
-								if (mid) {
-									data["mid"] = mid;
-								}
-								aid = visitor.getAnalyticsVisitorID();
-								if (aid) {
-									data["aid"] = visitor.getAnalyticsVisitorID();
-								}
+							mid = w.s.visitor.getMarketingCloudVisitorID();
+							if (mid) {
+								data["mid"] = mid;
+							}
+							aid = w.s.visitor.getAnalyticsVisitorID();
+							if (aid) {
+								data["aid"] = w.s.visitor.getAnalyticsVisitorID();
 							}
 						}
 						catch (err) {
@@ -137,37 +164,70 @@ Captures session ids and campaign information from third party analytic vendors 
 						}
 					}
 					else {
-						// AMCV doesn't seem to be installed
-						// the legacy session id is in a cookie named s_vi if the publisher is using a cname to collect metrics
-						// ie. third party cookie but on the same root domain name
-						aid = BOOMR.utils.getCookie("s_vi");
-						if (aid) {
-							// s_vi will be in a format like this "[CS]v1|2B8147DA850785C4-6000010E2006DC28[CE]"
-							// we need to extract the text between the pipe and the [CE]
-							m = SVI_REGEX.exec(aid);
-							if (m && m.length > 0) {
-								aid = m[1];
+						// Try extracting the "organization id" from the AMCV_ cookie instead
+						// the result of Vistor.getInstance should be the same as if we did have "s.visitor"
+						amcv = AMCV_REGEX.exec(w.document.cookie);
+						if (amcv && typeof w.Visitor === "function" && typeof w.Visitor.getInstance === "function") {
+							// we might have more than one AMCV_ cookie but we just take the first match for now
+							try {
+								visitor = w.Visitor.getInstance(amcv[1] + "@AdobeOrg");
+								if (visitor && typeof visitor.getAnalyticsVisitorID === "function" && typeof visitor.getMarketingCloudVisitorID === "function") {
+									mid = visitor.getMarketingCloudVisitorID();
+									if (mid) {
+										data["mid"] = mid;
+									}
+									aid = visitor.getAnalyticsVisitorID();
+									if (aid) {
+										data["aid"] = visitor.getAnalyticsVisitorID();
+									}
+								}
 							}
-							else {
-								aid = "";
+							catch (err) {
+								BOOMR.addError(err, "TPAnalytics adobeAnalytics");
 							}
 						}
 						else {
-							// fallback session id is a first party cookie named s_fid
-							// eg. 6B280792FE0CFE56-162DA99B1988A2F8
-							aid = BOOMR.utils.getCookie("s_fid");
-						}
-						if (aid) {
-							data["aid"] = aid;
+							// AMCV doesn't seem to be installed
+							// the legacy session id is in a cookie named s_vi if the publisher is using a cname to collect metrics
+							// ie. third party cookie but on the same root domain name
+							aid = BOOMR.utils.getCookie("s_vi");
+							if (aid) {
+								// s_vi will be in a format like this "[CS]v1|2B8147DA850785C4-6000010E2006DC28[CE]"
+								// we need to extract the text between the pipe and the [CE]
+								m = SVI_REGEX.exec(aid);
+								if (m && m.length > 0) {
+									aid = m[1];
+								}
+								else {
+									aid = "";
+								}
+							}
+							else {
+								// fallback session id is a first party cookie named s_fid
+								// eg. 6B280792FE0CFE56-162DA99B1988A2F8
+								aid = BOOMR.utils.getCookie("s_fid");
+							}
+							if (aid) {
+								data["aid"] = aid;
+							}
 						}
 					}
 				}
 
-				// get adobe campaign id
-				if (typeof w.s === "object" && typeof w.s.campaign === "string" && w.s.campaign) {
-					data["campaign"] = w.s.campaign;
+				if (typeof w.s === "object") {
+					// get adobe campaign id
+					// ref: https://marketing.adobe.com/resources/help/en_US/sc/implement/campaign.html
+					if (typeof w.s.campaign === "string" && w.s.campaign) {
+						data["campaign"] = w.s.campaign;
+					}
+					// get adobe purchase id
+					// ref: https://marketing.adobe.com/resources/help/en_US/sc/implement/purchaseID.html
+					if (typeof w.s.purchaseID === "string" && w.s.purchaseID) {
+						data["purchaseid"] = w.s.purchaseID;
+					}
 				}
 			}
+
 			return data;
 		},
 
@@ -200,7 +260,7 @@ Captures session ids and campaign information from third party analytic vendors 
 				"cm_re": [/([^&#]+?)-_-([^&#]+?)-_-([^&#]+)/, ["re_version", "re_pagearea", "re_link"]]
 			};
 
-			if (typeof w.cmRetrieveUserID === "function") {
+			if (impl.clientids && typeof w.cmRetrieveUserID === "function") {
 				try {
 					// in the current implementation of cmRetreiveUserID, the callback is called immediately (ie, not on a timer)
 					w.cmRetrieveUserID(function(userid) {
@@ -250,8 +310,10 @@ Captures session ids and campaign information from third party analytic vendors 
 				data = vendors[vendor]();
 				for (var key in data) {
 					var beaconParam = "tp." + vendor + "." + key;
-					BOOMR.addVar(beaconParam, data[key]);
-					impl.addedVars.push(beaconParam);
+					if (!BOOMR.utils.inArray(beaconParam, this.dropParams)) {
+						BOOMR.addVar(beaconParam, data[key]);
+						impl.addedVars.push(beaconParam);
+					}
 				}
 			}
 			if (this.addedVars.length > 0) {
@@ -269,8 +331,12 @@ Captures session ids and campaign information from third party analytic vendors 
 
 	BOOMR.plugins.TPAnalytics = {
 		init: function(config) {
+			BOOMR.utils.pluginConfig(impl, config, "TPAnalytics", ["clientids", "dropParams"]);
 
 			if (!impl.initialized) {
+				if (!BOOMR.utils.isArray(impl.dropParams)) {
+					impl.dropParams = [];
+				}
 				BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
 				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("prerender_to_visible", impl.pageReady, null, impl);

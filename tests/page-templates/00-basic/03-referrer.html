@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="03-referrer.js" type="text/javascript"></script>
+<script>
+var beaconHandler = function(data) {
+	if (!window.lastReferrer) {
+		window.lastReferrer = data.r2 || data.r;
+
+		BOOMR_test.runTests();
+	}
+};
+
+function testReferrer() {
+	var testFrame = document.getElementById("boomer_test_frame");
+	testFrame.contentWindow.BOOMR.subscribe("onbeacon", beaconHandler, null, this);
+	testFrame.contentWindow.BOOMR.responseEnd("manual");
+}
+</script>
+<iframe id="boomer_test_frame" src="support/generic.html" style="display: none" onload="testReferrer()"></iframe>
+<%= footer %>

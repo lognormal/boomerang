@@ -21,7 +21,7 @@ A plugin beaconing clicked elements back to the server
 		onbeforeunload: false,
 		retention: [],
 		handleEvent: function(event) {
-			if (typeof impl.click_url === "undefined" ) {
+			if (typeof impl.click_url === "undefined") {
 				BOOMR.error("No Beacon URL defined will not send beacon");
 				return;
 			}
@@ -43,7 +43,7 @@ A plugin beaconing clicked elements back to the server
 				viewport_width: viewport.width
 			};
 
-			if (typeof impl.onbeforeunload === "undefined" || impl.onbeforeunload === false ) {
+			if (typeof impl.onbeforeunload === "undefined" || impl.onbeforeunload === false) {
 				BOOMR.info("No preference set for when to send clickstats, will default to send immediately");
 				impl.sendData(data);
 			}
@@ -96,9 +96,9 @@ A plugin beaconing clicked elements back to the server
 
 			// IE6 in standards compliant mode (i.e. with a valid doctype as the
 			// first line in the document)
-			else if (typeof document.documentElement !== "undefined"
-				&& typeof document.documentElement.clientWidth !== "undefined"
-				&& document.documentElement.clientWidth !== 0) {
+			else if (typeof document.documentElement !== "undefined" &&
+			    typeof document.documentElement.clientWidth !== "undefined" &&
+			    document.documentElement.clientWidth !== 0) {
 				viewPortWidth = document.documentElement.clientWidth;
 				viewPortHeight = document.documentElement.clientHeight;
 			}

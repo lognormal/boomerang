@@ -14,7 +14,8 @@ var mimeTypes = {
 	"jpg": "image/jpeg",
 	"png": "image/png",
 	"js": "text/javascript",
-	"css": "text/css"
+	"css": "text/css",
+	"xml": "text/xml"
 };
 
 //
@@ -42,12 +43,22 @@ if (!fs.existsSync(wwwRoot)) {
 var previousDelay = 0;
 
 module.exports = function(req, res) {
-	var q = require("url").parse(req.url, true).query;
+	// keep query strings on files if requested that way
+	var url = req.url;
+	var querySplit = req.url.split(/\?/);
+	if (querySplit.length === 3) {
+		querySplit.pop();
+		url = querySplit.join("?");
+	}
+
+	var q = require("url").parse(url, true).query;
 	var delay = q.delay || 0;
 	var file = q.file;
 	var response = q.response;
 	var sendACAO = !(q.noACAO === "1"); // send by default
 	var sendTAO = (q.TAO === "1"); // don't send by default
+	var responseHeaders = q.headers;
+	var redir = q.redir;
 
 	// if we get a '+' or '-' delay prefix, add/sub its value with the delay used on the
 	// previous request. This is usefull in cases where we need to hit the
@@ -63,34 +74,68 @@ module.exports = function(req, res) {
 			delay = parseInt(delay, 10);
 		}
 	}
+
 	delay = delay >= 0 ? delay : 0;
 
 	previousDelay = delay;
 
 	setTimeout(function() {
+		var headers = {};
+
+		if (redir) {
+			res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+			res.header("Pragma", "no-cache");
+			res.header("Expires", 0);
+
+			return res.redirect(302, file);
+		}
+
 		if (sendACAO) {
-			res.set("Access-Control-Allow-Origin", "*");
+			headers["Access-Control-Allow-Origin"] = "*";
 		}
 
 		if (sendTAO) {
-			res.set("Timing-Allow-Origin", "*");
+			headers["Timing-Allow-Origin"] = "*";
+		}
+
+		if (responseHeaders) {
+			var responseHeadersObj = null;
+			try {
+				responseHeadersObj = JSON.parse(responseHeaders);
+			}
+			catch (e) {
+				// nop
+			}
+
+			for (var headerName in responseHeadersObj) {
+				if (responseHeadersObj.hasOwnProperty(headerName) && responseHeadersObj[headerName]) {
+					headers[headerName] = responseHeadersObj[headerName];
+				}
+			}
 		}
 
 		if (response) {
-			return res.send(response);
+			res.writeHead(200, headers);
+			return res.end(response);
 		}
 
 		var filePath = path.join(wwwRoot, file);
 
 		fs.exists(filePath, function(exists) {
 			if (!exists) {
-				return res.send(404);
+				return res.sendStatus(404);
 			}
 
-			var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
-			res.writeHead(200, {
-				"Content-Type": mimeType
-			});
+			// determine MIME type
+			if (!headers["Content-Type"]) {
+				var mimeType = mimeTypes[path.extname(filePath).split(".")[1]];
+
+				if (mimeType) {
+					headers["Content-Type"] = mimeType;
+				}
+			}
+
+			res.writeHead(200, headers);
 
 			var fileStream = fs.createReadStream(filePath);
 			fileStream.pipe(res);

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Generic Page w/ Boomerang</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="../../../build/boomerang-latest-debug.js" type="text/javascript"></script>
+</head>
+<body>
+	<div id="output"></div>
+	<script>
+		window.BOOMR_config = { autorun: false };
+		BOOMR.init();
+		document.getElementById("output").innerHTML = "Generic Page w/ Boomerang Autorun: False";
+		document.getElementById("output").innerHTML += " " + document.location;
+	</script>
+</body>
+</html>

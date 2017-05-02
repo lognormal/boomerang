@@ -25,7 +25,13 @@ see: http://www.w3.org/TR/resource-timing/
 		"script": 3,
 		"css": 4,
 		"xmlhttprequest": 5,
-		"html": 6
+		"html": 6,
+		// IMAGE element inside a SVG
+		"image": 7,
+		// sendBeacon: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
+		"beacon": 8,
+		// Fetch API: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+		"fetch": 9
 	};
 
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
@@ -51,6 +57,13 @@ see: http://www.w3.org/TR/resource-timing/
 
 	// Dimension data special type
 	var SPECIAL_DATA_SIZE_TYPE = "1";
+
+	// Script attributes
+	var SPECIAL_DATA_SCRIPT_ATTR_TYPE = "2";
+	// The following make up a bitmask
+	var ASYNC_ATTR = 0x1;
+	var DEFER_ATTR = 0x2;
+	var LOCAT_ATTR = 0x4;	// 0 => HEAD, 1 => BODY
 
 	/**
 	 * Converts entries to a Trie:
@@ -209,11 +222,12 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
-	 * Attempts to get the navigationStart time for a frame.
-	 * @returns navigationStart time, or 0 if not accessible
+	 * Checks if the current execution context can haz cheezburger from the specified frame
+	 * @param {Window} frame The frame to check if access can haz
+	 * @return {boolean} true if true, false otherwise
 	 */
-	function getNavStartTime(frame) {
-		var navStart = 0, frameLoc;
+	function isFrameAccessible(frame) {
+		var dummy;
 
 		try {
 			// Try to access location.href first to trigger any Cross-Origin
@@ -221,17 +235,31 @@ see: http://www.w3.org/TR/resource-timing/
 			// the browser to crash if accessing X-O frame.performance.
 			// https://code.google.com/p/chromium/issues/detail?id=585871
 			// This variable is not otherwise used.
-			frameLoc = frame.location && frame.location.href;
+			dummy = frame.location && frame.location.href;
 
-			if (("performance" in frame) &&
-			frame.performance &&
-			frame.performance.timing &&
-			frame.performance.timing.navigationStart) {
-				navStart = frame.performance.timing.navigationStart;
+			// Try to access frame.document to trigger X-O exceptions with that
+			dummy = frame.document;
+
+			if (("performance" in frame) && frame.performance) {
+				return true;
 			}
 		}
 		catch (e) {
 			// empty
+		}
+
+		return false;
+	}
+
+	/**
+	 * Attempts to get the navigationStart time for a frame.
+	 * @returns navigationStart time, or 0 if not accessible
+	 */
+	function getNavStartTime(frame) {
+		var navStart = 0;
+
+		if (isFrameAccessible(frame) && frame.performance.timing && frame.performance.timing.navigationStart) {
+			navStart = frame.performance.timing.navigationStart;
 		}
 
 		return navStart;
@@ -240,15 +268,16 @@ see: http://www.w3.org/TR/resource-timing/
 	/**
 	 * Gets all of the performance entries for a frame and its subframes
 	 *
-	 * @param [Frame] frame Frame
-	 * @param [boolean] top This is the top window
-	 * @param [string] offset Offset in timing from root IFRAME
-	 * @param [number] depth Recursion depth
-	 * @return [PerformanceEntry[]] Performance entries
+	 * @param {Frame} frame Frame
+	 * @param {boolean} top This is the top window
+	 * @param {string} offset Offset in timing from root IFRAME
+	 * @param {number} depth Recursion depth
+	 * @param {number[]} [frameDims] position and size of the frame if it is visible as returned by getVisibleEntries
+	 * @return {PerformanceEntry[]} Performance entries
 	 */
-	function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth) {
-		var entries = [], i, navEntries, navStart, frameNavStart, frameOffset,
-		    navEntry, t, frameLoc;
+	function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth, frameDims) {
+		var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, subFrames, subFrameDims,
+		    navEntry, t, rtEntry, visibleEntries, scripts = {}, a;
 
 		if (typeof isTopWindow === "undefined") {
 			isTopWindow = true;
@@ -267,37 +296,47 @@ see: http://www.w3.org/TR/resource-timing/
 		}
 
 		try {
+			if (!isFrameAccessible(frame)) {
+				return entries;
+			}
+
 			navStart = getNavStartTime(frame);
 
+			// gather visible entries on the page
+			visibleEntries = getVisibleEntries(frame, frameDims);
+
+			a = frame.document.createElement("a");
+
+			// get all scripts as an object keyed on script.src
+			Array.prototype
+				.forEach
+				.call(frame.document.getElementsByTagName("script"), function(s) {
+					a.href = s.src;	// Get canonical URL
+
+					// only get external scripts
+					if (a.href.match(/^https?:\/\//)) {
+						scripts[a.href] = s;
+					}
+				});
+
+			subFrames = frame.document.getElementsByTagName("iframe");
+
 			// get sub-frames' entries first
-			if (frame.frames) {
-				for (i = 0; i < frame.frames.length; i++) {
-					frameNavStart = getNavStartTime(frame.frames[i]);
+			if (subFrames && subFrames.length) {
+				for (i = 0; i < subFrames.length; i++) {
+					frameNavStart = getNavStartTime(subFrames[i].contentWindow);
 					frameOffset = 0;
 					if (frameNavStart > navStart) {
 						frameOffset = offset + (frameNavStart - navStart);
 					}
 
-					entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1));
+					a.href = subFrames[i].src;	// Get canonical URL
+
+					entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1, visibleEntries[a.href]));
 				}
 			}
 
-			try {
-				// Try to access location.href first to trigger any Cross-Origin
-				// warnings.  There's also a bug in Chrome ~48 that might cause
-				// the browser to crash if accessing X-O frame.performance.
-				// https://code.google.com/p/chromium/issues/detail?id=585871
-				// This variable is not otherwise used.
-				frameLoc = frame.location && frame.location.href;
-
-				if (!("performance" in frame) ||
-				   !frame.performance ||
-				   typeof frame.performance.getEntriesByType !== "function") {
-					return entries;
-				}
-			}
-			catch (e) {
-				// NOP
+			if (typeof frame.performance.getEntriesByType !== "function") {
 				return entries;
 			}
 
@@ -322,7 +361,11 @@ see: http://www.w3.org/TR/resource-timing/
 						connectEnd: navEntry.connectEnd,
 						requestStart: navEntry.requestStart,
 						responseStart: navEntry.responseStart,
-						responseEnd: navEntry.responseEnd
+						responseEnd: navEntry.responseEnd,
+						workerStart: navEntry.workerStart,
+						encodedBodySize: navEntry.encodedBodySize,
+						decodedBodySize: navEntry.decodedBodySize,
+						transferSize: navEntry.transferSize
 					});
 				}
 				else if (frame.performance.timing) {
@@ -363,7 +406,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 			for (i = 0; frameEntries && i < frameEntries.length; i++) {
 				t = frameEntries[i];
-				frameFixedEntries.push({
+				rtEntry = {
 					name: t.name,
 					initiatorType: t.initiatorType,
 					startTime: t.startTime + offset,
@@ -377,8 +420,31 @@ see: http://www.w3.org/TR/resource-timing/
 					connectEnd: t.connectEnd ? (t.connectEnd + offset) : 0,
 					requestStart: t.requestStart ? (t.requestStart + offset) : 0,
 					responseStart: t.responseStart ? (t.responseStart + offset) : 0,
-					responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0
-				});
+					responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0,
+					workerStart: t.workerStart ? (t.workerStart + offset) : 0,
+					encodedBodySize: t.encodedBodySize,
+					decodedBodySize: t.decodedBodySize,
+					transferSize: t.transferSize,
+					visibleDimensions: visibleEntries[t.name],
+					latestTime: getResourceLatestTime(t)
+				};
+
+				// If this is a script, set its flags
+				if (t.initiatorType === "script" && scripts[t.name]) {
+					var s = scripts[t.name];
+
+					// Add async & defer based on attribute values
+					rtEntry.scriptAttrs = (s.async ? ASYNC_ATTR : 0) | (s.defer ? DEFER_ATTR : 0);
+
+					while (s.nodeType === 1 && s.nodeName !== "BODY") {
+						s = s.parentNode;
+					}
+
+					// Add location by traversing up the tree until we either hit BODY or document
+					rtEntry.scriptAttrs |= (s.nodeName === "BODY" ? LOCAT_ATTR : 0);
+				}
+
+				frameFixedEntries.push(rtEntry);
 			}
 
 			entries = entries.concat(frameFixedEntries);
@@ -412,32 +478,58 @@ see: http://www.w3.org/TR/resource-timing/
 	 * Finds all remote resources in the selected window that are visible, and returns an object
 	 * keyed by the url with an array of height,width,top,left as the value
 	 *
-	 * @param [Window] win Window to search
-	 * @return [Object] Object with URLs of visible assets as keys, and Array[height, width, top, left] as value
+	 * @param {Window} win Window to search
+	 * @param {number[]} [winDims] position and size of the window if it is an embedded iframe in the format returned by this function
+	 * @return {Object} Object with URLs of visible assets as keys, and Array[height, width, top, left, naturalHeight, naturalWidth] as value
 	 */
-	function getVisibleEntries(win) {
-		var els = ["IMG", "IFRAME"], entries = {}, x, y, doc = win.document;
+	function getVisibleEntries(win, winDims) {
+		// lower-case tag names should be used: https://developer.mozilla.org/en-US/docs/Web/API/Element/getElementsByTagName
+		var els = ["img", "iframe", "image"], entries = {}, x, y, doc = win.document, a = doc.createElement("A");
+
+		winDims = winDims || [0, 0, 0, 0];
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
-		x = (win.pageXOffset !== undefined) ? win.pageXOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollLeft;
-		y = (win.pageYOffset !== undefined) ? win.pageYOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollTop;
+		x = winDims[3] + (win.pageXOffset !== undefined) ? win.pageXOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollLeft;
+		y = winDims[2] + (win.pageYOffset !== undefined) ? win.pageYOffset : (doc.documentElement || doc.body.parentNode || doc.body).scrollTop;
 
 		// look at each IMG and IFRAME
 		els.forEach(function(elname) {
-			var elements = doc.getElementsByTagName(elname), el, i, rect;
+			var elements = doc.getElementsByTagName(elname), el, i, rect, src;
 
 			for (i = 0; i < elements.length; i++) {
 				el = elements[i];
 
-				// look at this element if it has a src attribute, and we haven't already looked at it
-				if (el && el.src && !entries[el.src]) {
-					rect = el.getBoundingClientRect();
+				// look at this element if it has a src attribute or xlink:href, and we haven't already looked at it
+				if (el) {
+					// src = IMG, IFRAME
+					// xlink:href = svg:IMAGE
+					src = el.src || el.getAttribute("src") || el.getAttribute("xlink:href");
 
-					// Require both height & width to be non-zero
-					// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
-					if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
-						entries[el.src] = [el.offsetHeight, el.offsetWidth, Math.round(rect.top + y), Math.round(rect.left + x)];
+					// change src to be relative
+					a.href = src;
+					src = a.href;
+
+					if (src && !entries[src]) {
+						rect = el.getBoundingClientRect();
+
+						// Require both height & width to be non-zero
+						// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
+						if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
+							entries[src] = [
+								rect.height || el.offsetHeight,
+								rect.width || el.offsetWidth,
+								Math.round(rect.top + y),
+								Math.round(rect.left + x)
+							];
+
+							// If this is an image, it has a naturalHeight & naturalWidth
+							// if these are different from its display height and width, we should report that
+							// because it indicates scaling in HTML
+							if ((el.naturalHeight || el.naturalWidth) && (entries[src][0] !== el.naturalHeight || entries[src][1] !== el.naturalWidth)) {
+								entries[src].push(el.naturalHeight, el.naturalWidth);
+							}
+						}
 					}
 				}
 			}
@@ -462,13 +554,19 @@ see: http://www.w3.org/TR/resource-timing/
 			return [];
 		}
 
+		// sort entries by start time
+		entries.sort(function(a, b) {
+			return a.startTime - b.startTime;
+		});
+
 		var filteredEntries = [];
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
 
 			// skip non-resource URLs
 			if (e.name.indexOf("about:") === 0 ||
-			    e.name.indexOf("javascript:") === 0) {
+			    e.name.indexOf("javascript:") === 0 ||
+			    e.name.indexOf("res:") === 0) {
 				continue;
 			}
 
@@ -555,7 +653,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 * Decompresses size information back into the specified resource
 	 *
 	 * @param [string] compressed Compressed string
-	 * @param [ResourceTiming] resource ResourceTiming bject
+	 * @param [ResourceTiming] resource ResourceTiming object
 	 */
 	function decompressSize(compressed, resource) {
 		var split, i;
@@ -605,6 +703,42 @@ see: http://www.w3.org/TR/resource-timing/
 
 		return resource;
 	}
+
+	/**
+	 * Decompress compressed timepoints into a timepoint object with painted and finalized pixel counts
+	 * @param {string} comp The compressed timePoint object returned by getOptimizedTimepoints
+	 * @return {object} An object in the form { <timePoint>: [ <pixel count>, <finalized pixel count>], ... }
+	 */
+	function decompressTimePoints(comp) {
+		var result = {}, timePoints, i, split, prevs = [0, 0, 0];
+
+		timePoints = comp.split("!");
+
+		for (i = 0; i < timePoints.length; i++) {
+			split = timePoints[i]
+				.replace(/^~/, "Infinity~")
+				.replace("-", "~0~")
+				.split("~")
+				.map(function(v, j) {
+					v = (v === "Infinity" ? Infinity : parseInt(v, 36));
+
+					if (j === 2) {
+						v = prevs[1] - v;
+					}
+					else {
+						v = v + prevs[j];
+					}
+
+					prevs[j] = v;
+
+					return v;
+				});
+
+			result[split[0]] = [ split[1], split[2] || split[1] ];
+		}
+
+		return result;
+	}
 	/* END_DEBUG */
 
 	/**
@@ -644,23 +778,178 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
+	 * Get the latest timepoint for this resource from ResourceTiming. If the resource hasn't started downloading yet, return Infinity
+	 * @param {PerformanceResourceEntry} res The resource entry to get the latest time for
+	 * @return {number} latest timepoint for the resource or now if the resource is still in progress
+	 */
+	function getResourceLatestTime(res) {
+		// If responseEnd is non zero, return it
+		if (res.responseEnd) {
+			return res.responseEnd;
+		}
+
+		// If responseStart is non zero, assume it accounts for 80% of the load time, and bump it by 20%
+		if (res.responseStart && res.startTime) {
+			return res.responseStart + (res.responseStart - res.startTime) * 0.2;
+		}
+
+		// If the resource hasn't even started loading, assume it will come at some point in the distant future (after the beacon)
+		// we'll let the server determine what to do
+		return Infinity;
+	}
+
+	/**
+	 * Given a 2D array representing the screen and a list of rectangular dimension tuples, turn on the screen pixels that match the dimensions.
+	 * Previously set pixels that are also set with the current call will be overwritten with the new value of pixelValue
+	 * @param {number[][]} currentPixels A 2D sparse array of numbers representing set pixels or undefined if no pixels are currently set.
+	 * @param {number[][]} dimList A list of rectangular dimension tuples in the form [height, width, top, left] for resources to be painted on the virtual screen
+	 * @param {number} pixelValue The numeric value to set all new pixels to
+	 * @return {number[][]} An updated version of currentPixels.
+	 */
+	function mergePixels(currentPixels, dimList, pixelValue) {
+		var s = BOOMR.window.screen,
+		    h = s.height, w = s.width;
+
+		return dimList.reduce(
+			function(acc, val) {
+				var x_min, x_max,
+				    y_min, y_max,
+				    x, y;
+
+				x_min = Math.max(0, val[3]);
+				y_min = Math.max(0, val[2]);
+				x_max = Math.min(val[3] + val[1], w);
+				y_max = Math.min(val[2] + val[0], h);
+
+				// Object is off-screen
+				if (x_min >= x_max || y_min >= y_max) {
+					return acc;
+				}
+
+				// We fill all pixels of this resource with a true
+				// this is needed to correctly account for overlapping resources
+				for (y = y_min; y < y_max; y++) {
+					if (!acc[y]) {
+						acc[y] = [];
+					}
+
+					for (x = x_min; x < x_max; x++) {
+						acc[y][x] = pixelValue;
+					}
+				}
+
+				return acc;
+			},
+			currentPixels || []
+		);
+	}
+
+	/**
+	 * Counts the number of pixels that are set in the given 2D array representing the screen
+	 * @param {number[][]} pixels A 2D boolean array representing the screen with painted pixels set to true
+	 * @param {number} [rangeMin] If included, will only count pixels >= this value
+	 * @param {number} [rangeMax] If included, will only count pixels <= this value
+	 * @return {number} The number of pixels set in the passed in array
+	 */
+	function countPixels(pixels, rangeMin, rangeMax) {
+		rangeMin = rangeMin || 0;
+		rangeMax = rangeMax || Infinity;
+
+		return pixels
+			.reduce(function(acc, val) {
+				return acc +
+					val.filter(function(v) {
+						return rangeMin <= v && v <= rangeMax;
+					}).length;
+			},
+			0
+		);
+	}
+
+	/**
+	 * Returns a compressed string representation of a hash of timepoints to painted pixel count and finalized pixel count.
+	 * - Timepoints are reduced to milliseconds relative to the previous timepoint while pixel count is reduced to pixels relative to the previous timepoint. Finalized pixels are reduced to be relative (negated) to full pixels for that timepoint
+	 * - The relative timepoint and relative pixels are then each Base36 encoded and combined with a ~
+	 * - Finally, the list of timepoints is merged, separated by ! and returned
+	 * @param {object} timePoints An object in the form { "<timePoint>" : [ <object dimensions>, <object dimensions>, ...], <timePoint>: [...], ...}, where <object dimensions> is [height, width, top, left]
+	 * @return {string} The serialized compressed timepoint object with ! separating individual triads and ~ separating timepoint and pixels within the triad. The elements of the triad are the timePoint, number of pixels painted at that point, and the number of pixels finalized at that point (ie, no further paints). If the third part of the triad is 0, it is omitted, if the second part of the triad is 0, it is omitted and the repeated ~~ is replaced with a -
+	 */
+	function getOptimizedTimepoints(timePoints) {
+		var i, roundedTimePoints = {}, timeSequence, tPixels,
+		    t_prev, t, p_prev, p, f_prev, f,
+		    comp, result = [];
+
+		// Round timepoints to the nearest integral ms
+		timeSequence = Object.keys(timePoints);
+
+		for (i = 0; i < timeSequence.length; i++) {
+			t = Math.round(Number(timeSequence[i]));
+			if (typeof roundedTimePoints[t] === "undefined") {
+				roundedTimePoints[t] = [];
+			}
+
+			// Merge
+			Array.prototype.push.apply(roundedTimePoints[t], timePoints[timeSequence[i]]);
+		}
+
+		// Get all unique timepoints nearest ms sorted in ascending order
+		timeSequence = Object.keys(roundedTimePoints).map(Number).sort(function(a, b) { return a - b; });
+
+		if (timeSequence.length === 0) {
+			return {};
+		}
+
+		// First loop identifies pixel first paints
+		for (i = 0; i < timeSequence.length; i++) {
+			t = timeSequence[i];
+			tPixels = mergePixels(tPixels, roundedTimePoints[t], t);
+
+			p = countPixels(tPixels);
+			timeSequence[i] = [t, p];
+		}
+
+		// We'll make all times and pixel counts relative to the previous ones
+		t_prev = 0;
+		p_prev = 0;
+		f_prev = 0;
+
+		// Second loop identifies pixel final paints
+		for (i = 0; i < timeSequence.length; i++) {
+			t = timeSequence[i][0];
+			p = timeSequence[i][1];
+			f = countPixels(tPixels, 0, t);
+
+			if (p > p_prev || f > f_prev) {
+				comp = (t === Infinity ? "" : toBase36(Math.round(t - t_prev))) + "~" + toBase36(p - p_prev) + "~" + toBase36(p - f);
+
+				comp = comp.replace(/~~/, "-").replace(/~$/, "");
+
+				result.push(comp);
+
+				t_prev = t;
+				p_prev = p;
+				f_prev = f;
+			}
+		}
+
+		return result.join("!").replace(/!+$/, "");
+	}
+
+	/**
 	 * Gathers performance entries and compresses the result.
 	 * @param [number] from Only get timings from
 	 * @param [number] to Only get timings up to
-	 * @return Optimized performance entries trie
+	 * @return An object containing the Optimized performance entries trie and the Optimized timepoints array
 	 */
 	function getCompressedResourceTiming(from, to) {
 		/*eslint no-script-url:0*/
 		var entries = getFilteredResourceTiming(from, to),
 		    i, e, results = {}, initiatorType, url, data,
-		    visibleEntries = {};
+		    timePoints = {};
 
 		if (!entries || !entries.length) {
 			return {};
 		}
-
-		// gather visible entries on the page
-		visibleEntries = getVisibleEntries(BOOMR.window);
 
 		for (i = 0; i < entries.length; i++) {
 			e = entries[i];
@@ -703,33 +992,41 @@ see: http://www.w3.org/TR/resource-timing/
 				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SIZE_TYPE + compSize;
 			}
 
+			if (e.hasOwnProperty("scriptAttrs")) {
+				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SCRIPT_ATTR_TYPE + e.scriptAttrs;
+			}
+
 			url = trimUrl(e.name, impl.trimUrls);
 
 			// if this entry already exists, add a pipe as a separator
 			if (results[url] !== undefined) {
 				results[url] += "|" + data;
 			}
+			else if (e.visibleDimensions) {
+				// We use * as an additional separator to indicate it is not a new resource entry
+				// The following characters will not be URL encoded:
+				// *!-.()~_ but - and . are special to number representation so we don't use them
+				// After the *, the type of special data (ResourceTiming = 0) is added
+				results[url] =
+					SPECIAL_DATA_PREFIX +
+					SPECIAL_DATA_DIMENSION_TYPE +
+					e.visibleDimensions.map(Math.round).map(toBase36).join(",").replace(/,+$/, "") +
+					"|" +
+					data;
+			}
 			else {
-				// for the first time we see this URL, add resource dimensions if we have them
-				if (visibleEntries[url] !== undefined) {
-					// We use * as an additional separator to indicate it is not a new resource entry
-					// The following characters will not be URL encoded:
-					// *!-.()~_ but - and . are special to number representation so we don't use them
-					// After the *, the type of special data (ResourceTiming = 0) is added
-					results[url] =
-						SPECIAL_DATA_PREFIX +
-						SPECIAL_DATA_DIMENSION_TYPE +
-						visibleEntries[url].map(toBase36).join(",").replace(/,+$/, "")
-						+ "|"
-						+ data;
+				results[url] = data;
+			}
+
+			if (e.visibleDimensions) {
+				if (!timePoints[e.latestTime]) {
+					timePoints[e.latestTime] = [];
 				}
-				else {
-					results[url] = data;
-				}
+				timePoints[e.latestTime].push(e.visibleDimensions);
 			}
 		}
 
-		return optimizeTrie(convertToTrie(results), true);
+		return { restiming: optimizeTrie(convertToTrie(results), true) };
 	}
 
 	/**
@@ -839,6 +1136,31 @@ see: http://www.w3.org/TR/resource-timing/
 		return totalTime;
 	}
 
+	/**
+	 * Adds 'restiming' to the beacon
+	 *
+	 * @param [number] from Only get timings from
+	 * @param [number] to Only get timings up to
+	 */
+	function addResourceTimingToBeacon(from, to) {
+		var r;
+
+		// Can't send if we don't support JSON
+		if (typeof JSON === "undefined") {
+			return;
+		}
+
+		BOOMR.removeVar("restiming");
+		r = getCompressedResourceTiming(from, to);
+		if (r) {
+			BOOMR.info("Client supports Resource Timing API", "restiming");
+
+			BOOMR.addVar({
+				restiming: JSON.stringify(r.restiming)
+			});
+		}
+	}
+
 	impl = {
 		complete: false,
 		sentNavBeacon: false,
@@ -859,27 +1181,13 @@ see: http://www.w3.org/TR/resource-timing/
 		clearOnBeacon: false,
 		trimUrls: [],
 		done: function() {
-			var r;
-
 			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
 			// add restiming manually).
 			if (this.sentNavBeacon) {
 				return;
 			}
 
-			// Can't send if we don't support JSON
-			if (typeof JSON === "undefined") {
-				return;
-			}
-
-			BOOMR.removeVar("restiming");
-			r = getCompressedResourceTiming();
-			if (r) {
-				BOOMR.info("Client supports Resource Timing API", "restiming");
-				BOOMR.addVar({
-					restiming: JSON.stringify(r)
-				});
-			}
+			addResourceTimingToBeacon();
 
 			this.complete = true;
 			this.sentNavBeacon = true;
@@ -951,7 +1259,8 @@ see: http://www.w3.org/TR/resource-timing/
 		//
 		getCompressedResourceTiming: getCompressedResourceTiming,
 		getFilteredResourceTiming: getFilteredResourceTiming,
-		calculateResourceTimingUnion: calculateResourceTimingUnion
+		calculateResourceTimingUnion: calculateResourceTimingUnion,
+		addResourceTimingToBeacon: addResourceTimingToBeacon
 
 		//
 		// Test Exports (only for debug)
@@ -966,7 +1275,19 @@ see: http://www.w3.org/TR/resource-timing/
 		reduceFetchStarts: reduceFetchStarts,
 		compressSize: compressSize,
 		decompressSize: decompressSize,
-		trimUrl: trimUrl
+		trimUrl: trimUrl,
+		getResourceLatestTime: getResourceLatestTime,
+		mergePixels: mergePixels,
+		countPixels: countPixels,
+		getOptimizedTimepoints: getOptimizedTimepoints,
+		decompressTimePoints: decompressTimePoints,
+		SPECIAL_DATA_PREFIX: SPECIAL_DATA_PREFIX,
+		SPECIAL_DATA_DIMENSION_TYPE: SPECIAL_DATA_DIMENSION_TYPE,
+		SPECIAL_DATA_SIZE_TYPE: SPECIAL_DATA_SIZE_TYPE,
+		SPECIAL_DATA_SCRIPT_ATTR_TYPE: SPECIAL_DATA_SCRIPT_ATTR_TYPE,
+		ASYNC_ATTR: ASYNC_ATTR,
+		DEFER_ATTR: DEFER_ATTR,
+		LOCAT_ATTR: LOCAT_ATTR
 		/* END_DEBUG */
 	};
 

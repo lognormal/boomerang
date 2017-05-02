@@ -1,0 +1,43 @@
+<%= header %>
+<script src="29-xhrs-in-succession.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	instrument_xhr: true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 3 : 1,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			setTimeout(function() {
+				// on completion, send two quick XHRs
+				var xhr1 = new XMLHttpRequest();
+				xhr1.open("GET", "/delay?delay=10000&file=build/boomerang-latest-debug.js?1");
+
+				// start sending the first
+				xhr1.send(null);
+
+				// wait 3 seconds to start the second one
+				setTimeout(function() {
+					// Aborting the first
+					xhr1.abort();
+
+					setTimeout(function() {
+						var xhr2 = new XMLHttpRequest();
+						xhr2.open("GET", "/delay?delay=10000&file=build/boomerang-latest-debug.js?2");
+
+						// send the second one
+						xhr2.send(null);
+						xhr2.abort();
+					}, 150);
+				}, 3000);
+			}, 100);
+		}
+});
+</script>
+<%= footer %>

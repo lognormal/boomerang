@@ -53,35 +53,34 @@ see: http://www.w3.org/TR/navigation-timing/
 			}
 
 			p = BOOMR.getPerformance();
-			if (edata.url && p) {
-				res = BOOMR.getResourceTiming(edata.url, function(a, b) { return a.responseEnd - b.responseEnd; });
-				if (res) {
-					data = {
-						nt_red_st: res.redirectStart,
-						nt_red_end: res.redirectEnd,
-						nt_fet_st: res.fetchStart,
-						nt_dns_st: res.domainLookupStart,
-						nt_dns_end: res.domainLookupEnd,
-						nt_con_st: res.connectStart,
-						nt_con_end: res.connectEnd,
-						nt_req_st: res.requestStart,
-						nt_res_st: res.responseStart,
-						nt_res_end: res.responseEnd
-					};
-					if (res.secureConnectionStart) {
-						// secureConnectionStart is OPTIONAL in the spec
-						data.nt_ssl_st = res.secureConnectionStart;
+
+			// if we previous saved the correct ResourceTiming entry, use it
+			if (p && edata.restiming) {
+				data = {
+					nt_red_st: edata.restiming.redirectStart,
+					nt_red_end: edata.restiming.redirectEnd,
+					nt_fet_st: edata.restiming.fetchStart,
+					nt_dns_st: edata.restiming.domainLookupStart,
+					nt_dns_end: edata.restiming.domainLookupEnd,
+					nt_con_st: edata.restiming.connectStart,
+					nt_con_end: edata.restiming.connectEnd,
+					nt_req_st: edata.restiming.requestStart,
+					nt_res_st: edata.restiming.responseStart,
+					nt_res_end: edata.restiming.responseEnd
+				};
+
+				if (edata.restiming.secureConnectionStart) {
+					// secureConnectionStart is OPTIONAL in the spec
+					data.nt_ssl_st = edata.restiming.secureConnectionStart;
+				}
+
+				for (k in data) {
+					if (data.hasOwnProperty(k) && data[k]) {
+						data[k] += p.timing.navigationStart;
+
+						// don't need to send microseconds
+						data[k] = Math.floor(data[k]);
 					}
-
-					for (k in data) {
-						if (data.hasOwnProperty(k) && data[k]) {
-							data[k] += p.timing.navigationStart;
-
-							// don't need to send microseconds
-							data[k] = Math.round(data[k]);
-						}
-					}
-
 				}
 			}
 
@@ -120,6 +119,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 		done: function() {
 			var w = BOOMR.window, p, pn, pt, data;
+
 			if (this.complete) {
 				return this;
 			}
@@ -155,16 +155,31 @@ see: http://www.w3.org/TR/navigation-timing/
 					nt_unload_st: pt.unloadEventStart,
 					nt_unload_end: pt.unloadEventEnd
 				};
+
 				if (pt.secureConnectionStart) {
 					// secureConnectionStart is OPTIONAL in the spec
 					data.nt_ssl_st = pt.secureConnectionStart;
 				}
+
 				if (pt.msFirstPaint) {
 					// msFirstPaint is IE9+ http://msdn.microsoft.com/en-us/library/ff974719
 					data.nt_first_paint = pt.msFirstPaint;
 				}
 
 				BOOMR.addVar(data);
+
+				//
+				// Basic browser bug detection for known cases where NavigationTiming
+				// timestamps might not be trusted.
+				//
+				if ((pt.requestStart && pt.navigationStart && pt.requestStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.navigationStart && pt.responseStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.fetchStart && pt.responseStart < pt.fetchStart) ||
+				    (pt.navigationStart && pt.fetchStart < pt.navigationStart) ||
+				    (pt.responseEnd && pt.responseEnd > BOOMR.now() + 8.64e+7)) {
+					BOOMR.addVar("nt_bad", 1);
+					impl.addedVars.push("nt_bad");
+				}
 
 				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
 				catch (ignore) { /* empty */ }

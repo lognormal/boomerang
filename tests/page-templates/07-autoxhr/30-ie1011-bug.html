@@ -1,0 +1,44 @@
+<%= header %>
+<!--
+For this test case, we find that in IE 10 and IE 11, if you have a MutationObserver
+active in the document (whether its target is document or some other sub-element),
+with `subtree=true and `childList=true`, and a XMLHttpRequest is used to fetch
+UTF-8 XML content, the nodes in the XMLHttpRequest.responseXML might have
+additional newlines ('\n') added to them each time non-ASCII characters are encountered.
+-->
+<script src="30-ie1011-bug.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	instrument_xhr: true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			setTimeout(function() {
+				// on completion, get a UTF-8 XHR
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/delay?file=/pages/07-autoxhr/support/30-ie1011-bug.xml");
+
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4) {
+						// save the value of responseXML's first node for later
+						BOOMR_test.xhrValue = xhr.responseXML.documentElement.childNodes[0].nodeValue;
+
+						// create an IMG on the document to validate the MutationObserver is still
+						// working
+						BOOMR_test.img = document.createElement("img");
+						BOOMR_test.img.src = "/delay?file=/assets/img.jpg&delay=3000";
+						document.body.appendChild(BOOMR_test.img);
+					}
+				};
+
+				xhr.send(null);
+			}, 1000);
+		}
+});
+</script>
+<%= footer %>

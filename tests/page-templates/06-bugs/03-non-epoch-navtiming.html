@@ -1,0 +1,37 @@
+<%= header %>
+<%= boomerangScript %>
+<!--
+navigationStart and dom* events are norrmal, but other timestamps are 0-based instead of Unix Epoch based
+https://bugs.webkit.org/show_bug.cgi?id=168057
+-->
+<script src="03-non-epoch-navtiming.js" type="text/javascript"></script>
+<script>
+// Patch getPerformance to return our buggy data instead
+BOOMR.getPerformance = function() {
+	var data = BOOMR_test.getPerformanceCopy();
+
+	if (!data) {
+		return data;
+	}
+
+	// change other timestamps to 0-based
+	data.timing.fetchStart = 0;
+	data.timing.domainLookupStart = 1;
+	data.timing.domainLookupEnd = 2;
+	data.timing.connectStart = 3;
+	data.timing.connectEnd = 4;
+	data.timing.requestStart = 5;
+	data.timing.responseStart = 6;
+
+	// these ones seem to be 0 still
+	data.timing.responseEnd = 0;
+	data.timing.loadEventStart = 0;
+
+	return data;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

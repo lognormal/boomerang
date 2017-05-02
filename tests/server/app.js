@@ -82,6 +82,8 @@ app.post("/chunked", require("./route-chunked"));
 
 // add CORS headers
 app.get("/pages/*/support/*", require("./headers"));
+app.get("/blackhole/no-op", respond204);
+app.post("/blackhole/no-op", respond204);
 
 // all static content follows afterwards
 /*eslint dot-notation:0*/

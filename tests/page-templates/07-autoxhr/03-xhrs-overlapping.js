@@ -10,31 +10,30 @@ describe("e2e/07-autoxhr/03-xhrs-overlapping", function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				t.ensureBeaconCount(done, 3);
+				if (window.MutationObserver && typeof window.MutationObserver === "function") {
+					t.ensureBeaconCount(done, 2);
+				}
+				else {
+					t.ensureBeaconCount(done, 3);
+				}
 			});
 	});
 
-	it("Should have the second beacon contain the URL of the first XHR", function(done) {
+	it("Should have the second beacon contain a time of around 100ms because the XHR is aborted after 100ms", function(done) {
 		this.timeout(10000);
 		t.ifAutoXHR(
 			done,
 			function() {
 				t.ensureBeaconCount(function() {
-					assert.include(tf.beacons[1].u, "?1");
-					done();
-				}, 3);
-			});
-	});
-
-	it("Should have the second beacon contain a time of around around 3 seconds", function(done) {
-		this.timeout(10000);
-		t.ifAutoXHR(
-			done,
-			function() {
-				t.ensureBeaconCount(function() {
-					assert.closeTo(tf.beacons[1].t_done, 3000, 100);
-					done();
-				}, 3);
+					if (window.MutationObserver && typeof window.MutationObserver === "function") {
+						assert.closeTo(tf.beacons[1].t_done, 0, 100);
+						done();
+					}
+					else {
+						assert.closeTo(tf.beacons[1].t_done, 3000, 100);
+						done();
+					}
+				}, 2);
 			});
 	});
 
@@ -44,21 +43,15 @@ describe("e2e/07-autoxhr/03-xhrs-overlapping", function() {
 			done,
 			function() {
 				t.ensureBeaconCount(function() {
-					assert.include(tf.beacons[2].u, "?2");
-					done();
-				}, 3);
-			});
-	});
-
-	it("Should have the third beacon contain a time of near 0 seconds", function(done) {
-		this.timeout(10000);
-		t.ifAutoXHR(
-			done,
-			function() {
-				t.ensureBeaconCount(function() {
-					assert.closeTo(tf.beacons[2].t_done, 0, 100);
-					done();
-				}, 3);
+					if (window.MutationObserver && typeof window.MutationObserver === "function") {
+						assert.include(tf.beacons[1].u, "?2");
+						done();
+					}
+					else {
+						assert.include(tf.beacons[1].u, "?1");
+						done();
+					}
+				}, 2);
 			});
 	});
 

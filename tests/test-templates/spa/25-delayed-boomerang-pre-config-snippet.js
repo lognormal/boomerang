@@ -15,7 +15,7 @@ BOOMR_test.templates.SPA["25-delayed-boomerang-pre-config-snippet"] = function()
 			});
 	});
 
-	it("Should have had the first beacon was an spa_hard beacon", function() {
+	it("Should have had the first beacon be a spa_hard beacon", function() {
 		var b = tf.beacons[0];
 		assert.equal(b["http.initiator"], "spa_hard");
 		assert.include(b.u, "25-delayed-boomerang-pre-config-snippet.html");

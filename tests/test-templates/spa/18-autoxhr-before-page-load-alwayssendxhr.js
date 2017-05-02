@@ -19,8 +19,8 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		"nt_res_st": "responseStart"
 	};
 
-	var XHR_BEACONS = [0, 1];
-	var SPA_BEACONS = [2];
+	var XHR_BEACONS = [1, 2];
+	var SPA_BEACONS = [0];
 
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
@@ -74,7 +74,7 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 					var st = BOOMR.window.performance.timing.navigationStart;
 
 					for (var beaconProp in BEACON_VAR_RT_MAP) {
-						var resTime = Math.round(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
+						var resTime = Math.floor(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
 
 						assert.equal(
 							b[beaconProp],

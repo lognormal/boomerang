@@ -54,8 +54,10 @@ describe("e2e/14-errors/17-test", function() {
 		}
 
 		// Chrome, Firefox == a is not defined, Safari = Can't find variable
-		assert.isTrue(err.message.indexOf("a is not defined") !== -1
-			|| err.message.indexOf("Can't find variable: a") !== -1 || err.message.indexOf("'a' is undefined") !== -1);
+		assert.isTrue(
+			err.message.indexOf("a is not defined") !== -1 ||
+			err.message.indexOf("Can't find variable: a") !== -1 ||
+			err.message.indexOf("'a' is undefined") !== -1);
 	});
 
 	it("Should have source = APP", function() {

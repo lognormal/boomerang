@@ -95,4 +95,21 @@ describe("e2e/07-autoxhr/00-xhrs", function() {
 			});
 	});
 
+	it("Should have all beacons set rt.nstart = navigationTiming (if NavigationTiming is supported)", function(done) {
+		t.ifAutoXHR(
+			done,
+			undefined,
+			function() {
+				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+					for (var i = 0; i <= 7; i++) {
+						assert.equal(tf.beacons[i]["rt.nstart"], BOOMR.plugins.RT.navigationStart());
+					}
+				}
+				else {
+					done();
+				}
+			}
+		);
+	});
+
 });

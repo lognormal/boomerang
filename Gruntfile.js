@@ -19,6 +19,26 @@ var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
 var TEST_URL_BASE = grunt.option("test-url") || "http://localhost:4002";
 
+var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
+	preserveComments: false,
+	mangle: {
+		// for errors.js
+		except: [
+			"createStackForSend",
+			"loadFinished",
+			"BOOMR_addError",
+			"BOOMR_plugins_errors_onerror",
+			"BOOMR_plugins_errors_onxhrerror",
+			"BOOMR_plugins_errors_console_error",
+			"BOOMR_plugins_errors_wrap"
+		]
+	},
+	sourceMap: true,
+	compress: {
+		sequences: false
+	}
+};
+
 //
 // Grunt config
 //
@@ -87,6 +107,7 @@ module.exports = function() {
 	var buildRelease = buildPathPrefix + ".js";
 	var buildReleaseMin = buildPathPrefix + ".min.js";
 	var buildTest = testBuildPathPrefix + "-latest-debug.js";
+	var buildTestMin = testBuildPathPrefix + "-latest-debug.min.js";
 
 	//
 	// Build configuration
@@ -297,17 +318,7 @@ module.exports = function() {
 				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> */\n"
 			},
 			default: {
-				options: {
-					preserveComments: false,
-					mangle: {
-						// for errors.js
-						except: ["createStackForSend", "loadFinished"]
-					},
-					sourceMap: true,
-					compress: {
-						sequences: false
-					}
-				},
+				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
 				files: [{
 					expand: true,
 					cwd: "build/",
@@ -316,6 +327,13 @@ module.exports = function() {
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
+				}]
+			},
+			"debug-test-min": {
+				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
+				files: [{
+					src: buildTest,
+					dest: buildTestMin
 				}]
 			},
 			plugins: {
@@ -480,6 +498,7 @@ module.exports = function() {
 					"vendor/mocha/mocha.css",
 					"vendor/mocha/mocha.js",
 					"vendor/assertive-chai/dist/assertive-chai.js",
+					"boomerang-test-framework.js",
 					"unit/*.js",
 					"build/*.js"
 				]
@@ -551,7 +570,7 @@ module.exports = function() {
 			},
 			doc: {
 				options: {
-					port: TEST_DEBUG_PORT - 1,
+					port: (TEST_DEBUG_PORT - 1),
 					script: "tests/server/doc-server.js"
 				}
 			}
@@ -622,7 +641,8 @@ module.exports = function() {
 					"tests/page-templates/**/*",
 					"tests/unit/**/*",
 					"tests/test-templates/**/*.js",
-					"!tests/page-templates/12-react/support/*.jsx"
+					"!tests/page-templates/12-react/support/*.jsx",
+					"!*.#*"
 				],
 				tasks: ["pages-builder"]
 			},
@@ -693,15 +713,15 @@ module.exports = function() {
 		// Build
 		//
 		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
-		"build:test": ["concat:debug", "build:apply-templates"],
+		"build:test": ["concat:debug", "concat:debug-tests", "!build:apply-templates", "uglify:debug-test-min"],
 
 		// Build steps
 		"build:apply-templates": [
 			"string-replace:all",
-			"string-replace:debug-tests",
+			"!string-replace:debug-tests",
 			"string-replace:release",
-			"strip_code:debug",
-			"strip_code:prod"
+			"!strip_code:debug",
+			"!strip_code:prod"
 		],
 
 		// metrics to generate
@@ -724,7 +744,13 @@ module.exports = function() {
 		"test:build:react": ["babel:spa-react-test-templates", "browserify:spa-react-test-templates"],
 
 		// useful for debugging tests, leaves a webbrowser open at http://localhost:3001
-		"test:debug": ["test:build", "build:test", "express:dev", "express:secondary", "watch"],
+		"test:debug": [
+			"test:build",
+			"build:test",
+			"express:dev",
+			"express:secondary",
+			"test:debug:watch"
+		],
 
 		// open your browser to http://localhost:4000/debug.html to debug
 		"test:karma:debug": ["test:build", "build:test", "karma:debug"],
@@ -758,12 +784,19 @@ module.exports = function() {
 		return aliases[task] ? true : false;
 	}
 
+	// tasks that need to be run more than once (denoted by starting with !)
+	var rerunTasks = {};
+
 	function resolveAlias(task) {
-		var tasks = [],
+		var tasks = aliases[task],
 		    resolved = false;
-		tasks = aliases[task];
 
 		function checkDuplicates(insertableTask) {
+			if (rerunTasks[insertableTask]) {
+				// always return true for tasks that were marked as rerun
+				return true;
+			}
+
 			return tasks.indexOf(insertableTask) === -1;
 		}
 
@@ -773,9 +806,18 @@ module.exports = function() {
 			}
 
 			for (var index = 0; index < tasks.length; index++) {
+				// if the task starts with !, it should be run more than once
+				if (tasks[index].startsWith("!")) {
+					// trim back to the real name
+					tasks[index] = tasks[index].substr(1);
+
+					// keep track of this task
+					rerunTasks[tasks[index]] = true;
+				}
+
 				if (isAlias(tasks[index])) {
 					var aliasTask = tasks[index];
-					var beforeTask = tasks.slice(0, index );
+					var beforeTask = tasks.slice(0, index);
 					var afterTask = tasks.slice(index + 1, tasks.length);
 					var insertTask = aliases[aliasTask].filter(checkDuplicates);
 					tasks = [].concat(beforeTask, insertTask, afterTask);
@@ -790,5 +832,11 @@ module.exports = function() {
 		var resolved = resolveAlias(alias);
 		grunt.log.debug("Resolving task alias: " + alias + " to " + JSON.stringify(resolved));
 		grunt.registerTask(alias, resolved);
+	});
+
+	// Don't re-generate Docs during test:debug builds running
+	grunt.registerTask("test:debug:watch", function() {
+		delete grunt.config.data.watch.doc;
+		grunt.task.run("watch");
 	});
 };

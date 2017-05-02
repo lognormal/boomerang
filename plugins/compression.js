@@ -75,7 +75,7 @@
 				return "~null";
 			}
 
-			if (Array.isArray(v)) {
+			if (BOOMR.utils.isArray(v)) {
 				// iterate instead of Array.map for compat
 				for (var i = 0; i < v.length; i++) {
 					if (i in v) {
@@ -141,10 +141,10 @@
 		 */
 		function eat(expected) {
 			if (s.charAt(i) !== expected) {
-				throw new Error("bad JSURL syntax: expected " + expected + ", got " + (s && s.charAt(i))
-					+ " from:" + s
-					+ " length:" + s.length.toString()
-					+ " char at:" + s.charAt(i));
+				throw new Error("bad JSURL syntax: expected " + expected + ", got " + (s && s.charAt(i)) +
+					" from:" + s +
+					" length:" + s.length.toString() +
+					" char at:" + s.charAt(i));
 			}
 
 			i++;
