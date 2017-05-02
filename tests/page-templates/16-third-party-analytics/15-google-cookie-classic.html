@@ -1,0 +1,19 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="15-google-cookie-classic.js" type="text/javascript"></script>
+<script>
+
+BOOMR_test.clearCookies();
+
+// Set __utma cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["__utma=NNNNNNNNN.XXXXXXXXXX.YYYYYYYYYY.NNNNNNNNNN.NNNNNNNNNN.N", "path=/", "domain=" + location.hostname].join("; ");
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

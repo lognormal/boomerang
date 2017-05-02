@@ -26,12 +26,10 @@ function run(path, file) {
 			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
 				assert.equal(complete, true, "BOOMR_test.isComplete()");
 				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
-					// log testFailures only if they exist
 					if (testFailures.length > 0) {
-						console.log("BOOMR_test.getTestFailures():\n" + testFailures);
+						throw new Error(testFailures);
 					}
 
-					assert.equal(testFailures.length, 0);
 					done();
 				});
 			});

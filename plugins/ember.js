@@ -88,6 +88,9 @@
 			if (transition && transition.intent && transition.intent.url) {
 				log("[beforeModel] LastLocation: " + transition.intent.url);
 				BOOMR.plugins.SPA.last_location(transition.intent.url);
+				transition.promise.then(function() {
+					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
+				});
 			}
 
 			if (!routeHooked) {
@@ -115,6 +118,10 @@
 			if (transition && transition.intent && transition.intent.url) {
 				log("[willTransition] LastLocation: " + transition.intent.url);
 				BOOMR.plugins.SPA.last_location(transition.intent.url);
+
+				transition.promise.then(function() {
+					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
+				});
 			}
 
 			if (!routeHooked) {

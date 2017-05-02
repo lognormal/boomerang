@@ -106,7 +106,7 @@
 
 		var messages = "";
 		for (var i = 0; i < testFailures.length; i++) {
-			messages += "\n";
+			messages += i > 0 ? "\n" : "";
 			messages += testFailures[i].titles + ": " + testFailures[i].name + " | " + testFailures[i].message;
 		}
 
@@ -222,18 +222,22 @@
 			"h.cr": "abc"
 		});
 
-		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "gloabl_test_results", "BOOMR_configt"]);
-		window.mocha.checkLeaks();
-
-		// set globals
-		assert = window.assert = window.chai.assert;
+		t.configureTestEnvironment();
 
 		if (!config.testAfterOnBeacon) {
 			BOOMR.setImmediate(t.runTests);
 		}
 
 		initialized = true;
+	};
+
+	t.configureTestEnvironment = function() {
+		// setup Mocha
+		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt"]);
+		window.mocha.checkLeaks();
+
+		// set globals
+		assert = window.assert = window.chai.assert;
 	};
 
 	t.findResourceTimingBeacon = function() {
@@ -292,6 +296,10 @@
 		assert.isTrue(res.name.indexOf("h.t") !== -1);
 
 		done();
+	};
+
+	t.isMutationObserverSupported = function() {
+		return (window.MutationObserver && typeof window.MutationObserver === "function");
 	};
 
 	t.validateBeaconWasXhr = function(done) {
@@ -669,6 +677,34 @@
 		return list.filter(function(content) {
 			return content.indexOf(string) > -1;
 		});
+	};
+
+	/**
+	 * Creates a copy of window.performance that can be modified by the caller.
+	 */
+	t.getPerformanceCopy = function() {
+		if (!("performance" in window)) {
+			return;
+		}
+
+		var copy = {};
+
+		// copy over all values
+		var objs = ["timing", "navigation"];
+		for (var i = 0; i < objs.length; i++) {
+			var objName = objs[i];
+			var subObj = window.performance[objName];
+
+			copy[objName] = {};
+
+			if (subObj) {
+				for (var subObjAttr in subObj) {
+					copy[objName][subObjAttr] = subObj[subObjAttr];
+				}
+			}
+		}
+
+		return copy;
 	};
 
 	window.BOOMR_test = t;

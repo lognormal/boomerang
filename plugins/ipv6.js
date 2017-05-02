@@ -64,7 +64,7 @@ Beacon parameters:
 
 		load_img: function() {
 			var img,
-			    rnd = "?t=" + (new Date().getTime()) + Math.random(),
+			    rnd = "?t=" + BOOMR.utils.generateId(10),
 			    timer = 0, error = null,
 			    that = this,
 			    which = Array.prototype.shift.call(arguments),

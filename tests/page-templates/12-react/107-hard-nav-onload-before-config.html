@@ -1,0 +1,14 @@
+<%= header %>
+<script>
+window.BOOMR_LOGN_always = true;
+window.BOOMR_LOGN_key = "12-react-107-hard-nav-onload-before-config";
+</script>
+<%= boomerangScript %>
+<!-- Fires onload before config came in -->
+<script src="107-hard-nav-onload-before-config.js" type="text/javascript"></script>
+<script>
+setTimeout(function() {
+	BOOMR_test.runTests();
+}, 3000);
+</script>
+<%= footer %>

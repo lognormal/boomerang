@@ -3,7 +3,8 @@
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
 	    alwaysSendXhr = false,
-	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ];
+	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ],
+	    ie10or11;
 
 	/**
 	 * @constant
@@ -14,6 +15,14 @@
 	 * @default
 	 */
 	var SPA_TIMEOUT = 1000;
+
+	/**
+	 * How long to wait if we're not ready to send a beacon to try again.
+	 * @constant
+	 * @type {number}
+	 * @default
+	 */
+	var READY_TO_SEND_WAIT = 500;
 
 	/**
 	 * @constant
@@ -56,6 +65,12 @@
 		// Nothing to instrument
 		return;
 	}
+
+	// User-agent sniff IE 10 and IE 11 to apply a workaround for an XHR bug (see below when
+	// this variable is used).  We can only detect this bug by UA sniffing.  IE 11 requires a
+	// different way of detection than IE 11.
+	ie10or11 = (window.navigator && navigator.appVersion && navigator.appVersion.indexOf("MSIE 10") !== -1) ||
+	           (window.navigator && navigator.userAgent && navigator.userAgent.match(/Trident.*rv[ :]*11\./));
 
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -149,9 +164,41 @@
 	 * Disable internal MutationObserver instance. Use this when uninstrumenting the site we're on.
 	 */
 	MutationHandler.stop = function() {
-		if (MutationHandler.observer && MutationHandler.observer.observer) {
+		MutationHandler.pause();
+		MutationHandler.observer = null;
+	};
+
+	/**
+	 * @method
+	 * @memberof MutationHandler
+	 * @static
+	 *
+	 * @desc
+	 * Pauses the MutationObserver.  Call [resume]{@link handler#resume} to start it back up.
+	 */
+	MutationHandler.pause = function() {
+		if (MutationHandler.observer &&
+		    MutationHandler.observer.observer &&
+		    !MutationHandler.isPaused) {
+			MutationHandler.isPaused = true;
 			MutationHandler.observer.observer.disconnect();
-			MutationHandler.observer = null;
+		}
+	};
+
+	/**
+	 * @method
+	 * @memberof MutationHandler
+	 * @static
+	 *
+	 * @desc
+	 * Resumes the MutationObserver after a [pause]{@link handler#pause}.
+	 */
+	MutationHandler.resume = function() {
+		if (MutationHandler.observer &&
+		    MutationHandler.observer.observer &&
+		    MutationHandler.isPaused) {
+			MutationHandler.isPaused = false;
+			MutationHandler.observer.observer.observe(d, MutationHandler.observer.config);
 		}
 	};
 
@@ -166,22 +213,33 @@
 	 * will be called if something happens
 	 */
 	MutationHandler.start = function() {
+		if (MutationHandler.observer) {
+			// don't start twice
+			return;
+		}
+
+		var config = {
+			childList: true,
+			attributes: true,
+			subtree: true,
+			attributeFilter: ["src", "href"]
+		};
+
 		// Add a perpetual observer
 		MutationHandler.observer = BOOMR.utils.addObserver(
 			d,
-			{
-				childList: true,
-				attributes: true,
-				subtree: true,
-				attributeFilter: ["src", "href"]
-			},
+			config,
 			null, // no timeout
 			handler.mutation_cb, // will always return true
 			null, // no callback data
 			handler
 		);
 
-		BOOMR.subscribe("page_unload", MutationHandler.stop, null, MutationHandler);
+		if (MutationHandler.observer) {
+			MutationHandler.observer.config = config;
+
+			BOOMR.subscribe("page_unload", MutationHandler.stop, null, MutationHandler);
+		}
 	};
 
 	/**
@@ -306,25 +364,25 @@
 			return;
 		}
 
-		ev.complete = true;
-
-		this.watch--;
-
 		this.clearTimeout();
 		if (BOOMR.readyToSend()) {
+			ev.complete = true;
+
+			this.watch--;
+
 			ev.resource.resources = ev.resources;
 
 			// if this was an SPA nav that triggered no additional resources, substract the
 			// SPA_TIMEOUT from now to determine the end time
-			if (ev.type === "spa" && ev.resources.length === 0) {
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS) && ev.resources.length === 0) {
 				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
 			}
 
 			this.sendResource(ev.resource, i);
 		}
 		else {
-			// No crumb, so try again after 5 seconds
-			setTimeout(function() { self.sendEvent(i); }, 5000);
+			// No crumb, so try again after 500ms seconds
+			setTimeout(function() { self.sendEvent(i); }, READY_TO_SEND_WAIT);
 		}
 	};
 
@@ -353,6 +411,14 @@
 				resource.timing.loadEventEnd = BOOMR.now();
 			}
 
+			// send any queued beacons first
+			BOOMR.real_sendBeacon();
+
+			// If the resource has an onComplete event, trigger it.
+			if (resource.onComplete) {
+				resource.onComplete(resource);
+			}
+
 			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
 			// was for this resource.
 			if (BOOMR.plugins.ResourceTiming &&
@@ -360,15 +426,13 @@
 			    resource.timing &&
 			    resource.timing.requestStart) {
 				var r = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming(
-					resource.timing.requestStart,
-					resource.timing.loadEventEnd);
+						resource.timing.requestStart,
+						resource.timing.loadEventEnd
+					);
 
-				BOOMR.addVar("restiming", JSON.stringify(r));
-			}
-
-			// If the resource has an onComplete event, trigger it.
-			if (resource.onComplete) {
-				resource.onComplete();
+				BOOMR.addVar({
+					restiming: JSON.stringify(r.restiming)
+				});
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings
@@ -426,7 +490,10 @@
 		if (resource.initiator === "spa_hard") {
 			// ensure RT picks up the correct timestamps
 			resource.timing.responseEnd = p.timing.responseStart;
-			resource.timing.fetchStart = p.timing.fetchStart;
+
+			// use navigationStart instead of fetchStart to ensure Back-End time
+			// includes any redirects
+			resource.timing.fetchStart = p.timing.navigationStart;
 		}
 		else {
 			//
@@ -464,14 +531,28 @@
 				return;
 			}
 
+			// we currently can't reliably tell when a SCRIPT has loaded
+			// set an upper bound on responseStart/responseEnd for the resources to the SPA's loadEventEnd
+			var maxResponseEnd = resource.timing.loadEventEnd - p.timing.navigationStart;
+			for (var i = 0; i < resources.length; i++) {
+				if (resources[i].responseStart > maxResponseEnd) {
+					resources[i].responseStart = maxResponseEnd;
+					resources[i].responseEnd = maxResponseEnd;
+				}
+				else if (resources[i].responseEnd > maxResponseEnd) {
+					resources[i].responseEnd = maxResponseEnd;
+				}
+			}
+
 			// calculate the Back-End time based on any time those resources were active
 			var backEndTime = Math.round(BOOMR.plugins.ResourceTiming.calculateResourceTimingUnion(resources));
 
 			// front-end time is anything left over
 			var frontEndTime = totalTime - backEndTime;
 
-			if (backEndTime < 0 || totalTime < 0) {
+			if (backEndTime < 0 || totalTime < 0 || frontEndTime < 0) {
 				// some sort of error, don't put on the beacon
+				BOOMR.addError("Incorrect SPA time calculation");
 				return;
 			}
 
@@ -519,21 +600,18 @@
 	 * @param {number} index - Index of the event in pending_events array
 	 */
 	MutationHandler.prototype.timedout = function(index) {
+		var ev;
 		this.clearTimeout();
 
-		var ev = this.pending_events[index];
+		ev = this.pending_events[index];
 
 		if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS.concat("xhr"))) {
 			// XHRs or SPA page loads
-			if (ev.type === "xhr") {
-				// always send XHRs on timeout
-				this.sendEvent(index);
-			}
-			else if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)
-				 && ev.nodes_to_wait === 0) {
+			if (ev.nodes_to_wait === 0) {
 				// send page loads (SPAs) if there are no outstanding downloads
 				this.sendEvent(index);
 			}
+
 			// if there are outstanding downloads left, they will trigger a sendEvent for the SPA once complete
 		}
 		else {
@@ -646,7 +724,8 @@
 		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false, resourceNum;
 
 		// only images, scripts, iframes and links if stylesheet
-		if (node.nodeName.match(/^(IMG|SCRIPT|IFRAME)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+		// nodeName for SVG:IMAGE returns `image` in lowercase
+		if (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 			// if the attribute change affected the src/currentSrc attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
@@ -654,7 +733,8 @@
 				exisitingNodeSrcUrlChanged = true;
 			}
 
-			url = node.src || node.href;
+			// we put xlink:href before href because node.href works for <SVG:IMAGE> elements, but does not return a string
+			url = node.src || node.getAttribute("xlink:href") || node.href;
 
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
@@ -718,13 +798,17 @@
 				 */
 			}
 
-			if (!current_event.resource.url && (node.nodeName === "SCRIPT" || node.nodeName === "IMG")) {
+			// if we don't have a URL yet (i.e. a click started this), use
+			// this element's URL
+			if (!current_event.resource.url) {
 				a.href = url;
 
-				if (shouldExcludeXhr(a)) {
+				if (impl.excludeFilter(a)) {
+					BOOMR.debug("Exclude for " + a.href + " matched. Excluding", "AutoXHR");
 					// excluded resource, so abort
 					return false;
 				}
+
 				current_event.resource.url = a.href;
 			}
 
@@ -744,12 +828,14 @@
 			interesting = true;
 		}
 		else if (node.nodeType === Node.ELEMENT_NODE) {
-			els = node.getElementsByTagName("IMG");
-			if (els && els.length) {
-				for (i = 0, l = els.length; i < l; i++) {
-					interesting |= this.wait_for_node(els[i], index);
+			["IMAGE", "IMG"].forEach(function(tagName) {
+				els = node.getElementsByTagName(tagName);
+				if (els && els.length) {
+					for (i = 0, l = els.length; i < l; i++) {
+						interesting |= this.wait_for_node(els[i], index);
+					}
 				}
-			}
+			}, this);
 		}
 
 		return interesting;
@@ -931,7 +1017,8 @@
 			return;
 		}
 
-		BOOMR.orig_XMLHttpRequest = BOOMR.window.XMLHttpRequest;
+		// if there's a orig_XMLHttpRequest on the window, use that first (if another lib is overwriting XHR)
+		BOOMR.orig_XMLHttpRequest = BOOMR.window.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest;
 
 		MutationHandler.start();
 
@@ -957,7 +1044,8 @@
 		 *                          to synchronous. If true or undefined will be automatically set to asynchronous
 		 */
 		BOOMR.proxy_XMLHttpRequest = function() {
-			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send;
+			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send,
+			    opened = false;
 
 			req = new BOOMR.orig_XMLHttpRequest();
 
@@ -967,7 +1055,8 @@
 			req.open = function(method, url, async) {
 				a.href = url;
 
-				if (shouldExcludeXhr(a)) {
+				if (impl.excludeFilter(a)) {
+					BOOMR.debug("Exclude found for resource: " + a.href + " Skipping instrumentation!", "AutoXHR");
 					// skip instrumentation and call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -977,6 +1066,8 @@
 					async = true;
 				}
 
+				BOOMR.fireEvent("xhr_init", "xhr");
+
 				/**
 				 * @memberof ProxyXHRImplementation
 				 * @desc
@@ -985,7 +1076,7 @@
 				 * Otherwise add this call to the lise of Events that occured.
 				 */
 				function loadFinished() {
-					var entry, navSt, useRT = false;
+					var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
 
 					// if we already finished via readystatechange or an error event,
 					// don't do work again
@@ -998,29 +1089,58 @@
 						BOOMR.fireEvent("onxhrerror", resource);
 					}
 
-					resource.timing.loadEventEnd = BOOMR.now();
+					// set the loadEventEnd timestamp to when this callback fired
+					resource.timing.loadEventEnd = now;
 
-					// if ResourceTiming is available, fix-up the XHR time with the timestamps from that data, as it will be more accurate.
+					// if ResourceTiming is available, fix-up the .timings with ResourceTiming data, as it will be more accurate
 					entry = BOOMR.getResourceTiming(resource.url, function(x, y) { return x.responseEnd - y.responseEnd; });
 					if (entry) {
 						navSt = BOOMR.getPerformance().timing.navigationStart;
 
-						// re-set the timestamp to make sure it's greater than values in resource timing entry
+						// re-set the loadEventEnd timestamp to make sure it's greater than values in ResourceTiming entry
 						resource.timing.loadEventEnd = BOOMR.now();
-						if (entry.responseEnd !== 0) {
-							// sanity check to see if the entry should be used for this resource
-							if (Math.floor(navSt + entry.responseEnd) <= resource.timing.loadEventEnd) {
-								resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
-								useRT = true;
+
+						// convert the start time to Epoch
+						entryStartTime = Math.floor(navSt + entry.startTime);
+
+						// validate the start time to make sure it's not from another entry
+						if (resource.timing.requestStart - entryStartTime >= 2) {
+							// if the ResourceTiming startTime is more than 2ms earlier
+							// than when we thought the XHR started, this is probably
+							// an entry for a different fetch
+							useRT = false;
+						}
+						else {
+							// set responseEnd as long as it looks sane
+							if (entry.responseEnd !== 0) {
+								// convert to Epoch
+								entryResponseEnd = Math.floor(navSt + entry.responseEnd);
+
+								// sanity check to see if the entry should be used for this resource
+								if (entryResponseEnd <= resource.timing.loadEventEnd) {
+									resource.timing.responseEnd = entryResponseEnd;
+
+									// use this entry's other timestamps
+									useRT = true;
+
+									// save the entry for later use
+									resource.restiming = entry;
+								}
 							}
-						}
 
-						if (useRT && entry.responseStart !== 0) {
-							resource.timing.responseStart = Math.round(navSt + entry.responseStart);
-						}
+							// set more timestamps if we think the entry is valid
+							if (useRT) {
+								// use the startTime from ResourceTiming instead
+								resource.timing.requestStart = entryStartTime;
 
-						if (useRT && entry.startTime !== 0) {
-							resource.timing.requestStart = Math.round(navSt + entry.startTime);
+								// also track it as the fetchStart time
+								resource.timing.fetchStart = entryStartTime;
+
+								// use responseStart if it's valid
+								if (entry.responseStart !== 0) {
+									resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
+								}
+							}
 						}
 					}
 
@@ -1056,6 +1176,19 @@
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 
+								// For IE 10 and 11, we need to turn off the MutationObserver before responseXML
+								// is first referenced, otherwise responseXML might be malformed due to a browser
+								// bug (where extra newlines get added in nodes with UTF-8 content)
+								if (impl.ie1011fix && ie10or11 && req.readyState === 4) {
+									MutationHandler.pause();
+
+									// this reference to responseXML with MO off is enough to ensure the browser
+									// bug is not triggered
+									var nop = req.responseXML;
+
+									MutationHandler.resume();
+								}
+
 								// Listen here as well, as DOM changes might happen on other listeners
 								// of readyState = 4 (complete), and we want to make sure we've
 								// started the addEvent() if so.  Only listen if the status is non-zero,
@@ -1067,12 +1200,18 @@
 										resource.status = req.status;
 									}
 
+									resource.response = {
+										text: (req.responseType === "" || req.responseType === "text") ? req.responseText : null,
+										xml: (req.responseType === "" || req.responseType === "document") ? req.responseXML : null,
+										raw: req.response,
+										json: req.responseJSON
+									};
+
 									loadFinished();
 								}
 							}
 							else {// load, timeout, error, abort
 								resource.status = (stat === undefined ? req.status : stat);
-
 								loadFinished();
 							}
 						},
@@ -1080,21 +1219,26 @@
 					);
 				}
 
-				if (singlePageApp && handler.watch && !alwaysSendXhr) {
-					// If this is a SPA and we're already watching for resources due
-					// to a route change or other interesting event, add this to the
-					// current event.
-					handler.add_event_resource(resource);
-				}
+				// .open() can be called multiple times (before .send()) - just make
+				// sure that we don't track this as a new request, or add additional
+				// event listeners
+				if (!opened) {
+					if (singlePageApp && handler.watch && !alwaysSendXhr) {
+						// If this is a SPA and we're already watching for resources due
+						// to a route change or other interesting event, add this to the
+						// current event.
+						handler.add_event_resource(resource);
+					}
 
-				if (async) {
-					addListener("readystatechange");
-				}
+					if (async) {
+						addListener("readystatechange");
+					}
 
-				addListener("load");
-				addListener("timeout", XHR_STATUS_TIMEOUT);
-				addListener("error",   XHR_STATUS_ERROR);
-				addListener("abort",   XHR_STATUS_ABORT);
+					addListener("load");
+					addListener("timeout", XHR_STATUS_TIMEOUT);
+					addListener("error",   XHR_STATUS_ERROR);
+					addListener("abort",   XHR_STATUS_ABORT);
+				}
 
 				resource.url = a.href;
 				resource.method = method;
@@ -1105,6 +1249,9 @@
 				if (!async) {
 					resource.synchronous = true;
 				}
+
+				// note we've called .open
+				opened = true;
 
 				// call the original open method
 				try {
@@ -1124,7 +1271,9 @@
 			 * Mark requestStart timestamp and start the request unless the resource has already been marked as having an error code or a result to itself.
 			 * @returns {Object} The data normal XHR.send() would return
 			 */
-			req.send = function() {
+			req.send = function(data) {
+				req.resource.requestPayload = data;
+				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
 
 				// call the original send method unless there was an error
@@ -1140,6 +1289,11 @@
 			return req;
 		};
 
+		BOOMR.proxy_XMLHttpRequest.UNSENT = 0;
+		BOOMR.proxy_XMLHttpRequest.OPENED = 1;
+		BOOMR.proxy_XMLHttpRequest.HEADERS_RECEIVED = 2;
+		BOOMR.proxy_XMLHttpRequest.LOADING = 3;
+		BOOMR.proxy_XMLHttpRequest.DONE = 4;
 		// set our proxy's prototype to the original XHR prototype, in case anyone
 		// is using it to save state
 		BOOMR.proxy_XMLHttpRequest.prototype = BOOMR.orig_XMLHttpRequest.prototype;
@@ -1159,15 +1313,61 @@
 	}
 
 	/**
-	  * Sends an XHR resource
+	 * Sends an XHR resource
 	 */
 	function sendResource(resource) {
 		resource.initiator = "xhr";
 		BOOMR.responseEnd(resource);
 	}
 
+	/**
+	 * Container for AutoXHR plugin Closure specific state configuration data
+	 * @property {string[]} spaBackendResources - Default resources to count as Back-End during a SPA nav
+	 * @property {boolean} ie1011fix - If true, the MutationObserver  will be paused on IE10/11 to avoid delayed processing, see {@link ProxyXHRImplementation#addListener} for more info
+	 * @property {FilterObject[]} filters - Array of {@link FilterObject} that is used to apply filters on XHR Requests
+	 * @property {boolean} initialized - Set to true after the first run of {@link BOOMR.plugins.AutoXHR#init}
+	 */
 	impl = {
-		spaBackEndResources: SPA_RESOURCES_BACK_END
+		spaBackEndResources: SPA_RESOURCES_BACK_END,
+		ie1011fix: true,
+		excludeFilters: [],
+		initialized: false,
+		/**
+		 * Filter function iterating over all available {@link FilterObject}s if returns true will not instrument an XHR
+		 * @param {HTMLAnchorElement} anchor - HTMLAnchorElement node created with the XHRs URL as `href` to evaluate by {@link FilterObject}s and passed to {@link FilterObject#cb} callbacks.
+		 *                                     NOTE: The anchor needs to be created from the host document (ie. BOOMR.window.document) to enable us to resolve relative
+		 *                                     URLs to a full valid path and BASE HREF mechanics can take effect.
+		 * @return {boolean} true if the XHR should not be instrumented false if it should be instrumented
+		 */
+		excludeFilter: function(anchor) {
+			var idx, ret, ctx;
+
+			// If anchor is null we just throw it out period
+			if (!anchor || !anchor.href) {
+				return false;
+			}
+
+			for (idx = 0; idx < impl.excludeFilters.length; idx++) {
+				if (typeof impl.excludeFilters[idx].cb === "function") {
+					ctx = impl.excludeFilters[idx].ctx;
+					if (impl.excludeFilters[idx].name) {
+						log("Running filter: " + impl.excludeFilters[idx].name + " on URL: " + anchor.href);
+					}
+
+					try {
+						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
+						if (ret) {
+							BOOMR.debug("Found matching filter at: " + impl.excludeFilters[idx].name + " for URL: " + anchor.href, "AutoXHR");
+							return true;
+						}
+					}
+					catch (exception) {
+						BOOMR.addError(exception, "BOOMR.plugins.AutoXHR.impl.excludeFilter()");
+					}
+				}
+			}
+			return false;
+		}
 	};
 
 	/**
@@ -1248,7 +1448,7 @@
 	BOOMR.plugins.AutoXHR = {
 		is_complete: function() { return true; },
 		init: function(config) {
-			var i;
+			var i, idx;
 
 			// if we don't have window, abort
 			if (!BOOMR.window || !BOOMR.window.document) {
@@ -1259,10 +1459,24 @@
 			a = BOOMR.window.document.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "ie1011fix"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
+
+			// Ensure we're only once adding the shouldExcludeXhr
+			if (!impl.initialized) {
+				this.addExcludeFilter(shouldExcludeXhr, null, "shouldExcludeXhr");
+
+				impl.initialized = true;
+			}
+
+			// Add filters from config
+			if (config && config.AutoXHR && config.AutoXHR.excludeFilters && config.AutoXHR.excludeFilters.length > 0) {
+				for (idx = 0; idx < config.AutoXHR.excludeFilters.length; idx++) {
+					impl.excludeFilters.push(config.AutoXHR.excludeFilters[idx]);
+				}
+			}
 
 			autoXhrEnabled = config.instrument_xhr;
 
@@ -1283,34 +1497,22 @@
 			// listening for MutationObserver events after an XHR is complete.
 			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
 			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
-				var resources = BOOMR.xhr.stop(function(res) {
-					// any resource callbacks should happen in an setImmediate in case the rest
-					// of the plugins haven't yet been initialized
-					BOOMR.setImmediate(function sendAgain() {
-						// wait until we have a crumb to send
-						if (!BOOMR.readyToSend()) {
-							setTimeout(sendAgain, 1000);
-							return;
-						}
-
-						sendResource(res);
-					});
-				});
-
-				if (resources && resources.length) {
-					var sendNow = function() {
-						// wait until we have a crumb to send
-						if (!BOOMR.readyToSend()) {
-							setTimeout(sendNow, 1000);
-							return;
-						}
-
+				function sendXhrs(resources) {
+					if (resources.length) {
 						for (i = 0; i < resources.length; i++) {
 							sendResource(resources[i]);
 						}
-					};
+					}
+					else {
+						// single resoruce
+						sendResource(resources);
+					}
+				};
 
-					BOOMR.setImmediate(sendNow);
+				var resources = BOOMR.xhr.stop(sendXhrs);
+
+				if (resources && resources.length) {
+					BOOMR.setImmediate(sendXhrs, resources);
 				}
 			}
 
@@ -1321,7 +1523,9 @@
 					autoXhrEnabled = false;
 				}
 
-				BOOMR.instrumentXHR();
+				if (autoXhrEnabled) {
+					BOOMR.instrumentXHR();
+				}
 			}
 			else if (autoXhrEnabled) {
 				BOOMR.instrumentXHR();
@@ -1337,7 +1541,32 @@
 		},
 		getPathname: getPathName,
 		enableAutoXhr: function() {
+			if (!autoXhrEnabled) {
+				BOOMR.instrumentXHR();
+			}
+
 			autoXhrEnabled = true;
+		},
+		/**
+		 * Add a filter function to the list of functions to run to validate if an XHR should be instrumented
+		 * For a description of the params see properties of the {@link AutoXHR#FilterObject} type definition
+		 *
+		 * @example
+		 * BOOMR.plugins.AutoXHR.addExcludeFilter(function(anchor) {
+		 *   var m = anchor.href.match(/some-page\.html/g);
+		 *
+		 *   // If matching flag to not instrument
+		 *   if (m && m.length > 0) {
+		 *     return true;
+		 *   }
+		 *   return false;
+		 * }, null, "exampleFilter");
+		 * @param {function} cb - Callback to run to validate filtering of an XHR Request
+		 * @param {Object} ctx - Context to run {@param cb} in
+		 * @param {string} [name] - Optional name for the filter, called out when running exclude filters for debugging purposes
+		 */
+		addExcludeFilter: function(cb, ctx, name) {
+			impl.excludeFilters.push({cb: cb, ctx: ctx, name: name});
 		}
 	};
 
@@ -1385,5 +1614,13 @@
 	 *
 	 * @property {TimeStamp} loadEventEnd - Timestamp when the resource arrived in the browser
 	 * @property {TimeStamp} requestStart - High resolution timestamp when the resource was started to be loaded
+	 */
+
+	/**
+	 * @typedef FilterObject
+	 * @property {function} cb - Callback called with context accepts one param which is: AnchorElement referring
+	 *                           to the fully qualified URL of the XHR Request BOOMR is determining to instrument
+	 * @property {Object} ctx - Execution context to use when running `cb`
+	 * @property {string} [name] - Name of the filter used for logging and debugging purposes (This is an entirely optional property)
 	 */
 })();

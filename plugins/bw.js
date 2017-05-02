@@ -129,7 +129,7 @@
 
 			amean = Math.round(sum / n);
 
-			std_dev = Math.sqrt( sumsq / n - sum * sum / (n * n));
+			std_dev = Math.sqrt(sumsq / n - sum * sum / (n * n));
 
 			// See http://en.wikipedia.org/wiki/1.96 and http://en.wikipedia.org/wiki/Standard_error_%28statistics%29
 			std_err = (1.96 * std_dev / Math.sqrt(n)).toFixed(2);
@@ -252,8 +252,8 @@
 				n = bandwidths_corrected.length - 1;
 				median_corrected = Math.round(
 							(
-								bandwidths_corrected[Math.floor(n / 2)]
-								+ bandwidths_corrected[Math.ceil(n / 2)]
+								bandwidths_corrected[Math.floor(n / 2)] +
+								bandwidths_corrected[Math.ceil(n / 2)]
 							) / 2
 						);
 			}
@@ -275,8 +275,8 @@
 		},
 
 		load_img: function(i, run, callback) {
-			var url = this.base_url + images[i].name
-				+ "?t=" + BOOMR.now() + Math.random(),	// Math.random() is slow, but we get it before we start the timer
+			var url = this.base_url + images[i].name +
+			    "?t=" + BOOMR.utils.generateId(10),
 			    timer = 0, tstart = 0,
 			    img = new Image(),
 			    that = this;
@@ -519,7 +519,7 @@
 			a = BOOMR.window.document.createElement("a");
 			a.href = impl.base_url;
 
-			if ( !impl.test_https && a.protocol === "https:") {
+			if (!impl.test_https && a.protocol === "https:") {
 				// we don't run the test for https because SSL stuff will mess up b/w
 				// calculations we could run the test itself over HTTP, but then IE
 				// will complain about insecure resources, so the best is to just bail

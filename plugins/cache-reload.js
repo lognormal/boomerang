@@ -3,8 +3,6 @@
  * Plugin that forces a cache reload of boomerang (assuming you have server side support)
  * Copyright (c) 2013, SOASTA, Inc. All rights reserved.
  */
-
-
 (function() {
 
 	BOOMR = BOOMR || {};

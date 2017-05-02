@@ -12,5 +12,14 @@ BOOMR_test.init({
 		enabled: true
 	}
 });
+
+// send 2 xhrs with the same img so that we have multiple entries for the same resource name
+var xhr1 = new XMLHttpRequest();
+xhr1.open("GET", "/assets/img.jpg");
+xhr1.send(null);
+
+var xhr2 = new XMLHttpRequest();
+xhr2.open("GET", "/assets/img.jpg");
+xhr2.send(null);
 </script>
 <%= footer %>

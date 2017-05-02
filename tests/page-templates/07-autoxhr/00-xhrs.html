@@ -14,7 +14,7 @@ BOOMR_test.init({
 			}
 
 			var xhrNum = 0;
-			BOOMR.subscribe("onbeacon", function() {
+			function sendBeacon() {
 				setTimeout(function() {
 					var xhr;
 					if (xhrNum === 0) {
@@ -56,7 +56,13 @@ BOOMR_test.init({
 					}
 					xhrNum++;
 				}, 100);
-			});
+			}
+
+			// send a new XHR on each beacon
+			BOOMR.subscribe("onbeacon", sendBeacon);
+
+			// start the first beacon
+			sendBeacon();
 		}
 });
 </script>

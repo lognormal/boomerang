@@ -44,8 +44,6 @@ describe("e2e/00-basic/00-onload", function() {
 	});
 
 	it("Should have set RT properties", function() {
-		assert.isString(tf.lastBeacon().r, "r");
-
 		assert.isString(tf.lastBeacon().u, "u");
 
 		assert.isNumber(tf.lastBeacon()["rt.bstart"], "rt.bstart");
@@ -80,5 +78,9 @@ describe("e2e/00-basic/00-onload", function() {
 
 	it("Should have set vis.* properties", function() {
 		assert.isString(tf.lastBeacon()["vis.st"], "vis.st");
+	});
+
+	it("Should have set Page ID (pid)", function() {
+		assert.isString(tf.lastBeacon().pid, "pid");
 	});
 });

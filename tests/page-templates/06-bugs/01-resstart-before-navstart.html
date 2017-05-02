@@ -1,0 +1,28 @@
+<%= header %>
+<%= boomerangScript %>
+<!--
+responseStart happening before navigationStart:
+https://bugs.chromium.org/p/chromium/issues/detail?id=127644
+-->
+<script src="01-resstart-before-navstart.js" type="text/javascript"></script>
+<script>
+// Patch getPerformance to return our buggy data instead
+BOOMR.getPerformance = function() {
+	var data = BOOMR_test.getPerformanceCopy();
+
+	if (!data) {
+		return data;
+	}
+
+	// change requestStart and responseStart to be before navigationStart
+	data.timing.requestStart = data.timing.navigationStart - 1000;
+	data.timing.responseStart = data.timing.navigationStart - 1000;
+
+	return data;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

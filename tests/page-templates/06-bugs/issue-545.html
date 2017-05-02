@@ -1,0 +1,16 @@
+<%= header %>
+<script>
+// Setting window.performance.now to a bogus function
+window.performance.now = function() {
+	return 0;
+};
+</script>
+<%= boomerangScript %>
+<script src="issue-545.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	autorun: true
+});
+</script>

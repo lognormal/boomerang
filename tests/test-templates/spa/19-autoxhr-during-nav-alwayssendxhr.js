@@ -134,9 +134,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 						assert.equal(
 							b[beaconProp],
 							resTime,
-							"Beacon #" + k + ": " + beaconProp + "=" + b[beaconProp]
-								+ " vs " + BEACON_VAR_RT_MAP[beaconProp] + "=" + resTime
-								+ " (" + b.u + ")");
+							"Beacon #" + k + ": " + beaconProp + "=" + b[beaconProp] +
+								" vs " + BEACON_VAR_RT_MAP[beaconProp] + "=" + resTime +
+								" (" + b.u + ")");
 					}
 				}
 			}

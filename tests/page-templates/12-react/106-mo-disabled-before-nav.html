@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="106-mo-disabled-before-nav.js"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	instrument_xhr: true,
+	History: {
+		enabled: true,
+		auto: true
+	},
+	autorun: false
+});
+</script>
+<script type="text/javascript">
+// log whether BOOMR.proxy_XMLHttpRequest was created yet
+window.proxyXhrCreatedBeforeOnload = BOOMR.proxy_XMLHttpRequest ? true : false;
+</script>
+<%= footer %>

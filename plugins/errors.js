@@ -1,16 +1,6 @@
 /*eslint-disable*/
 
 //
-// Via https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-//
-// polyfill for Array.isArray
-if (!Array.isArray) {
-	Array.isArray = function(arg) {
-		return Object.prototype.toString.call(arg) === '[object Array]';
-	};
-}
-
-//
 // Via https://github.com/stacktracejs/error-stack-parser
 // Modifications:
 // * Removed UMD
@@ -249,7 +239,12 @@ if (!Array.isArray) {
 	// functions to strip
 	var STACK_FUNCTIONS_REMOVE = [
 		"BOOMR_addError",
-		"BOOMR_plugins_errors_wrap"
+		"createStackForSend",
+		"BOOMR.window.console.error",
+		"BOOMR.plugins.Errors.init",
+		"BOOMR.window.onerror",
+		// below matches multiple functions:
+		"BOOMR_plugins_errors_"
 	];
 
 	/**
@@ -325,14 +320,14 @@ if (!Array.isArray) {
 			this.via = parseInt(config.via, 10);
 		}
 
-		if (Array.isArray(config.frames)) {
+		if (BOOMR.utils.isArray(config.frames)) {
 			this.frames = config.frames;
 		}
 		else {
 			this.frames = [];
 		}
 
-		if (Array.isArray(config.events)) {
+		if (BOOMR.utils.isArray(config.events)) {
 			this.events = config.events;
 		}
 		else {
@@ -426,8 +421,17 @@ if (!Array.isArray) {
 					if (frames.length >= 3 &&
 						frames[0].functionName &&
 						frames[0].functionName.indexOf("createStackForSend") !== -1) {
-						// remove the top 2 frames
-						frames = frames.slice(2);
+						// check to see if the filename of frames two and 3 are the same (boomerang),
+						// if so, remove both
+						if (frames[1].fileName === frames[2].fileName) {
+							// remove the top 3 frames
+							frames = frames.slice(3);
+						}
+						else {
+							// remove the top 2 frames
+							frames = frames.slice(2);
+						}
+
 						forceUpdate = true;
 					}
 
@@ -456,24 +460,26 @@ if (!Array.isArray) {
 					}
 				}
 
-				// get the top frame
-				frame = frames[0];
+				if (frames.length) {
+					// get the top frame
+					frame = frames[0];
 
-				// fill in our error with the top frame, if not already specified
-				if (forceUpdate || typeof error.lineNumber === "undefined") {
-					error.lineNumber = frame.lineNumber;
-				}
+					// fill in our error with the top frame, if not already specified
+					if (forceUpdate || typeof error.lineNumber === "undefined") {
+						error.lineNumber = frame.lineNumber;
+					}
 
-				if (forceUpdate || typeof error.columnNumber === "undefined") {
-					error.columnNumber = frame.columnNumber;
-				}
+					if (forceUpdate || typeof error.columnNumber === "undefined") {
+						error.columnNumber = frame.columnNumber;
+					}
 
-				if (forceUpdate || typeof error.functionName === "undefined") {
-					error.functionName = frame.functionName;
-				}
+					if (forceUpdate || typeof error.functionName === "undefined") {
+						error.functionName = frame.functionName;
+					}
 
-				if (forceUpdate || typeof error.fileName === "undefined") {
-					error.fileName = frame.fileName;
+					if (forceUpdate || typeof error.fileName === "undefined") {
+						error.fileName = frame.fileName;
+					}
 				}
 
 				// trim stack down
@@ -497,8 +503,9 @@ if (!Array.isArray) {
 		}
 
 		// fixup some old browser types
-		if (error.message.indexOf("ReferenceError:") !== -1
-			&& error.name === "Error") {
+		if (error.message &&
+		    error.message.indexOf("ReferenceError:") !== -1 &&
+		    error.name === "Error") {
 			error.name = "ReferenceError";
 		}
 
@@ -699,7 +706,7 @@ if (!Array.isArray) {
 		 * @returns {BoomerangError} BoomerangErrors that was duped against, if any
 		 */
 		findDuplicateError: function(errors, err) {
-			if (!Array.isArray(errors) || typeof err === "undefined") {
+			if (!BOOMR.utils.isArray(errors) || typeof err === "undefined") {
 				return undefined;
 			}
 
@@ -722,7 +729,7 @@ if (!Array.isArray) {
 		 * @returns {BoomerangError} BoomerangErrors that was duped against, if any
 		 */
 		mergeDuplicateErrors: function(errors, err, bumpCount) {
-			if (!Array.isArray(errors) || typeof err === "undefined") {
+			if (!BOOMR.utils.isArray(errors) || typeof err === "undefined") {
 				return undefined;
 			}
 
@@ -780,11 +787,11 @@ if (!Array.isArray) {
 		getErrorsForUrl: function(errors) {
 			errors = impl.compressErrors(errors);
 
-			if (BOOMR.utils.Compression.jsUrl) {
+			if (BOOMR.utils.Compression && BOOMR.utils.Compression.jsUrl) {
 				return BOOMR.utils.Compression.jsUrl(errors);
 			}
 			else if (window.JSON) {
-				url += JSON.stringify(errors);
+				return JSON.stringify(errors);
 			}
 			else {
 				// not supported
@@ -965,6 +972,9 @@ if (!Array.isArray) {
 			}
 
 			via = via || BOOMR.plugins.Errors.VIA_APP;
+
+			// ensure the document.domain is OK before we wrap the function
+			BOOMR_check_doc_domain();
 
 			return function BOOMR_plugins_errors_wrap() {
 				try {

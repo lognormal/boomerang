@@ -1,0 +1,33 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="111096-2.js" type="text/javascript"></script>
+<script>
+//
+// Use window.orig_XMLHttpRequest if available
+//
+window.XMLHttpRequestCopy = window.XMLHttpRequest;
+window.orig_XMLHttpRequest = function() {
+	var xhr = new XMLHttpRequestCopy();
+	var orig_open = xhr.open;
+	xhr.open = function() {
+		window.origXhrCalled = 1;
+		return orig_open.apply(xhr, arguments);
+	};
+
+	return xhr;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	onBoomerangLoaded: function() {
+		// force a large payload so XHR is used
+		var largeVar = "";
+		for (var i = 0; i < 3000; i++) {
+			largeVar += "a";
+		}
+		BOOMR.addVar("largeVar", largeVar);
+	}
+});
+</script>
+<div id="content"></div>
+<%= footer %>
