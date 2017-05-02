@@ -328,5 +328,8 @@ BOOMR.addVar({"h.key": "%client_apikey%"})
 		},
 		TPAnalytics: {
 			enabled: false
+		},
+		UserTiming: {
+			enabled: false
 		}
 	});
