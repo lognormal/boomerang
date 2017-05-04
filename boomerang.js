@@ -1458,6 +1458,10 @@ BOOMR_check_doc_domain();
 			return impl.vars.hasOwnProperty(name);
 		},
 
+		getVar: function(name) {
+			return impl.vars[name];
+		},
+
 		/**
 		 * Sets a variable's priority in the beacon URL.
 		 * -1 = beginning of the URL
@@ -1620,9 +1624,7 @@ BOOMR_check_doc_domain();
 		},
 
 		real_sendBeacon: function() {
-			var k, form, url, img, errors = [], params = [], paramsJoined, useImg = 1,
-			    varsSent = {}, varsToSend = {}, urlFirst = [], urlLast = [],
-			    xhr;
+			var k, form, url, errors = [], params = [], paramsJoined, varsSent = {};
 
 			if (!impl.beaconQueued) {
 				return false;
@@ -1731,56 +1733,16 @@ BOOMR_check_doc_domain();
 			// If we reach here, all plugins have completed
 			impl.fireEvent("before_beacon", impl.vars);
 
-			// Use the override URL if given
-			impl.beacon_url = impl.beacon_url_override || impl.beacon_url;
-
-			// Don't send a beacon if no beacon_url has been set
-			// you would do this if you want to do some fancy beacon handling
-			// in the `before_beacon` event instead of a simple GET request
-			BOOMR.debug("Ready to send beacon: " + BOOMR.utils.objectToString(impl.vars));
-			if (!impl.beacon_url) {
-				BOOMR.debug("No beacon URL, so skipping.");
-				return true;
-			}
-
-			//
-			// Try to send an IMG beacon if possible (which is the most compatible),
-			// otherwise send an XHR beacon if the  URL length is longer than 2,000 bytes.
-			//
-
 			// clone the vars object for two reasons: first, so all listeners of
 			// onbeacon get an exact clone (in case listeners are doing
 			// BOOMR.removeVar), and second, to help build our priority list of vars.
 			for (k in impl.vars) {
 				if (impl.vars.hasOwnProperty(k)) {
 					varsSent[k] = impl.vars[k];
-					varsToSend[k] = impl.vars[k];
 				}
 			}
 
-			// get high- and low-priority variables first, which remove any of
-			// those vars from varsToSend
-			urlFirst = this.getVarsOfPriority(varsToSend, -1);
-			urlLast  = this.getVarsOfPriority(varsToSend, 1);
-
-			// merge the 3 lists
-			params = urlFirst.concat(this.getVarsOfPriority(varsToSend, 0), urlLast);
-			paramsJoined = params.join("&");
-
-			// if there are already url parameters in the beacon url,
-			// change the first parameter prefix for the boomerang url parameters to &
-			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + paramsJoined;
-
-			if (impl.beacon_type === "POST" || url.length > BOOMR.constants.MAX_GET_LENGTH) {
-				// switch to a XHR beacon if the the user has specified a POST OR GET length is too long
-				useImg = false;
-			}
-
 			BOOMR.removeVar("qt");
-
-			// If we reach here, we've transferred all vars to the beacon URL.
-			// The only thing that can stop it now is if we're rate limited
-			impl.fireEvent("onbeacon", varsSent);
 
 			// keep track of page load beacons
 			if (!impl.hasSentPageLoadBeacon && isPageLoad) {
@@ -1792,26 +1754,102 @@ BOOMR_check_doc_domain();
 				});
 			}
 
-			if (params.length === 0) {
-				// do not make the request if there is no data
-				return this;
-			}
-
 			/* SOASTA PRIVATE START */
 			// Stop at this point if we are rate limited
 			if (BOOMR.session.rate_limited) {
 				BOOMR.debug("Skipping because we're rate limited");
-				return this;
+				return false;
 			}
 			/* SOASTA PRIVATE END */
 
-			if (!BOOMR.orig_XMLHttpRequest && (!BOOMR.window || !BOOMR.window.XMLHttpRequest)) {
-				// if we don't have XHR available, force an image beacon and hope
-				// for the best
+			// send the beacon data
+			BOOMR.sendBeaconData(varsSent);
+
+			return true;
+		},
+
+		/**
+		 * Determines whether or not a Page Load beacon has been sent.
+		 *
+		 * @returns {boolean} True if a Page Load beacon has been sent.
+		 */
+		hasSentPageLoadBeacon: function() {
+			return impl.hasSentPageLoadBeacon;
+		},
+
+		/**
+		 * Sends beacon data via the Beacon API, XHR or Image
+		 *
+		 * @param {object} data Data
+		 */
+		sendBeaconData: function(data) {
+			var urlFirst = [], urlLast = [], params, paramsJoined,
+			    url, img, useImg = true, xhr, ret;
+
+			BOOMR.debug("Ready to send beacon: " + BOOMR.utils.objectToString(data));
+
+			// Use the override URL if given
+			impl.beacon_url = impl.beacon_url_override || impl.beacon_url;
+
+			// Check that the beacon_url was set first
+			if (!impl.beacon_url) {
+				BOOMR.debug("No beacon URL, so skipping.");
+				return false;
+			}
+
+			// Check that we have data to send
+			if (data.length === 0) {
+				return false;
+			}
+
+			// If we reach here, we've figured out all of the beacon data we'll send.
+			impl.fireEvent("onbeacon", data);
+
+			// get high- and low-priority variables first, which remove any of
+			// those vars from data
+			urlFirst = this.getVarsOfPriority(data, -1);
+			urlLast  = this.getVarsOfPriority(data, 1);
+
+			// merge the 3 lists
+			params = urlFirst.concat(this.getVarsOfPriority(data, 0), urlLast);
+			paramsJoined = params.join("&");
+
+			// if there are already url parameters in the beacon url,
+			// change the first parameter prefix for the boomerang url parameters to &
+			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + paramsJoined;
+
+			//
+			// Try to send an IMG beacon if possible (which is the most compatible),
+			// otherwise send an XHR beacon if the  URL length is longer than 2,000 bytes.
+			//
+			if (impl.beacon_type === "POST" || url.length > BOOMR.constants.MAX_GET_LENGTH) {
+				// switch to a XHR beacon if the the user has specified a POST OR GET length is too long
+				useImg = false;
+			}
+
+			//
+			// Try the sendBeacon API first
+			//
+			if (w && w.navigator && typeof w.navigator.sendBeacon === "function") {
+				// note we're using sendBeacon with &sb=1
+				if (w.navigator.sendBeacon(impl.beacon_url, paramsJoined + "&sb=1")) {
+					return true;
+				}
+
+				// sendBeacon was not successful, try Image or XHR beacons
+			}
+
+			// If we don't have XHR available, force an image beacon and hope
+			// for the best
+			if (!BOOMR.orig_XMLHttpRequest && (!w || !w.XMLHttpRequest)) {
 				useImg = true;
 			}
 
 			if (useImg) {
+				//
+				// Image beacon
+				//
+
 				// just in case Image isn't a valid constructor
 				try {
 					img = new Image();
@@ -1833,6 +1871,10 @@ BOOMR_check_doc_domain();
 				}
 			}
 			else {
+				//
+				// XHR beacon
+				//
+
 				// Send a form-encoded XHR POST beacon
 				xhr = new (BOOMR.window.orig_XMLHttpRequest || BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
 				try {
@@ -1844,17 +1886,6 @@ BOOMR_check_doc_domain();
 					this.sendXhrPostBeacon(xhr, paramsJoined);
 				}
 			}
-
-			return true;
-		},
-
-		/**
-		 * Determines whether or not a Page Load beacon has been sent.
-		 *
-		 * @returns {boolean} True if a Page Load beacon has been sent.
-		 */
-		hasSentPageLoadBeacon: function() {
-			return impl.hasSentPageLoadBeacon;
 		},
 
 		/**

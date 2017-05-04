@@ -1,0 +1,22 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="26-send-metric-not-exist.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		customMetrics: [
+			{
+				name: "custom_metric_1",
+				index: 1,
+				type: "Custom",
+				label: "cmet.CM1",
+				parameter1: "testMetric"
+			}
+		]
+	}
+});
+
+BOOMR.sendMetric("custom_metric_does_not_exist", 10);
+</script>
+<%= footer %>

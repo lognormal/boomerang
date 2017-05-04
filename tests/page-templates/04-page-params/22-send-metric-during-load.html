@@ -1,0 +1,59 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="22-send-metric-during-load.js" type="text/javascript"></script>
+<script>
+var pageGroup = "PG";
+var abTest = "A";
+var testDimension = "Dimension1";
+var testTimer = 111;
+
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	PageParams: {
+		customMetrics: [
+			{
+				name: "custom_metric_1",
+				index: 1,
+				type: "Custom",
+				label: "cmet.CM1",
+				parameter1: "testMetric"
+			}
+		],
+		customTimers: [
+			{
+				name: "custom_timer_1",
+				index: 1,
+				type: "Custom",
+				label: "custom1",
+				parameter1: "testTimer"
+			}
+		],
+		customDimensions: [
+			{
+				"name": "CD1",
+				"index": 1,
+				"type": "JavaScriptVar",
+				"label": "cdim.CD1",
+				"dataType": "Boolean",
+				"varName": "testDimension"
+			}
+		],
+		pageGroups: [
+			{
+				type: "Custom",
+				parameter1: "pageGroup"
+			}
+		],
+		abTests: [
+			{
+				type: "Custom",
+				parameter1: "abTest"
+			}
+		]
+	}
+});
+
+// send during load
+BOOMR.sendMetric("custom_metric_1", 10);
+</script>
+<%= footer %>

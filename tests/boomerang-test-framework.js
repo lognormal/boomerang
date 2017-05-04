@@ -298,6 +298,21 @@
 		done();
 	};
 
+	t.validateBeaconWasSendBeacon = function(done) {
+		if (!t.isResourceTimingSupported()) {
+			// need RT to validate
+			return done();
+		}
+
+		// look at the initiator
+		var res = this.findResourceTimingBeacon();
+		assert.isDefined(res, "sendBeacon existed in ResourceTiming");
+		assert.isNotNull(res, "sendBeacon existed in ResourceTiming");
+		assert.equal(res.initiator, "beacon");
+
+		done();
+	};
+
 	t.isMutationObserverSupported = function() {
 		return (window.MutationObserver && typeof window.MutationObserver === "function");
 	};

@@ -1,6 +1,5 @@
 (function() {
-	var w, l, d, p, impl,
-	    Handler;
+	var w, l, d, p, impl, Handler;
 
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -1985,6 +1984,8 @@
 		hasXhrIgnore: false,
 		autorun: true,
 
+		beaconQueue: [],
+
 		mayRetry: [],
 		matchPageGroupList: function(url, list, handler) {
 			var xhrPgIndex = 0, ret;
@@ -2405,9 +2406,299 @@
 
 			// add our data to the beacon
 			this.done({}, "load");
+		},
+
+		/**
+		 * Runs the specified PageParams handler
+		 *
+		 * @param {string} type Type of dimension (e.g. pageGroups)
+		 * @param {function} setMethod Method to run on match
+		 */
+		runPageParamsHandler: function(type, setMethod) {
+			var i,
+			    handlerConfig = PAGE_PARAMS_BASE_HANDLER_CONFIG()[type],
+			    handler,
+			    config = impl[type],
+			    ret;
+
+			handlerConfig.method = setMethod;
+			handler = new Handler(handlerConfig);
+
+			for (i = 0; i < config.length; i++) {
+				if (config[i].only_xhr) {
+					// do not process XHR only items for non-XHR requests
+					continue;
+				}
+
+				ret = handler.handle(config[i], "custom");
+
+				if (ret && handlerConfig.stopOnFirst) {
+					return ret;
+				}
+			}
+		},
+
+		/**
+		 * Processes all dimension handlers (Page Groups, A/B tests and Custom Dimensions)
+		 * and runs the specified method for any matches.
+		 *
+		 * @param {function} method Method to run on match
+		 */
+		runAllDimensions: function(method) {
+			impl.runPageParamsHandler("pageGroups", method);
+			impl.runPageParamsHandler("abTests", method);
+			impl.runPageParamsHandler("customDimensions", method);
+		},
+
+		/**
+		 * Sends a Custom Metric immediately
+		 *
+		 * @param {string} name Metric name
+		 * @param {number} [value] Metric value (1 if not specified)
+		 */
+		sendMetric: function(name, value) {
+			if (typeof name !== "string") {
+				return;
+			}
+
+			if (typeof value !== "undefined" &&
+				typeof value !== "number") {
+				return;
+			}
+
+			if (typeof value === "undefined") {
+				value = 1;
+			}
+
+			var metrics = {};
+			metrics[name] = value;
+
+			impl.sendMetrics(metrics);
+		},
+
+		/**
+		 * Sends a set of Custom Metrics immediately
+		 *
+		 * @param {object} metrics An object containing Custom Metric names and values
+		 */
+		sendMetrics: function(metrics) {
+			if (typeof metrics !== "object") {
+				return;
+			}
+
+			impl.addToBeaconQueue("metric", metrics);
+			BOOMR.setImmediate(impl.processBeaconQueue);
+		},
+
+		/**
+		 * Sends a Custom Timer immediately
+		 *
+		 * @param {string} name Timer name
+		 * @param {number} value Timer value
+		 */
+		sendTimer: function(name, value) {
+			if (typeof name !== "string") {
+				return;
+			}
+
+			if (typeof value !== "number") {
+				return;
+			}
+
+			var timers = {};
+			timers[name] = value;
+
+			impl.sendTimers(timers);
+		},
+
+		/**
+		 * Sends a set of Custom Timers immediately
+		 *
+		 * @param {object} timers An object containing Custom Timer names and values
+		 */
+		sendTimers: function(timers) {
+			if (typeof timers !== "object") {
+				return;
+			}
+
+			impl.addToBeaconQueue("timer", timers);
+			BOOMR.setImmediate(impl.processBeaconQueue);
+		},
+
+		/**
+		 * Adds a Custom Timer or Custom Metric to the queue
+		 *
+		 * @param {string} type "metrics" or "timers"
+		 * @param {string} values Data
+		 */
+		addToBeaconQueue: function(type, values) {
+			var vars = {};
+
+			var data = {
+				type: type,
+				values: values,
+				vars: vars,
+				when: BOOMR.now()
+			};
+
+			if (impl.configReceived) {
+				// we have config, process all dimensions
+				impl.runAllDimensions(function(name, val) {
+					vars[name] = val;
+				});
+			}
+			else {
+				// run dimensions when config comes in
+				data.needsDimensions = true;
+			}
+
+			impl.beaconQueue.push(data);
+		},
+
+		/**
+		 * Processes the Custom Timer / Custom Metric beacons queue
+		 *
+		 * @param {boolean} calledFromTimer Whether or not we were called from a timer
+		 */
+		processBeaconQueue: function(calledFromTimer) {
+			var q, data = {}, i, valName, found = false, anyFound = false, varName;
+
+			if (impl.beaconQueue.length === 0) {
+				// no work
+				return;
+			}
+
+			if (!impl.configReceived) {
+				// will trigger again once config comes in
+				return;
+			}
+
+			// get and remove the top thing of the queue
+			q = impl.beaconQueue.shift();
+
+			// when this beacon fired
+			data["rt.tstart"] = q.when;
+
+			// initiator
+			data["http.initiator"] = "api_custom_" + q.type;
+
+			if (q.type === "metric") {
+				for (valName in q.values) {
+					if (q.values.hasOwnProperty(valName)) {
+						found = false;
+
+						for (i = 0; i < impl.customMetrics.length; i++) {
+							if (valName === impl.customMetrics[i].name) {
+								found = anyFound = true;
+
+								data[impl.customMetrics[i].label] = q.values[valName];
+
+								break;
+							}
+						}
+
+						if (!found) {
+							BOOMR.warn("Custom Metric " + valName + " not found");
+						}
+					}
+				}
+			}
+			else if (q.type === "timer") {
+				for (valName in q.values) {
+					if (q.values.hasOwnProperty(valName)) {
+						found = false;
+
+						for (i = 0; i < impl.customTimers.length; i++) {
+							if (valName === impl.customTimers[i].name) {
+								found = anyFound = true;
+
+								if (data.t_other) {
+									data.t_other += ",";
+								}
+								else {
+									data.t_other = "";
+								}
+
+								data.t_other += impl.customTimers[i].label + "|" + q.values[valName];
+
+								break;
+							}
+						}
+
+						if (!found) {
+							BOOMR.warn("Custom Timer " + valName + " not found");
+						}
+					}
+				}
+			}
+
+			if (!anyFound) {
+				BOOMR.warn("No data found to send, aborting Custom beacon");
+				return;
+			}
+
+			// add all variables
+			for (var varName in q.vars) {
+				if (q.vars.hasOwnProperty(varName)) {
+					data[varName] = q.vars[varName];
+				}
+			}
+
+			// send the beacon
+			impl.sendBeacon(data);
+
+			// and run again soon until it's empty in case there's another beacon
+			BOOMR.setImmediate(impl.processBeaconQueue);
+		},
+
+		/**
+		 * Sends a beacon
+		 *
+		 * @param {object} params Parameters array
+		 */
+		sendBeacon: function(params) {
+			//
+			// Add additional parameters
+			//
+
+			// tokens
+			params.d = BOOMR.session.domain;
+			params["h.key"] = BOOMR.getVar("h.key");
+			params["h.d"] = BOOMR.getVar("h.d");
+			params["h.cr"] = BOOMR.getVar("h.cr");
+			params["h.t"] = BOOMR.getVar("h.t");
+
+			// page id
+			params.pid = BOOMR.pageId;
+
+			// start event
+			params["rt.start"] = "manual";
+
+			// session data
+			if (BOOMR.session && BOOMR.session.ID !== false) {
+				params["rt.si"] = BOOMR.session.ID;
+				params["rt.ss"] = BOOMR.session.start;
+				params["rt.sl"] = BOOMR.session.length;
+			}
+
+			// API info
+			params.api = 1;
+			params["api.v"] = 2;
+			params["api.l"] = "boomr";
+
+			// let others add data to the beacon
+			BOOMR.fireEvent("before_custom_beacon", params);
+
+			// send the beacon data to the specified URL
+			BOOMR.sendBeaconData(params);
 		}
 	};
 
+	// patch BOOMR with sendMetric and sendTimer
+	BOOMR.sendMetric = impl.sendMetric;
+	BOOMR.sendMetrics = impl.sendMetrics;
+	BOOMR.sendTimer = impl.sendTimer;
+	BOOMR.sendTimers = impl.sendTimers;
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
@@ -2469,6 +2760,20 @@
 
 				impl.checkPrioritizedPageParams("init");
 
+				// process Custom Dimensions for any Custom Metrics/Timers that
+				// were queued before config.js was loaded
+				for (var i = 0; i < impl.beaconQueue.length; i++) {
+					if (impl.beaconQueue[i].needsDimensions) {
+						/*eslint-disable no-loop-func*/
+						impl.runAllDimensions(function(name, val) {
+							impl.beaconQueue[i].vars[name] = val;
+						});
+						/*eslint-enable no-loop-func*/
+
+						delete impl.beaconQueue[i].needsDimensions;
+					}
+				}
+
 				// if we had previously run before config.js came in, re-run now
 				if (impl.rerunAfterConfig) {
 					BOOMR.debug("Re-running now that config came in");
@@ -2478,6 +2783,10 @@
 					return;
 				}
 			}
+
+			// process any Custom Timer or Custom Metric beacons after all other plugins
+			// react to config
+			BOOMR.setImmediate(impl.processBeaconQueue);
 
 			// Fire on the first of load or unload
 
