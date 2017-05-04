@@ -943,7 +943,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function getCompressedResourceTiming(from, to) {
 		/*eslint no-script-url:0*/
-		var entries = getFilteredResourceTiming(from, to),
+	    var entries = getFilteredResourceTiming(from, to, impl.trackedResourceTypes || INITIATOR_TYPES),
 		    i, e, results = {}, initiatorType, url, data,
 		    timePoints = {};
 
@@ -1180,6 +1180,8 @@ see: http://www.w3.org/TR/resource-timing/
 		urlLimit: DEFAULT_URL_LIMIT,
 		clearOnBeacon: false,
 		trimUrls: [],
+	    // [array of strings] Resource types to track via Resource Timing API
+		trackedResourceTypes: null,
 		done: function() {
 			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
 			// add restiming manually).
@@ -1226,7 +1228,7 @@ see: http://www.w3.org/TR/resource-timing/
 			var p = BOOMR.getPerformance();
 
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
-				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls"]);
+				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls", "trackedResourceTypes"]);
 
 			if (impl.initialized) {
 				return this;
