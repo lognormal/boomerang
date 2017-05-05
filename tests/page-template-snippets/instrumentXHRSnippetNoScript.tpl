@@ -25,11 +25,17 @@
 
 	var now = (function() {
 		try {
-			if ("performance" in w)
-				return function() { return Math.round(performance.now() + performance.timing.navigationStart); };
+			if ("performance" in w) {
+				return function() {
+					return Math.round(w.performance.now() + performance.timing.navigationStart);
+				};
+			}
 		}
 		catch (ignore) {}
-		return Date.now || function() { return new Date().getTime(); };
+
+		return Date.now || function() {
+			return new Date().getTime();
+		};
 	})();
 
 	w.XMLHttpRequest = function() {

@@ -608,7 +608,7 @@
 						error.generatedStack = true;
 
 						// set the time when it was created
-						error.timestamp =  now;
+						error.timestamp = error.timestamp || now;
 
 						impl.addError(error, via, source);
 					}
@@ -618,7 +618,7 @@
 			}
 			else {
 				// add the timestamp
-				error.timestamp = now;
+				error.timestamp = error.timestamp || now;
 
 				// send (or queue) the error
 				impl.addError(error, via, source);
@@ -1462,7 +1462,18 @@
 			// hook into window.onError if configured
 			if (impl.monitorGlobal) {
 				try {
-					var globalOnError = BOOMR.window.onerror;
+					// globalOnError might be set by loader snippet
+					if (!BOOMR.globalOnError) {
+						BOOMR.globalOnError = BOOMR.window.onerror;
+					}
+					else {
+						// Another error wrapper came in after us - call this new onerror first.  Since
+						// it presumably wrapped our original handler, that will likely be called but
+						// will detect Boomerang has loaded and will call *its* original onerror handler.
+						if (BOOMR.window.onerror && !BOOMR.window.onerror._bmr) {
+							BOOMR.globalOnError = BOOMR.window.onerror;
+						}
+					}
 
 					BOOMR.window.onerror = function BOOMR_plugins_errors_onerror(message, fileName, lineNumber, columnNumber, error) {
 						// a SyntaxError can produce a null error
@@ -1479,10 +1490,19 @@
 							}, E.VIA_GLOBAL_EXCEPTION_HANDLER);
 						}
 
-						if (typeof globalOnError === "function") {
-							globalOnError.apply(window, arguments);
+						if (typeof BOOMR.globalOnError === "function") {
+							BOOMR.globalOnError.apply(window, arguments);
 						}
 					};
+
+					// send any errors from the loader snippet
+					if (BOOMR.globalErrors) {
+						for (var i = 0; i < BOOMR.globalErrors.length; i++) {
+							impl.send(BOOMR.globalErrors[i], E.VIA_GLOBAL_EXCEPTION_HANDLER);
+						}
+
+						delete BOOMR.globalErrors;
+					}
 				}
 				catch (e) {
 					BOOMR.debug("Exception in the window.onerror handler", "Errors");

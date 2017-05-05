@@ -1,0 +1,51 @@
+<%= header %>
+<script>
+window.errorsLogged1 = 0;
+window.onerror = function() {
+	window.errorsLogged1++;
+};
+</script>
+<%= captureErrorsSnippet %>
+<script>
+// now have another snippet override ours
+window.oldOnError = window.onerror;
+window.errorsLogged2 = 0;
+window.onerror = function() {
+	window.errorsLogged2++;
+	window.oldOnError.apply(window, arguments);
+};
+
+function errorFunction1() {
+	// a is not defined
+	a.foo = 1;
+}
+function errorFunction2() {
+	// a is not defined
+	a.foo = 1;
+}
+function errorFunction3() {
+	// a is not defined
+	a.foo = 2;
+}
+errorFunction1();
+</script>
+<script>
+errorFunction2();
+</script>
+<%= boomerangScriptMin %>
+<script src="27-loader-snippet-overwritten.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorGlobal: true
+	}
+});
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<script>
+errorFunction3();
+</script>
+<%= footer %>
