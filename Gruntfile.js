@@ -95,10 +95,11 @@ module.exports = function() {
 	// Build numbers
 	//
 	var pkg = grunt.file.readJSON("package.json");
-	var buildNumber = grunt.option("buildNumber") || 0;
+	var buildNumber = grunt.option("build-number") || 0;
 	var releaseVersion = pkg.releaseVersion + "." + buildNumber;
-	var buildDate = Math.round(Date.now() / 1000);
-	var boomerangVersion = releaseVersion + "." + buildDate;
+	var buildRevision = grunt.option("build-revision") || 0;
+	var boomerangVersion = releaseVersion + "." + buildRevision;
+	var buildSuffix = grunt.option("build-suffix") ? (grunt.option("build-suffix") + ".") : "";
 
 	//
 	// Output files
@@ -111,9 +112,14 @@ module.exports = function() {
 	var testBuildFilePrefix = pkg.name;
 	var testBuildPathPrefix = path.join(TEST_BUILD_PATH, testBuildFilePrefix);
 
-	var buildDebug = buildPathPrefix + "-debug.js";
-	var buildRelease = buildPathPrefix + ".js";
-	var buildReleaseMin = buildPathPrefix + ".min.js";
+	var buildDebug = buildPathPrefix + "-debug." + buildSuffix + "js";
+	var buildDebugGz = buildPathPrefix + "-debug." + buildSuffix + "js.gz";
+	var buildDebugMin = buildPathPrefix + "-debug." + buildSuffix + "min.js";
+	var buildDebugMinGz = buildPathPrefix + "-debug." + buildSuffix + "min.js.gz";
+	var buildRelease = buildPathPrefix + "." + buildSuffix + "js";
+	var buildReleaseGz = buildPathPrefix + "." + buildSuffix + "js.gz";
+	var buildReleaseMin = buildPathPrefix + "." + buildSuffix + "min.js";
+	var buildReleaseMinGz = buildPathPrefix + "." + buildSuffix + "min.js.gz";
 	var buildTest = testBuildPathPrefix + "-latest-debug.js";
 	var buildTestMin = testBuildPathPrefix + "-latest-debug.min.js";
 
@@ -130,31 +136,12 @@ module.exports = function() {
 
 	/* SOASTA PRIVATE START */
 	// mPulse build config
-	buildConfig.hasApiKey = grunt.option("api-key") ? true : false;
-	buildConfig.apiKey = grunt.option("api-key") || "%client_apikey%";
 	buildConfig.secondaryBeacons = [];
 	buildConfig.configAsJson = grunt.option("config-as-json") ? true : false;
 	buildConfig.configAsJsonEval = grunt.option("config-as-json-eval") ? true : false;
 	buildConfig.configHost = grunt.option("config-host");
 	buildConfig.configPath = grunt.option("config-path") || (buildConfig.configAsJson ? MPULSE_CONFIG_JSON : MPULSE_CONFIG_JS);
-	buildConfig.beaconDestHost = grunt.option("beacon-dest-host");
-	buildConfig.beaconDestPath = grunt.option("beacon-dest-path");
 	buildConfig.configUrlSuffix = grunt.option("config-url-suffix") || "";
-
-	if (buildConfig.hasApiKey) {
-		// if defaults aren't given, use our mPulse defaults
-		buildConfig.configHost = buildConfig.configHost || BEACON_HOST;
-		buildConfig.beaconDestHost = buildConfig.beaconDestHost || BEACON_HOST;
-		buildConfig.beaconDestPath = buildConfig.beaconDestPath || "/";
-
-		// change output file names
-		buildFilePrefix = buildConfig.apiKey;
-		buildPathPrefix = path.join(BUILD_PATH, buildFilePrefix);
-
-		buildDebug = buildPathPrefix + "-debug.js";
-		buildRelease = buildPathPrefix + ".js";
-		buildReleaseMin = buildPathPrefix + ".min.js";
-	}
 	/* SOASTA PRIVATE END */
 
 	//
@@ -172,10 +159,16 @@ module.exports = function() {
 		buildFilePrefix: buildFilePrefix,
 		buildPathPrefix: buildPathPrefix,
 		testBuildPathPrefix: testBuildPathPrefix,
+		buildSuffix: buildSuffix,
 
 		//
 		// Tasks
 		//
+		githash: {
+			main: {
+				options: {}
+			}
+		},
 		concat: {
 			options: {
 				stripBanners: false,
@@ -278,11 +271,6 @@ module.exports = function() {
 							// Change to debug config URL
 							pattern: "%config_url_suffix%",
 							replacement: "&debug="
-						},
-						{
-							// Add a placeholder for the API key instead of %client_apikey%
-							pattern: /%client_apikey%/g,
-							replacement: "API_KEY"
 						}
 						/* SOASTA PRIVATE END */
 					]
@@ -312,7 +300,7 @@ module.exports = function() {
 				}
 			},
 			/* SOASTA PRIVATE START */
-			"mpulse-customer": {
+			"mpulse": {
 				files: [
 					{
 						src: buildRelease,
@@ -325,18 +313,6 @@ module.exports = function() {
 				],
 				options: {
 					replacements: [
-						{
-							pattern: /%client_apikey%/g,
-							replacement: buildConfig.apiKey
-						},
-						{
-							pattern: /%beacon_dest_host%/g,
-							replacement: buildConfig.beaconDestHost
-						},
-						{
-							pattern: /%beacon_dest_path%/g,
-							replacement: buildConfig.beaconDestPath
-						},
 						{
 							pattern: /%config_host%/g,
 							replacement: buildConfig.configHost
@@ -452,15 +428,15 @@ module.exports = function() {
 		},
 		uglify: {
 			options: {
-				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> */\n"
+				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> <%= githash.main.hash %> */\n"
 			},
 			default: {
 				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
 				files: [{
 					expand: true,
 					cwd: "build/",
-					src: ["<%= buildFilePrefix %>-debug.js",
-					      "<%= buildFilePrefix %>.js"],
+					src: ["<%= buildFilePrefix %>-debug.<%= buildSuffix %>js",
+					      "<%= buildFilePrefix %>.<%= buildSuffix %>js"],
 					dest: "build/",
 					ext: ".min.js",
 					extDot: "last"
@@ -520,19 +496,19 @@ module.exports = function() {
 				files: [
 					{
 						src: buildRelease,
-						dest: "<%= buildPathPrefix %>.js.gz"
+						dest: buildReleaseGz
 					},
 					{
 						src: buildDebug,
-						dest: "<%= buildPathPrefix %>-debug.js.gz"
+						dest: buildDebugGz
 					},
 					{
-						src: "<%= buildPathPrefix %>.min.js",
-						dest: "<%= buildPathPrefix %>.min.js.gz"
+						src: buildReleaseMin,
+						dest: buildReleaseMinGz
 					},
 					{
-						src: "<%= buildPathPrefix %>-debug.min.js",
-						dest: "<%= buildPathPrefix %>-debug.min.js.gz"
+						src: buildDebugMin,
+						dest: buildDebugMinGz
 					}
 				]
 			},
@@ -868,6 +844,7 @@ module.exports = function() {
 	grunt.loadNpmTasks("grunt-strip-code");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-jsdoc");
+	grunt.loadNpmTasks("grunt-githash");
 
 	// tasks/*.js
 	if (grunt.file.exists("tasks")) {
@@ -883,7 +860,7 @@ module.exports = function() {
 		//
 		// Build
 		//
-		"build": ["concat", "build:apply-templates", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
+		"build": ["concat", "build:apply-templates", "githash", "uglify", "string-replace:remove-sourcemappingurl", "compress", "metrics"],
 		"build:test": ["concat:debug", "concat:debug-tests", "!build:apply-templates", "uglify:debug-test-min"],
 
 		// Build steps
@@ -971,22 +948,21 @@ module.exports = function() {
 	//
 	// mPulse-specific edits
 	//
-
-	if (buildConfig.hasApiKey) {
-		aliases["build:apply-templates"].push("string-replace:mpulse-customer");
+	if (buildConfig.configHost) {
+		aliases["build:apply-templates"].push("string-replace:mpulse");
 	}
 
 	// config.js vs config.json code
 	if (!buildConfig.configAsJson) {
-		aliases["build:apply-templates"].push("strip_code:config-as-json");
+		aliases["build:apply-templates"].push("!strip_code:config-as-json");
 	}
 	else {
-		aliases["build:apply-templates"].push("strip_code:config-as-js");
+		aliases["build:apply-templates"].push("!strip_code:config-as-js");
 	}
 
 	// whether or not to allow eval()
 	if (!buildConfig.configAsJsonEval) {
-		aliases["build:apply-templates"].push("strip_code:config-as-json-eval");
+		aliases["build:apply-templates"].push("!strip_code:config-as-json-eval");
 	}
 	/* SOASTA PRIVATE END */
 

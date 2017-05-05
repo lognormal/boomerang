@@ -5,6 +5,11 @@ describe("e2e/06-bugs/96883", function() {
 	var t = BOOMR_test;
 
 	it("Should only have a single regular config.js node after 10 seconds", function(done) {
+		if (BOOMR.plugins.LOGN.isJson) {
+			// config.json mode doesn't use SCRIPT nodes
+			return done();
+		}
+
 		var timerId = t.timeout(this, 15000, 10000);
 
 		t.runRepeatedly(function() {
@@ -15,7 +20,12 @@ describe("e2e/06-bugs/96883", function() {
 		});
 	});
 
-	it("Should only have one or two (depending on the timing) refresh config.js nodes after 10 seconds", function(done) {
+	it("Should only have one or two (depending on the timing) refresh config.js[on] nodes after 10 seconds", function(done) {
+		if (BOOMR.plugins.LOGN.isJson) {
+			// config.json mode doesn't use SCRIPT nodes
+			return done();
+		}
+
 		var timerId = t.timeout(this, 15000, 10000);
 
 		t.runRepeatedly(function() {

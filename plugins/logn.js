@@ -141,7 +141,7 @@
 
 		url = "//%config_host%%config_path%";
 		url += "?key=" +
-		    (w.BOOMR_LOGN_key ? w.BOOMR_LOGN_key : "%client_apikey%") +
+		    BOOMR.getVar("h.key") +
 		    "%config_url_suffix%&d=" + encodeURIComponent(dom) +
 		    // add time field at 5 minute resolution so that we force a cache bust if the browser's being nasty
 		    "&t=" + Math.round(t_start / (5 * 60 * 1000)) +
@@ -222,6 +222,8 @@
 
 	BOOMR.plugins.LOGN = {
 		init: function(config) {
+			var apiKey;
+
 			if (complete || BOOMR.session.rate_limited) {
 				return this;
 			}
@@ -256,6 +258,24 @@
 			}
 			else {
 				BOOMR.registerEvent("onconfig");
+
+				// get the API key from a global BOOMR_API_key or the script loader URL
+				if (w && w.BOOMR_API_key) {
+					apiKey = w.BOOMR_API_key;
+				}
+				else if (dc) {
+					if (BOOMR.url && BOOMR.url.lastIndexOf("/") !== -1) {
+						apiKey = BOOMR.url.substr(BOOMR.url.lastIndexOf("/") + 1);
+					}
+				}
+
+				if (apiKey) {
+					BOOMR.addVar("h.key", apiKey);
+				}
+				else {
+					BOOMR.error("API key could not be detected from script URL or BOOMR_API_key, exiting");
+					return;
+				}
 			}
 
 			// put h.d, h.key and h.t at the beginning of the beacon
@@ -292,6 +312,10 @@
 		readyToSend: function() {
 			return BOOMR.hasVar("h.cr");
 		}
+
+		/* BEGIN_CONFIG_AS_JSON */
+		, isJson: true
+		/* END_CONFIG_AS_JSON */
 	};
 
 }(BOOMR.window));
@@ -301,35 +325,34 @@
  but not for the debug version.  We use special comment tags to indicate that this code
  block should be removed if the debug version is requested.
 */
-BOOMR.addVar({"h.key": "%client_apikey%"})
-	.init({
-		primary: true,
-		/* BEGIN_PROD */log: null, /* END_PROD */
-		site_domain: "",
-		wait: true,
-		site_domain: null,
-		ResourceTiming: {
-			enabled: false
-		},
-		Angular: {
-			enabled: false
-		},
-		Ember: {
-			enabled: false
-		},
-		Backbone: {
-			enabled: false
-		},
-		History: {
-			enabled: false
-		},
-		Errors: {
-			enabled: false
-		},
-		TPAnalytics: {
-			enabled: false
-		},
-		UserTiming: {
-			enabled: false
-		}
-	});
+BOOMR.init({
+	primary: true,
+	/* BEGIN_PROD */log: null, /* END_PROD */
+	site_domain: "",
+	wait: true,
+	site_domain: null,
+	ResourceTiming: {
+		enabled: false
+	},
+	Angular: {
+		enabled: false
+	},
+	Ember: {
+		enabled: false
+	},
+	Backbone: {
+		enabled: false
+	},
+	History: {
+		enabled: false
+	},
+	Errors: {
+		enabled: false
+	},
+	TPAnalytics: {
+		enabled: false
+	},
+	UserTiming: {
+		enabled: false
+	}
+});

@@ -1,0 +1,8 @@
+{
+	"autorun": false,
+	"History": {
+		"enabled": true,
+		"auto": true
+	},
+	"testAfterOnBeacon": true
+}

@@ -23,8 +23,15 @@ module.exports = function(req, res) {
 		res.header("Access-Control-Allow-Origin", "*");
 
 		if (q.key && q.key !== "API_KEY") {
+			var ending = typeof q.acao !== "undefined" ? ".json" : ".js";
+			var file = path.join(__dirname, "config", q.key + ending);
+
+			if (!fs.existsSync(file)) {
+				return res.status(404).send("Not found");
+			}
+
 			// if they've requested a specific config, send that file
-			var contents = fs.readFileSync(path.join(__dirname, "config", q.key + ".js"), "utf-8");
+			var contents = fs.readFileSync(file, "utf-8");
 
 			// replace h.t and h.cr
 			contents = contents.replace("{{H_T}}", ht);

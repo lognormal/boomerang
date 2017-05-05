@@ -33,8 +33,9 @@ module.exports = function(grunt) {
 		var template = grunt.file.read(options.template);
 
 		// read in both the minified and debug builds
-		var minFile = grunt.file.read(options.filePrefix + ".min.js");
-		var debugFile = grunt.file.read(options.filePrefix + "-debug.js");
+		var buildSuffix = grunt.option("build-suffix") ? (grunt.option("build-suffix") + ".") : "";
+		var minFile = grunt.file.read(options.filePrefix + "." + buildSuffix + "min.js");
+		var debugFile = grunt.file.read(options.filePrefix + "-debug." + buildSuffix + "js");
 
 		// convert both to base64
 		var minFileBase64 = new Buffer(minFile).toString("base64").match(/.{1,80}/g).join("\n");
@@ -65,7 +66,7 @@ module.exports = function(grunt) {
 		}
 
 		// write to XML
-		var xmlFileName = options.filePrefix + ".xml";
+		var xmlFileName = options.filePrefix + "." + buildSuffix + "xml";
 		grunt.log.ok("Writing " + xmlFileName);
 		grunt.file.write(xmlFileName, xml);
 	});
