@@ -23,7 +23,7 @@ BOOMR_test.init({
 var wrappedBad = BOOMR.plugins.Errors.wrap(errorFunction);
 wrappedBad();
 
-var wrappedGood = BOOMR.plugins.Errors.wrap(goodFunction);
-window.result = wrappedGood();
+// this code shouldn't execute because wrappedBad() should throw an exception
+window.ranAnyways = true;
 </script>
 <%= footer %>

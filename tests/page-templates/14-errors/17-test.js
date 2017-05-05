@@ -107,6 +107,11 @@ describe("e2e/14-errors/17-test", function() {
 		}
 	});
 
+	it("Should have thrown an exception for errorFunction", function() {
+		assert.isDefined(window.errorFunctionThrown);
+		assert.isTrue(window.errorFunctionThrown.reported);
+	});
+
 	it("Should have saved the result of the good function in testResult1", function() {
 		assert.equal(window.testResult1, 2);
 		assert.equal(window.result, 2);

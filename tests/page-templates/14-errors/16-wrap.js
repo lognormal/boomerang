@@ -107,7 +107,7 @@ describe("e2e/14-errors/16-wrap", function() {
 		}
 	});
 
-	it("Should have saved the result of the good function in result", function() {
-		assert.equal(window.result, 2);
+	it("Should have not set ranAnyways", function() {
+		assert.isUndefined(window.ranAnyways);
 	});
 });

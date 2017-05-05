@@ -545,7 +545,6 @@
 		monitorEvents: true,
 		monitorTimeout: true,
 		sendAfterOnload: false,
-		isDuringLoad: true,
 		maxErrors: 10,
 		// How often to send an error beacon after onload
 		sendInterval: 1000,
@@ -555,6 +554,7 @@
 		maxEvents: 10,
 
 		// state
+		isDuringLoad: true,
 		initialized: false,
 		supported: false,
 		autorun: true,
@@ -891,6 +891,10 @@
 				catch (e) {
 					// error during original callback setup
 					impl.send(e, via);
+
+					// re-throw
+					e.reported = true;
+					throw e;
 				}
 			};
 		},
@@ -1018,6 +1022,10 @@
 				catch (e) {
 					// error during callback
 					impl.send(e, via);
+
+					// re-throw
+					e.reported = true;
+					throw e;
 				}
 			};
 		},

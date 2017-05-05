@@ -12,7 +12,9 @@ BOOMR_test.init({
 		monitorGlobal: false
 	}
 });
-setInterval(function errorFunction() {
+var intId = setInterval(function errorFunction() {
+	clearInterval(intId);
+
 	// will throw an error
 	a.foo = false;
 }, 0);

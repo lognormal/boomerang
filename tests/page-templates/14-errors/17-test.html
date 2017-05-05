@@ -27,7 +27,13 @@ BOOMR_test.init({
 	}
 });
 
-BOOMR.plugins.Errors.test(errorFunction);
+try {
+	BOOMR.plugins.Errors.test(errorFunction);
+}
+catch (e) {
+	// exception should have been thrown
+	window.errorFunctionThrown = e;
+}
 
 window.foo = {
 	result: false
