@@ -13,4 +13,14 @@ describe("e2e/16-third-party-analytics/11-google-invalid", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["tp.ga.clientid"], undefined);
 	});
+
+	it("Should not have an app error on the beacon", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.err, undefined);
+	});
+
+	it("Should not have a boomerang error on the beacon", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.errors, undefined);
+	});
 });

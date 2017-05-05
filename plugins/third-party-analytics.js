@@ -14,6 +14,15 @@ Captures session ids and campaign information from third party analytic vendors 
 		return;
 	}
 
+	/**
+	 * Warning logging
+	 *
+	 * @param {string} msg Message
+	 */
+	function warn(msg) {
+		BOOMR.warn(msg, "TPAnalytics");
+	}
+
 	var impl = {
 		addedVars: [],
 
@@ -64,7 +73,7 @@ Captures session ids and campaign information from third party analytic vendors 
 					}
 					catch (err) {
 						// "ga" wasn't google analytics?
-						BOOMR.addError(err, "TPAnalytics googleAnalytics");
+						warn("googleAnalytics: " + err);
 					}
 				}
 				// if we still don't have the clientid then fallback to cookie parsing
@@ -160,7 +169,7 @@ Captures session ids and campaign information from third party analytic vendors 
 							}
 						}
 						catch (err) {
-							BOOMR.addError(err, "TPAnalytics adobeAnalytics");
+							warn("adobeAnalytics: " + err);
 						}
 					}
 					else {
@@ -183,7 +192,7 @@ Captures session ids and campaign information from third party analytic vendors 
 								}
 							}
 							catch (err) {
-								BOOMR.addError(err, "TPAnalytics adobeAnalytics");
+								warn("adobeAnalytics: " + err);
 							}
 						}
 						else {
@@ -268,8 +277,8 @@ Captures session ids and campaign information from third party analytic vendors 
 					});
 				}
 				catch (err) {
-					// not coremetrics?
-					BOOMR.addError(err, "TPAnalytics ibmAnalytics");
+					// not coremetrics or not properly setup
+					warn("ibmAnalytics: " + err);
 				}
 			}
 

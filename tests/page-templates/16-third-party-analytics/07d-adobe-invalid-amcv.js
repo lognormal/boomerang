@@ -18,4 +18,14 @@ describe("e2e/16-third-party-analytics/07d-adobe-invalid-amcv", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["tp.aa.mid"], undefined);
 	});
+
+	it("Should not have an app error on the beacon", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.err, undefined);
+	});
+
+	it("Should not have a boomerang error on the beacon", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.errors, undefined);
+	});
 });
