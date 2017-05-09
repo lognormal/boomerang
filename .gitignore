@@ -22,3 +22,4 @@ tests/page-templates/12-react/support/app.js
 *.#*
 *#*
 *~
+.idea/

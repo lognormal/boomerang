@@ -72,7 +72,8 @@
   },
   "scripts": {
     "test": "grunt test",
-    "install": "test -e node_modules/protractor/bin/webdriver-manager && node node_modules/protractor/bin/webdriver-manager update"
+    "install": "test -e node_modules/protractor/bin/webdriver-manager && node node_modules/protractor/bin/webdriver-manager update",
+    "lint": "grunt lint"
   },
   "repository": {
     "type": "git",
@@ -186,6 +187,10 @@
     {
       "name": "Nigel Heron",
       "email": "nheron@querymetrics.com"
+    },
+    {
+      "name": "Charles Vazac",
+      "email": "cvazac@gmail.com"
     }
   ],
   "license": "BSD-3-Clause",

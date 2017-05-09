@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global chai*/
 
-describe("BOOMR.utils filter", function() {
+describe("BOOMR.utils.arrayFilter()", function() {
 	var assert = chai.assert;
 
 	it("Should return an empty array if the function only returns false", function(){

@@ -939,6 +939,21 @@ BOOMR_check_doc_domain();
 					}
 				});
 			}
+
+			/* BEGIN_DEBUG */
+			, forEach: function(array, fn, thisArg) {
+				if (!BOOMR.utils.isArray(array) || typeof fn !== "function") {
+					return;
+				}
+				var length = array.length;
+				for (var i = 0; i < length; i++) {
+					if (array.hasOwnProperty(i)) {
+						fn.call(thisArg, array[i], i, array);
+					}
+				}
+			}
+			/* END_DEBUG */
+
 		},
 
 		init: function(config) {
@@ -2075,6 +2090,126 @@ BOOMR_check_doc_domain();
 			BOOMR.xhr_excludes = {};
 		}
 	}());
+
+	/* BEGIN_DEBUG */
+	/*
+	 * This block reports on overridden functions on `window` and properties on `document` using `BOOMR.warn()`.
+	 * To enable, add `overridden` with a value of `true` to the query string.
+	 */
+	(function() {
+		/**
+		 * Checks a window for overridden functions.
+		 *
+		 * @param {Window} win The window object under test
+		 *
+		 * @returns {Array} Array of overridden function names
+		 */
+		BOOMR.checkWindowOverrides = function(win) {
+			var freshWindow, objects, overridden = [];
+			function setup() {
+				var iframe = d.createElement("iframe");
+				iframe.style.display = "none";
+				iframe.src = "javascript:false"; // eslint-disable-line no-script-url
+				d.getElementsByTagName("script")[0].parentNode.appendChild(iframe);
+				freshWindow = iframe.contentWindow;
+				objects = Object.getOwnPropertyNames(freshWindow);
+			}
+
+			function teardown() {
+				iframe.parentNode.removeChild(iframe);
+			}
+
+			function checkWindowObject(objectKey) {
+				if (isNonNative(objectKey)) {
+					overridden.push(objectKey);
+				}
+			}
+
+			function isNonNative(key) {
+				var split = key.split("."), fn = win, results = [];
+				while (fn && split.length) {
+					try {
+						fn = fn[split.shift()];
+					}
+					catch (e) {
+						return false;
+					}
+				}
+				return typeof fn === "function" && !isNativeFunction(fn, key);
+			}
+
+			function isNativeFunction(fn, str) {
+				if (str === "console.assert" ||
+					str === "Function.prototype" ||
+					str.indexOf("onload") >= 0 ||
+					str.indexOf("onbeforeunload") >= 0 ||
+					str.indexOf("onerror") >= 0 ||
+					str.indexOf("onload") >= 0 ||
+					str.indexOf("NodeFilter") >= 0) {
+					return true;
+				}
+				return fn.toString &&
+					!fn.hasOwnProperty("toString") &&
+					/\[native code\]/.test(String(fn));
+			}
+
+			setup();
+			for (var objectIndex = 0; objectIndex < objects.length; objectIndex++) {
+				var objectKey = objects[objectIndex];
+				if (objectKey === "window" ||
+					objectKey === "self" ||
+					objectKey === "top" ||
+					objectKey === "parent" ||
+					objectKey === "frames") {
+					continue;
+				}
+				if (freshWindow[objectKey] &&
+					(typeof freshWindow[objectKey] === "object" || typeof freshWindow[objectKey] === "function")) {
+					checkWindowObject(objectKey);
+
+					var propertyNames = [];
+					try {
+						propertyNames = Object.getOwnPropertyNames(freshWindow[objectKey]);
+					}
+					catch (e) {;}
+					for (var i = 0; i < propertyNames.length; i++) {
+						checkWindowObject([objectKey, propertyNames[i]].join("."));
+					}
+
+					if (freshWindow[objectKey].prototype) {
+						propertyNames = Object.getOwnPropertyNames(freshWindow[objectKey].prototype);
+						for (var i = 0; i < propertyNames.length; i++) {
+							checkWindowObject([objectKey, "prototype", propertyNames[i]].join("."));
+						}
+					}
+				}
+			}
+			return overridden;
+		};
+
+		/**
+		 * Checks a document for overridden properties.
+		 *
+		 * @param {HTMLDocument} doc The document object under test
+		 *
+		 * @returns {Array} Array of overridden properties names
+		 */
+		BOOMR.checkDocumentOverrides = function(doc) {
+			return BOOMR.utils.arrayFilter(["readyState", "domain", "hidden", "URL", "cookie"], function(key) {
+				return doc.hasOwnProperty(key);
+			});
+		};
+
+		if (BOOMR.utils.getQueryParamValue("overridden") === "true" && w && w.Object && Object.getOwnPropertyNames) {
+			var overridden = []
+				.concat(BOOMR.checkWindowOverrides(w))
+				.concat(BOOMR.checkDocumentOverrides(d));
+			if (overridden.length > 0) {
+				BOOMR.warn("overridden: " + overridden.sort());
+			}
+		}
+	})();
+	/* END_DEBUG */
 
 	dispatchEvent("onBoomerangLoaded", { "BOOMR": BOOMR }, true);
 
