@@ -170,4 +170,4 @@
 			return this;
 		}
 	};
-}(BOOMR.window));
+}());

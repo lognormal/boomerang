@@ -1,9 +1,9 @@
 (function() {
-	var d, handler, a, impl,
+	var w, d, handler, a, impl,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
 	    alwaysSendXhr = false,
-	    readyStateMap = [ "uninitialized", "open", "responseStart", "domInteractive", "responseEnd" ],
+	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"],
 	    ie10or11;
 
 	/**
@@ -56,12 +56,21 @@
 	// Default resources to count as Back-End during a SPA nav
 	var SPA_RESOURCES_BACK_END = ["xmlhttprequest", "script"];
 
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.AutoXHR) {
+		return;
+	}
+
+	w = BOOMR.window;
+
 	// If this browser cannot support XHR, we'll just skip this plugin which will
 	// save us some execution time.
 
 	// XHR not supported or XHR so old that it doesn't support addEventListener
 	// (IE 6, 7, 8, as well as newer running in quirks mode.)
-	if (!window.XMLHttpRequest || !(new XMLHttpRequest()).addEventListener) {
+	if (!w || !w.XMLHttpRequest || !(new w.XMLHttpRequest()).addEventListener) {
 		// Nothing to instrument
 		return;
 	}
@@ -69,15 +78,10 @@
 	// User-agent sniff IE 10 and IE 11 to apply a workaround for an XHR bug (see below when
 	// this variable is used).  We can only detect this bug by UA sniffing.  IE 11 requires a
 	// different way of detection than IE 11.
-	ie10or11 = (window.navigator && navigator.appVersion && navigator.appVersion.indexOf("MSIE 10") !== -1) ||
-	           (window.navigator && navigator.userAgent && navigator.userAgent.match(/Trident.*rv[ :]*11\./));
+	ie10or11 = (w.navigator && w.navigator.appVersion && w.navigator.appVersion.indexOf("MSIE 10") !== -1) ||
+	           (w.navigator && w.navigator.userAgent && w.navigator.userAgent.match(/Trident.*rv[ :]*11\./));
 
-	BOOMR = window.BOOMR || {};
-	BOOMR.plugins = BOOMR.plugins || {};
 
-	if (BOOMR.plugins.AutoXHR) {
-		return;
-	}
 
 	function log(msg) {
 		BOOMR.debug(msg, "AutoXHR");
