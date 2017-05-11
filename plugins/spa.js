@@ -177,12 +177,13 @@
 		 * Called by a framework when a route change has happened
 		 *
 		 * @param {function} onComplete Called on completion
+		 * @param {object[]} routeFilterArgs Route Filter arguments
 		 */
-		route_change: function(onComplete) {
+		route_change: function(onComplete, routeFilterArgs) {
 			// if we have a routeFilter, see if they want to track this route
 			if (routeFilter) {
 				try {
-					if (!routeFilter.apply(null, arguments)) {
+					if (!routeFilter.apply(null, routeFilterArgs)) {
 						return;
 					}
 				}

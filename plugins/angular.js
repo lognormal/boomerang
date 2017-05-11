@@ -37,7 +37,9 @@
 (function() {
 	var hooked = false,
 	    enabled = true,
-	    hadMissedRouteChange = false;
+	    hadMissedRouteChange = false,
+	    lastRouteChangeTime = 0,
+	    locationChangeTrigger = false;
 
 	if (BOOMR.plugins.Angular || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -76,6 +78,36 @@
 
 		log("Startup");
 
+		/**
+		 * Fires the SPA route_change event.
+		 *
+		 * If it's been over 50ms since the last route change, fire a new
+		 * route change event. Several Angular events may call this function that
+		 * trigger off each other (e.g. $routeChangeStart from $locationChangeStart),
+		 * so this combines them into a single route change.
+		 *
+		 * We also want $routeChangeStart/$stateChangeStart to trigger the route_change()
+		 * if possible because those have arguments that we'll pass to the routeFilter
+		 * if specified.
+		 *
+		 * To do this, $locationChangeStart sets a timeout before calling this
+		 * that will be cleared by the $routeChangeStart/$stateChangeStart.
+		 */
+		function fireRouteChange() {
+			var now = BOOMR.now();
+
+			if (now - lastRouteChangeTime > 50) {
+				BOOMR.plugins.SPA.route_change.call(null, null, arguments);
+			}
+
+			lastRouteChangeTime = now;
+
+			// clear any $locationChangeStart triggers since we've handled it
+			// either via $routeChangeStart or $stateChangeStart
+			clearTimeout(locationChangeTrigger);
+			locationChangeTrigger = false;
+		}
+
 		//
 		// Traditional Angular Router events
 		//
@@ -91,7 +123,7 @@
 
 			log("$routeChangeStart: " + (next ? next.templateUrl : ""));
 
-			BOOMR.plugins.SPA.route_change(event, next, current);
+			fireRouteChange(event, next, current);
 		});
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
@@ -104,6 +136,12 @@
 
 			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), newState]);
 			BOOMR.plugins.SPA.last_location(newState);
+
+			// Fire a route change (on a short delay) after this callback in case
+			// $routeChangeStart never fires.  We'd prefer to use $routeChangeStart's
+			// arguments (next, current) for any routeFilter, so use a setTimeout
+			// that may be cancelled by the $routeChangeStart/$stateChangeStart event.
+			locationChangeTrigger = setTimeout(fireRouteChange, 0);
 		});
 
 		//
@@ -117,7 +155,7 @@
 
 			log("$stateChangeStart: " + toState);
 
-			BOOMR.plugins.SPA.route_change(event, toState, toParams, fromState, fromParams);
+			fireRouteChange(event, toState, toParams, fromState, fromParams);
 		});
 
 		$rootScope.$on("$stateChangeSuccess", function(event, toState, toParams, fromState, fromParams) {
