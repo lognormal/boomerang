@@ -1020,7 +1020,15 @@
 					return fn.apply(that, arguments);
 				}
 				catch (e) {
-					// error during callback
+					// Check for IE/Edge error "Can't execute code from freed script"
+					if (e.number === -2146823277 &&
+						(via === BOOMR.plugins.Errors.VIA_EVENTHANDLER || via === BOOMR.plugins.Errors.VIA_TIMEOUT)) {
+						// Event listeners that reference freed scripts don't generate errors in IE
+						// Our call to a freed script does though, don't report the error
+						return;
+					}
+
+					// Report error during callback
 					impl.send(e, via);
 
 					// re-throw
