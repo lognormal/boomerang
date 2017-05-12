@@ -216,7 +216,7 @@
 
 		// fake session details so beacons send
 		BOOMR.addVar({
-			"h.key": "aaaaa-bbbbb-ccccc-ddddd-eeeee",
+			"h.key": window.BOOMR_API_key ? window.BOOMR_API_key : "aaaaa-bbbbb-ccccc-ddddd-eeeee",
 			"h.d": "localhost",
 			"h.t": new Date().getTime(),
 			"h.cr": "abc"

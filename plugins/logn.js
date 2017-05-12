@@ -99,10 +99,12 @@
 			var params = ["h.key", "h.d", "h.t", "h.cr"];
 
 			for (var i = 0; i < params.length; i++) {
-				BOOMR.addVar(params[i], configData[params[i]]);
+				if (configData[params[i]]) {
+					BOOMR.addVar(params[i], configData[params[i]]);
 
-				// strip from the data we give to other plugins
-				delete configData[params[i]];
+					// strip from the data we give to other plugins
+					delete configData[params[i]];
+				}
 			}
 
 			BOOMR.init(configData);

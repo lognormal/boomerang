@@ -137,7 +137,7 @@ module.exports = function() {
 	/* SOASTA PRIVATE START */
 	// mPulse build config
 	buildConfig.secondaryBeacons = [];
-	buildConfig.configAsJson = grunt.option("config-as-json") ? true : false;
+	buildConfig.configAsJson = grunt.option("config-as-js") ? false : true;
 	buildConfig.configAsJsonEval = grunt.option("config-as-json-eval") ? true : false;
 	buildConfig.configHost = grunt.option("config-host");
 	buildConfig.configPath = grunt.option("config-path") || (buildConfig.configAsJson ? MPULSE_CONFIG_JSON : MPULSE_CONFIG_JS);
