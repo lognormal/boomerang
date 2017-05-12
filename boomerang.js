@@ -1858,9 +1858,15 @@ BOOMR_check_doc_domain();
 			//
 			// Try the sendBeacon API first
 			//
-			if (w && w.navigator && typeof w.navigator.sendBeacon === "function") {
+			if (w && w.navigator &&
+			    typeof w.navigator.sendBeacon === "function" &&
+			    typeof w.Blob === "function") {
 				// note we're using sendBeacon with &sb=1
-				if (w.navigator.sendBeacon(impl.beacon_url, paramsJoined + "&sb=1")) {
+				var blobData = new w.Blob([paramsJoined + "&sb=1"], {
+					type: "application/x-www-form-urlencoded"
+				});
+
+				if (w.navigator.sendBeacon(impl.beacon_url, blobData)) {
 					return true;
 				}
 
