@@ -21,4 +21,5 @@
 	<div id="mocha"></div>
 	<script>
 	mocha.setup("bdd");
+	window.BOOMR_API_key="API_KEY";
 	</script>

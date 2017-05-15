@@ -1,0 +1,17 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="108-iframe-wait-for-spa.js" type="text/javascript"></script>
+<iframe src="support/simple-spa-page.html"></iframe>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	IFrameDelay: {
+		enabled: true,
+		monitoredCount: 1
+	},
+	autorun: false
+});
+</script>
+
+<%= footer %>

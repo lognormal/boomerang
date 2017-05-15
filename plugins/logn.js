@@ -356,5 +356,8 @@ BOOMR.init({
 	},
 	UserTiming: {
 		enabled: false
+	},
+	IFrameDelay: {
+		enabled: false
 	}
 });

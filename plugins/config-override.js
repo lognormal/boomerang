@@ -69,6 +69,11 @@
 				sending: true,
 				session_transfer_timeout: true
 			},
+			IFrameDelay: {
+				enabled: true,
+				monitoredCount: true,
+				registerParent: true
+			},
 			instrument_xhr: true,
 			RT: {
 				cookie: true,

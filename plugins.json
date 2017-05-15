@@ -2,6 +2,7 @@
     "plugins": [
         "plugins/config-override.js",
         "plugins/page-params.js",
+        "plugins/iframe-delay.js",
         "plugins/auto-xhr.js",
         "plugins/spa.js",
         "plugins/angular.js",

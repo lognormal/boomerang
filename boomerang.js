@@ -460,6 +460,16 @@ BOOMR_check_doc_domain();
 
 		// Utility functions
 		utils: {
+			/**
+			 * Validate that the current frame has support for postMessage and can send iframe postMessages
+			 * @returns {boolean} - true if we have postMessage support, false if we don't
+			 */
+			hasPostMessageSupport: function() {
+				if (!w.postMessage || typeof w.postMessage !== "function" && typeof w.postMessage !== "object") {
+					return false;
+				}
+				return true;
+			},
 			objectToString: function(o, separator, nest_level) {
 				var value = [], k;
 

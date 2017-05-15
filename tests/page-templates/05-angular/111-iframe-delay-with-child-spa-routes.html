@@ -1,0 +1,15 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="111-iframe-delay-with-child-spa-routes.js" type="text/javascript"></script>
+<iframe src="support/simple-spa-page-with-nav.html"></iframe>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	IFrameDelay: {
+		enabled: true,
+		monitoredCount: 1
+	},
+	autorun: false
+});
+</script>
+<%= footer %>

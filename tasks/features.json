@@ -17,5 +17,6 @@
 	{"key":"third-party-analytics-cid"},
 	{"key":"js-var-string-property-access"},
 	{"key":"autoxhr-filters"},
-	{"key":"usertiming"}
+	{"key":"usertiming"},
+	{"key":"iframe-delay"}
 ]

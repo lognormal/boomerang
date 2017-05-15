@@ -226,13 +226,6 @@
 			iframe.style.display = "none";
 
 			return iframe;
-		},
-		hasPostMessageSupport: function() {
-			log("Checking if postMessage is supported.");
-			if (!w.postMessage || typeof w.postMessage !== "function" && typeof w.postMessage !== "object") {
-				return false;
-			}
-			return true;
 		}
 	};
 
@@ -266,7 +259,7 @@
 			impl.cross_domain_url = a.href;
 
 			// if postMessage is not supported bail and don't block the beacon
-			if (!impl.hasPostMessageSupport()) {
+			if (!BOOMR.utils.hasPostMessageSupport()) {
 				impl.session_transferred = true;
 				impl.enabled = false;
 

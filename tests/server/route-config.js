@@ -10,6 +10,7 @@ var path = require("path");
 module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
 	var r = typeof q.r !== "undefined";
+	var json = q.json || require("url").parse(req.url).pathname === "/config.json";
 	var delay = q.delay || 0;
 
 	setTimeout(function() {
@@ -40,10 +41,24 @@ module.exports = function(req, res) {
 			res.send(contents);
 		}
 		else if (r) {
-			res.send(util.format('BOOMR_configt=new Date().getTime();BOOMR.addVar({"h.t":%d,"h.cr":"%s"});', ht, hcr));
+			var content = util.format('{"h.t":%d,"h.cr":"%s"}', ht, hcr);
+			var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.addVar(%s);", content);
+			if (json) {
+				res.send(content);
+			}
+			else {
+				res.send(wrap);
+			}
 		}
 		else {
-			res.send(util.format('BOOMR_configt=new Date().getTime();BOOMR.init({"h.t":%d,"h.cr":"%s"});', ht, hcr));
+			var content = util.format('{"h.t":%d,"h.cr":"%s"}', ht, hcr);
+			var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.init(%s);", content);
+			if (json) {
+				res.send(content);
+			}
+			else {
+				res.send(wrap);
+			}
 		}
 	}, delay);
 };
