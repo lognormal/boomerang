@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="10-method-queue.js" type="text/javascript"></script>
+<script>
+	window.BOOMR_mq = [];
+	window.BOOMR_mq.push(
+		["addVar", "var1", "value1"],
+		["addVar", "var2", "value2"]
+	);
+
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		onBoomerangLoaded: function() {
+			window.BOOMR_mq.push(
+				["addVar", "var3", "value3"],
+				["addVar", "var4", "value4"]
+			);
+		}
+	});
+</script>
+<%= footer %>
