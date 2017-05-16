@@ -1227,13 +1227,6 @@
 				// sure that we don't track this as a new request, or add additional
 				// event listeners
 				if (!opened) {
-					if (singlePageApp && handler.watch && !alwaysSendXhr) {
-						// If this is a SPA and we're already watching for resources due
-						// to a route change or other interesting event, add this to the
-						// current event.
-						handler.add_event_resource(resource);
-					}
-
 					if (async) {
 						addListener("readystatechange");
 					}
@@ -1279,6 +1272,13 @@
 				req.resource.requestPayload = data;
 				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
+
+				if (singlePageApp && handler.watch && !alwaysSendXhr) {
+					// If this is a SPA and we're already watching for resources due
+					// to a route change or other interesting event, add this to the
+					// current event.
+					handler.add_event_resource(resource);
+				}
 
 				// call the original send method unless there was an error
 				// during .open
