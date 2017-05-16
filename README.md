@@ -152,6 +152,37 @@ Opera (including Android, but not Opera Mini), Safari (including iOS), IE 6+ (bu
 
 Boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon` events just before and during beaconing.
 
+#### 3.4. Method queue pattern
+
+If you want to call a public method that lives on `BOOMR`, but either don't know if Boomerang has loaded or don't want to wait, you can use the method queue pattern!
+
+Instead of:
+```javascript
+BOOMR.addVar('myVarName', 'myVarValue')
+```
+
+... you can write:
+```javascript
+BOOMR_mq = window.BOOMR_mq || [];
+BOOMR_mq.push(['addVar', 'myVarName', 'myVarValue']);
+```
+
+Or, if you care about the return value, instead of:
+```javascript
+var hasMyVar = BOOMR.hasVar('myVarName');
+```
+... you can write:
+```javascript
+var hasMyVar;
+BOOMR_mq = window.BOOMR_mq || [];
+BOOMR_mq.push({
+   arguments: ['hasVar', 'myVarName'],
+   callback: function(returnValue) {
+     hasMyVar = returnValue;
+   }
+});
+```
+
 docs
 ---
 Documentation is in the docs/ sub directory, and is written in HTML.  Your best bet is to check it out and view it locally, though it works best through a web server (you'll need cookies).
