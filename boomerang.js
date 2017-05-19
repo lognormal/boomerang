@@ -108,7 +108,7 @@ BOOMR_check_doc_domain();
 
 // beaconing section
 // the parameter is the window
-(function(w) {
+(function(w) {          /*w就是window*/
 
 	var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
