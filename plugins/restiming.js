@@ -222,7 +222,11 @@ see: http://www.w3.org/TR/resource-timing/
 	}
 
 	/**
-	 * Checks if the current execution context can haz cheezburger from the specified frame
+	 * Checks if the current execution context can access the specified frame.
+	 *
+	 * Note: In Safari, this will still produce a console error message, even
+	 * though the exception is caught.
+
 	 * @param {Window} frame The frame to check if access can haz
 	 * @return {boolean} true if true, false otherwise
 	 */
@@ -332,7 +336,7 @@ see: http://www.w3.org/TR/resource-timing/
 
 					a.href = subFrames[i].src;	// Get canonical URL
 
-					entries = entries.concat(findPerformanceEntriesForFrame(frame.frames[i], false, frameOffset, depth + 1, visibleEntries[a.href]));
+					entries = entries.concat(findPerformanceEntriesForFrame(subFrames[i].contentWindow, false, frameOffset, depth + 1, visibleEntries[a.href]));
 				}
 			}
 
@@ -1237,7 +1241,9 @@ see: http://www.w3.org/TR/resource-timing/
 				return this;
 			}
 
-			if (p && typeof p.getEntriesByType === "function") {
+			if (p &&
+			    typeof p.getEntriesByType === "function" &&
+			    typeof window.PerformanceResourceTiming !== "undefined") {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);

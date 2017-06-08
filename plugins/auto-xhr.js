@@ -529,7 +529,8 @@
 			// Back-End: Any timeslice where a XHR or JavaScript was outstanding
 			// Front-End: Total Time - Back-End
 			//
-			if (!BOOMR.plugins.ResourceTiming) {
+			if (!BOOMR.plugins.ResourceTiming ||
+			    !BOOMR.plugins.ResourceTiming.is_supported()) {
 				return;
 			}
 
@@ -543,15 +544,13 @@
 			var totalTime = Math.round(resource.timing.loadEventEnd - resource.timing.requestStart);
 
 			if (!resources || !resources.length) {
-				if (BOOMR.plugins.ResourceTiming.is_supported()) {
-					// If ResourceTiming is supported, but there were no entries,
-					// this was all Front-End time
-					resource.timers = {
-						t_resp: 0,
-						t_page: totalTime,
-						t_done: totalTime
-					};
-				}
+				// If ResourceTiming is supported, but there were no entries,
+				// this was all Front-End time
+				resource.timers = {
+					t_resp: 0,
+					t_page: totalTime,
+					t_done: totalTime
+				};
 
 				return;
 			}
