@@ -369,7 +369,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
 			// NOTE: what is tested depends on the environment, whether it supports ResourceTiming or not
 			if (!BOOMR.plugins.ResourceTiming.is_supported()) {
-				assert.deepEqual({}, trie);
+				assert.deepEqual({ restiming: {} }, trie);
 				return;
 			}
 

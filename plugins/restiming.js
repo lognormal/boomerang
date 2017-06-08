@@ -952,7 +952,9 @@ see: http://www.w3.org/TR/resource-timing/
 		    timePoints = {};
 
 		if (!entries || !entries.length) {
-			return {};
+			return {
+				restiming: {}
+			};
 		}
 
 		for (i = 0; i < entries.length; i++) {
