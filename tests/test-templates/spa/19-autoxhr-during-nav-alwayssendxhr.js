@@ -129,7 +129,7 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					var st = BOOMR.window.performance.timing.navigationStart;
 
 					for (var beaconProp in BEACON_VAR_RT_MAP) {
-						var resTime = Math.round(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
+						var resTime = Math.floor(res[BEACON_VAR_RT_MAP[beaconProp]] + st);
 
 						assert.equal(
 							b[beaconProp],
