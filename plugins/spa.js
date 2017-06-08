@@ -2,7 +2,6 @@
 	var hooked = false,
 	    initialRouteChangeStarted = false,
 	    initialRouteChangeCompleted = false,
-	    lastLocationChange = "",
 	    autoXhrEnabled = false,
 	    firstSpaNav = true,
 	    routeFilter = false,
@@ -199,8 +198,9 @@
 			// "now" as the begin timestamp.
 			var requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
 
-			// if we were given a URL by $locationChangeStart use that, otherwise, use the document.URL
-			var url = lastLocationChange ? lastLocationChange : BOOMR.window.document.URL;
+			// use the document.URL even though it may be the URL of the previous nav. We will updated
+			// it in AutoXHR sendEvent
+			var url = BOOMR.window.document.URL;
 
 			// construct the resource we'll be waiting for
 			var resource = {
@@ -253,13 +253,10 @@
 			}
 		},
 		/**
-		 * Called by a framework when the location has changed to the specified URL.  This
-		 * should be called prior to route_change() to use the specified URL.
-		 * @param {string} url URL
+		 * Return the current SPA beacon type
+		 *
+		 * @returns {string} SPA beacon type
 		 */
-		last_location: function(url) {
-			lastLocationChange = url;
-		},
 		current_spa_nav: function() {
 			return !initialRouteChangeCompleted ? "spa_hard" : "spa";
 		},

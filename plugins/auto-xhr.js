@@ -157,6 +157,7 @@
 		this.timer = null;
 
 		this.pending_events = [];
+		this.lastSpaLocation = null;
 	}
 
 	/**
@@ -262,8 +263,9 @@
 		var ev = {
 			type: resource.initiator,
 			resource: resource,
-			nodes_to_wait: 0,
-			resources: [],
+			nodes_to_wait: 0,  // MO resources + xhrs currently outstanding
+			total_nodes: 0,  // total MO resources + xhrs
+			resources: [],  // resources reported to MO handler (no xhrs)
 			complete: false
 		},
 		    i,
@@ -376,10 +378,29 @@
 
 			ev.resource.resources = ev.resources;
 
-			// if this was an SPA nav that triggered no additional resources, substract the
-			// SPA_TIMEOUT from now to determine the end time
-			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS) && ev.resources.length === 0) {
-				ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
+			// for SPA events, the resource's URL may be set to the previous navigation's URL.
+			// reset it to the current document URL
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				ev.resource.url = d.URL;
+			}
+
+			// if this was a SPA soft nav with no URL change and did not trigger additional resources
+			// then we will not send a beacon
+			if (ev.type === "spa" && ev.total_nodes === 0 && ev.resource.url === self.lastSpaLocation) {
+				log("SPA beacon cancelled, no URL change or resources triggered");
+				this.pending_events[i] = undefined;
+				return;
+			}
+
+			if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// save the last SPA location
+				self.lastSpaLocation = ev.resource.url;
+
+				// if this was a SPA nav that triggered no additional resources, substract the
+				// SPA_TIMEOUT from now to determine the end time
+				if (ev.total_nodes === 0) {
+					ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
+				}
 			}
 
 			this.sendResource(ev.resource, i);
@@ -823,7 +844,11 @@
 			node.addEventListener("load", function(ev) { self.load_cb(ev, resourceNum); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev, resourceNum); });
 
+			// increase the number of outstanding resources by one
 			current_event.nodes_to_wait++;
+			// increase the number of total resources by one
+			current_event.total_nodes++;
+
 			current_event.resources.push(node);
 
 			// Note that we're tracking this URL
@@ -831,6 +856,7 @@
 
 			interesting = true;
 		}
+		// if it's an Element node such as <p> or <div>, find all the images contained in it
 		else if (node.nodeType === Node.ELEMENT_NODE) {
 			["IMAGE", "IMG"].forEach(function(tagName) {
 				els = node.getElementsByTagName(tagName);
@@ -873,6 +899,8 @@
 
 		// increase the number of outstanding resources by one
 		current_event.nodes_to_wait++;
+		// increase the number of total resources by one
+		current_event.total_nodes++;
 
 		resource.index = index;
 
@@ -1603,7 +1631,8 @@
 	 * An event on a page instrumented by {@link AutoXHR#MutationHandler} and monitored by AutoXHR
 	 *
 	 * @property {string} type - The type of event that we are watching (`xhr`, `click`, [SPAs]{@link BOOMR#constants.BEACON_TYPE_SPAS})
-	 * @property {number} nodes_to_wait - Number of nodes to wait for before event completes
+	 * @property {number} nodes_to_wait - Number of nodes/resources to wait for before event completes
+	 * @property {number} total_nodes - Total number of resources
 	 * @property {Resource} resource - The resource this event is attached to
 	 * @property {boolean} complete - `true` if event completed `false` if not
 	 * @property {?Resource[]} resources - multiple resources that are attached to this event

@@ -135,7 +135,6 @@
 			log("$locationChangeStart: " + newState);
 
 			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), newState]);
-			BOOMR.plugins.SPA.last_location(newState);
 
 			// Fire a route change (on a short delay) after this callback in case
 			// $routeChangeStart never fires.  We'd prefer to use $routeChangeStart's
@@ -156,18 +155,6 @@
 			log("$stateChangeStart: " + toState);
 
 			fireRouteChange(event, toState, toParams, fromState, fromParams);
-		});
-
-		$rootScope.$on("$stateChangeSuccess", function(event, toState, toParams, fromState, fromParams) {
-			if (!enabled) {
-				return;
-			}
-
-			var lastLocation = window.location.pathname + window.location.search;
-
-			log("$stateChangeSuccess: " + lastLocation);
-
-			BOOMR.plugins.SPA.last_location(lastLocation);
 		});
 
 		return true;
