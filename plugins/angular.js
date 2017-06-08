@@ -39,7 +39,8 @@
 	    enabled = true,
 	    hadMissedRouteChange = false,
 	    lastRouteChangeTime = 0,
-	    locationChangeTrigger = false;
+	    locationChangeTrigger = false,
+	    disableLocationChangeTrigger = false;
 
 	if (BOOMR.plugins.Angular || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
@@ -124,6 +125,10 @@
 			log("$routeChangeStart: " + (next ? next.templateUrl : ""));
 
 			fireRouteChange(event, next, current);
+
+			// Since we've seen a $routeChangeStart, we don't need to have
+			// $locationChangeStarts also trigger navigations.
+			disableLocationChangeTrigger = true;
 		});
 
 		// Listen for $locationChangeStart to know the new URL when the route changes
@@ -136,11 +141,15 @@
 
 			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), newState]);
 
-			// Fire a route change (on a short delay) after this callback in case
-			// $routeChangeStart never fires.  We'd prefer to use $routeChangeStart's
-			// arguments (next, current) for any routeFilter, so use a setTimeout
-			// that may be cancelled by the $routeChangeStart/$stateChangeStart event.
-			locationChangeTrigger = setTimeout(fireRouteChange, 0);
+			// If we haven't yet seen $routeChangeStart or $stateChangeStart, we might
+			// be in an app that only uses $locationChangeStart to trigger navigations.
+			if (!disableLocationChangeTrigger) {
+				// Fire a route change (on a short delay) after this callback in case
+				// $routeChangeStart is about to fire.  We'd prefer to use $routeChangeStart's
+				// arguments (next, current) for any routeFilter, so use a setTimeout
+				// that may be cancelled by the $routeChangeStart/$stateChangeStart event.
+				locationChangeTrigger = setTimeout(fireRouteChange, 0);
+			}
 		});
 
 		//
@@ -155,6 +164,10 @@
 			log("$stateChangeStart: " + toState);
 
 			fireRouteChange(event, toState, toParams, fromState, fromParams);
+
+			// Since we've seen a $stateChangeStart, we don't need to have
+			// $locationChangeStarts also trigger navigations.
+			disableLocationChangeTrigger = true;
 		});
 
 		return true;

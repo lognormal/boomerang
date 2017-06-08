@@ -133,6 +133,13 @@ angular.module("app", ["ngResource", "ui.router"])
 
 					$timeout(function() {
 						$location.url(nextRoute);
+
+						if (window.angularBroadcastLocationAfterStateChange) {
+							$timeout(function() {
+								// for
+								$rootScope.$broadcast("$locationChangeStart", null, null, null, null);
+							}, 500);
+						}
 					}, 100);
 				}
 
