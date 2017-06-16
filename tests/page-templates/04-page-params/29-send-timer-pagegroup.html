@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="29-send-timer-pagegroup.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	PageParams: {
+		customTimers: [
+			{
+				name: "custom_timer_1",
+				index: 1,
+				type: "Custom",
+				label: "custom1",
+				parameter1: "testTimer"
+			}
+		],
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: ".*",
+				parameter2: "PG"
+			}
+		]
+	},
+	afterFirstBeacon: function() {
+		BOOMR.sendTimer("custom_timer_1", 111);
+	}
+});
+</script>
+<%= footer %>

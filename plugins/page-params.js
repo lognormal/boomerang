@@ -2421,6 +2421,9 @@
 			    config = impl[type],
 			    ret;
 
+			// set the location
+			l = BOOMR.window.location;
+
 			handlerConfig.method = setMethod;
 			handler = new Handler(handlerConfig);
 
