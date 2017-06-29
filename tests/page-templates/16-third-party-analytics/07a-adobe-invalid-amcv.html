@@ -11,6 +11,9 @@ window.Visitor.getInstance = function() {
 
 BOOMR_test.clearCookies();
 
+// Set AMCV_ cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["AMCV_XXXXXXXXXXXXXXXXXXXXXXXX%40AdobeOrg=999999999%7CMCIDTS%7C16898%7CMCMID%MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM%7CMCAAMLH-1111111111%7C7%7CMCAAMB-1111111111%7CNNNNNNNNnNNNNNh-nqAG_A%7CMCAID%7CAAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAA", "path=/", "domain=" + location.hostname].join("; ");
+
 BOOMR_test.init({
 	testAfterOnBeacon: true,
 	TPAnalytics: {
