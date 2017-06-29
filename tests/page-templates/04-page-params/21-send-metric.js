@@ -109,4 +109,14 @@ describe("e2e/04-page-params/21-send-metric", function() {
 		var b = tf.beacons[1];
 		assert.notInclude(b.t_other, "custom1|111");
 	});
+
+	it("Should have set rt.tstart on the second beacon", function(){
+		var b = tf.lastBeacon();
+		assert.isDefined(b["rt.tstart"]);
+	});
+
+	it("Should have set rt.end on the second beacon", function(){
+		var b = tf.lastBeacon();
+		assert.isDefined(b["rt.end"]);
+	});
 });

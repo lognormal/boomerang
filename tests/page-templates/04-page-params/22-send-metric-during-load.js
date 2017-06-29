@@ -100,6 +100,16 @@ describe("e2e/04-page-params/22-send-metric-during-load", function() {
 		assert.notInclude(b.t_other, "custom1|111");
 	});
 
+	it("Should have set rt.tstart on the first beacon", function(){
+		var b = tf.beacons[0];
+		assert.isDefined(b["rt.tstart"]);
+	});
+
+	it("Should have set rt.end on the first beacon", function(){
+		var b = tf.beacons[0];
+		assert.isDefined(b["rt.end"]);
+	});
+
 	it("Should have sent a regular page load beacon for the second beacon", function(){
 		var b = tf.beacons[1];
 		assert.isUndefined(b["http.initiator"]);

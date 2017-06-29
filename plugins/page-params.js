@@ -2581,6 +2581,7 @@
 
 			// when this beacon fired
 			data["rt.tstart"] = q.when;
+			data["rt.end"] = q.when;
 
 			// initiator
 			data["http.initiator"] = "api_custom_" + q.type;
