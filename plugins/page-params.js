@@ -2680,7 +2680,7 @@
 
 			// session data
 			if (BOOMR.session && BOOMR.session.ID !== false) {
-				params["rt.si"] = BOOMR.session.ID;
+				params["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36);
 				params["rt.ss"] = BOOMR.session.start;
 				params["rt.sl"] = BOOMR.session.length;
 			}

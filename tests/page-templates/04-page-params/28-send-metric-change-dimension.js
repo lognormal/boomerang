@@ -67,12 +67,7 @@ describe("e2e/04-page-params/28-send-metric-change-dimension", function() {
 	it("Should have set rt.si on the second beacon", function(){
 		var b = tf.beacons[1];
 		assert.isDefined(b["rt.si"]);
-	});
-
-	it("Should have set rt.sl on the second beacon", function(){
-		var b = tf.beacons[1];
-		assert.isDefined(b["rt.sl"]);
-		assert.operator(b["rt.sl"], ">", 0);
+		assert.equal(tf.beacons[0]["rt.si"], b["rt.si"]);
 	});
 
 	it("Should have set rt.start=manual on the second beacon", function(){
@@ -158,6 +153,7 @@ describe("e2e/04-page-params/28-send-metric-change-dimension", function() {
 	it("Should have set rt.si on the third beacon", function(){
 		var b = tf.beacons[2];
 		assert.isDefined(b["rt.si"]);
+		assert.equal(tf.beacons[0]["rt.si"], b["rt.si"]);
 	});
 
 	it("Should have set rt.sl on the third beacon", function(){

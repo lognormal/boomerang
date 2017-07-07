@@ -72,12 +72,7 @@ describe("e2e/04-page-params/23-send-metrics", function() {
 	it("Should have set rt.si on the second beacon", function(){
 		var b = tf.lastBeacon();
 		assert.isDefined(b["rt.si"]);
-	});
-
-	it("Should have set rt.sl on the second beacon", function(){
-		var b = tf.lastBeacon();
-		assert.isDefined(b["rt.sl"]);
-		assert.operator(b["rt.sl"], ">", 0);
+		assert.equal(tf.beacons[0]["rt.si"], b["rt.si"]);
 	});
 
 	it("Should have set rt.start=manual on the second beacon", function(){

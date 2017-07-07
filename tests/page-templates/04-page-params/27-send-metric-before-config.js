@@ -59,12 +59,6 @@ describe("e2e/04-page-params/27-send-metric-before-config", function() {
 		assert.isDefined(b["rt.si"]);
 	});
 
-	it("Should have set rt.sl on the first beacon", function(){
-		var b = tf.beacons[0];
-		assert.isDefined(b["rt.sl"]);
-		assert.operator(b["rt.sl"], ">", 0);
-	});
-
 	it("Should have set rt.start=manual on the first beacon", function(){
 		var b = tf.beacons[0];
 		assert.equal(b["rt.start"], "manual");
@@ -108,5 +102,11 @@ describe("e2e/04-page-params/27-send-metric-before-config", function() {
 	it("Should have set the Custom Timer for the second beacon", function(){
 		var b = tf.beacons[1];
 		assert.include(b.t_other, "custom1|111");
+	});
+
+	it("Should have set rt.si on the second beacon", function(){
+		var b = tf.lastBeacon();
+		assert.isDefined(b["rt.si"]);
+		assert.equal(tf.beacons[0]["rt.si"], b["rt.si"]);
 	});
 });
