@@ -1049,29 +1049,31 @@
 			}
 
 			// no exact match, maybe it has wildcards
-			reslist = frame.performance.getEntriesByType("resource");
-			if (reslist && reslist.length > 0) {
-				for (i = 0; i < reslist.length; i++) {
+			if (url.indexOf("*") !== -1 || url === "slowest") {
+				reslist = frame.performance.getEntriesByType("resource");
+				if (reslist && reslist.length > 0) {
+					for (i = 0; i < reslist.length; i++) {
 
-					// if we want the slowest url, then iterate through all till we find it
-					if (url === "slowest") {
-						if (!res || reslist[i].duration > res.duration) {
-							res = reslist[i];
+						// if we want the slowest url, then iterate through all till we find it
+						if (url === "slowest") {
+							if (!res || reslist[i].duration > res.duration) {
+								res = reslist[i];
+							}
 						}
-					}
 
-					// else stop at the first that matches the pattern
-					else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name, false)) {
-						foundList.push(reslist[i]);
-						if (limit && foundList.length === limit) {
-							return foundList;
+						// else stop at the first that matches the pattern
+						else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name, false)) {
+							foundList.push(reslist[i]);
+							if (limit && foundList.length === limit) {
+								return foundList;
+							}
 						}
 					}
 				}
-			}
 
-			if (res) {
-				return [res];
+				if (res) {
+					return [res];
+				}
 			}
 
 			if (frame.frames) {
