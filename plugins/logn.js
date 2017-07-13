@@ -9,13 +9,19 @@
 	    running = false,
 	    t_start,
 	    autorun = true,
-	    alwaysRun = typeof w.BOOMR_LOGN_always !== "undefined",
+
+	    // Default is undefined. Used from unit tests to change behavior.
+	    // When false, the plugin will not run.
+	    // When true, the plugin will always run
+	    alwaysRun = w.BOOMR_LOGN_always,
+
 	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,
 	    ready = false;
 
 	// Don't even bother creating the plugin if this is mhtml
-	if (!alwaysRun &&
-		(BOOMR.plugins.LOGN || !dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//))) {
+	if (alwaysRun === false ||
+	    (typeof alwaysRun === "undefined" &&
+	    (!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)))) {
 		return;
 	}
 

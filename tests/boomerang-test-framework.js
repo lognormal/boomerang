@@ -192,9 +192,11 @@
 			});
 		}
 
-		// initialize boomerang
-		BOOMR.addVar("h.cr", "test");
-		BOOMR.init(config);
+		if (window.BOOMR_LOGN_always !== true) {
+			// initialize boomerang if LOGN is disabled
+			BOOMR.addVar("h.cr", "test");
+			BOOMR.init(config);
+		}
 
 		if (config.onBoomerangLoaded) {
 			config.onBoomerangLoaded();
@@ -214,13 +216,15 @@
 				});
 		}
 
-		// fake session details so beacons send
-		BOOMR.addVar({
-			"h.key": window.BOOMR_API_key ? window.BOOMR_API_key : "aaaaa-bbbbb-ccccc-ddddd-eeeee",
-			"h.d": "localhost",
-			"h.t": new Date().getTime(),
-			"h.cr": "abc"
-		});
+		if (window.BOOMR_LOGN_always !== true) {
+			// fake session details so beacons send if LOGN is disabled
+			BOOMR.addVar({
+				"h.key": window.BOOMR_API_key ? window.BOOMR_API_key : "aaaaa-bbbbb-ccccc-ddddd-eeeee",
+				"h.d": window.location.hostname,
+				"h.t": new Date().getTime(),
+				"h.cr": "abc"
+			});
+		}
 
 		t.configureTestEnvironment();
 
@@ -267,7 +271,9 @@
 	};
 
 	t.isResourceTimingSupported = function() {
-		return (window.performance && typeof window.performance.getEntriesByType === "function");
+		return (window.performance &&
+		    typeof window.performance.getEntriesByType === "function" &&
+		    typeof window.PerformanceResourceTiming !== "undefined");
 	};
 
 	t.isQuerySelectorSupported = function() {
@@ -279,6 +285,7 @@
 	};
 
 	t.isUserTimingSupported = function() {
+		// don't check for PerformanceMark or PerformanceMeasure, they aren't polyfilled in usertiming.js
 		return (window.performance &&
 		        typeof window.performance.getEntriesByType === "function" &&
 		        typeof window.performance.mark === "function" &&
@@ -723,5 +730,9 @@
 	};
 
 	window.BOOMR_test = t;
+
+	// force LOGN plugin not to run. Individual tests will override this if needed.
+	// This only works if the test framework is loaded before boomerang
+	window.BOOMR_LOGN_always = false;
 
 }(window));

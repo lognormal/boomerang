@@ -10,8 +10,11 @@ var path = require("path");
 module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
 	var r = typeof q.r !== "undefined";
-	var json = q.json || require("url").parse(req.url).pathname === "/config.json";
+	var json = q.json ||
+	    require("url").parse(req.url).pathname === "/config.json" ||
+	    typeof q.acao !== "undefined";  // assume json if the acao param exists
 	var delay = q.delay || 0;
+	var domain = q.d || "";
 
 	setTimeout(function() {
 		var hash = crypto.createHash("sha1");
@@ -21,10 +24,13 @@ module.exports = function(req, res) {
 
 		var hcr = hash.digest("hex");
 
-		res.header("Access-Control-Allow-Origin", "*");
+		if (typeof q.acao !== "undefined") {
+			res.header("Access-Control-Allow-Origin", "*");
+		}
 
-		if (q.key && q.key !== "API_KEY") {
-			var ending = typeof q.acao !== "undefined" ? ".json" : ".js";
+		// if they've requested a specific non-refresh config, send that file
+		if (q.key && !q.key.startsWith("API_KEY") && !r) {
+			var ending = json ? ".json" : ".js";
 			var file = path.join(__dirname, "config", q.key + ending);
 
 			if (!fs.existsSync(file)) {
@@ -37,26 +43,28 @@ module.exports = function(req, res) {
 			// replace h.t and h.cr
 			contents = contents.replace("{{H_T}}", ht);
 			contents = contents.replace("{{H_CR}}", hcr);
+			contents = contents.replace("{{DOMAIN}}", domain);
 
 			res.send(contents);
 		}
+		// config refresh
 		else if (r) {
 			var content = util.format('{"h.t":%d,"h.cr":"%s"}', ht, hcr);
-			var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.addVar(%s);", content);
 			if (json) {
 				res.send(content);
 			}
 			else {
+				var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.addVar(%s);", content);
 				res.send(wrap);
 			}
 		}
 		else {
-			var content = util.format('{"h.t":%d,"h.cr":"%s"}', ht, hcr);
-			var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.init(%s);", content);
+			var content = util.format('{"h.t":%d,"h.cr":"%s","h.d":"%s","autorun":true}', ht, hcr, domain);
 			if (json) {
 				res.send(content);
 			}
 			else {
+				var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.init(%s);", content);
 				res.send(wrap);
 			}
 		}

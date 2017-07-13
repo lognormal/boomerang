@@ -1,5 +1,5 @@
 <%= header %>
-<%= boomerangSnippet %>
+<%= boomerangScript %> <!-- load bomerang sync so that we can check if AutoXHR is avail -->
 <script src="33-xhr-filters-custom-context.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -44,14 +44,13 @@ BOOMR_test.init({
 		}
 		setTimeout(function() {
 			var xhr1 = new XMLHttpRequest();
-			xhr1.open("GET", "/pages/07-autoxhr/support/img.jpg");
-			xhr1.send(null);
-
 			xhr1.addEventListener("load", function() {
 				var xhr2 = new XMLHttpRequest();
 				xhr2.open("GET", "/pages/07-autoxhr/support/script200.js");
 				xhr2.send(null);
 			});
+			xhr1.open("GET", "/pages/07-autoxhr/support/img.jpg");
+			xhr1.send(null);
 		}, 100);
 	}
 });
