@@ -54,7 +54,7 @@ see: http://www.w3.org/TR/navigation-timing/
 
 			p = BOOMR.getPerformance();
 
-			// if we previous saved the correct ResourceTiming entry, use it
+			// if we previously saved the correct ResourceTiming entry, use it
 			if (p && edata.restiming) {
 				data = {
 					nt_red_st: edata.restiming.redirectStart,
@@ -118,7 +118,7 @@ see: http://www.w3.org/TR/navigation-timing/
 		},
 
 		done: function() {
-			var w = BOOMR.window, p, pn, pt, data;
+			var w = BOOMR.window, p, pn, pt, data, cinf;
 
 			if (this.complete) {
 				return this;
@@ -126,75 +126,14 @@ see: http://www.w3.org/TR/navigation-timing/
 
 			impl.addedVars = [];
 
-			p = BOOMR.getPerformance();
-			if (p && p.timing && p.navigation) {
-				BOOMR.info("This user agent supports NavigationTiming.", "nt");
-				pn = p.navigation;
-				pt = p.timing;
-				data = {
-					nt_red_cnt: pn.redirectCount,
-					nt_nav_type: pn.type,
-					nt_nav_st: pt.navigationStart,
-					nt_red_st: pt.redirectStart,
-					nt_red_end: pt.redirectEnd,
-					nt_fet_st: pt.fetchStart,
-					nt_dns_st: pt.domainLookupStart,
-					nt_dns_end: pt.domainLookupEnd,
-					nt_con_st: pt.connectStart,
-					nt_con_end: pt.connectEnd,
-					nt_req_st: pt.requestStart,
-					nt_res_st: pt.responseStart,
-					nt_res_end: pt.responseEnd,
-					nt_domloading: pt.domLoading,
-					nt_domint: pt.domInteractive,
-					nt_domcontloaded_st: pt.domContentLoadedEventStart,
-					nt_domcontloaded_end: pt.domContentLoadedEventEnd,
-					nt_domcomp: pt.domComplete,
-					nt_load_st: pt.loadEventStart,
-					nt_load_end: pt.loadEventEnd,
-					nt_unload_st: pt.unloadEventStart,
-					nt_unload_end: pt.unloadEventEnd
-				};
-
-				if (pt.secureConnectionStart) {
-					// secureConnectionStart is OPTIONAL in the spec
-					data.nt_ssl_st = pt.secureConnectionStart;
-				}
-
-				if (pt.msFirstPaint) {
-					// msFirstPaint is IE9+ http://msdn.microsoft.com/en-us/library/ff974719
-					data.nt_first_paint = pt.msFirstPaint;
-				}
-
-				BOOMR.addVar(data);
-
-				//
-				// Basic browser bug detection for known cases where NavigationTiming
-				// timestamps might not be trusted.
-				//
-				if ((pt.requestStart && pt.navigationStart && pt.requestStart < pt.navigationStart) ||
-				    (pt.responseStart && pt.navigationStart && pt.responseStart < pt.navigationStart) ||
-				    (pt.responseStart && pt.fetchStart && pt.responseStart < pt.fetchStart) ||
-				    (pt.navigationStart && pt.fetchStart < pt.navigationStart) ||
-				    (pt.responseEnd && pt.responseEnd > BOOMR.now() + 8.64e+7)) {
-					BOOMR.addVar("nt_bad", 1);
-					impl.addedVars.push("nt_bad");
-				}
-
-				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-				catch (ignore) { /* empty */ }
-			}
-
-			// XXX Inconsistency warning.  msFirstPaint above is in milliseconds while
-			//     firstPaintTime below is in seconds.microseconds.  The server needs to deal with this.
-
-			// This is Chrome only, so will not overwrite nt_first_paint above
+			// This is Chrome only, so will not conflict with nt_first_paint below
 			if (w.chrome && w.chrome.loadTimes) {
 				pt = w.chrome.loadTimes();
 				if (pt) {
+					cinf = pt.connectionInfo;
 					data = {
 						nt_spdy: (pt.wasFetchedViaSpdy ? 1 : 0),
-						nt_cinf: pt.connectionInfo,
+						nt_cinf: cinf,
 						nt_first_paint: pt.firstPaintTime
 					};
 
@@ -203,6 +142,111 @@ see: http://www.w3.org/TR/navigation-timing/
 					try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
 					catch (ignore) { /* empty */ }
 				}
+				pt = undefined;
+			}
+
+			p = BOOMR.getPerformance();
+			if (p) {
+				if (typeof p.getEntriesByType === "function") {
+					pt = p.getEntriesByType("navigation");
+					if (pt && pt.length) {
+						BOOMR.info("This user agent supports NavigationTiming.", "nt");
+
+						pt = pt[0];
+					}
+					else {
+						pt = undefined;
+					}
+				}
+				if (!pt && p.timing) {
+					pt = p.timing;
+				}
+
+				if (pt) {
+					data = {
+						nt_nav_st: pt.navigationStart,
+						nt_red_st: pt.redirectStart,
+						nt_red_end: pt.redirectEnd,
+						nt_fet_st: pt.fetchStart,
+						nt_dns_st: pt.domainLookupStart,
+						nt_dns_end: pt.domainLookupEnd,
+						nt_con_st: pt.connectStart,
+						nt_con_end: pt.connectEnd,
+						nt_req_st: pt.requestStart,
+						nt_res_st: pt.responseStart,
+						nt_res_end: pt.responseEnd,
+						nt_domloading: pt.domLoading,
+						nt_domint: pt.domInteractive,
+						nt_domcontloaded_st: pt.domContentLoadedEventStart,
+						nt_domcontloaded_end: pt.domContentLoadedEventEnd,
+						nt_domcomp: pt.domComplete,
+						nt_load_st: pt.loadEventStart,
+						nt_load_end: pt.loadEventEnd,
+						nt_unload_st: pt.unloadEventStart,
+						nt_unload_end: pt.unloadEventEnd
+					};
+
+					if (pt.secureConnectionStart) {
+						// secureConnectionStart is OPTIONAL in the spec
+						data.nt_ssl_st = pt.secureConnectionStart;
+					}
+
+					// XXX Inconsistency warning.  msFirstPaint is in milliseconds while Chrome's firstPaintTime is in seconds.microseconds.
+					// The server needs to deal with this.
+
+					if (pt.msFirstPaint) {
+						// msFirstPaint is IE9+ http://msdn.microsoft.com/en-us/library/ff974719
+						data.nt_first_paint = pt.msFirstPaint;
+					}
+
+					if (pt.workerStart) {
+						data.nt_worker_start = pt.workerStart;
+					}
+					// Need to check both decodedSize and transferSize as
+					// transferSize is 0 for cached responses and
+					// decodedSize is 0 for empty responses (eg: beacons, 204s, etc.)
+					if (pt.decodedBodySize || pt.transferSize) {
+						data.nt_enc_size = pt.encodedBodySize;
+						data.nt_dec_size = pt.decodedBodySize;
+						data.nt_trn_size = pt.transferSize;
+					}
+					if (pt.nextHopProtocol) {
+						data.nt_protocol = pt.nextHopProtocol;
+
+						if (!cinf) {
+							data.nt_cinf = pt.nextHopProtocol;	// Maintain this for legacy code that only looks at nt_cinf
+						}
+					}
+
+				}
+
+				if (p.navigation) {
+					pn = p.navigation;
+
+					data.nt_red_cnt  = pn.redirectCount;
+					data.nt_nav_type = pn.type;
+				}
+
+
+				BOOMR.addVar(data);
+
+				//
+				// Basic browser bug detection for known cases where NavigationTiming
+				// timestamps might not be trusted.
+				//
+				if (pt && (
+				    (pt.requestStart && pt.navigationStart && pt.requestStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.navigationStart && pt.responseStart < pt.navigationStart) ||
+				    (pt.responseStart && pt.fetchStart && pt.responseStart < pt.fetchStart) ||
+				    (pt.navigationStart && pt.fetchStart < pt.navigationStart) ||
+				    (pt.responseEnd && pt.responseEnd > BOOMR.now() + 8.64e+7)
+				)) {
+					BOOMR.addVar("nt_bad", 1);
+					impl.addedVars.push("nt_bad");
+				}
+
+				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
+				catch (ignore) { /* empty */ }
 			}
 
 			impl.sendBeacon();
