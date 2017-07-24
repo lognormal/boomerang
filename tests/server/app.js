@@ -64,6 +64,9 @@ function respond301(req, res) {
 // Routes
 //
 
+// Favicon empty response
+app.get("/favicon.ico", respond204);
+
 // /blackhole and /204: returns a 204
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);

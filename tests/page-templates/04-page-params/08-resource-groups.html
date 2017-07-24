@@ -2,14 +2,27 @@
 <%= boomerangScript %>
 <script src="08-resource-groups.js" type="text/javascript"></script>
 <div id="wrapper">
-  <div id="element">
-	<img src="/delay?delay=1000&id=abc&file=/pages/04-page-params/support/img.jpg"/>
-  </div>
-  <div id="extra">
-	<img src="/delay?delay=2000&id=def&file=/pages/04-page-params/support/img.jpg"/>
-  </div>
+	<div id="element">
+		<img src="/delay?delay=1000&amp;id=abc&amp;file=/pages/04-page-params/support/img.jpg" style="width:100px;"/>
+	</div>
+	<div id="extra">
+		<img src="/delay?delay=1000&amp;id=def&amp;file=/pages/04-page-params/support/img.jpg" style="width:100px;"/>
+	</div>
 </div>
 
+<div class="single part" id="single-part1">
+	<img src="/delay?delay=1000&amp;id=zzz&amp;file=/pages/04-page-params/support/img.jpg" style="width:100px;"/>
+</div>
+<div class="single part2" id="single-part2">
+	<img src="/delay?delay=2000&amp;id=yyy&amp;file=/pages/04-page-params/support/img.jpg" style="width:100px;"/>
+</div>
+
+<!--
+	2017-07-24: This last image of 3 seconds is used to ensure Edge waits for the
+	previous 4 images before firing pageshow.  Currently in Edge 15, the "last image" (whatever
+	is delaying onload) is sometimes not yet visually on the page and its is responseEnd==0.
+-->
+<img src="/delay?delay=3000&amp;id=last&amp;file=/pages/04-page-params/support/img.jpg?last-image" style="width:100px;"/>
 
 <script type="text/javascript">
 BOOMR_test.init({
@@ -217,6 +230,21 @@ BOOMR_test.init({
 						resources: [{
 							type: "resource",
 							value: "*id=def*"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup matching multiple containers with resources inside",
+				index: 14,
+				label: "ctim.CT14",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "queryselector",
+							value: ".single"
 						}]
 					}
 				}

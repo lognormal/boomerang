@@ -18,5 +18,6 @@
 	{"key":"js-var-string-property-access"},
 	{"key":"autoxhr-filters"},
 	{"key":"usertiming"},
-	{"key":"iframe-delay"}
+	{"key":"iframe-delay"},
+	{"key":"resource-groups-nav-start"}
 ]

@@ -90,6 +90,12 @@ module.exports = function(req, res) {
 			return res.redirect(302, file);
 		}
 
+		if (delay > 0) {
+			res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+			res.header("Pragma", "no-cache");
+			res.header("Expires", 0);
+		}
+
 		if (sendACAO) {
 			headers["Access-Control-Allow-Origin"] = "*";
 		}

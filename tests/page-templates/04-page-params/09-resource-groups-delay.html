@@ -48,4 +48,7 @@ img.src = imgSrc;
 var container = document.getElementById("element");
 container.appendChild(img);
 </script>
+
+<!-- ensure the page load event is delayed until the above image has loaded -->
+<img src="/delay?delay=2000&amp;id=last&amp;file=/pages/04-page-params/support/img.jpg?last-image" style="width:100px;"/>
 <%= footer %>

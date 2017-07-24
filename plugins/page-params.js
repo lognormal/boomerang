@@ -569,12 +569,18 @@
 			return el.singleNodeValue;
 		},
 
-		runQuerySelector: function(queryselector, element) {
+		runQuerySelector: function(queryselector, element, all) {
 			var el;
+			all = all || false;
 			element = element || d;
 			try {
-				if (element.querySelector) {
-					el = element.querySelector(queryselector);
+				if (element.querySelector || element.querySelectorAll) {
+					if (all) {
+						el = element.querySelectorAll(queryselector);
+					}
+					else {
+						el = element.querySelector(queryselector);
+					}
 				}
 				else {
 					return null;
@@ -1218,8 +1224,11 @@
 		},
 		/**
 		 * @desc
-		 * Resource Groups is a Handler Type listening to the fetchStart and stop of a resource or set of
-		 * resources on the page initiated by either a SPA navigation type or XHR event we are listening to.
+		 * Resource Groups is a Handler Type listening to the fetchStart and responseEnd of a resource or set of
+		 * resources on the page initiated by either an Onload event, SPA navigation type or XHR event we are listening to.
+		 *
+		 * Optionally instead of the resources fetchStart we can also measure from a sites navigationStart until the resources
+		 * responseEnd.
 		 *
 		 * A resource-set here describes a set of type and value pairs designating a queriable element on the page
 		 * An event source is an event on the page we are listening for that we are expecting to correlate with the
@@ -1264,6 +1273,26 @@
 		 *       resource: [{
 		 *         type: "queryselector",
 		 *         value: "#generated-gif"
+		 *       }]
+		 *     }
+		 *   }
+		 * }
+		 *
+		 * In this example we wish to measure a given resource from navigationStart instead
+		 * of the fetchStart of the resource:
+		 * @example
+		 * {
+		 *   name: "Resource Group for generated GIF",
+		 *   index: 0,
+		 *   label: "ctim.CT0",
+		 *   type: "ResourceGroup",
+		 *   value: {
+		 *     "/app/overview": {
+		 *       on: ["onload"],
+		 *       resource: [{
+		 *         type: "queryselector",
+		 *         value: "#generated-gif",
+		 *         start: "navigationStart"
 		 *       }]
 		 *     }
 		 *   }
@@ -1344,7 +1373,7 @@
 				for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
 					// If the type is `init` this is after the Handler was initialized so don't check Resource Groups now
 					if (src !== "init" && src !== "xhr") {
-						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex));
+						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex), resourceSetIndex);
 					}
 
 					if (this.MOSupport && (src === "init" || this.isOnPageEvent())) {
@@ -1393,7 +1422,7 @@
 		 * @param {Resource} resource - resource to potentially watch
 		 */
 		setupMutationObserver: function(index) {
-			var resource = this.resourceSet[index], node = this.getNode(index), obsConfig = {
+			var resource = this.resourceSet[index], currentNode = null, nodeIndex = 0, node = this.getNode(index), obsConfig = {
 				childList: true,
 				attributes: true,
 				subtree: true,
@@ -1416,17 +1445,36 @@
 				node = BOOMR.window.document.body;
 			}
 
-			if (node && !this.isContainer(node)) {
-				this.resourceSet[index].found = true;
-				// Don't setup an MO if this is not a container
-				return null;
+			if (node && typeof node.length === "number") {
+				for (nodeIndex = 0; nodeIndex < node.length; nodeIndex++) {
+					currentNode = node[nodeIndex];
+
+					// Even if we expect new elements to arrive via MO we need to check the already added elements
+					this.traverseElements(currentNode, index);
+
+					if (currentNode && !this.isContainer(currentNode)) {
+						this.resourceSet[index].found = true;
+						// Don't setup an MO if this is not a container
+						continue;
+					}
+
+					BOOMR.debug("Starting a Mutation observer for Resource: " + this.config.label + "", "PageVars.ResourceGroup");
+					BOOMR.utils.addObserver(currentNode, obsConfig, null, this.mutationCb.bind(this), index, this);
+				}
 			}
+			else {
+				if (node && !this.isContainer(node)) {
+					this.resourceSet[index].found = true;
+					// Don't setup an MO if this is not a container
+					return null;
+				}
 
-			// Even if we expect new elements to arrive via MO we need to check the already added elements
-			this.traverseElements(node, index);
+				// Even if we expect new elements to arrive via MO we need to check the already added elements
+				this.traverseElements(node, index);
 
-			BOOMR.debug("Starting a Mutation observer for Resource: " + this.config.label + "", "PageVars.ResourceGroup");
-			return BOOMR.utils.addObserver(node, obsConfig, null, this.mutationCb.bind(this), index, this);
+				BOOMR.debug("Starting a Mutation observer for Resource: " + this.config.label + "", "PageVars.ResourceGroup");
+				return BOOMR.utils.addObserver(node, obsConfig, null, this.mutationCb.bind(this), index, this);
+			}
 		},
 		/**
 		 * @desc
@@ -1434,7 +1482,7 @@
 		 * @param {number} index - Array index of resource set element to use
 		 */
 		setupListener: function(index) {
-			var resource = this.resourceSet[index], node = this.getNode(index), timeout = null, runtime = 0, that = this, lastRun = BOOMR.now();
+			var resource = this.resourceSet[index], node = this.getNode(index), timeout = null, runtime = 0, that = this, lastRun = BOOMR.now(), nodeIndex = 0, curNode = null;
 
 			if (resource.type === "resource") {
 				node = BOOMR.window.document.body;
@@ -1451,6 +1499,23 @@
 			// Body might still be null if we run in IE8 returning
 			// waiting for a later run.
 			if (BOOMR.window.document.body === node && node === null) {
+				return null;
+			}
+
+			// If we got a set of elements returned (querySelectorAll for example) iterate and check we can listen on them
+			if (node && node.length > 0) {
+				this.resourceSet[index].found = true;
+
+				for (nodeIndex = 0; nodeIndex < node.length; nodeIndex++) {
+					curNode = node[nodeIndex];
+					if (!this.isContainer(curNode)) {
+						this.initResourceGroupListener(curNode, index);
+					}
+					else {
+						this.traverseElements(node, index);
+					}
+				}
+
 				return null;
 			}
 
@@ -1581,7 +1646,7 @@
 					node = this.getNode(index);
 
 					if (this.RTSupport) {
-						this.refreshResourceGroupTimings(this.lookupResources(index), this.config);
+						this.refreshResourceGroupTimings(this.lookupResources(index), index);
 					}
 
 					for (nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++) {
@@ -1708,10 +1773,11 @@
 		 * @return {Object[]} - An array of resources mapping to the found ResourceTiming entries found referring to the Resource passed in
 		 */
 		lookupResources: function(index) {
-			var resource = this.resourceSet[index], ret = this.getNode(index), resources = [], url, children;
+			var resource = this.resourceSet[index], ret = this.getNode(index), resources = [], url, children, resIndex = 0, currentNode, tmpResources, tmpResIndex = 0, start = this.getStartTime(index);
 
 			// check that returned value is a node type
-			if (ret && !ret.hasOwnProperty("length")) {
+			// need to use .length typeof check because nodeLists don't have an "own" property of length
+			if (ret && typeof ret.length === "undefined") {
 				this.resourceSet[index].found = true;
 				url = this.getNodeURL(ret);
 				// if url is a string
@@ -1727,7 +1793,24 @@
 					}
 				}
 			}
-			else if (ret && ret.hasOwnProperty("length")) {
+			// Checking if this is actuall a resourceGroup
+			else if (ret && typeof ret.length === "number" && ret.length > 0 && !ret[0][start]) {
+				for (resIndex = 0; resIndex < ret.length; resIndex++) {
+					currentNode = ret[resIndex];
+					if (!this.isContainer(currentNode)) {
+						tmpResources = this.findResources(this.getNodeURL(currentNode));
+						if (tmpResources) {
+							for (tmpResIndex = 0; tmpResIndex < tmpResources.length; tmpResIndex++) {
+								resources.push(tmpResources[tmpResIndex]);
+							}
+						}
+					}
+					else {
+						this.traverseElements(currentNode, index);
+					}
+				}
+			}
+			else if (ret && typeof ret.length === "number") {
 				if (ret.length > 0) {
 					this.resourceSet[index].found = true;
 				}
@@ -1742,11 +1825,11 @@
 		 * @desc
 		 * Takes an array of resources and applies their timing to the current ResourceGroup timing
 		 */
-		refreshResourceGroupTimings: function(resources) {
+		refreshResourceGroupTimings: function(resources, index) {
 			if (resources.length > 0) {
 				// We found resources for this RG time to map
 				for (var resourceIndex = 0; resourceIndex < resources.length; resourceIndex++) {
-					this.updateResourceGroupDelta(resources[resourceIndex]);
+					this.updateResourceGroupDelta(resources[resourceIndex], index);
 				}
 
 				// if applying the timer failed we will try again at a later point
@@ -1789,7 +1872,7 @@
 				ret = this.runXPath(resource.value);
 				break;
 			case "queryselector":
-				ret = this.runQuerySelector(resource.value);
+				ret = this.runQuerySelector(resource.value, false, true);
 				break;
 			case "resource":
 				if (this.RTSupport) {
@@ -1857,19 +1940,35 @@
 				break;
 			}
 		},
+		getStartTime: function(index) {
+			var resourceSet = this.resourceSet[index], start = "fetchStart";
+
+			if (resourceSet.start) {
+				start = resourceSet.start;
+			}
+
+			return start;
+		},
 		/**
 		 * @desc
 		 * Update the distance between start and end of a set of resources start and end times
 		 * @param {ResourceEntry} resource - a resource with a fetchStart and responseEnd entry to match against the current earliest start timestamp and last response ending time.
 		 */
-		updateResourceGroupDelta: function(resource) {
+		updateResourceGroupDelta: function(resource, index) {
+			var start = this.getStartTime(index);
+
 			if (!resource || (resource && !resource.responseEnd)) {
 				BOOMR.debug("Tried to update ResourceGroup delta with unfinished resource!", "PageVars");
 				return;
 			}
 
-			if (!this.resourceTime.start || this.resourceTime.start > resource.fetchStart) {
-				this.resourceTime.start = resource.fetchStart;
+			if (start !== "navigationStart") {
+				if (!this.resourceTime.start || this.resourceTime.start > resource[start]) {
+					this.resourceTime.start = resource[start];
+				}
+			}
+			else {
+				this.resourceTime.start = 0;
 			}
 
 			if (!this.resourceTime.stop || this.resourceTime.stop < resource.responseEnd) {
@@ -1884,10 +1983,10 @@
 		 * These attributes are only used when ResourceTiming is not available
 		 */
 		initResourceGroupListener: function(nodeChild, index) {
-			var resource = this.resourceSet[index], tempRG;
+			var resource = this.resourceSet[index], tempRG, start = this.getStartTime(index);
 
 			nodeChild._bmr_rg = nodeChild._bmr_rg || {};
-			nodeChild._bmr_rg.fetchStart = nodeChild._bmr_rg.fetchStart ? nodeChild._bmr_rg.fetchStart : BOOMR.now();
+			nodeChild._bmr_rg[start] = nodeChild._bmr_rg[start] ? nodeChild._bmr_rg[start] : BOOMR.now();
 
 			// this may be run twice on the same element if the resource is part of multiple overlapping resource groups
 			if (!nodeChild._bmr_rg_resource) {
@@ -1912,7 +2011,7 @@
 
 			function nodeLoaded(event) {
 				// event.targeg is not defined on IE8, but srcElement is
-				var nodeTarget = event.target ? event.target : event.srcElement, nodeURL = that.getNodeURL(nodeTarget), resources;
+				var nodeTarget = event.target ? event.target : event.srcElement, nodeURL = that.getNodeURL(nodeTarget), resources, start = that.getStartTime(index);
 
 				if (that.RTSupport) {
 					// Since in SPA navigations image resources may have been initially added to the
@@ -1921,35 +2020,41 @@
 						resources = that.findResources(nodeURL);
 						if (resources.length > 0) {
 							that.resourceSet[index].found = true;
-							that.refreshResourceGroupTimings(resources, that.config);
+							that.refreshResourceGroupTimings(resources, index);
 						}
 					}
 					else {
-						that.refreshResourceGroupTimings(that.findResources(that.getNodeURL(nodeTarget)), that.config);
+						that.refreshResourceGroupTimings(that.findResources(that.getNodeURL(nodeTarget)), index);
 					}
 				}
 				else {
 					nodeURL = that.getNodeURL(nodeTarget);
 					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
 						nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
-						that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+						that.updateResourceGroupDelta(nodeTarget._bmr_rg, index);
 					}
 					else {
 						// Multiple eventlisteners due to multiple resource groups overlapping
-						if (nodeTarget._bmr_rg && nodeTarget._bmr_rg.responseEnd && nodeTarget._bmr_rg.fetchStart) {
-							that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+						if (nodeTarget._bmr_rg && nodeTarget._bmr_rg.responseEnd && nodeTarget._bmr_rg[start]) {
+							that.updateResourceGroupDelta(nodeTarget._bmr_rg, index);
 						}
 						else {
 							// Prevent overlapping elements to update the end value
 							nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
-							that.updateResourceGroupDelta(nodeTarget._bmr_rg);
+							that.updateResourceGroupDelta(nodeTarget._bmr_rg, index);
 						}
 					}
 				}
 				that.applyTimedResources();
 			}
 
-			if (node.addEventListener) {
+			if (node.complete) {
+				// image already loaded
+				nodeLoaded({
+					target: node
+				});
+			}
+			else if (node.addEventListener) {
 				node.addEventListener("load", nodeLoaded);
 			}
 			else if (node.attachEvent) {
