@@ -2167,12 +2167,16 @@
 							// do not process xhr only items for non-xhr requests
 							continue;
 						}
-						if (handler.handle(limpl[v][i], ename, data) && hconfig[v].stopOnFirst) {
+
+						// Use the initiator (e.g. 'spa') in preference over the event name (e.g. 'xhr')
+						var beaconType = ename === "xhr" && BOOMR.utils.inArray(edata.initiator, BOOMR.constants.BEACON_TYPE_SPAS) ? edata.initiator : ename;
+						if (handler.handle(limpl[v][i], beaconType, data) && hconfig[v].stopOnFirst) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";
 							}
 							break;
 						}
+
 					}
 				}
 			}

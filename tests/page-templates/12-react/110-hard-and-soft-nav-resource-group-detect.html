@@ -1,0 +1,50 @@
+<%= header %>
+<%= boomerangScript %>
+<script type="text/javascript">
+window.navigator.sendBeacon = null;
+</script>
+<script src="support/function-bind-polyfill.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+window.imgs = [-1];
+window.late_imgs = [1000];
+window.nav_routes = ["/widgets/1", "/"];
+</script>
+
+<div id="root"></div>
+<script src="support/app.js"></script>
+
+<script src="110-hard-and-soft-nav-resource-group-detect.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	autorun: false,
+	instrument_xhr: true,
+	History: {
+		enabled: true,
+		auto: true
+	},
+	PageParams: {
+		customTimers: [
+			{
+				name: "ResourceGroup Element selected via XPath",
+				index: 1,
+				label: "ctim.CT1",
+				type: "ResourceGroup",
+				value: {
+					"*": {
+						on: ["spa_hard", "onload", "spa"],
+						resources: [{
+							type: "resource",
+							value: "*&id=late*"
+						}]
+					}
+				}
+			}
+		]
+	}
+});
+</script>
+
+<%= footer %>

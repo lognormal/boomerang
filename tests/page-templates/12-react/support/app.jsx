@@ -162,7 +162,21 @@ const Home = React.createClass({
 	},
 	render() {
 		var widgetsElements = this.renderWidgets();
-
+		if (window.window.late_imgs && !this.state.addedLates) {
+			var rnd = this.state.rnd;
+			this.state.addedLates = true;
+			setTimeout(function() {
+				var content = document.getElementById("root");
+				
+				window.window.late_imgs.forEach(function(imgDelay) {
+					var img = document.createElement("img");
+					if (imgDelay > 0) {
+						img.src = `/delay?delay=${imgDelay}&id=late&file=pages/12-react/support/img.jpg&id=home&rnd=${rnd}`;
+						content.appendChild(img);
+					}
+				});
+			}, 500);
+		}
 		if (!this.state.hide_imgs) {
 			var images = [];
 			for (var delayIndex in  this.state.imgs) {
@@ -175,7 +189,6 @@ const Home = React.createClass({
 				  <img onLoad={this.imageOnload} key={delayIndex} src={src} style={style}/>
 				</div>);
 			}
-
 			return (
 				<div className="content">
 					<div dangerouslySetInnerHTML={this.cartMarkup()} />
