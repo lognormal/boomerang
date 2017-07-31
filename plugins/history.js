@@ -45,6 +45,12 @@
 			impl.routeChangeInProgress = false;
 		}
 		else {
+			// don't track the SPA route change until the onload (page_ready)
+			// has fired
+			if (impl.disableHardNav && !BOOMR.onloadFired()) {
+				return;
+			}
+
 			if (!impl.routeChangeInProgress) {
 				log("routeChange triggered, sending route_change() event");
 				impl.routeChangeInProgress = true;

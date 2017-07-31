@@ -179,6 +179,8 @@
 		 * @param {object[]} routeFilterArgs Route Filter arguments
 		 */
 		route_change: function(onComplete, routeFilterArgs) {
+			var firedEvent = false;
+
 			// if we have a routeFilter, see if they want to track this route
 			if (routeFilter) {
 				try {
@@ -214,11 +216,13 @@
 			firstSpaNav = false;
 
 			if (!initialRouteChangeCompleted || typeof onComplete === "function") {
+				initialRouteChangeCompleted = true;
+
 				// if we haven't completed our initial SPA navigation yet (this is a hard nav), wait
 				// for all of the resources to be downloaded
 				resource.onComplete = function(onCompleteResource) {
-					if (!initialRouteChangeCompleted) {
-						initialRouteChangeCompleted = true;
+					if (!firedEvent) {
+						firedEvent = true;
 
 						// fire a SPA navigation completed event so that other plugins can act on it
 						BOOMR.fireEvent("spa_navigation");

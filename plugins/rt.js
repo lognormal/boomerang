@@ -1152,7 +1152,7 @@
 
 			if (ename === "load" ||
 			    ename === "visible" ||
-				(ename === "xhr" && edata && edata.initiator === "spa_hard")) {
+			    (ename === "xhr" && edata && edata.initiator === "spa_hard")) {
 				// Only add Boomerang timings to page load and SPA beacons
 				impl.getBoomerangTimings();
 			}
@@ -1181,7 +1181,7 @@
 			// make sure old variables don't stick around
 			BOOMR.removeVar(
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
-				"rt.tstart", "rt.nstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres", "rt.abld",
+				"rt.tstart", "rt.nstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres",
 				"http.errno", "http.method", "xhr.sync",
 				/* SOASTA PRIVATE START */
 				"rt.ss", "rt.sl", "rt.tt", "rt.lt"
@@ -1265,6 +1265,7 @@
 
 				if (!impl.onloadfired) {
 					BOOMR.addVar("rt.abld", "");
+					impl.addedVars.push("rt.abld");
 				}
 
 				if (!impl.visiblefired) {

@@ -331,7 +331,7 @@ BOOMR_check_doc_domain();
 				if (!ev) { ev = w.event; }
 				if (ev.target) { target = ev.target; }
 				else if (ev.srcElement) { target = ev.srcElement; }
-				if (target.nodeType === 3) {// defeat Safari bug
+				if (target.nodeType === 3) {  // defeat Safari bug
 					target = target.parentNode;
 				}
 
@@ -609,7 +609,7 @@ BOOMR_check_doc_domain();
 				for (i = 0, l = cookies_a.length; i < l; i++) {
 					kv = cookies_a[i].split("=");
 					if (kv[0]) {
-						kv.push("");	// just in case there's no value
+						kv.push("");  // just in case there's no value
 						cookies[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
 						gotcookies = true;
 					}
@@ -1310,6 +1310,17 @@ BOOMR_check_doc_domain();
 			return impl.fireEvent(e_name, data);
 		},
 
+		/**
+		 * Subscribe to an event
+		 *
+		 * @param {string} e_name Event name
+		 * @param {function} fn callback function
+		 * @param {object} cb_data Any passthrough data for the callback function
+		 * @param {object} cb_scope The scope of the callback function if it is a method of an object
+		 * @param {Boolean} once If true subscribe to only one event call
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 */
 		subscribe: function(e_name, fn, cb_data, cb_scope, once) {
 			var i, handler, ev;
 
@@ -1345,7 +1356,7 @@ BOOMR_check_doc_domain();
 			// Attach unload handlers directly to the window.onunload and
 			// window.onbeforeunload events. The first of the two to fire will clear
 			// fn so that the second doesn't fire. We do this because technically
-			// onbeforeunload is the right event to fire, but all browsers don't
+			// onbeforeunload is the right event to fire, but not all browsers
 			// support it.  This allows us to fall back to onunload when onbeforeunload
 			// isn't implemented
 			if (e_name === "page_unload" || e_name === "before_unload") {
@@ -1699,8 +1710,10 @@ BOOMR_check_doc_domain();
 			var isSPA = BOOMR.utils.inArray(impl.vars["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS);
 			var isPageLoad = typeof impl.vars["http.initiator"] === "undefined" || isSPA;
 
-			var pgu = isSPA ? d.URL : d.URL.replace(/#.*/, "");
-			impl.vars.pgu = BOOMR.utils.cleanupURL(pgu);
+			if (!impl.vars.pgu) {
+				impl.vars.pgu = isSPA ? d.URL : d.URL.replace(/#.*/, "");
+			}
+			impl.vars.pgu = BOOMR.utils.cleanupURL(impl.vars.pgu);
 
 			// Use the current document.URL if it hasn't already been set, or for SPA apps,
 			// on each new beacon (since each SPA soft navigation might change the URL)

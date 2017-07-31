@@ -270,11 +270,13 @@
 		},
 		    i,
 		    last_ev,
+		    last_ev_index,
 		    index = this.pending_events.length;
 
 		for (i = index - 1; i >= 0; i--) {
 			if (this.pending_events[i] && !this.pending_events[i].complete) {
 				last_ev = this.pending_events[i];
+				last_ev_index = i;
 				break;
 			}
 		}
@@ -287,7 +289,7 @@
 					// continue with new event
 				}
 				// last_ev will no longer receive watches as ev will receive them
-				// last_ev will wait fall interesting nodes and then send event
+				// last_ev will wait for all interesting nodes and then send event
 			}
 			else if (last_ev.type === "xhr") {
 				// 3.2
@@ -304,6 +306,19 @@
 				// the SPA event take control.
 				if (ev.type === "xhr") {
 					return null;
+				}
+
+				// If we have a pending SPA event, send an aborted load beacon before
+				// adding the new SPA event
+				if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+					BOOMR.debug("Aborting previous SPA navigation");
+
+					// mark the end of this navigation as now
+					last_ev.resource.timing.loadEventEnd = BOOMR.now();
+					last_ev.aborted = true;
+
+					// send the previous SPA
+					this.sendEvent(last_ev_index);
 				}
 			}
 		}
@@ -422,7 +437,7 @@
 	 * @param {number} eventIndex - index of the event in the pending_events array
 	 */
 	MutationHandler.prototype.sendResource = function(resource, eventIndex) {
-		var self = this;
+		var self = this, ev = self.pending_events[eventIndex];
 
 		// Use 'requestStart' as the startTime of the resource, if given
 		var startTime = resource.timing ? resource.timing.requestStart : undefined;
@@ -455,28 +470,37 @@
 						resource.timing.loadEventEnd
 					);
 
-				BOOMR.addVar({
-					restiming: JSON.stringify(r.restiming)
-				});
+				BOOMR.addVar("restiming", JSON.stringify(r.restiming));
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings
 			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
 				self.calculateSpaTimings(resource);
+
+				// If the SPA load was aborted, set the rt.quit and rt.abld flags
+				if (typeof eventIndex === "number" && self.pending_events[eventIndex].aborted) {
+					// Save the URL otherwise it might change before we have a chance to put it on the beacon
+					BOOMR.addVar("pgu", d.URL);
+					BOOMR.addVar("rt.quit", "");
+					BOOMR.addVar("rt.abld", "");
+
+					impl.addedVars.push("pgu", "rt.quit", "rt.abld");
+				}
 			}
 
 			BOOMR.responseEnd(resource, startTime, resource);
 
-			if (eventIndex) {
+			if (typeof eventIndex === "number") {
 				self.pending_events[eventIndex] = undefined;
 			}
 		};
 
 		// send the beacon if we were not told to hold it
 		if (!resource.wait) {
-			// if this is a SPA event, make sure it doesn't fire until onload
-			if (BOOMR.utils.inArray(resource.initiator, BOOMR.constants.BEACON_TYPE_SPAS)) {
-				if (d && d.readyState && d.readyState !== "complete") {
+			// if this is a SPA Hard navigation, make sure it doesn't fire until onload
+			if (resource.initiator === "spa_hard") {
+				// don't wait for onload if this was an aborted SPA navigation
+				if ((!ev || !ev.aborted) && d && d.readyState && d.readyState !== "complete") {
 					BOOMR.window.addEventListener("load", function() {
 						sendResponseEnd(true);
 					});
@@ -1363,6 +1387,8 @@
 		ie1011fix: true,
 		excludeFilters: [],
 		initialized: false,
+		addedVars: [],
+
 		/**
 		 * Filter function iterating over all available {@link FilterObject}s if returns true will not instrument an XHR
 		 * @param {HTMLAnchorElement} anchor - HTMLAnchorElement node created with the XHRs URL as `href` to evaluate by {@link FilterObject}s and passed to {@link FilterObject#cb} callbacks.
@@ -1398,6 +1424,13 @@
 				}
 			}
 			return false;
+		},
+
+		clear: function() {
+			if (impl.addedVars && impl.addedVars.length > 0) {
+				BOOMR.removeVar(impl.addedVars);
+				impl.addedVars = [];
+			}
 		}
 	};
 
@@ -1566,6 +1599,8 @@
 			}
 
 			BOOMR.registerEvent("onxhrerror");
+
+			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
 		},
 		getMutationHandler: function() {
 			return handler;
