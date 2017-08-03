@@ -102,3 +102,5 @@ app.post("/blackhole/no-op", respond204);
 // all static content follows afterwards
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));
+
+require("express-middleware-server-timing")(app);
