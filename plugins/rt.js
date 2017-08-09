@@ -597,15 +597,15 @@
 				// if this is an XHR event, trust the input end "now" timestamp
 				return t_now;
 			}
-			// Boomerang loaded late and...
-			else if (BOOMR.loadedLate) {
+			else {
+				// use loadEventEnd from NavigationTiming
 				p = BOOMR.getPerformance();
 
 				// We have navigation timing,
 				if (p && p.timing) {
-					// and boomerang loaded after onload fired
-					if (p.timing.loadEventStart && p.timing.loadEventStart < BOOMR.t_end) {
-						return p.timing.loadEventStart;
+					// and the loadEventEnd timestamp
+					if (p.timing.loadEventEnd) {
+						return p.timing.loadEventEnd;
 					}
 				}
 				// We don't have navigation timing,

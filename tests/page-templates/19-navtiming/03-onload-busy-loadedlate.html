@@ -1,0 +1,20 @@
+<%= header %>
+<script>
+console.log("Registering load event");
+
+window.onload = function() {
+	if (window.console) {
+		console.log("Delaying for 1500ms");
+	}
+
+	BOOMR_test.busy(1500);
+};
+</script>
+<script src="03-onload-busy-loadedlate.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= boomerangDelayedSnippet %>
+<%= footer %>

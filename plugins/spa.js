@@ -35,9 +35,9 @@
 			var p = BOOMR.getPerformance(), startTime, stopTime;
 
 			// gather start times from NavigationTiming if available
-			if (p && p.timing && p.timing.navigationStart && p.timing.loadEventStart) {
+			if (p && p.timing && p.timing.navigationStart && p.timing.loadEventEnd) {
 				startTime = p.timing.navigationStart;
-				stopTime = p.timing.loadEventStart;
+				stopTime = p.timing.loadEventEnd;
 			}
 			else {
 				startTime = BOOMR.t_start;
@@ -54,7 +54,7 @@
 
 			if (resource.resources.length === 0 && stopTime) {
 				// No other resources were fetched, so set the end time
-				// to NavigationTiming's performance.loadEventStart (instead of 'now')
+				// to NavigationTiming's performance.loadEventEnd (instead of 'now')
 				resource.timing.loadEventEnd = stopTime;
 			}
 		}

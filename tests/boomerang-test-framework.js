@@ -729,6 +729,22 @@
 		return copy;
 	};
 
+	/**
+	 * Do busy work for the specified number of ms
+	 */
+	t.busy = function(ms) {
+		var startTime = (new Date()).getTime();
+		var now = startTime;
+		var endTime = startTime + ms;
+		var math = 1;
+
+		while (now < endTime) {
+			now = (new Date()).getTime();
+			math *= 2;
+			math *= 0.5;
+		}
+	};
+
 	window.BOOMR_test = t;
 
 	// force LOGN plugin not to run. Individual tests will override this if needed.
