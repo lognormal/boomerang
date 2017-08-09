@@ -42,7 +42,7 @@
     "jquery": "~2.1.4",
     "json3": "~3.3.2",
     "lodash": "~3.0.0",
-    "mocha": "~1.21.5",
+    "mocha": "~3.4.2",
     "resourcetiming-compression": "^0.3.3",
     "usertiming-compression": "~0.1.4"
   },

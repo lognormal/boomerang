@@ -567,6 +567,7 @@
 				// the value for the new request.
 				BOOMR.addVar("rt.start", source || "navigation");
 				this.navigationStart = ti.navigationStart || ti.fetchStart || undefined;
+				this.fetchStart = ti.fetchStart || undefined;
 				this.responseStart = ti.responseStart || undefined;
 
 				// bug in Firefox 7 & 8 https://bugzilla.mozilla.org/show_bug.cgi?id=691547
@@ -672,8 +673,9 @@
 				// Use NavTiming API to figure out resp latency and page time
 				// t_resp will use the cookie if available or fallback to NavTiming
 
-				// only use if the time looks legit (after navigationStart)
-				if (impl.responseStart >= impl.cached_t_start) {
+				// only use if the time looks legit (after navigationStart/fetchStart)
+				if (impl.responseStart >= impl.navigationStart &&
+				    impl.responseStart >= impl.fetchStart) {
 					t_resp_start = impl.responseStart;
 				}
 			}
