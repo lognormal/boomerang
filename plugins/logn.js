@@ -147,7 +147,7 @@
 
 		t_start = BOOMR.now();
 
-		url = "//%config_host%%config_path%";
+		url = "%config_scheme%%config_host%%config_path%";
 		url += "?key=" +
 		    BOOMR.getVar("h.key") +
 		    "%config_url_suffix%&d=" + encodeURIComponent(dom) +

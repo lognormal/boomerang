@@ -271,6 +271,11 @@ module.exports = function() {
 							// Change to debug config URL
 							pattern: "%config_url_suffix%",
 							replacement: "&debug="
+						},
+						{
+							// change to relative scheme
+							pattern: "%config_scheme%",
+							replacement: "//"
 						}
 						/* SOASTA PRIVATE END */
 					]
@@ -324,6 +329,10 @@ module.exports = function() {
 						{
 							pattern: /%config_url_suffix%/g,
 							replacement: buildConfig.configUrlSuffix
+						},
+						{
+							pattern: /%config_scheme%/g,
+							replacement: "https://"
 						}
 					]
 				}
