@@ -1028,7 +1028,7 @@
 		 * @returns {PerformanceResourceTiming[]} - Resources found matching a URL Pattern
 		 */
 		findResources: function(url, frame, limit) {
-			var i, res, reslist, foundList = [], tempReslist, tempResListIndex;
+			var i, res, reslist, frameCount, foundList = [], tempReslist, tempResListIndex;
 
 			if (typeof frame === "number") {
 				limit = frame;
@@ -1083,7 +1083,8 @@
 			}
 
 			if (frame.frames) {
-				for (i = 0; i < frame.frames.length; i++) {
+				frameCount = getFrameCount(frame);
+				for (i = 0; i < frameCount; i++) {
 					tempReslist = this.findResources(url, frame.frames[i]);
 					if (tempReslist) {
 						for (tempResListIndex = 0; tempResListIndex < tempReslist.length; tempResListIndex++) {
@@ -3044,5 +3045,14 @@
 		Handler: Handler
 		/* END_DEBUG */
 	};
+
+	function getFrameCount(frame) {
+		try {
+			return frame.frames.length;
+		}
+		catch (e) {
+			return 0;
+		};
+	}
 
 }());
