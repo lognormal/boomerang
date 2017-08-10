@@ -1055,7 +1055,7 @@
 			}
 
 			// no exact match, maybe it has wildcards
-			if (url.indexOf("*") !== -1 || url === "slowest") {
+			if (url && (url.indexOf("*") !== -1 || url === "slowest")) {
 				reslist = frame.performance.getEntriesByType("resource");
 				if (reslist && reslist.length > 0) {
 					for (i = 0; i < reslist.length; i++) {
@@ -1774,7 +1774,9 @@
 		 * @return {Object[]} - An array of resources mapping to the found ResourceTiming entries found referring to the Resource passed in
 		 */
 		lookupResources: function(index) {
-			var resource = this.resourceSet[index], ret = this.getNode(index), resources = [], url, children, resIndex = 0, currentNode, tmpResources, tmpResIndex = 0, start = this.getStartTime(index);
+			var resource = this.resourceSet[index], ret = this.getNode(index),
+			    resources = [], url, children, resIndex = 0, currentNode,
+			    tmpResources, tmpResIndex = 0, start = this.getStartTime(index);
 
 			// check that returned value is a node type
 			// need to use .length typeof check because nodeLists don't have an "own" property of length
@@ -1794,8 +1796,12 @@
 					}
 				}
 			}
-			// Checking if this is actuall a resourceGroup
-			else if (ret && typeof ret.length === "number" && ret.length > 0 && !ret[0][start]) {
+			// Checking if this is actually a resourceGroup
+			else if (ret &&
+			    typeof ret.length === "number" &&
+			    ret.length > 0 &&
+			    !ret[0][start] &&
+			    resource.type !== "resource") {
 				for (resIndex = 0; resIndex < ret.length; resIndex++) {
 					currentNode = ret[resIndex];
 					if (!this.isContainer(currentNode)) {
