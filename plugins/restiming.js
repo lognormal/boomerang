@@ -34,6 +34,15 @@ see: http://www.w3.org/TR/resource-timing/
 		"fetch": 9
 	};
 
+	// https://html.spec.whatwg.org/multipage/links.html#linkTypes
+	// these are the only `rel` types that _might_ be reference-able from resource-timing
+	var REL_TYPES = {
+		"prefetch": 1,
+		"preload": 2,
+		"prerender": 3,
+		"stylesheet": 4
+	};
+
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
 	// the whole string) in URLs, to ensure NoScript doesn't think this is an XSS attack
 	var DEFAULT_XSS_BREAK_WORDS = [
@@ -64,6 +73,9 @@ see: http://www.w3.org/TR/resource-timing/
 	var ASYNC_ATTR = 0x1;
 	var DEFER_ATTR = 0x2;
 	var LOCAT_ATTR = 0x4;	// 0 => HEAD, 1 => BODY
+
+	// Link attributes
+	var SPECIAL_DATA_LINK_ATTR_TYPE = "4";
 
 	/**
 	 * Converts entries to a Trie:
@@ -281,7 +293,7 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function findPerformanceEntriesForFrame(frame, isTopWindow, offset, depth, frameDims) {
 		var entries = [], i, navEntries, navStart, frameNavStart, frameOffset, subFrames, subFrameDims,
-		    navEntry, t, rtEntry, visibleEntries, scripts = {}, a;
+		    navEntry, t, rtEntry, visibleEntries, scripts = {}, links = {}, a;
 
 		if (typeof isTopWindow === "undefined") {
 			isTopWindow = true;
@@ -312,16 +324,8 @@ see: http://www.w3.org/TR/resource-timing/
 			a = frame.document.createElement("a");
 
 			// get all scripts as an object keyed on script.src
-			Array.prototype
-				.forEach
-				.call(frame.document.getElementsByTagName("script"), function(s) {
-					a.href = s.src;	// Get canonical URL
-
-					// only get external scripts
-					if (a.href.match(/^https?:\/\//)) {
-						scripts[a.href] = s;
-					}
-				});
+			collectResources(a, scripts, "script");
+			collectResources(a, links, "link");
 
 			subFrames = frame.document.getElementsByTagName("iframe");
 
@@ -434,7 +438,7 @@ see: http://www.w3.org/TR/resource-timing/
 				};
 
 				// If this is a script, set its flags
-				if (t.initiatorType === "script" && scripts[t.name]) {
+				if ((t.initiatorType === "script" || t.initiatorType === "link") && scripts[t.name]) {
 					var s = scripts[t.name];
 
 					// Add async & defer based on attribute values
@@ -448,6 +452,21 @@ see: http://www.w3.org/TR/resource-timing/
 					rtEntry.scriptAttrs |= (s.nodeName === "BODY" ? LOCAT_ATTR : 0);
 				}
 
+				// If this is a link, set its flags
+				if (t.initiatorType === "link" && links[t.name]) {
+					// split on ASCII whitespace
+					links[t.name].rel.split(/[\u0009\u000A\u000C\u000D\u0020]+/).find(function(rel) { //eslint-disable-line no-loop-func
+						// `rel`s are case insensitive
+						rel = rel.toLowerCase();
+
+						// only report the `rel` if it's from the known list
+						if (REL_TYPES[rel]) {
+							rtEntry.linkAttrs = REL_TYPES[rel];
+							return true;
+						}
+					});
+				}
+
 				frameFixedEntries.push(rtEntry);
 			}
 
@@ -458,6 +477,27 @@ see: http://www.w3.org/TR/resource-timing/
 		}
 
 		return entries;
+	}
+
+    /**
+	 * Collect external resources by tagName
+	 *
+	 * @param [Element] a an anchor element
+	 * @param [Object] obj object of resources where the key is the url
+	 * @param [string] tagName tag name to collect
+	 */
+	function collectResources(a, obj, tagName) {
+		Array.prototype
+			.forEach
+			.call(a.ownerDocument.getElementsByTagName(tagName), function(r) {
+				// Get canonical URL
+				a.href = r.src || r.href;
+
+				// only get external resource
+				if (a.href.match(/^https?:\/\//)) {
+					obj[a.href] = r;
+				}
+			});
 	}
 
 	/**
@@ -1002,6 +1042,10 @@ see: http://www.w3.org/TR/resource-timing/
 				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SCRIPT_ATTR_TYPE + e.scriptAttrs;
 			}
 
+			if (e.hasOwnProperty("linkAttrs")) {
+				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_LINK_ATTR_TYPE + e.linkAttrs;
+			}
+
 			url = trimUrl(e.name, impl.trimUrls);
 
 			// if this entry already exists, add a pipe as a separator
@@ -1308,9 +1352,12 @@ see: http://www.w3.org/TR/resource-timing/
 		SPECIAL_DATA_DIMENSION_TYPE: SPECIAL_DATA_DIMENSION_TYPE,
 		SPECIAL_DATA_SIZE_TYPE: SPECIAL_DATA_SIZE_TYPE,
 		SPECIAL_DATA_SCRIPT_ATTR_TYPE: SPECIAL_DATA_SCRIPT_ATTR_TYPE,
+		SPECIAL_DATA_LINK_ATTR_TYPE: SPECIAL_DATA_LINK_ATTR_TYPE,
 		ASYNC_ATTR: ASYNC_ATTR,
 		DEFER_ATTR: DEFER_ATTR,
-		LOCAT_ATTR: LOCAT_ATTR
+		LOCAT_ATTR: LOCAT_ATTR,
+		INITIATOR_TYPES: INITIATOR_TYPES,
+		REL_TYPES: REL_TYPES
 		/* END_DEBUG */
 	};
 
