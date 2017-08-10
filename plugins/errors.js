@@ -247,6 +247,19 @@
 		"BOOMR_plugins_errors_"
 	];
 
+	// functions to strip if they match a STACK_FILENAME_MATCH
+	var STACK_FUNCTIONS_REMOVE_IF_FILENAME_MATCH = [
+		"Object.send",
+		"b.send",
+		"wrap",
+		"Anonymous function"
+	];
+
+	// files that will match for STACK_FUNCTIONS_REMOVE_IF_FILENAME_MATCH
+	var STACK_FILENAME_MATCH = [
+		"/boomerang"
+	];
+
 	/**
 	 * Maximum size, in characters, of stack to capture
 	 */
@@ -389,8 +402,8 @@
 	 * @returns {BoomerangError} Error
 	 */
 	BoomerangError.fromError = function(error, via, source) {
-		var frame, frames, lastFrame, forceUpdate = false, i, j,
-		    now = BOOMR.now();
+		var frame, frames, lastFrame, forceUpdate = false, i, j, k,
+		    now = BOOMR.now(), skipThis, thisFrame, thisFn;
 
 		if (!error) {
 			return null;
@@ -446,15 +459,41 @@
 
 				// remove our error wrappers from the stack
 				for (i = 0; i < frames.length; i++) {
-					if (frames[i].functionName) {
+					thisFrame = frames[i];
+					thisFn = thisFrame.functionName;
+					skipThis = false;
+
+					// strip boomerang function names
+					if (thisFn) {
 						for (j = 0; j < STACK_FUNCTIONS_REMOVE.length; j++) {
-							if (frames[i].functionName.indexOf(STACK_FUNCTIONS_REMOVE[j]) !== -1) {
+							if (thisFn.indexOf(STACK_FUNCTIONS_REMOVE[j]) !== -1) {
 								frames.splice(i, 1);
 								forceUpdate = true;
 
 								// outloop continues with the next element
 								i--;
+								skipThis = true;
 								break;
+							}
+						}
+
+						// strip additional functions if they also match a file
+						if (!skipThis && thisFrame.fileName) {
+							for (j = 0; j < STACK_FILENAME_MATCH.length; j++) {
+								if (thisFrame.fileName.indexOf(STACK_FILENAME_MATCH[j]) !== -1) {
+									// this file name matches, see if any of the matching functions also do
+									for (k = 0; k < STACK_FUNCTIONS_REMOVE_IF_FILENAME_MATCH.length; k++) {
+										if (thisFn.indexOf(STACK_FUNCTIONS_REMOVE_IF_FILENAME_MATCH[k]) !== -1) {
+											frames.splice(i, 1);
+											forceUpdate = true;
+
+											// outloop continues with the next element
+											i--;
+											skipThis = true;
+											break;
+										}
+									}
+								}
 							}
 						}
 					}

@@ -523,6 +523,52 @@ describe("BOOMR.plugins.Errors", function() {
 					assert.include(be.stack, "Test");
 				}
 			});
+
+			it("Should strip Boomerang functions from an Error", function() {
+				var stack = "Error: Test\n" +
+							"    at okFunction1 (okFile1:1:1)\n" + // keep
+							"    at okFunction2 (okFile2:2:2)\n" + // keep
+							"    at createStackForSend (boomr:1)\n" +
+							"    at BOOMR.window.console.error (boomr:1)\n" +
+							"    at BOOMR.plugins.Errors.init (a.html:1)\n" +
+							"    at BOOMR.window.onerror (boomr:1)\n" +
+							"    at BOOMR_plugins_errors_console (boomr:1)\n" +
+							"    at okFunction3 (okFile3:3:3)\n" + // keep
+							"    at BOOMR_plugins_errors_console (boomr:1)\n" +
+							"    at okFunction4 (okFile4:4:4)\n" + // keep
+							"    at Object.send (/a/boomerang/b/:1:2)\n" +
+							"    at wrap/< (/a/boomerang/b/:1:2)\n" +
+							"    at Anonymous function (/a/boomerang/b/:1:2)\n" +
+							"    at Object.send (/a/noboomr/b/:1:2)\n" + // keep
+							"    at wrap/< (/a/noboomr/b/:1:2)"; // keep
+				var err = {
+					stack: stack
+				};
+
+				var parsed = BOOMR.plugins.Errors.BoomerangError.fromError(err);
+
+				// only 4 frames should be left
+				assert.equal(parsed.frames.length, 6);
+
+				// first 4 matches are all okFunctionN at okFileN:N:n
+				for (var i = 1; i <= 4; i++) {
+					assert.equal(parsed.frames[i - 1].functionName, "okFunction" + i);
+					assert.equal(parsed.frames[i - 1].fileName, "okFile" + i);
+					assert.equal(parsed.frames[i - 1].lineNumber, i);
+					assert.equal(parsed.frames[i - 1].columnNumber, i);
+				}
+
+				// then Object.send and wrap match
+				assert.equal(parsed.frames[4].functionName, "Object.send");
+				assert.equal(parsed.frames[4].fileName, "/a/noboomr/b/");
+				assert.equal(parsed.frames[4].lineNumber, 1);
+				assert.equal(parsed.frames[4].columnNumber, 2);
+
+				assert.equal(parsed.frames[5].functionName, "wrap/<");
+				assert.equal(parsed.frames[5].fileName, "/a/noboomr/b/");
+				assert.equal(parsed.frames[5].lineNumber, 1);
+				assert.equal(parsed.frames[5].columnNumber, 2);
+			});
 		});
 	});
 });
