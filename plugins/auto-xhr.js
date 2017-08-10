@@ -462,7 +462,7 @@
 			// Add ResourceTiming data to the beacon, starting at when 'requestStart'
 			// was for this resource.
 			if (BOOMR.plugins.ResourceTiming &&
-			    BOOMR.plugins.ResourceTiming.is_supported() &&
+			    BOOMR.plugins.ResourceTiming.is_enabled() &&
 			    resource.timing &&
 			    resource.timing.requestStart) {
 				var r = BOOMR.plugins.ResourceTiming.getCompressedResourceTiming(

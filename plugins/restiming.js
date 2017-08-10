@@ -1171,7 +1171,7 @@ see: http://www.w3.org/TR/resource-timing/
 		complete: false,
 		sentNavBeacon: false,
 		initialized: false,
-		supported: false,
+		supported: null,
 		xhr_load: function() {
 			if (this.complete) {
 				return;
@@ -1234,8 +1234,6 @@ see: http://www.w3.org/TR/resource-timing/
 
 	BOOMR.plugins.ResourceTiming = {
 		init: function(config) {
-			var p = BOOMR.getPerformance();
-
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
 				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls", "trackedResourceTypes"]);
 
@@ -1243,15 +1241,12 @@ see: http://www.w3.org/TR/resource-timing/
 				return this;
 			}
 
-			if (p &&
-			    typeof p.getEntriesByType === "function" &&
-			    typeof window.PerformanceResourceTiming !== "undefined") {
+			if (this.is_supported()) {
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
 				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
-				impl.supported = true;
 			}
 			else {
 				impl.complete = true;
@@ -1264,8 +1259,23 @@ see: http://www.w3.org/TR/resource-timing/
 		is_complete: function() {
 			return true;
 		},
+		is_enabled: function() {
+			return impl.initialized && this.is_supported();
+		},
 		is_supported: function() {
-			return impl.initialized && impl.supported;
+			var p;
+
+			if (impl.supported !== null) {
+				return impl.supported;
+			}
+
+			// check for getEntriesByType and the entry type existing
+			var p = BOOMR.getPerformance();
+			impl.supported = p &&
+			    typeof p.getEntriesByType === "function" &&
+			    typeof window.PerformanceResourceTiming !== "undefined";
+
+			return impl.supported;
 		},
 		//
 		// Public Exports

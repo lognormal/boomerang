@@ -24,7 +24,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.lastBeacon();
-			assert.equal(b.t_resp, pt.responseStart - pt.fetchStart);
+			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
 		}
 	});
 

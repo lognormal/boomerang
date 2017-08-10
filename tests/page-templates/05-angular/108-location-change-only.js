@@ -86,7 +86,7 @@ describe("e2e/05-angular/108-location-change-only", function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[0];
-			assert.equal(b.t_resp, pt.responseStart - pt.fetchStart);
+			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
 		}
 	});
 
