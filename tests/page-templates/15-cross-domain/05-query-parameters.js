@@ -11,7 +11,7 @@ describe("e2e/15-cross-domain/00-post-message-beacon", function() {
 
 	it("Should have \"rt.sstr_dur\" beacon param with the duration for the session to be transferred in under 500 miliseconds", function() {
 		var b = tf.lastBeacon();
-		assert.closeTo(b["rt.sstr_dur"], 0, 500);
+		assert.closeTo(b["rt.sstr_dur"], 0, 750);
 	});
 
 	it("Should not include a the session transfer timed out flag ", function() {
