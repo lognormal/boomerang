@@ -1100,7 +1100,7 @@
 		 */
 		BOOMR.proxy_XMLHttpRequest = function() {
 			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send,
-			    opened = false;
+			    opened = false, excluded = false;
 
 			req = new BOOMR.orig_XMLHttpRequest();
 
@@ -1111,10 +1111,13 @@
 				a.href = url;
 
 				if (impl.excludeFilter(a)) {
+					// this xhr should be excluded from instrumentation
+					excluded = true;
 					BOOMR.debug("Exclude found for resource: " + a.href + " Skipping instrumentation!", "AutoXHR");
-					// skip instrumentation and call the original open method
+					// call the original open method
 					return orig_open.apply(req, arguments);
 				}
+				excluded = false;
 
 				// Default value of async is true
 				if (async === undefined) {
@@ -1310,6 +1313,9 @@
 					// so let's fire loadFinished now
 					resource.status = XHR_STATUS_OPEN_EXCEPTION;
 					loadFinished();
+
+					// rethrow the native method's exception
+					throw e;
 				}
 			};
 
@@ -1320,6 +1326,11 @@
 			 * @returns {Object} The data normal XHR.send() would return
 			 */
 			req.send = function(data) {
+				if (excluded) {
+					// this xhr is excluded from instrumentation, call the original send method
+					return orig_send.apply(req, arguments);
+				}
+
 				req.resource.requestPayload = data;
 				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
