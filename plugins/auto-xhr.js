@@ -987,9 +987,10 @@
 			});
 		}
 
-		if (!evt.interesting) {
-			// if we didn't have any interesting nodes for this MO callback or
-			// any prior callbacks, timeout the event
+		if (!this.timer && !evt.interesting) {
+			// timeout the event if we haven't already created a timer and
+			// we didn't have any interesting nodes for this MO callback or
+			// any prior callbacks
 			this.setTimeout(SPA_TIMEOUT, index);
 		}
 
@@ -1477,7 +1478,8 @@
 	 * - We turn on DOM observer, and wait up to 50 milliseconds for something
 	 *  - If nothing happens after the timeout, we stop watching and clear the resource without firing the event
 	 *  - If a history event happened recently/will happen shortly, use the URL as the resource.url
-	 *  - Else if something uninteresting happens, we extend the timeout for 1 second
+	 *  - Else if something uninteresting happens, we set the timeout for 1 second if it wasn't already started
+	 *    - We don't want to continuously extend the timeout with each uninteresting event
 	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout but keep watching
 	 *    - If we do not have a resource.url, and if this is a script, then we use the script's URL
 	 *    - Once all listeners have fired, we stop watching, fire the event and clear the resource
@@ -1490,7 +1492,8 @@
 	 * - If a history event happened recently/will happen shortly, use the URL as the resource.url
 	 * - We watch for all changes in state (for async requests) and for load (for all requests)
 	 * - On load, we turn on DOM observer, and wait up to 50 milliseconds for something
-	 *  - If something uninteresting happens, we extend the timeout for 1 second
+	 *  - If something uninteresting happens, we set the timeout for 1 second if it wasn't already started
+	 *    - We don't want to continuously extend the timeout with each uninteresting event
 	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout
 	 *    - Once all listeners have fired, we stop watching, fire the event and clear the resource
 	 *  - If nothing happens after the timeout, we stop watching fire the event and clear the resource
