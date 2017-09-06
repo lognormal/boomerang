@@ -17,6 +17,25 @@
 	var SPA_TIMEOUT = 1000;
 
 	/**
+	 * Clicks and XHR events get 50ms for an interesting thing to happen before
+	 * being cancelled.
+	 * @type {number}
+	 * @constant
+	 * @default
+	 */
+	var CLICK_XHR_TIMEOUT = 50;
+
+	/**
+	 * If we get a Mutation event that doesn't have any interesting nodes after
+	 * a Click or XHR event started, wait up to 1,000ms for an interesting one
+	 * to happen before cancelling the event.
+	 * @type {number}
+	 * @constant
+	 * @default
+	 */
+	var UNINTERESTING_MUTATION_TIMEOUT = 1000;
+
+	/**
 	 * How long to wait if we're not ready to send a beacon to try again.
 	 * @constant
 	 * @type {number}
@@ -348,9 +367,9 @@
 		}
 		else {
 			if (!BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
-				// Give clicks and history changes 50ms to see if they resulted
+				// Give Click and XHR events 50ms to see if they resulted
 				// in DOM mutations (and thus it is an 'interesting event').
-				this.setTimeout(50, index);
+				this.setTimeout(CLICK_XHR_TIMEOUT, index);
 			}
 			else {
 				// Give SPAs a bit more time to do something since we know this was
@@ -987,11 +1006,14 @@
 			});
 		}
 
-		if (!this.timer && !evt.interesting) {
+		if (!evt.interesting && !this.timeoutExtended) {
 			// timeout the event if we haven't already created a timer and
 			// we didn't have any interesting nodes for this MO callback or
 			// any prior callbacks
-			this.setTimeout(SPA_TIMEOUT, index);
+			this.setTimeout(UNINTERESTING_MUTATION_TIMEOUT, index);
+
+			// only extend the timeout for an interesting thing to happen once
+			this.timeoutExtended = true;
 		}
 
 		return true;
@@ -1478,7 +1500,7 @@
 	 * - We turn on DOM observer, and wait up to 50 milliseconds for something
 	 *  - If nothing happens after the timeout, we stop watching and clear the resource without firing the event
 	 *  - If a history event happened recently/will happen shortly, use the URL as the resource.url
-	 *  - Else if something uninteresting happens, we set the timeout for 1 second if it wasn't already started
+	 *  - Else if something uninteresting happens, we set the timeout for 1 more second (only once)
 	 *    - We don't want to continuously extend the timeout with each uninteresting event
 	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout but keep watching
 	 *    - If we do not have a resource.url, and if this is a script, then we use the script's URL
@@ -1492,7 +1514,7 @@
 	 * - If a history event happened recently/will happen shortly, use the URL as the resource.url
 	 * - We watch for all changes in state (for async requests) and for load (for all requests)
 	 * - On load, we turn on DOM observer, and wait up to 50 milliseconds for something
-	 *  - If something uninteresting happens, we set the timeout for 1 second if it wasn't already started
+	 *  - If something uninteresting happens, we set the timeout for 1 more second (only once)
 	 *    - We don't want to continuously extend the timeout with each uninteresting event
 	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout
 	 *    - Once all listeners have fired, we stop watching, fire the event and clear the resource

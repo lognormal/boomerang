@@ -1,0 +1,39 @@
+<%= header %>
+<!--
+Verify that creating uninteresting mutation observer events doesn't hold an xhr beacon from being sent
+-->
+<script src="39-uninteresting-mo-followed-by-interesting.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			// start a XHR
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/assets/blank.html");
+			xhr.send();
+
+			// create a non-interesting MO event right afterwards.
+			// this should extend the timeout to 1s.
+			setTimeout(function() {
+				var div = window.document.createElement("div");
+				window.document.body.appendChild(div);
+			}, 10);
+
+			// create an interesting MO event at 500ms.
+			// this should trigger the beacon.
+			setTimeout(function() {
+				var img = window.document.createElement("img");
+				img.src = "/assets/img.jpg";
+				window.document.body.appendChild(img);
+			}, 500);
+		}
+});
+</script>
+<%= footer %>
