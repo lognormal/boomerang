@@ -1,5 +1,7 @@
 (function() {
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
+	BOOMR.utils = BOOMR.utils || {};
+
 	if (BOOMR.utils && BOOMR.utils.Compression) {
 		return;
 	}

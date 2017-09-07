@@ -40,6 +40,9 @@
 	    enabled = true,
 	    hadMissedRouteChange = false;
 
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.Backbone || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}

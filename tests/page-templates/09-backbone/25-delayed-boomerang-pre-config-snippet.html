@@ -19,7 +19,7 @@ BOOMR_test.init({
 <div id="content"></div>
 <script type="text/javascript">
 // force some beacons to be sent right before the spa_hard beacon would send
-BOOMR = BOOMR || {};
+BOOMR = window.BOOMR || {};
 BOOMR.xhr = {
 	stop: function(callback) {
 		callback({

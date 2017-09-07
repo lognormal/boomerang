@@ -1,5 +1,5 @@
 (function() {
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
 	if (BOOMR.plugins.CrossDomain) {

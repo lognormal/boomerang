@@ -8,8 +8,9 @@
 (function() {
 	var impl, images;
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.BW) {
 		return;
 	}

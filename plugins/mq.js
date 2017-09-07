@@ -5,6 +5,8 @@ http://www.lognormal.com/blog/2012/12/12/the-script-loader-pattern/#the_method_q
 */
 
 (function() {
+	BOOMR = window.BOOMR || {};
+
 	function processEntry(args, callback, thisArg) {
 		var methodName = args.shift();
 		if (typeof methodName !== "string") {

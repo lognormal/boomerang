@@ -4,9 +4,9 @@
  * Copyright (c) 2013, SOASTA, Inc. All rights reserved.
  */
 (function() {
-
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.CACHE_RELOAD) {
 		return;
 	}

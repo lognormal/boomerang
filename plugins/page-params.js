@@ -3,6 +3,7 @@
 
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.PageParams) {
 		return;
 	}

@@ -1,12 +1,16 @@
 (function() {
-	BOOMR = window.BOOMR || {};
-	BOOMR.plugins = BOOMR.plugins || {};
-
 	var dc = document,
 	    s = "script",
 	    dom = location.hostname,
 	    complete = false,
 	    t_start, load;
+
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.CT) {
+		return;
+	}
 
 	// Don't even bother creating the plugin if this is mhtml
 	if (!dom || dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {

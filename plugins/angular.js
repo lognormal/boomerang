@@ -42,6 +42,9 @@
 	    locationChangeTrigger = false,
 	    disableLocationChangeTrigger = false;
 
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.Angular || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
 	}

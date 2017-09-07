@@ -5,13 +5,14 @@ A plugin beaconing clicked elements back to the server
 
 // w is the window object
 (function(w) {
-
 	var d = w.document;
 
-	// First make sure BOOMR is actually defined.  It's possible that your plugin is
-	// loaded before boomerang, in which case you'll need this.
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.clicks) {
+		return;
+	}
 
 	// A private object to encapsulate all your implementation details
 	// This is optional, but the way we recommend you do it.

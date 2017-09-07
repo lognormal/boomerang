@@ -6,11 +6,11 @@ see: http://www.w3.org/TR/resource-timing/
 */
 
 (function() {
-
 	var impl;
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.ResourceTiming) {
 		return;
 	}

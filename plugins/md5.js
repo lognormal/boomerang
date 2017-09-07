@@ -23,11 +23,12 @@
 
 	"use strict";
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
+	BOOMR.utils = BOOMR.utils || {};
+
 	if (BOOMR.utils && BOOMR.utils.md5) {
 		return;
 	}
-	BOOMR.utils = BOOMR.utils || {};
 
 	/*
 	* Add integers, wrapping at 2^32. This uses 16-bit operations internally

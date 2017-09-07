@@ -11,7 +11,10 @@
 	    latestResource,
 	    waitingOnHardMissedComplete = false;
 
-	if (BOOMR.plugins.SPA) {
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.SPA || !BOOMR.plugins.AutoXHR) {
 		return;
 	}
 

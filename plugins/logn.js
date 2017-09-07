@@ -18,6 +18,13 @@
 	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,
 	    ready = false;
 
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.LOGN) {
+		return;
+	}
+
 	// Don't even bother creating the plugin if this is mhtml
 	if (alwaysRun === false ||
 	    (typeof alwaysRun === "undefined" &&

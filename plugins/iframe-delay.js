@@ -2,6 +2,10 @@
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
+	if (BOOMR.plugins.IFrameDelay) {
+		return;
+	}
+
 	function log(message) {
 		BOOMR.debug("(url: " + BOOMR.window.location.href + "): " + message, "IFrameDelay");
 	}

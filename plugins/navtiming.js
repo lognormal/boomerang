@@ -9,11 +9,9 @@ see: http://www.w3.org/TR/navigation-timing/
 */
 
 (function() {
-
-	// First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
-	// you'll need this.
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.NavigationTiming) {
 		return;
 	}

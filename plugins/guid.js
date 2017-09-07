@@ -2,6 +2,12 @@
  Tag users with a unique GUID
 */
 (function() {
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+
+	if (BOOMR.plugins.GUID) {
+		return;
+	}
 
 	var impl = {
 		expires:  604800,

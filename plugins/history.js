@@ -1,4 +1,3 @@
-/*global BOOMR*/
 (function() {
 	var impl = {
 		auto: false,
@@ -9,6 +8,9 @@
 		routeChangeInProgress: false,
 		disableHardNav: false
 	};
+
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
 
 	// Checking for Plugins required and if already integrated
 	if (BOOMR.plugins.History || typeof BOOMR.plugins.SPA === "undefined" || typeof BOOMR.plugins.AutoXHR === "undefined") {

@@ -11,9 +11,9 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 */
 
 (function() {
-
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.DNS) {
 		return;
 	}

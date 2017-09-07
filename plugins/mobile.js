@@ -6,6 +6,12 @@ Plugin to capture navigator.connection.type on browsers that support it
 (function() {
 	var connection;
 
+	BOOMR = window.BOOMR || {};
+
+	if (typeof BOOMR.addVar !== "function") {
+		return;
+	}
+
 	if (typeof navigator === "object") {
 		connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || navigator.msConnection;
 	}
@@ -13,6 +19,7 @@ Plugin to capture navigator.connection.type on browsers that support it
 	if (!connection) {
 		return;
 	}
+
 	BOOMR.addVar({
 		"mob.ct": connection.type,
 		"mob.bw": connection.bandwidth,

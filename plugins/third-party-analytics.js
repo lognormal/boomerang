@@ -8,8 +8,9 @@ Captures session ids and campaign information from third party analytic vendors 
 (function() {
 	"use strict";
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.TPAnalytics) {
 		return;
 	}

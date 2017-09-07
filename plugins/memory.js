@@ -10,10 +10,10 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 
 (function() {
 	var w, p = {}, d, m, s, n, b, impl;
-	// First make sure BOOMR is actually defined.  It's possible that your plugin is loaded before boomerang, in which case
-	// you'll need this.
-	BOOMR = BOOMR || {};
+
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.Memory) {
 		return;
 	}

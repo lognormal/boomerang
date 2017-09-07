@@ -14,7 +14,7 @@
 <script src="25-delayed-boomerang-pre-config-snippet.js" type="text/javascript"></script>
 <script>
 // force some beacons to be sent right before the spa_hard beacon would send
-BOOMR = BOOMR || {};
+BOOMR = window.BOOMR || {};
 BOOMR.xhr = {
 	stop: function(callback) {
 		callback({

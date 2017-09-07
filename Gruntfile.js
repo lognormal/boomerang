@@ -237,8 +237,8 @@ module.exports = function() {
 							replacement: boomerangVersion
 						},
 						{
-							// strip out BOOMR = BOOMR || {}; in plugins
-							pattern: /BOOMR\s*=\s*BOOMR\s*\|\|\s*{};/g,
+							// strip out BOOMR = window.BOOMR || {}; in plugins
+							pattern: /BOOMR\s*=\s*window\.BOOMR\s*\|\|\s*{};/g,
 							replacement: ""
 						},
 						{

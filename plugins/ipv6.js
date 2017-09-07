@@ -30,9 +30,9 @@ Beacon parameters:
 */
 
 (function() {
-
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
+
 	if (BOOMR.plugins.IPv6) {
 		return;
 	}

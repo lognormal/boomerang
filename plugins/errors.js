@@ -225,7 +225,7 @@
 (function() {
 	var impl;
 
-	BOOMR = BOOMR || {};
+	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
 	if (BOOMR.plugins.Errors) {

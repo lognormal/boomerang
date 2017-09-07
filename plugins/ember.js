@@ -1,5 +1,3 @@
-/*global BOOMR*/
-
 /**
  * @namespace Ember
  * @desc
@@ -40,6 +38,9 @@
 	    routeHooked = false,
 	    enabled = true,
 	    hadMissedRouteChange = false;
+
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
 
 	if (BOOMR.plugins.Ember || typeof BOOMR.plugins.SPA === "undefined") {
 		return;
