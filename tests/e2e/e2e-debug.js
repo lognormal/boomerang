@@ -10,14 +10,9 @@ var assert = chai.assert;
 var path = require("path");
 
 var testsFile = path.join(__dirname, "e2e-debug.json");
+var tests = require(testsFile).tests;
+var servers = require(testsFile).server;
 
-var tests = [];
-
-if (fs.existsSync(testsFile)) {
-	tests = require(testsFile);
-}
-
-var i;
 
 //
 // Functions
@@ -28,12 +23,12 @@ function run(testPath, file) {
 		it("Should pass " + testPath + "/" + fileName, function(done) {
 			var logCount = 0;
 
-			browser.driver.get("http://localhost:4002/pages/" + testPath + "/" + fileName);
+			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + path + "/" + fileName);
 
 			setInterval(function() {
 				browser.manage().logs().get("browser").then(function(browserLog) {
 					if (browserLog.length > logCount) {
-						for (i = logCount; i < browserLog.length; i++) {
+						for (var i = logCount; i < browserLog.length; i++) {
 							var log = browserLog[i];
 							console.log("[" + new Date(log.timestamp).toLocaleTimeString() + "] " + log.message);
 						}
@@ -67,7 +62,7 @@ function run(testPath, file) {
 //
 // Run the tests in e2e-debug.json
 //
-for (i = 0; i < tests.length; i++) {
+for (var i = 0; i < tests.length; i++) {
 	var data = tests[i];
 
 	console.log("Running " + data.path + "/" + data.file);

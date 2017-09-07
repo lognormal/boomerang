@@ -89,12 +89,12 @@ describe("e2e/14-errors/07-global", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 32", function() {
+	it("Should have lineNumber ~ 52", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 32, 5);
+			assert.closeTo(err.lineNumber, 52, 5);
 		}
 	});
 });

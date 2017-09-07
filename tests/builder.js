@@ -68,6 +68,15 @@ module.exports = function() {
 	var e2eDir = path.join(testsDir, "e2e");
 	var e2eJsonPath = path.join(e2eDir, "e2e.json");
 
+	//
+	// Domains for test purposes
+	//
+	var DEFAULT_TEST_MAIN_DOMAIN = "boomerang-test.local";
+	var DEFAULT_TEST_SECONDARY_DOMAIN = "boomerang-test2.local";
+
+	var boomerangE2ETestDomain = grunt.option("main-domain") || DEFAULT_TEST_MAIN_DOMAIN;
+	var boomerangE2ESecondDomain = grunt.option("secondary-domain") || DEFAULT_TEST_SECONDARY_DOMAIN;
+
 	//make grunt know this task is async.
 	var done = this.async();
 
@@ -86,7 +95,10 @@ module.exports = function() {
 			});
 		},
 		function(opts, cb) {
-			opts.vars = {};
+			opts.vars = {
+				mainServer: boomerangE2ETestDomain,
+				secondaryServer: boomerangE2ESecondDomain
+			};
 
 			// Set all template vars to their file name
 			opts.snippetFiles.forEach(function(file) {
@@ -217,9 +229,19 @@ module.exports = function() {
 				// write root index
 				grunt.log.ok("index.html");
 				grunt.file.write(rootIndexFile, rootIndexHtml);
-
+				var testConfiguration = {
+					server: {
+						main: boomerangE2ETestDomain,
+						second: boomerangE2ESecondDomain
+					},
+					ports: {
+						main: 4002,
+						second: 4003
+					},
+					tests: testDefinitions
+				};
 				// test definitions
-				grunt.file.write(e2eJsonPath, JSON.stringify(testDefinitions, null, 2));
+				grunt.file.write(e2eJsonPath, JSON.stringify(testConfiguration, null, 2));
 
 				cb(err, opts);
 			});

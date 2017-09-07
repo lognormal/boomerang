@@ -10,23 +10,46 @@
 	<![endif]-->
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript">
+
+	// Clear localstorage
+	if (typeof window.localStorage === "object" && typeof window.localStorage.clear === "function") {
+		window.localStorage.clear();
+	}
+	// BOOMR API Key is required so LOGN doesn't fail to setup
+	window.BOOMR_API_key = "API_KEY";
+	// Set RT Cookie to empty, preventing navigation related issues with session tests
+	document.cookie = "RT=\"\";domain=.boomerang-test2.local;path=/";
+	// Prevent Boomerang from setting a cookie on unload so as to prevent cookies to show up when we load the next E2E test
+	window.addEventListener("beforeunload", function(e) {
+		if (BOOMR) {
+			BOOMR.disable();
+		}
+
+		e.preventDefault();
+	});
+	window.BOOMR_API_key = "API_KEY";
 	window.sessionMock = {
 		ID: "mocked-id",
 		length: 10,
-		start: (new Date().getTime()),
+		start: (new Date().getTime()) - 65000,
 		loadTime: 666,
 		sessionHistory: [],
 		offByOne: 1,
 		beacon_url: "/blackhole/no-op"
 	};
 	</script>
+	<script src="../../../vendor/mocha/mocha.js"></script>
+	<script src="../../../vendor/assertive-chai/dist/assertive-chai.js"></script>
+	<script src="../../../vendor/lodash/lodash.js"></script>
+	<script src="../../../boomerang-test-framework.js" type="text/javascript"></script>
 	<script src="session-mock.js" type="text/javascript"></script>
+	<script src="../../../build/boomerang-latest-debug.js"></script>
 	</head>
 	<body>
-	<script src="../../../build/boomerang-latest-debug.js" type="text/javascript"></script>
 	<!-- We don't want this page to beacon just give us the session content -->
 	<script>
-	BOOMR.init({
+	BOOMR_test.init({
+		site_domain: "boomerang-test2.local",
 		autorun: false,
 		CrossDomain: {
 			sending: true
@@ -35,3 +58,5 @@
 	</script>
 </body>
 </html>
+
+

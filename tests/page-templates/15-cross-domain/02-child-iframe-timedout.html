@@ -2,6 +2,8 @@
 <%= boomerangScript %>
 
 <script type="text/javascript">
+BOOMR.utils.removeCookie("RT");
+
 function handler(event) {
 	var data = JSON.parse(event.data);
 	if (data) {
@@ -19,7 +21,8 @@ else {
 
 <script src="02-child-iframe-timedout.js" type="text/javascript"></script>
 <script>
-var host = window.location.hostname;
+var server = "<%= secondaryServer %>";
+var host = server || window.location.hostname;
 var port = (parseInt(window.location.port) || 4002) + 1;
 
 BOOMR_test.init({
@@ -30,4 +33,22 @@ BOOMR_test.init({
 	}
 });
 </script>
+
+<pre>
+
+Test ensures we set the timedout flag on beacon if the main did not respond on time and we move on with our session
+
+ +---------+        +----------+
+ |  Alias  +---?---->   Main   |
+ +---------+        +----------+
+
+ +---------+
+ |   Main  +------> ... Thinking ...
+ +---------+
+
+ +--------------------------------------------+
+ |Alias: No Data from Main. Using own data... |
+ +--------------------------------------------+
+
+</pre>
 <%= footer %>

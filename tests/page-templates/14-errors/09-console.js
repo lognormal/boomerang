@@ -95,12 +95,12 @@ describe("e2e/14-errors/09-console", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 38 for the first error", function() {
+	it("Should have lineNumber ~ 59 for the first error", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 38, 5);
+			assert.closeTo(err.lineNumber, 59, 5);
 		}
 	});
 

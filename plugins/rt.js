@@ -65,7 +65,7 @@
 
 		// These timers are added directly as beacon variables
 		basic_timers: { t_done: 1, t_resp: 1, t_page: 1},
-
+		crossdomain_sending: false,
 		// Vars that were added to the beacon that we can remove after beaconing
 		addedVars: [],
 
@@ -388,6 +388,7 @@
 		 * Increment session length, and either session.obo or session.loadTime whichever is appropriate for this page
 		 */
 		incrementSessionDetails: function() {
+			BOOMR.debug("Incrementing Session Details... ", "RT");
 			BOOMR.session.length++;
 			if (isNaN(impl.timers.t_done.delta)) {
 				impl.oboError++;
@@ -952,6 +953,10 @@
 				w = BOOMR.window;
 			}
 
+			if (config && config.CrossDomain && config.CrossDomain.sending) {
+				impl.crossdomain_sending = true;
+			}
+
 			// protect against undefined window/document
 			if (!w || !w.document) {
 				return;
@@ -1243,7 +1248,7 @@
 			    // xhr beacon and this is not a subresource
 			    (ename === "xhr" && !subresource) ||
 			    // unload fired before onload
-			    (ename === "unload" && !impl.onloadfired && impl.autorun)) {
+			    (ename === "unload" && !impl.onloadfired && impl.autorun) && !impl.crossdomain_sending) {
 				impl.incrementSessionDetails();
 
 				// save a last-loaded timestamp in the cookie
@@ -1311,6 +1316,11 @@
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(impl.cookie)) || {};
 			return subcookies;
 		},
+
+		incrementSessionDetails: function() {
+			impl.incrementSessionDetails();
+		},
+
 		/* SOASTA PRIVATE END */
 
 		navigationStart: function() {

@@ -10,14 +10,28 @@ var fse = require("fs-extra");
 var stripJsonComments = require("strip-json-comments");
 var grunt = require("grunt");
 
+
 //
 // Constants
 //
+
+//
+// Domains for test purposes
+//
+var DEFAULT_TEST_MAIN_DOMAIN = "boomerang-test.local";
+var DEFAULT_TEST_SECONDARY_DOMAIN = "boomerang-test2.local";
+
+var boomerangE2ETestDomain = grunt.option("main-domain") || DEFAULT_TEST_MAIN_DOMAIN;
+var boomerangE2ESecondDomain = grunt.option("secondary-domain") || DEFAULT_TEST_SECONDARY_DOMAIN;
+
 var BUILD_PATH = "build";
 var TEST_BUILD_PATH = path.join("tests", "build");
 var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
-var TEST_URL_BASE = grunt.option("test-url") || "http://localhost:4002";
+var TEST_URL_BASE = grunt.option("test-url") || "http://" + boomerangE2ETestDomain + ":4002";
+
+var SELENIUM_ADDRESS = "http://" + boomerangE2ETestDomain + ":4444/wd/hub";
+var E2E_BASE_URL = "http://" + boomerangE2ETestDomain + ":4002/";
 
 var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 	preserveComments: false,
@@ -127,7 +141,7 @@ module.exports = function() {
 	// Build configuration
 	//
 	var buildConfig = {
-		server: grunt.option("server") || "localhost"
+		server: grunt.option("server") || DEFAULT_TEST_MAIN_DOMAIN || "localhost"
 	};
 
 	var bannerFilePathRelative = "./lib/banner.txt";
@@ -658,13 +672,42 @@ module.exports = function() {
 				keepAlive: false
 			},
 			phantomjs: {
-				configFile: "tests/protractor.config.phantom.js"
+				options: {
+					configFile: "tests/protractor.config.phantom.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL,
+						capabilities: {
+							"browserName": "phantomjs",
+							"phantomjs.binary.path": require("phantomjs").path
+						}
+					}
+				}
 			},
 			chrome: {
-				configFile: "tests/protractor.config.chrome.js"
+				options: {
+					configFile: "tests/protractor.config.chrome.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["e2e/*.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
 			},
 			debug: {
-				configFile: "tests/protractor.config.debug.js"
+				options: {
+					configFile: "tests/protractor.config.debug.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["e2e/e2e-debug.js"],
+						baseUrl: E2E_BASE_URL,
+						capabilities: {
+							"browserName": "phantomjs",
+							"phantomjs.binary.path": require("phantomjs").path
+						}
+					}
+				}
 			}
 		},
 		protractor_webdriver: {

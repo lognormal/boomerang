@@ -1,6 +1,13 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
+/*
+  Ensure Main Session that existed before this session gets merged with the session in this page
+  +-------+   +------+             +-------+   +--------------------------+
+  | Alias |-?-| Main |-->Data! --->| Alias |-->| Alias.data === Main.data |
+  +-------+   +------+             +-------+   +--------------------------+
+*/
+
 describe("e2e/15-cross-domain/03-existing-main-session", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
@@ -28,16 +35,7 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 	it("Should have a session length of 11 from the 10 prior to loading the page", function() {
 		var cookie = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie("RT"));
 		var b = tf.lastBeacon();
-		// Off By One error or t_done not defined because phantomjs
-		if (b["rt.obo"]) {
-			// If 2 off by ones are recorded we can expect the length to be 12
-			// as both main and crossdomain is having trouble getting the page done
-			assert.equal(parseInt(b["rt.obo"]) + 10, 12);
-			return;
-		}
-		else {
-			assert.equal(parseInt(cookie.sl), 11);
-		}
+		assert.equal(parseInt(cookie.sl), 11);
 	});
 
 	it("Should have a rt.tt of 666 (mocked session total time across session) + beacons t_done", function() {
@@ -51,7 +49,10 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 		else {
 			assert.isDefined(b.t_done, "t_done is not defined");
 			assert.isNumber(b.t_done, "t_done is not a number");
-			assert.equal(parseInt(cookie.tt), parseInt(b.t_done) + 666);
+
+			// CookieTT equals RT's impl.loadTime.delta + t_done (for the current page) + 666 taken from the mocked session;
+			var allLoadTimes = b["rt.end"] - b["rt.tstart"] + b.t_done + 666;
+			assert.equal(parseInt(cookie.tt), allLoadTimes);
 		}
 	});
 });

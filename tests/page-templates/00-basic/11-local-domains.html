@@ -1,0 +1,28 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script type="text/javascript">
+window.mainServer = "<%= mainServer %>";
+window.secondaryServer = "<%= secondaryServer %>";
+
+window.mainPort = (parseInt(window.location.port) || 4002);
+window.secondaryPort = (parseInt(window.location.port) || 4002) + 1;
+
+</script>
+<script src="11-local-domains.js" type="text/javascript"></script>
+
+<pre>  Why is this test here?
+  ======================
+  
+  Some tests require us to have a proper domain and port assigned and requesting resources from those domains+ports 
+  as this is the only way we can ensure a cookie is created and session details can be validated. 
+
+  In this set of tests we ensure that both the port and domain are setup as expected in our environment.
+</pre>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+
+<%= footer %>

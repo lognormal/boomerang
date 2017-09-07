@@ -54,19 +54,53 @@
 		beacon_url: "/no-op"
 	};
 
+	function log(message) {
+		BOOMR.debug(message, "MockSession");
+	}
+
 	BOOMR.plugins.MockSession = {
 		init: function(config) {
+			var rtObj;
 			// This is plugin won't do much if RT plugin is not part of the build
 			if (!BOOMR.plugins.RT) {
 				return;
 			}
+
+			if (BOOMR.utils.getCookie("RT")) {
+				rtObj = BOOMR.utils.getCookie("RT")
+					.split("&")
+					.map(function(val) {
+						return val.split("=");
+					}).reduce(function(acc, val) {
+
+						if (acc.hasOwnProperty("length")) {
+							var obj = {};
+							obj[val[0]] = val[1];
+							obj[acc[0]] = acc[1];
+							return obj;
+						}
+						else {
+							acc[val[0]] = val[1];
+							return acc;
+						}
+					});
+			}
+
+			log("Current Cookie Content: " + BOOMR.utils.objectToString(rtObj));
+
 			// We need to use window.sessionMock instead of the much
 			// more comfortable MockSession as config item in
 			// BOOMR_config since this needs to be running before
 			// CrossDomain has run.
 			impl = BOOMR.window.sessionMock;
 
-			BOOMR.utils.removeCookie("RT");
+			log("Session Mocked: " + BOOMR.utils.objectToString(impl));
+			if (!BOOMR.session.domain) {
+				BOOMR.session.domain = BOOMR.window.location.host;
+			}
+			if (BOOMR.utils.getCookie("RT")) {
+				BOOMR.utils.removeCookie("RT");
+			}
 			BOOMR.session.start = impl.start;
 			BOOMR.session.ID = impl.ID;
 			BOOMR.session.length = impl.length;

@@ -100,12 +100,12 @@ describe("e2e/14-errors/12-events-xhr", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 48", function() {
+	it("Should have lineNumber ~ 68", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 48, 5);
+			assert.closeTo(err.lineNumber, 68, 5);
 		}
 	});
 });

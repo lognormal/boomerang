@@ -2074,7 +2074,7 @@ BOOMR_check_doc_domain();
 		var make_logger;
 
 		if (typeof console === "object" && console.log !== undefined) {
-			boomr.log = function(m, l, s) { console.log(BOOMR.now() + ": " + s + ": [" + l + "] " + m); };
+			boomr.log = function(m, l, s) { console.log("(" + BOOMR.now() + ") " + "{" + BOOMR.pageId + "}" + ": " + s + ": [" + l + "] " + m); };
 		}
 
 		make_logger = function(l) {

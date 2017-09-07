@@ -1,6 +1,23 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
+/*
+  Ensure we are recording the correct amount of delay between requesting and receiving data
+
+  +---------+        +----------+
+  |  Alias  +---?---->   Main   |
+  +---------+        +----------+
+
+  +---------+
+  |   Main  +------> ... Thinking ...
+  +---------+
+
+  +---------+        +----------+
+  |  Main   +---!---->  Alias   |
+  +---------+        +----------+
+
+*/
+
 describe("e2e/15-cross-domain/01-child-iframe-delayed", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;

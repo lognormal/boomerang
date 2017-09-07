@@ -9,12 +9,11 @@
 	    running = false,
 	    t_start,
 	    autorun = true,
-
+	    isConfigXHRFilterSet = false,
 	    // Default is undefined. Used from unit tests to change behavior.
 	    // When false, the plugin will not run.
 	    // When true, the plugin will always run
 	    alwaysRun = w.BOOMR_LOGN_always,
-
 	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,
 	    ready = false;
 
@@ -286,6 +285,22 @@
 
 				if (apiKey) {
 					BOOMR.addVar("h.key", apiKey);
+					/* BEGIN_CONFIG_AS_JSON */
+					// Prevent AutoXHR from instrumenting and beaconing on Boomerangs own config.json requests
+					if (!isConfigXHRFilterSet &&
+						BOOMR.plugins &&
+						BOOMR.plugins.AutoXHR &&
+						typeof BOOMR.plugins.AutoXHR.addExcludeFilter === "function") {
+
+						BOOMR.plugins.AutoXHR.addExcludeFilter(function(anchor) {
+							if (anchor && anchor.href && anchor.href.indexOf(this) > -1) {
+								return true;
+							}
+							return false;
+						}, apiKey, "ConfigXHRRequestFilter");
+						isConfigXHRFilterSet = true;
+					}
+					/* END_CONFIG_AS_JSON */
 				}
 				else {
 					BOOMR.error("API key could not be detected from script URL or BOOMR_API_key, exiting");

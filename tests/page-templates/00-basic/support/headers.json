@@ -1,0 +1,7 @@
+{
+    "generic.html": {
+        "headers": {
+            "Access-Control-Allow-Origin": "*"
+        }
+    }
+}

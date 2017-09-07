@@ -13,7 +13,7 @@ describe("e2e/00-basic/04-onunload-autorun-false", function() {
 
 		var testFrame = document.getElementById("boomer_test_frame");
 		testFrame.contentWindow.BOOMR.subscribe("onbeacon", unloadBeaconHandler, null, this);
-		testFrame.src = "support/generic.html?2";
+		testFrame.src = "about:blank";
 	});
 
 });

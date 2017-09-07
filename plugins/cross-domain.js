@@ -134,7 +134,7 @@
 				}
 			}
 
-			var urlQueryParams = BOOMR.utils.objectToString(BOOMR.session, "&");
+			var urlQueryParams = BOOMR.utils.objectToString(queryObject, "&");
 			url = url + "#" + urlQueryParams;
 
 			d.body.appendChild(impl.buildIFrame(url, impl.iframe_name));
@@ -236,7 +236,7 @@
 			}
 		},
 		init: function(config) {
-			var a;
+			var a, index;
 
 			if (config.primary) {
 				return;
@@ -250,12 +250,12 @@
 			}
 
 			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
-			impl.plugin_start = BOOMR.now();
 
-			// Normalize the URL
-			a = d.createElement("a");
-			a.href = impl.cross_domain_url;
-			impl.cross_domain_url = a.href;
+			if (!impl.enabled || impl.session_transferred) {
+				return;
+			}
+
+			impl.plugin_start = BOOMR.now();
 
 			// if postMessage is not supported bail and don't block the beacon
 			if (!BOOMR.utils.hasPostMessageSupport()) {
@@ -267,6 +267,11 @@
 			}
 
 			if (impl.cross_domain_url && !impl.sending && impl.enabled) {
+				// Normalize the URL
+				a = d.createElement("a");
+				a.href = impl.cross_domain_url;
+				impl.cross_domain_url = a.href;
+
 				log("CrossDomain frame for URL: " + impl.cross_domain_url);
 				impl.setup(impl.cross_domain_url);
 				setTimeout(function() {
@@ -292,18 +297,33 @@
 
 			// If sending is enabled we know that we're on the primary domain
 			if (impl.sending && impl.enabled) {
+				// make sure boomerang doesn't do anything at this point
+				BOOMR.disable();
+
 				log("Client preparing to send postMessage");
 
-				var query = w.location.hash;
+				// remove hash ('#')
+				var query = w.location.hash.substring(1, w.location.hash.length);
+				log("Session Data passed via Query: " + query);
+				var items = query.split("&");
+				var values = {};
+
+				for (index = 0; index < items.length; index++) {
+					var group = items[index].split("=");
+					if (group && group.hasOwnProperty("length") && group.length >= 2) {
+						values[group[0]] = group[1];
+					}
+				}
+
 				var querySession = {
-					start: BOOMR.utils.getQueryParamValue("start", query),
-					length: BOOMR.utils.getQueryParamValue("length", query),
-					ID: BOOMR.utils.getQueryParamValue("ID", query)
+					start: values.start,
+					length: values.length,
+					ID: values.ID
 				};
 
 				var queryCookie = {
-					obo: BOOMR.utils.getQueryParamValue("obo", query),
-					tt: BOOMR.utils.getQueryParamValue("tt", query)
+					obo: values.obo,
+					tt: values.tt
 				};
 
 				try {
@@ -317,15 +337,19 @@
 						querySession.length >= BOOMR.session.length &&
 						querySession.start > (BOOMR.now() - maxSessionExpiry)) {
 						BOOMR.session.start = querySession.start;
+
+						if (!BOOMR.session.ID || typeof querySession.ID === "string") {
+							BOOMR.session.ID = querySession.ID;
+						}
 					}
 
-					BOOMR.session.length++;
 					BOOMR.plugins.RT.updateCookie();
 
 					queryCookie.obo = parseInt(queryCookie.obo);
 					queryCookie.tt = parseInt(queryCookie.tt);
-
-					this.updateCookie(queryCookie);
+					if (!isNaN(queryCookie.obo) && !isNaN(queryCookie.tt)) {
+						this.updateCookie(queryCookie);
+					}
 				}
 				catch (ignore) {
 					/* not doing anything with the passed session info if not valid */
@@ -354,9 +378,6 @@
 				// Since we're not required to do anything else, other than sending a postMessage
 				// we don't need to block boomerang
 				impl.session_transferred = true;
-
-				// make sure boomerang doesn't do anything at this point
-				BOOMR.disable();
 			}
 		},
 		updateCookie: function(queryCookie) {
@@ -386,12 +407,20 @@
 			    impl.session_transferred) {
 				// Make sure that we are only updating the session start time if the following criteria match:
 				//  - session.start is less than 24h old (maxSessionExpiry)
-				if (!isNaN(impl.session.start) && impl.session.start > (BOOMR.now() - maxSessionExpiry)) {
+				//  - session.start is less than current BOOMR.session.start or BOOMR.now() if BOOMR.session.start does not exist
+				if (!isNaN(impl.session.start) &&
+					impl.session.start > (BOOMR.now() - maxSessionExpiry) &&
+					impl.session.start < (typeof BOOMR.session.start === "number" ? BOOMR.session.start : BOOMR.now())) {
 					BOOMR.session.start = impl.session.start;
 
 					// if we're given a session length greater than our own, use it instead
 					if (!isNaN(impl.session.length) && impl.session.length > BOOMR.session.length) {
 						BOOMR.session.length = impl.session.length;
+
+						/* SOASTA PRIVATE START */
+						// Increment it for current session navigation
+						BOOMR.plugins.RT.incrementSessionDetails();
+						/* SOASTA PRIVATE END */
 					}
 
 					BOOMR.session.ID = impl.session.ID;
@@ -417,3 +446,5 @@
 	};
 
 }());
+
+

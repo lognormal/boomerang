@@ -5,6 +5,7 @@ describe("e2e/15-cross-domain/00-post-message-beacon", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
+
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});

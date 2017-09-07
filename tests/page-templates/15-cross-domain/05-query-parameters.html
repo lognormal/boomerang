@@ -2,6 +2,8 @@
 <%= boomerangScript %>
 
 <script type="text/javascript">
+BOOMR.utils.removeCookie("RT");
+
 function handler(event) {
 	var data = JSON.parse(event.data);
 	if (data) {
@@ -18,10 +20,12 @@ else {
 </script>
 <script src="05-query-parameters.js" type="text/javascript"></script>
 <script>
-var host = window.location.hostname;
+var server = "<%= secondaryServer %>";
+var host = server || window.location.hostname;
 var port = (parseInt(window.location.port) || 4002) + 1;
 
 BOOMR_test.init({
+	site_domain: "<%= mainServer %>",
 	testAfterOnBeacon: true,
 	CrossDomain: {
 		cross_domain_url: "http://" + host + ":" + port + "/pages/15-cross-domain/support/frameScriptSimple.html?SOME_VARIABLE=Breaks",

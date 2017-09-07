@@ -7,7 +7,9 @@
 var chai = require("chai");
 var assert = chai.assert;
 
-var tests = require("./e2e.json");
+var tests = require("./e2e.json").tests;
+var servers = require("./e2e.json").server;
+var ports = require("./e2e.json").ports;
 var disabledTests = require("./e2e.disabled.json");
 
 //
@@ -16,16 +18,20 @@ var disabledTests = require("./e2e.disabled.json");
 function run(path, file) {
 	describe(path, function() {
 		var fileName = file + ".html";
+
 		it("Should pass " + path + "/" + fileName, function(done) {
-			browser.driver.get("http://localhost:4002/pages/" + path + "/" + fileName);
+
+			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + path + "/" + fileName);
 
 			browser.driver.wait(function() {
 				return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));
 			});
 
-			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
+			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {
+
 				assert.equal(complete, true, "BOOMR_test.isComplete()");
-				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
+
+				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures) {
 					if (testFailures.length > 0) {
 						throw new Error(testFailures);
 					}

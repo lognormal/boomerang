@@ -1,6 +1,10 @@
 <%= header %>
 <%= boomerangScript %>
 
+<script>
+BOOMR.utils.removeCookie("RT");
+</script>
+
 <script type="text/javascript">
 function handler(event) {
 	var data = JSON.parse(event.data);
@@ -19,16 +23,26 @@ else {
 
 <script src="03-existing-main-session.js" type="text/javascript"></script>
 <script>
-var host = window.location.hostname;
+var server = "<%= secondaryServer %>";
+var host = server || window.location.hostname;
 var port = (parseInt(window.location.port) || 4002) + 1;
 
 BOOMR_test.init({
+	site_domain: "<%= mainServer %>",
 	testAfterOnBeacon: true,
 	CrossDomain: {
 		cross_domain_url: "http://" + host + ":" + port + "/pages/15-cross-domain/support/frameWithExistingSession.html",
-		sending: false,
-		debug: true
+		sending: false
 	}
 });
 </script>
+
+<pre>
+Ensure Main Session that existed before this session gets merged with the session in this page
++-------+   +------+             +-------+   +--------------------------+
+| Alias |-?-| Main |-->Data! --->| Alias |-->| Alias.data === Main.data |
++-------+   +------+             +-------+   +--------------------------+
+</pre>
 <%= footer %>
+
+

@@ -1,6 +1,23 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
+/*
+  Simple test to ensure communication between Alias and main domain works
+
+  Q: Main, do you have a session to transfer?
+  +---------+        +----------+
+  |  Alias  +---?---->   Main   |
+  +---------+        +----------+
+
+  A: Yes!
+  +---------+        +----------+
+  |   Main  +---!---->   Alias  |
+  +---------+        +----------+
+
+  - Ensures transfer duration is set, we know how long it took to transfer session info from main to alias
+  - Ensures we did not timeout when requesting iframe/data
+*/
+
 describe("e2e/15-cross-domain/00-post-message-beacon", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;

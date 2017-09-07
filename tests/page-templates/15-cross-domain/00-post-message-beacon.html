@@ -2,6 +2,7 @@
 <%= boomerangScript %>
 
 <script type="text/javascript">
+BOOMR.utils.setCookie("RT", {}, -86400);
 function handler(event) {
 	var data = JSON.parse(event.data);
 	if (data) {
@@ -19,7 +20,8 @@ else {
 
 <script src="00-post-message-beacon.js" type="text/javascript"></script>
 <script>
-var host = window.location.hostname;
+var server = "<%= secondaryServer %>";
+var host = server || window.location.hostname;
 var port = (parseInt(window.location.port) || 4002) + 1;
 
 BOOMR_test.init({
@@ -30,4 +32,22 @@ BOOMR_test.init({
 	}
 });
 </script>
+
+<pre>
+Simple test to ensure communication between Alias and main domain works
+
+Q: Main, do you have a session to transfer?
++---------+        +----------+
+|  Alias  +---?---->   Main   |
++---------+        +----------+
+
+A: Yes!
++---------+        +----------+
+|   Main  +---!---->   Alias  |
++---------+        +----------+
+
+ - Ensures transfer duration is set, we know how long it took to transfer session info from main to alias
+ - Ensures we did not timeout when requesting iframe/data
+</pre>
+
 <%= footer %>
