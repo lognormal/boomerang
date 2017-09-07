@@ -80,8 +80,6 @@
 			BOOMR.debug($rootScope.$id + ": " + msg, "angular");
 		}
 
-		log("Startup");
-
 		/**
 		 * Fires the SPA route_change event.
 		 *

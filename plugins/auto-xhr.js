@@ -398,7 +398,7 @@
 	 * @returns {undefined} - returns early if the event already completed
 	 */
 	MutationHandler.prototype.sendEvent = function(i) {
-		var ev = this.pending_events[i], self = this;
+		var ev = this.pending_events[i], self = this, now = BOOMR.now();
 
 		if (!ev || ev.complete) {
 			return;
@@ -432,8 +432,8 @@
 
 				// if this was a SPA nav that triggered no additional resources, substract the
 				// SPA_TIMEOUT from now to determine the end time
-				if (ev.total_nodes === 0) {
-					ev.resource.timing.loadEventEnd = BOOMR.now() - SPA_TIMEOUT;
+				if (!ev.forced && ev.total_nodes === 0) {
+					ev.resource.timing.loadEventEnd = now - SPA_TIMEOUT;
 				}
 			}
 
@@ -1025,21 +1025,53 @@
 	 * @return {boolean} True if there are no outstanding resources
 	 */
 	MutationHandler.prototype.queue_is_empty = function() {
+		return this.nodesWaitingFor() === 0;
+	};
+
+	/**
+	 * Determines how many nodes are being waited on
+	 * @return {number} Number of nodes being waited on
+	 */
+	MutationHandler.prototype.nodesWaitingFor = function() {
 		if (this.pending_events.length === 0) {
-			return true;
+			return 0;
 		}
 
 		var index = this.pending_events.length - 1;
 
 		if (!this.pending_events[index]) {
-			return true;
+			return 0;
 		}
 
-		if (this.pending_events[index].nodes_to_wait === 0) {
-			return true;
+		return this.pending_events[index].nodes_to_wait;
+	};
+
+	/**
+	 * Completes the current event, marking the end time as 'now'.
+	 */
+	MutationHandler.prototype.completeEvent = function() {
+		var now = BOOMR.now(), index, ev;
+
+		if (this.pending_events.length === 0) {
+			// no active events
+			return;
 		}
 
-		return false;
+		index = this.pending_events.length - 1;
+		ev = this.pending_events[index];
+		if (!ev) {
+			// unknown event
+			return;
+		}
+
+		// set the end timestamp to now
+		ev.resource.timing.loadEventEnd = now;
+
+		// note that this end was forced
+		ev.forced = true;
+
+		// complete this event
+		this.sendEvent(index);
 	};
 
 	handler = new MutationHandler();

@@ -1,5 +1,6 @@
 (function() {
 	var hooked = false,
+	    initialized = false,
 	    initialRouteChangeStarted = false,
 	    initialRouteChangeCompleted = false,
 	    autoXhrEnabled = false,
@@ -16,6 +17,15 @@
 
 	if (BOOMR.plugins.SPA || !BOOMR.plugins.AutoXHR) {
 		return;
+	}
+
+	/**
+	 * Debug logging for this plugin
+	 *
+	 * @param {string} msg Message
+	 */
+	function log(msg) {
+		BOOMR.debug(msg, "spa");
 	}
 
 	var impl = {
@@ -60,6 +70,14 @@
 				// to NavigationTiming's performance.loadEventEnd (instead of 'now')
 				resource.timing.loadEventEnd = stopTime;
 			}
+		},
+
+		/**
+		 * Fired on each beacon.
+		 */
+		onBeacon: function() {
+			// remove all of the potential parameters we added to the beacon
+			BOOMR.removeVar("spa.missed", "spa.forced", "spa.waiting");
 		}
 	};
 
@@ -90,6 +108,14 @@
 					BOOMR.plugins.AutoXHR.enableAutoXhr();
 				}
 			}
+
+			if (initialized) {
+				return;
+			}
+
+			initialized = true;
+
+			BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
 		},
 		/**
 		 * Registers a framework with the SPA plugin
@@ -149,6 +175,8 @@
 		hook: function(hadRouteChange, options) {
 			options = options || {};
 
+			log("Hooked");
+
 			if (hooked) {
 				return this;
 			}
@@ -182,12 +210,15 @@
 		 * @param {object[]} routeFilterArgs Route Filter arguments
 		 */
 		route_change: function(onComplete, routeFilterArgs) {
+			log("Route Change");
+
 			var firedEvent = false;
 
 			// if we have a routeFilter, see if they want to track this route
 			if (routeFilter) {
 				try {
 					if (!routeFilter.apply(null, routeFilterArgs)) {
+						log("Route filter returned false; not tracking this route");
 						return;
 					}
 				}
@@ -280,6 +311,25 @@
 				}
 
 				latestResource = null;
+			}
+		},
+
+		/**
+		 * Marks the current navigation as complete and sends a beacon.
+		 */
+		markNavigationComplete: function() {
+			log("Navigation being marked complete");
+
+			var mh = BOOMR.plugins.AutoXHR.getMutationHandler();
+			if (mh) {
+				// note that the navigation was forced complete
+				BOOMR.addVar("spa.forced", "1");
+
+				// add the count of nodes we were waiting for
+				BOOMR.addVar("spa.waiting", mh.nodesWaitingFor());
+
+				// finalize this navigation
+				mh.completeEvent();
 			}
 		}
 	};

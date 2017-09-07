@@ -251,7 +251,6 @@
 
 			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
 			impl.plugin_start = BOOMR.now();
-			log("Plugin started at: " + impl.plugin_start);
 
 			// Normalize the URL
 			a = d.createElement("a");
