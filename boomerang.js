@@ -948,6 +948,24 @@ BOOMR_check_doc_domain();
 						return c.substr(2, 1);
 					}
 				});
+			},
+
+			/**
+			 * Attempt to serialize an object, preferring JSURL over JSON.stringify
+			 *
+			 * @param {Object} value Object to serialize
+			 * @returns {string} serialized version of value, empty-string if not possible
+			 */
+			serializeForUrl: function(value) {
+				if (BOOMR.utils.Compression && BOOMR.utils.Compression.jsUrl) {
+					return BOOMR.utils.Compression.jsUrl(value);
+				}
+				if (window.JSON) {
+					return JSON.stringify(value);
+				}
+				// not supported
+				BOOMR.debug("JSON is not supported");
+				return "";
 			}
 
 			/* BEGIN_DEBUG */
@@ -964,7 +982,7 @@ BOOMR_check_doc_domain();
 			}
 			/* END_DEBUG */
 
-		},
+		}, // closes `utils`
 
 		init: function(config) {
 			var i, k,

@@ -86,7 +86,8 @@
 			ResourceTiming: {
 				enabled: true,
 				clearOnBeacon: true,
-				trimUrls: true
+				trimUrls: true,
+				serverTiming: true
 			},
 			AutoXHR: {
 				alwaysSendXhr: true,

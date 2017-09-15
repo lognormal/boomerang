@@ -851,18 +851,7 @@
 		 */
 		getErrorsForUrl: function(errors) {
 			errors = impl.compressErrors(errors);
-
-			if (BOOMR.utils.Compression && BOOMR.utils.Compression.jsUrl) {
-				return BOOMR.utils.Compression.jsUrl(errors);
-			}
-			else if (window.JSON) {
-				return JSON.stringify(errors);
-			}
-			else {
-				// not supported
-				BOOMR.debug("JSON is not supported", "Errors");
-				return "";
-			}
+			return BOOMR.utils.serializeForUrl(errors);
 		},
 
 		/**

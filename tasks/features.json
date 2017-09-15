@@ -19,5 +19,6 @@
 	{"key":"autoxhr-filters"},
 	{"key":"usertiming"},
 	{"key":"iframe-delay"},
-	{"key":"resource-groups-nav-start"}
+	{"key":"resource-groups-nav-start"},
+	{"key":"server-timing"}
 ]

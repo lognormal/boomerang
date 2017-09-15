@@ -489,7 +489,7 @@
 						resource.timing.loadEventEnd
 					);
 
-				BOOMR.addVar("restiming", JSON.stringify(r.restiming));
+				BOOMR.plugins.ResourceTiming.addToBeacon(r);
 			}
 
 			// For SPAs, calculate Back-End and Front-End timings
@@ -581,7 +581,7 @@
 			var resources = BOOMR.plugins.ResourceTiming.getFilteredResourceTiming(
 				resource.timing.requestStart,
 				resource.timing.loadEventEnd,
-				impl.spaBackEndResources);
+				impl.spaBackEndResources).entries;
 
 			// determine the total time based on the SPA logic
 			var totalTime = Math.round(resource.timing.loadEventEnd - resource.timing.requestStart);
@@ -1636,7 +1636,7 @@
 						}
 					}
 					else {
-						// single resoruce
+						// single resource
 						sendResource(resources);
 					}
 				};

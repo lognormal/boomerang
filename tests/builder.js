@@ -179,11 +179,6 @@ module.exports = function() {
 
 						grunt.log.ok(templateFile);
 
-						// save to our test definitions
-						testDefinitions.push({
-							path: templateDir,
-							file: templateFileName.replace(".html", "")
-						});
 
 						// javascript file
 						var jsFile = file.replace(".html", "") + ".js";
@@ -202,12 +197,23 @@ module.exports = function() {
 						// write
 						grunt.file.write(templateFileDest, rendered);
 
+						// skip '.headers' files
+						if (!templateFileName.endsWith("html")) {
+							return;
+						}
+
+						// save to our test definitions
+						testDefinitions.push({
+							path: templateDir,
+							file: templateFileName.replace(".html", "")
+						});
+
 						//
 						// Index.html
 						//
 						indexHtml += "<p><a href='" + templateFileName + "'>" + templateFileName + "</a></p>";
 
-						// only show IFRAMEs if there's not a ton of htem
+						// only show IFRAMEs if there's not a ton of them
 						if (files.length <= 5) {
 							indexHtml += "<iframe src='" + templateFileName + "' style='width: 100%'></iframe>\n";
 						}
