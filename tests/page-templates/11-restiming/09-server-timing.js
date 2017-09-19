@@ -27,7 +27,7 @@ describe("e2e/11-restiming/09-server-timing", function() {
 		}
 		var b = tf.beacons[0];
 		var hasMiddlewareEntry = typeof performance.getEntriesByType("navigation")[0].serverTiming.find(function(e) {
-			return e.name === "mw";
+			return (e.name || e.metric) === "mw";
 		}) !== "undefined";
 		assert.match(b.restiming, !hasMiddlewareEntry ? /\*31:.1,2:2/ : /\*31:1.1,2:3/);
 		assert.match(b.restiming, !hasMiddlewareEntry ? /\*31:.2,4:3/ : /\*31:1.2,4:4/);
