@@ -1065,13 +1065,16 @@ see: http://www.w3.org/TR/resource-timing/
 			if (e.serverTiming && e.serverTiming.length) {
 				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_SERVERTIMING_TYPE +
 					e.serverTiming.reduce(function(stData, entry, entryIndex) {
-						var duration = String(entry.duration);
+						// The numeric of the entry is `value` for Chrome 61, `duration` after that
+						var duration = String(typeof entry.duration !== "undefined" ? entry.duration : entry.value);
 						if (duration.substring(0, 2) === "0.") {
 							// lop off the leading 0
 							duration = duration.substring(1);
 						}
-						var lookupKey = identifyServerTimingEntry(serverTiming.indexed[entry.name].index,
-							serverTiming.indexed[entry.name].descriptions[entry.description]);
+						// The name of the entry is `metric` for Chrome 61, `name` after that
+						var name = entry.name || entry.metric;
+						var lookupKey = identifyServerTimingEntry(serverTiming.indexed[name].index,
+							serverTiming.indexed[name].descriptions[entry.description]);
 						stData += (entryIndex > 0 ? "," : "") + duration + lookupKey;
 						return stData;
 					}, "");
@@ -1266,13 +1269,14 @@ see: http://www.w3.org/TR/resource-timing/
 	 */
 	function accumulateServerTimingEntries(countCollector, serverTimingEntries) {
 		(serverTimingEntries || []).forEach(function(entry) {
-			if (typeof countCollector[entry.name] === "undefined") {
-				countCollector[entry.name] = {
+			var name = entry.name || entry.metric;
+			if (typeof countCollector[name] === "undefined") {
+				countCollector[name] = {
 					count: 0,
 					counts: {}
 				};
 			}
-			var metric = countCollector[entry.name];
+			var metric = countCollector[name];
 			metric.counts[entry.description] = metric.counts[entry.description] || 0;
 			metric.counts[entry.description]++;
 			metric.count++;
