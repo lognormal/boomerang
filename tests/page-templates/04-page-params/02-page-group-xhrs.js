@@ -9,12 +9,12 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent five beacons", function(done) {
+	it("Should have sent 11 beacons", function(done) {
 		var _this = this;
 		t.ifAutoXHR(
 			done,
 			function() {
-				_this.timeout(11000);
+				_this.timeout(25000);
 				t.ensureBeaconCount(done, 11);
 			});
 	});
@@ -120,13 +120,25 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 	});
 
 	it("Should have a seventh beacon matching XPath based payload validation", function(done) {
+		if (!Function.prototype.bind) {
+			return this.skip();
+		}
+
 		t.ifAutoXHR(
 			done,
 			function() {
 				var b = tf.beacons[6];
-				assert.equal(b["xhr.pg"], "PageGroupXPath");
+				var pg = b["xhr.pg"];
+
+				if (pg === "Test Pages" && t.isIE()) {
+					// IE 6-11 doesn't have a proper XPath parser
+					this.skip();
+					return done();
+				}
+
+				assert.equal(pg, "PageGroupXPath");
 				done();
-			});
+			}.bind(this));
 	});
 
 	it("Should have a eigth beacon matching JSON based payload validation", function(done) {
@@ -170,4 +182,3 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 	});
 
 });
-

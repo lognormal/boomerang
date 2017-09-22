@@ -739,6 +739,17 @@
 		}
 	};
 
+	/**
+	 * Determines the user agent is Internet Explorer or not
+	 *
+	 * @returns {boolean} True if the user agent is Internet Explorer
+	 */
+	t.isIE = function() {
+		return window.navigator &&
+			(window.navigator.userAgent.indexOf("MSIE") !== -1 ||
+			window.navigator.appVersion.indexOf("Trident/") > 0);
+	};
+
 	window.BOOMR_test = t;
 
 	// force LOGN plugin not to run. Individual tests will override this if needed.

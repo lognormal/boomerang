@@ -87,18 +87,18 @@ BOOMR_test.init({
 			},
 			{
 				type: "Regexp",
-				parameter1: "/blackhole#subresource",
+				parameter1: "/blackhole.subresource",
 				parameter2: "XHR subresource",
 				subresource: true
 			},
 			{
 				type: "Regexp",
-				parameter1: "/blackhole#not-subresource",
+				parameter1: "/blackhole.not-subresource",
 				parameter2: "XHR not subresource"
 			},
 			{
 				type: "Regexp",
-				parameter1: "/blackhole#passive-subresource",
+				parameter1: "/blackhole.passive-subresource",
 				// endswith "_subresource" will be flagged as passive subresource
 				parameter2: "XHR_subresource"
 			}
@@ -112,63 +112,63 @@ BOOMR_test.init({
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/blackhole#subresource", true);
+				xhr.open("GET", "/blackhole?subresource", true);
 				xhr.send(null);
 			}, 0);
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/blackhole#not-subresource", true);
-				xhr.send(null);
-			}, 1000);
-
-			setTimeout(function() {
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/blackhole#not-pagegroup", true);
+				xhr.open("GET", "/blackhole?not-subresource", true);
 				xhr.send(null);
 			}, 2000);
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/blackhole#passive-subresource", true);
-				xhr.send(null);
-			}, 3000);
-
-			setTimeout(function() {
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/pages/04-page-params/support/payload-queryselector.xml", true);
+				xhr.open("GET", "/blackhole?not-pagegroup", true);
 				xhr.send(null);
 			}, 4000);
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/pages/04-page-params/support/payload-xpath.xml", true);
-				xhr.send(null);
-			}, 5000);
-
-			setTimeout(function() {
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/pages/04-page-params/support/payload.json", true);
+				xhr.open("GET", "/blackhole?passive-subresource", true);
 				xhr.send(null);
 			}, 6000);
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/pages/04-page-params/support/payload.txt", true);
-				xhr.send(null);
-			}, 7000);
-
-			setTimeout(function() {
-				var xhr = new XMLHttpRequest();
-				xhr.open("POST", "/blackhole?id=xhr", true);
+				xhr.open("GET", "/pages/04-page-params/support/payload-queryselector.xml", true);
 				xhr.send(null);
 			}, 8000);
 
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload-xpath.xml", true);
+				xhr.send(null);
+			}, 10000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload.json", true);
+				xhr.send(null);
+			}, 12000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload.txt", true);
+				xhr.send(null);
+			}, 14000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", "/blackhole?id=xhr", true);
+				xhr.send(null);
+			}, 16000);
+
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
 				xhr.open("POST", "/blackhole?id=xhr_post", true);
 				xhr.send("{ \"operationName\": \"PageXHRPOST\"}");
-			}, 9000);
+			}, 18000);
 		}
 });
 </script>
