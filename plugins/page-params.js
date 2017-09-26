@@ -2808,6 +2808,7 @@
 			params.api = 1;
 			params["api.v"] = 2;
 			params["api.l"] = "boomr";
+			params.v = BOOMR.version;
 
 			// let others add data to the beacon
 			BOOMR.fireEvent("before_custom_beacon", params);

@@ -278,18 +278,13 @@ module.exports = function() {
 						/* SOASTA PRIVATE START */
 						{
 							// Config URL
-							pattern: "//%config_host%%config_path%",
+							pattern: "%config_scheme%%config_host%%config_path%",
 							replacement: "/config"
 						},
 						{
 							// Change to debug config URL
 							pattern: "%config_url_suffix%",
 							replacement: "&debug="
-						},
-						{
-							// change to relative scheme
-							pattern: "%config_scheme%",
-							replacement: "//"
 						}
 						/* SOASTA PRIVATE END */
 					]

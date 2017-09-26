@@ -1,0 +1,17 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="28-send-plugin-disabled.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+	BOOMR.plugins.Errors.send("ERROR!");
+}
+errorFunction();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: false
+	}
+});
+</script>
+<%= footer %>

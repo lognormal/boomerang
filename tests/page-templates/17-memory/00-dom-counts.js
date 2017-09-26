@@ -21,16 +21,16 @@ describe("e2e/17-memory/00-dom-counts", function() {
 		assert.equal(tf.lastBeacon()["dom.img.uniq"], 1);
 	});
 
-	it("Should have found 10 scripts", function() {
-		assert.equal(tf.lastBeacon()["dom.script"], 10);
+	it("Should have found 11 scripts", function() {
+		assert.equal(tf.lastBeacon()["dom.script"], 11);
 	});
 
-	it("Should have found 6 external scripts", function() {
-		assert.equal(tf.lastBeacon()["dom.script.ext"], 6);
+	it("Should have found 7 external scripts", function() {
+		assert.equal(tf.lastBeacon()["dom.script.ext"], 7);
 	});
 
-	it("Should have found 5 unique external scripts", function() {
-		assert.equal(tf.lastBeacon()["dom.script.uniq"], 5);
+	it("Should have found 6 unique external scripts", function() {
+		assert.equal(tf.lastBeacon()["dom.script.uniq"], 6);
 	});
 
 	it("Should have found 3 iframes", function() {

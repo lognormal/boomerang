@@ -73,6 +73,8 @@
 
 	var beaconsSeen = 0;
 
+	var doNotTestErrorsParam = false;
+
 	// test framework
 	var assert;
 
@@ -121,7 +123,8 @@
 		beacon_url: t.BEACON_URL,
 		ResourceTiming: {
 			enabled: false
-		}
+		},
+		doNotTestErrorsParam: false
 	};
 
 	t.flattenTestTitles = function(test) {
@@ -191,6 +194,8 @@
 				}
 			});
 		}
+
+		t.doNotTestErrorsParam = config.doNotTestErrorsParam;
 
 		if (window.BOOMR_LOGN_always !== true) {
 			// initialize boomerang if LOGN is disabled
@@ -348,7 +353,7 @@
 
 		assert.isObject(tf.lastBeacon(), "ensure the data was sent to 'onbeacon'");
 
-		assert.isString(tf.lastBeacon().v, "ensure the beacon has basic properties");
+		assert.equal(tf.lastBeacon().v, BOOMR.version, "ensure the beacon has the boomerang version");
 
 		done();
 	};
