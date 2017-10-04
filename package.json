@@ -81,10 +81,10 @@
     "NavigationTiming",
     "PerformanceTimeline",
     "ResourceTiming",
+    "ServerTiming",
     "UserTiming",
     "analytics",
     "boomerang",
-    "performance",
     "performance",
     "rum"
   ],
@@ -185,6 +185,14 @@
     {
       "name": "Nigel Heron",
       "email": "nheron@querymetrics.com"
+    },
+    {
+      "name": "Nic Jansma",
+      "email": "nic@nicj.net"
+    },
+    {
+      "name": "Charles Vazac",
+      "email": "cvazac@gmail.com"
     }
   ],
   "license": "BSD-3-Clause",
