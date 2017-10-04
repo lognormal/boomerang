@@ -270,6 +270,10 @@
 		return (window.performance && typeof window.performance.getEntriesByType === "function");
 	};
 
+	t.isServerTimingSupported = function() {
+		return this.isResourceTimingSupported() && typeof PerformanceServerTiming !== "undefined";
+	};
+
 	t.isQuerySelectorSupported = function() {
 		return typeof window.document.querySelector === "function";
 	};

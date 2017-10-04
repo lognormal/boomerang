@@ -369,7 +369,7 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 
 			// NOTE: what is tested depends on the environment, whether it supports ResourceTiming or not
 			if (!BOOMR.plugins.ResourceTiming.is_supported()) {
-				assert.deepEqual({}, trie);
+				assert.deepEqual({}, trie.restiming);
 				return;
 			}
 
@@ -1271,6 +1271,162 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 				assert.strictEqual(tp[k][0], pixelCounts[i]);
 				assert.strictEqual(tp[k][1], finalCounts[i]);
 			}
+		});
+	});
+
+	describe("accumulateServerTimingEntries", function() {
+		it("Should increment our count collector", function() {
+			var serverTimingCollection = {};
+			BOOMR.plugins.ResourceTiming.accumulateServerTimingEntries(serverTimingCollection, [{name: "n1", description: "d1"}, {name: "n2", description: "d1"}]);
+			BOOMR.plugins.ResourceTiming.accumulateServerTimingEntries(serverTimingCollection, [{name: "n2", description: "d1"}, {name: "n2", description: "d2"}]);
+			assert.deepEqual(serverTimingCollection, {
+				n1: {
+					count: 1,
+					counts: {
+						d1: 1
+					}
+				},
+				n2: {
+					count: 3,
+					counts: {
+						d1: 2,
+						d2: 1
+					}
+				}
+			});
+		});
+	});
+
+	describe("compressServerTiming", function() {
+		it("Should create a lookup from our count collector", function() {
+			assert.deepEqual(BOOMR.plugins.ResourceTiming.compressServerTiming({
+				m0: {
+					count: 0,
+				    counts: {}
+				},
+				m1: {
+					count: 1,
+					counts: {
+						d1: 1
+					}
+				}, m2: {
+					count: 5,
+					counts: {
+						d2a: 3,
+						d2b: 2
+					}
+				}
+			}), [
+				["m2", "d2a", "d2b"],
+				["m1", "d1"],
+				["m0"]
+			]);
+		});
+		it("Should special case exactly one empty description", function() {
+			assert.deepEqual(BOOMR.plugins.ResourceTiming.compressServerTiming({
+				m0: {
+					count: 1,
+					counts: {
+						"": 1
+					}
+				}
+			}), [
+				"m0"
+			]);
+		});
+	});
+
+	describe("indexServerTiming", function() {
+		it("Should index a lookup", function() {
+			assert.deepEqual(BOOMR.plugins.ResourceTiming.indexServerTiming([
+				["metric0", "d1"],
+				["metric1", "d2a", "d2b"]
+			]), {
+				metric0: {
+					index: 0,
+					descriptions: {
+						d1: 0
+					}
+				},
+				metric1: {
+					index: 1,
+					descriptions: {
+						d2a: 0,
+						d2b: 1
+					}
+				}
+			});
+		});
+
+		it("Should special case exactly one empty description", function() {
+			assert.deepEqual(BOOMR.plugins.ResourceTiming.indexServerTiming([
+				"metric0"
+			]), {
+				metric0: {
+					index: 0,
+					descriptions: {
+						"": 0
+					}
+				}
+			});
+		});
+	});
+
+	describe("identifyServerTimingEntry", function() {
+		it("Should create identifiers", function() {
+			assert.equal(BOOMR.plugins.ResourceTiming.identifyServerTimingEntry(0, 0), "");
+			assert.equal(BOOMR.plugins.ResourceTiming.identifyServerTimingEntry(0, 1), ":.1");
+			assert.equal(BOOMR.plugins.ResourceTiming.identifyServerTimingEntry(1, 0), ":1");
+			assert.equal(BOOMR.plugins.ResourceTiming.identifyServerTimingEntry(1, 1), ":1.1");
+		});
+	});
+
+	describe("decompressServerTiming", function() {
+		var optimized = [["m0", "d0a", "d0b"], ["m1", "d1a", "d1b"], "m2"];
+		it("Should resolve to m0-d0a", function() {
+			["123", "123:0", "123:.0", "123:0.0"].forEach(function(compressed) {
+				assert.deepEqual(BOOMR.plugins.ResourceTiming.decompressServerTiming(optimized, compressed), {
+					name: "m0",
+					description: "d0a",
+					duration: 123
+				});
+			});
+		});
+		it("Should resolve to m0-d0b", function() {
+			["123:.1", "123:0.1"].forEach(function(compressed) {
+				assert.deepEqual(BOOMR.plugins.ResourceTiming.decompressServerTiming(optimized, compressed), {
+					name: "m0",
+					description: "d0b",
+					duration: 123
+				});
+			});
+		});
+		it("Should resolve to m1-d1a", function() {
+			["123:1", "123:1.0"].forEach(function(compressed) {
+				assert.deepEqual(BOOMR.plugins.ResourceTiming.decompressServerTiming(optimized, compressed), {
+					name: "m1",
+					description: "d1a",
+					duration: 123
+				});
+			});
+		});
+		it("Should resolve to m1-d1b", function() {
+			["123:1.1"].forEach(function(compressed) {
+				assert.deepEqual(BOOMR.plugins.ResourceTiming.decompressServerTiming(optimized, compressed), {
+					name: "m1",
+					description: "d1b",
+					duration: 123
+				});
+			});
+		});
+		it("Should resolve to m1-<empty string>", function() {
+			["123:2"].forEach(function(compressed) {
+				assert.deepEqual(BOOMR.plugins.ResourceTiming.decompressServerTiming(optimized, compressed), {
+					name: "m2",
+					description: "",
+					duration: 123
+				});
+			});
 		});
 	});
 });
