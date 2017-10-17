@@ -1,15 +1,16 @@
 /*eslint-env mocha*/
 /*global BOOMR_test*/
 
-describe("e2e/01-beacon-type/00-resourcetiming-disabled", function() {
-	it("Should send an beacon via navigator.sendBeacon if it is available", function(done) {
+describe("e2e/01-beacon-type/04-send-beacon", function() {
+	it("Should send an beacon via navigator.sendBeacon if it is available", function() {
 		if (window && window.navigator && typeof window.navigator.sendBeacon === "function") {
-			// NOTE: Currently this doesn't work because the beacon isn't added to ResourceTiming in Chrome/Opera:
-			// https://bugs.chromium.org/p/chromium/issues/detail?id=711060
-			// BOOMR_test.validateBeaconWasSendBeacon(done);
+			assert.isDefined(window.sendBeaconUrl);
+			assert.equal(window.sendBeaconUrl, BOOMR_test.BEACON_URL);
+
+			assert.isDefined(window.sendBeaconData);
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 });
