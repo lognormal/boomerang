@@ -15,7 +15,11 @@ describe("e2e/04-page-params/13-missing-elements", function() {
 		assert.isUndefined(timers["ctim.CT1"], "ctim.CT1 - Exists on the beacon!");
 	});
 
-	it("Should have custom timer 2 - Image Resource is on page", function() {
+	it("Should have custom timer 2 - Script Resource is on page (if ResourceTiming is supported)", function() {
+		if (!t.isResourceTimingSupported()) {
+			return this.skip();
+		}
+
 		var b = tf.lastBeacon();
 		var timers = t.parseTimers(b.t_other);
 		assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Does not exist on the beacon!");
