@@ -20,5 +20,6 @@
 	{"key":"usertiming"},
 	{"key":"iframe-delay"},
 	{"key":"resource-groups-nav-start"},
-	{"key":"server-timing"}
+	{"key":"server-timing"},
+	{"key":"autoxhr-management"}
 ]
