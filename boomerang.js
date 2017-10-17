@@ -1883,6 +1883,13 @@ BOOMR_check_doc_domain();
 			params = urlFirst.concat(this.getVarsOfPriority(data, 0), urlLast);
 			paramsJoined = params.join("&");
 
+			/* SOASTA PRIVATE START */
+			// If beacon_url is protocol relative, make it https only
+			if (impl.beacon_url.match(/^\/\//)) {
+				impl.beacon_url = "https:" + impl.beacon_url;
+			}
+			/* SOASTA PRIVATE END */
+
 			// if there are already url parameters in the beacon url,
 			// change the first parameter prefix for the boomerang url parameters to &
 			url = impl.beacon_url + ((impl.beacon_url.indexOf("?") > -1) ? "&" : "?") + paramsJoined;
