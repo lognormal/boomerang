@@ -1808,6 +1808,8 @@
 					if (!this.isContainer(currentNode)) {
 						tmpResources = this.findResources(this.getNodeURL(currentNode));
 						if (tmpResources) {
+							this.resourceSet[index].found = true;
+
 							for (tmpResIndex = 0; tmpResIndex < tmpResources.length; tmpResIndex++) {
 								resources.push(tmpResources[tmpResIndex]);
 							}

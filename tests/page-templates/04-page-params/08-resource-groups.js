@@ -14,7 +14,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT1"], "ctim.CT1 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT1"]), 1000, 100);
+			assert.closeTo(parseInt(timers["ctim.CT1"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -23,7 +23,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT2"]), 1000, 100);
+			assert.closeTo(parseInt(timers["ctim.CT2"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -32,7 +32,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT3"], "ctim.CT3 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT3"]), 1000, 100);
+			assert.closeTo(parseInt(timers["ctim.CT3"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -41,7 +41,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT4"], "ctim.CT4 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT4"]), 1000, 200);
+			assert.closeTo(parseInt(timers["ctim.CT4"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -50,7 +50,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT5"], "ctim.CT5 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT5"]), 1000, 100);
+			assert.closeTo(parseInt(timers["ctim.CT5"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -91,7 +91,13 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT10"], "ctim.CT10 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT10"]), 1000, 200);
+			assert.closeTo(
+				parseInt(timers["ctim.CT10"]),
+				Math.max(
+					t.findFirstResource("id=abc").duration,
+					t.findFirstResource("id=def").duration
+				),
+				2);
 		}
 	});
 
@@ -100,7 +106,13 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT11"], "ctim.CT11 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT11"]), 1000, 175);
+			assert.closeTo(
+				parseInt(timers["ctim.CT11"]),
+				Math.max(
+					t.findFirstResource("id=abc").duration,
+					t.findFirstResource("id=def").duration
+				),
+				2);
 		}
 	});
 
@@ -109,7 +121,16 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT12"], "ctim.CT12 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT12"]), 2000, 175);
+
+			assert.closeTo(
+				parseInt(timers["ctim.CT12"]),
+				Math.max(
+					t.findFirstResource("id=abc").duration,
+					t.findFirstResource("id=def").duration,
+					t.findFirstResource("id=zzz").duration,
+					t.findFirstResource("id=yyy").duration
+				),
+				2);
 		}
 	});
 
@@ -118,7 +139,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT13"], "ctim.CT13 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT13"]), 1000, 175);
+			assert.closeTo(parseInt(timers["ctim.CT13"]), t.findFirstResource("id=abc").duration, 2);
 		}
 	});
 
@@ -127,7 +148,13 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT14"], "ctim.CT14 - Does not exist on the beacon!");
-			assert.closeTo(parseInt(timers["ctim.CT14"]), 2000, 175);
+			assert.closeTo(
+				parseInt(timers["ctim.CT14"]),
+				Math.max(
+					t.findFirstResource("id=zzz").duration,
+					t.findFirstResource("id=yyy").duration
+				),
+				2);
 		}
 	});
 });
