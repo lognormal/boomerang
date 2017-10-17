@@ -22,13 +22,24 @@
 	// Set RT Cookie to empty, preventing navigation related issues with session tests
 	document.cookie = "RT=\"\";domain=.<%= mainServer %>;path=/";
 	// Prevent Boomerang from setting a cookie on unload so as to prevent cookies to show up when we load the next E2E test
-	window.addEventListener("beforeunload", function (e) {
+	function preventCookie(e) {
 		if (BOOMR) {
 			BOOMR.disable();
 		}
 
-		e.preventDefault();
-	});
+		if (e) {
+			e.preventDefault();
+		}
+	}
+
+	if (window.addEventListener) {
+		window.addEventListener("beforeunload", preventCookie);
+	} else {
+		window.onbeforeunload = preventCookie;
+	}
+
+	// approx number of lines in the header
+	window.HEADER_LINES = 55;
 
 	</script>
 	<script src="../../vendor/mocha/mocha.js"></script>

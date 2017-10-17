@@ -7,5 +7,11 @@
 //
 if (BOOMR.window && BOOMR.window.BOOMR_test_config) {
 	BOOMR.window.BOOMR_test.init(BOOMR.window.BOOMR_test_config);
-	delete BOOMR.window.BOOMR_test_config;
+
+	try {
+		delete BOOMR.window.BOOMR_test_config;
+	}
+	catch (e) {
+		// nop
+	}
 }

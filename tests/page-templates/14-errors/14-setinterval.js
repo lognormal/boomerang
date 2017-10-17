@@ -100,12 +100,12 @@ describe("e2e/14-errors/14-setinterval", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 64", function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 16), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 64, 5);
+			assert.closeTo(err.lineNumber, (HEADER_LINES + 16), 5);
 		}
 	});
 });

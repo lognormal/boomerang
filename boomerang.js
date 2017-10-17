@@ -2163,6 +2163,10 @@ BOOMR_check_doc_domain();
 		 * @returns {Array} Array of overridden function names
 		 */
 		BOOMR.checkWindowOverrides = function(win) {
+			if (!Object.getOwnPropertyNames) {
+				return [];
+			}
+
 			var freshWindow, objects, overridden = [];
 			function setup() {
 				var iframe = d.createElement("iframe");

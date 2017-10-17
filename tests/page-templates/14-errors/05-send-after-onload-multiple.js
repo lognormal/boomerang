@@ -121,7 +121,7 @@ describe("e2e/14-errors/05-send-after-onload-multiple", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 52", function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 4), function() {
 		var b = tf.lastBeacon();
 		var errs = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err));
 
@@ -129,7 +129,7 @@ describe("e2e/14-errors/05-send-after-onload-multiple", function() {
 			var err = errs[i];
 
 			if (err.lineNumber) {
-				assert.closeTo(err.lineNumber, 52, 5);
+				assert.closeTo(err.lineNumber, HEADER_LINES + 4, 5);
 			}
 		}
 	});

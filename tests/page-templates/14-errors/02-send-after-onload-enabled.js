@@ -88,12 +88,12 @@ describe("e2e/14-errors/02-send-after-onload-enabled", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ 51", function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 3), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, 51, 5);
+			assert.closeTo(err.lineNumber, HEADER_LINES + 3, 5);
 		}
 	});
 });
