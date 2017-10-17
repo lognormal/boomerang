@@ -557,6 +557,8 @@ BOOMR_check_doc_domain();
 				/* SOASTA PRIVATE END */
 				if (!name || !BOOMR.session.domain) {
 					BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
+
+					BOOMR.addVar("nocookie", 1);
 					return null;
 				}
 
@@ -587,6 +589,7 @@ BOOMR_check_doc_domain();
 					BOOMR.warn("Cookie too long: " + nameval.length + " " + nameval);
 				}
 
+				BOOMR.addVar("nocookie", 1);
 				return false;
 			},
 
