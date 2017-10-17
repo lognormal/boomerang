@@ -298,7 +298,8 @@ BOOMR_check_doc_domain();
 			"xhr_init": [],
 			"spa_init": [],
 			"spa_navigation": [],
-			"xhr_send": []
+			"xhr_send": [],
+			"netinfo": []
 		},
 
 		public_events: {

@@ -4,7 +4,15 @@ Plugin to capture navigator.connection.type on browsers that support it
 */
 
 (function() {
-	var connection;
+	var connection, param_map = {
+		"type": "ct",
+		"bandwidth": "bw",
+		"metered": "mt",
+		"effectiveType": "etype",
+		"downlinkMax": "lm",
+		"downlink": "dl",
+		"rtt": "rtt"
+	};
 
 	BOOMR = window.BOOMR || {};
 
@@ -20,13 +28,27 @@ Plugin to capture navigator.connection.type on browsers that support it
 		return;
 	}
 
-	BOOMR.addVar({
-		"mob.ct": connection.type,
-		"mob.bw": connection.bandwidth,
-		"mob.mt": connection.metered
-	});
+	function setVars() {
+		var k;
 
-	if (connection.downlinkMax) {
-		BOOMR.addVar("mob.lm", connection.downlinkMax);
+		for (k in param_map) {
+			if (connection.hasOwnProperty(k)) {
+				// Remove old parameter value from the beacon because new value might be falsy which won't overwrite old value
+				BOOMR.removeVar("mob." + param_map[k]);
+				if (connection[k]) {
+					BOOMR.addVar("mob." + param_map[k], connection[k]);
+				}
+			}
+		}
 	}
+
+	// If connection information changes, we collect the latest values
+	if (connection.addEventListener) {
+		connection.addEventListener("change", function() {
+			setVars();
+			BOOMR.fireEvent("netinfo", connection);
+		});
+	}
+
+	setVars();
 }());
