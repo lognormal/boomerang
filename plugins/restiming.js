@@ -31,7 +31,10 @@ see: http://www.w3.org/TR/resource-timing/
 		// sendBeacon: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
 		"beacon": 8,
 		// Fetch API: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
-		"fetch": 9
+		"fetch": 9,
+		"iframe": "a",
+		// IE11 and Edge (some versions) send "subdocument" instead of "iframe"
+		"subdocument": "a"
 	};
 
 	// https://html.spec.whatwg.org/multipage/links.html#linkTypes
