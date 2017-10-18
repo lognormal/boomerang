@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/15-cross-domain/00-post-message-beacon", function() {
+describe("e2e/15-cross-domain/05-query-parameters", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 

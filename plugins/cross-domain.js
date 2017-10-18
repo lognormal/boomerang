@@ -270,6 +270,13 @@
 				// Normalize the URL
 				a = d.createElement("a");
 				a.href = impl.cross_domain_url;
+				// If we're supposed to receive data from a child frame
+				// and the Main Domain URL is the same as the current location
+				// stop what we're doing and disable the plugin
+				if (a.href === BOOMR.window.location.href) {
+					impl.enabled = false;
+					return;
+				}
 				impl.cross_domain_url = a.href;
 
 				log("CrossDomain frame for URL: " + impl.cross_domain_url);
