@@ -2116,7 +2116,7 @@
 			return false;
 		},
 		excludeXhrFilter: function(anchor) {
-			var xhrPgIndex = 0, hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), pgArray, ret;
+			var xhrPgIndex = 0, hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), pgArray, ret, foundMatch = false;
 
 			hconfig.pageGroups.varname = "xhr.pg";
 
@@ -2140,11 +2140,17 @@
 				// Match against the PageGroups
 				if (impl.xhr === "match") {
 					for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
+						// we're iterating over all items in the list. If we find one that matches: break the loop! Otherwise keep going
 						ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
-						if (!ret) {
-							BOOMR.debug("Found XHR PageParam matching URL: " + BOOMR.utils.objectToString(ret), "PageParams");
-							return true;
+						if (ret && !pgArray[xhrPgIndex].ignore) {
+							foundMatch = true;
+							break;
 						}
+					}
+
+					if (!foundMatch) {
+						BOOMR.debug("excludeXhrFilter: No matching rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
+						return true;
 					}
 
 					return false;
@@ -2160,7 +2166,7 @@
 							if (pgArray[xhrPgIndex].ignore) {
 								ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
 								if (ret) {
-									BOOMR.debug("Found XHR PageParam matching URL: " + BOOMR.utils.objectToString(ret), "PageParams");
+									BOOMR.debug("excludeXhrFilter: Ignore rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
 									return true;
 								}
 							}

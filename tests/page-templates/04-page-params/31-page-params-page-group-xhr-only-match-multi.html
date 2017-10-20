@@ -1,0 +1,80 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="31-page-params-page-group-xhr-only-match-multi.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+		setTimeout(function() {
+			setTimeout(function() {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/delay?id=first&delay=1000&file=/pages/04-page-params/18-page-params-page-group-xhr-only-match-one.js");
+				xhr.send(null);
+				for (var i = 1; i < 3; i++) {
+					var xhr2 = new XMLHttpRequest();
+					if (i % 2 === 0) {
+						xhr2.open("GET", "/delay?id=test&delay=1000&file=/pages/04-page-params/18-page-params-page-group-xhr-only-match-one.js");
+					}
+					else {
+						xhr2.open("GET", "/delay?id=" + i + "&delay=1000&file=/pages/04-page-params/18-page-params-page-group-xhr-only-match-one.js");
+					}
+					xhr2.send(null);
+				}
+				var ignoreXhr = new XMLHttpRequest();
+				ignoreXhr.open("GET", "/delay?id=-ignore-&delay=1000&file=/pages/04-page-params/18-page-params-page-group-xhr-only-match-one.js");
+				ignoreXhr.send(null);
+
+				var doNotIgnoreXhr = new XMLHttpRequest();
+				doNotIgnoreXhr.open("GET", "/delay?id=do-not-ignore-&delay=1000&file=/pages/04-page-params/18-page-params-page-group-xhr-only-match-one.js");
+				doNotIgnoreXhr.send(null);
+			}, 0);
+		}, 100);
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	PageParams: {
+		xhr: "match",
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: ".*/18-page-params-page-group-xhr-only-match-one.html",
+				parameter2: "Test Page",
+				on: ["navigation"]
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*id=test.*",
+				parameter2: "XHR Test Page 2",
+				on: ["xhr"]
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*id=first.*",
+				parameter2: "XHR Test Page",
+				on: ["xhr"]
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*id=do-not-ignore.*",
+				parameter2: "XHR Test Do Not Ignore",
+				on: ["xhr"]
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*id=.*ignore.*",
+				parameter2: "XHR Ignored",
+				ignore: true
+			}
+		]
+	},
+	instrument_xhr: true
+});
+</script>
+
+<%= footer %>
+
