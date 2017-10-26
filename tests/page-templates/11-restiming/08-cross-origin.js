@@ -15,6 +15,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 			var b = tf.lastBeacon();
 			assert.isDefined(b.restiming);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have all of the resouces on the page", function() {
@@ -37,6 +40,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 				}), "Finding " + url);
 			}
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have the same-origin IFRAME", function() {
@@ -48,6 +54,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 			assert.isDefined(resources.find(function(r) {
 				return r.name.indexOf("support/iframe.html?same-origin") !== -1;
 			}), "Finding support/iframe.html?same-origin");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -61,6 +70,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 				return r.name.indexOf("/assets/img.jpg?iframe") !== -1;
 			}), "Finding /assets/img.jpg?iframe in the IFRAME");
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have the cross-origin IFRAME", function() {
@@ -72,6 +84,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 			assert.isDefined(resources.find(function(r) {
 				return r.name.indexOf("support/iframe.html?cross-origin") !== -1;
 			}), "Finding support/iframe.html?cross-origin");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -85,6 +100,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 				return r.name.indexOf("/assets/img.jpg?afteriframe") !== -1 &&
 				       r.name.indexOf(":" + window.crossOriginPort) !== -1;
 			}), "Not finding /assets/img.jpg?afteriframe from cross-origin iframe");
+		}
+		else {
+			this.skip();
 		}
 	});
 });

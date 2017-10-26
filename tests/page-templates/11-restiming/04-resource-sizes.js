@@ -9,7 +9,7 @@ describe("e2e/11-restiming/04-resource-sizes", function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sizes for the IMG on the page (if ResourceTiming2 is supported)", function(){
+	it("Should have sizes for the IMG on the page (if ResourceTiming2 is supported)", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.beacons[0];
 
@@ -27,6 +27,9 @@ describe("e2e/11-restiming/04-resource-sizes", function() {
 				}
 			}
 			assert.equal(3, cnt);
+		}
+		else {
+			this.skip();
 		}
 	});
 });

@@ -30,6 +30,9 @@ describe("e2e/11-restiming/07-script-attrs", function() {
 
 			assert.strictEqual(interesting.length, 7);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should find attributes for script elements", function() {
@@ -91,6 +94,9 @@ describe("e2e/11-restiming/07-script-attrs", function() {
 			assert.strictEqual(js_body_defer  & RT.LOCAT_ATTR, RT.LOCAT_ATTR);
 
 			assertBodyAsync(js_link_async);
+		}
+		else {
+			this.skip();
 		}
 	});
 });

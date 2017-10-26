@@ -11,6 +11,7 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 
 	it("Should find the link elements", function() {
 		if (!t.isResourceTimingSupported()) {
+			this.skip();
 			return;
 		}
 
@@ -21,7 +22,6 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 			arr.push(r.name);
 			return arr;
 		}, []);
-		debugger;
 
 		var a = document.createElement("a");
 		var expectedURLs = [
@@ -40,6 +40,7 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 
 	it("Should find `rel` for link elements", function() {
 		if (!t.isResourceTimingSupported()) {
+			this.skip();
 			return;
 		}
 

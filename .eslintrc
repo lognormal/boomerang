@@ -83,6 +83,7 @@
 		"comma-dangle": [2, "never"],
 		"operator-linebreak": [2, "after"],
 		"space-in-parens": [2, "never"],
+		"no-debugger": "error",
 
 		//
 		// Disabled rules

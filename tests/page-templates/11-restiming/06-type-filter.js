@@ -20,5 +20,8 @@ describe("e2e/11-restiming/06-type-filter", function() {
 			assert.equal(resources[0].initiatorType, "img");
 			assert.include(resources[0].name, "img.jpg");
 		}
+		else {
+			this.skip();
+		}
 	});
 });

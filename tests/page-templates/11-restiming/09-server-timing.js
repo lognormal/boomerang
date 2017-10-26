@@ -11,6 +11,7 @@ describe("e2e/11-restiming/09-server-timing", function() {
 
 	it("Should have optimized server timing entries as `servertiming`", function() {
 		if (!t.isServerTimingSupported()) {
+			this.skip();
 			return;
 		}
 
@@ -23,6 +24,7 @@ describe("e2e/11-restiming/09-server-timing", function() {
 
 	it("Should have server timing data on `restiming`", function() {
 		if (!t.isServerTimingSupported()) {
+			this.skip();
 			return;
 		}
 		var b = tf.beacons[0];

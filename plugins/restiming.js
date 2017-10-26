@@ -467,7 +467,7 @@ see: http://www.w3.org/TR/resource-timing/
 				// If this is a link, set its flags
 				if (t.initiatorType === "link" && links[t.name]) {
 					// split on ASCII whitespace
-					links[t.name].rel.split(/[\u0009\u000A\u000C\u000D\u0020]+/).find(function(rel) { //eslint-disable-line no-loop-func
+					BOOMR.utils.arrayFind(links[t.name].rel.split(/[\u0009\u000A\u000C\u000D\u0020]+/), function(rel) { //eslint-disable-line no-loop-func
 						// `rel`s are case insensitive
 						rel = rel.toLowerCase();
 

@@ -484,7 +484,7 @@ BOOMR_check_doc_domain();
 					nest_level = 0;
 				}
 
-				if (Object.prototype.toString.call(o) === "[object Array]") {
+				if (BOOMR.utils.isArray(o)) {
 					for (k = 0; k < o.length; k++) {
 						if (nest_level > 0 && o[k] !== null && typeof o[k] === "object") {
 							value.push(
@@ -636,7 +636,7 @@ BOOMR_check_doc_domain();
 			 * @returns {string} Cleaned up URL
 			 */
 			cleanupURL: function(url, urlLimit) {
-				if (!url || Object.prototype.toString.call(url) === "[object Array]") {
+				if (!url || BOOMR.utils.isArray(url)) {
 					return "";
 				}
 
@@ -710,6 +710,11 @@ BOOMR_check_doc_domain();
 			arrayFilter: function(array, predicate) {
 				var result = [];
 
+				if (!(BOOMR.utils.isArray(array) || (array && typeof array.length === "number")) ||
+				    typeof predicate !== "function") {
+					return result;
+				}
+
 				if (typeof array.filter === "function") {
 					result = array.filter(predicate);
 				}
@@ -726,6 +731,37 @@ BOOMR_check_doc_domain();
 					}
 				}
 				return result;
+			},
+			/**
+			 * `find` for arrays
+			 *
+			 * @private
+			 * @param {Array} array The array to iterate over.
+			 * @param {Function} predicate The function invoked per iteration.
+			 * @returns {Array} Returns the value of first element that satisfies the predicate.
+			 */
+			arrayFind: function(array, predicate) {
+				if (!(BOOMR.utils.isArray(array) || (array && typeof array.length === "number")) ||
+				    typeof predicate !== "function") {
+					return undefined;
+				}
+
+				if (typeof array.find === "function") {
+					return array.find(predicate);
+				}
+				else {
+					var index = -1,
+					    length = array.length,
+					    value;
+
+					while (++index < length) {
+						value = array[index];
+						if (predicate(value, index, array)) {
+							return value;
+						}
+					}
+					return undefined;
+				}
 			},
 			/**
 			 * @desc
@@ -839,7 +875,7 @@ BOOMR_check_doc_domain();
 
 				for (k in vars) {
 					if (vars.hasOwnProperty(k)) {
-						if (Object.prototype.toString.call(vars[k]) === "[object Array]") {
+						if (BOOMR.utils.isArray(vars[k])) {
 							for (i = 0; i < vars[k].length; ++i) {
 								l += BOOMR.utils.pushVars(form, vars[k][i], k + "[" + i + "]");
 							}
@@ -1495,8 +1531,7 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
-			if (arguments.length === 1 &&
-			    Object.prototype.toString.apply(arg0) === "[object Array]") {
+			if (arguments.length === 1 && BOOMR.utils.isArray(arg0)) {
 				params = arg0;
 			}
 			else {

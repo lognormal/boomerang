@@ -5,11 +5,11 @@ describe("e2e/11-restiming/07-page-ready-held", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
-	it("Should pass basic beacon validation", function(done){
+	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should include img.jpg in the ResourceTiming data", function(){
+	it("Should include img.jpg in the ResourceTiming data", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.beacons[0];
 
@@ -24,6 +24,9 @@ describe("e2e/11-restiming/07-page-ready-held", function() {
 			}
 
 			assert.isTrue(found, "Found img.jpg");
+		}
+		else {
+			this.skip();
 		}
 	});
 });
