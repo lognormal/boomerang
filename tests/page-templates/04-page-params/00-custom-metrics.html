@@ -37,6 +37,9 @@ custom_metric_6 = 0;
 custom_metric_7 = null;
 custom_metric_8 = false;
 custom_metric_9 = "";
+custom_metric_10 = "   ";
+custom_metric_11 = "0";
+custom_metric_12 = "False";
 
 BOOMR_test.init({
 	testAfterOnBeacon: true,
@@ -364,6 +367,38 @@ BOOMR_test.init({
 				label: "cmet50",
 				varName: "custom_metric_bad_format_4",
 				type: "JavaScriptVar"
+			},
+			{
+				label: "cmet51",
+				type: "Custom",
+				dataType: "Percentage",
+				match: "boolean",
+				parameter1: "custom_metric_10",
+				parameter2: ""
+			},
+			{
+				label: "cmet52",
+				type: "Custom",
+				dataType: "Percentage",
+				match: "boolean",
+				parameter1: "custom_metric_11",
+				parameter2: ""
+			},
+			{
+				label: "cmet53",
+				type: "Custom",
+				dataType: "Percentage",
+				match: "boolean",
+				parameter1: "custom_metric_12",
+				parameter2: ""
+			},
+			{
+				label: "cmet54",
+				type: "Custom",
+				dataType: "Percentage",
+				match: "boolean",
+				parameter1: "custom_metric_string",
+				parameter2: ""
 			}
 		]
 	}

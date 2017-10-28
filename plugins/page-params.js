@@ -707,12 +707,17 @@
 			BOOMR.debug("final value: " + value, "PageVars");
 
 			if (o && o.match === "boolean") {
-				if (value) {
+				if (typeof value === "string") {
+					// Strip string and lower case (strip() is IE 9+)
+					value = value.replace(/^\s+|\s+$/g, "").toLowerCase();
+					if (value !== "0" && value !== "false" && value) {
+						return this.apply(1);
+					}
+				}
+				else if (value) {
 					return this.apply(1);
 				}
-				else {
-					return undefined;
-				}
+				return undefined;
 			}
 
 			// Now remove invalid characters

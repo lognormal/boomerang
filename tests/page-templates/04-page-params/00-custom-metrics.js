@@ -113,7 +113,7 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet19, 444.44);
 	});
 
-	it("Should have the custom metric 20 - A javascript variable with matched as boolean", function() {
+	it("Should have the custom metric 20 - A javascript variable matched as boolean", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet20, 1);
 	});
@@ -260,13 +260,33 @@ describe("e2e/04-page-params/00-custom-metrics", function() {
 		assert.equal(b.cmet48, undefined);
 	});
 
-	it("Should have the custom metric 48 - JavaScript variable with a value of '12,345.6.78' be 12345.6", function() {
+	it("Should have the custom metric 49 - JavaScript variable with a value of '12,345.6.78' be 12345.6", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet49, 12345.6);
 	});
 
-	it("Should have the custom metric 48 - JavaScript variable with a value of '12-34,567.89' be 12", function() {
+	it("Should have the custom metric 50 - JavaScript variable with a value of '12-34,567.89' be 12", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b.cmet50, 12);
+	});
+
+	it("Should have the custom metric 51 - A javascript variable with value of '   ' matched as boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet51, undefined);
+	});
+
+	it("Should have the custom metric 52 - A javascript variable with value of '0' matched as boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet52, undefined);
+	});
+
+	it("Should have the custom metric 53 - A javascript variable with value of 'False' matched as boolean set to undefined", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet53, undefined);
+	});
+
+	it("Should have the custom metric 54 - A javascript variable with value of 'abcdef' matched as boolean", function() {
+		var b = tf.lastBeacon();
+		assert.equal(b.cmet54, 1);
 	});
 });
