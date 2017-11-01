@@ -93,7 +93,7 @@
 	 * @returns {number} Timestamp for beacon
 	 */
 	function calcNavTimingTimestamp(offset, val) {
-		if (typeof val !== "number") {
+		if (typeof val !== "number" || val === 0) {
 			return undefined;
 		}
 
