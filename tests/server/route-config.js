@@ -11,7 +11,7 @@ module.exports = function(req, res) {
 	var q = require("url").parse(req.url, true).query;
 	var r = typeof q.r !== "undefined";
 	var json = q.json ||
-	    require("url").parse(req.url).pathname === "/config.json" ||
+	    require("url").parse(req.url).pathname.indexOf("/config.json") > -1 ||
 	    typeof q.acao !== "undefined";  // assume json if the acao param exists
 	var delay = q.delay || 0;
 	var domain = q.d || "";

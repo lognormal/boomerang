@@ -1,0 +1,28 @@
+{
+    "h.key": "A775A-U5W6H-T93UL-4SYS6-32VBA",
+    "h.d": "test-bna",
+    "h.t": {{H_T}},
+    "h.cr": "{{H_CR}}",
+    "session_id": "db5eec50-1235-44a9-b448-94c4d8cedadd",
+    "site_domain": "test-bna",
+    "beacon_url": "//boomerang-test.soasta.com:3000/blackhole",
+    "autorun": true,
+    "beacon_interval": 60,
+    "BW": {
+        "enabled": false
+    },
+    "RT": {
+        "session_exp": 1800
+    },
+    "ResourceTiming": {
+        "enabled": true
+    },
+    "PageParams": {
+        "pageGroups": [],
+        "customMetrics": [],
+        "customTimers": [],
+        "customDimensions": [],
+        "urlPatterns": [],
+        "params": true
+    }
+}
