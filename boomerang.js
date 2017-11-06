@@ -311,6 +311,7 @@ BOOMR_check_doc_domain();
 		listenerCallbacks: {},
 
 		vars: {},
+		singleBeaconVars: {},
 
 		/**
 		 * Variable priority lists:
@@ -1230,18 +1231,36 @@ BOOMR_check_doc_domain();
 		 */
 		page_ready_autorun: function(ev) {
 			if (impl.autorun) {
-				BOOMR.page_ready(ev);
+				BOOMR.page_ready(ev, true);
 			}
 		},
 
 		// The page dev calls this method when they determine the page is usable.
 		// Only call this if autorun is explicitly set to false
-		page_ready: function(ev) {
-			if (!ev) { ev = w.event; }
-			if (!ev) { ev = { name: "load" }; }
+		page_ready: function(ev, auto) {
+			if (!ev) {
+				ev = w.event;
+			}
+
+			if (!ev) {
+				ev = {
+					name: "load"
+				};
+			}
+
+			// if we were called manually, add the current timestamp and note
+			// this was 'pr' on the beacon
+			if (!auto) {
+				ev.timing = ev.timing || {};
+				ev.timing.loadEventEnd = BOOMR.now();
+
+				BOOMR.addVar("pr", 1, true);
+			}
+
 			if (impl.onloadfired) {
 				return this;
 			}
+
 			impl.fireEvent("page_ready", ev);
 			impl.onloadfired = true;
 			return this;
@@ -1510,7 +1529,7 @@ BOOMR_check_doc_domain();
 				(err.name === "Error" && err.message && err.message.match(/^(Permission|Access is) denied/));
 		},
 
-		addVar: function(name, value) {
+		addVar: function(name, value, singleBeacon) {
 			if (typeof name === "string") {
 				impl.vars[name] = value;
 			}
@@ -1522,6 +1541,11 @@ BOOMR_check_doc_domain();
 					}
 				}
 			}
+
+			if (singleBeacon) {
+				impl.singleBeaconVars[name] = 1;
+			}
+
 			return this;
 		},
 
@@ -1852,6 +1876,16 @@ BOOMR_check_doc_domain();
 
 			BOOMR.removeVar("qt");
 
+			// remove any vars that should only be on a single beacon
+			for (var singleVarName in impl.singleBeaconVars) {
+				if (impl.singleBeaconVars.hasOwnProperty(singleVarName)) {
+					BOOMR.removeVar(singleVarName);
+				}
+			}
+
+			// clear single beacon vars list
+			impl.singleBeaconVars = {};
+
 			// keep track of page load beacons
 			if (!impl.hasSentPageLoadBeacon && isPageLoad) {
 				impl.hasSentPageLoadBeacon = true;
@@ -2079,13 +2113,16 @@ BOOMR_check_doc_domain();
 		 * @returns {string} URI-encoded string
 		 */
 		getUriEncodedVar: function(name, value) {
+			if (value === undefined || value === null) {
+				value = "";
+			}
+
+			if (typeof value === "object") {
+				value = BOOMR.utils.serializeForUrl(value);
+			}
+
 			var result = encodeURIComponent(name) +
-				"=" +
-				(
-					value === undefined || value === null ?
-						"" :
-						encodeURIComponent(value)
-				);
+				"=" + encodeURIComponent(value);
 
 			return result;
 		},

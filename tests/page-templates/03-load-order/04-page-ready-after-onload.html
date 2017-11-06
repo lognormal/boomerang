@@ -1,0 +1,18 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	autorun: false,
+	testAfterOnBeacon: 1
+});
+
+window.onload = function() {
+	// wait 3 seconds before the page is ready
+	setTimeout(function() {
+		window.pageReadyTs = BOOMR.now();
+		BOOMR.page_ready();
+	}, 3000);
+};
+</script>
+<script src="04-page-ready-after-onload.js" type="text/javascript"></script>
+<%= footer %>
