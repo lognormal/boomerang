@@ -12,7 +12,7 @@ var path = require("path");
 var testsFile = path.join(__dirname, "e2e-debug.json");
 var tests = require(testsFile).tests;
 var servers = require(testsFile).server;
-
+var ports = require(testsFile).ports;
 
 //
 // Functions
@@ -23,7 +23,7 @@ function run(testPath, file) {
 		it("Should pass " + testPath + "/" + fileName, function(done) {
 			var logCount = 0;
 
-			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + path + "/" + fileName);
+			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName);
 
 			setInterval(function() {
 				browser.manage().logs().get("browser").then(function(browserLog) {

@@ -695,7 +695,7 @@ module.exports = function() {
 					configFile: "tests/protractor.config.debug.js",
 					args: {
 						seleniumAddress: SELENIUM_ADDRESS,
-						specs: ["e2e/e2e-debug.js"],
+						specs: ["tests/e2e/e2e-debug.js"],
 						baseUrl: E2E_BASE_URL,
 						capabilities: {
 							"browserName": "phantomjs",
