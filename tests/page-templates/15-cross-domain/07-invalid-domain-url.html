@@ -1,0 +1,15 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="07-invalid-domain-url.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	site_domain: "<%= mainServer %>",
+	testAfterOnBeacon: true,
+	CrossDomain: {
+		cross_domain_url: "  about:blank  ",
+		sending: false
+	}
+});
+</script>
+<%= footer %>
+

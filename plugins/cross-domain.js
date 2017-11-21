@@ -271,9 +271,9 @@
 				a = d.createElement("a");
 				a.href = impl.cross_domain_url;
 				// If we're supposed to receive data from a child frame
-				// and the Main Domain URL is the same as the current location
+				// and the Main Domain URL is the same as the current location or the URL is not a http request
 				// stop what we're doing and disable the plugin
-				if (a.href === BOOMR.window.location.href) {
+				if (a.href === BOOMR.window.location.href || !a.href.match(/^https?:\/\//)) {
 					impl.enabled = false;
 					return;
 				}
