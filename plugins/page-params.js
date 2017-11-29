@@ -2621,8 +2621,7 @@
 				return;
 			}
 
-			impl.addToBeaconQueue("metric", metrics);
-			BOOMR.setImmediate(impl.processBeaconQueue);
+			impl.addToBeaconQueue({ metrics: metrics });
 		},
 
 		/**
@@ -2656,30 +2655,43 @@
 				return;
 			}
 
-			impl.addToBeaconQueue("timer", timers);
-			BOOMR.setImmediate(impl.processBeaconQueue);
+			impl.addToBeaconQueue({ timers: timers });
 		},
 
 		/**
-		 * Adds a Custom Timer or Custom Metric to the queue
+		 * Sends a set of Custom Metrics and Timers immediately
 		 *
-		 * @param {string} type "metrics" or "timers"
+		 * @param {object} data An object containing a map of Custom Metrics and Timers
+		 */
+		sendAll: function(data) {
+			if (typeof data !== "object") {
+				return;
+			}
+
+			impl.addToBeaconQueue(data);
+		},
+
+		/**
+		 * Adds Custom Timers and Custom Metrics to the queue
+		 *
+		 * @param {object} data Data
 		 * @param {string} values Data
 		 */
-		addToBeaconQueue: function(type, values) {
-			var vars = {};
+		addToBeaconQueue: function(data) {
+			// ensure the timestamp is on the data
+			if (!data.timestamp) {
+				data.timestamp = BOOMR.now();
+			}
 
-			var data = {
-				type: type,
-				values: values,
-				vars: vars,
-				when: BOOMR.now()
-			};
+			// other variables (e.g. Dimensions) to add
+			if (!data.vars) {
+				data.vars = {};
+			}
 
 			if (impl.configReceived) {
 				// we have config, process all dimensions
 				impl.runAllDimensions(function(name, val) {
-					vars[name] = val;
+					data.vars[name] = val;
 				});
 			}
 			else {
@@ -2687,7 +2699,11 @@
 				data.needsDimensions = true;
 			}
 
+			// queue this data set
 			impl.beaconQueue.push(data);
+
+			// run the queue immediately
+			BOOMR.setImmediate(impl.processBeaconQueue);
 		},
 
 		/**
@@ -2712,22 +2728,26 @@
 			q = impl.beaconQueue.shift();
 
 			// when this beacon fired
-			data["rt.tstart"] = q.when;
-			data["rt.end"] = q.when;
+			data["rt.tstart"] = q.timestamp;
+			data["rt.end"] = q.timestamp;
 
-			// initiator
-			data["http.initiator"] = "api_custom_" + q.type;
+			// initiator - if there is a timer on it, send it as a timer beacon,
+			// otherwise call it a metric beacon
+			data["http.initiator"] = "api_custom_" + (q.timers ? "timer" : "metric");
 
-			if (q.type === "metric") {
-				for (valName in q.values) {
-					if (q.values.hasOwnProperty(valName)) {
+			//
+			// Custom Metrics
+			//
+			if (q.metrics) {
+				for (valName in q.metrics) {
+					if (q.metrics.hasOwnProperty(valName)) {
 						found = false;
 
 						for (i = 0; i < impl.customMetrics.length; i++) {
 							if (valName === impl.customMetrics[i].name) {
 								found = anyFound = true;
 
-								data[impl.customMetrics[i].label] = q.values[valName];
+								data[impl.customMetrics[i].label] = q.metrics[valName];
 
 								break;
 							}
@@ -2739,9 +2759,13 @@
 					}
 				}
 			}
-			else if (q.type === "timer") {
-				for (valName in q.values) {
-					if (q.values.hasOwnProperty(valName)) {
+
+			//
+			// Custom Timers
+			//
+			if (q.timers) {
+				for (valName in q.timers) {
+					if (q.timers.hasOwnProperty(valName)) {
 						found = false;
 
 						for (i = 0; i < impl.customTimers.length; i++) {
@@ -2755,7 +2779,7 @@
 									data.t_other = "";
 								}
 
-								data.t_other += impl.customTimers[i].label + "|" + q.values[valName];
+								data.t_other += impl.customTimers[i].label + "|" + q.timers[valName];
 
 								break;
 							}
@@ -2836,6 +2860,7 @@
 	BOOMR.sendMetrics = impl.sendMetrics;
 	BOOMR.sendTimer = impl.sendTimer;
 	BOOMR.sendTimers = impl.sendTimers;
+	BOOMR.sendAll = impl.sendAll;
 
 	BOOMR.plugins.PageParams = {
 		init: function(config) {
