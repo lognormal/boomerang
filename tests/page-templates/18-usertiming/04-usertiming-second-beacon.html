@@ -1,0 +1,29 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="04-usertiming-second-beacon.js" type="text/javascript"></script>
+<script src="../../vendor/usertiming-compression/src/usertiming-decompression.js" type="text/javascript"></script>
+<script>
+	if (BOOMR_test.isUserTimingSupported()) {
+		window.performance.mark("pre-load-mark-start");
+		window.performance.mark("pre-load-mark-end");
+		window.performance.measure("pre-load-measure", "pre-load-mark-start", "pre-load-mark-end");
+	}
+
+	function sendPostLoadMark() {
+		if (BOOMR_test.isUserTimingSupported()) {
+			window.performance.mark("post-load-mark-start");
+			window.performance.mark("post-load-mark-end");
+			window.performance.measure("post-load-measure", "post-load-mark-start", "post-load-mark-end");
+			BOOMR.responseEnd("test");
+		}
+	}
+
+	BOOMR_test.init({
+		testAfterOnBeacon: BOOMR_test.isUserTimingSupported() ? 2 : 1,
+		UserTiming: {
+			enabled: true
+		},
+		afterFirstBeacon: sendPostLoadMark
+	});
+</script>
+<%= footer %>
