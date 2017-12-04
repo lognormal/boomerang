@@ -285,6 +285,14 @@
 		        typeof window.performance.measure === "function");
 	};
 
+	t.isNetworkAPISupported = function() {
+		return (navigator && typeof navigator === "object" &&
+			navigator.connection ||
+			navigator.mozConnection ||
+			navigator.webkitConnection ||
+			navigator.msConnection);
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		if (!t.isResourceTimingSupported()) {
 			// need RT to validate
