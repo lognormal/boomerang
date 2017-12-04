@@ -113,4 +113,19 @@ describe("e2e/19-mobile/01-mobile-variable-mapping", function() {
 			}
 		}
 	});
+
+	it("Should map saveData to sd when available", function() {
+		if (t.isNetworkAPISupported()) {
+			var connection, b = tf.beacons[0];
+
+			if (typeof navigator === "object") {
+				connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || navigator.msConnection;
+			}
+
+			if (connection && "saveData" in connection) {
+				assert.isTrue("mob.sd" in b);
+				assert.isTrue(b["mob.sd"] === connection.saveData);
+			}
+		}
+	});
 });
