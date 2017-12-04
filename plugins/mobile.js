@@ -52,7 +52,7 @@ Plugin to capture navigator.connection.type on browsers that support it
 				connection.addEventListener("change", function() {
 					this.setConnectionInformation();
 					BOOMR.fireEvent("netinfo", connection);
-				});
+				}.bind(this));
 			}
 		},
 
