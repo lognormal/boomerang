@@ -50,9 +50,9 @@ Plugin to capture navigator.connection.type on browsers that support it
 
 			if (connection.addEventListener) {
 				connection.addEventListener("change", function() {
-					this.setConnectionInformation();
+					impl.setConnectionInformation();
 					BOOMR.fireEvent("netinfo", connection);
-				}.bind(this));
+				});
 			}
 		},
 
