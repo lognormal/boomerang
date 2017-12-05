@@ -65,7 +65,7 @@ Plugin to capture navigator.connection.type on browsers that support it
 		 * @returns {void}
 		 */
 		setConnectionInformation: function() {
-			var k, connection, param_map = this.param_map;
+			var k, connection, type, param_map = this.param_map;
 
 			connection = this.getConnection();
 
@@ -73,7 +73,9 @@ Plugin to capture navigator.connection.type on browsers that support it
 				if (k in connection) {
 					// Remove old parameter value from the beacon because new value might be falsey which won't overwrite old value
 					BOOMR.removeVar("mob." + param_map[k]);
-					if (connection[k]) {
+
+					type = typeof connection[k];
+					if (type === "number" || type === "string" || type === "boolean") {
 						BOOMR.addVar("mob." + param_map[k], connection[k]);
 					}
 				}
