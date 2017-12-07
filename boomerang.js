@@ -1132,18 +1132,10 @@ BOOMR_check_doc_domain();
 
 			// The developer can override onload by setting autorun to false
 			if (!impl.onloadfired && (config.autorun === undefined || config.autorun !== false)) {
-				if (d.readyState && d.readyState === "complete") {
+				if (BOOMR.hasBrowserOnloadFired()) {
 					BOOMR.loadedLate = true;
-					this.setImmediate(BOOMR.page_ready_autorun, null, null, BOOMR);
 				}
-				else {
-					if (w.onpagehide || w.onpagehide === null) {
-						BOOMR.utils.addListener(w, "pageshow", BOOMR.page_ready_autorun);
-					}
-					else {
-						BOOMR.utils.addListener(w, "load", BOOMR.page_ready_autorun);
-					}
-				}
+				BOOMR.attach_page_ready(BOOMR.page_ready_autorun);
 			}
 
 			BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
@@ -1206,16 +1198,19 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Attach a callback to the onload event if the onload has not
-		 * been fired yet
+		 * Attach a callback to the `pageshow` or `onload` event if `onload` has not
+		 * been fired otherwise queue it to run immediately
 		 *
-		 * @param {function} cb - Callback to run when onload fires or page is visible (pageshow)
+		 * @param {function} cb - Callback to run when `onload` fires or page is visible (`pageshow`)
 		 */
 		attach_page_ready: function(cb) {
-			if (d.readyState && d.readyState === "complete") {
+			if (BOOMR.hasBrowserOnloadFired()) {
 				this.setImmediate(cb, null, null, BOOMR);
 			}
 			else {
+				// Use `pageshow` if available since it will fire even if page came from a back-forward page cache.
+				// Browsers that support `pageshow` will not fire `onload` if navigation was through a back/forward button
+				// and the page was retrieved from back-forward cache.
 				if (w.onpagehide || w.onpagehide === null) {
 					BOOMR.utils.addListener(w, "pageshow", cb);
 				}
@@ -1264,6 +1259,24 @@ BOOMR_check_doc_domain();
 			impl.fireEvent("page_ready", ev);
 			impl.onloadfired = true;
 			return this;
+		},
+
+		/**
+		 * Determines whether or not the page's `onload` event has fired
+		 *
+		 * @returns {boolean} True if page's onload was called
+		 */
+		hasBrowserOnloadFired: function() {
+			var p = BOOMR.getPerformance();
+			// if the document is `complete` then the `onload` event has already occurred, we'll fire the callback immediately.
+			// When `document.write` is used to replace the contents of the page and inject boomerang, the document `readyState`
+			// will go from `complete` back to `loading` and then to `complete` again. The second transition to `complete`
+			// doesn't fire a second `pageshow` event in some browsers (e.g. Safari). We need to check if
+			// `performance.timing.loadEventStart` or `BOOMR_onload` has occurred to detect this scenario. Will not work for
+			// older Safari that doesn't have NavTiming
+			return ((d.readyState && d.readyState === "complete") ||
+			    (p && p.timing && p.timing.loadEventStart > 0) ||
+			    w.BOOMR_onload > 0);
 		},
 
 		/**
@@ -2136,12 +2149,11 @@ BOOMR_check_doc_domain();
 		 *          supported or if the entry doesn't exist
 		 */
 		getResourceTiming: function(url, sort) {
-			var entries;
+			var entries, p = BOOMR.getPerformance();
 
 			try {
-				if (BOOMR.getPerformance() &&
-				    typeof BOOMR.getPerformance().getEntriesByName === "function") {
-					entries = BOOMR.getPerformance().getEntriesByName(url);
+				if (p && typeof p.getEntriesByName === "function") {
+					entries = p.getEntriesByName(url);
 					if (entries && entries.length) {
 						if (typeof sort === "function") {
 							entries.sort(sort);

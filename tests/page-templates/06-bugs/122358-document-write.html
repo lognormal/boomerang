@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--[if IE 8]>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 1.0 Transitional//EN" "http://www.w3.org/TR/html1/DTD/html1-transitional.dtd">
+<![endif]-->
+
+<!--
+	When document.write is used to replace the contents of the page and inject boomerang, the document readyState
+	will go from "complete" back to "loading" and then to "complete" again. The second transition to "complete"
+	doesn't fire a second pageshow event in some browsers (e.g. Safari). Boomerang needs to check if performance.timing.loadEventStart has occurred
+	to detect this scenario.
+-->
+<html>
+<head>
+</head>
+<body onload="setTimeout(onLoad, 100);">
+
+	<!-- the textarea contains the html that we'll use with document.write to replace the page -->
+	<textarea id="newdocument">
+		<%= header %>
+		<script src="122358-document-write.js" type="text/javascript"></script>
+		<%= boomerangSnippet %>
+		<script>
+		BOOMR_test.init({
+			testAfterOnBeacon: 1,
+			onBoomerangLoaded: function() {
+				setTimeout(function() {
+					document.close();
+					// readyState will return to "complete" without firing a second pageshow event in Safari
+				}, 100);
+			}
+		});
+		</script>
+		<div id="content"></div>
+		<%= footer %>
+	</textarea>
+
+	<script>
+		function onLoad() {
+			// replace our page
+			var newdocument = document.getElementById("newdocument").value;
+			document.open();
+			document.write(newdocument);
+			// wait until boomerang has loaded before closing the document so that it detects a "loading" readyState
+		}
+	</script>
+</body>
+</html>
+
