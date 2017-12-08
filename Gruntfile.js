@@ -446,7 +446,8 @@ module.exports = function() {
 		},
 		uglify: {
 			options: {
-				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> <%= githash.main.hash %> */\n"
+				banner: bannerString + "/* Boomerang Version: <%= boomerangVersion %> " +
+					(grunt.option("commit") || "<%= githash.main.hash %>") + " */\n"
 			},
 			default: {
 				options: DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS,
