@@ -45,7 +45,7 @@
 			}
 
 			BOOMR.subscribe("page_ready", this.page_ready, null, this);
-			BOOMR.subscribe("onbeacon", this.onbeacon, null, this);
+			BOOMR.subscribe("beacon", this.onbeacon, null, this);
 			BOOMR.subscribe("before_unload", this.before_unload, null, this);
 
 			this.initialized = true;
@@ -186,7 +186,7 @@
 				config.testAfterOnBeacon = 1;
 			}
 
-			BOOMR.subscribe("onbeacon", function() {
+			BOOMR.subscribe("beacon", function() {
 				if (++beaconsSeen === config.testAfterOnBeacon) {
 					// wait a few more ms so the beacon fires
 					// TODO: Trim this timing down if we can make it more reliable
@@ -210,7 +210,7 @@
 		if (config.afterFirstBeacon) {
 			var xhrSent = false;
 			BOOMR.subscribe(
-				"onbeacon",
+				"beacon",
 				function() {
 					if (xhrSent) {
 						return;
@@ -334,9 +334,9 @@
 	t.validateBeaconWasSent = function(done) {
 		var tf = BOOMR.plugins.TestFramework;
 
-		assert.isTrue(tf.fired_onbeacon, "ensure we fired a beacon ('onbeacon')");
+		assert.isTrue(tf.fired_onbeacon, "ensure we fired a beacon ('beacon')");
 
-		assert.isObject(tf.lastBeacon(), "ensure the data was sent to 'onbeacon'");
+		assert.isObject(tf.lastBeacon(), "ensure the data was sent to 'beacon'");
 
 		assert.equal(tf.lastBeacon().v, BOOMR.version, "ensure the beacon has the boomerang version");
 
@@ -579,7 +579,7 @@
 	 *
 	 * @param {string} tagName Tag name
 	 * @param {string} attr Attribute name
-	 * @param {RegEx} regex Regular expression matching the attribute
+	 * @param {RegExp} regex Regular expression matching the attribute
 	 * @returns {number} Number of elements matching
 	 */
 	t.elementsWithAttribute = function(tagName, attr, regex) {
@@ -687,7 +687,7 @@
 	 * @param {string} string - String to search for
 	 * @param {string[]} list - array of strings to test for string
 	 *
-	 * @returns {string[]} - list of strings matching
+	 * @returns {string[]} list of strings matching
 	 */
 	t.checkStringInArray = function(string, list) {
 		return list.filter(function(content) {

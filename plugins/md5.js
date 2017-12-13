@@ -1,4 +1,11 @@
-/*
+/**
+ * Adds support for [MD5](https://en.wikipedia.org/wiki/MD5) to Boomerang
+ * (as `BOOMR.utils.md5`).
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## License
+ *
  * JavaScript MD5 1.0.1
  * https://github.com/blueimp/JavaScript-MD5
  *
@@ -15,6 +22,12 @@
  * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
  * Distributed under the BSD License
  * See http://pajhome.org.uk/crypt/md5 for more info.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds no parameters to the beacon.
+ *
+ * @class BOOMR.utils.MD5
  */
 
 (function() {
@@ -258,6 +271,17 @@
 		return rstr2hex(raw_hmac_md5(k, d));
 	}
 
+	/**
+	 * Calculates the MD5 of the specified string and optional key.
+	 *
+	 * @param {string} string Input string
+	 * @param {string} [key] Key
+	 * @param {boolean} [raw] Whether or not to return data raw MD5 (versus hex-encoded)
+	 *
+	 * @returns {string} Raw or hex-encoded MD5 of the input string and key
+	 *
+	 * @memberof BOOMR.utils.MD5
+	 */
 	function md5(string, key, raw) {
 		if (!key) {
 			if (!raw) {
@@ -272,5 +296,4 @@
 	}
 
 	BOOMR.utils.MD5 = md5;
-
 }());

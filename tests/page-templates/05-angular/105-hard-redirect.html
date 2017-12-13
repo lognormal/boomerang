@@ -12,7 +12,7 @@ function onBeaconHandler(b) {
 var testFrame = document.getElementById("boomer_test_frame");
 
 testFrame.onload = function() {
-	testFrame.contentWindow.BOOMR.subscribe("onbeacon", onBeaconHandler);
+	testFrame.contentWindow.BOOMR.subscribe("beacon", onBeaconHandler);
 };
 </script>
 <%= footer %>

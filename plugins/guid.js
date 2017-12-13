@@ -1,6 +1,18 @@
-/*
- Tag users with a unique GUID
-*/
+/**
+ * Tag users with a unique GUID.
+ *
+ * The `GUID` plugin adds a tracking cookie to the user that will be sent to the
+ * beacon-server as cookie.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds no parameters to the beacon.
+ *
+ * (It sets the specified cookie)
+ * @class BOOMR.plugins.GUID
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -15,6 +27,16 @@
 	};
 
 	BOOMR.plugins.GUID = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} config.GUID.cookieName The name of the cookie to be set in the browser session
+		 * @param {number} [config.GUID.expires] An expiry time for the cookie in seconds. By default 7 days.
+		 *
+		 * @returns {@link BOOMR.plugins.GUID} The GUID plugin for chaining
+		 * @memberof BOOMR.plugins.GUID
+		 */
 		init: function(config) {
 			var properties = ["cookieName", "expires"];
 			BOOMR.utils.pluginConfig(impl, config, "GUID", properties);
@@ -38,6 +60,13 @@
 			}
 			return this;
 		},
+
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.GUID
+		 */
 		is_complete: function() {
 			return true;
 		}

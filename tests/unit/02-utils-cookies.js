@@ -77,17 +77,17 @@ describe("BOOMR.utils cookies", function() {
 			assert.isFunction(BOOMR.utils.setCookie);
 		});
 
-		it("Should return null if no domain is set", function()  {
+		it("Should return false if no domain is set", function()  {
 			BOOMR.session.domain = null;
 
-			assert.isNull(BOOMR.utils.setCookie());
-			assert.isNull(BOOMR.utils.setCookie(cookieName));
+			assert.isFalse(BOOMR.utils.setCookie());
+			assert.isFalse(BOOMR.utils.setCookie(cookieName));
 		});
 
-		it("Should return null if no name was passed as first argument to setCookie()", function()  {
+		it("Should return false if no name was passed as first argument to setCookie()", function()  {
 			BOOMR.session.domain = cookieDomain;
 
-			assert.isNull(BOOMR.utils.setCookie());
+			assert.isFalse(BOOMR.utils.setCookie());
 		});
 
 		if (canSetCookies) {
@@ -229,16 +229,16 @@ describe("BOOMR.utils cookies", function() {
 
 	/* SOASTA PRIVATE START */
 	describe("BOOMR.utils.removeCookie()", function() {
-		it("Should return null when given no argurments", function() {
+		it("Should return false when given no argurments", function() {
 			BOOMR.session.domain = cookieDomain;
 
-			assert.isNull(BOOMR.utils.removeCookie());
+			assert.isFalse(BOOMR.utils.removeCookie());
 		});
 
-		it("Should return null when the session domain isn't set", function() {
+		it("Should return false when the session domain isn't set", function() {
 			BOOMR.session.domain = undefined;
 
-			assert.isNull(BOOMR.utils.removeCookie(cookieName));
+			assert.isFalse(BOOMR.utils.removeCookie(cookieName));
 		});
 
 		if (canSetCookies) {

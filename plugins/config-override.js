@@ -1,3 +1,27 @@
+/**
+ * This plugin is responsible for allowing in-page overrides of config.js[on] for
+ * mPulse by setting a global `window.BOOMR_config` variable.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Example
+ *
+ * `BOOMR_config` should be set prior to boomerang.js loading.
+ *
+ * ```
+ * window.BOOMR_config = {
+ *   instrument_xhr: true
+ * };
+ * ```
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `c.o`: `BOOMR_config` was set on the page
+ *
+ * @class BOOMR.plugins.ConfigOverride
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -8,7 +32,11 @@
 
 	var impl = {
 		/**
-		 * safeConfigOverride - override current @param config with values from @param override if @param whitelist allows
+		 * Override current config with values from override if whitelist allows
+		 *
+		 * @param {object} override Global config override
+		 * @param {object} whitelist Whitelist of allowed overrides
+		 * @param {object} config Configuration
 		 */
 		safeConfigOverride: function(override, whitelist, config) {
 			for (var property in whitelist) {
@@ -32,10 +60,12 @@
 		},
 
 		/**
-		 * allowedConfigOverrides: list of configuration options allowed to be
-		 * overwritten by user defined configuration via BOOMR_config.
+		 * List of configuration options allowed to be overwritten by user
+		 * defined configuration via `BOOMR_config`.
 		 *
-		 * Object is build like the init() config object with the overwritable properties set to true.
+		 * Object is build like the `init()` config object with the overwritable
+		 * properties set to true.
+		 *
 		 * Other properties set by the override not set here.
 		 */
 		allowedConfigOverrides: {
@@ -116,17 +146,39 @@
 		}
 	};
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.ConfigOverride = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 *
+		 * @returns {@link BOOMR.plugins.ConfigOverride} The ConfigOverride plugin for chaining
+		 * @memberof BOOMR.plugins.ConfigOverride
+		 */
 		init: function(config) {
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
-				BOOMR.debug("Found BOOMR_config on global scope: " + BOOMR.utils.objectToString(BOOMR.window.BOOMR_config), "ConfigOverride");
+				BOOMR.debug("Found BOOMR_config on global scope: " +
+					BOOMR.utils.objectToString(BOOMR.window.BOOMR_config),
+					"ConfigOverride");
+
 				impl.safeConfigOverride(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 			}
 			return this;
 		},
+
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.ConfigOverride
+		 */
 		is_complete: function() {
 			return true;
 		}
+
 		/* BEGIN_DEBUG */,
 		safeConfigOverride: impl.safeConfigOverride
 		/* END_DEBUG */

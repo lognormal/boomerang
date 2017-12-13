@@ -53,7 +53,7 @@
     "gruntify-eslint": "^3.1.0",
     "history": "^1.12.5",
     "jasmine-reporters": "^1.0.0",
-    "jsdoc": "git+ssh://git@github.com:SOASTA/jsdoc.git#b567ed6",
+    "jsdoc": "^3.5.5",
     "karma": "^0.13.0",
     "karma-chrome-launcher": "^0.1.5",
     "karma-coverage": "^0.2.6",
@@ -71,6 +71,7 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "react-router": "^1.0.0-rc3",
+    "sanitize-html": "^1.15.0",
     "soasta-repository": "0.0.2",
     "strip-json-comments": "^1.0.2"
   },

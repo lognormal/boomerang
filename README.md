@@ -1,104 +1,199 @@
-Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-Copyright (c) 2011-2012, Log-Normal Inc.  All rights reserved.
-Copyright (c) 2012-2017 SOASTA, Inc. All rights reserved.
-Copyright (c) 2017, Akamai Technologies, Inc. All rights reserved.
+* _Copyright (c) 2011, Yahoo! Inc.  All rights reserved._
+* _Copyright (c) 2011-2012, Log-Normal Inc.  All rights reserved._
+* _Copyright (c) 2012-2017 SOASTA, Inc. All rights reserved._
+* _Copyright (c) 2017, Akamai Technologies, Inc. All rights reserved._
+* _Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms._
 
-Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+**boomerang always comes back, except when it hits something.**
 
-boomerang always comes back, except when it hits something.
+# Summary
 
-summary
----
+[![Join the chat at https://gitter.im/SOASTA/boomerang](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SOASTA/boomerang)
 
-[![Join the chat at https://gitter.im/SOASTA/boomerang](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SOASTA/boomerang?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+boomerang is a JavaScript library that measures the page load time experienced by
+real users, commonly called RUM (Real User Measurement).  It has the ability to
+send this data back to your server for further analysis.  With boomerang, you
+find out exactly how fast your users think your site is.
 
-boomerang is a JavaScript library that measures the page load time experienced by real users, commonly called RUM.
+Apart from page load time, boomerang measures performance timings, metrics and
+characteristics of your user's web browsing experience.  All you have to do is
+include it in your web pages and call the `BOOMR.init()` method.  Once the
+performance data is captured, it will be beaconed to your chosen URL.
 
-Apart from page load time, boomerang measures a whole bunch of performance characteristics of your user's web browsing experience.  All you have to do is stick it into your web pages and call the
-init() method.
+boomerang is designed to be a performant and flexible library that can be adapted
+to your site's needs.  It has an extensive plugin architecture, and works with
+both traditional and modern websites (including Single Page Apps).
 
-usage
----
+boomerang's goal is to not affect the load time of the page (avoiding the
+[Observer Effect](https://en.wikipedia.org/wiki/Observer_effect_(information_technology)).
+It can be loaded in an asynchronous way that will not delay the page load even
+if `boomerang.js` is unavailable.
 
+# Features
+
+* Supports:
+     * IE 6+, Edge, all major versions of Firefox, Chrome, Opera, and Safari
+     * Desktop and mobile devices
+* Captures (all optional):
+    * Page characteristics such as the URL and Referrer
+    * Overall page load times (via [NavigationTiming](https://www.w3.org/TR/navigation-timing/) if available)
+    * DNS, TCP, Request and Response timings (via [NavigationTiming](https://www.w3.org/TR/navigation-timing/))
+    * Browser characteristics such as screen size, orientation, memory usage, visibility state
+    * DOM characteristics such as the number of nodes, HTML length, number of images, scripts, etc
+    * [ResourceTiming](https://www.w3.org/TR/resource-timing-1/) data (to reconstruct the page's Waterfall)
+    * Bandwidth
+    * Mobile connection data
+    * DNS latency
+    * JavaScript Errors
+    * XMLHttpRequest instrumentation
+    * Third-Party analytics providers IDs
+    * Single Page App interactions
+
+# Usage
+
+boomerang can be included on your page in one of two ways: [synchronously](#synchronously) or [asynchronously](#asynchronously).
+
+The asynchronous method is recommended.
+
+<a name="synchronously"></a>
 ## The simple synchronous way
 
 ```html
-<script src="boomerang/boomerang.js"></script>
-<script src="boomerang/plugins/rt.js"></script>
+<script src="boomerang.js"></script>
+<script src="plugins/rt.js"></script>
+<!-- any other plugins you want to include -->
 <script>
-   BOOMR.init({
-       beacon_url: "/boomerang_handler"
-   });
+  BOOMR.init({
+    beacon_url: "http://yoursite.com/beacon/"
+  });
 </script>
 ```
 
-**Note** - you must include at least one plugin (it doesn't have to be rt) or else the beacon will never actually be called.
+**Note:** You must include at least one plugin (it doesn't have to be `RT`) or
+else the beacon will never fire.
 
+Each plugin has its own configuration as well -- these configuration options
+should be included in the `BOOMR.init()` call:
+
+```html
+BOOMR.init({
+  beacon_url: "http://yoursite.com/beacon/",
+  ResourceTiming: {
+    enabled: true,
+    clearOnBeacon: true
+  }
+});
+```
+
+<a name="asynchronously"></a>
 ## The faster, more involved, asynchronous way
 
-This is what I like to do for sites I control.
+Loading boomerang asynchronously ensures that even if `boomerang.js` is
+unavailable (or loads slowly), your host page will not be affected.
 
 ### 1. Add a plugin to init your code
 
-Create a plugin (call it zzz_init.js or whatever you like) with your init code in there:
+Create a plugin (or use the sample `zzz-last-plugin.js`) with a call
+to `BOOMR.init`:
+
 ```javascript
 BOOMR.init({
-	config: parameters,
-	...
+  config: parameters,
+  ...
 });
+BOOMR.t_end = new Date().getTime();
 ```
-You could also include any other code you need.  For example, I include a timer to measure when boomerang has finished loading.
 
-I call my plugin `zzz_init.js` to remind me to include it last in the plugin list
+You could also include any other code you need.  For example, you could include
+a timer to measure when boomerang has finished loading (as above).
 
 ### 2. Build boomerang
-The build process picks up all the plugins referenced in the `plugins.json` file. To change the plugins included in the boomerang build, change the contents of the file to your needs.
+
+The [build process](#documentation) bundles `boomerang.js` and all of the plugins
+listed in `plugins.json` (in that order).
+
+To build boomerang with all of your desired plugins, you would run:
 
 ```bash
 grunt clean build
 ```
 
-This creates deployable boomerang versions in the `build` directory, e.g. `build/boomerang-<version>.min.js`.
+This creates a deployable boomerang in the `build` directory, e.g. `build/boomerang-<version>.min.js`.
 
-Install this file on your web server or origin server where your CDN can pick it up.  Set a far future max-age header for it.  This file will never change.
+Install this file on your web server or origin server where your CDN can pick it
+up.  Set a far future
+[max-age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)
+header for it.  This file will never change.
 
 ### 3. Asynchronously include the script on your page
 
+There are two methods of asynchronously including boomerang on your page: by
+adding it to your main document, or via an IFRAME.
+
+The former method could block your `onload` event (affecting the measured
+performance of your page), so the later method is recommended.
+
+<a name="asynchronously-document"></a>
 #### 3.1. Adding it to the main document
+
 Include the following code at the *top* of your HTML document:
+
 ```html
 <script>
 (function(d, s) {
-   var js = d.createElement(s),
-       sc = d.getElementsByTagName(s)[0];
+  var js = d.createElement(s),
+      sc = d.getElementsByTagName(s)[0];
 
-   js.src="http://your-cdn.host.com/path/to/boomerang-<version>.js";
-   sc.parentNode.insertBefore(js, sc);
+  js.src="http://your-cdn.host.com/path/to/boomerang-<version>.js";
+  sc.parentNode.insertBefore(js, sc);
 }(document, "script"));
 </script>
 ```
 
-Yes, the best practices say to include scripts at the bottom.  That's different.  That's for scripts that block downloading of other resources.  Including a script this
-way will not block other resources, however it _will_ block <code>onload</code>.  Including the script at the top of your page gives it a good chance of loading
-before the rest of your page does thereby reducing the probability of it blocking the `onload` event.  If you don't want to block `onload` either, follow Stoyan's
-<a href="http://www.phpied.com/non-onload-blocking-async-js/">advice from the Meebo team</a>.
+Best practices will suggest including all scripts at the bottom of your page.
+However, that only applies to scripts that block downloading of other resources.  
 
-#### 3.2. Adding it via an iframe
+Including a script this way will not block other resources, however it _will_
+block `onload`.
 
-The method described in 3.1 will still block `onload` on most browsers (Internet Explorer not included).  To avoid
-blocking `onload`, we could load boomerang in an iframe.  Stoyan's <a href="http://www.phpied.com/non-onload-blocking-async-js/">documented
-the technique on his blog</a>.  We've modified it to work across browsers with different configurations, documented on
-<a href="http://www.lognormal.com/blog/2012/12/12/the-script-loader-pattern/">the lognormal blog</a>.
+Including the script at the top of your page gives it a good chance of loading
+before the rest of your page does, thereby reducing the probability of it
+blocking the `onload` event.  
 
-For boomerang, this is the code you'll include:
+If you don't want to block `onload` either, use the following IFRAME method:
+
+<a name="asynchronously-iframe"></a>
+#### 3.2. Adding it via an IFRAME
+
+The method described in 3.1 will still block `onload` on most browsers.
+
+To avoid blocking `onload`, we can load boomerang in an asynchronous IFRAME.
+The general process is documented on in
+[this blog post](http://www.lognormal.com/blog/2012/12/12/the-script-loader-pattern/).
+
+For boomerang, the asynchronous loader snippet you'll use is:
 
 ```html
 <script>
 (function(){
-  var dom,doc,where,iframe = document.createElement('iframe');
+  if (window.BOOMR && window.BOOMR.version) { return; }
+  var dom,doc,where,iframe = document.createElement("iframe"),win = window;
+
+  function boomerangSaveLoadTime(e) {
+    win.BOOMR_onload=(e && e.timeStamp) || new Date().getTime();
+  }
+
+  if (win.addEventListener) {
+    win.addEventListener("load", boomerangSaveLoadTime, false);
+  } else if (win.attachEvent) {
+    win.attachEvent("onload", boomerangSaveLoadTime);
+  }
+
   iframe.src = "javascript:void(0)";
-  (iframe.frameElement || iframe).style.cssText = "width: 0; height: 0; border: 0";
-  var where = document.getElementsByTagName('script')[0];
+  iframe.title = ""; iframe.role = "presentation";
+  (iframe.frameElement || iframe).style.cssText =
+      "width:0;height:0;border:0;display:none;";
+  where = document.getElementsByTagName("script")[0];
   where.parentNode.insertBefore(iframe, where);
 
   try {
@@ -108,66 +203,116 @@ For boomerang, this is the code you'll include:
     iframe.src="javascript:var d=document.open();d.domain='"+dom+"';void(0);";
     doc = iframe.contentWindow.document;
   }
+
   doc.open()._l = function() {
     var js = this.createElement("script");
-    if(dom) this.domain = dom;
+    if (dom) { this.domain = dom; }
     js.id = "boomr-if-as";
     js.src = 'http://your-cdn.host.com/path/to/boomerang-<version>.js';
+    BOOMR_lstart=new Date().getTime();
     this.body.appendChild(js);
   };
-  doc.write('<body onload="document._l();">');
+
+  doc.write('<bo' + 'dy onload="document._l();">');
   doc.close();
 })();
 </script>
 ```
-The `id` of the script node created by this code MUST be `boomr-if-as` as boomerang looks for that id to determine if it's running within an iframe or not.
 
-Boomerang will still export the `BOOMR` object to the parent window if running inside an iframe, so the rest of your code should remain unchanged.
+The `id` of the script node created by this code MUST be `boomr-if-as` as
+boomerang looks for that id to determine if it's running within an IFRAME or not.
+
+boomerang will still export the `BOOMR` object to the parent window if running
+inside an IFRAME, so the rest of your code should remain unchanged.
 
 #### 3.3. Identifying when boomerang has loaded
 
-If you load boomerang asynchronously, there's some uncertainty in when boomerang has completed loading.  To get around this, you can subscribe to the
+If you load boomerang asynchronously, there's some uncertainty in when boomerang
+has completed loading.  To get around this, you can subscribe to the
 `onBoomerangLoaded` Custom Event on the `document` object:
 
 ```javascript
-   // Modern browsers
-   if (document.addEventListener) {
-      document.addEventListener("onBoomerangLoaded", function(e) {
-         // e.detail.BOOMR is a reference to the BOOMR global object
-      });
-   }
-   // IE 6, 7, 8 we use onPropertyChange and look for propertyName === "onBoomerangLoaded"
-   else if (document.attachEvent) {
-      document.attachEvent("onpropertychange", function(e) {
-         if (!e) e=event;
-         if (e.propertyName === "onBoomerangLoaded") {
-            // e.detail.BOOMR is a reference to the BOOMR global object
-         }
-      });
-   }
-
+// Modern browsers
+if (document.addEventListener) {
+  document.addEventListener("onBoomerangLoaded", function(e) {
+    // e.detail.BOOMR is a reference to the BOOMR global object
+  });
+}
+// IE 6, 7, 8 we use onPropertyChange and look for propertyName === "onBoomerangLoaded"
+else if (document.attachEvent) {
+  document.attachEvent("onpropertychange", function(e) {
+    if (!e) e=event;
+    if (e.propertyName === "onBoomerangLoaded") {
+      // e.detail.BOOMR is a reference to the BOOMR global object
+    }
+  });
+}
 ```
 
-Note that this only works on browsers that support the CustomEvent interface, which at this time is Chrome (including Android), Firefox 6+ (including Android),
-Opera (including Android, but not Opera Mini), Safari (including iOS), IE 6+ (but see the code above for the special way to listen for the event on IE6, 7 & 8).
+Note that this only works on browsers that support the CustomEvent interface,
+which is Chrome (including Android), Firefox 6+ (including Android), Opera
+(including Android, but not Opera Mini), Safari (including iOS), IE 6+
+(but see the code above for the special way to listen for the event on IE6, 7 & 8).
 
-Boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon` events just before and during beaconing.
+boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon`
+events just before and during beaconing.
 
-docs
----
-Documentation is in the docs/ sub directory, and is written in HTML.  Your best bet is to check it out and view it locally, though it works best through a web server (you'll need cookies).
-Thanks to github's awesome `gh-pages` feature, we're able to host the boomerang docs right here on github.  Visit http://soasta.github.com/boomerang/doc/ for a browsable version where all
-the examples work.
+<a name="documentation"></a>
+# Documentation
 
-In case you're browsing this elsewhere, the latest development version of the code and docs are available at https://github.com/bluesmoon/boomerang/, while the latest stable version is
-at https://github.com/SOASTA/boomerang/
+Documentation is in the `docs/` directory.  Boomerang documentation is
+written in Markdown and is built via [JSDoc](http://usejsdoc.org/).
 
-support
----
-We use github issues for discussions, feature requests and bug reports.  Get in touch at https://github.com/SOASTA/boomerang/issues
-You'll need a github account to participate, but then you'll need one to check out the code as well :)
+You can build the current documentation by running Grunt:
 
-Thanks for dropping by, and please leave us a message telling us if you use boomerang.
+```
+grunt jsdoc
+```
 
-boomerang is supported by the devs at <a href="http://akamai.com/">Akamai</a>, and the awesome community of opensource developers that use
-and hack it.  That's you.  Thank you!
+HTML files will be built under `build/docs`.
+
+Documentation is also currently published at [docs.soasta.com/boomerang-api/](https://docs.soasta.com/boomerang-api/).
+
+mPulse-specific Boomerang documentation is also available at [docs.soasta.com/boomerang/](https://docs.soasta.com/boomerang/).
+
+There is a lot more documentation available:
+
+- [API Documentation](https://docs.soasta.com/boomerang-api/): The `BOOMR` API
+- [Building Boomerang](https://docs.soasta.com/boomerang-api/tutorial-building.html): How to build boomerang with plugins
+- [Contributing](https://docs.soasta.com/boomerang-api/tutorial-contributing.html): Contributing to the open-source project
+- [Creating Plugins](https://docs.soasta.com/boomerang-api/tutorial-creating-plugins.html): Creating a plugin
+- [Methodology](https://docs.soasta.com/boomerang-api/tutorial-methodology.html): How boomerang works internally
+- [How-Tos](https://docs.soasta.com/boomerang-api/tutorial-howtos.html): Short recipes on how to do a bunch of things with boomerang
+
+# Source code
+
+The boomerang source code is primarily on GitHub at [github.com/SOASTA/boomerang](https://github.com/SOASTA/boomerang).
+
+Feel free to fork it and [contribute](https://docs.soasta.com/boomerang-api/tutorial-contributing.html) to it.
+
+You can also get a [check out the releases](https://github.com/SOASTA/boomerang/releases)
+or download a [tarball](https://github.com/SOASTA/boomerang/archive/master.tar.gz) or 
+[zip](http://github.com/SOASTA/boomerang/archive/master.zip) of the code.
+
+# Support
+
+We use [GitHub Issues](https://github.com/SOASTA/boomerang/issues) for discussions,
+feature requests and bug reports.
+
+Get in touch at [github.com/SOASTA/boomerang/issues](https://github.com/SOASTA/boomerang/issues).
+
+boomerang is supported by the developers at [Akamai](http://akamai.com/), and the
+awesome community of open-source developers that use and hack it.  That's you.  Thank you!
+
+# Contributions
+
+Boomerang is brought to you by:
+
+* the former [Exceptional Performance](http://developer.yahoo.com/performance/) team at the company once known as
+    [Yahoo!](http://www.yahoo.com/), aided by the [Yahoo! Developer Network](http://developer.yahoo.com/),
+* the folks at [LogNormal](http://www.lognormal.com/), continued by
+* the mPulse team at [SOASTA](https://www.soasta.com/), ongoing by
+* the mPulse team at [Akamai](https://www.akamai.com/), and
+* many independent contributors whose contributions are cemented in our git history
+
+To help out, please read our [contributing](https://docs.soasta.com/boomerang-api/tutorial-contributing.html) page.

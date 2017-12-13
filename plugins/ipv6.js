@@ -1,34 +1,35 @@
-/*
- * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
- */
-
 /**
-\file ipv6.js
-Plugin to measure various ipv6 related metrics.
-This plugin tries to do a few things:
-- Check if the client can connect to an ipv6 address
-- Check if the client can resolve DNS that points to an ipv6 address
-- Check latency of connecting to an ipv6 address
-- Check avg latency of doing dns lookup to an ipv6 address (not worstcase)
-
-You'll need a server that has an ipv6 address, and a DNS name to point to it.
-Additionally, this server needs to be configured to serve content requested
-from the IPv6 address and should not require a virtual host name.  This means
-that you probably cannot use shared hosting that puts multiple hosts on the
-same IP address.
-
-All beacon parameters are prefixed with ipv6_
-
-Beacon parameters:
-- ipv6_latency: Latency in milliseconds of getting data from an ipv6 host when
-		connecting to the IP.  Set to NA if the client cannot connect
-		to the ipv6 host.
-- ipv6_lookup:  Latency of getting data from a hostname that resolves to an
-		ipv6 address.  Set to NA if the client cannot resolve or connect
-		to the ipv6 host.
-*/
-
+ * Plugin to measure various [IPv6](https://en.wikipedia.org/wiki/IPv6) related metrics.
+ *
+ * This plugin tries to do a few things:
+ * - Check if the client can connect to an IPv6 address
+ * - Check if the client can resolve DNS that points to an IPv6 address
+ * - Check latency of connecting to an IPv6 address
+ * - Check avg latency of doing DNS lookup to an IPv6 address (not worstcase)
+ *
+ * You'll need a server that has an IPv6 address, and a DNS name to point to it.
+ * Additionally, this server needs to be configured to serve content requested
+ * from the IPv6 address and should not require a virtual host name.  This means
+ * that you probably cannot use shared hosting that puts multiple hosts on the
+ * same IP address.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * All beacon parameters are prefixed with `ipv6_`.
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `ipv6_latency`: Latency in milliseconds of getting data from an IPv6 host when
+ *     connecting to the IP.  Set to NA if the client cannot connect
+ *     to the IPv6 host.
+ * * `ipv6_lookup`:  Latency of getting data from a hostname that resolves to an
+ *     IPv6 address.  Set to NA if the client cannot resolve or connect
+ *     to the IPv6 host.
+ *
+ * @class BOOMR.plugins.IPv6
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -38,15 +39,15 @@ Beacon parameters:
 	}
 
 	/*
-	Algorithm:
-
-	1. Try to load a sizeless image from an IPv6 host
-	   - onerror, flag no IPv6 connect support and end
-	   - onload, measure load time
-	2. Try to load a sizeless image from a hostname that resolves to an IPv6 address
-	   - onerror, flag no IPv6 DNS resolver and end
-	   - onload, measure load time
-	*/
+	 * Algorithm:
+	 *
+	 * 1. Try to load a sizeless image from an IPv6 host
+	 *   - onerror, flag no IPv6 connect support and end
+	 *   - onload, measure load time
+	 * 2. Try to load a sizeless image from a hostname that resolves to an IPv6 address
+	 *   - onerror, flag no IPv6 DNS resolver and end
+	 *   - onload, measure load time
+	 */
 	var impl = {
 		complete: false,
 		ipv6_url: "",
@@ -150,6 +151,28 @@ Beacon parameters:
 	};
 
 	BOOMR.plugins.IPv6 = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} config.IPv6.ipv6_url An image URL referenced by its IPv6 address,
+		 * eg, http://fe80::1/image-i.png.
+		 *
+		 * If not specified, the test will abort.
+		 * @param {string} [config.IPv6.host_url] An image URL on an IPv6 only host referenced
+		 * by its DNS hostname.
+		 *
+		 * The hostname should not resolve to an IPv4 address.
+		 *
+		 * If not specified, the host test will be skipped.
+		 * @param {string} [config.IPv6.timeout] The time, in milliseconds, that boomerang should
+		 * wait for a network response before giving up and assuming that the request failed.
+		 *
+		 * The default is 1200ms.
+		 *
+		 * @returns {@link BOOMR.plugins.IPv6} The IPv6 plugin for chaining
+		 * @memberof BOOMR.plugins.IPv6
+		 */
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "IPv6", ["ipv6_url", "host_url", "timeout"]);
 
@@ -183,6 +206,12 @@ Beacon parameters:
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.IPv6
+		 */
 		is_complete: function() {
 			return impl.complete;
 		}

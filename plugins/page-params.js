@@ -1,3 +1,23 @@
+/**
+ * This plugin is responsible for handling Page Groups, A/B, Custom Timers,
+ * Custom Metrics and Custom Dimensions for mPulse.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin will add Page Group, A/B, Custom Timers, Metrics and Dimensions
+ * to the beacon.
+ *
+ * * `h.pg`: The Page Group
+ * * `t_other`: Custom Timers get added to the beacon as part of `t_other`.  In it, the
+ *   Custom Timers will be `custom[n]|val`, separated by commas.
+ * * `custom[n]_st`: Start time of a Custom Timer
+ * * `cmet.[name]`: Custom Metrics
+ * * `cdim.[name]`: Custom Dimensions
+ *
+ * @class BOOMR.plugins.PageParams
+ */
 (function() {
 	var w, l, d, p, impl, Handler;
 
@@ -15,29 +35,30 @@
 	var DEFAULT_THOUSANDS = ",";
 
 	/**
+	 * Regular Expression to extract a number under en-US internationalization
+	 * from a body of text
+	 *
 	 * @constant
-	 * Regular Expression to extract a number under en-US internationalization from a body of text
 	 * @type {RegExp}
 	 */
 	var REGEX_NUMBER_US_DEFAULT = /(-?(?:[1-9][\d,]*)?[0-9](?:\.\d+)?)/;
 
 	/**
-	 * @constant
 	 * Time in milliseconds to keep the observer alive during runtime
+	 * @constant
 	 * @type {number}
 	 */
 	var RESOURCE_GROUPS_MO_TIMEOUT = 2000;
 
 	/**
-	 * @constant
 	 * Maximum time in milliseconds to keep the timer alive for constant checking
 	 * for new resources being added to a container on the page
+	 * @constant
 	 * @type {number}
 	 */
 	var RESOURCE_GROUPS_CHILDLISTENER_TIMEOUT = 500;
 
 	/**
-	 * @constant
 	 * Sets the priority of trying to run PageParam evaluation types.
 	 * Based on these priorities we can decide whether or not to run
 	 * these evaluation types to retrieve the right value for this
@@ -54,6 +75,7 @@
 	 * - page_ready
 	 * - before_unload
 	 * - xhr_load
+	 * @constant
 	 * @type {object}
 	 */
 	var PAGE_PARAM_TRY_PRIORITY = {
@@ -73,21 +95,23 @@
 	};
 
 	/**
-	 * @constant
 	 * Tag names matching element types that have a onload event
+	 * @constant
 	 * @type {string[]}
 	 */
-	var PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES = ["img", "iframe", "script", "link", "object", "svg", "video"];
+	var PAGE_PARAM_RESOURCEGROUP_NETWORK_RESOURCES =
+		["img", "iframe", "script", "link", "object", "svg", "video"];
 
 	/**
-	 * @private
-	 * Each handler config has a basic configuration. The configuration is used when initializing the Handler.
-	 * The configuration is may be modified for initialization purposes of the specific Handler.
+	 * Each handler config has a basic configuration. The configuration is used
+	 * when initializing the Handler. The configuration is may be modified for
+	 * initialization purposes of the specific Handler.
 	 *
 	 * This needs to be a function as otherwise the BOOMR.RT.setTimer
 	 * is not accessible.
 	 *
-	 * @returns {HandlerConfig} - object containing basic Handler Configuration
+	 * @returns {HandlerConfig} Object containing basic Handler Configuration
+	 * @private
 	 */
 	var PAGE_PARAMS_BASE_HANDLER_CONFIG = function() {
 		return {
@@ -121,34 +145,46 @@
 
 	/**
 	 * @typedef HandlerConfig
-	 * @property {object} pageGroups - PageGroups specific configuration
-	 * @property {string} pageGroups.varname - Name of the beacon param storing the retrieved page group
-	 * @property {boolean} pageGroups.stopOnFirst - If true the first found value for the page group will be taken as the page group name
-	 * @property {object} abTests - A/B tests specific configuration
-	 * @property {string} abTests.varname - Name of the beacon param storing the retrieved A/B test value
-	 * @property {boolean} abTests.stopOnFirst - If true the first found value for the A/B test name will be taken as the A/B test name
-	 * @property {object} customMetrics - Custom Metrics configuration
-	 * @property {RegExp} customMetrics.cleanUpRE - Regular Expression for filtering out numeric values from a string of text
-	 * @property {object} customDimensions - Custom Dimension specific configuration
-	 * @property {RegExp} customDimensions.sanitizeRE - Regular Expression to clean body of text for a custom dimension value
-	 * @property {object} customTimers - Custom Timers specific configuration
-	 * @property {RegExp} customTimers.cleanUpRE - Regular Expression to clean up a numeric value to receive a numeric value from a body of text
-	 * @property {function} customTimers.method - Function used to set the timer on the beacon
-	 * @property {PluginContext} customTimers.ctx - Instance of Plugin to call {@link HandlerConfig#customTimers~method} in
-	 * @property {function} customTimers.preProcessor - Method to pre process the custom timers value before setting the timer with {@link HandlerConfig#customTimers~method}
+	 * @memberof BOOMR.plugins.PageParams
+	 *
+	 * @property {object} pageGroups PageGroups specific configuration
+	 * @property {string} pageGroups.varname Name of the beacon param storing the
+	 *   retrieved page group
+	 * @property {boolean} pageGroups.stopOnFirst If true the first found value for the page group will be taken as the page group name
+	 * @property {object} abTests A/B tests specific configuration
+	 * @property {string} abTests.varname Name of the beacon param storing the
+	 *   retrieved A/B test value
+	 * @property {boolean} abTests.stopOnFirst If true the first found value for
+	 *   the A/B test name will be taken as the A/B test name
+	 * @property {object} customMetrics Custom Metrics configuration
+	 * @property {RegExp} customMetrics.cleanUpRE Regular Expression for filtering
+	 *   out numeric values from a string of text
+	 * @property {object} customDimensions Custom Dimension specific configuration
+	 * @property {RegExp} customDimensions.sanitizeRE Regular Expression to clean
+	 *   body of text for a custom dimension value
+	 * @property {object} customTimers Custom Timers specific configuration
+	 * @property {RegExp} customTimers.cleanUpRE Regular Expression to clean up a
+	 *   numeric value to receive a numeric value from a body of text
+	 * @property {function} customTimers.method Function used to set the timer on the beacon
+	 * @property {PluginContext} customTimers.ctx Instance of Plugin to call
+	 *  {@link HandlerConfig#customTimers~method} in
+	 * @property {function} customTimers.preProcessor Method to pre process the
+	 *   custom timers value before setting the timer with {@link HandlerConfig#customTimers~method}
 	 */
 
 	/**
+ 	 * Names of PageParams types collected by this plugin
 	 * @constant
-	 * Names of PageParams types collected by this plugin
 	 * @type {string[]}
 	 */
 	var PAGE_PARAMS_NAMES = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
 
 	/**
+	 * Nodes or Document element fetching new resources on a page may have one
+	 * of these attributes and should be classified as resources in case
+	 * resource groups are used in the page param configuration as a type
+	 *
 	 * @constant
-	 * Nodes or Document element fetching new resources on a page may have one of these attributes and should be
-	 * classified as resources in case resource groups are used in the page param configuration as a type
 	 * @type {string[]}
 	 */
 	var RESOURCE_GROUPS_URL_SRC_PROPERTIES = [
@@ -161,11 +197,15 @@
 		// object (flash)
 		"codebase"
 	];
+
 	//
 	// Cache of number regular expressions.
 	// key is "[decimal][thousands]", value is the regex
 	//
-	var regExNumberCache = { ".,": REGEX_NUMBER_US_DEFAULT };
+	var regExNumberCache = {
+		".,": REGEX_NUMBER_US_DEFAULT
+	};
+
 	var regExThousandsCache = {
 		".": /\./g,
 		",": /,/g,
@@ -175,19 +215,23 @@
 
 	/**
 	 * @typedef {Object} Resource
+	 * @memberof BOOMR.plugins.PageParams
 	 * A resource is an object with a type and a value.
 	 * Valid types for a resource are:
 	 *  - `queryselector`: A CSS QuerySelector pointing to one or more elements in a document
 	 *  - `xpath`: An XPath pointing to one or multiple elements in a document
-	 *  - `resource`: A fully qualified URL to a resource on a page referenced in a href,src or other way resulting in an entry in ResourceTiming
-	 * @property {string} type - a type definition for the resource (possible values: `queryselector`, `xpath`, `resource`) see description for more information
-	 * @property {string} value - a value mapping to the type of the resource
+	 *  - `resource`: A fully qualified URL to a resource on a page referenced in a
+	 *     `href`, `src` or other way resulting in an entry in ResourceTiming
+	 * @property {string} type a type definition for the resource (possible values:
+	 *   `queryselector`, `xpath`, `resource`) see description for more information
+	 * @property {string} value a value mapping to the type of the resource
 	 */
 
 	/**
-	 * @class
-	 * @name BOOMR.plugins.PageParams.impl.Handler
 	 * A PageVar Handler taking care of mapping a type of PageVar to its result
+	 * @class
+	 * @name BOOMR.plugins.PageParams.Handler
+	 * @private
 	 */
 	Handler = function(config) {
 		this.varname = config.varname;
@@ -205,29 +249,54 @@
 	};
 
 	Handler.prototype = {
+		/**
+		 * Applies the result of a successful Handler
+		 *
+		 * @param {object} value Handler value
+		 */
 		apply: function(value) {
 			if (this.preProcessor) {
 				value = this.preProcessor(value);
 			}
+
 			if (!value && value !== 0) {
 				return false;
 			}
+
 			this.method.call(this.ctx, this.varname, value);
 			return true;
 		},
 
+		/**
+		 * Runs the handler
+		 *
+		 * @param {object} o Object
+		 * @param {string} eventSrc Event source
+		 * @param {object} edata Event data
+		 *
+		 * @returns {boolean} The result of the handler
+		 */
 		handle: function(o, eventSrc, edata) {
 			var h = this;
 			if (!this.isValid(o)) {
 				return false;
 			}
+
 			if (o.label) {
 				h = new Handler(this);
 				h.varname = o.label;
 			}
+
 			return h[o.type](o, eventSrc, edata);
 		},
 
+		/**
+		 * Determines whether a Handler object is valid or not
+		 *
+		 * @param {object} o object
+		 *
+		 * @returns {boolean} True if the object is valid
+		 */
 		isValid: function(o) {
 			// Valid iff
 			return (
@@ -319,9 +388,10 @@
 		/**
 		 * Checks if {@link part} is a valid object-member of {@link value}
 		 *
-		 * @param {object} value - value to check if it has {@link part} as a member
-		 * @param {string} part - member part name to validate if it is a member of the {@link value} object
-		 * @returns {boolean} - True if {@link part} is a property of {@link value} else false
+		 * @param {object} value Value to check if it has {@link part} as a member
+		 * @param {string} part Member part name to validate if it is a member
+		 * of the {@link value} object
+		 * @returns {boolean} True if {@link part} is a property of {@link value} else false
 		 */
 		isValidObjectMember: function(value, part) {
 			if (value === null) {
@@ -343,6 +413,14 @@
 			return false;
 		},
 
+		/**
+		 * Extracts the value from a DOM element
+		 *
+		 * @param {Element} element DOM element
+		 * @param {object} o Handler object
+		 *
+		 * @returns {string|boolean} Element value, or false if it couldn't be found
+		 */
 		extractFromDOMElement: function(element, o) {
 			var m, re, elementValue = "";
 
@@ -389,6 +467,14 @@
 			return elementValue;
 		},
 
+		/**
+		 * Executes the specified RegExp
+		 *
+		 * @param {RegExp} re Regular expression
+		 * @param {string} operand Operand to run on
+		 *
+		 * @returns {object} Value of running `RegExp.exec`
+		 */
 		execSafeRegEx: function(re, operand) {
 			if (!(re instanceof RegExp)) {
 				try {
@@ -408,6 +494,15 @@
 			return re.exec(operand);
 		},
 
+		/**
+		 * Handles a RegExp
+		 *
+		 * @param {RegExp} re Regular expression
+		 * @param {string} extract Value to extract
+		 * @param {string} operand RegExp operand
+		 *
+		 * @returns {boolean} True if the RegExp could be run
+		 */
 		handleRegEx: function(re, extract, operand) {
 			var value, m;
 
@@ -427,6 +522,13 @@
 			return this.apply(value);
 		},
 
+		/**
+		 * Checks if the URL pattern matches
+		 *
+		 * @param {string} u URL pattern
+		 * @param {string} urlToCheck URL to check
+		 * @param {boolean} doLog Log the results
+		 */
 		checkURLPattern: function(u, urlToCheck, doLog) {
 			var re;
 
@@ -462,6 +564,14 @@
 			return true;
 		},
 
+		/**
+		 * Walks the XPath node
+		 *
+		 * @param {Element} root Root node
+		 * @param {string} xpath XPath
+		 *
+		 * @returns {Element|null} Matching element
+		 */
 		nodeWalk: function(root, xpath) {
 			var m, nodes, index, el;
 
@@ -500,6 +610,15 @@
 			return null;
 		},
 
+		/**
+		 * Runs the specified XPath expression
+		 *
+		 * @param {string} xpath XPath expression
+		 * @param {Element} element Root node
+		 *
+		 * @returns {Element|null} Matching element
+		 * @memberof BOOMR.utils
+		 */
 		runXPath: function(xpath, element) {
 			var el, m, tryOurs = false, err;
 			element = element || d;
@@ -563,13 +682,24 @@
 			}
 
 			if (!el || el.resultType !== 9 || !el.singleNodeValue) {
-				BOOMR.debug("XPath did not return anything: " + el + ", " + el.resultType + ", " + el.singleNodeValue, "PageVars");
+				BOOMR.debug("XPath did not return anything: " + el +
+					", " + el.resultType + ", " + el.singleNodeValue, "PageVars");
 				return null;
 			}
 
 			return el.singleNodeValue;
 		},
 
+		/**
+		 * Runs the specified QuerySelector
+		 *
+		 * @param {string} queryselector QuerySelector
+		 * @param {Element} element Root node
+		 * @param {boolean} all True to use querySelectorAll
+		 *
+		 * @returns {Element|null} Matching element
+		 * @memberof BOOMR.utils
+		 */
 		runQuerySelector: function(queryselector, element, all) {
 			var el;
 			all = all || false;
@@ -600,6 +730,13 @@
 			return el;
 		},
 
+		/**
+		 * Runs a JavaScript handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		JavaScriptVar: function(o) {
 			var res;
 
@@ -617,6 +754,13 @@
 			return res;
 		},
 
+		/**
+		 * Runs a Custom (JavaScript) handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		Custom: function(o) {
 			var res;
 
@@ -634,6 +778,15 @@
 			return res;
 		},
 
+		/**
+		 * Attempts to extract the specified JavaScript variable
+		 *
+		 * @param {string} varname Variable name
+		 * @param {object} o Handler data
+		 * @param {object} [parent] Parent node
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		extractJavaScriptVariable: function(varname, o, parent) {
 			var parts, parts_str_prop, value, ctx = parent || w, partIndex;
 
@@ -678,7 +831,11 @@
 				}
 			}
 			catch (err) {
-				BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "::" + parts.join("."));
+				BOOMR.addError(
+					err,
+					"PageVars.extractJavaScriptVariable",
+					varname + "::" + parts.join("."));
+
 				return false;
 			}
 
@@ -688,8 +845,9 @@
 				return false;
 			}
 
-			// Value evaluated to a function, so we execute it, and pass the label in as an argument
-			// We don't have the ability to pass custom arguments to the function
+			// Value evaluated to a function, so we execute it, and pass the
+			// label in as an argument.  We don't have the ability to pass
+			// custom arguments to the function
 			if (typeof value === "function") {
 				try {
 					value = value.call(ctx, this.varname);
@@ -726,6 +884,13 @@
 			return this.apply(value);
 		},
 
+		/**
+		 * Runs a URL pattern handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		URLPattern: function(o) {
 			var value;
 			if (!o.parameter2) {
@@ -746,10 +911,24 @@
 			}
 		},
 
+		/**
+		 * Runs a URL substring (end of text) handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		URLSubstringEndOfText: function(o) {
 			return this.URLSubstringTrailingText(o);
 		},
 
+		/**
+		 * Runs a URL substring (trailing text) handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		URLSubstringTrailingText: function(o) {
 			if (!o.parameter1) {
 				return false;
@@ -759,29 +938,62 @@
 			return this.handleRegEx(
 				(
 					"^" +
-					o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*?").replace(/^\*/, ".*") +
+					o.parameter1.replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1")
+						.replace(/([^\.])\*/g, "$1.*?").replace(/^\*/, ".*") +
 					"(.*)" +
-					(o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1").replace(/([^\.])\*/g, "$1.*") +
+					(o.parameter2 || "").replace(/([.+?\^=!:${}()|\[\]\/\\])/g, "\\$1")
+						.replace(/([^\.])\*/g, "$1.*") +
 					"$"
 				),
 				"$1",
 				l.href);
 		},
 
+		/**
+		 * Runs a User Agent RegExp handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		UserAgentRegex: function(o) {
 			return this._Regex(o.parameter1, o.regex, o.replacement, navigator.userAgent);
 		},
 
+		/**
+		 * Runs a Cookie RegExp handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		CookieRegex: function(o) {
-			return this._Regex(o.parameter1, o.regex, o.replacement, o.cookieName ? BOOMR.utils.getCookie(o.cookieName) : d.cookie);
+			return this._Regex(
+				o.parameter1,
+				o.regex,
+				o.replacement,
+				o.cookieName ? BOOMR.utils.getCookie(o.cookieName) : d.cookie);
 		},
 
-		// New method for custom dimensions
+		/**
+		 * Runs a URL RegExp handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		URLRegex: function(o) {
 			return this._Regex(o.parameter1, o.regex, o.replacement, l.href);
 		},
 
-		// Old method for page groups
+		/**
+		 * Runs a Regular Expression handler (used for Page Groups)
+		 *
+		 * @param {object} o Handler data
+		 * @param {string} [url] URL
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		Regexp: function(o, url) {
 			var m;
 			if (url && typeof url === "string") {
@@ -796,6 +1008,17 @@
 			}
 		},
 
+		/**
+		 * Runs a Regular Expression against a URL
+		 *
+		 * @param {string} url URL
+		 * @param {RegExp} regex Regular Expression
+		 * @param {string} replacement Replacement expression
+		 * @param {string} [url] URL
+		 * @param {string} operand RegExp operand
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		_Regex: function(url, regex, replacement, operand) {
 			if (!regex || !replacement) {
 				return false;
@@ -810,6 +1033,13 @@
 			return this.handleRegEx(regex, replacement, operand);
 		},
 
+		/**
+		 * Runs a URL pattern handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		URLPatternType: function(o) {
 			var value;
 
@@ -849,6 +1079,13 @@
 			return this.apply(value);
 		},
 
+		/**
+		 * Runs a ResourceTiming handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		ResourceTiming: function(o) {
 			var el, url, res, st, en, k;
 
@@ -868,7 +1105,8 @@
 				return false;
 			}
 
-			BOOMR.debug("Got ResourceTiming: " + o.parameter1 + ", " + o.parameter2 + ", " + o.url, "PageVars");
+			BOOMR.debug("Got ResourceTiming: " + o.parameter1 + ", " +
+				o.parameter2 + ", " + o.url, "PageVars");
 
 			// Require page URL to match
 			if (!this.checkURLPattern(o.parameter1)) {
@@ -900,8 +1138,9 @@
 			if (!res) {
 				BOOMR.debug("No resource matched", "PageVars");
 
-				// If we reach here, that means the url wasn't found.  We'll save it for retrying because it's
-				// possible that it will be added later in the page, but before we beacon
+				// If we reach here, that means the url wasn't found.  We'll save
+				// it for retrying because it's possible that it will be added
+				// later in the page, but before we beacon
 				impl.mayRetry.push({ handler: this, data: o });
 
 				return false;
@@ -915,7 +1154,9 @@
 			if (o.start === "*") {
 				for (k in res) {
 					if (res.hasOwnProperty(k) && k.match(/(Start|End)$/) && res[k] > 0) {
-						BOOMR.addVar(this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"), Math.round(res[k]));
+						BOOMR.addVar(
+							this.varname + "." + k.replace(/^(...).*(St|En).*$/, "$1$2"),
+							Math.round(res[k]));
 					}
 				}
 
@@ -954,14 +1195,17 @@
 		},
 
 		/**
-		 * Finds first resource matching slowest, a url or a URLPattern in all available frames
-		 * if we have access to them.
-		 * This function masks usage of {@link Handler.prototype.findResources} but pre-sets limit to 1
+		 * Finds first resource matching slowest, a url or a URLPattern in all
+		 * available frames if we have access to them.
 		 *
-		 * @param {String} url - Full URL, a URL pattern Regex or "slowest"
-		 * @param {Window} frame - Frame to query for Resource Timings
+		 * This function masks usage of {@link Handler.prototype.findResources}
+		 * but pre-sets limit to 1.
 		 *
-		 * @returns {(PerformanceResourceTiming|null)} - First ResourceTiming entity matching url in any frame or null if none found
+		 * @param {string} url Full URL, a URL pattern Regex or "slowest"
+		 * @param {HTMLFrameElement} frame Frame to query for Resource Timings
+		 *
+		 * @returns {PerformanceResourceTiming|null} First ResourceTiming
+		 * entity matching url in any frame or null if none found
 		 */
 		findResource: function(url, frame) {
 			var resources = this.findResources(url, frame);
@@ -977,13 +1221,16 @@
 				return null;
 			}
 		},
+
 		/**
 		 * Check if we are allowed to access perfomance timing information on a given frame
 		 *
-		 * @param {string} url - URL of a given Resource Timing entry
-		 * @param {HTMLFrameElement} frame - Frame to access performance timing on
+		 * @param {string} url URL of a given Resource Timing entry
+		 * @param {HTMLFrameElement} frame Frame to access performance timing on
 		 *
-		 * @return {(PerformanceResourceTiming[]|null)} - Either the PerformanceResourceTiming object associated with the URL or null if access is denied
+		 * @return {PerformanceResourceTiming[]|null} Either the
+		 * PerformanceResourceTiming object associated with the URL or null if
+		 * access is denied.
 		 */
 		getFrameResourcesForUrl: function(url, frame) {
 			var frameLoc;
@@ -1012,7 +1259,9 @@
 
 				try {
 					// PDFs in IE will throw this exception
-					if (e.name === "TypeError" && e.message === "Invalid calling object" && frame.document.location.pathname.match(/\.pdf$/)) {
+					if (e.name === "TypeError" &&
+						e.message === "Invalid calling object" &&
+						frame.document.location.pathname.match(/\.pdf$/)) {
 						return null;
 					}
 				}
@@ -1027,11 +1276,11 @@
 		 * Finds all resources matching slowest or a url or a URLPattern in all available frames
 		 * if we have access to them.
 		 *
-		 * @param {String} url - Full URL, a URL pattern Regex or "slowest"
-		 * @param {Window} frame - Frame to query for Resource Timings
-		 * @param {Number} limit - the maximum number of resources to look for
+		 * @param {string} url Full URL, a URL pattern Regex or "slowest"
+		 * @param {HTMLFrameElement} frame Frame to query for Resource Timings
+		 * @param {number} limit the maximum number of resources to look for
 		 *
-		 * @returns {PerformanceResourceTiming[]} - Resources found matching a URL Pattern
+		 * @returns {PerformanceResourceTiming[]} Resources found matching a URL Pattern
 		 */
 		findResources: function(url, frame, limit) {
 			var i, res, reslist, frameCount, foundList = [], tempReslist, tempResListIndex;
@@ -1066,7 +1315,8 @@
 				if (reslist && reslist.length > 0) {
 					for (i = 0; i < reslist.length; i++) {
 
-						// if we want the slowest url, then iterate through all till we find it
+						// if we want the slowest url, then iterate through all
+						// till we find it
 						if (url === "slowest") {
 							if (!res || reslist[i].duration > res.duration) {
 								res = reslist[i];
@@ -1106,6 +1356,13 @@
 			return foundList;
 		},
 
+		/**
+		 * Runs a UserTiming handler
+		 *
+		 * @param {object} o Handler data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		UserTiming: function(o) {
 			var res, i;
 			if (!o.parameter2) {
@@ -1140,10 +1397,21 @@
 				}
 			}
 
-			// If we reach here, that means the mark/measure wasn't found.  We'll save it for retrying because it's
-			// possible that it will be added later in the page, but before we beacon
+			// If we reach here, that means the mark/measure wasn't found.  We'll
+			// save it for retrying because it's possible that it will be added
+			// later in the page, but before we beacon.
 			impl.mayRetry.push({ handler: this, data: o });
 		},
+
+		/**
+		 * Runs a XHR Payload handler
+		 *
+		 * @param {object} o Handler data
+		 * @param {string} ename Event name
+		 * @param {object} data Event data
+		 *
+		 * @returns {boolean} True if the handler is successful
+		 */
 		Payload: function(o, ename, data) {
 			var element, parser, dom, m, value, content, DP = BOOMR.window.DOMParser, JSON = BOOMR.window.JSON;
 			// If no data was passed in we're not the main audience for this request
@@ -1162,7 +1430,8 @@
 				}
 
 				if (o.parameter1 === "queryselector" || o.parameter1 === "xpath") {
-					// if xml was passed in we can attempt to use it as DOM, otherwise we'll fallback to DOMParsing
+					// if xml was passed in we can attempt to use it as DOM,
+					// otherwise we'll fallback to DOMParsing
 					if (data.response.xml) {
 						if (o.parameter1 === "queryselector") {
 							element = this.runQuerySelector(o.parameter2, data.response.xml);
@@ -1229,26 +1498,29 @@
 
 			return null;
 		},
+
 		/**
-		 * @desc
-		 * Resource Groups is a Handler Type listening to the fetchStart and responseEnd of a resource or set of
-		 * resources on the page initiated by either an Onload event, SPA navigation type or XHR event we are listening to.
+		 * A Resource Group is a Handler Type listening to the fetchStart and
+		 * stop of a resource or a set of resources on the page.
 		 *
-		 * Optionally instead of the resources fetchStart we can also measure from a sites navigationStart until the resources
-		 * responseEnd.
+		 * Optionally, instead of the resource's fetchStart, we can also measure
+		 * from the navigationStart until the final resource's responseEnd.
 		 *
-		 * A resource-set here describes a set of type and value pairs designating a queriable element on the page
-		 * An event source is an event on the page we are listening for that we are expecting to correlate with the
-		 * resource set element arrival on the page.
+		 * A resource-set here describes a set of type and value pairs
+		 * designating a queriable element on the page. An event source is an
+		 * event on the page we are listening for that we are expecting to
+		 * correlate with the resource set element arrival on the page.
 		 *
-		 * Furthermore these Resource Groups can be delimited in their occurence by the page they appear on.
+		 * Furthermore these Resource Groups can be delimited in their occurence
+		 * by the page they appear on.
 		 *
-		 * For example if we have a page in our app `/app/overview` where we expect to be navigated to and it
-		 * is a simple onload procedure on this page we expect there to be an image generated by a previously set
+		 * For example if we have a page in our app `/app/overview` where we
+		 * expect to be navigated to and it is a simple onload procedure on
+		 * this page we expect there to be an image generated by a previously set
 		 * configuration. The image URL would be: `/app/generated/image.gif`
 		 *
-		 * We can address this image by it's URL or the DOM element via a selector (XPath or CSS).
-		 * So, our configuration may look like this:
+		 * We can address this image by its URL or the DOM element via a
+		 * selector (XPath or CSS). So, our configuration may look like this:
 		 *
 		 * @example
 		 * {
@@ -1267,7 +1539,7 @@
 		 *   }
 		 * }
 		 *
-		 * If we wanted to address it by it's CSS Selector:
+		 * If we wanted to address it by its CSS Selector:
 		 * @example
 		 * {
 		 *   name: "Resource Group for generated GIF",
@@ -1304,9 +1576,13 @@
 		 *     }
 		 *   }
 		 * }
+		 *
+		 * @param {object} config Configuration
+		 * @param {object[]} params Parameters
 		 */
 		ResourceGroup: function(config, params) {
-			var resourceSet = [], path, resource, performance, resourceSetIndex, listener, obs, src, eventsrc, url, onindex;
+			var resourceSet = [], path, resource, performance, resourceSetIndex,
+			    listener, obs, src, eventsrc, url, onindex;
 
 			if (BOOMR.utils.isArray(params)) {
 				eventsrc = params[0];
@@ -1317,7 +1593,8 @@
 				url = BOOMR.window.document.URL;
 			}
 
-			// assume events are onload and need to be run immediately if no eventsrc is given
+			// assume events are onload and need to be run immediately if no
+			// eventsrc is given
 			src = (typeof eventsrc !== "undefined" ? eventsrc : "onload");
 			src = (src === "load" ? "onload" : eventsrc);
 
@@ -1329,13 +1606,17 @@
 			for (path in config.value) {
 				if (config.value.hasOwnProperty(path)) {
 
-					// Match the URL against current location if that matches check resource property is available and is populated
+					// Match the URL against current location if that matches
+					// check resource property is available and is populated
 					if (this.checkURLPattern(path, url) &&
 						(config.value[path].resources &&
 						 config.value[path].resources.length > 0)) {
 
-						// Check the event this resource is supposed to be tracked on (spa_hard, spa, xhr, onload)
-						// If we are running on init and resources are `onload` include them as well as they might be added after boomerang is loaded via JavaScript
+						// Check the event this resource is supposed to be
+						// tracked on (spa_hard, spa, xhr, onload). If we are
+						// running on init and resources are `onload` include
+						// them as well as they might be added after boomerang
+						// is loaded via JavaScript.
 						if (config.value[path].on &&
 							config.value[path].on.length > 0 &&
 							(BOOMR.utils.inArray(src, config.value[path].on) || src === "init" && BOOMR.utils.inArray("onload", config.value[path].on))) {
@@ -1344,8 +1625,9 @@
 							for (var resourceIndex in config.value[path].resources) {
 
 								if (config.value[path].resources.hasOwnProperty(resourceIndex)) {
-									// If `on` is defined and has more than one element in it we check against the eventsrc
-									// Otherwise expect the onload and immediate evaluation
+									// If `on` is defined and has more than one
+									// element in it we check against the eventsrc.
+									// Otherwise expect the onload and immediate evaluation.
 									resourceSet.push(config.value[path].resources[resourceIndex]);
 								}
 							}
@@ -1378,7 +1660,8 @@
 			if (this.RTSupport) {
 				// iterate through resources finding URLs
 				for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
-					// If the type is `init` this is after the Handler was initialized so don't check Resource Groups now
+					// If the type is `init` this is after the Handler was
+					// initialized so don't check Resource Groups now
 					if (src !== "init" && src !== "xhr") {
 						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex), resourceSetIndex);
 					}
@@ -1421,12 +1704,16 @@
 
 			return this;
 		},
+
 		/**
-		 * @desc
-		 * Setup a mutation observer watching nodes referenced by the Resource passed in
-		 * This will only work if the Resource in question also is a container. Otherwise we are returning null.
+		 * Setup a mutation observer watching nodes referenced by the Resource passed in.
 		 *
-		 * @param {Resource} resource - resource to potentially watch
+		 * This will only work if the Resource in question also is a container.
+		 * Otherwise it will return null.
+		 *
+		 * @param {number} index Resource index
+		 *
+		 * @param {MutationObserver|null}
 		 */
 		setupMutationObserver: function(index) {
 			var resource = this.resourceSet[index], currentNode = null, nodeIndex = 0, node = this.getNode(index), obsConfig = {
@@ -1437,7 +1724,7 @@
 			};
 
 			if (!this.isOnPageEvent() && this.eventsrc === "onload") {
-				return;
+				return null;
 			}
 
 			if (resource.type === "resource") {
@@ -1448,7 +1735,8 @@
 				this.resourceSet[index].found = false;
 				this.resourceSet[index].fallback = true;
 
-				// node may be null because the element hasn't been added yet so we are waiting for it on the document;
+				// node may be null because the element hasn't been added yet so
+				// we are waiting for it on the document;
 				node = BOOMR.window.document.body;
 			}
 
@@ -1456,7 +1744,8 @@
 				for (nodeIndex = 0; nodeIndex < node.length; nodeIndex++) {
 					currentNode = node[nodeIndex];
 
-					// Even if we expect new elements to arrive via MO we need to check the already added elements
+					// Even if we expect new elements to arrive via MO we need
+					// to check the already added elements.
 					this.traverseElements(currentNode, index);
 
 					if (currentNode && !this.isContainer(currentNode)) {
@@ -1476,17 +1765,20 @@
 					return null;
 				}
 
-				// Even if we expect new elements to arrive via MO we need to check the already added elements
+				// Even if we expect new elements to arrive via MO we need to
+				// check the already added elements.
 				this.traverseElements(node, index);
 
 				BOOMR.debug("Starting a Mutation observer for Resource: " + this.config.label + "", "PageVars.ResourceGroup");
 				return BOOMR.utils.addObserver(node, obsConfig, null, this.mutationCb.bind(this), index, this);
 			}
 		},
+
 		/**
-		 * @desc
-		 * Attaches `onload`-listeners to elements matching resource set. Will start an interval with a callback checking our found node and if it has new elements
-		 * @param {number} index - Array index of resource set element to use
+		 * Attaches `onload`-listeners to elements matching resource set. Will start
+		 * an interval with a callback checking our found node and if it has new elements.
+		 *
+		 * @param {number} index Resource index
 		 */
 		setupListener: function(index) {
 			var resource = this.resourceSet[index], node = this.getNode(index), timeout = null, runtime = 0, that = this, lastRun = BOOMR.now(), nodeIndex = 0, curNode = null;
@@ -1499,17 +1791,19 @@
 				this.resourceSet[index].found = false;
 				this.resourceSet[index].fallback = true;
 
-				// node may be null because the element hasn't been added yet so we are waiting for it on the document;
+				// node may be null because the element hasn't been added yet
+				// so we are waiting for it on the document
 				node = BOOMR.window.document.body;
 			}
 
 			// Body might still be null if we run in IE8 returning
 			// waiting for a later run.
 			if (BOOMR.window.document.body === node && node === null) {
-				return null;
+				return;
 			}
 
-			// If we got a set of elements returned (querySelectorAll for example) iterate and check we can listen on them
+			// If we got a set of elements returned (querySelectorAll for example)
+			// iterate and check we can listen on them
 			if (node && node.length > 0) {
 				this.resourceSet[index].found = true;
 
@@ -1530,7 +1824,7 @@
 			if (node && !this.isContainer(node)) {
 				this.resourceSet[index].found = true;
 				this.initResourceGroupListener(node, index);
-				return null;
+				return;
 			}
 
 			this.traverseElements(node, index);
@@ -1545,15 +1839,16 @@
 				runtime += BOOMR.now() - lastRun;
 				lastRun = BOOMR.now();
 			}
-			timeout = setInterval(timeoutCb, 100);
 
+			timeout = setInterval(timeoutCb, 100);
 		},
+
 		/**
-		 * @desc
 		 * Finds all child elements that are network bound
-		 * @param {Node} node - Node with child elements
 		 *
-		 * @returns {Node[]} - All network-bound nodes with in @param{node}
+		 * @param {Node} node Node with child elements
+		 *
+		 * @returns {Node[]} All network-bound nodes with in @param{node}
 		 */
 		findResourceChildren: function(node) {
 			var nodeChildren = [], networkResourceIndex, foundIndex, foundElements;
@@ -1570,19 +1865,21 @@
 
 			return nodeChildren;
 		},
+
 		/**
-		 * @desc
-		 * Finds all network-bound elements in a container and attaches a listener to them if matching our resource group
-		 * @param {Node} node - A container element to search
-		 * @param {number} index - resourceSet array index to search for
+		 * Finds all network-bound elements in a container and attaches a listener
+		 * to them if matching our resource group.
+		 *
+		 * @param {Node} node A container element to search
+		 * @param {number} index resourceSet array index to search for
 		 */
 		attachContainerElements: function(node, index) {
 			var resource = this.resourceSet[index], nodeChildren = [], childIndex, nodeURL;
 			nodeChildren = this.findResourceChildren(node);
 			for (childIndex in nodeChildren) {
 				nodeURL = this.getNodeURL(nodeChildren[childIndex]);
-				// If we're looking for only one resource check that we are looking at the right URL
-				// otherwise attach to all elements matching
+				// If we're looking for only one resource check that we are
+				// looking at the right URL. Otherwise, attach to all elements matching.
 				if (resource.type === "resource" && nodeURL && this.checkURLPattern(resource.value, nodeURL)) {
 					this.resourceSet[index].found = true;
 					this.initResourceGroupListener(nodeChildren[childIndex], index);
@@ -1590,9 +1887,10 @@
 				}
 				else if (resource.type === "resource" && !(nodeURL && this.checkURLPattern(resource.value, nodeURL))) {
 					if (!nodeURL && this.isOnPageEvent()) {
-						// Some SPAs don't attach a src value to the node when mutationCb was called and needs to
-						// attach. So we're checking that this eventsrc was spa/spa_hard/xhr and make sure to still attach
-						// to the element
+						// Some SPAs don't attach a src value to the node when
+						// mutationCb was called and needs to attach. So we're
+						// checking that this eventsrc was spa/spa_hard/xhr and
+						// make sure to still attach to the element.
 						this.initResourceGroupListener(nodeChildren[childIndex], index);
 					}
 					continue;
@@ -1602,9 +1900,13 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Search node and child nodes for elements we need to attach ourselves to if required by resourceSet element
+		 * Search node and child nodes for elements we need to attach ourselves
+		 * to if required by resourceSet element.
+		 *
+		 * @param {Node} node Node
+		 * @param {number} index Resource index
 		 */
 		traverseElements: function(node, index) {
 			var resource = this.resourceSet[index], nodes = [], nodeURL;
@@ -1630,11 +1932,14 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Called when the mutation observer sees a new set of resources added to the page
+		 * Called when the mutation observer sees a new set of resources added to the page.
+		 *
 		 * @callback Handler~mutationCb
-		 * @param {MutationRecord[]} mutation - Mutation
+		 *
+		 * @param {MutationRecord[]} mutations Mutations
+		 * @param {number} index Resource index
 		 */
 		mutationCb: function(mutations, index) {
 			var resource = this.resourceSet[index], node, nodes = [], mutation, mutationIndex, nodeIndex, addedNodes, addedIndex;
@@ -1674,10 +1979,12 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Test if current event source is an on-page event such as SPA soft/hard navigation or XHR
-		 * @returns {bool} - True if the current event source is an on-page event
+		 * Test if current event source is an on-page event such as SPA soft/hard
+		 * navigation or XHR.
+		 *
+		 * @returns {boolean} True if the current event source is an on-page event
 		 */
 		isOnPageEvent: function(src) {
 			if (!src) {
@@ -1691,10 +1998,11 @@
 						src === "xhr");
 			}
 		},
+
 		/**
-		 * @desc
-		 * Check if all resource sets assigned to this handler have been resolved
-		 * @returns {boolean} - True if all resourceSet elements have been found
+		 * Check if all resource sets assigned to this handler have been resolved.
+		 *
+		 * @returns {boolean} True if all resourceSet elements have been found
 		 */
 		resourceSetIsResolved: function() {
 			var index = this.getUnresolvedIndex();
@@ -1706,10 +2014,13 @@
 				return false;
 			}
 		},
+
 		/**
-		 * @desc
-		 * Return the Resource Set array index of the element that has not been resolved to an element on the page
-		 * @returns {number} - Index of the Resource Set element in resource set Array for this configured item
+		 * Return the Resource Set array index of the element that has not been
+		 * resolved to an element on the page.
+		 *
+		 * @returns {number} Index of the Resource Set element in resource set
+		 * Array for this configured item.
 		 */
 		getUnresolvedIndex: function() {
 			var resourceSetIndex = 0;
@@ -1720,10 +2031,14 @@
 			}
 			return false;
 		},
+
 		/**
-		 * @desc
-		 * If there are resourceSet elements that have not been resolved add them to the beacon as a param if all are
-		 * resolved return true.
+		 * If there are resourceSet elements that have not been resolved, add
+		 * them to the beacon as a param
+		 *
+		 * If all are resolved return true.
+		 *
+		 * @returns {boolean} True if all elements are resolved.
 		 */
 		hasUnresolvedAddVar: function() {
 			if (!this.resourceSetIsResolved()) {
@@ -1736,14 +2051,22 @@
 			}
 			return false;
 		},
+
 		/**
-		 * @desc
-		 * Takes the delta of the stored {@link resourceTime} objects `start` and `stop` and applies it as a current custom timer value
-		 * If the resource group was not fully resolved add a var to the beacon pointing to the varname that was not found
+		 * Takes the delta of the stored {@link resourceTime} objects `start` and
+		 * `stop` and applies it as a current custom timer value.
+		 *
+		 * If the resource group was not fully resolved add a var to the beacon
+		 * pointing to the varname that was not found.
+		 *
+		 * @param {boolean} log Debug log
+		 *
+		 * @returns {boolean} True if everything was resolved
 		 */
 		applyTimedResources: function(log) {
 			if (isNaN(this.resourceTime.start) || isNaN(this.resourceTime.stop)) {
-				BOOMR.debug("Start or stop time for this resource group were not numeric (" + this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars");
+				BOOMR.debug("Start or stop time for this resource group were not numeric (" +
+					this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars");
 				return false;
 			}
 
@@ -1763,21 +2086,28 @@
 			}
 
 			if (log) {
-				BOOMR.debug("Resource Group '" + this.config.label + "' final values: " + (this.resourceTime.stop - this.resourceTime.start), "PageVars.ResourceGroup");
+				BOOMR.debug("Resource Group '" + this.config.label + "' final values: " +
+					(this.resourceTime.stop - this.resourceTime.start), "PageVars.ResourceGroup");
 			}
+
 			BOOMR.addVar(this.varname + "_st", Math.round(this.resourceTime.start));
+
 			if (this.obs && this.obs.observer) {
 				this.obs.observer.disconnect();
 				clearTimeout(this.obs.timer);
 			}
+
 			return this.apply(this.resourceTime.stop - this.resourceTime.start);
 		},
+
 		/**
-		 * @desc
-		 * Resolves a node or resource to an array of resources if ResourceTiming is supported
+		 * Resolves a node or resource to an array of resources if ResourceTiming
+		 * is supported.
 		 *
-		 * @param {Resource} resource - a resource that is part of a resource group
-		 * @return {Object[]} - An array of resources mapping to the found ResourceTiming entries found referring to the Resource passed in
+		 * @param {number} index Resource index
+		 *
+		 * @return {Object[]} An array of resources mapping to the found
+		 * ResourceTiming entries.
 		 */
 		lookupResources: function(index) {
 			var resource = this.resourceSet[index], ret = this.getNode(index),
@@ -1785,7 +2115,8 @@
 			    tmpResources, tmpResIndex = 0, start = this.getStartTime(index);
 
 			// check that returned value is a node type
-			// need to use .length typeof check because nodeLists don't have an "own" property of length
+			// need to use .length typeof check because nodeLists don't have an
+			// "own" property of length
 			if (ret && typeof ret.length === "undefined") {
 				this.resourceSet[index].found = true;
 				url = this.getNodeURL(ret);
@@ -1836,9 +2167,12 @@
 			// ret had an unexpected value hoping resources was filled by the first if-branch
 			return resources;
 		},
+
 		/**
-		 * @desc
-		 * Takes an array of resources and applies their timing to the current ResourceGroup timing
+		 * Takes an array of resources and applies their timing to the current
+		 * ResourceGroup timing.
+		 *
+		 * @param {ResourceTiming[]} resources ResourceTimings
 		 */
 		refreshResourceGroupTimings: function(resources, index) {
 			if (resources.length > 0) {
@@ -1853,13 +2187,14 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * If node passed in as only param does not return with a src URL or a URL of any kind we
-		 * define it as a container element
+		 * If node passed in as only param does not return with a src URL or a
+		 * URL of any kind we define it as a container element.
 		 *
-		 * @param {HTMLElement} node - Node to test if it's a node or not
-		 * @return {boolean}
+		 * @param {HTMLElement} node Node to test if it's a node or not
+		 *
+		 * @return {boolean} True if the node is a container
 		 */
 		isContainer: function(node) {
 			var url;
@@ -1873,12 +2208,14 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Get's node from {@link Resource}
+		 * Gets node from {@link Resource}
 		 *
-		 * @param {Resource} resource - a resource that is part of a resource group
-		 * @return {(Node|PerformanceResourceTiming[])} - Either a node or a PerformanceResourceTiming object referring to a Resource
+		 * @param {number} index Resource index
+		 *
+		 * @return {(Node|PerformanceResourceTiming[])} Either a node or a
+		 * PerformanceResourceTiming object referring to a Resource.
 		 */
 		getNode: function(index) {
 			var ret, resource = this.resourceSet[index];
@@ -1895,7 +2232,8 @@
 				}
 				break;
 			default:
-				BOOMR.debug("Found Item of unknown type (" + resource.type + "), skipping...", "PageVars");
+				BOOMR.debug("Found Item of unknown type (" + resource.type +
+					"), skipping...", "PageVars");
 				break;
 			}
 
@@ -1905,12 +2243,14 @@
 
 			return ret;
 		},
+
 		/**
-		 * @desc
 		 * Find child elements of a node that can trigger a network request
 		 *
-		 * @param {HTMLElement} node - Parent node that is a container that may contain elements that can trigger network requests
-		 * @return {HTMLElement[]} - Array of child nodes
+		 * @param {HTMLElement} node Parent node that is a container that may
+		 * contain elements that can trigger network requests
+		 *
+		 * @return {HTMLElement[]} Array of child nodes
 		 */
 		findChildElements: function(node) {
 			var nodes = [], foundNodes, nodeIndex, tagIndex;
@@ -1922,12 +2262,15 @@
 			}
 			return nodes;
 		},
+
 		/**
-		 * @desc
 		 * Extract URL from a node that can have a resource bound to it
 		 *
-		 * @param {HTMLElement} node - DOM node element with a possible URL attribute triggering network requests
-		 * @return {string|null} - will return URL referring to a downloadable resource or null if it did not match a node-type
+		 * @param {HTMLElement} node DOM node element with a possible URL attribute
+		 * triggering network requests
+		 *
+		 * @return {string|null} Returns the URL referring to a downloadable
+		 * resource or null if it did not match a node-type
 		 */
 		getNodeURL: function(node) {
 			var nodeProp, nodeName;
@@ -1955,6 +2298,14 @@
 				break;
 			}
 		},
+
+		/**
+		 * Gets the start time of a resource set.
+		 *
+		 * @param {number} index Resource Set index
+		 *
+		 * @returns {number} Start time (in milliseconds)
+		 */
 		getStartTime: function(index) {
 			var resourceSet = this.resourceSet[index], start = "fetchStart";
 
@@ -1964,10 +2315,14 @@
 
 			return start;
 		},
+
 		/**
-		 * @desc
-		 * Update the distance between start and end of a set of resources start and end times
-		 * @param {ResourceEntry} resource - a resource with a fetchStart and responseEnd entry to match against the current earliest start timestamp and last response ending time.
+		 * Update the distance between start and end of a set of resources
+		 * start and end times.
+		 *
+		 * @param {ResourceTiming} resource A resource with a fetchStart and
+		 * responseEnd entry to match against the current earliest start timestamp
+		 * and last response ending time.
 		 */
 		updateResourceGroupDelta: function(resource, index) {
 			var start = this.getStartTime(index);
@@ -1990,12 +2345,21 @@
 				this.resourceTime.stop = resource.responseEnd;
 			}
 
-			BOOMR.debug("New Resource Times for resource: '" + this.config.label + "' start(" + this.resourceTime.start + ") , stop (" + this.resourceTime.stop + ") delta(" + (this.resourceTime.stop - this.resourceTime.start) + ")", "PageVars.ResourceGroup");
+			BOOMR.debug("New Resource Times for resource: '" + this.config.label +
+				"' start(" + this.resourceTime.start + ") , stop (" +
+				this.resourceTime.stop + ") delta(" +
+				(this.resourceTime.stop - this.resourceTime.start) +
+				")", "PageVars.ResourceGroup");
 		},
+
 		/**
-		 * @desc
-		 * Attaches a resource group listener to a node and adds attributes to the Node object to set fetchStart and responseEnd
+		 * Attaches a resource group listener to a node and adds attributes to
+		 * the Node object to set fetchStart and responseEnd.
+		 *
 		 * These attributes are only used when ResourceTiming is not available
+		 *
+		 * @param {Element} nodeChild Node child
+		 * @param {number} index Resource index
 		 */
 		initResourceGroupListener: function(nodeChild, index) {
 			var resource = this.resourceSet[index], tempRG, start = this.getStartTime(index);
@@ -2003,13 +2367,15 @@
 			nodeChild._bmr_rg = nodeChild._bmr_rg || {};
 			nodeChild._bmr_rg[start] = nodeChild._bmr_rg[start] ? nodeChild._bmr_rg[start] : BOOMR.now();
 
-			// this may be run twice on the same element if the resource is part of multiple overlapping resource groups
+			// this may be run twice on the same element if the resource is part
+			// of multiple overlapping resource groups
 			if (!nodeChild._bmr_rg_resource) {
 				nodeChild._bmr_rg_resource = resource;
 				this.addResourceGroupListener(nodeChild, index);
 				return;
 			}
-			else if (nodeChild._bmr_rg_resource && !nodeChild._bmr_rg_resource.hasOwnProperty("length")) {
+			else if (nodeChild._bmr_rg_resource &&
+				!nodeChild._bmr_rg_resource.hasOwnProperty("length")) {
 				tempRG = nodeChild._bmr_rg_resource;
 				nodeChild._bmr_rg_resource = [];
 			}
@@ -2017,9 +2383,12 @@
 			nodeChild._bmr_rg_resource.push(tempRG, resource);
 			this.addResourceGroupListener(nodeChild, index);
 		},
+
 		/**
-		 * @desc
-		 * Add an EventListener to the node found to listen to
+		 * Add an EventListener to the node
+		 *
+		 * @param {Element} node Node
+		 * @param {number} index Resource index
 		 */
 		addResourceGroupListener: function(node, index) {
 			var that = this, resource = this.resourceSet[index];
@@ -2029,8 +2398,10 @@
 				var nodeTarget = event.target ? event.target : event.srcElement, nodeURL = that.getNodeURL(nodeTarget), resources, start = that.getStartTime(index);
 
 				if (that.RTSupport) {
-					// Since in SPA navigations image resources may have been initially added to the
-					// page without a src URL we're checking here if the resource now has a URL and if it matches the resource we're looking for
+					// Since in SPA navigations image resources may have been
+					// initially added to the page without a src URL we're
+					// checking here if the resource now has a URL and if it
+					// matches the resource we're looking for.
 					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
 						resources = that.findResources(nodeURL);
 						if (resources.length > 0) {
@@ -2109,6 +2480,16 @@
 		beaconQueue: [],
 
 		mayRetry: [],
+
+		/**
+		 * Determines if the URL matches the Page Group List
+		 *
+		 * @param {string} url URL
+		 * @param {object[]} list Page Groups list
+		 * @param {Handler} handler Handler
+		 *
+		 * @returns {boolean} True if matched
+		 */
 		matchPageGroupList: function(url, list, handler) {
 			var xhrPgIndex = 0, ret;
 			for (xhrPgIndex = 0; xhrPgIndex < list.length; xhrPgIndex++) {
@@ -2120,6 +2501,14 @@
 			}
 			return false;
 		},
+
+		/**
+		 * Runs the XHR excludes filter
+		 *
+		 * @param {HTMLAnchorElement} anchor Anchor element
+		 *
+		 * @returns {boolean} True on match
+		 */
 		excludeXhrFilter: function(anchor) {
 			var xhrPgIndex = 0, hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), pgArray, ret, foundMatch = false;
 
@@ -2145,7 +2534,9 @@
 				// Match against the PageGroups
 				if (impl.xhr === "match") {
 					for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
-						// we're iterating over all items in the list. If we find one that matches: break the loop! Otherwise keep going
+						// We're iterating over all items in the list. If we
+						// find one that matches: break the loop! Otherwise,
+						// keep going.
 						ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
 						if (ret && !pgArray[xhrPgIndex].ignore) {
 							foundMatch = true;
@@ -2165,8 +2556,9 @@
 						return true;
 					}
 					else if (impl.xhr === "all" || impl.xhr === "subresource") {
-						// Even though our xhr flag was set to instrument all XHRs we need to honor ignore flags
-						// If we find an entry with ignore and the Handler matches throw away that XHR
+						// Even though our xhr flag was set to instrument all XHRs
+						// we need to honor ignore flags. If we find an entry with
+						// ignore and the Handler matches throw away that XH.
 						for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
 							if (pgArray[xhrPgIndex].ignore) {
 								ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
@@ -2179,9 +2571,19 @@
 					}
 				}
 			}
-			// If the config did not contain xhr flag, we're expecting not to filter out anything
+
+			// If the config did not contain xhr flag, we're expecting not to
+			// filter out anything
 			return false;
 		},
+
+		/**
+		 * Runs the PageParams to calculate Page Groups, A/B, Custom Timers,
+		 * Custom Metrics and Custom Dimensions.
+		 *
+		 * @param {object} edata Event data
+		 * @param {string} ename Event name
+		 */
 		done: function(edata, ename) {
 			var i, v, hconfig, handler, limpl = impl, data, pg, match, onlyDimensions = false;
 
@@ -2229,8 +2631,12 @@
 					l = d.createElement("a");
 					l.href = data.url;
 
-					// Flag this resource as subresource if it wasn't explicitly called out in the configuration to be a instrumented XHR
-					match = impl.matchPageGroupList(l.href, impl.hasXhrOn ? impl.xhrPageGroups : impl.pageGroups, new Handler(hconfig.pageGroups));
+					// Flag this resource as subresource if it wasn't explicitly
+					// called out in the configuration to be a instrumented XHR
+					match = impl.matchPageGroupList(
+						l.href, impl.hasXhrOn ? impl.xhrPageGroups : impl.pageGroups,
+						new Handler(hconfig.pageGroups));
+
 					if (impl.xhr === "subresource" && !match) {
 						edata.subresource = "active";
 					}
@@ -2245,7 +2651,8 @@
 
 					hconfig.pageGroups.varname = "xhr.pg";
 
-					// Page Group name for an XHR resource can specify if this is a subresource or not
+					// Page Group name for an XHR resource can specify if this
+					// is a subresource or not
 					hconfig.pageGroups.preProcessor = function(val) {
 						if (val && val.match(/_subresource$/)) {
 							val = val.replace(/_subresource$/, "");
@@ -2266,7 +2673,8 @@
 				onlyDimensions = true;
 			}
 
-			// Since we're going to write new stuff, clear out anything that we've previously written but couldn't be beaconed
+			// Since we're going to write new stuff, clear out anything that
+			// we've previously written but couldn't be beaconed
 			impl.clearMetrics();
 
 			// Also clear the retry list since we'll repopulate it if needed
@@ -2278,11 +2686,13 @@
 					handler = new Handler(hconfig[v]);
 
 					if (onlyDimensions && !hconfig[v].isDimension) {
-						// skip this type if we're only asking for dimensions and this isn't a dimension
+						// skip this type if we're only asking for dimensions
+						// and this isn't a dimension
 						continue;
 					}
 
-					// if data.pg (hard set page group from xhr_send/xhr_load/...) just skip the pageGroups config and move on
+					// if data.pg (hard set page group from xhr_send/xhr_load/...)
+					// just skip the pageGroups config and move on
 					if (ename === "xhr" && v === "pageGroups" && data && data.pg && typeof data.pg === "string") {
 						BOOMR.debug("Found data.pg on data param " + data.pg, "PageParams");
 						handler.apply(data.pg);
@@ -2294,8 +2704,14 @@
 							continue;
 						}
 
-						// Use the initiator (e.g. 'spa') in preference over the event name (e.g. 'xhr')
-						var beaconType = ename === "xhr" && BOOMR.utils.inArray(edata.initiator, BOOMR.constants.BEACON_TYPE_SPAS) ? edata.initiator : ename;
+						// Use the initiator (e.g. 'spa') in preference over the
+						// event name (e.g. 'xhr')
+						var beaconType = ename === "xhr" &&
+							BOOMR.utils.inArray(
+								edata.initiator,
+								BOOMR.constants.BEACON_TYPE_SPAS) ?
+									edata.initiator : ename;
+
 						if (handler.handle(limpl[v][i], beaconType, data) && hconfig[v].stopOnFirst) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";
@@ -2310,6 +2726,9 @@
 			BOOMR.sendBeacon();
 		},
 
+		/**
+		 * Re-runs retry-able handlers.
+		 */
 		retry: function() {
 			var i, handler, o, retries = impl.mayRetry;
 
@@ -2326,16 +2745,19 @@
 						handler[o.type](o);
 					}
 					catch (e) {
-						BOOMR.addError(e, "PageVars.retry." + (o ? o.type : "?") + "." + (handler ? handler.varname : "?"));
+						BOOMR.addError(e, "PageVars.retry." + (o ? o.type : "?") +
+							"." + (handler ? handler.varname : "?"));
 					}
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * If configuration for PageParams contains a page param Handler type with a value of 1 in
-		 * {@link PAGE_PARAM_TRY_PRIORITY} run them and run their handle. This allows us to listen for later
-		 * changes to the page via EventListeners and fetch data to attach to the beacon as early as possible.
+		 * If configuration for PageParams contains a Handler type with a value of 1 in
+		 * {@link PAGE_PARAM_TRY_PRIORITY}, run them.
+		 *
+		 * This allows us to listen for later changes to the page via
+		 * EventListeners and fetch data to attach to the beacon as early as possible.
 		 */
 		checkPrioritizedPageParams: function(type) {
 			var highPriorityParams = impl.checkHighPriorityParams(), hconfig, handleConfig, handler, handlerInstance, hpPpNameIndex, ppName, ppNameIndex;
@@ -2362,9 +2784,9 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Handlers that we returned an instance for when running prioritized and stuck around are removed from impl object onbeacon
+		 * Remove prioritized handlers that were resolved.
 		 */
 		removeDoneHandlers: function()  {
 			var label;
@@ -2374,13 +2796,14 @@
 				}
 			}
 		},
+
 		/**
-		 * @desc
-		 * Iterate through page params and find elements that match the {@link PAGE_PARAM_TRY_PRIORITY}
-		 * high priority values (value = 1) thus being able to be run at an earlier time
+		 * Iterate through page params and find elements that match the
+		 * {@link PAGE_PARAM_TRY_PRIORITY} high priority values (value = 1) thus
+		 * being able to be run at an earlier time.
 		 *
-		 * @return {object} - Returns an object with keys corresponding to page params and array holding
-		 * objects containing the page param
+		 * @return {object} Returns an object with keys corresponding to page
+		 * params and array holding objects containing the page param
 		 */
 		checkHighPriorityParams: function() {
 			var collected = {};
@@ -2401,6 +2824,10 @@
 			}
 			return collected;
 		},
+
+		/**
+		 * Clears all metrics
+		 */
 		clearMetrics: function() {
 			var i, label;
 
@@ -2426,10 +2853,16 @@
 			// TODO remove all resource timing components when start==="*"
 		},
 
+		/**
+		 * Run on onload
+		 */
 		onload: function() {
 			this.onloadfired = true;
 		},
 
+		/**
+		 * Extract XHR parameters
+		 */
 		extractXHRParams: function(edata, hconfig) {
 			var limpl, sections, k, section, itemName, value, m, i, j, handler, data;
 
@@ -2475,7 +2908,8 @@
 
 				// if there's no data elements passed in
 				if (!section.data || !section.data.length) {
-					// If we have a URL and customer has not overridden which timers to use, then figure out based on url filters
+					// If we have a URL and customer has not overridden which
+					// timers to use, then figure out based on url filters
 					if (data.url) {
 						for (i = 0; i < impl[section.impl].length; i++) {
 							// only allow timers, metrics & dimensions that are xhr_ok
@@ -2524,6 +2958,8 @@
 
 		/**
 		 * Fired on before_beacon
+		 *
+		 * @param {object[]} vars Beacon parameters
 		 */
 		onBeforeBeacon: function(vars) {
 			if (vars && vars["http.initiator"] === "error") {
@@ -2531,6 +2967,9 @@
 			}
 		},
 
+		/*
+		 * Fired when the state changes from pre-render to visible
+		 */
 		prerenderToVisible: function() {
 			// ensure we add our data to the beacon even if we had added it
 			// during prerender (in case another beacon went out in between)
@@ -2574,8 +3013,8 @@
 		},
 
 		/**
-		 * Processes all dimension handlers (Page Groups, A/B tests and Custom Dimensions)
-		 * and runs the specified method for any matches.
+		 * Processes all dimension handlers (Page Groups, A/B tests and Custom
+		 * Dimensions) and runs the specified method for any matches.
 		 *
 		 * @param {function} method Method to run on match
 		 */
@@ -2862,7 +3301,26 @@
 	BOOMR.sendTimers = impl.sendTimers;
 	BOOMR.sendAll = impl.sendAll;
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.PageParams = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {object} [config.PageParams.pageGroups] Page groups
+		 * @param {object} [config.PageParams.abTests] A/B test variable
+		 * @param {object} [config.PageParams.customTimers] Custom Timers
+		 * @param {object} [config.PageParams.customMetrics] Custom Metrics
+		 * @param {object} [config.PageParams.customDimensions] Custom Dimensions
+		 * @param {object} [config.PageParams.defaultDecimal] Default decimal format
+		 * @param {object} [config.PageParams.defaultThousands] Default thousands format
+		 * @param {object} [config.PageParams.xhr] XHR whitelist/blacklist configuration
+		 *
+		 * @returns {@link BOOMR.plugins.PageParams} The PageParams plugin for chaining
+		 * @memberof BOOMR.plugins.PageParams
+		 */
 		init: function(config) {
 			var properties = [
 				"pageGroups",
@@ -2878,7 +3336,9 @@
 			var pgIndex = 0, pgList = [];
 
 			w = BOOMR.window;
-			l = w.location;	// if client uses history.pushState, parent location might be different from boomerang frame location
+			// if client uses history.pushState, parent location might be different
+			// from boomerang frame location
+			l = w.location;
 			d = w.document;
 			p = BOOMR.getPerformance();
 
@@ -3056,12 +3516,12 @@
 			}
 
 			if (!impl.initialized) {
-				// We do not want to subscribe to unload or onbeacon more than once
+				// We do not want to subscribe to unload or beacon more than once
 				// because this will just create too many references
 				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
-				BOOMR.subscribe("onbeacon", impl.clearMetrics, null, impl);
-				BOOMR.subscribe("onbeacon", impl.removeDoneHandlers);
+				BOOMR.subscribe("beacon", impl.clearMetrics, null, impl);
+				BOOMR.subscribe("beacon", impl.removeDoneHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 				BOOMR.subscribe("before_beacon", impl.onBeforeBeacon, null, impl);
 				if (BOOMR.plugins.AutoXHR) {
@@ -3073,6 +3533,12 @@
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.PageParams
+		 */
 		is_complete: function() {
 			// We'll run retry() here because it must run before RT's before_beacon handler
 			if (impl.mayRetry.length > 0) {
@@ -3083,6 +3549,13 @@
 			return impl.configReceived || impl.unloadFired;
 		},
 
+		/**
+		 * Determines if Boomerang can send a beacon.  Waits for
+		 * config to have been received or if this is an unload event.
+		 *
+		 * @returns {boolean} True once the plugin is ready to send
+		 * @memberof BOOMR.plugins.PageParams
+		 */
 		readyToSend: function() {
 			return impl.configReceived || impl.unloadFired;
 		}
@@ -3100,5 +3573,4 @@
 			return 0;
 		};
 	}
-
 }());

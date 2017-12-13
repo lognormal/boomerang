@@ -1,15 +1,39 @@
-/*
- * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
- */
-
 /**
-\file dns.js
-Plugin to measure DNS latency.
-This code is based on Carlos Bueno's guide to DNS on the YDN blog:
-http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
-*/
-
+ * Plugin to measure DNS latency.
+ *
+ * This code is based on Carlos Bueno's guide to DNS on the
+ * [YDN blog](http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html)
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Setup
+ *
+ * Measuring DNS requires some server-side set up, as
+ * [documented in detail](http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html) by
+ * Yahoo! engineer Carlos Bueno, so go read his post for everything you'll need to set this up.
+ *
+ * In brief, the points he covers are:
+ *
+ * 1. Set up a wildcard hostname, perferably one that does not share cookies with
+ *   your main site. Give it a low TTL, say, 60 seconds, so you don't pollute downstream caches.
+ * 2. Set up a webserver for the wildcard hostname that serves the images named `A.gif`
+ *   and `B.gif` (from the `images/` subdirectory) as fast as possible.  Make sure
+ *   that KeepAlive, Nagle, and any caching headers are turned off.
+ * 3. Include the DNS plugin (see {@tutorial building})
+ * 4. Tell the DNS plugin where to get its images from
+ *   via {@link BOOMR.plugins.DNS.init DNS.base_url}
+ *
+ * Steps 1 and 2 are complicated, and if you don't have full control over your
+ * DNS server, then it may be impossible for you to use this plugin.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `dns.t`: The worst-case DNS latency from the user's browser to your DNS server.
+ *
+ * @class BOOMR.plugins.DNS
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -77,6 +101,31 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 	};
 
 	BOOMR.plugins.DNS = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} config.DNS.base_url The `base_url` parameter tells the DNS
+		 * plugin where it can find its DNS testing images. This URL must contain
+		 * a wildcard character (`*`) which will be replaced with a random string.
+		 *
+		 * The images will be appended to this string without any other modification.
+		 *
+		 * If you have any pages served over HTTPS, then this URL should be configured
+		 * to work over HTTPS as well as HTTP.
+		 *
+		 * The protocol part of the URL will be automatically changed to fit the
+		 * current document.
+		 *
+		 * @returns {@link BOOMR.plugins.DNS} The DNS plugin for chaining
+		 * @example
+		 * BOOMR.init({
+		 *   DNS: {
+		 *     base_url: "http://*.yoursite.com/images/"
+		 *   }
+		 * });
+		 * @memberof BOOMR.plugins.DNS
+		 */
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "DNS", ["base_url"]);
 
@@ -102,6 +151,12 @@ http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.DNS
+		 */
 		is_complete: function() {
 			return impl.complete;
 		}

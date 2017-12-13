@@ -12,7 +12,7 @@ var beaconHandler = function(data) {
 
 function testReferrer() {
 	var testFrame = document.getElementById("boomer_test_frame");
-	testFrame.contentWindow.BOOMR.subscribe("onbeacon", beaconHandler, null, this);
+	testFrame.contentWindow.BOOMR.subscribe("beacon", beaconHandler, null, this);
 	testFrame.contentWindow.BOOMR.responseEnd("manual");
 }
 </script>

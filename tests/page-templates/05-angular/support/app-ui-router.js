@@ -121,7 +121,6 @@ angular.module("app", ["ngResource", "ui.router"])
 
 		if (typeof window.angular_nav_routes !== "undefined" &&
 			Object.prototype.toString.call(window.angular_nav_routes) === "[object Array]") {
-
 			handler = function(beacon) {
 				// only continue for SPA beacons
 				if (beacon && !BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
@@ -150,9 +149,9 @@ angular.module("app", ["ngResource", "ui.router"])
 				}
 			};
 
-			BOOMR.subscribe("onbeacon", handler);
+			BOOMR.subscribe("beacon", handler);
 
-			// set a timeout that calls the handler if onbeacon hasn't fired
+			// set a timeout that calls the handler if beacon hasn't fired
 			if (window.angular_nav_route_timeout) {
 				window.angular_timerid = setTimeout(handler, window.angular_nav_route_timeout);
 			}

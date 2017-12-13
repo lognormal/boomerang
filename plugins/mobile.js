@@ -1,8 +1,21 @@
 /**
-\file mobile.js
-Plugin to capture navigator.connection.type on browsers that support it
-*/
-
+ * Plugin to capture
+ * [Network Information API](https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API)
+ * on browsers that support it.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `mob.ct`: [`navigator.connection.type`](https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/type)
+ * * `mob.bw`: [`navigator.connection.bandwidth`](https://developer.mozilla.org/en-US/docs/Web/API/Connection/bandwidth)
+ * * `mob.mt`: [`navigator.connection.metered`](https://developer.mozilla.org/en-US/docs/Web/API/Connection/metered)
+ * * `mob.lm`: [`navigator.connection.downlinkMax`](https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlinkMax)
+ *
+ * @class BOOMR.plugins.Mobile
+ */
 (function() {
 	var connection, param_map = {
 		"type": "ct",

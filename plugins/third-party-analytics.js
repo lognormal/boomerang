@@ -1,10 +1,42 @@
-/*eslint dot-notation:0*/
 /**
-\file third-party-analytics.js
-
-Captures session ids and campaign information from third party analytic vendors installed on the same page
-*/
-
+ * Captures session IDs and campaign information from third party analytic vendors
+ * installed on the same page.
+ *
+ * Third party analytics vendors currently supported:
+ *
+ * * Google Analytics
+ * * Adobe Analytics (formerly Omniture Sitecatalyst)
+ * * IBM Digital Analytics (formerly Coremetrics)
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `tp.ga.clientid`: Google Analytics [clientID](https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id) (unique id per visitor)
+ * * `tp.ga.utm_source`: Google Analytics [Campaign source](https://support.google.com/analytics/answer/1033863?hl=en)
+ * * `tp.ga.utm_medium`: Google Analytics [Campaign medium](https://support.google.com/analytics/answer/1033863?hl=en)
+ * * `tp.ga.utm_term`: Google Analytics [Campaign term](https://support.google.com/analytics/answer/1033863?hl=en)
+ * * `tp.ga.utm_content`: Google Analytics [Campaign content](https://support.google.com/analytics/answer/1033863?hl=en)
+ * * `tp.ga.utm_campaign`: Google Analytics [Campaign ID](https://support.google.com/analytics/answer/1033863?hl=en)
+ * * `tp.aa.aid`: Adobe Analytics [Analytics ID (AID)](https://marketing.adobe.com/resources/help/en_US/reference/)
+ * * `tp.aa.mid`: Adobe Analytics [Marketing ID (MID)](https://marketing.adobe.com/resources/help/en_US/reference/)
+ * * `tp.aa.campaign`: Adobe Analytics [Campaign ID](https://marketing.adobe.com/resources/help/en_US/reference/)
+ * * `tp.aa.purchaseid`: Adobe Analytics [Purchase ID](https://marketing.adobe.com/resources/help/en_US/reference/)
+ * * `tp.ia.coreid`: IBM Analytics [Core ID (unique id per visitor)](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.mmc_vendor`: IBM Analytics [Campaign vendor](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.mmc_category`: IBM Analytics [Campaign category](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.mmc_placement`: IBM Analytics [Campaign placement](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.mmc_item`: IBM Analytics [Campaign item](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.sp_type`: IBM Analytics [Site promotion type](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.sp_promotion`: IBM Analytics [Site promotion](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.sp_link`: IBM Analytics [Site promotion link](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.re_version`: IBM Analytics [Real estate version](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.re_pagearea`: IBM Analytics [Real estate page area](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html)
+ * * `tp.ia.re_link`: IBM Analytics [Real estate link](https://www.ibm.com/support/knowledgecenter/en/SSPG9M/Analytics/kc_welcome_analytics.html) *
+ *
+ * @class BOOMR.plugins.TPAnalytics
+ */
+/*eslint dot-notation:0*/
 (function() {
 	"use strict";
 
@@ -339,7 +371,28 @@ Captures session ids and campaign information from third party analytic vendors 
 		}
 	};
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.TPAnalytics = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {boolean} config.TPAnalytics.clientids Whether or not to include
+		 * client IDs.
+		 * @param {string[]} config.TPAnalytics.dropParams Parameters to not include
+		 * on the beacon.
+		 *
+		 * @returns {@link BOOMR.plugins.TPAnalytics} The TPAnalytics plugin for chaining
+		 * @example
+		 * BOOMR.init({
+		 *   TPAnalytics: {
+		 *     clientids: false
+		 *   }
+		 * });
+		 * @memberof BOOMR.plugins.TPAnalytics
+		 */
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "TPAnalytics", ["clientids", "dropParams"]);
 
@@ -348,7 +401,7 @@ Captures session ids and campaign information from third party analytic vendors 
 					impl.dropParams = [];
 				}
 				BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
-				BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
+				BOOMR.subscribe("beacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("prerender_to_visible", impl.pageReady, null, impl);
 				impl.initialized = true;
 			}
@@ -356,6 +409,12 @@ Captures session ids and campaign information from third party analytic vendors 
 			return this;
 		},
 
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.TPAnalytics
+		 */
 		is_complete: function() {
 			return true;
 		}

@@ -10,9 +10,9 @@
 	/**
 	 * @typedef {Obeject} HistoryEntry
 	 *
-	 * @property {TimeStamp} timestamp - timestamp of the start of the session or now()
-	 * @property {Number} offByOne - number of times t_done was not set for a page for a reason or another
-	 * @property {loadTime} loadTime - load time of the specific history entry page
+	 * @property {TimeStamp} timestamp timestamp of the start of the session or now()
+	 * @property {Number} offByOne number of times t_done was not set for a page for a reason or another
+	 * @property {loadTime} loadTime load time of the specific history entry page
 	 */
 
 	/**
@@ -27,13 +27,13 @@
 	 * Properties set in this object will be overridden by whatever you are writing in the `window.mockSession`
 	 * object on the page you wish to override or mock.
 	 *
-	 * @property {String} ID - Session ID mocked
-	 * @property {Number} length - Session length
-	 * @property {TimeStamp} start - Time when the session started
-	 * @property {Number} loadTime - Duration until page was loaded
-	 * @property {HistoryEntry[]} sessionHistory - Session history entries
-	 * @property {Number} offByOne - Off By one error number for a session
-	 * @property {string} beacon_url - Beacon URL destination
+	 * @property {String} ID Session ID mocked
+	 * @property {Number} length Session length
+	 * @property {TimeStamp} start Time when the session started
+	 * @property {Number} loadTime Duration until page was loaded
+	 * @property {HistoryEntry[]} sessionHistory Session history entries
+	 * @property {Number} offByOne Off By one error number for a session
+	 * @property {string} beacon_url Beacon URL destination
 	 *
 	 * @example
 	 * // Session History content
@@ -128,7 +128,7 @@
 		 * @param {Number} [optional] baseLength - if passed used as base number to increment from when
 		 *  iterating over sessionHistoryEntries and creating length values
 		 *
-		 * @returns {string} - Stringified session history
+		 * @returns {string} Stringified session history
 		 */
 		buildSessionHistory: function(sessionHistoryEntries, baseLength) {
 			var sessionHistory = "", sessionHistoryCollection = [];

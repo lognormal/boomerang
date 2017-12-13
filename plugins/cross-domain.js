@@ -1,3 +1,23 @@
+/**
+ * This plugin enables cross-domain session tracking.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Setup
+ *
+ * The primary domain needs to host a known HTML file that will load Boomerang
+ * and can communicate via `postMessage()` to other domains so session information
+ * such as ID and length can be coordianted between all of the domains.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `rt.sstr_dur`: Session transfer duration (ms)
+ * * `rt.sstr_to`:  The session transfer timed out (`1` or missing)
+ *
+ * @class BOOMR.plugins.CrossDomain
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -75,11 +95,6 @@
 		},
 
 		/**
-		 * Beacon destination URL, passed over when updating session info
-		 */
-		beacon_url: "",
-
-		/**
 		 * Time stamp of when the session was transferred
 		 */
 		session_transferred_time: 0,
@@ -149,6 +164,8 @@
 
 		/**
 		 * Callback for all postMessage calls on the IFrame
+		 *
+		 * @param {Event} event IFRAME message event
 		 */
 		onIFrameMessage: function(event) {
 			var data;
@@ -175,7 +192,7 @@
 				impl.session_transferred_time = BOOMR.now();
 
 				if (data.bcn) {
-					BOOMR.fireEvent("onconfig", {
+					BOOMR.fireEvent("config", {
 						beacon_url: data.bcn,
 						RT: {
 							oboError: data.obo ? parseInt(data.obo, 10) : 0,
@@ -184,7 +201,7 @@
 					});
 				}
 				else {
-					BOOMR.fireEvent("onconfig", {
+					BOOMR.fireEvent("config", {
 						beacon_url: BOOMR.getBeaconURL()
 					});
 				}
@@ -206,10 +223,11 @@
 
 		/**
 		 * Construct IFrame for the communication between boomerangs
-		 * @param {string} url - URL Path the IFrame should use as src
-		 * @param {string} name - name of the element
 		 *
-		 * @returns {FrameElement} - IFrame pointing to URL invisible on the site itself
+		 * @param {string} url URL Path the IFrame should use as src
+		 * @param {string} name name of the element
+		 *
+		 * @returns {FrameElement} IFrame pointing to URL invisible on the site itself
 		 */
 		buildIFrame: function(url, name) {
 			var iframe;
@@ -229,12 +247,22 @@
 		}
 	};
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.CrossDomain = {
-		onConfigCb: function(config) {
-			if (config.beacon_url) {
-				impl.beacon_url = config.beacon_url;
-			}
-		},
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} [config.CrossDomain.cross_domain_url] Cross domain IFRAME URL
+		 * @param {boolean} [config.CrossDomain.sending] Whether or not this is the parent domain
+		 * @param {number} [config.CrossDomain.session_transfer_timeout] Session transfer timeout (ms)
+		 * @param {boolean} [config.CrossDomain.debug] Enable debugging
+		 *
+		 * @returns {@link BOOMR.plugins.CrossDomain} The CrossDomain plugin for chaining
+		 * @memberof BOOMR.plugins.CrossDomain
+		 */
 		init: function(config) {
 			var a, index;
 
@@ -249,7 +277,8 @@
 				return;
 			}
 
-			BOOMR.utils.pluginConfig(impl, config, "CrossDomain", ["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
+			BOOMR.utils.pluginConfig(impl, config, "CrossDomain",
+				["cross_domain_url", "sending", "session_transfer_timeout", "debug"]);
 
 			if (!impl.enabled || impl.session_transferred) {
 				return;
@@ -387,9 +416,15 @@
 				impl.session_transferred = true;
 			}
 		},
+
+		/**
+		 * Updates the Boomerang query cookie
+		 *
+		 * @param {object} queryCookie Query cookie values
+		 */
 		updateCookie: function(queryCookie) {
 			if (BOOMR.plugins.RT) {
-				BOOMR.fireEvent("onconfig", {
+				BOOMR.fireEvent("config", {
 					RT: {
 						oboError: queryCookie.obo,
 						loadTime: queryCookie.tt
@@ -397,6 +432,13 @@
 				});
 			}
 		},
+
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.CrossDomain
+		 */
 		is_complete: function() {
 			if (impl.sending) {
 				return true;
@@ -451,7 +493,4 @@
 		}
 
 	};
-
 }());
-
-

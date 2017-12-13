@@ -1,4 +1,21 @@
-/*global BOOMR_configt:true*/
+/**
+ * This plugin is responsible for fetching config.js[on] for mPulse.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `h.key`: mPulse API key
+ * * `h.d`: mPulse domain
+ * * `h.t`: mPulse Anti-CSRF timestamp
+ * * `h.cr`: mPulse Anti-CSRF crumb
+ * * `t_configjs`: The time the config.js[on] data was sent to `init()`
+ * * `t_configfb`: The time the config.js[on] data's first bytes were received
+ *
+ * @class BOOMR.plugins.LOGN
+ */
 (function(w) {
 	var dc = document,
 	    /* BEGIN_CONFIG_AS_JS */
@@ -125,6 +142,11 @@
 	/* END_CONFIG_AS_JSON */
 
 	/* BEGIN_CONFIG_AS_JS */
+	/**
+	 * Remove the specified node
+	 *
+	 * @param {Element} element HTML element
+	 */
 	function removeNodeIfSafe(element) {
 		element.parentNode.removeChild(element);
 	}
@@ -226,7 +248,7 @@
 	}
 
 	/**
-	 * Fired 'onbeacon'
+	 * Fired 'beacon'
 	 */
 	function onBeacon() {
 		// remove config timing vars
@@ -234,7 +256,20 @@
 		BOOMR.removeVar("t_configfb");
 	}
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.LOGN = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {boolean} [config.rate_limited] Whether or not the session is rate limited
+		 * @param {boolean} [config.autorun] Whether or not to auto-run on onload
+		 *
+		 * @returns {@link BOOMR.plugins.LOGN} The LOGN plugin for chaining
+		 * @memberof BOOMR.plugins.LOGN
+		 */
 		init: function(config) {
 			var apiKey;
 
@@ -253,7 +288,7 @@
 
 			// if we are called a second time while running, it means config.js has finished loading
 			if (running) {
-				BOOMR.fireEvent("onconfig", config);
+				BOOMR.fireEvent("config", config);
 
 				// We need this monstrosity because Internet Explorer is quite moody
 				// regarding whether it will or willn't fire onreadystatechange for
@@ -271,7 +306,7 @@
 				return this;
 			}
 			else {
-				BOOMR.registerEvent("onconfig");
+				BOOMR.registerEvent("config");
 
 				// get the API key from a global BOOMR_API_key or the script loader URL
 				if (w && w.BOOMR_API_key) {
@@ -316,7 +351,7 @@
 			// put h.cr at the end
 			BOOMR.setVarPriority("h.cr", 1);
 
-			BOOMR.subscribe("onbeacon", onBeacon, null, null);
+			BOOMR.subscribe("beacon", onBeacon, null, null);
 
 			running = true;
 			if (w === window) {
@@ -329,6 +364,12 @@
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.LOGN
+		 */
 		is_complete: function() {
 			return ready;
 		},
@@ -338,6 +379,7 @@
 		 * h.cr to be available
 		 *
 		 * @returns {boolean} True once h.cr is available
+		 * @memberof BOOMR.plugins.LOGN
 		 */
 		readyToSend: function() {
 			return BOOMR.hasVar("h.cr");
@@ -347,7 +389,6 @@
 		, isJson: true
 		/* END_CONFIG_AS_JSON */
 	};
-
 }(BOOMR.window));
 
 /*

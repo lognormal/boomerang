@@ -1,13 +1,42 @@
 /**
- * @namespace Ember
- * @desc
- * Add this to the end of your route definitions, substituting App for your Ember
- * BOOMR.plugins.Ember will take your Application and test if it has ApplicationRoute setup at this point.
- * If that isn't the case it will extend() Ember.Route to with the action didTransition and activate
- * Once didTransition has triggered we set our selfs up for the Run-Loop coming to 'afterRender' at which
- * point we configure our Beacon data and run BOOMR.responseEnd should this not be the first beacon we send.
+ * The `Ember` plugin allows you to automatically monitor Single Page
+ * App (SPA) navigations for [Ember.js]{@link https://www.emberjs.com/}
+ * websites.
  *
- * @example
+ * **Note**: This plugins requires the {@link BOOMR.plugins.SPA} and
+ * {@link BOOMR.plugins.AutoXHR} plugins.
+ *
+ * For details on how Boomerang Single Page App instrumentation works, see the
+ * {@link BOOMR.plugins.SPA} documentation.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Compatibility
+ *
+ * * Ember.js 1.x
+ *
+ * **Note**: For Ember.js 2.x, use the {@link BOOMR.plugins.History} plugin.
+ *
+ * Ember-CLI is not currently supported.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin does not add any additional beacon parameters beyond the
+ * {@link BOOMR.plugins.SPA} plugin.
+ *
+ * ## Usage
+ *
+ * First, include the {@link BOOMR.plugins.SPA}, {@link BOOMR.plugins.Ember}
+ * and {@link BOOMR.plugins.AutoXHR} plugins.  See {@tutorial building} for details.
+ *
+ * Next, you need to also "hook" Boomerang into the Ember.js lifecycle events.
+ *
+ * Add the following code to the end of your route definitions, substituting `App`
+ * for your Ember app.
+ *
+ * Example:
+ *
+ * ```
  * function hookEmberBoomerang() {
  *   if (window.BOOMR && BOOMR.version) {
  *     if (BOOMR.plugins && BOOMR.plugins.Ember) {
@@ -30,9 +59,10 @@
  *     });
  *   }
  * }
+ * ```
  *
+ * @class BOOMR.plugins.Ember
  */
-
 (function() {
 	var hooked = false,
 	    routeHooked = false,
@@ -72,7 +102,11 @@
 		log("Startup");
 
 		/**
-		 * beforeModel even earlier than activate
+		 * Called for the Ember `beforeModel` event.
+		 *
+		 * Often the first route-change event for a model.
+		 *
+		 * @param {object} transition Ember transition
 		 */
 		function beforeModel(transition) {
 			// Make sure the original beforeModel callback is called before we proceed.
@@ -103,7 +137,11 @@
 		}
 
 		/**
-		 * subsequent navigations will use willTransition
+		 * Called for the Ember `willTransition` event.
+		 *
+		 * Subsequent navigations will use `willTransition`
+		 *
+		 * @param {object} transition Ember transition
 		 */
 		function willTransition(transition) {
 			this._super(transition);
@@ -131,6 +169,11 @@
 			return true;
 		}
 
+		/**
+		 * Called for the Ember `willTransition` event.
+		 *
+		 * @param {object} transition Ember transition
+		 */
 		function didTransition(transition) {
 			this._super(transition);
 
@@ -168,9 +211,27 @@
 	// Exports
 	//
 	BOOMR.plugins.Ember = {
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Ember
+		 */
 		is_complete: function() {
 			return true;
 		},
+
+		/**
+		 * Hooks Boomerang into the Ember.js lifecycle events
+		 *
+		 * @param {object} $rootScope Ember.js router
+		 * @param {boolean} [hadRouteChange] Whether or not there was a route change
+		 * event prior to this `hook()` call
+		 * @param {object} [options] Options
+		 *
+		 * @returns {@link BOOMR.plugins.Ember} The Ember plugin for chaining
+		 * @memberof BOOMR.plugins.Ember
+		 */
 		hook: function(App, hadRouteChange, options) {
 			if (hooked) {
 				return this;
@@ -182,10 +243,24 @@
 			}
 			return this;
 		},
+
+		/**
+		 * Disables the Ember plugin
+		 *
+		 * @returns {@link BOOMR.plugins.Ember} The Ember plugin for chaining
+		 * @memberof BOOMR.plugins.Ember
+		 */
 		disable: function() {
 			enabled = false;
 			return this;
 		},
+
+		/**
+		 * Enables the Ember plugin
+		 *
+		 * @returns {@link BOOMR.plugins.Ember} The Ember plugin for chaining
+		 * @memberof BOOMR.plugins.Ember
+		 */
 		enable: function() {
 			enabled = true;
 

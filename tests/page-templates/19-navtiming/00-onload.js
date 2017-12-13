@@ -29,12 +29,12 @@ describe("e2e/19-navtiming/00-onload", function() {
 	];
 
 	it("Should have sent a beacon", function() {
-		// ensure we fired a beacon ('onbeacon')
+		// ensure we fired a beacon ('beacon')
 		assert.isTrue(tf.fired_onbeacon);
 	});
 
-	it("Should have fired onbeacon with a beacon payload", function() {
-		// ensure the data was sent to 'onbeacon'
+	it("Should have fired 'beacon' with a beacon payload", function() {
+		// ensure the data was sent to 'beacon'
 		assert.isObject(tf.lastBeacon());
 	});
 

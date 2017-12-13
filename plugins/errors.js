@@ -1,5 +1,410 @@
-/*eslint-disable*/
+/**
+ * The `Errors` plugin automatically captures JavaScript and other errors from
+ * your web application.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Sources of Errors
+ *
+ * When the `Errors` plugin is enabled, the following sources of errors are captured:
+ *
+ * * JavaScript runtime errors captured via the
+ *   [`onerror`](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror)
+ *   global event handler
+ * * [``XMLHttpRequest``](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
+ *   responses that were not successful.  Note {@link BOOMR.plugins.AutOXHR} is required
+ *   if using this.
+ * * Any calls to [``window.console.error``](https://developer.mozilla.org/en-US/docs/Web/API/Console/error)
+ * * JavaScript runtime errors that happen during a callback for
+ *   [``addEventListener``](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+ * * JavaScript runtime errors that happen during a callback for
+ *   [``setTimeout``](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setTimeout)
+ *   and [``setInterval``](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)
+ * * Manually sent errors via {@link BOOMR.plugins.Errors.send}
+ * * Functions that threw an exception that were wrapped via {@link BOOMR.plugins.Errors.wrap}
+ * * Functions that threw an exception that were run via {@link BOOMR.plugins.Errors.test}
+ *
+ * These are all enabled by default, and can be
+ * {@link BOOMR.plugins.Errors.init manually turned off}.
+ *
+ * ## Supported Browsers
+ *
+ * The `Errors` plugin can be enabled for all browsers, though some older browsers
+ * may not be able to capture the full breadth of sources of errors.
+ *
+ * Notable browsers:
+ *
+ * * Internet Explorer <= 8: Does not support capturing `XMLHttpRequest` errors.
+ *
+ * ## Manually Sending Errors
+ *
+ * Besides automatically capturing errors from `onerror`, `XMLHttpRequest`,
+ * `console.error` or event handlers such as `setTimeout`, you can also manually
+ * send errors.
+ *
+ * There are three ways of doing this as follows:
+ *
+ * * {@link BOOMR.plugins.Errors.send}: Immediately sends an error.
+ * * {@link BOOMR.plugins.Errors.wrap}: Wraps a function with error tracking
+ * * {@link BOOMR.plugins.Errors.test}: Runs the function and captures any errors.
+ *
+ * ## Error callback
+ *
+ * You can specify an {@link BOOMR.plugins.Errors.init `onError`} function that
+ * the Errors plugin will call any time an error is captured on the page.
+ *
+ * If your `onError` function returns `true`, the error will be captured.
+ *
+ * If your `onError` function does not return `true`, the error will be ignored.
+ *
+ * Example:
+ *
+ * ```
+ * BOOMR.init({
+ *   Errors: {
+ *     onError: function(err) {
+ *       if (err.message && err.message.indexOf("internally handled")) {
+ *         return false;
+ *       }
+ *       return true;
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * ## When to Send Errors
+ *
+ * By default, errors captured during the page load will be sent along with the
+ * page load beacon.
+ *
+ * Errors that happen after the page load will not be captured or sent.
+ *
+ * To enable capturing of errors after page load, you need to set
+ * {@link BOOMR.plugins.Errors.init `sendAfterOnload`} to `true`. If set,
+ * errors that happen after the page load will be sent at most once every
+ * {@link BOOMR.plugins.Errors.init `sendInterval`} (which defaults to 1 second)
+ * on a new beacon.
+ *
+ * Example:
+ *
+ * ```
+ * BOOMR.init({
+ *   Errors: {
+ *     sendAfterOnload: true,
+ *     sendInterval: 5000
+ *   }
+ * });
+ * ```
+ *
+ * ## How Many Errors to Capture
+ *
+ * The `Errors` plugin will only capture up to
+ * {@link BOOMR.plugins.Errors.init `maxErrors`} (defaults to 10) distinct
+ * errors on the page.
+ *
+ * Please note that duplicate errors (those with the same function name, stack,
+ * and so on) are tracked as single distinct error, with a `count` of how many
+ * times it was seen.
+ *
+ * You can increase (or decrease) `maxErrors`. For example:
+ * ```
+ * BOOMR.init({
+ *   Errors: {
+ *     maxErrors: 20
+ *   }
+ * });
+ * ```
+ *
+ * ## Dealing with Script Error
+ *
+ * When looking at JavaScript errors, you will likely come across the generic error
+ * message: `Script error.`
+ *
+ * `Script Error.` is the message that browsers send to the
+ * [`window.onerror`](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror)
+ * global exception handler when the error was triggered by a script loaded from a different (cross)
+ * [origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin).  `window.onerror`
+ * is used by Boomerang so that it gets notified of all unhandled exceptions.
+ *
+ * The `Script Error.` string is given _instead_ of the real error message
+ * and does not contain any useful information about what caused the error. In addition,
+ * there is no stack associated with the message, so it's impossible to know where
+ * or why the error occurred.
+ *
+ * Browsers mask the real error message for cross-origin scripts due to security and
+ * privacy concerns - they don't want to leak sensitive information in the message
+ * or stack.  The only thing that `window.onerror` knows for cross-origin scripts
+ * is that an error occurred, not where or why.
+ *
+ * ### Example
+ *
+ * For an example of where you'd see `Script Error.`, consider the following code
+ * that lives on `website.com`:
+ *
+ * ```html
+ * <html>
+ *     <head>
+ *         <title>website.com</title>
+ *     </head>
+ *     <body>
+ *         <script>
+ *             window.onerror = function(message, url, line, column, error) {
+ *                 console.log("window.onerror: " + message);
+ *                 console.log((error && error.stack) ? error.stack : "(no stack)");
+ *             };
+ *         </script>
+ *         <script src="my-script.js"></script>
+ *         <script src="https://anothersite.com/my-script.js"></script>
+ *     </body>
+ * </html>
+ * ```
+ *
+ * Assume `my-script.js` is the same file being served from both `website.com` and
+ * `anothersite.com`:
+ *
+ * ```js
+ * function runCode() {
+ *     a = b + 1;
+ * }
+ *
+ * runCode();
+ * ```
+ *
+ * When `my-script.js` is loaded from `website.com`, it will be executed twice:
+ *
+ * 1. First on the same-origin, where we'll see the full error message followed by
+ *     the stack:
+ *
+ *     ```
+ *     window.onerror: Uncaught ReferenceError: b is not defined
+ *
+ *     ReferenceError: b is not defined
+ *         at runCode (my-script.js:2)
+ *         at my-script.js:5
+ *     ```
+ *
+ * 2. Then, it will be loaded from `https://anothersite.com/my-script.js`, which
+ *     will be considered cross-origin and only `Script Error.` will be logged:
+ *
+ *     ```
+ *     window.onerror: Script error.
+ *
+ *     (no stack)
+ *     ```
+ *
+ * As you can see, browser shares the full details of the exception when it's served
+ * from the same origin as the website, but if it's served from any other origin,
+ * it will be considered cross-origin and no details will be shared.
+ *
+ * Note that while the browser only shares `Script Error.` to `window.onerror`
+ * for cross-origin scripts, if _you_ have browser developer tools open,
+ * the browser will show _you_ the full error message in the Console.  This is
+ * because there aren't any security or privacy concerns for a developer looking at
+ * their own machine's information.
+ *
+ * ### When You'll See Script Error
+ *
+ * Unfortunately `Script Error.` will be shown in many legitimate use-cases,
+ * such as:
+ *
+ * 1. When serving your website's JavaScript from a CDN (since it will be coming
+ *     from a different origin)
+ *
+ * 2. When loading a library such as jQuery or Angular from their CDN, i.e.
+ *     [Google's Hosted Libraries](https://developers.google.com/speed/libraries/)
+ *     or [cdnjs](https://cdnjs.com/)
+ *
+ * 3. When a third-party script loads from another domain
+ *
+ * The good news is that in many of these cases, there are changes you can make to
+ * ensure the full error message and stack are shared with `window.onerror`.
+ *
+ * ### Fixing Script Error
+ *
+ * To ensure a cross-origin script shares full error details with `window.onerror`,
+ * you'll need to do **two** things:
+ *
+ * 1. Add `crossorigin="anonymous"` to the `<script>` tag
+ *
+ *     The [`crossorigin="anonymous"` attribute](https://www.w3.org/TR/html5/infrastructure.html#cors-settings-attribute)
+ *     tells the browser that the script should be fetched without sending
+ *     any cookies or HTTP authentication
+ *
+ * 2. Add the `Access-Control-Allow-Origin` (ACAO) header to the JavaScript file's response.
+ *
+ *     The `Access-Control-Allow-Origin` header is part of the
+ *     [Cross Origin Resource Sharing](https://www.w3.org/TR/cors/) (CORS) standard.
+ *
+ *     The ACAO header **must** be set in the JavaScript's HTTP response headers.
+ *
+ *     An example header that sets ACAO for all calling origins would be:
+ *
+ *     `Access-Control-Allow-Origin: *`
+ *
+ * If both conditions are true, cross-origin JavaScript files will report errors
+ * to `window.onerror` with the correct error message and full stack.
+ *
+ * The biggest challenge to getting this working is that (1) is within the _site's_
+ * control while (2) can only be configured by the _owner_ of the JavaScript.  If you're
+ * loading JavaScript from a third-party, you will need to encourage them to add the
+ * ACAO header if it's not already set.  The good news is that many CDNs and
+ * third-parties set the ACAO header already.
+ *
+ * ### Workarounds for Third Parties that aren't sending ACAO
+ *
+ * One way to help monitor for errors coming from third-party scripts that aren't
+ * setting ACAO (and aren't within your control) is by manually wrapping calls
+ * to any of the third-party script's functions in a `try {} catch {}`.
+ *
+ * ```js
+ * try {
+ *     // calls a cross-origin script that doesn't have ACAO
+ *     runThirdPartyCode();
+ * } catch (e) {
+ *     // report on error with e.message and e.stack
+ * }
+ * ```
+ *
+ * If `runThirdPartyCode()` causes any errors, the `catch {}` handler will get the full
+ * details of the exception.
+ *
+ * Unfortunately this won't work for functions that are executed in the third-party
+ * script as a result of browser events or callbacks (since you're not wrapping them).
+ *
+ * When using Boomerang to monitor JavaScript errors, Boomerang automatically wraps some
+ * of the built-in browser APIs such as `setTimeout`, `setInterval` and `addEventListener`
+ * with a minimal-overhead wrapper.  It does this to help ensure as many cross-origin
+ * exceptions as possible have full stack details. You may also do this manually via
+ * [`` BOOMR.plugin.Errors.wrap(function)``](#BOOMR_plugin_Errors_wrap).
+ *
+ * ## Why is Boomerang in my Error Stack?
+ *
+ * When looking at error reports, you may find errors that have a function in
+ * `boomerang.js` (or `/boomerang/`) on the stack.  Why is that?  Is Boomerang
+ * causing errors on your site?
+ *
+ * One of the ways that Boomerang is able to monitor and measure your site's performance
+ * is by _wrapping_ itself around some of the core browser APIs.  Boomerang only does
+ * this in a few places, if absolutely necessary -- namely, when the browser doesn't
+ * provide a native "monitoring" interface for something that needs to be tracked.
+ *
+ * One example is for `XMLHttpRequests`, as there are no browser APIs to monitor when
+ * XHRs load.  To monitor XHRs, Boomerang swaps in its own `window.XMLHttpRequest`
+ * object, wrapping around the native methods.  When an XHR is created (via `.open()`),
+ * the lightweight Boomerang wrapper is executed first so it can log a start timestamp.
+ * When the XHR finishes (via a `readyState` change), Boomerang can log the end
+ * timestamp and report on the XHR's performance.
+ *
+ * Examples of Boomerang wrapping native methods include:
+ *
+ * * `XMLHttpRequest` if the XHR instrumentation is turned on
+ * * `setTimeout` and `setInterval` if error tracking is turned on
+ * * `console.error` if error tracking is turned on
+ * * `addEventListener` and `removeEventListener` if error tracking is turned on
+ *
+ * All of these wrapped functions come into play when you see an error stack with
+ * a `boomerang.js` function in it.
+ *
+ * Often, the `boomerang.js` function will be at the _bottom_ of the stack (the first
+ * function called).  This does not mean Boomerang caused the error, merely that
+ * the monitoring code was running before the error occurred.  The actual
+ * error happens towards the _top_ of the stack -- the function that ran and threw
+ * the exception.
+ *
+ * Let's look at some examples:
+ *
+ * ```
+ * Cannot read property 'foo' of undefined at thirdPartyTwo (https://thirdparty.com/core.js:1:100)
+ * at thirdPartyOne (https://thirdparty.com/core.js:1:101)
+ * at runThirdParty (https://thirdparty.com/core.js:1:102)
+ * at xhrCallback (http://website.com/site.js:2:200)
+ * at XMLHttpRequest.send (https://mysite.com/boomerang.js:3:300)
+ * ```
+ *
+ * In the above example, Boomerang is monitoring `XMLHttpRequests`.  An XHR was
+ * loaded on the site, and during the XHR callback, an exception was thrown.  Even
+ * though `/boomerang/` is listed here, the error was caused by code in the XHR
+ * callback (`xhrCallback` eventually calling `thirdPartyTwo`).
+ *
+ * Here's a second example:
+ *
+ * ```
+ * Reference error: a is not defined at setTimeout (http://website.com/site.js:1:200)
+ * at BOOMR_plugins_errors_wrap (http://mysite.com/boomerang.js:3:300)
+ * at onclick (http://website.com/site.js:1:100)
+ * ```
+ *
+ * In the above example, JavaScript Error Reporting is enabled and an exception was
+ * thrown in a `setTimeout()` on the website.  You can see the `BOOMR_plugins_errors_wrap`
+ * function is near the top of the stack, but this is merely the error tracking code.
+ * All it did was wrap `setTimeout` to help ensure that cross-origin exceptions are
+ * caught.  It was not the actual cause of the site's error.
+ *
+ * Here's a third example:
+ *
+ * ```
+ * Error: missing argument 1 at BOOMR.window.console.error (https://mysite.com/boomerang.js:3:300)
+ * at u/< (https://website.com/site.js:1:100)
+ * at tp/this.$get</< (https://website.com/site.js:1:200)
+ * at $digest (https://website.com/site.js:1:300)
+ * at $apply (https://website.com/site.js:1:400)
+ * at ut (https://website.com/site.js:1:500)
+ * at it (https://website.com/site.js:1:600)
+ * at vp/</k.onload (https://website.com/site.js:1:700)
+ * ```
+ *
+ * In the above example, JavaScript Error Reporting is enabled and has wrapped
+ * `console.error`.  The minified function `u/<` must be logging a `console.error`,
+ * which executes the Boomerang wrapper code, reporting the error.
+ *
+ * In summary, if you see Boomerang functions in error stacks similar to any of the
+ * ones listed below, it's probable that you're just seeing a side-effect of the
+ * monitoring code:
+ *
+ * * `BOOMR_addError`
+ * * `BOOMR_plugins_errors_onerror`
+ * * `BOOMR_plugins_errors_onxhrerror`
+ * * `BOOMR_plugins_errors_console_error`
+ * * `BOOMR_plugins_errors_wrap`
+ * * `BOOMR.window.console.error`
+ *
+ * ## Beacon Parameters
+ *
+ * * `err`: The compressed error data structure
+ * * `http.initiator = error` (if not part of a Page Load beacon)
+ *
+ * The compressed error data structure is a [JSURL](https://github.com/Sage/jsurl)
+ * encoded JSON object.
+ *
+ * Each element in the array is a compressed representation of a JavaScript error:
+ *
+ * * `n`: Count (if the error was seen more than once)
+ * * `f[]`: An array of frames
+ *   * `f[].l`: Line number
+ *   * `f[].c`: Colum number
+ *   * `f[].f`: Function name
+ *   * `f[].w`: File name (if origin differs from root page)
+ *   * `f[].wo`: File name without origin (if same as root page)
+ * * `s`: Source:
+ *   * `1`: Error was triggered by the application
+ *   * `2`: Error was triggered by Boomerang
+ * * `v`: Via
+ *   * `1`: Application ({@link BOOMR.plugins.Errors.send})
+ *   * `2`: Global exception handler (`window.onerror`)
+ *   * `3`: Network (XHR) error
+ *   * `4`: Console (`console.error`)
+ *   * `5`: Event handler (`addEventListener`)
+ *   * `6`: `setTimeout` or `setInterval`
+ * * `t`: Type (e.g. `SyntaxError` or `ReferenceError`)
+ * * `c`: Code (for network errors)
+ * * `m`: Error messag
+ * * `x`: Extra data
+ * * `d`: Timestamp (base 36)
+ *
+ * @class BOOMR.plugins.Errors
+ */
 
+/*eslint-disable*/
 //
 // Via https://github.com/stacktracejs/error-stack-parser
 // Modifications:
@@ -47,6 +452,7 @@
 		 * Given an Error object, extract the most information from it.
 		 * @param error {Error}
 		 * @return Array[]
+		 * @ignore
 		 */
 		parse: function ErrorStackParser$$parse(error) {
 			if (typeof error.stacktrace !== 'undefined' || typeof error['opera#sourceloc'] !== 'undefined') {
@@ -64,6 +470,7 @@
 		 * Separate line and column numbers from a URL-like string.
 		 * @param urlLike String
 		 * @return Array[String]
+		 * @ignore
 		 */
 		extractLocation: function ErrorStackParser$$extractLocation(urlLike) {
 			// Fail-fast but return locations like "(native)"
@@ -236,7 +643,9 @@
 	// Constants
 	//
 
-	// functions to strip
+	/**
+	 * Functions to strip from any stack (internal functions)
+	 */
 	var STACK_FUNCTIONS_REMOVE = [
 		"BOOMR_addError",
 		"createStackForSend",
@@ -620,6 +1029,8 @@
 		 * Sends an error
 		 *
 		 * @param {Error|String} error Error object or message
+		 *
+		 * @memberof BOOMR.plugins.Errors
 		 */
 		send: function(error, via, source) {
 			var now = BOOMR.now();
@@ -709,7 +1120,7 @@
 			dup = impl.mergeDuplicateErrors(impl.errors, err, false);
 
 			// fire an error event with the duped or new error
-			BOOMR.fireEvent("onerror", dup || err);
+			BOOMR.fireEvent("error", dup || err);
 
 			// add to our current queue
 			impl.mergeDuplicateErrors(impl.q, err, true);
@@ -813,7 +1224,7 @@
 		},
 
 		/**
-		 * Fired 'onbeacon'
+		 * Fired 'beacon'
 		 */
 		onBeacon: function() {
 			// remove our err vars
@@ -936,7 +1347,7 @@
 		 * @param {boolean} useCapture Use capture
 		 * @param {function} wrapped Wrapped function
 		 *
-		 * @returns {boolean} - `true` if function is not already tracked, false otherwise
+		 * @returns {boolean} `true` if function is not already tracked, false otherwise
 		 */
 		trackFn: function(target, type, listener, useCapture, wrapped) {
 			if (!target) {
@@ -1028,6 +1439,8 @@
 		 * @param {number} via Via (optional)
 		 *
 		 * @returns {function} Wrapped function
+		 *
+		 * @memberof BOOMR.plugins.Errors
 		 */
 		wrap: function(fn, that, via) {
 			if (typeof fn !== "function") {
@@ -1072,6 +1485,8 @@
 		 * @param {function} fn Function
 		 * @param {object} that Target object
 		 * @param {object[]} args Arguments
+		 *
+		 * @memberof BOOMR.plugins.Errors
 		 */
 		test: function() {
 			var fn, that, args;
@@ -1463,7 +1878,36 @@
 		/* END_DEBUG */
 	};
 
+	//
+	// Exports
+	//
 	var E = BOOMR.plugins.Errors = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {function} [config.Errors.onError] Callback to fire when
+		 * an error occurs
+		 *
+		 * @param {boolean} [config.Errors.monitorGlobal] Monitor `window.onerror`
+		 * @param {boolean} [config.Errors.monitorNetwork] Monitor XHR errors
+		 * @param {boolean} [config.Errors.monitorConsole] Monitor `console.error`
+		 * @param {boolean} [config.Errors.monitorEvents] Monitor event callbacks
+		 * (from `addEventListener`)
+		 * @param {boolean} [config.Errors.monitorTimeout] Monitor `setTimout`
+		 * and `setInterval`.
+		 * @param {boolean} [config.Errors.sendAfterOnload] Whether or not to
+		 * send errors after the page load beacon.  If set to false, only errors
+		 * that happened up to the page load beacon will be captured.
+		 * @param {boolean} [config.Errors.sendInterval] If `sendAfterOnload` is
+		 * true, how often to send the latest batch of errors.
+		 * @param {number} [config.Errors.maxErrors] Maximum number of errors
+		 * to track per page.
+		 *
+		 * @returns {@link BOOMR.plugins.Errors} The Errors plugin for chaining
+		 * @memberof BOOMR.plugins.Errors
+		 */
+
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "Errors",
 				["onError", "monitorGlobal", "monitorNetwork", "monitorConsole",
@@ -1489,11 +1933,11 @@
 
 			// only if we're supported
 			BOOMR.subscribe("before_beacon", impl.beforeBeacon, null, impl);
-			BOOMR.subscribe("onbeacon", impl.onBeacon, null, impl);
+			BOOMR.subscribe("beacon", impl.onBeacon, null, impl);
 			BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
 
 			// register an event
-			BOOMR.registerEvent("onerror");
+			BOOMR.registerEvent("error");
 
 			// hook into window.onError if configured
 			if (impl.monitorGlobal) {
@@ -1547,7 +1991,7 @@
 
 			// listen for XHR errors
 			if (impl.monitorNetwork) {
-				BOOMR.subscribe("onxhrerror", function BOOMR_plugins_errors_onxhrerror(resource) {
+				BOOMR.subscribe("xhr_error", function BOOMR_plugins_errors_onxhrerror(resource) {
 					impl.send({
 						code: resource.status,
 						message: resource.url,
@@ -1609,28 +2053,92 @@
 
 			return this;
 		},
+
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Errors
+		 */
 		is_complete: function() {
 			return true;
 		},
+
+		/**
+		 * Determines if Error tracking is initialized and supported.
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Errors
+		 */
 		is_supported: function() {
 			return impl.initialized && impl.supported;
 		},
+
 		//
 		// Public Exports
 		//
 		// constants
+		/**
+		 * This error came from the app
+		 */
 		SOURCE_APP: 1,
+
+		/**
+		 * This error came from Boomerang
+		 */
 		SOURCE_BOOMERANG: 2,
 
+		//
+		// Via: Where the error came from
+		//
+		/**
+		 * This error was generated by {@link BOOMR.plugins.Errors.wrap},
+		 * {@link BOOMR.plugins.Errors.test} or {@link BOOMR.plugins.Errors.send}
+		 */
 		VIA_APP: 1,
+
+		/**
+		 * This error was caught by the Global Exception handler (e.g.
+		 * `window.onerror`).
+		 */
 		VIA_GLOBAL_EXCEPTION_HANDLER: 2,
+
+		/**
+		 * This was a network error caught by XMLHttpRequest instrumentation.
+		 */
 		VIA_NETWORK: 3,
+
+		/**
+		 * This was caught by `console.error()`
+		 */
 		VIA_CONSOLE: 4,
+
+		/**
+		 * This was caught by monitoring `addEventListener()`
+		 */
 		VIA_EVENTHANDLER: 5,
+
+		/**
+		 * This was caught by monitoring `setTimeout()` or `setInterval()`
+		 */
 		VIA_TIMEOUT: 6,
 
+		//
+		// Events
+		//
+		/**
+		 * A click event
+		 */
 		EVENT_CLICK: 1,
+
+		/**
+		 * A network event
+		 */
 		EVENT_NETWORK: 2,
+
+		/**
+		 * A console.log event
+		 */
 		EVENT_LOG: 3,
 
 		// functions

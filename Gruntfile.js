@@ -790,7 +790,8 @@ module.exports = function() {
 					destination: "build/doc",
 					package: "package.json",
 					readme: "README.md",
-					configure: "jsdoc.conf.json"
+					configure: "jsdoc.conf.json",
+					template: "doc-template"
 				}
 			}
 		},
@@ -833,7 +834,8 @@ module.exports = function() {
 				files: [
 					"boomerang.js",
 					"plugins/*.js",
-					"doc/**/**"
+					"doc/**/**",
+					"README.md"
 				],
 				tasks: ["clean", "jsdoc"]
 			}

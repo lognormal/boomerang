@@ -140,7 +140,7 @@ app.run(["$rootScope", "$location", "$timeout", function($rootScope, $location, 
 
 	if (typeof window.angular_nav_routes !== "undefined" &&
 		Object.prototype.toString.call(window.angular_nav_routes) === "[object Array]") {
-		BOOMR.subscribe("onbeacon", function(beacon) {
+		BOOMR.subscribe("beacon", function(beacon) {
 			// only continue for SPA beacons
 			if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
 				return;

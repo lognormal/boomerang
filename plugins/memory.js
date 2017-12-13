@@ -1,13 +1,49 @@
-/*
- * Copyright (c), Log-Normal, Inc.
- */
-
 /**
-\file memory.js
-Plugin to collect memory metrics when available.
-see: http://code.google.com/p/chromium/issues/detail?id=43281
-*/
-
+ * Plugin to collect memory, page construction (DOM), screen, CPU and battery metrics (when available).
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * * Resources:
+ *   * `dom.res`: Number of resources fetched in the main frame (via ResourceTiming)
+ *   * `dom.doms`: Number of unique domains in the main page (via ResourceTiming)
+ * * Memory
+ *   * `mem.total`: [`memory.totalJSHeapSize`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
+ *   * `mem.limit`: [`memory.jsHeapSizeLimit`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
+ *   * `mem.used`: [`m.usedJSHeapSize`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
+ * * Screen
+ *   * `scr.xy`: [`screen.width`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/width)
+ *     and [`screen.height`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/height) (e.g. `100x200`)
+ *   * `scr.bpp`: [`screen.colorDepth`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/colorDepth)
+ *     and [`screen.pixelDepth`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/pixelDepth) (e.g. `32/24`)
+ *   * `scr.dpx`: [`screen.devicePixelRatio`](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
+ *   * `scr.orn`: [`screen.orientation.angle`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/orientation) and
+ *     [`screen.orientation.type`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/type) (e.g. `90/landscape-primary`)
+ *   * `scr.sxy`: [`window.scrollX`](https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollX) and
+ *     [`window.scrollY`](https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY) (e.g. `0x1000`)
+ * * Hardware
+ *   * `scr.mtp`: [`navigator.maxTouchPoints`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/maxTouchPoints)
+ *   * `cpu.cnc`: [`navigator.hardwareConcurrency`](https://developer.mozilla.org/en-US/docs/Web/API/NavigatorConcurrentHardware/hardwareConcurrency)
+ *   * `bat.lvl`: [Battery API](https://developer.mozilla.org/en-US/docs/Web/API/Battery_Status_API) level
+ * * DOM
+ *   * `dom.ln`: Number of DOM nodes in the main frame
+ *   * `dom.sz`: Number of HTML bytes of of the main frame
+ *   * `dom.img`: Number of `IMG` nodes in the main frame
+ *   * `dom.img.ext`: Number of external (e.g. not `data:` URI) `IMG` nodes in the main frame
+ *   * `dom.img.uniq`: Number of unique `IMG src` nodes in the main frame
+ *   * `dom.script`: Number of `SCRIPT` nodes in the main frame
+ *   * `dom.script.ext`: Number of external (e.g. not inline or `data:` URI) `SCRIPT` nodes in the main frame
+ *   * `dom.script.uniq`: Number of unique `SCRIPT src` nodes in the main frame
+ *   * `dom.iframe`: Number of `IFRAME` nodes in the main frame
+ *   * `dom.iframe.ext`: Number of external (e.g. not `javascript:` or `about:` URI) `IFRAME` nodes in the main frame
+ *   * `dom.iframe.uniq`: Number of unique `IFRAME src` nodes in the main frame
+ *   * `dom.link`: Number of `LINK` nodes in the main frame
+ *   * `dom.link.css`: Number of `rel="stylesheet"` `LINK` nodes in the main frame
+ *   * `dom.link.css.uniq`: Number of unique `rel="stylesheet"` `LINK` nodes in the main frame
+ *
+ * @class BOOMR.plugins.Memory
+ */
 (function() {
 	var w, p = {}, d, m, s, n, b, impl;
 
@@ -19,26 +55,33 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 	}
 
 	/**
-	 * Count elements of a given type and return the count or an object with the `key` mapped to the `count` if a `key` is specified.
-	 * If one or more filters are included, apply them incrementally to the `element` array, assigning each intermediate count to the
-	 * corresponding `key` in the return object
+	 * Count elements of a given type and return the count or an object with the
+	 * `key` mapped to the `count` if a `key` is specified. If one or more filters
+	 * are included, apply them incrementally to the `element` array, assigning
+	 * each intermediate count to the corresponding `key` in the return object
 	 *
 	 * @param {string} type Element type to search DOM for
-	 *
-	 * @param {string[]} [keys] List of keys for return object
+	 * @param {string[]} [keys] List of keys for return object.
 	 * If not included, just the tag count is returned.
-	 * If included then an object is returned with each element in this array as a key, and the element count as the value.
-	 * For keys[1] onwards, the element count is the number of elements returned from each corresponding filter function.
 	 *
-	 * @param {function} [filter] List of filters to apply incrementally to element array
-	 * This is NOT an array
+	 * If included then an object is returned with each element in this array as
+	 * a key, and the element count as the value.
+	 *
+	 * For keys[1] onwards, the element count is the number of elements returned
+	 * from each corresponding filter function.
+	 * @param {function} [filter] List of filters to apply incrementally to element array.
+	 * This is NOT an array.
+	 *
 	 * The input to each function in the argument list is the array returned by the previous function
+	 *
 	 * The first function receives the array returned by the `getElementsByTagName` function
+	 *
 	 * Each function MUST return a NodeList or an Array with a `length` property
 	 *
 	 * @returns {number|object}
-	 * If only one argument is passed in, returns a nodeCount matching that element type
-	 * If multiple arguments are passed in, returns an object with key to count mapping based on the rules above
+	 * If only one argument is passed in, returns a nodeCount matching that element type.
+	 * If multiple arguments are passed in, returns an object with key to count
+	 * mapping based on the rules above.
 	 */
 	function nodeCount(type, keys /*, filter...*/) {
 		var tags, r, o, i, filter;
@@ -82,6 +125,13 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 		}
 	}
 
+	/**
+	 * Wraps a callback for error reporting
+	 *
+	 * @param {boolean} condition Condition
+	 * @param {function} callback Callback
+	 * @param {string} component Component name
+	 */
 	function errorWrap(condition, callback, component) {
 		if (condition) {
 			try {
@@ -247,7 +297,15 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 		}
 	};
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.Memory = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @memberof BOOMR.plugins.Memory
+		 */
 		init: function() {
 			var c;
 
@@ -296,6 +354,12 @@ see: http://code.google.com/p/chromium/issues/detail?id=43281
 			return this;
 		},
 
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Memory
+		 */
 		is_complete: function() {
 			// Always true since we run on before_beacon, which happens after the check
 			return true;

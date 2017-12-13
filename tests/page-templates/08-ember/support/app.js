@@ -14,7 +14,7 @@ App.ApplicationRoute = Ember.Route.extend({
 		Ember.run.scheduleOnce("afterRender", function() {
 			if (typeof window.ember_nav_routes !== "undefined" &&
 			    Object.prototype.toString.call(window.ember_nav_routes) === "[object Array]") {
-				BOOMR.subscribe("onbeacon", function(beacon) {
+				BOOMR.subscribe("beacon", function(beacon) {
 					// only continue for SPA beacons
 					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
 						return;

@@ -9,7 +9,7 @@ describe("e2e/00-basic/01-onunload", function() {
 		};
 
 		var testFrame = document.getElementById("boomer_test_frame");
-		testFrame.contentWindow.BOOMR.subscribe("onbeacon", unloadBeaconHandler, null, this);
+		testFrame.contentWindow.BOOMR.subscribe("beacon", unloadBeaconHandler, null, this);
 		testFrame.src = "about:blank";
 	});
 

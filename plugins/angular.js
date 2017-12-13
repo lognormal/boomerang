@@ -1,17 +1,58 @@
 /**
- * @module Angular
- * @desc
- * Installation:
+ * The `Angular` plugin allows you to automatically monitor Single Page
+ * App (SPA) navigations for [AngularJS 1.x]{@link https://angularjs.org/}
+ * websites.
  *
- * Somewhere in your Angular app or module startup, call BOOMR.plugins.Angular.hook($rootScope).
+ * **Note**: This plugins requires the {@link BOOMR.plugins.SPA} and
+ * {@link BOOMR.plugins.AutoXHR} plugins.
  *
- * @example
- * angular.module('app')
- *   .run(['$rootScope', function($rootScope) {
+ * For details on how Boomerang Single Page App instrumentation works, see the
+ * {@link BOOMR.plugins.SPA} documentation.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Compatibility
+ *
+ * * AngularJS 1.x
+ * * Router support:
+ *   * {@link https://docs.angularjs.org/api/ngRoute|ngRoute}
+ *   * {@link https://github.com/angular-ui/ui-router|ui-router}
+ *
+ * **Note**: For AngularJS 2.x, use the {@link BOOMR.plugins.History} plugin.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin does not add any additional beacon parameters beyond the
+ * {@link BOOMR.plugins.SPA} plugin.
+ *
+ * ## Usage
+ *
+ * First, include the {@link BOOMR.plugins.SPA}, {@link BOOMR.plugins.Angular}
+ * and {@link BOOMR.plugins.AutoXHR} plugins.  See {@tutorial building} for details.
+ *
+ * Next, you need to also "hook" Boomerang into the AngularJS lifecycle events.
+ *
+ * Somewhere in your AngularJS app or module startup, add a `.run()` block with
+ * a `$rootScope` dependency.  In this run block, add the code below, calling
+ * {@link BOOMR.plugins.Angular.hook}.
+ *
+ * Example:
+ *
+ * ```
+ * angular.module("app")
+ *   .run(["$rootScope", function($rootScope) {
  *     var hadRouteChange = false;
+ *
+ *     // The following listener is required if you're using ng-router
  *     $rootScope.$on("$routeChangeStart", function() {
  *       hadRouteChange = true;
  *     });
+ *
+ *     // The following listener is required if you're using ui-router
+ *     $rootScope.$on("$stateChangeStart", function() {
+ *       hadRouteChange = true;
+ *     });
+ *
  *     function hookAngularBoomerang() {
  *       if (window.BOOMR && BOOMR.version) {
  *         if (BOOMR.plugins && BOOMR.plugins.Angular) {
@@ -33,6 +74,9 @@
  *         });
  *       }
  *   }]);
+ * ```
+ *
+ * @class BOOMR.plugins.Angular
  */
 (function() {
 	var hooked = false,
@@ -178,9 +222,27 @@
 	// Exports
 	//
 	BOOMR.plugins.Angular = {
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Angular
+		 */
 		is_complete: function() {
 			return true;
 		},
+
+		/**
+		 * Hooks Boomerang into the AngularJS lifecycle events
+		 *
+		 * @param {object} $rootScope AngularJS `$rootScope` dependecy
+		 * @param {boolean} [hadRouteChange] Whether or not there was a route change
+		 * event prior to this `hook()` call
+		 * @param {object} [options] Options
+		 *
+		 * @returns {@link BOOMR.plugins.Angular} The Angular plugin for chaining
+		 * @memberof BOOMR.plugins.Angular
+		 */
 		hook: function($rootScope, hadRouteChange, options) {
 			if (hooked) {
 				return this;
@@ -194,10 +256,24 @@
 
 			return this;
 		},
+
+		/**
+		 * Disables the AngularJS plugin
+		 *
+		 * @returns {@link BOOMR.plugins.Angular} The Angular plugin for chaining
+		 * @memberof BOOMR.plugins.Angular
+		 */
 		disable: function() {
 			enabled = false;
 			return this;
 		},
+
+		/**
+		 * Enables the AngularJS plugin
+		 *
+		 * @returns {@link BOOMR.plugins.Angular} The Angular plugin for chaining
+		 * @memberof BOOMR.plugins.Angular
+		 */
 		enable: function() {
 			enabled = true;
 

@@ -5,12 +5,12 @@ describe("e2e/00-basic/00-onload", function() {
 	var tf = BOOMR.plugins.TestFramework;
 
 	it("Should have sent a beacon", function() {
-		// ensure we fired a beacon ('onbeacon')
+		// ensure we fired a beacon ('beacon')
 		assert.isTrue(tf.fired_onbeacon);
 	});
 
-	it("Should have fired onbeacon with a beacon payload", function() {
-		// ensure the data was sent to 'onbeacon'
+	it("Should have fired 'beacon' with a beacon payload", function() {
+		// ensure the data was sent to 'beacon'
 		assert.isObject(tf.lastBeacon());
 	});
 

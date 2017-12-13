@@ -69,7 +69,7 @@ const App = React.createClass({
 		var that = this;
 		if ( window.nav_routes && window.nav_routes.hasOwnProperty("length") && window.nav_routes.length > 0) {
 			if (!subscribed) {
-				BOOMR.subscribe("onbeacon", function(beacon) {
+				BOOMR.subscribe("beacon", function(beacon) {
 					// only continue for SPA beacons
 					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS) && !window.call_page_ready) {
 						return;
@@ -261,4 +261,3 @@ var routerInstance = render((
 			</Route>
 		</Router>
 ), document.getElementById("root"));
-

@@ -1,3 +1,222 @@
+/**
+ * Instrument and measure `XMLHttpRequest` (AJAX) requests.
+ *
+ * With this plugin, sites can measure the performance of `XMLHttpRequests`
+ * (XHRs) and other in-page interactions after the page has been loaded.
+ *
+ * This plugin also monitors DOM manipulations following a XHR to filter out
+ * "background" XHRs.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## What is Measured
+ *
+ * When `AutoXHR` is enabled, after the Page Load has occurred, this plugin will
+ * monitor several events:
+ *
+ * - `XMLHttpRequest` fetches
+ * - Clicks
+ * - `window.History` changes
+ *
+ * When any of these events occur, `AutoXHR` will start monitoring the page for
+ * other events, DOM manipulations and other networking activity.
+ *
+ * As long as the event isn't determined to be background activity (i.e an XHR
+ * that didn't change the DOM at all), the event will be measured until all networking
+ * activity has completed.
+ *
+ * This means if your click generated an XHR that triggered an updated view to fetch
+ * more HTML that added images to the page, the entire event will be measured
+ * from the click to the last image completing.
+ *
+ * ## Usage
+ *
+ * To enable AutoXHR, you should set {@link BOOMR.plugins.AutoXHR.init|instrument_xhr} to `true`:
+ *
+ *     BOOMR.init({
+ *       instrument_xhr: true
+ *     });
+ *
+ * Once enabled and initialized, the `window.XMLHttpRequest` object will be
+ * replaced with a "proxy" object that instruments all XHRs.
+ *
+ * ## Monitoring XHRs
+ *
+ * After `AutoXHR` is enabled, any `XMLHttpRequest.send` will be monitored:
+ *
+ *     xhr = new XMLHttpRequest();
+ *     xhr.open("GET", "/api/foo");
+ *     xhr.send(null);
+ *
+ * If this XHR triggers DOM changes, a beacon will eventually be sent.
+ *
+ * This beacon will have `http.initiator=xhr` and the beacon parameters will differ
+ * from a Page Load beacon.  See {@link BOOMR.plugins.RT} and
+ * {@link BOOMR.plugins.NavigationTiming} for details.
+ *
+ * ## Combining XHR Beacons
+ *
+ * By default `AutoXHR` groups all XHR activity that happens in the same event together.
+ *
+ * If you have one XHR that immediately triggers a second XHR, you will get a single
+ * XHR beacon.  The `u` (URL) will be of the first XHR.
+ *
+ * If you don't want this behavior, and want to measure *every* XHR on the page, you
+ * can enable {@link BOOMR.plugins.AutoXHR.init|alwaysSendXhr=true}.  When set, every
+ * distinct XHR will get its own XHR beacon.
+ *
+ * ### Compatibility and Browser Support
+ *
+ * Currently supported Browsers and platforms that AutoXHR will work on:
+ *
+ * - IE 9+ (not in quirks mode)
+ * - Chrome 38+
+ * - Firefox 25+
+ *
+ * In general we support all browsers that support
+ * [MutationObserver]{@link https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver}
+ * and [XMLHttpRequest]{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest}.
+ *
+ * ## Excluding Certain Requests From Instrumentation
+ *
+ * Whenever Boomerang intercepts an `XMLHttpRequest`, it will check if that request
+ * matches anything in the XHR exclude list. If it does, Boomerang will not
+ * instrument, time, send a beacon for that request, or include it in the
+ * {@link BOOMR.plugins.SPA} calculations.
+ *
+ * The XHR exclude list is defined by creating an `BOOMR.xhr_excludes` map, and
+ * adding URL parts that you would like to exclude from instrumentation. You
+ * can put any of the following in `BOOMR.xhr_excludes`:
+ *
+ * 1. A full HREF
+ * 2. A hostname
+ * 3. A path
+ *
+ * Example:
+ *
+ * ```
+ * BOOMR = window.BOOMR || {};
+ *
+ * BOOMR.xhr_excludes = {
+ *   "www.mydomain.com":  true,
+ *   "a.anotherdomain.net": true,
+ *   "/api/v1/foobar":  true,
+ *   "https://mydomain.com/dashboard/": true
+ * };
+ * ```
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin doesn't add any specific parameters to the beacon.  However, XHR
+ * beacons have different parameters in general than Page Load beacons.
+ *
+ * - Many of the timestamps will differ, see {@link BOOMR.plugins.RT}
+ * - All of the `nt_*` parameters are ResourceTiming, see {@link BOOMR.plugins.NavigationTiming}
+ * - `u`: the URL of the resource that was fetched
+ * - `pgu`: The URL of the page the resource was fetched on
+ * - `http.initiator`: `xhr`
+ *
+ * ## Algorithm
+ *
+ * Here's how the general AutoXHR algorithm works:
+ *
+ * - `0.0` History changed
+ *
+ *   - Pass new URL and timestamp of change on to most recent event (which might
+ *     not have happened yet)
+ *
+ * - `0.1` History changes as a result of a pushState or replaceState
+ *
+ *   - In this case we get the new URL when the developer calls pushState or
+ *     replaceState
+ *   - we do not know if they plan to make an XHR call or use a dynamic script
+ *     node, or do nothing interesting (eg: just make a div visible/invisible)
+ *   - we also do not know if they will do this before or after they've called
+ *     pushState/replaceState
+ *   - so our best bet is to check if either an XHR event or an interesting
+ *     Mutation event happened in the last 50ms, and if not, then hold on to
+ *     this state for 50ms to see if an interesting event will happen.
+ *
+ * - `0.2` History changes as a result of the user hitting Back/Forward and we
+ *   get a window.popstate event
+ *   - In this case we get the new URL from location.href when our event listener
+ *     runs
+ *   - we do not know if this event change will result in some interesting network
+ *     activity or not
+ *   - we do not know if the developer's event listener has already run before
+ *     ours or if it will run in the future
+ *     or even if they do have an event listener
+ *   - so our best bet is the same as 0.1 above
+ *
+ * - `1` Click initiated
+ *
+ *   - User clicks on something
+ *   - We create a resource with the start time and no URL
+ *   - We turn on DOM observer, and wait up to 50 milliseconds for something
+ *     - If nothing happens after the timeout, we stop watching and clear the
+ *       resource without firing the event
+ *     - If a history event happened recently/will happen shortly, use the URL
+ *       as the resource.url
+ *     - Else if something uninteresting happens, we set the timeout for 1
+ *       second if it wasn't already started
+ *       - We don't want to continuously extend the timeout with each uninteresting
+ *         event
+ *     - Else if an interesting node is added, we add load and error listeners
+ *       and turn off the timeout but keep watching
+ *       - If we do not have a resource.url, and if this is a script, then we
+ *         use the script's URL
+ *       - Once all listeners have fired, we stop watching, fire the event and
+ *         clear the resource
+ *
+ * - `2` XHR initiated
+ *   - XHR request is sent
+ *   - We create a resource with the start time and the request URL
+ *   - If a history event happened recently/will happen shortly, use the URL as
+ *     the resource.url
+ *   - We watch for all changes in state (for async requests) and for load (for
+ *     all requests)
+ *   - On load, we turn on DOM observer, and wait up to 50 milliseconds for something
+ *     - If something uninteresting happens, we set the timeout for 1 second if
+ *       it wasn't already started
+ *       - We don't want to continuously extend the timeout with each uninteresting
+ *         event
+ *     - Else if an interesting node is added, we add load and error listeners
+ *       and turn off the timeout
+ *       - Once all listeners have fired, we stop watching, fire the event and
+ *         clear the resource
+ *     - If nothing happens after the timeout, we stop watching fire the event
+ *       and clear the resource
+ *
+ * What about overlap?
+ *
+ * - `3.1` XHR initiated while click watcher is on
+ *
+ *   - If first click watcher has not detected anything interesting or does not
+ *     have a URL, abort it
+ *   - If the click watcher has detected something interesting and has a URL, then
+ *     - Proceed with 2 above.
+ *     - concurrently, click stops watching for new resources
+ *       - once all resources click is waiting for have completed, fire the event
+ *         and clear click resource
+ *
+ * - `3.2` click initiated while XHR watcher is on
+ *
+ *   - Ignore click
+ *
+ * - `3.3` click initiated while click watcher is on
+ *
+ *   - If first click watcher has not detected anything interesting or does not
+ *     have a URL, abort it
+ *   - Else proceed with parallel resource steps from 3.1 above
+ *
+ * - `3.4` XHR initiated while XHR watcher is on
+ *
+ *   - Allow anything interesting detected by first XHR watcher to complete and
+ *     fire event
+ *   - Start watching for second XHR and proceed with 2 above.
+ *
+ * @class BOOMR.plugins.AutoXHR
+ */
 (function() {
 	var w, d, handler, a, impl,
 	    singlePageApp = false,
@@ -7,10 +226,9 @@
 	    ie10or11;
 
 	/**
-	 * @constant
-	 * @desc
 	 * Single Page Applications get an additional timeout for all XHR Requests to settle in.
 	 * This is used after collecting resources for a SPA routechange
+	 * @constant
 	 * @type {number}
 	 * @default
 	 */
@@ -44,29 +262,32 @@
 	var READY_TO_SEND_WAIT = 500;
 
 	/**
+	 * Timeout event fired for XMLHttpRequest resource
 	 * @constant
-	 * @desc Timeout event fired for XMLHttpRequest resource
 	 * @type {number}
 	 * @default
 	 */
 	var XHR_STATUS_TIMEOUT        = -1001;
+
 	/**
+	 * XMLHttpRequest was aborted
 	 * @constant
-	 * @desc XMLHttpRequest was aborted
 	 * @type {number}
 	 * @default
 	 */
 	var XHR_STATUS_ABORT          = -999;
+
 	/**
+	 * An error code was returned by the HTTP Server
 	 * @constant
-	 * @desc An error code was returned by the HTTP Server
 	 * @type {number}
 	 * @default
 	 */
 	var XHR_STATUS_ERROR          = -998;
+
 	/**
+	 * An exception occured as we tried to request resource
 	 * @constant
-	 * @desc An exception occured as we tried to request resource
 	 * @type {number}
 	 * @default
 	 */
@@ -105,16 +326,19 @@
 	function log(msg) {
 		BOOMR.debug(msg, "AutoXHR");
 	}
+
 	/**
-	 * @memberof AutoXHR
-	 * @desc
-	 * Tries to resolve href links from relative URLs
-	 * This implementation takes into account a bug in the way IE handles relative paths on anchors and resolves this
-	 * by assigning a.href to itself which triggers the URL resolution in IE and will fix missing leading slashes if
-	 * necessary
+	 * Tries to resolve `href` links from relative URLs.
 	 *
-	 * @param {string} anchor - the anchor object to resolve
-	 * @returns {string} - The unrelativized URL href
+	 * This implementation takes into account a bug in the way IE handles relative
+	 * paths on anchors and resolves this by assigning `a.href` to itself which
+	 * triggers the URL resolution in IE and will fix missing leading slashes if
+	 * necessary.
+	 *
+	 * @param {string} anchor The anchor object to resolve
+	 *
+	 * @returns {string} The unrelativized URL href
+	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 	function getPathName(anchor) {
 		if (!anchor) {
@@ -142,14 +366,14 @@
 	}
 
 	/**
-	 * @memberof AutoXHR
-	 * @private
-	 * @desc
 	 * Based on the contents of BOOMR.xhr_excludes check if the URL that we instrumented as XHR request
 	 * matches any of the URLs we are supposed to not send a beacon about.
 	 *
-	 * @param {HTMLAnchorElement} anchor - <a> element with URL of the element checked agains BOOMR.xhr_excludes
-	 * @returns {boolean} - `true` if intended to be excluded, `false` if it is not in the list of excludables
+	 * @param {HTMLAnchorElement} anchor HTML anchor element with URL of the element
+	 * checked against `BOOMR.xhr_excludes`
+	 *
+	 * @returns {boolean} `true` if intended to be excluded, `false` if it is not in the list of excludables
+	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 	function shouldExcludeXhr(anchor) {
 		if (anchor.href && anchor.href.match(/^(about:|javascript:|data:)/i)) {
@@ -162,14 +386,9 @@
 	}
 
 	/**
+	 * Handles the MutationObserver for {@link BOOMR.plugins.AutoXHR}.
+	 *
 	 * @class MutationHandler
-	 * @desc
-	 * If MutationObserver is supported on the browser we are running on this will handle [case 1]{@link AutoXHR#description} of the AutoXHR
-	 * class.
-	 */
-
-	/**
-	 * @constructor
 	 */
 	function MutationHandler() {
 		this.watch = 0;
@@ -180,12 +399,11 @@
 	}
 
 	/**
+	 * Disable internal MutationObserver instance. Use this when uninstrumenting the site we're on.
+	 *
 	 * @method
 	 * @memberof MutationHandler
 	 * @static
-	 *
-	 * @desc
-	 * Disable internal MutationObserver instance. Use this when uninstrumenting the site we're on.
 	 */
 	MutationHandler.stop = function() {
 		MutationHandler.pause();
@@ -193,12 +411,11 @@
 	};
 
 	/**
+	 * Pauses the MutationObserver.  Call [resume]{@link handler#resume} to start it back up.
+	 *
 	 * @method
 	 * @memberof MutationHandler
 	 * @static
-	 *
-	 * @desc
-	 * Pauses the MutationObserver.  Call [resume]{@link handler#resume} to start it back up.
 	 */
 	MutationHandler.pause = function() {
 		if (MutationHandler.observer &&
@@ -210,12 +427,11 @@
 	};
 
 	/**
+	 * Resumes the MutationObserver after a [pause]{@link handler#pause}.
+	 *
 	 * @method
 	 * @memberof MutationHandler
 	 * @static
-	 *
-	 * @desc
-	 * Resumes the MutationObserver after a [pause]{@link handler#pause}.
 	 */
 	MutationHandler.resume = function() {
 		if (MutationHandler.observer &&
@@ -227,14 +443,17 @@
 	};
 
 	/**
+	 * Initiate {@link MutationHandler.observer} on the
+	 * [outer parent document]{@link BOOMR.window.document}.
+	 *
+	 * Uses [addObserver]{@link BOOMR.utils.addObserver} to instrument.
+	 *
+	 * [Our internal handler]{@link handler#mutation_cb} will be called if
+	 * something happens.
+	 *
 	 * @method
 	 * @memberof MutationHandler
 	 * @static
-	 *
-	 * @desc
-	 * Initiate {@link MutationHandler.observer} on the [outer parent document]{@link BOOMR.window.document}.
-	 * Uses [addObserver}{@link BOOMR.utils.addObserver} to instrument. [Our internal handler]{@link handler#mutation_cb}
-	 * will be called if something happens
 	 */
 	MutationHandler.start = function() {
 		if (MutationHandler.observer) {
@@ -267,16 +486,15 @@
 	};
 
 	/**
-	 * @method
-	 * @memberof MutationHandler
-	 *
-	 * @desc
 	 * If an event has triggered a resource to be fetched we add it to the list of pending events
 	 * here and wait for it to eventually resolve.
 	 *
 	 * @param {object} resource - [Resource]{@link AutoXHR#Resource} object we are waiting for
 	 *
-	 * @returns {?index} - If we are already waiting for an event of this type null otherwise index in the [queue]{@link MutationHandler#pending_event}.
+	 * @returns {?index} If we are already waiting for an event of this type null
+	 * otherwise index in the [queue]{@link MutationHandler#pending_event}.
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.addEvent = function(resource) {
 		var ev = {
@@ -382,10 +600,6 @@
 	};
 
 	/**
-	 * @method
-	 * @memberof MutationHandler
-	 * @desc
-	 *
 	 * If called with an event in the [pending events list]{@link MutationHandler#pending_events}
 	 * trigger a beacon for this event.
 	 *
@@ -393,9 +607,11 @@
 	 * beacon will be sent immediately. If that is not the case we wait 5 seconds and attempt to send the
 	 * event again.
 	 *
-	 * @param {number} i - index in event list to send
+	 * @param {number} i Index in event list to send
 	 *
-	 * @returns {undefined} - returns early if the event already completed
+	 * @returns {undefined} Rturns early if the event already completed
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.sendEvent = function(i) {
 		var ev = this.pending_events[i], self = this, now = BOOMR.now();
@@ -446,14 +662,13 @@
 	};
 
 	/**
-	 * @memberof MutationHandler
-	 * @method
-	 *
-	 * @desc
 	 * Creates and triggers sending a beacon for a Resource that has finished loading.
 	 *
-	 * @param {Resource} resource - The Resource to send a beacon on
-	 * @param {number} eventIndex - index of the event in the pending_events array
+	 * @param {Resource} resource The Resource to send a beacon on
+	 * @param {number} eventIndex index of the event in the pending_events array
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.sendResource = function(resource, eventIndex) {
 		var self = this, ev = self.pending_events[eventIndex];
@@ -539,10 +754,13 @@
 	};
 
 	/**
-	  * Calculates SPA Back-End and Front-End timings for Hard and Soft
-	  * SPA navigations.
-	  *
-	  * @param resource Resouce to calculate for
+	 * Calculates SPA Back-End and Front-End timings for Hard and Soft
+	 * SPA navigations.
+	 *
+	 * @param {object} resource Resouce to calculate for
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.calculateSpaTimings = function(resource) {
 		var p = BOOMR.getPerformance();
@@ -633,16 +851,16 @@
 	};
 
 	/**
-	 * @memberof MutationHandler
-	 * @method
-	 *
-	 * @desc
-	 * Will create a new timer waiting for `timeout` milliseconds to wait until a resources load time has ended or should have ended.
-	 * If the timeout expires the Resource at `index` will be marked as timedout and result in an error Resource marked with
+	 * Will create a new timer waiting for `timeout` milliseconds to wait until a
+	 * resources load time has ended or should have ended. If the timeout expires
+	 * the Resource at `index` will be marked as timedout and result in an error Resource marked with
 	 * [XHR_STATUS_TIMEOUT]{@link AutoXHR#XHR_STATUS_TIMEOUT} as status information.
 	 *
 	 * @param {number} timeout - time ot wait for the resource to be loaded
 	 * @param {number} index - Index of the {@link Resource} in our {@link MutationHandler#pending_events}
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.setTimeout = function(timeout, index) {
 		var self = this;
@@ -656,15 +874,14 @@
 	};
 
 	/**
-	 * @memberof MutationHandler
-	 * @method
-	 *
-	 * @desc
 	 * Sends a Beacon for the [Resource]{@link AutoXHR#Resource} at `index` with the status
 	 * [XHR_STATUS_TIMEOUT]{@link AutoXHR#XHR_STATUS_TIMEOUT} code, If there are multiple resources attached to the
 	 * `pending_events` array at `index`.
 	 *
 	 * @param {number} index - Index of the event in pending_events array
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.timedout = function(index) {
 		var ev;
@@ -679,7 +896,8 @@
 				this.sendEvent(index);
 			}
 
-			// if there are outstanding downloads left, they will trigger a sendEvent for the SPA once complete
+			// if there are outstanding downloads left, they will trigger a
+			// sendEvent for the SPA once complete
 		}
 		else {
 			if (this.watch > 0) {
@@ -690,11 +908,10 @@
 	};
 
 	/**
+	 * If this instance of the {@link MutationHandler} has a `timer` set, clear it
+	 *
 	 * @memberof MutationHandler
 	 * @method
-	 *
-	 * @desc
-	 * If this instance of the {@link MutationHandler} has a `timer` set, clear it
 	 */
 	MutationHandler.prototype.clearTimeout = function() {
 		if (this.timer) {
@@ -704,14 +921,13 @@
 	};
 
 	/**
-	 * @memberof MutationHandler
+	 * Once an asset has been loaded and the resource appeared in the page we
+	 * check if it was part of the interesting events on the page and mark it as finished.
+	 *
 	 * @callback load_cb
-	 *
-	 * @desc
-	 * Once an asset has been loaded and the resource appeared in the page we check if it was part of the interesting events
-	 * on the page and mark it as finished.
-	 *
 	 * @param {Event} ev - Load event Object
+	 *
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.load_cb = function(ev, resourceNum) {
 		var target, index, now = BOOMR.now();
@@ -737,11 +953,7 @@
 	};
 
 	/**
-	 * @memberof MutationHandler
-	 * @method
-	 *
-	 * @desc
-	 * Decrement the number of [nodes_to_wait]{@link AutoXHR#.PendingEvent} for the the
+	 * Decrement the number of [nodes_to_wait]{@link AutoXHR#.PendingEvent} for the
 	 * [PendingEvent Object]{@link AutoXHR#.PendingEvent}.
 	 *
 	 * If the nodes_to_wait is decremented to 0 and the event type was SPA:
@@ -756,6 +968,9 @@
 	 *
 	 * @param {number} index - Index of the event found in the pending_events array
 	 * @param {TimeStamp} loadEventEnd - TimeStamp at which the resource was finnished loading
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.load_finished = function(index, loadEventEnd) {
 		var current_event = this.pending_events[index];
@@ -787,12 +1002,24 @@
 		}
 	};
 
+	/**
+	 * Determines if we sohuld wait for resources that would be fetched by the
+	 * specified node.
+	 *
+	 * @param {Element} node DOM node
+	 * @param {number} i Event index
+	 *
+	 * @method
+	 * @memberof MutationHandler
+	 */
 	MutationHandler.prototype.wait_for_node = function(node, index) {
-		var self = this, current_event, els, interesting = false, i, l, url, exisitingNodeSrcUrlChanged = false, resourceNum;
+		var self = this, current_event, els, interesting = false, i, l, url,
+		    exisitingNodeSrcUrlChanged = false, resourceNum;
 
 		// only images, scripts, iframes and links if stylesheet
 		// nodeName for SVG:IMAGE returns `image` in lowercase
-		if (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) || (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+		if (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) ||
+		   (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
 
 			// if the attribute change affected the src/currentSrc attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
@@ -800,7 +1027,8 @@
 				exisitingNodeSrcUrlChanged = true;
 			}
 
-			// we put xlink:href before href because node.href works for <SVG:IMAGE> elements, but does not return a string
+			// we put xlink:href before href because node.href works for <SVG:IMAGE> elements,
+			// but does not return a string
 			url = node.src || node.getAttribute("xlink:href") || node.href;
 
 			if (node.nodeName === "IMG") {
@@ -914,15 +1142,19 @@
 	};
 
 	/**
-	  * Adds a resource to the current event.
-	  *
-	  * Might fail (return -1) if:
-	  * a) There are no pending events
-	  * b) The current event is complete
-	  * c) There's no passed-in resource
-	  *
-	  * @param resource Resource
-	  * @return Event index, or -1 on failure
+	 * Adds a resource to the current event.
+	 *
+	 * Might fail (return -1) if:
+	 * a) There are no pending events
+	 * b) The current event is complete
+	 * c) There's no passed-in resource
+	 *
+	 * @param resource Resource
+	 *
+	 * @return Event index, or -1 on failure
+	 *
+ 	 * @method
+ 	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.add_event_resource = function(resource) {
 		var index = this.pending_events.length - 1, current_event;
@@ -950,12 +1182,14 @@
 	};
 
 	/**
+	 * Callback called once [Mutation Observer instance]{@link MutationObserver#observer}
+	 * noticed a mutation on the page. This method will determine if a mutation on
+	 * the page is interesting or not.
+	 *
 	 * @callback mutation_cb
-	 * @memberof MutationHandler
-	 * @desc
-	 * Callback called once [Mutation Observer instance]{@link MutationObserver#observer} noticed a mutation on the page.
-	 * This method will determine if a mutation on the page is interesting or not.
 	 * @param {Mutation[]} mutations - Mutation array describing changes to the DOM
+	 *
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.mutation_cb = function(mutations) {
 		var self, index, evt;
@@ -1020,9 +1254,12 @@
 	};
 
 	/**
-	 * @desc
 	 * Determines if the resources queue is empty
+	 *
 	 * @return {boolean} True if there are no outstanding resources
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.queue_is_empty = function() {
 		return this.nodesWaitingFor() === 0;
@@ -1077,8 +1314,6 @@
 	handler = new MutationHandler();
 
 	/**
-	 * @function
-	 * @desc
 	 * Subscribe to click events on the page and see if they are triggering new
 	 * resources fetched from the network in which case they are interesting
 	 * to us!
@@ -1094,7 +1329,8 @@
 
 			var resource = { timing: {}, initiator: "click" };
 
-			if (!BOOMR.orig_XMLHttpRequest || BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+			if (!BOOMR.orig_XMLHttpRequest ||
+			    BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 				// do nothing if we have un-instrumented XHR
 				return;
 			}
@@ -1106,19 +1342,19 @@
 	}
 
 	/**
-	 * @function
-	 * @desc
-	 * Replace original window.XMLHttpRequest with our implementation instrumenting any AJAX Requests happening afterwards.
-	 * This will also enable instrumentation of mouse events (clicks) and start the {@link MutationHandler}
-	 *
-	 * @returns {null} - returns early if we need to re-instrument
+	 * Replace original window.XMLHttpRequest with our implementation instrumenting
+	 * any AJAX Requests happening afterwards. This will also enable instrumentation
+	 * of mouse events (clicks) and start the {@link MutationHandler}
 	 */
 	function instrumentXHR() {
-		if (BOOMR.proxy_XMLHttpRequest && BOOMR.proxy_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		if (BOOMR.proxy_XMLHttpRequest &&
+			BOOMR.proxy_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 			// already instrumented
 			return;
 		}
-		if (BOOMR.proxy_XMLHttpRequest && BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+		if (BOOMR.proxy_XMLHttpRequest &&
+			BOOMR.orig_XMLHttpRequest &&
+			BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
 			// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
 			BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
@@ -1135,8 +1371,11 @@
 		instrumentClick();
 
 		/**
-		 * @memberof ProxyXHRImplementation
-		 * @desc
+		 * Proxy `XMLHttpRequest` object
+		 * @class ProxyXHRImplementation
+		 */
+
+		/**
 		 * Open an XMLHttpRequest.
 		 * If the URL passed as a second argument is in the BOOMR.xhr_exclude list ignore it and move on to request it
 		 * Otherwise add it to our list of resources to monitor and later beacon on.
@@ -1148,10 +1387,12 @@
 		 * - error {Event} {@link XHR_STATUS_ERROR}
 		 * - abort {Event} {@link XHR_STATUS_ABORT}
 		 *
-		 * @param method {String} - HTTP request method
-		 * @param url {String} - URL to request on
-		 * @param async {boolean} - [optional] if true will setup the EventListeners for XHR events otherwise will set the resource
-		 *                          to synchronous. If true or undefined will be automatically set to asynchronous
+		 * @param {string} method HTTP request method
+		 * @param {string} url URL to request on
+		 * @param {boolean} [async] If `true` will setup the EventListeners for XHR events otherwise will set the resource
+		 * to synchronous. If `true` or `undefined` will be automatically set to asynchronous
+		 *
+		 * @memberof ProxyXHRImplementation
 		 */
 		BOOMR.proxy_XMLHttpRequest = function() {
 			var req, resource = { timing: {}, initiator: "xhr" }, orig_open, orig_send,
@@ -1182,11 +1423,11 @@
 				BOOMR.fireEvent("xhr_init", "xhr");
 
 				/**
-				 * @memberof ProxyXHRImplementation
-				 * @desc
 				 * Mark this as the time load ended via resources loadEventEnd property, if this resource has been added
 				 * to the {@link MutationHandler} already notify that the resource has finished.
 				 * Otherwise add this call to the lise of Events that occured.
+				 *
+				 * @memberof ProxyXHRImplementation
 				 */
 				function loadFinished() {
 					var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
@@ -1199,18 +1440,23 @@
 
 					// fire an event for anyone listening
 					if (resource.status) {
-						BOOMR.fireEvent("onxhrerror", resource);
+						BOOMR.fireEvent("xhr_error", resource);
 					}
 
 					// set the loadEventEnd timestamp to when this callback fired
 					resource.timing.loadEventEnd = now;
 
-					// if ResourceTiming is available, fix-up the .timings with ResourceTiming data, as it will be more accurate
-					entry = BOOMR.getResourceTiming(resource.url, function(x, y) { return x.responseEnd - y.responseEnd; });
+					// if ResourceTiming is available, fix-up the .timings with ResourceTiming
+					// data, as it will be more accurate
+					entry = BOOMR.getResourceTiming(resource.url, function(x, y) {
+						return x.responseEnd - y.responseEnd;
+					});
+
 					if (entry) {
 						navSt = BOOMR.getPerformance().timing.navigationStart;
 
-						// re-set the loadEventEnd timestamp to make sure it's greater than values in ResourceTiming entry
+						// re-set the loadEventEnd timestamp to make sure it's greater
+						// than values in ResourceTiming entry
 						resource.timing.loadEventEnd = BOOMR.now();
 
 						// convert the start time to Epoch
@@ -1274,13 +1520,17 @@
 				}
 
 				/**
-				 * @memberof ProxyXHRImplementation
-				 * @desc
-				 * Setup an {EventListener} for Event @param{ename}. This function will make sure the timestamp for the resources request is set and calls
-				 * loadFinished should the resource have finished. See {@link open()} for it's usage
+				 * Setup an {EventListener} for Event @param{ename}. This function will
+				 * make sure the timestamp for the resources request is set and calls
+				 * loadFinished should the resource have finished.
+				 *
+				 * See {@link open()} for it's usage
 				 *
 				 * @param ename {String} Eventname to listen on via addEventListener
-				 * @param stat {String} if that {@link ename} is reached set this as the status of the resource
+				 * @param stat {String} if that {@link ename} is reached set this
+				 * as the status of the resource
+				 *
+				 * @memberof ProxyXHRImplementation
 				 */
 				function addListener(ename, stat) {
 					req.addEventListener(
@@ -1375,10 +1625,12 @@
 			};
 
 			/**
-			 * @memberof ProxyXHRImplementation
-			 * @desc
-			 * Mark requestStart timestamp and start the request unless the resource has already been marked as having an error code or a result to itself.
+			 * Mark requestStart timestamp and start the request unless the resource
+			 * has already been marked as having an error code or a result to itself.
+			 *
 			 * @returns {Object} The data normal XHR.send() would return
+			 *
+			 * @memberof ProxyXHRImplementation
 			 */
 			req.send = function(data) {
 				if (excluded) {
@@ -1423,8 +1675,6 @@
 	}
 
 	/**
-	 * @function
-	 * @desc
 	 * Put original XMLHttpRequest Configuration back into place
 	 */
 	function uninstrumentXHR() {
@@ -1443,10 +1693,14 @@
 
 	/**
 	 * Container for AutoXHR plugin Closure specific state configuration data
-	 * @property {string[]} spaBackendResources - Default resources to count as Back-End during a SPA nav
-	 * @property {boolean} ie1011fix - If true, the MutationObserver  will be paused on IE10/11 to avoid delayed processing, see {@link ProxyXHRImplementation#addListener} for more info
-	 * @property {FilterObject[]} filters - Array of {@link FilterObject} that is used to apply filters on XHR Requests
-	 * @property {boolean} initialized - Set to true after the first run of {@link BOOMR.plugins.AutoXHR#init}
+	 *
+	 * @property {string[]} spaBackendResources Default resources to count as Back-End during a SPA nav
+	 * @property {boolean} ie1011fix If true, the MutationObserver  will be paused on
+	 * IE10/11 to avoid delayed processing, see {@link ProxyXHRImplementation#addListener} for more info
+	 * @property {FilterObject[]} filters Array of {@link FilterObject} that is used to apply filters on XHR Requests
+	 * @property {boolean} initialized Set to true after the first run of
+	 * @property {string[]} addedVars Vars added to the next beacon only
+	 * {@link BOOMR.plugins.AutoXHR#init}
 	 */
 	impl = {
 		spaBackEndResources: SPA_RESOURCES_BACK_END,
@@ -1456,10 +1710,17 @@
 		addedVars: [],
 
 		/**
-		 * Filter function iterating over all available {@link FilterObject}s if returns true will not instrument an XHR
-		 * @param {HTMLAnchorElement} anchor - HTMLAnchorElement node created with the XHRs URL as `href` to evaluate by {@link FilterObject}s and passed to {@link FilterObject#cb} callbacks.
-		 *                                     NOTE: The anchor needs to be created from the host document (ie. BOOMR.window.document) to enable us to resolve relative
-		 *                                     URLs to a full valid path and BASE HREF mechanics can take effect.
+		 * Filter function iterating over all available {@link FilterObject}s if
+		 * returns true will not instrument an XHR
+		 *
+		 * @param {HTMLAnchorElement} anchor - HTMLAnchorElement node created with
+		 * the XHRs URL as `href` to evaluate by {@link FilterObject}s and passed
+		 * to {@link FilterObject#cb} callbacks.
+		 *
+		 * NOTE: The anchor needs to be created from the host document
+		 * (ie. `BOOMR.window.document`) to enable us to resolve relative URLs to
+		 * a full valid path and BASE HREF mechanics can take effect.
+		 *
 		 * @return {boolean} true if the XHR should not be instrumented false if it should be instrumented
 		 */
 		excludeFilter: function(anchor) {
@@ -1480,7 +1741,9 @@
 					try {
 						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
 						if (ret) {
-							BOOMR.debug("Found matching filter at: " + impl.excludeFilters[idx].name + " for URL: " + anchor.href, "AutoXHR");
+							BOOMR.debug("Found matching filter at: " +
+								impl.excludeFilters[idx].name + " for URL: " +
+								anchor.href, "AutoXHR");
 							return true;
 						}
 					}
@@ -1500,85 +1763,32 @@
 		}
 	};
 
-	/**
-	 * @module AutoXHR
-	 * @desc
-	 * How should this work?
-	 *
-	 * 0. History changed
-	 *
-	 * - Pass new URL and timestamp of change on to most recent event (which might not have happened yet)
-	 *
-	 * 0.1. History changes as a result of a pushState or replaceState
-	 * - In this case we get the new URL when the developer calls pushState or replaceState
-	 * - we do not know if they plan to make an XHR call or use a dynamic script node, or do nothing interesting
-	 *  (eg: just make a div visible/invisible)
-	 * - we also do not know if they will do this before or after they've called pushState/replaceState
-	 * - so our best bet is to check if either an XHR event or an interesting Mutation event happened in the last 50ms,
-	 *  and if not, then hold on to this state for 50ms to see if an interesting event will happen.
-	 *
-	 * 0.2. History changes as a result of the user hitting Back/Forward and we get a window.popstate event
-	 * - In this case we get the new URL from location.href when our event listener runs
-	 * - we do not know if this event change will result in some interesting network activity or not
-	 * - we do not know if the developer's event listener has already run before ours or if it will run in the future
-	 *  or even if they do have an event listener
-	 * - so our best bet is the same as 0.1 above
-	 *
-	 *
-	 * 1. Click initiated
-	 *
-	 * - User clicks on something
-	 * - We create a resource with the start time and no URL
-	 * - We turn on DOM observer, and wait up to 50 milliseconds for something
-	 *  - If nothing happens after the timeout, we stop watching and clear the resource without firing the event
-	 *  - If a history event happened recently/will happen shortly, use the URL as the resource.url
-	 *  - Else if something uninteresting happens, we set the timeout for 1 more second (only once)
-	 *    - We don't want to continuously extend the timeout with each uninteresting event
-	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout but keep watching
-	 *    - If we do not have a resource.url, and if this is a script, then we use the script's URL
-	 *    - Once all listeners have fired, we stop watching, fire the event and clear the resource
-	 *
-	 *
-	 * 2. XHR initiated
-	 *
-	 * - XHR request is sent
-	 * - We create a resource with the start time and the request URL
-	 * - If a history event happened recently/will happen shortly, use the URL as the resource.url
-	 * - We watch for all changes in state (for async requests) and for load (for all requests)
-	 * - On load, we turn on DOM observer, and wait up to 50 milliseconds for something
-	 *  - If something uninteresting happens, we set the timeout for 1 more second (only once)
-	 *    - We don't want to continuously extend the timeout with each uninteresting event
-	 *  - Else if an interesting node is added, we add load and error listeners and turn off the timeout
-	 *    - Once all listeners have fired, we stop watching, fire the event and clear the resource
-	 *  - If nothing happens after the timeout, we stop watching fire the event and clear the resource
-	 *
-	 *
-	 * 3. What about overlap?
-	 *
-	 * 3.1. XHR initiated while click watcher is on
-	 *
-	 * - If first click watcher has not detected anything interesting or does not have a URL, abort it
-	 * - If the click watcher has detected something interesting and has a URL, then
-	 *  - Proceed with 2 above.
-	 *  - concurrently, click stops watching for new resources
-	 *   - once all resources click is waiting for have completed, fire the event and clear click resource
-	 *
-	 * 3.2. click initiated while XHR watcher is on
-	 *
-	 * - Ignore click
-	 *
-	 * 3.3. click initiated while click watcher is on
-	 *
-	 * - If first click watcher has not detected anything interesting or does not have a URL, abort it
-	 * - Else proceed with parallel resource steps from 3.1 above
-	 *
-	 * 3.4. XHR initiated while XHR watcher is on
-	 *
-	 * - Allow anything interesting detected by first XHR watcher to complete and fire event
-	 * - Start watching for second XHR and proceed with 2 above.
-	 */
 	BOOMR.plugins.AutoXHR = {
-		is_complete: function() { return true; },
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
+		is_complete: function() {
+			return true;
+		},
+
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {boolean} [config.instrument_xhr] Whether or not to instrument XHR
+		 * @param {string[]} [config.AutoXHR.spaBackEndResources] Default resources to count as
+		 * Back-End during a SPA nav
+		 * @param {boolean} [config.AutoXHR.ie1011fix] If true, the MutationObserver will be paused on
+		 * IE10/11 to avoid delayed processing
+		 * @param {boolean} [config.AutoXHR.alwaysSendXhr] Whether or not to send XHR
+		 * beacons for every XHR.
+		 *
+		 * @returns {@link BOOMR.plugins.AutoXHR} The AutoXHR plugin for chaining
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
 		init: function(config) {
 			var i, idx;
 
@@ -1666,14 +1876,28 @@
 				BOOMR.uninstrumentXHR();
 			}
 
-			BOOMR.registerEvent("onxhrerror");
+			BOOMR.registerEvent("xhr_error");
 
-			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
+			BOOMR.subscribe("beacon", impl.clear, null, impl);
 		},
+
+		/**
+		 * Gets the {@link MutationHandler}
+		 *
+		 * @returns {MutationHandler} Handler
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
 		getMutationHandler: function() {
 			return handler;
 		},
+
 		getPathname: getPathName,
+
+		/**
+		 * Enables AutoXHR if not already enabled.
+		 *
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
 		enableAutoXhr: function() {
 			if (!autoXhrEnabled) {
 				BOOMR.instrumentXHR();
@@ -1681,9 +1905,17 @@
 
 			autoXhrEnabled = true;
 		},
+
 		/**
-		 * Add a filter function to the list of functions to run to validate if an XHR should be instrumented
-		 * For a description of the params see properties of the {@link AutoXHR#FilterObject} type definition
+		 * A callback with a HTML element.
+		 * @callback htmlElementCallback
+		 * @param {HTMLAnchorElement} elem HTML a element
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
+
+		/**
+		 * Add a filter function to the list of functions to run to validate if an
+		 * XHR should be instrumented.
 		 *
 		 * @example
 		 * BOOMR.plugins.AutoXHR.addExcludeFilter(function(anchor) {
@@ -1695,9 +1927,11 @@
 		 *   }
 		 *   return false;
 		 * }, null, "exampleFilter");
-		 * @param {function} cb - Callback to run to validate filtering of an XHR Request
-		 * @param {Object} ctx - Context to run {@param cb} in
-		 * @param {string} [name] - Optional name for the filter, called out when running exclude filters for debugging purposes
+		 * @param {BOOMR.plugins.AutoXHR.htmlElementCallback} cb Callback to run to validate filtering of an XHR Request
+		 * @param {Object} ctx Context to run {@param cb} in
+		 * @param {string} [name] Optional name for the filter, called out when running exclude filters for debugging purposes
+		 *
+		 * @memberof BOOMR.plugins.AutoXHR
 		 */
 		addExcludeFilter: function(cb, ctx, name) {
 			impl.excludeFilters.push({cb: cb, ctx: ctx, name: name});
@@ -1705,57 +1939,62 @@
 	};
 
 	/**
+	 * Hook called once a resource is found to be loaded and timers have been set.
+	 * @callback ResourceOnComplete
+	 * @memberof BOOMR.plugins.AutoXHR
+	 */
+
+	/**
 	 * @typedef {Object} Resource
-	 * @memberof AutoXHR
+	 * @memberof BOOMR.plugins.AutoXHR
 	 *
 	 * @desc
 	 * Resource objects define properties of a page element or resource monitored by {@link AutoXHR}.
 	 *
-	 * @property {string} initiator - Type of source that initiated the resource to be fetched:
-	 * 				  `click`, `xhr` or SPA initiated
-	 * @property {string} url - Path to the resource fetched from either the HTMLElement or XHR request that triggered it
-	 * @property {object} timing - Resource timing information gathered from internal timers or ResourceTiming if supported
-	 * @property {Timing} timing - Object containing start and end timings of the resource if set
-	 * @property {?onComplete} [onComplete] - called once the resource has been fetched
+	 * @property {string} initiator Type of source that initiated the resource to be fetched:
+	 * `click`, `xhr` or SPA initiated
+	 * @property {string} url Path to the resource fetched from either the HTMLElement or XHR request that triggered it
+	 * @property {object} timing Resource timing information gathered from internal timers or ResourceTiming if supported
+	 * @property {ResourceTiming} timing Object containing start and end timings of the resource if set
+	 * @property {ResourceOnComplete} [onComplete] Called once the resource has been fetched
 	 */
 
 	/**
-	 * @callback onComplete
-	 * @desc
-	 * Hook called once a resource is found to be loaded and timers have been set.
-	 */
-
-	/**
-	 * @typedef PendingEvent
-	 * @memberof AutoXHR
-	 * @private
-	 * @desc
-	 * An event on a page instrumented by {@link AutoXHR#MutationHandler} and monitored by AutoXHR
+	 * An event on a page instrumented by {@link MutationHandler} and monitored by AutoXHR
 	 *
-	 * @property {string} type - The type of event that we are watching (`xhr`, `click`, [SPAs]{@link BOOMR#constants.BEACON_TYPE_SPAS})
-	 * @property {number} nodes_to_wait - Number of nodes/resources to wait for before event completes
-	 * @property {number} total_nodes - Total number of resources
-	 * @property {Resource} resource - The resource this event is attached to
-	 * @property {boolean} complete - `true` if event completed `false` if not
-	 * @property {?Resource[]} resources - multiple resources that are attached to this event
+	 * @typedef PendingEvent
+	 *
+	 * @property {string} type The type of event that we are watching (`xhr`, `click`,
+	 *   [SPAs]{@link BOOMR.constants.BEACON_TYPE_SPAS})
+	 * @property {number} nodes_to_wait Number of nodes to wait for before event completes
+	 * @property {number} total_nodes Total number of resources
+	 * @property {Resource} resource The resource this event is attached to
+	 * @property {boolean} complete `true` if event completed `false` if not
+	 * @property {Resource[]} [resources] multiple resources that are attached to this event
+	 *
+	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 
 	/**
-	 * @typedef Timing
-	 * @memberof AutoXHR
-	 * @private
-	 * @desc
 	 * Timestamps for start of a request and end of loading
 	 *
-	 * @property {TimeStamp} loadEventEnd - Timestamp when the resource arrived in the browser
-	 * @property {TimeStamp} requestStart - High resolution timestamp when the resource was started to be loaded
+	 * @typedef ResourceTiming
+	 *
+	 * @property {TimeStamp} loadEventEnd Timestamp when the resource arrived in the browser
+	 * @property {TimeStamp} requestStart High resolution timestamp when the resource was started to be loaded
+	 *
+	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 
 	/**
+	 * Filter object with data on the callback, context and name.
+	 *
 	 * @typedef FilterObject
-	 * @property {function} cb - Callback called with context accepts one param which is: AnchorElement referring
-	 *                           to the fully qualified URL of the XHR Request BOOMR is determining to instrument
-	 * @property {Object} ctx - Execution context to use when running `cb`
-	 * @property {string} [name] - Name of the filter used for logging and debugging purposes (This is an entirely optional property)
+	 *
+	 * @property {BOOMR.plugins.AutoXHR.htmlElementCallback} cb Callback
+	 * @property {Object} ctx Execution context to use when running `cb`
+	 * @property {string} [name] Name of the filter used for logging and debugging purposes (This is an entirely optional property)
+	 *
+	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 })();

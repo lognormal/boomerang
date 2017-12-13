@@ -1,13 +1,74 @@
 /*
  * Copyright (c), Buddy Brewer.
  */
-
 /**
-\file navtiming.js
-Plugin to collect metrics from the W3C Navigation Timing API. For more information about Navigation Timing,
-see: http://www.w3.org/TR/navigation-timing/
-*/
-
+ * The Navigation Timing plugin collects performance metrics collected by modern
+ * user agents that support the W3C [NavigationTiming]{@link http://www.w3.org/TR/navigation-timing/}
+ * specification.
+ *
+ * This plugin also adds similar [ResourceTiming]{@link https://www.w3.org/TR/resource-timing-1/}
+ * metrics for any XHR beacons.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * All beacon parameters are prefixed with `nt_`.
+ *
+ * This plugin adds the following parameters to the beacon for Page Loads:
+ *
+ * * `nt_red_cnt`: `performance.navigation.redirectCount`
+ * * `nt_nav_type`: `performance.navigation.type`
+ * * `nt_nav_st`: `performance.timing.navigationStart`
+ * * `nt_red_st`: `performance.timing.redirectStart`
+ * * `nt_red_end`: `performance.timing.redirectEnd`
+ * * `nt_fet_st`: `performance.timing.fetchStart`
+ * * `nt_dns_st`: `performance.timing.domainLookupStart`
+ * * `nt_dns_end`: `performance.timing.domainLookupEnd`
+ * * `nt_con_st`: `performance.timing.connectStart`
+ * * `nt_con_end`: `performance.timing.connectEnd`
+ * * `nt_req_st`: `performance.timing.requestStart`
+ * * `nt_res_st`: `performance.timing.responseStart`
+ * * `nt_res_end`: `performance.timing.responseEnd`
+ * * `nt_domloading`: `performance.timing.domLoading`
+ * * `nt_domint`: `performance.timing.domInteractive`
+ * * `nt_domcontloaded_st`: `performance.timing.domContentLoadedEventStart`
+ * * `nt_domcontloaded_end`: `performance.timing.domContentLoadedEventEnd`
+ * * `nt_domcomp`: `performance.timing.domComplete`
+ * * `nt_load_st`: `performance.timing.loadEventStart`
+ * * `nt_load_end`: `performance.timing.loadEventEnd`
+ * * `nt_unload_st`: `performance.timing.unloadEventStart`
+ * * `nt_unload_end`: `performance.timing.unloadEventEnd`
+ * * `nt_ssl_st`: `performance.timing.secureConnectionStart`
+ * * `nt_spdy`: `1` if page was loaded over SPDY, `0` otherwise
+ * * `nt_first_paint`: The time when the first paint happened. On Internet Explorer,
+ *   this is milliseconds since the epoch, while on Chrome this is
+ *   seconds.microseconds since the epoch. If you detect a decimal point in
+ *   this number, multiply it by 1000 to compare it to the other timers
+ * * `nt_cinf`: Chrome `chrome.loadTimes().connectionInfo`
+ * * `nt_bad`: If we detected that any NavigationTiming metrics looked odd,
+ *   such as `responseEnd` in the far future or `fetchStart` before `navigationStart`.
+ *
+ * For XHR beacons, the following parameters are added (via ResourceTiming):
+ *
+ * * `nt_red_st`: `redirectStart`
+ * * `nt_red_end`: `redirectEnd`
+ * * `nt_fet_st`: `fetchStart`
+ * * `nt_dns_st`: `domainLookupStart`
+ * * `nt_dns_end`: `domainLookupEnd`
+ * * `nt_con_st`: `connectStart`
+ * * `nt_con_end`: `connectEnd`
+ * * `nt_req_st`: `requestStart`
+ * * `nt_res_st`: `responseStart`
+ * * `nt_res_end`: `responseEnd`
+ * * `nt_load_st`: `loadEventStart`
+ * * `nt_load_end`: `loadEventEnd`
+ * * `nt_ssl_st`: `secureConnectionStart`
+ *
+ * @see {@link http://www.w3.org/TR/navigation-timing/}
+ * @see {@link https://www.w3.org/TR/resource-timing-1/}
+ * @class BOOMR.plugins.NavigationTiming
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -318,7 +379,17 @@ see: http://www.w3.org/TR/navigation-timing/
 		}
 	};
 
+	//
+	// Exports
+	//
 	BOOMR.plugins.NavigationTiming = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * This plugin does not have any configuration.
+		 * @returns {@link BOOMR.plugins.NavigationTiming} The IPv6 plugin for chaining
+		 * @memberof BOOMR.plugins.NavigationTiming
+		 */
 		init: function() {
 			if (!impl.initialized) {
 				// we'll fire on whichever happens first
@@ -326,13 +397,19 @@ see: http://www.w3.org/TR/navigation-timing/
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
-				BOOMR.subscribe("onbeacon", impl.clear, null, impl);
+				BOOMR.subscribe("beacon", impl.clear, null, impl);
 
 				impl.initialized = true;
 			}
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.NavigationTiming
+		 */
 		is_complete: function() {
 			return true;
 		}

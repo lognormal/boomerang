@@ -14,8 +14,8 @@
 		"outputSourcePath": false,
 		"systemName": "Boomerang",
 		"footer": "",
-		"copyright": "Boomerang Team © 2010-2017 The contributors to the Open Source Boomerang project and Akamai Technologies, Inc. .",
-		"theme": "cosmo",
+		"copyright": "© 2010-2017 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.",
+		"theme": "akamai",
 		"linenums": true,
 		"collapseSymbols": false,
 		"inverseNav": false,
@@ -23,11 +23,12 @@
 		"protocol": "html://"
 	},
 	"markdown": {
-		"parser": "gfm",
-		"hardwrap": true
+		"parser": "gfm"
 	},
 	"opts": {
 		"tutorials": "doc/",
-		"recurse": true
-	}
+		"recurse": true,
+		"pedantic": true
+	},
+	"sourceType": "script"
 }

@@ -1,7 +1,74 @@
-/*
- * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
- * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+/**
+ * The roundtrip (RT) plugin measures page load time, or other timers associated with the page.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `t_done`: Perceived load time of the page.
+ * * `t_page`: Time taken from the head of the page to {@link BOOMR#event:page_ready}.
+ * * `t_page.inv`: If there was a problem detected with the start/end times of `t_page`.
+ *    This can happen due to bugs in NavigationTiming clients, where `responseEnd`
+ *    happens after all other NavigationTiming events.
+ * * `t_resp`: Time taken from the user initiating the request to the first byte of the response.
+ * * `t_other`: Comma separated list of additional timers set by page developer.
+ *   Each timer is of the format `name|value`
+ * * `t_load`: If the page were prerendered, this is the time to fetch and prerender the page.
+ * * `t_prerender`: If the page were prerendered, this is the time from start of
+ *   prefetch to the actual page display. It may only be useful for debugging.
+ * * `t_postrender`: If the page were prerendered, this is the time from prerender
+ *   finish to actual page display. It may only be useful for debugging.
+ * * `vis.pre`: `1` if the page transitioned from prerender to visible
+ * * `r`: URL of page that set the start time of the beacon.
+ * * `r2`: URL of referrer of current page. Only set if different from `r` and
+ *   `strict_referrer` has been explicitly turned off.
+ * * `nu`: URL of next page if the user clicked a link or submitted a form
+ * * `rt.start`: Specifies where the start time came from. May be one of:
+ *   - `cookie` for the start cookie
+ *   - `navigation` for the W3C NavigationTiming API,
+ *   - `csi` for older versions of Chrome or gtb for the Google Toolbar.
+ *   - `manual` for XHR beacons
+ *   - `none` if the start could not be detected
+ * * `rt.tstart`: The start time timestamp.
+ * * `rt.nstart`: The `navigationStart` timestamp, if different from `rt.tstart.  This could
+ *    happen for XHR beacons, where `rt.tstart` is the start of the XHR fetch, and `nt_nav_st`
+ *    won't be on the beacon.  It could also happen for SPA Soft beacons, where `rt.tstart`
+ *    is the start of the Soft Navigation.
+ * * `rt.cstart`: The start time stored in the cookie if different from rt.tstart.
+ * * `rt.bstart`: The timestamp when boomerang started executing.
+ * * `rt.blstart`: The timestamp when the boomerang was added to the host page.
+ * * `rt.end`: The timestamp when the `t_done` timer ended
+ *   (`rt.end - rt.tstart === t_done`)
+ * * `rt.bmr`: Several parameters that include resource timing information for
+ *   boomerang itself, ie, how long did boomerang take to load
+ * * `rt.subres`: Set to `1` if this beacon is for a sub-resource of a primary
+ *    page beacon. This is typically set by XHR beacons, and you will need to
+ *    use a separate identifier to tie the primary beacon and the subresource
+ *    beacon together on the server-side.
+ * * `rt.quit`: This parameter will exist (but have no value) if the beacon was
+ *    fired as part of the `onbeforeunload` event. This is typically used to
+ *    find out how much time the user spent on the page before leaving, and is
+ *    not guaranteed to fire.
+ * * `rt.abld`: This parameter will exist (but have no value) if the `onbeforeunload`
+ *    event fires before the `onload` event fires. This can happen, for example,
+ *    if the user left the page before it completed loading.
+ * * `rt.ntvu`: This parameter will exist (but have no value) if the `onbeforeunload`
+ *    event fires before the page ever became visible. This can happen if the
+ *    user opened the page in a background tab, and closed it without viewing it,
+ *    and also if the page was pre-rendered, but never made visible. Use this
+ *    to check your pre-render success ratio.
+ * * `http.method`: For XHR beacons, the HTTP method if not `GET`.
+ * * `http.errno`: For XHR beacons, the HTTP result code if not 200.
+ * * `http.hdr`: For XHR beacons, headers if available.
+ * * `xhr.sync`: For XHR beacons, `1` if it was sent synchronously.
+ * * `http.initiator`: The initiator of the beacon:
+ *   - (empty/missing) for the page load beacon
+ *   - `xhr` for XHR beacons
+ *   - `spa` for SPA Soft Navigations
+ *   - `spa_hard` for SPA Hard Navigations
+ * @class BOOMR.plugins.RT
  */
 
 // This is the Round Trip Time plugin.  Abbreviated to RT
@@ -23,49 +90,106 @@
 
 	// private object
 	impl = {
-		onloadfired: false,	//! Set when the page_ready event fires
-					//  Use this to determine if unload fires before onload
-		unloadfired: false,	//! Set when the first unload event fires
-					//  Use this to make sure we don't beacon twice for beforeunload and unload
-		visiblefired: false,	//! Set when page becomes visible (Chrome/IE)
-					//  Use this to determine if user bailed without opening the tab
-		initialized: false,	//! Set when init has completed to prevent double initialization
-		complete: false,	//! Set when this plugin has completed
+		// Set when the page_ready event fires.
+		// Use this to determine if unload fires before onload.
+		onloadfired: false,
+
+		// Set when the first unload event fires.
+		// Use this to make sure we don't beacon twice for beforeunload and
+		// unload.
+		unloadfired: false,
+
+		// Set when page becomes visible (for browsers that support it).
+		// Use this to determine if user bailed without opening the tab.
+		visiblefired: false,
+
+		// Set when init has completed to prevent double initialization.
+		initialized: false,
+
+		// Set when this plugin has completed.
+		complete: false,
+
+		// Whether or not Boomerang is set to run at onload.
 		autorun: true,
-		timers: {},		//! Custom timers that the developer can use
-					// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
-		cookie: "RT",		//! Name of the cookie that stores the start time and referrer
-		cookie_exp: COOKIE_EXP,	//! Cookie expiry in seconds (7 days)
-		/* SOASTA PRIVATE START */
-		session_exp: SESSION_EXP, //! Session expiry in seconds (30 minutes)
-		/* SOASTA PRIVATE END */
-		strict_referrer: true,	//! By default, don't beacon if referrers don't match.
-					// If set to false, beacon both referrer values and let
-					// the back end decide
 
-		navigationType: 0,	// Navigation Type from the NavTiming API.  We mainly care if this was BACK_FORWARD
-					// since cookie time will be incorrect in that case
+		// Custom timers that the developer can use.
+		// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
+		timers: {},
+
+		// Name of the cookie that stores the start time and referrer.
+		cookie: "RT",
+
+		// Cookie expiry in seconds (7 days)
+		cookie_exp: COOKIE_EXP,
+
+		/* SOASTA PRIVATE START */
+		// Session expiry in seconds (30 minutes)
+		session_exp: SESSION_EXP,
+		/* SOASTA PRIVATE END */
+
+		// By default, don't beacon if referrers don't match.
+		// If set to false, beacon both referrer values and let the back-end decide.
+		strict_referrer: true,
+
+		// Navigation Type from the NavTiming API.  We mainly care if this was
+		// BACK_FORWARD since cookie time will be incorrect in that case.
+		navigationType: 0,
+
+		// Navigation Start time.
 		navigationStart: undefined,
+
+		// Response Start time.
 		responseStart: undefined,
+
 		/* SOASTA PRIVATE START */
-		loadTime: 0,		// Total load time for the user session
-		oboError: 0,		// Number of pages in the session that had no load time
-		sessionHistory: [],	// all session changes that have happened
-		/* SOASTA PRIVATE END */
-		t_start: undefined,	// t_start that came off the cookie
-		cached_t_start: undefined,	// cached value of t_start once we know its real value
-		cached_xhr_start: undefined,	// cached value of xhr t_start once we know its real value
-		t_fb_approx: undefined,	// approximate first byte time for browsers that don't support navtiming
-		r: undefined,		// referrer from the cookie
-		r2: undefined,		// referrer from document.referer
-		/* SOASTA PRIVATE START */
-		beacon_url: undefined,	// Beacon server for the current session.  This could get reset at the end of the session.
-		next_beacon_url: undefined,	// beacon_url to use when session expires
+		// Total load time for the user session.
+		loadTime: 0,
+
+		// Number of pages in the session that had no load time.
+		oboError: 0,
+
+		// All session changes that have happened.
+		sessionHistory: [],
 		/* SOASTA PRIVATE END */
 
-		// These timers are added directly as beacon variables
-		basic_timers: { t_done: 1, t_resp: 1, t_page: 1},
+		// t_start that came off the cookie.
+		t_start: undefined,
+
+		// Cached value of t_start once we know its real value.
+		cached_t_start: undefined,
+
+		// Cached value of xhr t_start once we know its real value.
+		cached_xhr_start: undefined,
+
+		// Approximate first byte time for browsers that don't support NavigationTiming.
+		t_fb_approx: undefined,
+
+		// Referrer from the cookie.
+		r: undefined,
+
+		// Referrer from document.referer
+		r2: undefined,
+
+		/* SOASTA PRIVATE START */
+		// Beacon server for the current session.
+		// This could get reset at the end of the session.
+		beacon_url: undefined,
+
+		// beacon_url to use when session expires.
+		next_beacon_url: undefined,
+		/* SOASTA PRIVATE END */
+
+		// These timers are added directly as beacon variables.
+		basic_timers: {
+			t_done: 1,
+			t_resp: 1,
+			t_page: 1
+		},
+
+		// Whether or not this is a Cross-Domain load and we're sending session
+		// details.
 		crossdomain_sending: false,
+
 		// Vars that were added to the beacon that we can remove after beaconing
 		addedVars: [],
 
@@ -945,8 +1069,44 @@
 	};
 
 	BOOMR.plugins.RT = {
-		// Methods
-
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} [config.RT.cookie] The name of the cookie in which to store
+		 * the start time for measuring page load time.
+		 *
+		 * The default name is `RT`.
+		 *
+		 * Set this to a falsy value to ignore cookies and depend completely on
+		 * the NavigationTiming API for the start time.
+		 * @param {string} [config.RT.cookie_exp] The lifetime in seconds of the roundtrip cookie.
+		 *
+		 * This only needs to live for as long as it takes for a single page to load.
+		 *
+		 * Something like 10 seconds or so should be good for most cases, but to be safe,
+		 * and to cover people with really slow connections, or users that are geographically
+		 * far away from you, keep it to a few minutes.
+		 *
+		 * The default is set to 10 minutes.
+		 * @param {string} [config.RT.strict_referrer] By default, boomerang will not measure a
+		 * page's roundtrip time if the URL in the RT cookie doesn't match the
+		 * current page's `document.referrer`.
+		 *
+		 * This is because it generally means that the user visited a third page
+		 * while their RT cookie was still valid, and this could render the page
+		 * load time invalid.
+		 *
+		 * There may be cases, though, when this is a valid flow — for example,
+		 * you have an SSL page in between and the referrer isn't passed through.
+		 *
+		 * In this case, you'll want to set `strict_referrer` to `false`.
+		 *
+		 * The default is `true.`
+		 *
+		 * @returns {@link BOOMR.plugins.RT} The RT plugin for chaining
+		 * @memberof BOOMR.plugins.RT
+		 */
 		init: function(config) {
 			BOOMR.debug("init RT", "rt");
 			if (w !== BOOMR.window) {
@@ -1021,9 +1181,9 @@
 			BOOMR.subscribe("click", impl.onclick, null, impl);
 			BOOMR.subscribe("form_submit", impl.onsubmit, null, impl);
 			BOOMR.subscribe("before_beacon", this.addTimersToBeacon, "beacon", this);
-			BOOMR.subscribe("onbeacon", impl.clear, null, impl);
-			BOOMR.subscribe("onerror", impl.onerror, null, impl);
-			BOOMR.subscribe("onconfig", impl.onconfig, null, impl);
+			BOOMR.subscribe("beacon", impl.clear, null, impl);
+			BOOMR.subscribe("error", impl.onerror, null, impl);
+			BOOMR.subscribe("config", impl.onconfig, null, impl);
 			BOOMR.subscribe("spa_navigation", impl.spaNavigation, null, impl);
 
 			// Override any getBeaconURL method to make sure we return the one from the
@@ -1034,6 +1194,25 @@
 			return this;
 		},
 
+		/**
+		 * Starts the timer named `timer_name`.
+		 *
+		 * Timers count in milliseconds.
+		 *
+		 * You must call {@link BOOMR.plugins.RT.endTimer} when this timer has
+		 * completed for the measurement to be recorded in the beacon.
+		 *
+		 * If passed in, the optional second parameter `time_value` is the timestamp
+		 * in milliseconds to set the timer's start time to. This is useful if you
+		 * need to record a timer that started before boomerang was loaded.
+		 *
+		 * @param {string} timer_name The name of the timer to start
+		 * @param {TimeStamp} [time_value] If set, the timer's start time will be
+		 * set explicitly to this value. If not set, the current timestamp is used.
+		 *
+		 * @returns {@link BOOMR.plugins.RT} The RT plugin for chaining
+		 * @memberof BOOMR.plugins.RT
+		 */
 		startTimer: function(timer_name, time_value) {
 			if (timer_name) {
 				if (timer_name === "t_page") {
@@ -1045,6 +1224,21 @@
 			return this;
 		},
 
+		/**
+		 * Stops the timer named `timer_name`.
+		 *
+		 * It is not necessary for the timer to have been started before you call `endTimer()`.
+		 *
+		 * If a timer with this name was not started, then the unload time of the
+		 * previous page is used instead. This allows you to measure the time across pages.
+		 *
+		 * @param {string} timer_name The name of the timer to start
+		 * @param {TimeStamp} [time_value] If set, the timer's stop time will be
+		 * set explicitly to this value. If not set, the current timestamp is used.
+		 *
+		 * @returns {@link BOOMR.plugins.RT} The RT plugin for chaining
+		 * @memberof BOOMR.plugins.RT
+		 */
 		endTimer: function(timer_name, time_value) {
 			if (timer_name) {
 				impl.timers[timer_name] = impl.timers[timer_name] || {};
@@ -1061,6 +1255,7 @@
 		 * Clears (removes) the specified timer
 		 *
 		 * @param {string} timer_name Timer name
+		 * @memberof BOOMR.plugins.RT
 		 */
 		clearTimer: function(timer_name) {
 			if (timer_name) {
@@ -1070,6 +1265,25 @@
 			return this;
 		},
 
+		/**
+		 * Sets the timer named `timer_name` to an explicit time measurement `time_value`.
+		 *
+		 * You'd use this method if you measured time values within your page before
+		 * boomerang was loaded and now need to pass those values to the {@link BOOMR.plugins.RT}
+		 * plugin for inclusion in the beacon.
+		 *
+		 * It is not necessary to call `startTimer()` or `endTimer()` before
+		 * calling `setTimer()`.
+		 *
+		 * If you do, the old values will be ignored and the value passed in to
+		 * this function will be used.
+		 *
+		 * @param {string} timer_name The name of the timer to start
+		 * @param {number} time_value The value in milliseconds to set this timer to.
+		 *
+		 * @returns {@link BOOMR.plugins.RT} The RT plugin for chaining
+		 * @memberof BOOMR.plugins.RT
+		 */
 		setTimer: function(timer_name, time_delta_or_start, timer_end) {
 			if (timer_name) {
 				if (typeof timer_end !== "undefined") {
@@ -1090,6 +1304,14 @@
 			return this;
 		},
 
+		/**
+		 * Adds all known timers to the beacon
+		 *
+		 * @param {object} vars (unused)
+		 * @param {string} source Source
+		 *
+		 * @memberof BOOMR.plugins.RT
+		 */
 		addTimersToBeacon: function(vars, source) {
 			var t_name, timer,
 			    t_other = [];
@@ -1135,9 +1357,18 @@
 			}
 		},
 
-		// Called when the page has reached a "usable" state.  This may be when the
-		// onload event fires, or it could be at some other moment during/after page
-		// load when the page is usable by the user
+		/**
+		 * Called when the page has reached a "usable" state.  This may be when the
+		 * `onload` event fires, or it could be at some other moment during/after page
+		 * load when the page is usable by the user
+		 *
+		 * @param {object} edata Event data
+		 * @param {string} ename Event name
+		 *
+		 * @returns {@link BOOMR.plugins.RT} The RT plugin for chaining
+		 *
+		 * @memberof BOOMR.plugins.RT
+		 */
 		done: function(edata, ename) {
 			BOOMR.debug("Called done: " + ename, "rt");
 
@@ -1285,14 +1516,21 @@
 			return this;
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.RT
+		 */
 		is_complete: function(vars) {
 			// allow error beacons to go through even if we're not complete
 			return impl.complete || (vars && vars["http.initiator"] === "error");
 		},
 
 		/**
-		 * @desc
-		 * Publicly accessible function to updating implementation private data of the RT plugin on the RT cookie
+		 * Updates the RT cookie.
+		 *
+		 * @memberof BOOMR.plugins.RT
 		 */
 		updateCookie: function() {
 			impl.updateCookie();
@@ -1300,10 +1538,11 @@
 
 		/* SOASTA PRIVATE START */
 		/**
-		 * @desc
 		 * Gets RT cookie data from the cookie and returns it as an object
 		 *
-		 * @returns {(RTCookie|false)} - an object containing RT Cookie data or false if no cookie is available
+		 * @returns {(RTCookie|false)} an object containing RT Cookie data or false if no cookie is available
+		 *
+		 * @memberof BOOMR.plugins.RT
 		 */
 		getCookie: function() {
 			var subcookies, k;
@@ -1323,6 +1562,13 @@
 
 		/* SOASTA PRIVATE END */
 
+		/**
+		 * Gets the Navigation Start time
+		 *
+		 * @returns {TimeStamp} Navigation start
+		 *
+		 * @memberof BOOMR.plugins.RT
+		 */
 		navigationStart: function() {
 			if (!impl.navigationStart) {
 				impl.initFromNavTiming();

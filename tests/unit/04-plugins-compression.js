@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global chai*/
 
-describe("BOOMR.plugins.Compression", function() {
+describe("BOOMR.utils.Compression", function() {
 	var assert = chai.assert;
 
 	describe("BOOMR.utils", function() {

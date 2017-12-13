@@ -1,10 +1,136 @@
-/*
- * Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
- * Copyright (c) 2012, Log-Normal, Inc.  All rights reserved.
- * Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
+/**
+ * The bandwidth plugin measures the bandwidth and latency of the user's network
+ * connection to your server.
+ *
+ * Please note that bandwidth detection through JavaScript is not accurate. If
+ * the user's network is lossy or is shared with other users, or network traffic
+ * is bursty, real bandwidth can vary over time.
+ *
+ * The measurement Boomerang takes is based over a short period of time, and this may not
+ * be representative of the best or worst cases. Boomerang tries to account for that by
+ * measuring not just the bandwidth, but also the error value in that measurement.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Setup
+ *
+ * The bandwidth images are located in the `images/` folder. You need to copy all
+ * of these images to a location on your HTTP server.
+ *
+ * You may put these images on your CDN, but be aware that this could result in
+ * increased CDN charges.  You will need to configure your CDN to ignore the
+ * query string when caching these images.
+ *
+ * ## Usage
+ *
+ * Once Boomerang has been added to your page and {@link BOOMR.init} has been called,
+ * the bandwidth test will start once the page loads.
+ *
+ * See the list of {@link BOOMR.plugins.BW.init BW options} for required {@link BOOMR.init}
+ * configuration, e.g. {@link BOOMR.plugins.BW.init BW.base_url}.
+ *
+ * If you want the page load beacon to include the results of the bandwidth test,
+ * setting {@link BOOMR.plugins.BW.init BW.block_beacon} to `true` will force boomerang
+ * to wait for the test to complete before sending the beacon.
+ *
+ * If you do not turn on the {@link BOOMR.plugins.BW.init BW.block_beacon} option,
+ * you will only receive bandwidth results if they were cached in a cookie by a
+ * previous test run.
+ *
+ * ## IPv4 optimisations
+ *
+ * While visitor's IP address information isn't available to JavaScript, if your server
+ * can communicate the IP address to JavaScript (e.g. via HTML injection), Boomerang
+ * will use it to detect if the visitor has changed networks.  See
+ * {@link BOOMR.plugins.BW.init BW.user_ip} for details.
+ *
+ * If your visitor has an IPv4 address, then Boomerang will also strip out the last
+ * part of the IP and use that rather than the entire IP address.  This helps if
+ * visitors use DHCP on the same ISP where their IP address changes frequently,
+ * but they stay within the same subnet.
+ *
+ * If the visitor has an IPv6 address, we use the entire address.
+ *
+ * ## The Cookie
+ *
+ * The bandwidth results are stored within a cookie.  This helps ensure the bandwidth
+ * test isn't repeated for the same user repeatedly (slowing down their experience).
+ *
+ * You can customise the name of the cookie where the bandwidth will be stored via
+ * the {@link BOOMR.plugins.BW.init BW.cookie} option.
+ *
+ * By default this is set to `BA`.
+ *
+ * This cookie is set to expire in 7 days. You can change its lifetime using
+ * the {@link BOOMR.plugins.BW.init BW.cookie_exp} option.
+ *
+ * During that time, you can also read the value of the cookie on the server
+ * side. Its format is as follows:
+ *
+ * ```
+ * BA=ba=nnnnnnn&be=nnn.nn&l=nnnn&le=nn.nn&ip=iiiiii&t=sssssss;
+ * ```
+ *
+ * The parameters are defined as:
+ *
+ * * `ba` [integer] [bytes/s] The user's bandwidth to your server
+ * * `be` [float] [bytes/s] The 95% confidence interval margin of error in measuring the user's bandwidth
+ * * `l` [float] [ms] The HTTP latency between the user's computer and your server
+ * * `le` [float] [ms] The 95% confidence interval margin of error in measuring the user's latency
+ * * `ip` [ip address] The user's IPv4 or IPv6 address that was passed as the user_ip parameter to the init() method
+ * * `t` [timestamp] The browser time (in seconds since the epoch) when the cookie was set
+ *
+ * ## Disabling the bandwidth check
+ *
+ * Finally, there may be cases when you want to completely disable the bandwidth test --
+ * perhaps you know that your user is on a slow network, or pays by the byte (the
+ * andwidth test uses a lot of bandwidth), or is on a mobile device that cannot
+ * handle the load.
+ *
+ * In such cases you have two options:
+ *
+ * * Delete the bandwdith plugin (`delete BOOMR.plugins.BW`)
+ * * Set the {@link BOOMR.plugins.BW.init BW.enabled} parameter to `false`
+ *
+ * ## Methodology
+ * Bandwidth and latency are measured by downloading fixed-size images from a server
+ * and measuring the time it took to download them.  We run it in the following order:
+ *
+ * * First, download a 32 byte gif 10 times serially.  This is used to measure latency.
+ *   * We discard the first measurement because that pays the price for the TCP
+ *     handshake (3 packets) and TCP slow-start (4 more packets).  All other
+ *     image requests take two TCP packets (one for the request and one for the
+ *     response).  This gives us a good idea of how much time it takes to
+ *     make a HTTP request from the browser to our server.
+ *   * Once done, we calculate the arithmetic mean, standard deviation and standard
+ *     error at 95% confidence for the 9 download times that we have.  This is
+ *     the latency number (`lat`) and confidence intervl (`lat_err`) that we
+ *     beacon back to our server.
+ * * Next, download images of increasing size until one of the times out
+ *   * We choose image sizes so that we can narrow down on a bandwidth range as
+ *     soon as possible.
+ *   * Image timeouts are set at between 1.2 and 1.5 seconds.  If an image times
+ *     out, we stop downloading larger images, and retry the largest image 4
+ *     more times.  We then calculate the bandwidth for the largest 3 images
+ *     that we downloaded.  This should result in 7 readings unless the test
+ *     timed out before that. We calculate the median, standard deviation and
+ *     standard error from these values and this is the bandwidth (`bw`) and
+ *     confidence interval (`bw_err`) that we beacon back to our server.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds the following parameters to the beacon:
+ *
+ * * `bw`: User's measured bandwidth in bytes per second
+ * * `bw_err`: 95% confidence interval margin of error in measuring user's bandwidth
+ * * `lat`: User's measured HTTP latency in milliseconds
+ * * `lat_err`: 95% confidence interval margin of error in measuring user's latency
+ * * `bw_time` Timestamp (seconds since the epoch) on the user's browser when
+ *   the bandwidth and latency was measured
+ * * `bw_debug` Debug information
+ *
+ * @class BOOMR.plugins.BW
  */
-
-// This is the Bandwidth & Latency plugin abbreviated to BW
 (function() {
 	var impl, images;
 
@@ -475,6 +601,81 @@
 	};
 
 	BOOMR.plugins.BW = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} [config.BW.base_url] By default, this is set to the empty string,
+		 * which has the effect of disabling the bandwidth plugin. Set the
+		 * `base_url` parameter to the HTTP path of the directory that contains
+		 * the bandwidth images to enable this test.
+		 *
+		 * This can be an absolute or a relative URL.
+		 *
+		 * If it's relative, remember that it's relative to the page that boomerang is included
+		 * in and not to the javascript file.
+		 *
+		 * The trailing / is required.
+		 * @param {boolean} [config.BW.cookie] The name of the cookie in which to store
+		 * the measured bandwidth and latency of the user's network connection.
+		 *
+		 * The default name is `BA`.
+		 * @param {boolean} [config.BW.cookie_exp] The lifetime in seconds of the bandwidth cookie.
+		 *
+		 * The default is set to 7 days. This specifies how long it will be before
+		 * we run the bandwidth test again for a user, assuming their IP address
+		 * doesn't change within this time.
+		 *
+		 * You probably do not need to change this setting at all since the bandwidth
+		 * of a given network connection typically does not change by an order
+		 * of magnitude on a regular basis.
+		 *
+		 * Note that if you're doing some kind of real-time streaming, then
+		 * chances are that this bandwidth test isn't right for you, so
+		 * setting this cookie to a shorter value isn't the right solution.
+		 * @param {boolean} [config.BW.timeout] The timeout in seconds for the entire bandwidth test.
+		 *
+		 * The default is set to 15 seconds.
+		 *
+		 * The bandwidth test can run for a long time, and sometimes, due to
+		 * network errors, it might never complete. The timeout forces the test
+		 * to complete at that time. This is a hard limit.
+		 *
+		 * If the timeout fires, we stop further iterations of the test and
+		 * attempt to calculate bandwidth with the data that we've collected at that point.
+		 *
+		 * Increasing the timeout can get you more data and increase the accuracy
+		 * of the test, but at the same time increases the risk of the test not
+		 * completing before the user leaves the page.
+		 * @param {boolean} [config.BW.nruns] The number of times the bandwidth test should run.
+		 *
+		 * The default is set to 5.
+		 *
+		 * The first test is always a pilot to figure out the best way to proceed
+		 * with the remaining tests. Increasing this number will increase the
+		 * tests accuracy, but at the same time increases the risk that the test will timeout.
+		 *
+		 * It should take about 2-4 seconds per run, so consider this value along with the timeout value above.
+		 * @param {boolean} [config.BW.test_https] By default, boomerang will skip the bandwidth
+		 * test over an HTTPS connection.
+		 *
+		 * Establishing an SSL connection takes time, which could skew the
+		 * bandwidth results. If all your traffic is sent over SSL, then running
+		 * the test over SSL probably gets you what you want.
+		 *
+		 * If you set `test_https` to `true`, boomerang will run the test instead of skipping.
+		 * @param {boolean} [config.BW.block_beacon] By default, the bandwidth plugin
+		 * will not block boomerang from sending a beacon, so the results will
+		 * not be included in the broadcast with default settings.
+		 *
+		 * If you set `block_beacon` to true, boomerang will wait for the
+		 * results of the test before sending the beacon.
+		 * @param {string} [config.BW.user_ip] The user's IP address, for detecting
+		 * if networks change.
+		 *
+		 * @returns {@link BOOMR.plugins.BW} The BW plugin for chaining
+		 * @memberof BOOMR.plugins.BW
+		 */
 		init: function(config) {
 			if (impl.initialized) {
 				return this;
@@ -510,6 +711,14 @@
 			return this;
 		},
 
+		/**
+		 * Starts the bandwidth test. This method is called automatically when
+		 * boomerang's {@link BOOMR#event:page_ready} event fires, so you won't need
+		 * to call it yourself.
+		 *
+		 * @returns {@link BOOMR.plugins.BW} The BW plugin for chaining
+		 * @memberof BOOMR.plugins.BW
+		 */
 		run: function() {
 			var a;
 			if (impl.running || impl.complete) {
@@ -546,6 +755,16 @@
 			return this;
 		},
 
+		/**
+		 * Stops the bandwidth test immediately and attempts to calculate bandwidth
+		 * and latency from values that it has already gathered.
+		 *
+		 * This method is called automatically if the bandwidth test times out.
+		 *
+		 * It is better to set the timeout value appropriately when calling the
+		 * {@link BOOMR.init} method.
+		 * @memberof BOOMR.plugins.BW
+		 */
 		abort: function() {
 			impl.aborted = true;
 			if (impl.running) {
@@ -555,6 +774,12 @@
 			}
 		},
 
+		/**
+		 * Whether or not this plugin is complete
+		 *
+		 * @returns {boolean} `true` if the plugin is complete
+		 * @memberof BOOMR.plugins.BW
+		 */
 		is_complete: function() {
 			if (impl.block_beacon === true) {
 				return impl.complete;

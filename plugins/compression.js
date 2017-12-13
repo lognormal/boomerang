@@ -1,3 +1,14 @@
+/**
+ * The `Compression` plugin adds common compression code that other plugins can use.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * This plugin adds no parameters to the beacon.
+ *
+ * @class BOOMR.utils.Compression
+ */
 (function() {
 	BOOMR = window.BOOMR || {};
 	BOOMR.utils = BOOMR.utils || {};
@@ -9,8 +20,10 @@
 	var self = BOOMR.utils.Compression = {};
 
 	/**
-	 * Converts the structure to URL-friendly JSON
+	 * Converts an object to URL-friendly JSON
+	 *
 	 * Adapted from https://github.com/Sage/jsurl
+	 *
 	 * Changes:
 	 *  Formatting
 	 *  Removal of Array.map and Object.map for compat with IE 6-8
@@ -19,6 +32,7 @@
 	 * @param {object} v Object to convert
 	 *
 	 * @returns {string} URL-friendly JSON
+	 * @memberof BOOMR.utils.Compression
 	 */
 	self.jsUrl = function jsUrl(v) {
 		/**
@@ -120,12 +134,14 @@
 	};
 
 	/**
-	 * Converts from JSURL to JSON
+	 * Converts from JSURL to JSON.
+	 *
 	 * Adapted from https://github.com/Sage/jsurl
 	 *
 	 * @param {string} s JSURL string
 	 *
 	 * @returns {object} Decompressed object
+	 * @memberof BOOMR.utils.Compression
 	 */
 	self.jsUrlDecompress = function(s) {
 		if (typeof s !== "string") {

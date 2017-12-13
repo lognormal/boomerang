@@ -13,7 +13,7 @@ window.backbone_imgs = [-1];
 var xhr;
 
 var beaconNum = 0;
-BOOMR.subscribe("onbeacon", function() {
+BOOMR.subscribe("beacon", function() {
 	if (!BOOMR.plugins.AutoXHR) {
 		return;
 	}

@@ -1,4 +1,3 @@
-doc/soasta.md
 plugins/config_override.js
 plugins/config-override.js
 plugins/cross-domain.js

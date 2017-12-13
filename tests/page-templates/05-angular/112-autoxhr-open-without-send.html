@@ -20,7 +20,7 @@ window.angular_nav_routes = ["/widgets/1", "/"];
 <script src="112-autoxhr-open-without-send.js" type="text/javascript"></script>
 <script>
 var img, xhr, beaconCount = 0;
-BOOMR.subscribe("onbeacon", function(vars) {
+BOOMR.subscribe("beacon", function(vars) {
 	beaconCount++;
 	if (beaconCount === 3) {
 		setTimeout(function() {

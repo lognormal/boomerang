@@ -7,7 +7,7 @@
  */
 
 /**
- * @namespace Boomerang
+ * @class BOOMR
  * @desc
  * boomerang measures various performance characteristics of your user's browsing
  * experience and beacons it back to your server.
@@ -15,34 +15,74 @@
  * To use this you'll need a web site, lots of users and the ability to do
  * something with the data you collect.  How you collect the data is up to
  * you, but we have a few ideas.
-*/
+ *
+ * Everything in boomerang is accessed through the `BOOMR` object, which is
+ * available on `window.BOOMR`.  It contains the public API, utility functions
+ * ({@link BOOMR.utils}) and all of the plugins ({@link BOOMR.plugins}).
+ *
+ * Each plugin has its own API, but is reachable through {@link BOOMR.plugins}.
+ *
+ * ## Beacon Parameters
+ *
+ * The core boomerang object will add the following parameters to the beacon.
+ *
+ * Note that each individual {@link BOOMR.plugins plugin} will add its own
+ * parameters as well.
+ *
+ * * `v`: Boomerang version
+ * * `u`: The page's URL (for most beacons), or the `XMLHttpRequest` URL
+ * * `pgu`: The page's URL (for `XMLHttpRequest` beacons)
+ * * `pid`: Page ID (8 characters)
+ * * `r`: Navigation referrer (from the cookie)
+ * * `r2`: Navigation referrer (from `document.location`, if different than `r`)
+ * * `vis.pre`: `1` if the page transitioned from prerender to visible
+ * * `xhr.pg`: The `XMLHttpRequest` page group
+ * * `errors`: Error messages of errors detected in Boomerang code, separated by a newline
+ */
 
 /**
- * @memberof Boomerang
+ * @typedef TimeStamp
+ * @type {number}
+ *
+ * @desc
+ * A [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time) timestamp (milliseconds
+ * since 1970) created by [BOOMR.now()]{@link BOOMR.now}.
+ *
+ * If `DOMHighResTimeStamp` (`performance.now()`) is supported, it is
+ * a `DOMHighResTimeStamp` (with microsecond resolution in the fractional),
+ * otherwise, it is `Date.now()`.
+ */
+
+/**
+ * @global
  * @type {TimeStamp}
  * @desc
- * Measure the time the script started
- * This has to be global so that we don't wait for the entire
- * BOOMR function to download and execute before measuring the
+ * Timestamp the boomerang.js script started executing.
+ *
+ * This has to be global so that we don't wait for this entire
+ * script to download and execute before measuring the
  * time.  We also declare it without `var` so that we can later
- * `delete` it.  This is the only way that works on Internet Explorer
-*/
+ * `delete` it.  This is the only way that works on Internet Explorer.
+ */
 BOOMR_start = new Date().getTime();
 
 /**
  * @function
+ * @global
  * @desc
- * Check the value of document.domain and fix it if incorrect.
+ * Check the value of `document.domain` and fix it if incorrect.
+ *
  * This function is run at the top of boomerang, and then whenever
- * init() is called.  If boomerang is running within an iframe, this
+ * {@link BOOMR.init} is called.  If boomerang is running within an IFRAME, this
  * function checks to see if it can access elements in the parent
- * iframe.  If not, it will fudge around with document.domain until
+ * IFRAME.  If not, it will fudge around with `document.domain` until
  * it finds a value that works.
  *
- * This allows site owners to change the value of document.domain at
+ * This allows site owners to change the value of `document.domain` at
  * any point within their page's load process, and we will adapt to
  * it.
- * @param {string} domain - domain name as retrieved from page url
+ *
+ * @param {string} domain Domain name as retrieved from page URL
  */
 function BOOMR_check_doc_domain(domain) {
 	/*eslint no-unused-vars:0*/
@@ -106,11 +146,9 @@ function BOOMR_check_doc_domain(domain) {
 
 BOOMR_check_doc_domain();
 
-
-// beaconing section
-// the parameter is the window
+// Construct BOOMR
+// w is window
 (function(w) {
-
 	var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
 	// This is the only block where we use document without the w. qualifier
@@ -124,18 +162,66 @@ BOOMR_check_doc_domain();
 	d = w.document;
 
 	// Short namespace because I don't want to keep typing BOOMERANG
-	if (!w.BOOMR) { w.BOOMR = {}; }
+	if (!w.BOOMR) {
+		w.BOOMR = {};
+	}
+
 	BOOMR = w.BOOMR;
+
 	// don't allow this code to be included twice
 	if (BOOMR.version) {
 		return;
 	}
 
+	/**
+	 * Boomerang version, formatted as major.minor.patchlevel.
+	 *
+	 * This variable is replaced during build (`grunt build`).
+	 *
+	 * @type {string}
+	 *
+	 * @memberof BOOMR
+	 */
 	BOOMR.version = "%boomerang_version%";
+
+	/**
+	 * The main document window.
+	 * * If Boomerang was loaded in an IFRAME, this is the parent window
+	 * * If Boomerang was loaded inline, this is the current window
+	 *
+	 * @type {Window}
+	 *
+	 * @memberof BOOMR
+	 */
 	BOOMR.window = w;
+
+	/**
+	 * The Boomerang frame:
+	 * * If Boomerang was loaded in an IFRAME, this is the IFRAME
+	 * * If Boomerang was loaded inline, this is the current window
+	 *
+	 * @type {Window}
+	 *
+	 * @memberof BOOMR
+	 */
 	BOOMR.boomerang_frame = orig_w;
 
-	if (!BOOMR.plugins) { BOOMR.plugins = {}; }
+	/**
+	 * @class BOOMR.plugins
+	 * @desc
+	 * Boomerang plugin namespace.
+	 *
+	 * All plugins should add their plugin object to `BOOMR.plugins`.
+	 *
+	 * A plugin should have, at minimum, the following exported functions:
+	 * * `init(config)`
+	 * * `is_complete()`
+	 *
+	 * See {@tutorial creating-plugins} for details.
+	 */
+	if (!BOOMR.plugins) {
+		BOOMR.plugins = {};
+	}
 
 	// CustomEvent proxy for IE9 & 10 from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent
 	(function() {
@@ -181,12 +267,12 @@ BOOMR_check_doc_domain();
 	}());
 
 	/**
-	 dispatch a custom event to the browser
-	 @param e_name	The custom event name that consumers can subscribe to
-	 @param e_data	Any data passed to subscribers of the custom event via the `event.detail` property
-	 @param async	By default, custom events are dispatched immediately.
-			Set to true if the event should be dispatched once the browser has finished its current
-			JavaScript execution.
+	 * Dispatch a custom event to the browser
+	 * @param {string} e_name The custom event name that consumers can subscribe to
+	 * @param {object} e_data Any data passed to subscribers of the custom event via the `event.detail` property
+	 * @param {boolean} async By default, custom events are dispatched immediately.
+	 * Set to true if the event should be dispatched once the browser has finished its current
+	 * JavaScript execution.
 	 */
 	dispatchEvent = function(e_name, e_data, async) {
 		var ev = createCustomEvent(e_name, {"detail": e_data});
@@ -223,7 +309,7 @@ BOOMR_check_doc_domain();
 	// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
 
 	// Set the name of the hidden property and the change event for visibility
-	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+	if (typeof document.hidden !== "undefined") {
 		visibilityState = "visibilityState";
 		visibilityChange = "visibilitychange";
 	}
@@ -240,30 +326,37 @@ BOOMR_check_doc_domain();
 		visibilityChange = "webkitvisibilitychange";
 	}
 
-	// impl is a private object not reachable from outside the BOOMR object
-	// users can set properties by passing in to the init() method
+	// impl is a private object not reachable from outside the BOOMR object.
+	// Users can set properties by passing in to the init() method.
 	impl = {
-		// properties
+		// Beacon URL
 		beacon_url: "",
-		// beacon request method, either GET, POST or AUTO. AUTO will check the
-		// request size then use GET if the request URL is less than MAX_GET_LENGTH chars
-		// otherwise it will fall back to a POST request.
+
+		// Beacon request method, either GET, POST or AUTO. AUTO will check the
+		// request size then use GET if the request URL is less than MAX_GET_LENGTH
+		// chars. Otherwise, it will fall back to a POST request.
 		beacon_type: "AUTO",
-		//  beacon authorization key value.  Most systems will use the 'Authentication' keyword, but some
-		//  some services use keys like 'X-Auth-Token' or other custom keys
+
+		// Beacon authorization key value. Most systems will use the 'Authentication'
+		// keyword, but some some services use keys like 'X-Auth-Token' or other
+		// custom keys.
 		beacon_auth_key: "Authorization",
-		//  beacon authorization token.  This is only needed if your are using a POST and
-		//  the beacon requires an Authorization token to accept your data
+
+		// Beacon authorization token. This is only needed if your are using a POST
+		// and the beacon requires an Authorization token to accept your data.
 		beacon_auth_token: undefined,
-		// strip out everything except last two parts of hostname.
+
+		// Strip out everything except last two parts of hostname.
 		// This doesn't work well for domains that end with a country tld,
 		// but we allow the developer to override site_domain for that.
-		// You can disable all cookies by setting site_domain to a falsy value
+		// You can disable all cookies by setting site_domain to a falsy value.
 		site_domain: w.location.hostname.
 					replace(/.*?([^.]+\.[^.]+)\.?$/, "$1").
 					toLowerCase(),
-		//! User's ip address determined on the server.  Used for the BA cookie
+
+		// User's ip address determined on the server.  Used for the BW cookie.
 		user_ip: "",
+
 		// Whether or not to send beacons on page load
 		autorun: true,
 
@@ -276,36 +369,324 @@ BOOMR_check_doc_domain();
 		// document.referrer
 		r2: undefined,
 
-		//! strip_query_string: false,
+		// strip_query_string: false,
 
-		//! onloadfired: false,
+		// onloadfired: false,
 
-		//! handlers_attached: false,
+		// handlers_attached: false,
 		events: {
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when the page is usable by the user.
+			 *
+			 * By default this is fired when `window.onload` fires, but if you
+			 * set `autorun` to false when calling {@link BOOMR.init}, then you
+			 * must explicitly fire this event by calling {@link BOOMR#event:page_ready}.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload}
+			 * @event BOOMR#page_ready
+			 * @property {Event} [event] Event triggering the page_ready
+			 */
 			"page_ready": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired just before the browser unloads the page.
+			 *
+			 * The first event of `window.pagehide`, `window.beforeunload`,
+			 * or `window.unload` will trigger this.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/Events/pagehide}
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload}
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunload}
+			 * @event BOOMR#page_unload
+			 */
 			"page_unload": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired before the document is about to be unloaded.
+			 *
+			 * `window.beforeunload` will trigger this.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload}
+			 * @event BOOMR#before_unload
+			 */
 			"before_unload": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired on `document.DOMContentLoaded`.
+			 *
+			 * The `DOMContentLoaded` event is fired when the initial HTML document
+			 * has been completely loaded and parsed, without waiting for stylesheets,
+			 * images, and subframes to finish loading
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded}
+			 * @event BOOMR#dom_loaded
+			 */
 			"dom_loaded": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired on `document.visibilitychange`.
+			 *
+			 * The `visibilitychange` event is fired when the content of a tab has
+			 * become visible or has been hidden.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange}
+			 * @event BOOMR#visibility_changed
+			 */
 			"visibility_changed": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when the `visibilityState` of the document has changed from
+			 * `prerender` to `visible`
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange}
+			 * @event BOOMR#prerender_to_visible
+			 */
 			"prerender_to_visible": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when a beacon is about to be sent.
+			 *
+			 * The subscriber can still add variables to the beacon at this point,
+			 * either by modifying the `vars` paramter or calling {@link BOOMR.addVar}.
+			 *
+			 * @event BOOMR#before_beacon
+			 * @property {object} vars Beacon variables
+			 */
 			"before_beacon": [],
-			"onbeacon": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when a beacon was sent.
+			 *
+			 * The beacon variables cannot be modified at this point.  Any calls
+			 * to {@link BOOMR.addVar} or {@link BOOMR.removeVar} will apply to the
+			 * next beacon.
+			 *
+			 * Also known as `onbeacon`.
+			 *
+			 * @event BOOMR#beacon
+			 * @property {object} vars Beacon variables
+			 */
+			"beacon": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when the page load beacon has been sent.
+			 *
+			 * This event should only happen once on a page.  It does not apply
+			 * to SPA soft navigations.
+			 *
+			 * @event BOOMR#page_load_beacon
+			 * @property {object} vars Beacon variables
+			 */
 			"page_load_beacon": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when an XMLHttpRequest has finished, or, if something calls
+			 * {@link BOOMR.responseEnd}.
+			 *
+			 * @event BOOMR#xhr_load
+			 * @property {object} data Event data
+			 */
 			"xhr_load": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when the `click` event has happened on the `document`.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick}
+			 * @event BOOMR#click
+			 */
 			"click": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired when any `FORM` element is submitted.
+			 *
+			 * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit}
+			 * @event BOOMR#form_submit
+			 */
 			"form_submit": [],
-			"onconfig": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever new configuration data is applied via {@link BOOMR.init}.
+			 *
+			 * Also known as `onconfig`.
+			 *
+			 * @event BOOMR#config
+			 * @property {object} data Configuration data
+			 */
+			"config": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever `XMLHttpRequest.open` is called.
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.
+			 *
+			 * @event BOOMR#xhr_init
+			 * @property {string} type XHR type ("xhr")
+			 */
 			"xhr_init": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever a SPA plugin is about to track a new navigation.
+			 *
+			 * @event BOOMR#spa_init
+			 * @property {string} navType Navigation type (`spa` or `spa_hard`)
+			 * @property {object} param SPA navigation parameters
+			 */
 			"spa_init": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever a SPA navigation is complete.
+			 *
+			 * @event BOOMR#spa_navigation
+			 */
 			"spa_navigation": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever `XMLHttpRequest.send` is called.
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.
+			 *
+			 * @event BOOMR#xhr_send
+			 * @property {object} xhr `XMLHttpRequest` object
+			 */
 			"xhr_send": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever and `XMLHttpRequest` has an error (if its `status` is
+			 * set).
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.
+			 *
+			 * Also known as `onxhrerror`.
+			 *
+			 * @event BOOMR#xhr_error
+			 * @property {object} data XHR data
+			 */
+			"xhr_error": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever a page error has happened.
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.Errors} is enabled.
+			 *
+			 * Also known as `onerror`.
+			 *
+			 * @event BOOMR#error
+			 * @property {object} err Error
+			 */
+			"error": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever an `XMLHttpRequest.send()` is called
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.
+			 *
+			 * @event BOOMR#xhr_send
+			 * @property {object} req XMLHttpRequest
+			 */
+			"xhr_send": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever connection information changes via the
+			 * Network Information API.
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.Mobile} is enabled.
+			 *
+			 * @event BOOMR#netinfo
+			 * @property {object} connection `navigator.connection`
+			 */
 			"netinfo": []
 		},
 
+		/**
+		 * Public events
+		 */
 		public_events: {
+			/**
+			 * Public event (fired on `document`), and can be subscribed via
+			 * `document.addEventListener("onBeforeBoomerangBeacon", ...)` or
+			 * `document.attachEvent("onpropertychange", ...)`.
+			 *
+			 * Maps to {@link BOOMR#event:before_beacon}
+			 *
+			 * @event document#onBeforeBoomerangBeacon
+			 * @property {object} vars Beacon variables
+			 */
 			"before_beacon": "onBeforeBoomerangBeacon",
-			"onbeacon": "onBoomerangBeacon",
+
+			/**
+			 * Public event (fired on `document`), and can be subscribed via
+			 * `document.addEventListener("onBoomerangBeacon", ...)` or
+			 * `document.attachEvent("onpropertychange", ...)`.
+			 *
+			 * Maps to {@link BOOMR#event:before_beacon}
+			 *
+			 * @event document#onBoomerangBeacon
+			 * @property {object} vars Beacon variables
+			 */
+			"beacon": "onBoomerangBeacon",
+
+			/**
+			 * Public event (fired on `document`), and can be subscribed via
+			 * `document.addEventListener("onBoomerangLoaded", ...)` or
+			 * `document.attachEvent("onpropertychange", ...)`.
+			 *
+			 * Fired when {@link BOOMR} has loaded and can be used.
+			 *
+			 * @event document#onBoomerangLoaded
+			 */
 			"onboomerangloaded": "onBoomerangLoaded"
+		},
+
+		/**
+		 * Maps old event names to their updated name
+		 */
+		translate_events: {
+			"onbeacon": "beacon",
+			"onconfig": "config",
+			"onerror": "error",
+			"onxhrerror": "xhr_error"
 		},
 
 		listenerCallbacks: {},
@@ -339,7 +720,9 @@ BOOMR_check_doc_domain();
 
 				// don't capture events on flash objects
 				// because of context slowdowns in PepperFlash
-				if (target && target.nodeName.toUpperCase() === "OBJECT" && target.type === "application/x-shockwave-flash") {
+				if (target &&
+				    target.nodeName.toUpperCase() === "OBJECT" &&
+				    target.type === "application/x-shockwave-flash") {
 					return;
 				}
 				impl.fireEvent(type, target);
@@ -380,6 +763,11 @@ BOOMR_check_doc_domain();
 
 			e_name = e_name.toLowerCase();
 
+			// translate old names
+			if (this.translate_events[e_name]) {
+				e_name = this.translate_events[e_name];
+			}
+
 			if (!this.events.hasOwnProperty(e_name)) {
 				return;// false;
 			}
@@ -392,7 +780,7 @@ BOOMR_check_doc_domain();
 
 			// Before we fire any event listeners, let's call real_sendBeacon() to flush
 			// any beacon that is being held by the setImmediate.
-			if (e_name !== "before_beacon" && e_name !== "onbeacon") {
+			if (e_name !== "before_beacon" && e_name !== "beacon") {
 				BOOMR.real_sendBeacon();
 			}
 
@@ -431,40 +819,136 @@ BOOMR_check_doc_domain();
 	// we don't overwrite anything additional that was added to BOOMR before this
 	// was called... for example, a plugin.
 	boomr = {
-		//! t_lstart: value of BOOMR_lstart set in host page
+		/**
+		 * The timestamp when boomerang.js showed up on the page.
+		 *
+		 * This is the value of `BOOMR_start` we set earlier.
+		 * @type {TimeStamp}
+		 *
+		 * @memberof BOOMR
+		 */
 		t_start: BOOMR_start,
-		//! t_end: value set in zzz-last-plugin.js
 
+		/**
+		 * When the Boomerang plugins have all run.
+		 *
+		 * This value is generally set in zzz-last-plugin.js.
+		 * @type {TimeStamp}
+		 *
+		 * @memberof BOOMR
+		 */
+		t_end: undefined,
+
+		/**
+		 * URL of boomerang.js.  This is only set if using the asynchronous loader snippet.
+		 *
+		 * @type {string}
+		 *
+		 * @memberof BOOMR
+		 */
 		url: myurl,
 
 		/* SOASTA PRIVATE START */
+		/**
+		 * URL of config.js.
+		 *
+		 * @type {string}
+		 *
+		 * @memberof BOOMR
+		 */
 		config_url: null,
 		/* SOASTA PRIVATE END */
 
-		// constants visible to the world
+		/**
+		 * Whether or not Boomerang was loaded after the `onload` event.
+		 *
+		 * @type {boolean}
+		 *
+		 * @memberof BOOMR
+		 */
+		loadedLate: false,
+
+		/**
+		 * Constants visible to the world
+		 * @class BOOMR.constants
+		 */
 		constants: {
-			// SPA beacon types
+			/**
+			 * SPA beacon types
+			 *
+			 * @type {string[]}
+			 *
+			 * @memberof BOOMR.constants
+			 */
 			BEACON_TYPE_SPAS: ["spa", "spa_hard"],
-			// using 2000 here as a de facto maximum URL length based on:
-			// http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+
+			/**
+			 * Maximum GET URL length.
+			 * Using 2000 here as a de facto maximum URL length based on:
+ 			 * http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+			 *
+			 * @type {number}
+			 *
+			 * @memberof BOOMR.constants
+			 */
 			MAX_GET_LENGTH: 2000
 		},
 
 		/* SOASTA PRIVATE START */
+		/**
+		 * Session data
+		 * @class BOOMR.session
+		 */
 		session: {
-			// You can disable all cookies by setting site_domain to a falsy value
+			/**
+			 * Session Domain.
+			 *
+			 * You can disable all cookies by setting site_domain to a falsy value.
+			 *
+			 * @type {string}
+			 *
+			 * @memberof BOOMR.session
+			 */
 			domain: null,
+
+			/**
+			 * Session ID.  This will be randomly generated in the client but may
+			 * be overwritten by the server if not set.
+			 *
+			 * @type {string}
+			 *
+			 * @memberof BOOMR.session
+			 */
 			ID: Math.random().toString(36).replace(/^0\./, ""),
+
+			/**
+			 * Session start time.
+			 *
+			 * @type {TimeStamp}
+			 *
+			 * @memberof BOOMR.session
+			 */
 			start: undefined,
+
+			/**
+			 * Session length (number of pages)
+			 *
+			 * @type {number}
+			 *
+			 * @memberof BOOMR.session
+			 */
 			length: 0
 		},
 		/* SOASTA PRIVATE END */
 
-		// Utility functions
+		/**
+		 * @class BOOMR.utils
+		 */
 		utils: {
 			/**
-			 * Validate that the current frame has support for postMessage and can send iframe postMessages
-			 * @returns {boolean} - true if we have postMessage support, false if we don't
+			 * Determines whether or not the browser has `postMessage` support
+			 *
+			 * @returns {boolean} True if supported
 			 */
 			hasPostMessageSupport: function() {
 				if (!w.postMessage || typeof w.postMessage !== "function" && typeof w.postMessage !== "object") {
@@ -472,6 +956,18 @@ BOOMR_check_doc_domain();
 				}
 				return true;
 			},
+
+			/**
+			 * Converts an object to a string.
+			 *
+			 * @param {object} o Object
+			 * @param {string} separator Member separator
+			 * @param {number} nest_level Number of levels to recruse
+			 *
+			 * @returns {string} String representation of the object
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			objectToString: function(o, separator, nest_level) {
 				var value = [], k;
 
@@ -534,6 +1030,15 @@ BOOMR_check_doc_domain();
 				return value.join(separator);
 			},
 
+			/**
+			 * Gets the value of the cookie identified by `name`.
+			 *
+			 * @param {string} name Cookie name
+			 *
+			 * @returns {string|null} Cookie value, if set.
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			getCookie: function(name) {
 				if (!name) {
 					return null;
@@ -550,6 +1055,23 @@ BOOMR_check_doc_domain();
 				}
 			},
 
+			/**
+			 * Sets the cookie named `name` to the serialized value of `subcookies`.
+			 *
+			 * @param {string} name The name of the cookie
+			 * @param {object} subcookies Key/value pairs to write into the cookie.
+			 * These will be serialized as an & separated list of URL encoded key=value pairs.
+			 * @param {number} max_age Lifetime in seconds of the cookie.
+			 * Set this to 0 to create a session cookie that expires when
+			 * the browser is closed. If not set, defaults to 0.
+			 *
+			 * @returns {boolean} True if the cookie was set successfully
+			 *
+			 * @example
+			 * BOOMR.utils.setCookie("RT", { s: t_start, r: url });
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			setCookie: function(name, subcookies, max_age) {
 				var value, nameval, savedval, c, exp;
 
@@ -560,7 +1082,8 @@ BOOMR_check_doc_domain();
 					BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
 
 					BOOMR.addVar("nocookie", 1);
-					return null;
+
+					return false;
 				}
 
 				value = this.objectToString(subcookies, "&");
@@ -594,6 +1117,18 @@ BOOMR_check_doc_domain();
 				return false;
 			},
 
+			/**
+			 * Parse a cookie string returned by {@link BOOMR.utils.getCookie} and
+			 * split it into its constituent subcookies.
+			 *
+			 * @param {string} cookie Cookie value
+			 *
+			 * @returns {object} On success, an object of key/value pairs of all
+			 * sub cookies. Note that some subcookies may have empty values.
+			 * `null` if `cookie` was not set or did not contain valid subcookies.
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			getSubCookies: function(cookie) {
 				var cookies_a,
 				    i, l, kv,
@@ -623,6 +1158,14 @@ BOOMR_check_doc_domain();
 				return gotcookies ? cookies : null;
 			},
 
+			/**
+			 * Removes the cookie identified by `name` by nullifying its value,
+			 * and making it a session cookie.
+			 *
+			 * @param {string} name Cookie name
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			removeCookie: function(name) {
 				return this.setCookie(name, {}, -86400);
 			},
@@ -635,6 +1178,8 @@ BOOMR_check_doc_domain();
 			 * @param {number} urlLimit Maximum size, in characters, of the URL
 			 *
 			 * @returns {string} Cleaned up URL
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			cleanupURL: function(url, urlLimit) {
 				if (!url || BOOMR.utils.isArray(url)) {
@@ -660,6 +1205,16 @@ BOOMR_check_doc_domain();
 				return url;
 			},
 
+			/**
+			 * Gets the URL with the query string replaced with a MD5 hash of its contents.
+			 *
+			 * @param {string} url URL
+			 * @param {boolean} stripHash Whether or not to strip the hash
+			 *
+			 * @returns {string} URL with query string hashed
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			hashQueryString: function(url, stripHash) {
 				if (!url) {
 					return url;
@@ -681,9 +1236,27 @@ BOOMR_check_doc_domain();
 				if (!BOOMR.utils.MD5) {
 					return url;
 				}
-				return url.replace(/\?([^#]*)/, function(m0, m1) { return "?" + (m1.length > 10 ? BOOMR.utils.MD5(m1) : m1); });
+				return url.replace(/\?([^#]*)/, function(m0, m1) {
+					return "?" + (m1.length > 10 ? BOOMR.utils.MD5(m1) : m1);
+				});
 			},
 
+			/**
+			 * Sets the object's properties if anything in config matches
+			 * one of the property names.
+			 *
+			 * @param {object} o The plugin's `impl` object within which it stores
+			 * all its configuration and private properties
+			 * @param {object} config The config object passed in to the plugin's
+			 * `init()` method.
+			 * @param {string} plugin_name The plugin's name in the {@link BOOMR.plugins} object.
+			 * @param {string[]} properties An array containing a list of all configurable
+			 * properties that this plugin has.
+			 *
+			 * @returns {boolean} True if a property was set
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			pluginConfig: function(o, config, plugin_name, properties) {
 				var i, props = 0;
 
@@ -700,13 +1273,16 @@ BOOMR_check_doc_domain();
 
 				return (props > 0);
 			},
+
 			/**
 			 * `filter` for arrays
 			 *
-			 * @private
 			 * @param {Array} array The array to iterate over.
 			 * @param {Function} predicate The function invoked per iteration.
+			 *
 			 * @returns {Array} Returns the new filtered array.
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			arrayFilter: function(array, predicate) {
 				var result = [];
@@ -733,13 +1309,30 @@ BOOMR_check_doc_domain();
 				}
 				return result;
 			},
+
 			/**
-			 * `find` for arrays
+			 * The callback function may return a falsy value to disconnect the
+			 * observer after it returns, or a truthy value to keep watching for
+			 * mutations. If the return value is numeric and greater than 0, then
+			 * this will be the new timeout. If it is boolean instead, then the
+			 * timeout will not fire any more so the caller MUST call disconnect()
+			 * at some point.
 			 *
-			 * @private
-			 * @param {Array} array The array to iterate over.
-			 * @param {Function} predicate The function invoked per iteration.
-			 * @returns {Array} Returns the value of first element that satisfies the predicate.
+			 * @callback BOOMR~addObserverCallback
+			 * @param {object[]} mutations List of mutations detected by the observer or `undefined` if the observer timed out
+			 * @param {object} callback_data Is the passed in `callback_data` parameter without modifications
+			 */
+
+			/**
+			 * `find` for Arrays
+			 *
+			 * @param {Array} array The array to iterate over
+			 * @param {Function} predicate The function invoked per iteration
+			 *
+			 * @returns {Array} Returns the value of first element that satisfies
+			 * the predicate
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			arrayFind: function(array, predicate) {
 				if (!(BOOMR.utils.isArray(array) || (array && typeof array.length === "number")) ||
@@ -764,32 +1357,29 @@ BOOMR_check_doc_domain();
 					return undefined;
 				}
 			},
+
 			/**
-			 * @desc
 			 * Add a MutationObserver for a given element and terminate after `timeout`ms.
-			 * @param el		DOM element to watch for mutations
-			 * @param config		MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
-			 * @param timeout		Number of milliseconds of no mutations after which the observer should be automatically disconnected
-			 * 			If set to a falsy value, the observer will wait indefinitely for Mutations.
-			 * @param callback	Callback function to call either on timeout or if mutations are detected.  The signature of this method is:
-			 * 				function(mutations, callback_data)
-			 * 			Where:
-			 * 				mutations is the list of mutations detected by the observer or `undefined` if the observer timed out
-			 * 				callback_data is the passed in `callback_data` parameter without modifications
 			 *
-			 * 						The callback function may return a falsy value to disconnect the observer after it returns, or a truthy value to
-			 * 			keep watching for mutations. If the return value is numeric and greater than 0, then this will be the new timeout
-			 * 			if it is boolean instead, then the timeout will not fire any more so the caller MUST call disconnect() at some point
-			 * @param callback_data	Any data to be passed to the callback function as its second parameter
-			 * @param callback_ctx	An object that represents the `this` object of the `callback` method.  Leave unset the callback function is not a method of an object
+			 * @param {DOMElement} el DOM element to watch for mutations
+			 * @param {MutationObserverInit} config MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)
+			 * @param {number} timeout Number of milliseconds of no mutations after which the observer should be automatically disconnected.
+			 * If set to a falsy value, the observer will wait indefinitely for Mutations.
+			 * @param {BOOMR~addObserverCallback} callback Callback function to call either on timeout or if mutations are detected.
+			 * @param {object} callback_data Any data to be passed to the callback function as its second parameter.
+			 * @param {object} callback_ctx An object that represents the `this` object of the `callback` method.
+			 * Leave unset the callback function is not a method of an object.
 			 *
-			 * @returns {?object} - `null` if a MutationObserver could not be created OR
-			 * 		- An object containing the observer and the timer object:
-			 * 		  { observer: <MutationObserver>, timer: <Timeout Timer if any> }
+			 * @returns {object|null}
+			 * - `null` if a MutationObserver could not be created OR
+			 * - An object containing the observer and the timer object:
+			 *   `{ observer: <MutationObserver>, timer: <Timeout Timer if any> }`
+			 * - The caller can use this to disconnect the observer at any point
+			 *   by calling `retval.observer.disconnect()`
+			 * - Note that the caller should first check to see if `retval.observer`
+			 *   is set before calling `disconnect()` as it may have been cleared automatically.
 			 *
-			 * 		The caller can use this to disconnect the observer at any point by calling `retval.observer.disconnect()`
-			 * 		Note that the caller should first check to see if `retval.observer` is set before calling `disconnect()` as it may
-			 * 		have been cleared automatically.
+			 * @memberof BOOMR.utils
 			 */
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 				var o = {observer: null, timer: null};
@@ -835,6 +1425,15 @@ BOOMR_check_doc_domain();
 				return o;
 			},
 
+			/**
+			 * Adds an event listener.
+			 *
+			 * @param {DOMElement} el DOM element
+			 * @param {string} type Event name
+			 * @param {function} fn Callback function
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			addListener: function(el, type, fn) {
 				if (el.addEventListener) {
 					el.addEventListener(type, fn, false);
@@ -850,6 +1449,15 @@ BOOMR_check_doc_domain();
 				impl.listenerCallbacks[type].push({ el: el, fn: fn});
 			},
 
+			/**
+			 * Removes an event listener.
+			 *
+			 * @param {DOMElement} el DOM element
+			 * @param {string} type Event name
+			 * @param {function} fn Callback function
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			removeListener: function(el, type, fn) {
 				var i;
 
@@ -871,36 +1479,29 @@ BOOMR_check_doc_domain();
 				}
 			},
 
-			pushVars: function(form, vars, prefix) {
-				var k, i, l = 0, input;
-
-				for (k in vars) {
-					if (vars.hasOwnProperty(k)) {
-						if (BOOMR.utils.isArray(vars[k])) {
-							for (i = 0; i < vars[k].length; ++i) {
-								l += BOOMR.utils.pushVars(form, vars[k][i], k + "[" + i + "]");
-							}
-						}
-						else {
-							input = document.createElement("input");
-							input.type = "hidden";	// we need `hidden` to preserve newlines. see commit message for more details
-							input.name = (prefix ? (prefix + "[" + k + "]") : k);
-							input.value = (vars[k] === undefined || vars[k] === null ? "" : vars[k]);
-
-							form.appendChild(input);
-
-							l += encodeURIComponent(input.name).length + encodeURIComponent(input.value).length + 2;
-						}
-					}
-				}
-
-				return l;
-			},
-
+			/**
+			 * Determines if the specified object is an `Array` or not
+			 *
+			 * @param {object} ary Object in question
+			 *
+			 * @returns {boolean} True if the object is an `Array`
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			isArray: function(ary) {
 				return Object.prototype.toString.call(ary) === "[object Array]";
 			},
 
+			/**
+			 * Determines if the specified value is in the array
+			 *
+			 * @param {object} val Value to check
+			 * @param {object} ary Object in question
+			 *
+			 * @returns {boolean} True if the value is in the Array
+			 *
+			 * @memberof BOOMR.utils
+			 */
 			inArray: function(val, ary) {
 				var i;
 
@@ -921,9 +1522,12 @@ BOOMR_check_doc_domain();
 			 * Get a query parameter value from a URL's query string
 			 *
 			 * @param {string} param Query parameter name
-			 * @param {string|Object} [url] URL containing the query string, or a link object. Defaults to BOOMR.window.location
+			 * @param {string|Object} [url] URL containing the query string, or a link object.
+			 * Defaults to `BOOMR.window.location`
 			 *
 			 * @returns {string|null} URI decoded value or null if param isn't a query parameter
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			getQueryParamValue: function(param, url) {
 				var l, params, i, kv;
@@ -961,6 +1565,8 @@ BOOMR_check_doc_domain();
 			 * https://en.wikipedia.org/wiki/Universally_unique_identifier
 			 *
 			 * @returns {string} UUID
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			generateUUID: function() {
 				return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
@@ -975,7 +1581,10 @@ BOOMR_check_doc_domain();
 			 * characters a-z0-9.
 			 *
 			 * @param {number} chars Number of characters (max 40)
+			 *
 			 * @returns {string} Random ID
+			 *
+			 * @memberof BOOMR.utils
 			 */
 			generateId: function(chars) {
 				return "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".substr(0, chars || 40).replace(/x/g, function(c) {
@@ -1025,19 +1634,54 @@ BOOMR_check_doc_domain();
 
 		}, // closes `utils`
 
+		/**
+		 * Initializes Boomerang by applying the specified configuration.
+		 *
+		 * All plugins' `init()` functions will be called with the same config as well.
+		 *
+		 * @param {object} config Configuration object
+		 * @param {boolean} [config.autorun] By default, boomerang runs automatically
+		 * and attaches its `page_ready` handler to the `window.onload` event.
+		 * If you set `autorun` to `false`, this will not happen and you will
+		 * need to call {@link BOOMR.page_ready} yourself.
+		 * @param {string} config.beacon_auth_key Beacon authorization key value
+		 * @param {string} config.beacon_auth_token Beacon authorization token.
+		 * @param {string} config.beacon_url The URL to beacon results back to.
+		 * If not set, no beacon will be sent.
+		 * @param {string} config.beacon_type `GET`, `POST` or `AUTO`
+		 * @param {string[]} [config.secondary_beacons] Additional beacon URLs to send data to
+		 * @param {string} [config.site_domain] The domain that all cookies should be set on
+		 * Boomerang will try to auto-detect this, but unless your site is of the
+		 * `foo.com` format, it will probably get it wrong. It's a good idea
+		 * to set this to whatever part of your domain you'd like to share
+		 * bandwidth and performance measurements across.
+		 * Set this to a falsy value to disable all cookies.
+		 * @param {boolean} [config.strip_query_string] Whether or not to strip query strings from all URLs (e.g. `u`, `pgu`, etc.)
+		 * @param {string} [config.user_ip] Despite its name, this is really a free-form
+		 * string used to uniquely identify the user's current internet
+		 * connection. It's used primarily by the bandwidth test to determine
+		 * whether it should re-measure the user's bandwidth or just use the
+		 * value stored in the cookie. You may use IPv4, IPv6 or anything else
+		 * that you think can be used to identify the user's network connection.
+		 * @param {function} [config.log] Logger to use. Set to `null` to disable logging.
+		 * @param {function} [<plugins>] Each plugin has its own section
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
+		 */
 		init: function(config) {
 			var i, k,
 			    properties = [
-				    "beacon_url",
-				    "beacon_type",
+				    "autorun",
 				    "beacon_auth_key",
 				    "beacon_auth_token",
-				    "site_domain",
-				    "user_ip",
-				    "strip_query_string",
+				    "beacon_url",
+				    "beacon_type",
 				    "secondary_beacons",
-				    "autorun",
-				    "site_domain"
+				    "site_domain",
+				    "strip_query_string",
+				    "user_ip"
 			    ];
 
 			BOOMR_check_doc_domain();
@@ -1139,8 +1783,8 @@ BOOMR_check_doc_domain();
 			}
 
 			BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
-			BOOMR.fireEvent("onconfig", config);
-			BOOMR.subscribe("onconfig", function(beaconConfig) {
+			BOOMR.fireEvent("config", config);
+			BOOMR.subscribe("config", function(beaconConfig) {
 				if (beaconConfig.beacon_url) {
 					impl.beacon_url = beaconConfig.beacon_url;
 				}
@@ -1201,7 +1845,9 @@ BOOMR_check_doc_domain();
 		 * Attach a callback to the `pageshow` or `onload` event if `onload` has not
 		 * been fired otherwise queue it to run immediately
 		 *
-		 * @param {function} cb - Callback to run when `onload` fires or page is visible (`pageshow`)
+		 * @param {function} cb Callback to run when `onload` fires or page is visible (`pageshow`)
+		 *
+		 * @memberof BOOMR
 		 */
 		attach_page_ready: function(cb) {
 			if (BOOMR.hasBrowserOnloadFired()) {
@@ -1221,8 +1867,12 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Sends the page_ready beacon only if 'autorun' is still true after init
-		 * is called.
+		 * Sends the `page_ready` event only if `autorun` is still true after
+		 * {@link BOOMR.init} is called.
+		 *
+		 * @param {Event} ev Event
+		 *
+		 * @memberof BOOMR
 		 */
 		page_ready_autorun: function(ev) {
 			if (impl.autorun) {
@@ -1230,8 +1880,24 @@ BOOMR_check_doc_domain();
 			}
 		},
 
-		// The page dev calls this method when they determine the page is usable.
-		// Only call this if autorun is explicitly set to false
+		/**
+		 * Method that fires the {@link BOOMR#event:page_ready} event. Call this
+		 * only if you've set `autorun` to `false` when calling the {@link BOOMR.init}
+		 * method. You should call this method when you determine that your page
+		 * is ready to be used by your user. This will be the end-time used in
+		 * the page load time measurement.
+		 *
+		 * @param {Event} ev Ready event
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @example
+		 * BOOMR.init({ autorun: false, ... });
+		 * // wait until the page is ready, i.e. your view has loaded
+		 * BOOMR.page_ready();
+		 *
+		 * @memberof BOOMR
+		 */
 		page_ready: function(ev, auto) {
 			if (!ev) {
 				ev = w.event;
@@ -1281,24 +1947,44 @@ BOOMR_check_doc_domain();
 
 		/**
 		 * Determines whether or not the page's `onload` event has fired, or
-		 * if `autorun` is false, whether `BOOMR.page_ready()` was called.
+		 * if `autorun` is false, whether {@link BOOMR.page_ready} was called.
 		 *
-		 * @returns {boolean} True if onload or page_ready() were called
+		 * @returns {boolean} True if `onload` or {@link BOOMR.page_ready} were called
+		 *
+		 * @memberof BOOMR
 		 */
 		onloadFired: function() {
 			return impl.onloadfired;
 		},
 
 		/**
-		 * Defer the function `fn` until the next instant the browser is free from user tasks
-		 * @param [Function] fn The callback function.  This function accepts the following arguments:
-		 *     - data: The passed in data object
-		 *     - cb_data: The passed in cb_data object
-		 *     - call stack: An Error object that holds the callstack for when setImmediate was called, used to determine what called the callback
-		 * @param [object] data Any data to pass to the callback function
-		 * @param [object] cb_data Any passthrough data for the callback function. This differs from `data` when setImmediate is called via an event handler and `data` is the Event object
-		 * @param [object] cb_scope The scope of the callback function if it is a method of an object
+		 * The callback function may return a falsy value to disconnect the observer
+		 * after it returns, or a truthy value to keep watching for mutations. If
+		 * the return value is numeric and greater than 0, then this will be the new timeout.
+		 * If it is boolean instead, then the timeout will not fire any more so
+		 * the caller MUST call disconnect() at some point
+		 *
+		 * @callback BOOMR~setImmediateCallback
+		 * @param {object} data The passed in `data` object
+		 * @param {object} cb_data The passed in `cb_data` object
+		 * @param {Error} callstack An Error object that holds the callstack for
+		 * when `setImmediate` was called, used to determine what called the callback
+		 */
+
+		/**
+		 * Defer the function `fn` until the next instant the browser is free from
+		 * user tasks.
+		 *
+		 * @param {BOOMR~setImmediateCallback} fn The callback function.
+		 * @param {object} [data] Any data to pass to the callback function
+		 * @param {object} [cb_data] Any passthrough data for the callback function.
+		 * This differs from `data` when `setImmediate` is called via an event
+		 * handler and `data` is the Event object
+		 * @param {object} [cb_scope] The scope of the callback function if it is a method of an object
+		 *
 		 * @returns nothing
+		 *
+		 * @memberof BOOMR
 		 */
 		setImmediate: function(fn, data, cb_data, cb_scope) {
 			var cb, cstack;
@@ -1329,16 +2015,29 @@ BOOMR_check_doc_domain();
 		/**
 		 * Gets the current time in milliseconds since the Unix Epoch (Jan 1 1970).
 		 *
-		 * In browsers that support DOMHighResTimeStamp, this will be replaced
-		 * by a function that adds BOOMR.now() to navigationStart
+		 * In browsers that support `DOMHighResTimeStamp`, this will be replaced
+		 * by a function that adds `performance.now()` to `navigationStart`
 		 * (with milliseconds.microseconds resolution).
 		 *
-		 * @returns {Number} Milliseconds since Unix Epoch
+		 * @function
+		 *
+		 * @returns {TimeStamp} Milliseconds since Unix Epoch
+		 *
+		 * @memberof BOOMR
 		 */
 		now: (function() {
 			return Date.now || function() { return new Date().getTime(); };
 		}()),
 
+		/**
+		 * Gets the `window.performance` object of the root window.
+		 *
+		 * Checks vendor prefixes for older browsers (e.g. IE9).
+		 *
+		 * @returns {Performance|undefined} `window.performance` if it exists
+		 *
+		 * @memberof BOOMR
+		 */
 		getPerformance: function() {
 			try {
 				if (BOOMR.window) {
@@ -1347,7 +2046,9 @@ BOOMR_check_doc_domain();
 					}
 
 					// vendor-prefixed fallbacks
-					return BOOMR.window.msPerformance || BOOMR.window.webkitPerformance || BOOMR.window.mozPerformance;
+					return BOOMR.window.msPerformance ||
+					    BOOMR.window.webkitPerformance ||
+					    BOOMR.window.mozPerformance;
 				}
 			}
 			catch (ignore) {
@@ -1355,16 +2056,39 @@ BOOMR_check_doc_domain();
 			}
 		},
 
-		visibilityState: (visibilityState === undefined ? function() { return "visible"; } : function() { return d[visibilityState]; }),
+		/**
+		 * Gets the `document.visibilityState`, or `visible` if Page Visibility
+		 * is not supported.
+		 *
+		 * @function
+		 *
+		 * @returns {string} Visibility state
+		 *
+		 * @memberof BOOMR
+		 */
+		visibilityState: (visibilityState === undefined ? function() {
+			return "visible";
+		} : function() {
+			return d[visibilityState];
+		}),
 
+		/**
+		 * An mapping of visibliity event states to the latest time they happened
+		 *
+		 * @type {object}
+		 *
+		 * @memberof BOOMR
+		 */
 		lastVisibilityEvent: {},
 
 		/**
-		 * Registers an event
+		 * Registers a Boomerang event.
 		 *
 		 * @param {string} e_name Event name
 		 *
 		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
 		 */
 		registerEvent: function(e_name) {
 			if (impl.events.hasOwnProperty(e_name)) {
@@ -1382,6 +2106,8 @@ BOOMR_check_doc_domain();
 		 * Disables boomerang from doing anything further:
 		 * 1. Clears event handlers (such as onload)
 		 * 2. Clears all event listeners
+		 *
+		 * @memberof BOOMR
 		 */
 		disable: function() {
 			impl.clearEvents();
@@ -1389,32 +2115,49 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Fires an event
+		 * Fires a Boomerang event
 		 *
 		 * @param {string} e_name Event name
 		 * @param {object} data Event payload
 		 *
 		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
 		 */
 		fireEvent: function(e_name, data) {
 			return impl.fireEvent(e_name, data);
 		},
 
 		/**
-		 * Subscribe to an event
+		 * @callback BOOMR~subscribeCallback
+		 * @param {object} eventData Event data
+		 * @param {object} cb_data Callback data
+		 */
+
+		/**
+		 * Subscribes to a Boomerang event
 		 *
-		 * @param {string} e_name Event name
-		 * @param {function} fn callback function
-		 * @param {object} cb_data Any passthrough data for the callback function
-		 * @param {object} cb_scope The scope of the callback function if it is a method of an object
-		 * @param {Boolean} once If true subscribe to only one event call
+		 * @param {string} e_name Event name, i.e. {@link BOOMR#event:page_ready}.
+		 * @param {BOOMR~subscribeCallback} fn Callback function
+		 * @param {object} cb_data Callback data, passed as the second parameter to the callback function
+		 * @param {object} cb_scope Callback scope.  If set to an object, then the
+		 * callback function is called as a method of this object, and all
+		 * references to `this` within the callback function will refer to `cb_scope`.
+		 * @param {boolean} once Whether or not this callback should only be run once
 		 *
 		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
 		 */
 		subscribe: function(e_name, fn, cb_data, cb_scope, once) {
 			var i, handler, ev;
 
 			e_name = e_name.toLowerCase();
+
+			// translate old names
+			if (impl.translate_events[e_name]) {
+				e_name = impl.translate_events[e_name];
+			}
 
 			if (!impl.events.hasOwnProperty(e_name)) {
 				// allow subscriptions before they're registered
@@ -1482,6 +2225,19 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
+		/**
+		 * Logs an internal Boomerang error.
+		 *
+		 * If the {@link BOOMR.plugins.Errors} plugin is enabled, this data will
+		 * be compressed on the `err` beacon parameter.  If not, it will be included
+		 * in uncompressed form on the `errors` parameter.
+		 *
+		 * @param {string|object} err Error
+		 * @param {string} [src] Source
+		 * @param {object} [extra] Extra data
+		 *
+		 * @memberof BOOMR
+		 */
 		addError: function BOOMR_addError(err, src, extra) {
 			var str, E = BOOMR.plugins.Errors;
 
@@ -1534,6 +2290,15 @@ BOOMR_check_doc_domain();
 			}
 		},
 
+		/**
+		 * Determines if the specified Error is a Cross-Origin error.
+		 *
+		 * @param {string|object} err Error
+		 *
+		 * @returns {boolean} True if the Error is a Cross-Origin error.
+		 *
+		 * @memberof BOOMR
+		 */
 		isCrossOriginError: function(err) {
 			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
 			// work for browsers using English.
@@ -1542,7 +2307,36 @@ BOOMR_check_doc_domain();
 				(err.name === "Error" && err.message && err.message.match(/^(Permission|Access is) denied/));
 		},
 
-		addVar: function(name, value, singleBeacon) {
+		/**
+		 * Add one or more parameters to the beacon.
+		 *
+		 * This method may either be called with a single object containing
+		 * key/value pairs, or with two parameters, the first is the variable
+		 * name and the second is its value.
+		 *
+		 * All names should be strings usable in a URL's query string.
+		 *
+		 * We recommend only using alphanumeric characters and underscores, but you
+		 * can use anything you like.
+		 *
+		 * Values should be strings (or numbers), and have the same restrictions
+		 * as names.
+		 *
+		 * Parameters will be on all subsequent beacons unless `singleBeacon` is
+		 * set.
+		 *
+		 * @param {string} name Variable name
+		 * @param {string|object} val Value
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @example
+		 * BOOMR.addVar("page_id", 123);
+		 * BOOMR.addVar({"page_id": 123, "user_id": "Person1"});
+		 *
+		 * @memberof BOOMR
+		 */
+		 addVar: function(name, value, singleBeacon) {
 			if (typeof name === "string") {
 				impl.vars[name] = value;
 			}
@@ -1562,6 +2356,22 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
+		/**
+		 * Removes one or more variables from the beacon URL. This is useful within
+		 * a plugin to reset the values of parameters that it is about to set.
+		 *
+		 * Plugins can also use this in the {@link BOOMR#event:beacon} event to clear
+		 * any variables that should only live on a single beacon.
+		 *
+		 * This method accepts either a list of variable names, or a single
+		 * array containing a list of variable names.
+		 *
+		 * @param {string[]|string} name Variable name or list
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
+		 */
 		removeVar: function(arg0) {
 			var i, params;
 			if (!arguments.length) {
@@ -1584,6 +2394,15 @@ BOOMR_check_doc_domain();
 			return this;
 		},
 
+		/**
+		 * Determines whether or not the beacon has the specified variable.
+		 *
+		 * @param {string} name Variable name
+		 *
+		 * @returns {boolean} True if the variable is set.
+		 *
+		 * @memberof BOOMR
+		 */
 		hasVar: function(name) {
 			return impl.vars.hasOwnProperty(name);
 		},
@@ -1613,6 +2432,10 @@ BOOMR_check_doc_domain();
 		 *
 		 * @param {string} name Variable name
 		 * @param {number} pri Priority (-1 or 1)
+		 *
+		 * @returns {BOOMR} Boomerang object
+		 *
+		 * @memberof BOOMR
 		 */
 		setVarPriority: function(name, pri) {
 			if (typeof pri !== "number" || Math.abs(pri) !== 1) {
@@ -1625,9 +2448,12 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Sets the Referrers
+		 * Sets the Referrers variables.
+		 *
 		 * @param {string} r Referrer from the cookie
 		 * @param {string} [r2] Referrer from document.referrer, if different
+		 *
+		 * @memberof BOOMR
 		 */
 		setReferrer: function(r, r2) {
 			// cookie referrer
@@ -1642,6 +2468,24 @@ BOOMR_check_doc_domain();
 			}
 		},
 
+		/**
+		 * Starts a timer for a dynamic request.
+		 *
+		 * Once the named request has completed, call `loaded()` to send a beacon
+		 * with the duration.
+		 *
+		 * @example
+		 * var timer = BOOMR.requestStart("my-timer");
+		 * // do stuff
+		 * timer.loaded();
+		 *
+		 * @param {string} name Timer name
+		 *
+		 * @returns {object} An object with a `.loaded()` function that you can call
+		 *     when the dynamic timer is complete.
+		 *
+		 * @memberof BOOMR
+		 */
 		requestStart: function(name) {
 			var t_start = BOOMR.now();
 			BOOMR.plugins.RT.startTimer("xhr_" + name, t_start);
@@ -1654,14 +2498,16 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Determines is Boomerang can send a beacon.
+		 * Determines if Boomerang can send a beacon.
 		 *
-		 * Queryies all plugins to see if they implement readyToSend(),
-		 * and if so, that they return true;
+		 * Queryies all plugins to see if they implement `readyToSend()`,
+		 * and if so, that they return `true`.
 		 *
 		 * If not, the beacon cannot be sent.
 		 *
 		 * @returns {boolean} True if Boomerang can send a beacon
+		 *
+		 * @memberof BOOMR
 		 */
 		readyToSend: function() {
 			var plugin;
@@ -1683,6 +2529,18 @@ BOOMR_check_doc_domain();
 			return true;
 		},
 
+		/**
+		 * Sends a beacon for a dynamic request.
+		 *
+		 * @param {string|object} name Timer name or timer object data.
+		 * @param {string} [name.initiator] Initiator, such as `xhr` or `spa`
+		 * @param {string} [name.url] URL of the request
+		 * @param {TimeStamp} t_start Start time
+		 * @param {object} data Request data
+		 * @param {TimeStamp} t_end End time
+		 *
+		 * @memberof BOOMR
+		 */
 		responseEnd: function(name, t_start, data, t_end) {
 			// take the now timestamp for start and end, if unspecified, in case we delay this beacon
 			t_start = typeof t_start === "number" ? t_start : BOOMR.now();
@@ -1741,16 +2599,59 @@ BOOMR_check_doc_domain();
 		// by auto-xhr.js if active.
 		//
 		/**
-		 * Undo XMLHttpRequest instrumentation and reset the original
+		 * Undo XMLHttpRequest instrumentation and reset the original `XMLHttpRequest`
+		 * object
+		 *
+		 * This is implemented in `plugins/auto-xhr.js` {@link BOOMR.plugins.AutoXHR}.
+		 *
+		 * @memberof BOOMR
 		 */
 		uninstrumentXHR: function() {
 		},
+
 		/**
-		 * Instrument all requests made via XMLHttpRequest to send beacons
-		 * This is implemented in plugins/auto-xhr.js
+		 * Instrument all requests made via XMLHttpRequest to send beacons.
+		 *
+		 * This is implemented in `plugins/auto-xhr.js` {@link BOOMR.plugins.AutoXHR}.
+		 *
+		 * @memberof BOOMR
 		 */
 		instrumentXHR: function() { },
 
+		/**
+		 * Request boomerang to send its beacon with all queued beacon data
+		 * (via {@link BOOMR.addVar}).
+		 *
+		 * Boomerang may ignore this request.
+		 *
+		 * When this method is called, boomerang checks all plugins. If any
+		 * plugin has not completed its checks (ie, the plugin's `is_complete()`
+		 * method returns `false`, then this method does nothing.
+		 *
+		 * If all plugins have completed, then this method fires the
+		 * {@link BOOMR#event:before_beacon} event with all variables that will be
+		 * sent on the beacon.
+		 *
+		 * After all {@link BOOMR#event:before_beacon} handlers return, this method
+		 * checks if a `beacon_url` has been configured and if there are any
+		 * beacon parameters to be sent. If both are true, it fires the beacon.
+		 *
+		 * The {@link BOOMR#event:beacon} event is then fired.
+		 *
+		 * `sendBeacon()` should be called any time a plugin goes from
+		 * `is_complete() = false` to `is_complete = true` so the beacon is
+		 * sent.
+		 *
+		 * The actual beaconing is handled in {@link BOOMR.real_sendBeacon} after
+		 * a short delay (via {@link BOOMR.setImmediate}).  If other calls to
+		 * `sendBeacon` happen before {@link BOOMR.real_sendBeacon} is called,
+		 * those calls will be discarded (so it's OK to call this in quick
+		 * succession).
+		 *
+		 * @param {string} [beacon_url_override] Beacon URL override
+		 *
+		 * @memberof BOOMR
+		 */
 		sendBeacon: function(beacon_url_override) {
 			// This plugin wants the beacon to go somewhere else,
 			// so update the location
@@ -1766,6 +2667,16 @@ BOOMR_check_doc_domain();
 			return true;
 		},
 
+		/**
+		 * Sends all beacon data.
+		 *
+		 * This function should be called directly any time a "new" beacon is about
+		 * to be constructed.  For example, if you're creating a new XHR or other
+		 * custom beacon, you should ensure the existing beacon data is flushed
+		 * by calling `BOOMR.real_sendBeacon();` first.
+		 *
+		 * @memberof BOOMR
+		 */
 		real_sendBeacon: function() {
 			var k, form, url, errors = [], params = [], paramsJoined, varsSent = {};
 
@@ -1879,7 +2790,7 @@ BOOMR_check_doc_domain();
 			impl.fireEvent("before_beacon", impl.vars);
 
 			// clone the vars object for two reasons: first, so all listeners of
-			// onbeacon get an exact clone (in case listeners are doing
+			// 'beacon' get an exact clone (in case listeners are doing
 			// BOOMR.removeVar), and second, to help build our priority list of vars.
 			for (k in impl.vars) {
 				if (impl.vars.hasOwnProperty(k)) {
@@ -1958,7 +2869,7 @@ BOOMR_check_doc_domain();
 			}
 
 			// If we reach here, we've figured out all of the beacon data we'll send.
-			impl.fireEvent("onbeacon", data);
+			impl.fireEvent("beacon", data);
 
 			// get high- and low-priority variables first, which remove any of
 			// those vars from data
@@ -2054,13 +2965,28 @@ BOOMR_check_doc_domain();
 					this.sendXhrPostBeacon(xhr, paramsJoined);
 				}
 			}
+
+			return true;
 		},
 
 		/**
-		 * Sends an XHR beacon
+		 * Determines whether or not a Page Load beacon has been sent.
+		 *
+		 * @returns {boolean} True if a Page Load beacon has been sent.
+		 *
+		 * @memberof BOOMR
+		 */
+		hasSentPageLoadBeacon: function() {
+			return impl.hasSentPageLoadBeacon;
+		},
+
+		/**
+		 * Sends a beacon via XMLHttpRequest
 		 *
 		 * @param {object} xhr XMLHttpRequest object
 		 * @param {object} [paramsJoined] XMLHttpRequest.send() argument
+		 *
+		 * @memberof BOOMR
 		 */
 		sendXhrPostBeacon: function(xhr, paramsJoined) {
 			xhr.open("POST", impl.beacon_url);
@@ -2085,6 +3011,8 @@ BOOMR_check_doc_domain();
 		 * @param {number} pri Priority (-1, 0, or 1)
 		 *
 		 * @return {string[]} Array of URI-encoded vars
+		 *
+		 * @memberof BOOMR
 		 */
 		getVarsOfPriority: function(vars, pri) {
 			var name, url = [];
@@ -2124,6 +3052,8 @@ BOOMR_check_doc_domain();
 		 * @param {string} value Value
 		 *
 		 * @returns {string} URI-encoded string
+		 *
+		 * @memberof BOOMR
 		 */
 		getUriEncodedVar: function(name, value) {
 			if (value === undefined || value === null) {
@@ -2141,12 +3071,17 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Gets the latest ResourceTiming entry for the specified URL
-		 * Default sort order is chronological startTime
+		 * Gets the latest ResourceTiming entry for the specified URL.
+		 *
+		 * Default sort order is chronological startTime.
+		 *
 		 * @param {string} url Resource URL
 		 * @param {function} [sort] Sort the entries before returning the last one
+		 *
 		 * @returns {PerformanceEntry|undefined} Entry, or undefined if ResourceTiming is not
-		 *          supported or if the entry doesn't exist
+		 *  supported or if the entry doesn't exist
+		 *
+		 * @memberof BOOMR
 		 */
 		getResourceTiming: function(url, sort) {
 			var entries, p = BOOMR.getPerformance();
@@ -2171,7 +3106,22 @@ BOOMR_check_doc_domain();
 
 	delete BOOMR_start;
 
+	/**
+	 * @global
+	 * @type {TimeStamp}
+	 * @name BOOMR_lstart
+	 * @desc
+	 * Time the loader script started fetching boomerang.js (if the asynchronous
+	 * loader snippet is used).
+	 */
 	if (typeof BOOMR_lstart === "number") {
+		/**
+		 * Time the loader script started fetching boomerang.js (if using the
+		 * asynchronous loader snippet) (`BOOMR_lstart`)
+		 * @type {TimeStamp}
+		 *
+		 * @memberof BOOMR
+		 */
 		boomr.t_lstart = BOOMR_lstart;
 		delete BOOMR_lstart;
 	}
@@ -2179,7 +3129,24 @@ BOOMR_check_doc_domain();
 		boomr.t_lstart = BOOMR.window.BOOMR_lstart;
 	}
 
+	/**
+	 * Time the `window.onload` event fired (if using the asynchronous loader snippet).
+	 *
+	 * This timestamp is logged in the case boomerang.js loads after the onload event
+	 * for browsers that don't support NavigationTiming.
+	 *
+	 * @global
+	 * @name BOOMR_onload
+	 * @type {TimeStamp}
+	 */
 	if (typeof BOOMR.window.BOOMR_onload === "number") {
+		/**
+		 * Time the loader script started (if using the asynchronous loader snippet)
+		 * (`BOOMR_onload`)
+		 *
+		 * @type {TimeStamp}
+		 * @memberof BOOMR
+		 */
 		boomr.t_onload = BOOMR.window.BOOMR_onload;
 	}
 
@@ -2187,7 +3154,24 @@ BOOMR_check_doc_domain();
 		var make_logger;
 
 		if (typeof console === "object" && console.log !== undefined) {
-			boomr.log = function(m, l, s) { console.log("(" + BOOMR.now() + ") " + "{" + BOOMR.pageId + "}" + ": " + s + ": [" + l + "] " + m); };
+			/**
+			 * Logs the message to the console
+			 *
+			 * @param {string} m Message
+			 * @param {string} l Log level
+			 * @param {string} [s] Source
+			 *
+			 * @function log
+			 *
+			 * @memberof BOOMR
+			 */
+			boomr.log = function(m, l, s) {
+				console.log("(" + BOOMR.now() + ") " +
+					"{" + BOOMR.pageId + "}" +
+					": " + s +
+					": [" + l + "] " +
+					m);
+			};
 		}
 
 		make_logger = function(l) {
@@ -2197,9 +3181,54 @@ BOOMR_check_doc_domain();
 			};
 		};
 
+		/**
+		 * Logs debug messages to the console
+		 *
+		 * Debug messages are stripped out of production builds.
+		 *
+		 * @param {string} m Message
+		 * @param {string} [s] Source
+		 *
+		 * @function debug
+		 *
+		 * @memberof BOOMR
+		 */
 		boomr.debug = make_logger("debug");
+
+		/**
+		 * Logs info messages to the console
+		 *
+		 * @param {string} m Message
+		 * @param {string} [s] Source
+		 *
+		 * @function info
+		 *
+		 * @memberof BOOMR
+		 */
 		boomr.info = make_logger("info");
+
+		/**
+		 * Logs warning messages to the console
+		 *
+		 * @param {string} m Message
+		 * @param {string} [s] Source
+		 *
+		 * @function warn
+		 *
+		 * @memberof BOOMR
+		 */
 		boomr.warn = make_logger("warn");
+
+		/**
+		 * Logs error messages to the console
+		 *
+		 * @param {string} m Message
+		 * @param {string} [s] Source
+		 *
+		 * @function error
+		 *
+		 * @memberof BOOMR
+		 */
 		boomr.error = make_logger("error");
 	}());
 
@@ -2208,7 +3237,8 @@ BOOMR_check_doc_domain();
 		var p = boomr.getPerformance();
 		if (p &&
 		    typeof p.now === "function" &&
-		    /\[native code\]/.test(String(p.now)) &&		// #545 handle bogus performance.now from broken shims
+		    // #545 handle bogus performance.now from broken shims
+		    /\[native code\]/.test(String(p.now)) &&
 		    p.timing &&
 		    p.timing.navigationStart) {
 			boomr.now = function() {
@@ -2227,8 +3257,26 @@ BOOMR_check_doc_domain();
 				BOOMR[ident] = boomr[ident];
 			}
 		}
+
 		if (!BOOMR.xhr_excludes) {
-			//! URLs to exclude from automatic XHR instrumentation
+			/**
+			 * URLs to exclude from automatic `XMLHttpRequest` instrumentation.
+			 *
+			 * You can put any of the following in it:
+			 * * A full URL
+			 * * A hostname
+			 * * A path
+			 *
+			 * @example
+			 * BOOMR = window.BOOMR || {};
+			 * BOOMR.xhr_excludes = {
+			 *   "mysite.com": true,
+			 *   "/dashboard/": true,
+			 *   "https://mysite.com/dashboard/": true
+			 * };
+			 *
+			 * @memberof BOOMR
+			 */
 			BOOMR.xhr_excludes = {};
 		}
 	}());

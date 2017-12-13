@@ -84,6 +84,13 @@
 		"operator-linebreak": [2, "after"],
 		"space-in-parens": [2, "never"],
 		"no-debugger": "error",
+		
+		//
+		// To enable soon
+		//
+
+		//"require-jsdoc": "error",
+		//"valid-jsdoc": "error",
 
 		//
 		// Disabled rules

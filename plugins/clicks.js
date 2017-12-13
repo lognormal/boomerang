@@ -1,12 +1,27 @@
 /**
-\file clicks.js
-A plugin beaconing clicked elements back to the server
-*/
-
+ * The `Clicks` plugin tracks all mouse clicks on a page and beacons them to a dedicated endpoint on your server.
+ *
+ * For information on how to include this plugin, see the {@tutorial building} tutorial.
+ *
+ * ## Beacon Parameters
+ *
+ * The following parameters are sent when a click event is triggered.
+ *
+ * * `element`: The `nodeName` of the element that has been clicked (ie. `A`, `BUTTON`, `NAV`, etc.)
+ * * `id`: The `id` of the element if specified
+ * * `class`: The `class` attribute of the element
+ * * `document_height`: The height of the `document`
+ * * `document_width`: The width of the `document`
+ * * `viewport_height`: The height of the viewport when the `click` event was triggered
+ * * `viewport_width`: The width of the viewport when the `click` event was triggered
+ *
+ * @class BOOMR.plugins.Clicks
+ */
 // w is the window object
 (function(w) {
 	var d = w.document;
 
+	// Ensure Boomerang is defined
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
 
@@ -14,13 +29,13 @@ A plugin beaconing clicked elements back to the server
 		return;
 	}
 
-	// A private object to encapsulate all your implementation details
-	// This is optional, but the way we recommend you do it.
 	var impl = {
-		start_time: "",
+		// local vars
 		click_url: "",
 		onbeforeunload: false,
 		retention: [],
+
+		// functions
 		handleEvent: function(event) {
 			if (typeof impl.click_url === "undefined") {
 				BOOMR.error("No Beacon URL defined will not send beacon");
@@ -84,7 +99,6 @@ A plugin beaconing clicked elements back to the server
 			};
 		},
 		getViewport: function() {
-
 			var viewPortWidth;
 			var viewPortHeight;
 
@@ -113,28 +127,40 @@ A plugin beaconing clicked elements back to the server
 		}
 	};
 
-	BOOMR.plugins.clicks = {
+	BOOMR.plugins.Clicks = {
+		/**
+		 * Initializes the plugin.
+		 *
+		 * @param {object} config Configuration
+		 * @param {string} config.Clicks.click_url The URL the click events will be beaconed to.
+		 * @param {boolean} [config.Clicks.onbeforeunload] A boolean value for when to send click events.  If this is `true`, clicks will be sent when the page is unloaded.  Otherwise, click events are sent immediately as they occur.
+		 *
+		 * @returns {@link BOOMR.plugins.Clicks} The Clicks plugin for chaining
+		 * @memberof BOOMR.plugins.Clicks
+		 */
 		init: function(config) {
-			var properties = ["click_url",	  // URL to beacon
-					 "onbeforeunload"]; // Send the beacon when page is closed?
+			var properties = [
+				"click_url",     // URL to beacon
+				"onbeforeunload" // Send the beacon when page is closed?
+			];
 
-			// This block is only needed if you actually have user configurable properties
 			BOOMR.utils.pluginConfig(impl, config, "clicks", properties);
 
 			// Other initialisation code here
 			w.addEventListener("click", impl.handleEvent, true);
 			w.addEventListener("beforeunload", impl.unload, true);
+
 			return this;
 		},
 
-		// Any other public methods would be defined here
-
+		/**
+		 * This plugin is always complete (ready to send a beacon)
+		 *
+		 * @returns {boolean} `true`
+		 * @memberof BOOMR.plugins.Clicks
+		 */
 		is_complete: function() {
-			// This method should determine if the plugin has completed doing what it
-			/// needs to do and return true if so or false otherwise
-			impl.start_time = Date.now();
 			return true;
 		}
 	};
-
 }(window));

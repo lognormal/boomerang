@@ -5,7 +5,7 @@ describe("e2e/17-memory/00-dom-counts", function() {
 	var tf = BOOMR.plugins.TestFramework;
 
 	it("Should have sent a beacon", function() {
-		// ensure we fired a beacon ('onbeacon')
+		// ensure we fired a beacon ('beacon')
 		assert.isTrue(tf.fired_onbeacon);
 	});
 
