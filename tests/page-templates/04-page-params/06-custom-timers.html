@@ -84,6 +84,15 @@ BOOMR_test.init({
 				start: "requestStart",
 				end: "responseEnd",
 				parameter2: "slowest"
+			},
+			{
+				name: "custom_timer_8",
+				index: 8,
+				type: "ResourceTiming",
+				label: "ctim.CT8",
+				start: "navigationStart",
+				end: "responseEnd",
+				url: window.location.origin + "/delay?delay=3000&file=/assets/img.jpg"
 			}
 		]
 	}

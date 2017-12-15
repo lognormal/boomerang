@@ -67,11 +67,17 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(tf.beacons.length, BEACONS_SENT);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent " + BEACONS_SENT_SPA + " spa beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
 		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(getBeaconByType().spa.length, BEACONS_SENT_SPA);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -79,17 +85,26 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(getBeaconByType().spa_hard.length, BEACONS_SENT_SPA_HARD);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent " + BEACONS_SENT_XHR + " xhr beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
 		if (BOOMR.plugins.AutoXHR && window.MutationObserver) {
 			assert.equal(getBeaconByType().xhr.length, BEACONS_SENT_XHR);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent 1 beacons (if AutoXHR is not enabled)", function() {
 		if (!BOOMR.plugins.AutoXHR) {
 			assert.equal(tf.beacons.length, 1);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -105,6 +120,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set rt.start = 'manual' on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
@@ -115,6 +133,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					assert.equal(beacons.xhr[k]["rt.start"], "manual");
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -141,6 +162,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set pgu = the page's location on the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
@@ -151,6 +175,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					assert.include(BOOMR.window.location.href, beacons.xhr[k].pgu);
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -166,6 +193,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set t_done = rt.end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported and MutationObserver is supported)", function() {
@@ -177,6 +207,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					assert.equal(b.t_done, b["rt.end"] - b.nt_fet_st);
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -190,6 +223,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set t_page = t_done - t_resp for the XHR beacons (if AutoXHR is enabled and MutationObserver is supported)", function() {
@@ -201,6 +237,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					assert.equal(b.t_page, b.t_done - b.t_resp);
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -217,6 +256,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	//
@@ -231,6 +273,9 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 					assert.equal(b["http.initiator"], "spa");
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 };

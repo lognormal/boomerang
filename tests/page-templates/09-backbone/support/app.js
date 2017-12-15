@@ -124,13 +124,25 @@ app.WidgetView = Backbone.View.extend({
 					rnd: Math.random()
 				},
 				success: function() {
+					// these overwrite what was in the HTML
+					window.custom_metric_1 = that.model.id;
+					window.custom_metric_2 = function() {
+						return 10 * that.model.id;
+					};
+
+					window.custom_timer_1 = that.model.id;
+					window.custom_timer_2 = function() {
+						return 10 * that.model.id;
+					};
+
 					var widget = app.widgets.get(that.model.id).toJSON();
 
 					var template = Handlebars.compile(widgetTemplate);
 
 					that.$el.html(template({
 						widget: widget,
-						rnd: Math.random()
+						rnd: Math.random(),
+						carttotal: 11.11 * that.model.id
 					}));
 				}
 			});

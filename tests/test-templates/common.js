@@ -25,8 +25,8 @@ describe("common", function() {
 
 			assert.isDefined(b["h.t"], prefix + "has the time (h.t) param");
 			tm = parseInt(b["h.t"], 10);
-			assert.isTrue(tm > now - (60 * 1000), prefix + "time is greater than a minute ago");
-			assert.isTrue(tm < now, prefix + "time is less than now");
+			assert.operator(tm, ">", now - (60 * 1000), prefix + "time is greater than a minute ago");
+			assert.operator(tm, "<", now, prefix + "time is less than now");
 
 			if (window.BOOMR_LOGN_always !== true) {
 				assert.equal(b["h.cr"], "abc", prefix + "has the correct crumb (h.cr)");
@@ -116,7 +116,44 @@ describe("common", function() {
 				// invalid
 				assert.fail(prefix + "has a valid rt.start, was: " + b["rt.start"]);
 			}
+		}
+	});
 
+	it("BUG: should have sent beacons without negative timers", function() {
+		var t_done, t_resp, t_page;
+		for (var i = 0; i < tf.beacons.length; i++) {
+			var b = tf.beacons[i];
+			var prefix = "ensure beacon " + (i + 1) + " ";
+			if (b.t_done) {
+				t_done = parseInt(b.t_done, 10);
+				assert.operator(t_done, ">=", 0, prefix + "has a positive 't_done' timer");
+			}
+
+			if (b.t_resp) {
+				t_resp = parseInt(b.t_resp, 10);
+				assert.operator(t_resp, ">=", 0, prefix + "has a positive 't_resp' timer");
+			}
+
+			if (b.t_page) {
+				t_page = parseInt(b.t_page, 10);
+				assert.operator(t_page, ">=", 0, prefix + "has a positive 't_page' timer");
+			}
+
+			if (b.t_other) {
+				var timers = t.parseTimers(b.t_other);
+				for (var timer in timers) {
+					if (timers.hasOwnProperty(timer)) {
+						// TODO: this test reveals a bug, see https://github.com/SOASTA/soasta-boomerang/issues/626
+						//assert.isTrue(timers[timer] >= 0, prefix + "has a positive 't_other." + timer + "' timer");
+						if (timers[timer] < 0) {
+							return this.skip();
+						}
+						if (b[timer + "_st"]) {
+							assert.operator(parseInt(b[timer + "_st"], 10), ">=", 0, prefix + "has a positive '" + timer + "_st' value");
+						}
+					}
+				}
+			}
 		}
 	});
 });

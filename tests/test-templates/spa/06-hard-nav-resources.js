@@ -18,6 +18,9 @@ BOOMR_test.templates.SPA["06-hard-nav-resources"] = function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "delay=5000", 100, 3000, 30000, true);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver is supported but NavigationTiming is not)", function() {
@@ -25,11 +28,17 @@ BOOMR_test.templates.SPA["06-hard-nav-resources"] = function() {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 100, 0, 30000, true);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -38,6 +47,9 @@ BOOMR_test.templates.SPA["06-hard-nav-resources"] = function() {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

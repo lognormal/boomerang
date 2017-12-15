@@ -12,9 +12,8 @@ App.ApplicationRoute = Ember.Route.extend({
 		var router = this;
 		this._super.apply(arguments);
 		Ember.run.scheduleOnce("afterRender", function() {
-			if (typeof window.ember_nav_routes !== "undefined" &&
-			    Object.prototype.toString.call(window.ember_nav_routes) === "[object Array]") {
-				BOOMR.subscribe("beacon", function(beacon) {
+			if (typeof window.ember_nav_routes !== "undefined" && BOOMR.utils.isArray(window.ember_nav_routes)) {
+				BOOMR.subscribe("onbeacon", function(beacon) {
 					// only continue for SPA beacons
 					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
 						return;
@@ -51,9 +50,24 @@ App.WidgetsWidgetRoute = Ember.Route.extend({
 	},
 	model: function(params)  {
 		return Ember.$.getJSON("support/widgets.json?rnd=" + Math.random()).then(function(data) {
-			return data.filter(function(model) {
-				return String(model.id) === params.id;
+			var model;
+
+			// these overwrite what was in the HTML
+			window.custom_metric_1 = params.id;
+			window.custom_metric_2 = function() {
+				return 10 * params.id;
+			};
+
+			window.custom_timer_1 = params.id;
+			window.custom_timer_2 = function() {
+				return 10 * params.id;
+			};
+
+			model = data.filter(function(widget) {
+				return String(widget.id) === params.id;
 			})[0];
+			model.carttotal = 11.11 * params.id;
+			return model;
 		});
 	}
 });
@@ -76,6 +90,23 @@ App.HomeRoute = Ember.Route.extend({
 			console.log(model.imgs);
 			model.hide = model.imgs[0] === -1;
 			model.rnd = Math.random();
+
+			// these overwrite what was in the HTML
+			window.custom_metric_1 = 11;
+			window.custom_metric_2 = function() {
+				return 22;
+			};
+
+			window.custom_timer_1 = 11;
+			window.custom_timer_2 = function() {
+				return 22;
+			};
+
+			if (typeof window.performance !== "undefined" &&
+			    typeof window.performance.mark === "function") {
+				window.performance.mark("mark_usertiming");
+			}
+
 			return model;
 		});
 	}
@@ -96,21 +127,6 @@ App.Router.map(function() {
 	this.resource("empty", { path: "empty" });
 
 	this.route("home", { path: "" });
-
-	window.custom_metric_1 = 11;
-	window.custom_metric_2 = function() {
-		return 22;
-	};
-
-	window.custom_timer_1 = 11;
-	window.custom_timer_2 = function() {
-		return 22;
-	};
-
-	if (typeof window.performance !== "undefined" &&
-	    typeof window.performance.mark === "function") {
-		window.performance.mark("mark_usertiming");
-	}
 
 	var hadRouteChange = false;
 	var hadRouteChangeToggle = function() {

@@ -91,6 +91,9 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 1000);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent the third beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
@@ -98,6 +101,9 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 0);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

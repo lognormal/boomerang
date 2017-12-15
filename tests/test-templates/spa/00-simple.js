@@ -18,6 +18,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg", 100, 3000, 30000, true);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
@@ -25,6 +28,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			var pt = window.performance.timing;
 			var b = tf.lastBeacon();
 			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -34,6 +40,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
@@ -41,11 +50,17 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 100, 0, 30000, true);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -54,6 +69,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -87,6 +105,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 			assert.isDefined(b.nt_load_end);
 			assert.isDefined(b.nt_unload_st);
 			assert.isDefined(b.nt_unload_end);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

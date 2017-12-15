@@ -30,11 +30,17 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		if (BOOMR.plugins.AutoXHR) {
 			assert.equal(tf.beacons.length, 3);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent 1 beacons (if AutoXHR is not enabled)", function() {
 		if (!BOOMR.plugins.AutoXHR) {
 			assert.equal(tf.beacons.length, 1);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -50,6 +56,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set rt.start = 'manual' on the XHR beacons (if AutoXHR is enabled)", function() {
@@ -60,6 +69,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 					assert.equal(tf.beacons[i]["rt.start"], "manual");
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -84,6 +96,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set pgu = the page's location on the XHR beacons (if AutoXHR is enabled)", function() {
@@ -94,6 +109,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 					assert.include(BOOMR.window.location.href, tf.beacons[i].pgu);
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -109,6 +127,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set t_done = rt.end - nt_fet_st for the XHR beacons (if AutoXHR is enabled and NavigationTiming is supported)", function() {
@@ -120,6 +141,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 					assert.equal(b.t_done, b["rt.end"] - b.nt_fet_st);
 				}
 			}
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -133,6 +157,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have set t_page = t_done - t_resp for the XHR beacons (if AutoXHR is enabled)", function() {
@@ -145,6 +172,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 				}
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	//
@@ -156,6 +186,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 			var b2 = tf.beacons[XHR_BEACONS[1]];
 			assert.equal(t.checkStringInArray("home.html", [b1.u, b2.u]).length, 1, "Neither of the 2 XHR beacons had the string we were looking for.");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	//
@@ -166,6 +199,9 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 			var b1 = tf.beacons[XHR_BEACONS[0]];
 			var b2 = tf.beacons[XHR_BEACONS[1]];
 			assert.equal(t.checkStringInArray("widgets.json", [b1.u, b2.u]).length, 1, "Neither of the 2 XHR beacons had the string we were looking for.");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

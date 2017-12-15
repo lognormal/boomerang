@@ -4,6 +4,7 @@
 <script src="../../vendor/ember/ember.prod.js"></script>
 <script src="../../vendor/handlebars/handlebars.min.js"></script>
 <script src="../../vendor/ember/ember-template-compiler.js"></script>
+<script src="../../vendor/usertiming/src/usertiming.js"></script>
 <script src="support/app.js"></script>
 
 <!-- Handlebars templates for our application. -->
@@ -73,6 +74,33 @@ BOOMR_test.init({
 				"label": "custom5",
 				"parameter1": "",
 				"parameter2": "missing_mark_usertiming"
+			},
+			{
+				"name": "Timer ResourceTiming",
+				"index": 6,
+				"type": "ResourceTiming",
+				"label": "custom6",
+				"start": "requestStart",
+				"end": "responseEnd",
+				"url": "*id=home*"
+			},
+			{
+				"name": "Timer ResourceTiming nav start",
+				"index": 7,
+				"type": "ResourceTiming",
+				"label": "custom7",
+				"start": "navigationStart",
+				"end": "responseEnd",
+				"url": "*id=home*"
+			},
+			{
+				"name": "Missing Timer ResourceTiming",
+				"index": 8,
+				"type": "ResourceTiming",
+				"label": "custom8",
+				"start": "requestStart",
+				"end": "responseEnd",
+				"url": "*id=doesnotexist*"
 			}
 		]
 	}

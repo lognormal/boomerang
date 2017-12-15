@@ -29,6 +29,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 				assert.equal(tf.beacons[i]["rt.nstart"], BOOMR.plugins.RT.navigationStart());
 			}
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	//
@@ -43,6 +46,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have the first beacon take as long as the first img load (if MutationObserver is supported but NavigationTiming is not)", function() {
@@ -50,11 +56,17 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have the first beacon take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, false);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -63,6 +75,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -80,6 +95,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 1000);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent the second beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
@@ -87,6 +105,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 0);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -109,6 +130,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			// because of the widget IMG delaying 2 second
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 2000);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -140,6 +164,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			var b = tf.beacons[3];
 			assert.operator(b.t_done, ">=", 3000);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have sent the fourth beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
@@ -147,6 +174,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			// because of the widget IMG delaying 3 seconds but we couldn't track it because no MO support
 			var b = tf.beacons[3];
 			assert.operator(b.t_done, ">=", 0);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -195,6 +225,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 			assert.isUndefined(b.nt_load_end);
 			assert.isUndefined(b.nt_unload_st);
 			assert.isUndefined(b.nt_unload_end);
+		}
+		else {
+			return this.skip();
 		}
 	});
 };

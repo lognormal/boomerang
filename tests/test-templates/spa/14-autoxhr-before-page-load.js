@@ -18,6 +18,9 @@ BOOMR_test.templates.SPA["14-autoxhr-before-page-load"] = function() {
 		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg", 100, 3000, 30000, true);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
@@ -25,11 +28,17 @@ BOOMR_test.templates.SPA["14-autoxhr-before-page-load"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
 		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 100, 0, 30000, true);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -38,6 +47,9 @@ BOOMR_test.templates.SPA["14-autoxhr-before-page-load"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

@@ -51,21 +51,6 @@ if (!window.reactDisableBoomerangHook) {
 
 const App = React.createClass({
 	getInitialState() {
-		window.custom_metric_1 = 11;
-		window.custom_metric_2 = function() {
-			return 22;
-		};
-
-		window.custom_timer_1 = 11;
-		window.custom_timer_2 = function() {
-			return 22;
-		};
-
-		if (typeof window.performance !== "undefined" &&
-			typeof window.performance.mark === "function") {
-			window.performance.mark("mark_usertiming");
-		}
-
 		var that = this;
 		if ( window.nav_routes && window.nav_routes.hasOwnProperty("length") && window.nav_routes.length > 0) {
 			if (!subscribed) {
@@ -101,6 +86,22 @@ const App = React.createClass({
 const Home = React.createClass({
 	getInitialState() {
 		var images;
+
+		// these overwrite what was in the HTML
+		window.custom_metric_1 = 11;
+		window.custom_metric_2 = function() {
+			return 22;
+		};
+
+		window.custom_timer_1 = 11;
+		window.custom_timer_2 = function() {
+			return 22;
+		};
+
+		if (typeof window.performance !== "undefined" &&
+			typeof window.performance.mark === "function") {
+			window.performance.mark("mark_usertiming");
+		}
 
 		if (typeof window.imgs !== "undefined" && window.imgs.hasOwnProperty("length")) {
 			images = window.imgs;
@@ -192,6 +193,9 @@ const Home = React.createClass({
 			return (
 				<div className="content">
 					<div dangerouslySetInnerHTML={this.cartMarkup()} />
+					<div class="cart-container" style={{display: "none"}}>
+						<div id="cart-total">$444.44</div>
+					</div>
 					{images}
 					<div>
 						<ul>
@@ -217,9 +221,22 @@ const Home = React.createClass({
 
 const Widget = React.createClass({
 	getInitialState() {
+		var wid = this.props.params.id;
+
+		// these overwrite what was in the HTML
+		window.custom_metric_1 = wid;
+		window.custom_metric_2 = function() {
+			return 10 * wid;
+		};
+
+		window.custom_timer_1 = wid;
+		window.custom_timer_2 = function() {
+			return 10 * wid;
+		};
+
 		return {
 			rnd: '' + (Math.random() * 1000),
-			id: this.props.params.id
+			id: wid
 		};
 	},
 	componentDidMount() {
@@ -243,10 +260,13 @@ const Widget = React.createClass({
 			height: "auto"
 		};
 		var image = <div className="image" key={this.props.params.id}><img key={this.props.params.id} src={`/delay?delay=${this.props.params.id}000&file=pages/12-react/support/img.jpg&id=${this.props.params.id}&rnd=${this.state.rnd}`} style={style}></img></div>;
-
+		var carttotal = this.props.params.id * 11.11;
 		return (
 			<div>
 				<div dangerouslySetInnerHTML={this.widgetMarkup()} />
+				<div class="cart-container" style={{display: "none"}}>
+					<div id="cart-total">${carttotal}</div>
+				</div>
 				{image}
 			</div>
 		);

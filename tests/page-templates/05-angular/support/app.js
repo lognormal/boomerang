@@ -28,6 +28,8 @@ var app = angular.module("app", modules)
 
 		$scope.rnd = Math.random();
 
+		$scope.carttotal = 444.44;
+
 		window.custom_timer_1 = 11;
 		window.custom_timer_2 = function() {
 			return 22;
@@ -53,6 +55,19 @@ var app = angular.module("app", modules)
 			$scope.rnd = Math.random();
 
 			var wid = parseInt($routeParams.widgetId);
+
+			$scope.carttotal = 11.11 * wid;
+
+			// these overwrite what was in the HTML
+			window.custom_metric_1 = wid;
+			window.custom_metric_2 = function() {
+				return 10 * wid;
+			};
+
+			window.custom_timer_1 = wid;
+			window.custom_timer_2 = function() {
+				return 10 * wid;
+			};
 
 			for (var i = 0; i < widgets.length; i++) {
 				if (widgets[i].id === wid) {
@@ -137,10 +152,8 @@ app.run(["$rootScope", "$location", "$timeout", function($rootScope, $location, 
 		}
 	}
 
-
-	if (typeof window.angular_nav_routes !== "undefined" &&
-		Object.prototype.toString.call(window.angular_nav_routes) === "[object Array]") {
-		BOOMR.subscribe("beacon", function(beacon) {
+	if (typeof window.angular_nav_routes !== "undefined" && BOOMR.utils.isArray(window.angular_nav_routes)) {
+		BOOMR.subscribe("onbeacon", function(beacon) {
 			// only continue for SPA beacons
 			if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
 				return;

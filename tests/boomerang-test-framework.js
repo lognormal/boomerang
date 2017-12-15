@@ -364,10 +364,12 @@
 	t.parseTimers = function(timers) {
 		var timerValues = {};
 
-		var timersSplit = timers.split(",");
-		for (var i = 0; i < timersSplit.length; i++) {
-			var timerSplit = timersSplit[i].split("|");
-			timerValues[timerSplit[0]] = timerSplit[1];
+		if (timers) {
+			var timersSplit = timers.split(",");
+			for (var i = 0; i < timersSplit.length; i++) {
+				var timerSplit = timersSplit[i].split("|");
+				timerValues[timerSplit[0]] = parseInt(timerSplit[1], 10);
+			}
 		}
 
 		return timerValues;

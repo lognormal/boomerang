@@ -1133,7 +1133,7 @@
 				return false;
 			}
 
-			res = this.findResource(url);
+			res = this.findResource(url, null, impl.deltaFromNavStart);
 
 			if (!res) {
 				BOOMR.debug("No resource matched", "PageVars");
@@ -1165,7 +1165,7 @@
 			}
 
 			if (o.relative_to_nt || o.start === "navigationStart") {
-				st = 0;
+				st = impl.deltaFromNavStart;
 			}
 			else {
 				st = parseFloat(res[o.start], 10);
@@ -1179,7 +1179,7 @@
 			en = parseFloat(res[o.end], 10);
 
 			if (isNaN(st) || isNaN(en)) {
-				BOOMR.debug("Start and end were not numeric: " + st + ", " + en, "PageVars");
+				BOOMR.debug("Start or end were not numeric: " + st + ", " + en, "PageVars");
 				return false;
 			}
 
@@ -1188,9 +1188,11 @@
 				return false;
 			}
 
-			BOOMR.debug("Final values: " + st + ", " + en, "PageVars");
+			BOOMR.debug("Final values: ns:" + impl.deltaFromNavStart + ", st:" + st + ", en:" + en, "PageVars");
 
-			BOOMR.addVar(this.varname + "_st", Math.round(st));
+			// the timer's reported start time should be a delta from the navigation start time
+			BOOMR.addVar(this.varname + "_st", Math.round(st - impl.deltaFromNavStart));
+
 			return this.apply(en - st);
 		},
 
@@ -1203,13 +1205,13 @@
 		 *
 		 * @param {string} url Full URL, a URL pattern Regex or "slowest"
 		 * @param {HTMLFrameElement} frame Frame to query for Resource Timings
+		 * @param {number} minStartTime the Minumum resource startTime
 		 *
 		 * @returns {PerformanceResourceTiming|null} First ResourceTiming
 		 * entity matching url in any frame or null if none found
 		 */
-		findResource: function(url, frame) {
-			var resources = this.findResources(url, frame);
-
+		findResource: function(url, frame, minStartTime) {
+			var resources = this.findResources(url, frame, minStartTime, 1);
 			if (resources === null) {
 				return null;
 			}
@@ -1220,6 +1222,7 @@
 			else {
 				return null;
 			}
+
 		},
 
 		/**
@@ -1274,38 +1277,44 @@
 
 		/**
 		 * Finds all resources matching slowest or a url or a URLPattern in all available frames
-		 * if we have access to them.
+		 * if we have access to them. If url is "slowest" then the limit is implicitly 1.
 		 *
 		 * @param {string} url Full URL, a URL pattern Regex or "slowest"
 		 * @param {HTMLFrameElement} frame Frame to query for Resource Timings
+		 * @param {number} minStartTime the minumum resource startTime
 		 * @param {number} limit the maximum number of resources to look for
 		 *
 		 * @returns {PerformanceResourceTiming[]} Resources found matching a URL Pattern
 		 */
-		findResources: function(url, frame, limit) {
-			var i, res, reslist, frameCount, foundList = [], tempReslist, tempResListIndex;
-
-			if (typeof frame === "number") {
-				limit = frame;
-				frame = null;
-			}
+		findResources: function(url, frame, minStartTime, limit) {
+			var i, slowestRes, reslist, frameIdx, frameCount, foundList = [], tempReslist;
 
 			if (!frame) {
 				frame = w;
 			}
 
-			reslist = this.getFrameResourcesForUrl(url, frame);
-
-			if (reslist === null) {
-				return reslist;
+			if (!minStartTime) {
+				minStartTime = 0;
 			}
 
-			if (reslist && reslist.length > 0) {
-				if (limit && limit === 1 && reslist.length > 1) {
-					return [reslist[0]];
-				}
-				else {
+			if (url !== "slowest") {
+				reslist = this.getFrameResourcesForUrl(url, frame);
+
+				if (reslist === null) {
 					return reslist;
+				}
+
+				if (reslist && reslist.length > 0) {
+					for (i = 0; i < reslist.length; i++) {
+						if (reslist[i].startTime < minStartTime) {
+							continue;
+						}
+
+						foundList.push(reslist[i]);
+						if (limit && foundList.length === limit) {
+							return foundList;
+						}
+					}
 				}
 			}
 
@@ -1314,16 +1323,18 @@
 				reslist = frame.performance.getEntriesByType("resource");
 				if (reslist && reslist.length > 0) {
 					for (i = 0; i < reslist.length; i++) {
+						if (reslist[i].startTime < minStartTime) {
+							continue;
+						}
 
 						// if we want the slowest url, then iterate through all
 						// till we find it
 						if (url === "slowest") {
-							if (!res || reslist[i].duration > res.duration) {
-								res = reslist[i];
+							if (!slowestRes || reslist[i].duration > slowestRes.duration) {
+								slowestRes = reslist[i];
 							}
 						}
-
-						// else stop at the first that matches the pattern
+						// else add it to the list of resources that match the pattern
 						else if (reslist[i].name && this.checkURLPattern(url, reslist[i].name, false)) {
 							foundList.push(reslist[i]);
 							if (limit && foundList.length === limit) {
@@ -1332,25 +1343,36 @@
 						}
 					}
 				}
-
-				if (res) {
-					return [res];
-				}
 			}
 
 			if (frame.frames) {
 				frameCount = getFrameCount(frame);
-				for (i = 0; i < frameCount; i++) {
-					tempReslist = this.findResources(url, frame.frames[i]);
+				for (frameIdx = 0; frameIdx < frameCount; frameIdx++) {
+					tempReslist = this.findResources(url, frame.frames[frameIdx], minStartTime, limit ? limit - foundList.length : 0);
 					if (tempReslist) {
-						for (tempResListIndex = 0; tempResListIndex < tempReslist.length; tempResListIndex++) {
-							foundList.push(tempReslist[tempResListIndex]);
-							if (limit && foundList.length === limit) {
-								return foundList;
+						for (i = 0; i < tempReslist.length; i++) {
+							// if we want the slowest url, then iterate through all till we find it
+							if (url === "slowest") {
+								if (!slowestRes || tempReslist[i].duration > slowestRes.duration) {
+									slowestRes = tempReslist[i];
+								}
+							}
+							// else add it to the list of resources that match the pattern
+							else {
+								foundList.push(tempReslist[i]);
+								// this result limiting doesn't take into account the order of the frames we're looping over.
+								// Resources that started earlier could be omitted if they occurred in other frames
+								if (limit && foundList.length === limit) {
+									return foundList;
+								}
 							}
 						}
 					}
 				}
+			}
+
+			if (slowestRes) {
+				return [slowestRes];
 			}
 
 			return foundList;
@@ -1358,6 +1380,8 @@
 
 		/**
 		 * Runs a UserTiming handler
+		 * Finds the first UserTiming mark that matches. If no marks are found then return the first UserTiming measure
+		 * that matches. If none are found, we'll retry later.
 		 *
 		 * @param {object} o Handler data
 		 *
@@ -1381,6 +1405,10 @@
 			// Check performance.mark
 			res = p.getEntriesByType("mark");
 			for (i = 0; res && i < res.length; i++) {
+				// filter out marks that happened before the navigation (for spa soft)
+				if (res[i].startTime < impl.deltaFromNavStart) {
+					continue;
+				}
 				if (res[i].name === o.parameter2) {
 					return this.apply(res[i].startTime);
 				}
@@ -1389,6 +1417,10 @@
 			// Check performance.measure
 			res = p.getEntriesByType("measure");
 			for (i = 0; res && i < res.length; i++) {
+				// filter out measures that happened before the navigation (for spa soft)
+				if (res[i].startTime < impl.deltaFromNavStart) {
+					continue;
+				}
 				if (res[i].name === o.parameter2) {
 					if (res[i].startTime) {
 						BOOMR.addVar(this.varname + "_st", Math.round(res[i].startTime));
@@ -2338,7 +2370,7 @@
 				}
 			}
 			else {
-				this.resourceTime.start = 0;
+				this.resourceTime.start = impl.deltaFromNavStart;
 			}
 
 			if (!this.resourceTime.stop || this.resourceTime.stop < resource.responseEnd) {
@@ -2481,6 +2513,11 @@
 
 		mayRetry: [],
 
+		// millisecond delta from page navigation start time.
+		// Will be 0 for page view and SPA hard navigations.
+		// SPA soft navigations will set this value to the start of the soft navigation
+		deltaFromNavStart: 0,
+
 		/**
 		 * Determines if the URL matches the Page Group List
 		 *
@@ -2585,7 +2622,7 @@
 		 * @param {string} ename Event name
 		 */
 		done: function(edata, ename) {
-			var i, v, hconfig, handler, limpl = impl, data, pg, match, onlyDimensions = false;
+			var i, v, hconfig, handler, limpl = impl, data, pg, match, onlyDimensions = false, navigationStart;
 
 			if (!impl.configReceived) {
 				// we should try to run again after config comes in
@@ -2680,6 +2717,21 @@
 			// Also clear the retry list since we'll repopulate it if needed
 			impl.mayRetry = [];
 
+			// for spa soft, we want to use the start time of the soft navigation.
+			// In all other cases use 0
+			if (ename === "xhr" && edata && edata.initiator === "spa" &&
+			    edata.timing && edata.timing.requestStart) {
+
+				navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart) ?
+				    BOOMR.plugins.RT.navigationStart() :
+				    (BOOMR.t_lstart || BOOMR.t_start);
+
+				impl.deltaFromNavStart = edata.timing.requestStart - navigationStart;
+			}
+			else {
+				impl.deltaFromNavStart = 0;
+			}
+
 			// Page Groups, AB Tests, Custom Metrics & Timers
 			for (v in hconfig) {
 				if (hconfig.hasOwnProperty(v)) {
@@ -2706,7 +2758,7 @@
 
 						// Use the initiator (e.g. 'spa') in preference over the
 						// event name (e.g. 'xhr')
-						var beaconType = ename === "xhr" &&
+						var beaconType = ename === "xhr" && edata &&
 							BOOMR.utils.inArray(
 								edata.initiator,
 								BOOMR.constants.BEACON_TYPE_SPAS) ?

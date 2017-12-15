@@ -18,6 +18,9 @@ BOOMR_test.templates.SPA["08-no-images"] = function() {
 		if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, true);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Shouldn't have a load time (if NavigationTiming is not supported)", function() {
@@ -25,6 +28,9 @@ BOOMR_test.templates.SPA["08-no-images"] = function() {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 };
