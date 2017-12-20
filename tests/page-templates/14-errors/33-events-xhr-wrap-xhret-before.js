@@ -1,16 +1,22 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/14-errors/11-events-element", function() {
+describe("e2e/14-errors/33-events-xhr-wrap-xhret-before", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 	var C = BOOMR.utils.Compression;
 
-	if (!window.addEventListener) {
-		it("Skipping on browser that doesn't support addEventListener", function() {
+	if (!BOOMR.plugins.AutoXHR) {
+		it("Skipping on non-AutoXHR supporting browser", function() {
 			return this.skip();
 		});
+		return;
+	}
 
+	if (!window.XMLHttpRequestEventTarget) {
+		it("Skipping on non-XMLHttpRequestEventTarget supporting browser", function() {
+			return this.skip();
+		});
 		return;
 	}
 
@@ -26,7 +32,7 @@ describe("e2e/14-errors/11-events-element", function() {
 
 	it("Should have had a single error", function() {
 		var b = tf.lastBeacon();
-		assert.equal(C.jsUrlDecompress(b.err).length, 1);
+		assert.equal(BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err)).length, 1);
 	});
 
 	it("Should have count = 1", function() {
@@ -83,16 +89,22 @@ describe("e2e/14-errors/11-events-element", function() {
 		assert.isDefined(err.stack);
 	});
 
+	it("Should have not have BOOMR_plugins_errors_wrap on the stack", function() {
+		var b = tf.lastBeacon();
+		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
+		assert.notInclude(err.stack, "BOOMR_plugins_errors_wrap");
+	});
+
 	it("Should have type = 'ReferenceError' or 'Error'", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 		assert.isTrue(err.type === "ReferenceError" || err.type === "Error");
 	});
 
-	it("Should have via = EVENTHANDLER", function() {
+	it("Should have via = GLOBAL_EXCEPTION_HANDLER", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
-		assert.equal(err.via, BOOMR.plugins.Errors.VIA_EVENTHANDLER);
+		assert.equal(err.via, BOOMR.plugins.Errors.VIA_GLOBAL_EXCEPTION_HANDLER);
 	});
 
 	it("Should have columNumber to be a number if specified", function() {
@@ -106,15 +118,19 @@ describe("e2e/14-errors/11-events-element", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ " + (HEADER_LINES + 18), function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 36), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, HEADER_LINES + 18, 5);
+			assert.closeTo(err.lineNumber, HEADER_LINES + 36, 5);
 		}
 		else {
 			return this.skip();
 		}
+	});
+
+	it("Should have called the wrapped XMLHttpRequestEventTarget addEventListener once", function() {
+		assert.equal(window.listenerCalled, 1);
 	});
 });

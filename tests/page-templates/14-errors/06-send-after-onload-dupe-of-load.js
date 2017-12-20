@@ -34,6 +34,9 @@ describe("e2e/14-errors/06-send-after-onload-dupe-of-load", function() {
 		if (err.fileName) {
 			assert.include(err.fileName, "06-send-after-onload-dupe-of-load.html");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have functionName of 'errorFunction'", function() {
@@ -42,6 +45,9 @@ describe("e2e/14-errors/06-send-after-onload-dupe-of-load", function() {
 
 		if (err.functionName) {
 			assert.equal(err.functionName, "errorFunction");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -81,6 +87,9 @@ describe("e2e/14-errors/06-send-after-onload-dupe-of-load", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 3), function() {
@@ -89,6 +98,9 @@ describe("e2e/14-errors/06-send-after-onload-dupe-of-load", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 3, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

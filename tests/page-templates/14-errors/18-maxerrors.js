@@ -33,7 +33,10 @@ describe("e2e/14-errors/18-maxerrors", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "18-maxerrors.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -43,6 +46,9 @@ describe("e2e/14-errors/18-maxerrors", function() {
 
 		if (err.functionName) {
 			assert.include(err.functionName, "errorFunction");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -90,6 +96,9 @@ describe("e2e/14-errors/18-maxerrors", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 3), function() {
@@ -98,6 +107,9 @@ describe("e2e/14-errors/18-maxerrors", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 3, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

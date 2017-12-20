@@ -7,6 +7,7 @@ describe("e2e/14-errors/26-freed-events", function() {
 
 	if (!window.addEventListener) {
 		it("Skipping on browser that doesn't support addEventListener", function() {
+			return this.skip();
 		});
 
 		return;

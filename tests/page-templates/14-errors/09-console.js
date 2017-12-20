@@ -34,6 +34,9 @@ describe("e2e/14-errors/09-console", function() {
 		if (err.fileName) {
 			assert.include(err.fileName, "09-console.html");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have functionName of 'errorFunction' for the first error", function() {
@@ -42,6 +45,9 @@ describe("e2e/14-errors/09-console", function() {
 
 		if (err.functionName) {
 			assert.equal(err.functionName, "errorFunction");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -93,6 +99,9 @@ describe("e2e/14-errors/09-console", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 11) + " for the first error", function() {
@@ -101,6 +110,9 @@ describe("e2e/14-errors/09-console", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 11, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

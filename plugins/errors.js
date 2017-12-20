@@ -30,7 +30,8 @@
  * ## Supported Browsers
  *
  * The `Errors` plugin can be enabled for all browsers, though some older browsers
- * may not be able to capture the full breadth of sources of errors.
+ * may not be able to capture the full breadth of sources of errors. Due to the lack
+ * of error detail on some older browsers, some errors may be reported more than once.
  *
  * Notable browsers:
  *
@@ -1039,6 +1040,14 @@
 				return;
 			}
 
+			// check if this error was already sent.
+			// This could happen if an event handler caught it and then the global
+			// error handler caught it again.
+			if (error.reported === true) {
+				return;
+			}
+			error.reported = true;
+
 			// defaults, if not specified
 			via = via || BOOMR.plugins.Errors.VIA_APP;
 			source = source ||  BOOMR.plugins.Errors.SOURCE_APP;
@@ -1332,7 +1341,6 @@
 					impl.send(e, via);
 
 					// re-throw
-					e.reported = true;
 					throw e;
 				}
 			};
@@ -1473,7 +1481,6 @@
 					impl.send(e, via);
 
 					// re-throw
-					e.reported = true;
 					throw e;
 				}
 			};
@@ -1961,6 +1968,12 @@
 							impl.send(error, E.VIA_GLOBAL_EXCEPTION_HANDLER);
 						}
 						else {
+							// older browsers will not send an error object to the global error handler making deduplication difficult.
+							// If an error is caught and reported (eg. in an error wrapper of addEventListener or setTimeout) then it will
+							// also be reported here.
+							// We could possibly check that the last error in our queue did not arrive via the global error handler
+							// and assume it was the same error but more testing will be required. We cannot compare the error message,
+							// since the message of the original error and the one that is provided here will be different in some cases.
 							impl.send({
 								message: message,
 								fileName: fileName,
@@ -2000,6 +2013,7 @@
 				});
 			}
 
+			// listen for calls to console.error
 			if (impl.monitorConsole) {
 				if (!BOOMR.window.console) {
 					BOOMR.window.console = {};
@@ -2036,16 +2050,36 @@
 				}
 			}
 
-			if (impl.monitorEvents && BOOMR.window.addEventListener && BOOMR.window.Element) {
-				impl.wrapFn("addEventListener", BOOMR.window, false, 1, E.VIA_EVENTHANDLER);
-				impl.wrapFn("addEventListener", BOOMR.window.Element.prototype, true, 1, E.VIA_EVENTHANDLER);
-				impl.wrapFn("addEventListener", BOOMR.window.XMLHttpRequest.prototype, true, 1, E.VIA_EVENTHANDLER);
+			// listen for errors in addEventListener callbacks
+			if (impl.monitorEvents) {
+				// EventTarget's addEventListener will catch events from window, document, Element and XHR in modern browsers.
+				// We want to instrument addEventListener at the end of the protocol chain in order to avoid conflicts with
+				// other libraries that might be wrapping AEL at a different level.
+				// This pattern is safer since other libraries' wrappers will get called. The downside is that our wrapper
+				// will not be called and any error in the AEL callback will be caught by the global error handler instead.
+				if (BOOMR.window.EventTarget) {
+					impl.wrapFn("addEventListener", BOOMR.window.EventTarget.prototype, true, 1, E.VIA_EVENTHANDLER);
+					impl.wrapRemoveEventListener(BOOMR.window.EventTarget.prototype);
+				}
+				else {
+					if (BOOMR.window) {
+						impl.wrapFn("addEventListener", BOOMR.window, false, 1, E.VIA_EVENTHANDLER);
+						impl.wrapRemoveEventListener(BOOMR.window);
+					}
 
-				impl.wrapRemoveEventListener(BOOMR.window);
-				impl.wrapRemoveEventListener(BOOMR.window.Element.prototype);
-				impl.wrapRemoveEventListener(BOOMR.window.XMLHttpRequest.prototype);
+					if (BOOMR.window.Node) {
+						impl.wrapFn("addEventListener", BOOMR.window.Node.prototype, true, 1, E.VIA_EVENTHANDLER);
+						impl.wrapRemoveEventListener(BOOMR.window.Node.prototype);
+					}
+
+					if (BOOMR.window.XMLHttpRequest) {
+						impl.wrapFn("addEventListener", BOOMR.window.XMLHttpRequest.prototype, true, 1, E.VIA_EVENTHANDLER);
+						impl.wrapRemoveEventListener(BOOMR.window.XMLHttpRequest.prototype);
+					}
+				}
 			}
 
+			// listen for errors in timeout callbacks
 			if (impl.monitorTimeout) {
 				impl.wrapFn("setTimeout", BOOMR.window, false, 0, E.VIA_TIMEOUT);
 				impl.wrapFn("setInterval", BOOMR.window, false, 0, E.VIA_TIMEOUT);

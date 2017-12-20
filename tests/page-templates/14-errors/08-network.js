@@ -8,6 +8,7 @@ describe("e2e/14-errors/08-network", function() {
 
 	if (!BOOMR.plugins.AutoXHR) {
 		it("Skipping on non-AutoXHR supporting browser", function() {
+			return this.skip();
 		});
 		return;
 	}

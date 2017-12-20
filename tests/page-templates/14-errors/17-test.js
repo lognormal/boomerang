@@ -31,7 +31,10 @@ describe("e2e/14-errors/17-test", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "17-test.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -42,6 +45,9 @@ describe("e2e/14-errors/17-test", function() {
 		if (err.functionName) {
 			assert.include(err.functionName, "errorFunction");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have message = 'a is not defined' or 'Can't find variable: a' or ''a' is undefined'", function() {
@@ -50,14 +56,15 @@ describe("e2e/14-errors/17-test", function() {
 
 		// Skip for IE6
 		if (err.message === "[object Error]") {
-			return;
+			return this.skip();
 		}
 
-		// Chrome, Firefox == a is not defined, Safari = Can't find variable
+		// Chrome, Firefox == a is not defined, Safari = Can't find variable, Edge = 'a' is not defined
 		assert.isTrue(
 			err.message.indexOf("a is not defined") !== -1 ||
 			err.message.indexOf("Can't find variable: a") !== -1 ||
-			err.message.indexOf("'a' is undefined") !== -1);
+			err.message.indexOf("'a' is undefined") !== -1 ||
+			err.message.indexOf("'a' is not defined") !== -1);
 	});
 
 	it("Should have source = APP", function() {
@@ -96,6 +103,9 @@ describe("e2e/14-errors/17-test", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 4), function() {
@@ -104,6 +114,9 @@ describe("e2e/14-errors/17-test", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 4, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

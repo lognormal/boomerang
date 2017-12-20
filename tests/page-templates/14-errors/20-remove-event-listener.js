@@ -8,6 +8,7 @@ describe("e2e/14-errors/20-remove-event-listener", function() {
 
 	if (!window.addEventListener) {
 		it("Skipping on browser that doesn't support addEventListener", function() {
+			return this.skip();
 		});
 
 		return;

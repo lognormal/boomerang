@@ -27,16 +27,28 @@ describe("e2e/14-errors/23-autorun-false", function() {
 		assert.equal(err.count, 1);
 	});
 
-	it("Should have an error coming from the html page", function() {
+	it("Should have fileName of the page (if set)", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "23-autorun-false.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
 		}
+		else {
+			return this.skip();
+		}
+	});
+
+	it("Should have functionName of 'Global code' (if set)", function() {
+		var b = tf.lastBeacon();
+		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.functionName) {
-			assert.include(err.functionName, "badFunction");
+			// not set in Chrome and FF, Edge = 'Global code', Safari = 'global code'
+			assert.include(err.functionName.toLowerCase(), "global code");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

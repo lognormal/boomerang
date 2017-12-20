@@ -22,17 +22,27 @@ describe("e2e/14-errors/22-empty-message-error", function() {
 		assert.equal(err.count, 1);
 	});
 
-	it("Should have an error coming from the html page", function() {
+	it("Should have fileName of the page (if set)", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "22-empty-message-error.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
 		}
+		else {
+			return this.skip();
+		}
+	});
+
+	it("Should have functionName of 'afterFirstBeacon'", function() {
+		var b = tf.lastBeacon();
+		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.functionName) {
 			assert.include(err.functionName, "afterFirstBeacon");
 		}
+		else {
+			return this.skip();
+		}
 	});
-
 });

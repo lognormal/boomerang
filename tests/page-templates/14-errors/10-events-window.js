@@ -8,6 +8,7 @@ describe("e2e/14-errors/10-events-window", function() {
 
 	if (!window.addEventListener) {
 		it("Skipping on browser that doesn't support addEventListener", function() {
+			return this.skip();
 		});
 
 		return;
@@ -39,7 +40,10 @@ describe("e2e/14-errors/10-events-window", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "10-events-window.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -56,11 +60,12 @@ describe("e2e/14-errors/10-events-window", function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
-		// Chrome, Firefox == a is not defined, Safari = Can't find variable
+		// Chrome, Firefox == a is not defined, Safari = Can't find variable, Edge = 'a' is not defined
 		assert.isTrue(
 			err.message.indexOf("a is not defined") !== -1 ||
 			err.message.indexOf("Can't find variable: a") !== -1 ||
-			err.message.indexOf("'a' is undefined") !== -1);
+			err.message.indexOf("'a' is undefined") !== -1 ||
+			err.message.indexOf("'a' is not defined") !== -1);
 	});
 
 	it("Should have source = APP", function() {
@@ -93,14 +98,20 @@ describe("e2e/14-errors/10-events-window", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
-	it("Should have lineNumber ~ " + (HEADER_LINES + 25), function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 26), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, HEADER_LINES + 25, 5);
+			assert.closeTo(err.lineNumber, HEADER_LINES + 26, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

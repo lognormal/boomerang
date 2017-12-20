@@ -38,11 +38,23 @@ describe("e2e/14-errors/24-autorun-false-multiple-then-load", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.fileName) {
-			assert.include(err.fileName, "24-autorun-false-multiple-then-load.html");
+			assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
 		}
+		else {
+			return this.skip();
+		}
+	});
+
+	it("Should have functionName of 'Global code' (if set) on the first beacon first error", function() {
+		var b = tf.beacons[0];
+		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.functionName) {
-			assert.include(err.functionName, "badFunction");
+			// not set in Chrome and FF, Edge = 'Global code', Safari = 'global code'
+			assert.include(err.functionName.toLowerCase(), "global code");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -79,6 +91,9 @@ describe("e2e/14-errors/24-autorun-false-multiple-then-load", function() {
 		if (t.isNavigationTimingSupported()) {
 			assert.isDefined(tf.beacons[1].nt_nav_st);
 			assert.isDefined(tf.beacons[1].nt_load_st);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

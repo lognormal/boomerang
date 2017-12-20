@@ -30,26 +30,34 @@ describe("e2e/14-errors/26-loader-snippet", function() {
 	});
 
 	it("Should have fileName of the page (if set) for each error", function() {
-		var b = tf.lastBeacon();
+		var b = tf.lastBeacon(), found = false;
 		var errs = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err));
 		for (var i = 0; i < 3; i++) {
 			var err = errs[i];
 
 			if (err.fileName) {
-				assert.include(err.fileName, "26-loader-snippet.html");
+				assert.include(err.fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
+				found = true;
 			}
+		}
+		if (!found) {
+			return this.skip();
 		}
 	});
 
 	it("Should have functionName of 'errorFunction' for each error", function() {
-		var b = tf.lastBeacon();
+		var b = tf.lastBeacon(), found = false;
 		var errs = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err));
 		for (var i = 0; i < 3; i++) {
 			var err = errs[i];
 
 			if (err.functionName) {
 				assert.include(err.functionName, "errorFunction");
+				found = true;
 			}
+		}
+		if (!found) {
+			return this.skip();
 		}
 	});
 
@@ -59,11 +67,12 @@ describe("e2e/14-errors/26-loader-snippet", function() {
 		for (var i = 0; i < 3; i++) {
 			var err = errs[i];
 
-			// Chrome, Firefox == a is not defined, Safari = Can't find variable
+			// Chrome, Firefox == a is not defined, Safari = Can't find variable, Edge = 'a' is not defined
 			assert.isTrue(
 				err.message.indexOf("a is not defined") !== -1 ||
 				err.message.indexOf("Can't find variable: a") !== -1 ||
-				err.message.indexOf("'a' is undefined") !== -1);
+				err.message.indexOf("'a' is undefined") !== -1 ||
+				err.message.indexOf("'a' is not defined") !== -1);
 		}
 	});
 
@@ -109,14 +118,18 @@ describe("e2e/14-errors/26-loader-snippet", function() {
 	});
 
 	it("Should have columNumber to be a number if specified for each error", function() {
-		var b = tf.lastBeacon();
+		var b = tf.lastBeacon(), found = false;
 		var errs = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err));
 		for (var i = 0; i < 3; i++) {
 			var err = errs[i];
 
 			if (typeof err.columnNumber !== "undefined") {
 				assert.isTrue(err.columnNumber >= 0);
+				found = true;
 			}
+		}
+		if (!found) {
+			return this.skip();
 		}
 	});
 

@@ -30,13 +30,16 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 	});
 
 	it("Should have fileName of the page (if set)", function() {
-		var b = tf.lastBeacon();
+		var b = tf.lastBeacon(), found = false;
 		var errs = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err));
-
 		for (var i = 0; i < errs.length; i++) {
 			if (errs[i].fileName) {
-				assert.include(errs[i].fileName, "19-boomr-errors.html");
+				assert.include(errs[i].fileName, window.location.pathname.substring(window.location.pathname.lastIndexOf("/") + 1));
+				found = true;
 			}
+		}
+		if (!found) {
+			return this.skip();
 		}
 	});
 
@@ -47,6 +50,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 		if (err.functionName) {
 			assert.include(err.functionName, "errorFunction");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have error #2 functionName of 'BOOMRtest2'", function() {
@@ -55,6 +61,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 
 		if (err.functionName) {
 			assert.include(err.functionName, "BOOMRtest2");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -65,6 +74,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 		if (err.functionName) {
 			assert.include(err.functionName, "BOOMRtest3");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have error #4 functionName of 'BOOMRtest4'", function() {
@@ -73,6 +85,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 
 		if (err.functionName) {
 			assert.include(err.functionName, "BOOMRtest4");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -148,6 +163,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 15), function() {
@@ -156,6 +174,9 @@ describe("e2e/14-errors/19-boomr-errors", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 15, 5);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

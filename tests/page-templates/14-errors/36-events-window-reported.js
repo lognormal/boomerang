@@ -1,13 +1,21 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/14-errors/11-events-element", function() {
+describe("e2e/14-errors/36-events-window-reported", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 	var C = BOOMR.utils.Compression;
 
 	if (!window.addEventListener) {
 		it("Skipping on browser that doesn't support addEventListener", function() {
+			return this.skip();
+		});
+
+		return;
+	}
+
+	if (!window.postMessage) {
+		it("Skipping on browser that doesn't support postMessage", function() {
 			return this.skip();
 		});
 
@@ -24,9 +32,21 @@ describe("e2e/14-errors/11-events-element", function() {
 		assert.isDefined(b.err);
 	});
 
-	it("Should have had a single error", function() {
+	it("Should have had a single error in a browser that has the error object in onerror", function() {
 		var b = tf.lastBeacon();
-		assert.equal(C.jsUrlDecompress(b.err).length, 1);
+		if (!t.isErrorObjInOnErrorSupported()) {
+			return this.skip();
+		}
+		assert.equal(BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err)).length, 1);
+	});
+
+	it("Should have had 2 errors in a browser that does not have the error object in onerror", function() {
+		var b = tf.lastBeacon();
+		if (t.isErrorObjInOnErrorSupported()) {
+			return this.skip();
+		}
+		// PhantomJS, older IE and Safari will report 2 errors, one from the addEventListener wrapper and another from the global onerror
+		assert.equal(BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err)).length, 2);
 	});
 
 	it("Should have count = 1", function() {
@@ -52,7 +72,7 @@ describe("e2e/14-errors/11-events-element", function() {
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.functionName) {
-			assert.include(err.functionName, "errorFunction");
+			assert.equal(err.functionName, "errorFunction");
 		}
 		else {
 			return this.skip();
@@ -106,12 +126,12 @@ describe("e2e/14-errors/11-events-element", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ " + (HEADER_LINES + 18), function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 26), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, HEADER_LINES + 18, 5);
+			assert.closeTo(err.lineNumber, HEADER_LINES + 26, 5);
 		}
 		else {
 			return this.skip();
