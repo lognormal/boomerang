@@ -2678,7 +2678,7 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		real_sendBeacon: function() {
-			var k, form, url, errors = [], params = [], paramsJoined, varsSent = {};
+			var k, form, url, errors = [], params = [], paramsJoined, varsSent = {}, _if;
 
 			if (!impl.beaconQueued) {
 				return false;
@@ -2771,7 +2771,8 @@ BOOMR_check_doc_domain();
 			}
 
 			if (w !== window) {
-				impl.vars["if"] = "";
+				_if = "if";  // work around uglifyJS minification that breaks in IE8 and quirks mode
+				impl.vars[_if] = "";
 			}
 
 			for (k in impl.errors) {

@@ -25,10 +25,18 @@
 		doc = iframe.contentWindow.document;
 	}
 	doc.open()._l = function() {
-		var js = this.createElement("script");
+		var js = this.createElement("script"), prefix, suffix;
 		if (dom) { this.domain = dom; }
 		js.id = "boomr-if-as";
-		js.src = "../../build/boomerang-latest-debug.js";
+		if (window.BOOMR_script_delay) {
+			prefix = "/delay?delay=3000&file=build/";
+			suffix = "&rnd=" + Math.random();
+		}
+		else {
+			prefix = "../../build/";
+			suffix = "";
+		}
+		js.src = prefix + (window.BOOMR_script_minified ? "boomerang-latest-debug.min.js" : "boomerang-latest-debug.js") + suffix;
 		BOOMR_lstart=new Date().getTime();
 		this.body.appendChild(js);
 	};

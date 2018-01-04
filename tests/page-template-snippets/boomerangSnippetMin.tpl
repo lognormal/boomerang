@@ -1,0 +1,3 @@
+<script>
+<%= boomerangSnippetMinNoScript %>
+</script>

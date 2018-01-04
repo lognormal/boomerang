@@ -127,11 +127,11 @@
 	/**
 	 * JSURL reserved value map
 	 */
-	var JSURL_RESERVED = {
-		"true": true,
-		"false": false,
-		"null": null
-	};
+	var _true = "true", _false = "false", _null = "null";  // work around uglifyJS minification that breaks in IE8 and quirks mode
+	var JSURL_RESERVED = {};
+	JSURL_RESERVED[_true] = true;
+	JSURL_RESERVED[_false] = false;
+	JSURL_RESERVED[_null] = null;
 
 	/**
 	 * Converts from JSURL to JSON.
