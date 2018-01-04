@@ -8,7 +8,7 @@ BOOMR.utils.removeCookie("RT");
 <script type="text/javascript">
 function handler(event) {
 	var data = JSON.parse(event.data);
-	if (data) {
+	if (data && data.dm) {
 		window.childSessionData = data;
 	}
 }

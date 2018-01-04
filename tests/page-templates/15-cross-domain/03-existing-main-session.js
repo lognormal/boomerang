@@ -44,7 +44,7 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 
 		// Off By One error or t_done not defined because phantomjs
 		if (b["rt.obo"]) {
-			return;
+			return this.skip();
 		}
 		else {
 			assert.isDefined(b.t_done, "t_done is not defined");

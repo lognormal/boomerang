@@ -266,15 +266,15 @@
 		init: function(config) {
 			var a, index;
 
+			if (!BOOMR.plugins.RT) {
+				return;
+			}
+
 			if (config.primary) {
 				return;
 			}
 			else if (config.CrossDomain) {
 				impl.enabled = true;
-			}
-
-			if (!BOOMR.plugins.RT) {
-				return;
 			}
 
 			BOOMR.utils.pluginConfig(impl, config, "CrossDomain",
@@ -295,7 +295,16 @@
 				return;
 			}
 
-			if (impl.cross_domain_url && !impl.sending && impl.enabled) {
+			if (!impl.sending && impl.enabled) {
+				if (impl.cross_domain_url) {
+					// if we use the a.href trick below to cleanup a crossdomain URL string containing only spaces,
+					// Chrome will return window.location but IE will return the parent folder of the URI.
+					impl.cross_domain_url = impl.cross_domain_url.replace(/^\s+|\s+$/g, "");  // trim spaces
+				}
+				if (!impl.cross_domain_url) {
+					impl.enabled = false;
+					return;
+				}
 				// Normalize the URL
 				a = d.createElement("a");
 				a.href = impl.cross_domain_url;

@@ -1,12 +1,12 @@
 <%= header %>
 <%= boomerangScript %>
-<script src="06-no-main-domain-url.js" type="text/javascript"></script>
+<script src="08-whitespace-main-domain-url.js" type="text/javascript"></script>
 <script>
 BOOMR_test.init({
 	site_domain: "<%= mainServer %>",
 	testAfterOnBeacon: true,
 	CrossDomain: {
-		cross_domain_url: "",
+		cross_domain_url: "  ",
 		sending: false
 	}
 });

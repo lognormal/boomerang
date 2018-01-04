@@ -22,10 +22,13 @@ describe("e2e/15-cross-domain/05-query-parameters", function() {
 
 	it("Should have only one ? in the iframe URL", function() {
 		if (t.isResourceTimingSupported()) {
-			var resource = t.findFirstResource("frameScript");
+			var resource = t.findFirstResource("frameScript");  // Chrome bug? it doesn't find the resource
 			assert.isDefined(resource);
 			var resourceURL = resource.name;
-			assert.equal(resourceURL.match(/\?/g).length, 1, "Number of '?'s in URL was not 1.");
+			assert.equal(resourceURL.match(/\?/g).length, 1, "Number of '?'s in URL is 1");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

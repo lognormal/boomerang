@@ -17,7 +17,7 @@ window.sessionMock = {
 <script type="text/javascript">
 function handler(event) {
 	var data = JSON.parse(event.data);
-	if (data) {
+	if (data && data.dm) {
 		console.log(data);
 		window.childSessionData = data;
 	}
