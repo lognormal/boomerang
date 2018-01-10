@@ -1,0 +1,35 @@
+<%= header %>
+<script>
+// ensure we wait for LOGN
+window.BOOMR_LOGN_always = true;
+// we can use the fact that the api key is pasted into the config query request to delay config
+window.BOOMR_API_key = "13-logn-03-localstorage&delay=2000";
+</script>
+<!-- ensure the script is on the page before onload -->
+<%= boomerangScript %>
+
+<script src="03-localstorage.js" type="text/javascript"></script>
+<script type="text/javascript">
+config = {
+	"h.t": BOOMR.now(),
+	"h.cr": "abc",
+	"h.d": window.location.host,
+	"PageParams": {
+		"pageGroups": [
+			{
+				"type": "Regexp",
+				"parameter1": "/pages/",
+				"parameter2": "FROMLOCALSTORAGE"
+			}
+		]
+	}
+};
+
+BOOMR.utils.setLocalStorage("LOGN", config, 5 * 60); // in secs
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1
+});
+
+</script>
+<%= footer %>

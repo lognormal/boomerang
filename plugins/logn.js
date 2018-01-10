@@ -13,6 +13,7 @@
  * * `h.cr`: mPulse Anti-CSRF crumb
  * * `t_configjs`: The time the config.js[on] data was sent to `init()`
  * * `t_configfb`: The time the config.js[on] data's first bytes were received
+ * * `t_configls`: The time the config was read from localStorage (delta from navStart)
  *
  * @class BOOMR.plugins.LOGN
  */
@@ -32,6 +33,7 @@
 	    // When true, the plugin will always run
 	    alwaysRun = w.BOOMR_LOGN_always,
 	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,
+	    CONFIG_STORE_TIMEOUT = w.BOOMR_CONFIG_STORE_TIMEOUT || 8 * 60 * 1000;
 	    ready = false;
 
 	BOOMR = window.BOOMR || {};
@@ -48,8 +50,12 @@
 		return;
 	}
 
+	var impl = {
+		storeConfig: false  // use localStorage to cache config, default to false
+	};
+
 	/**
-	 * Called when config.js[on] has loaded
+	 * Called when config.js[on] has loaded either from a server response or localStorage
 	 */
 	function loaded() {
 		if (complete) {
@@ -111,33 +117,73 @@
 	}
 
 	/**
+	 * Loads the config JSON either from a server response or localStorage
+	 *
+	 * @param {object} JSON config object
+	 *
+	 * @returns {boolean} true if successful
+	 */
+	function loadJsonConfig(configData) {
+		// save the session ID first
+		BOOMR.session.ID = configData.session_id;
+		delete configData.session_id;
+
+		// addVar other key config
+		var params = ["h.key", "h.d", "h.t", "h.cr"];
+
+		for (var i = 0; i < params.length; i++) {
+			if (configData[params[i]]) {
+				BOOMR.addVar(params[i], configData[params[i]]);
+
+				// strip from the data we give to other plugins
+				delete configData[params[i]];
+			}
+		}
+
+		// call init even if the object is empty like the JS config would have.
+		// The page-params plugin (maybe others) depends on this functionality
+		BOOMR.init(configData);
+		return true;
+	}
+
+	/**
 	 * Handles a config.json response
 	 *
 	 * @param {string} responseText HTTP response text
+	 * @param {boolean} configRefresh true if the response is a result of a config refresh
+	 *
+	 * @returns {boolean} true if successful
 	 */
-	function handleJsonResponse(responseText) {
+	function handleJsonResponse(responseText, configRefresh) {
 		w.BOOMR_configt = BOOMR.now();
 
-		var configData = parseJson(responseText);
+		var configData = parseJson(responseText), logn;
+
 		if (configData) {
-			// save the session ID first
-			BOOMR.session.ID = configData.session_id;
-			delete configData.session_id;
-
-			// addVar other key config
-			var params = ["h.key", "h.d", "h.t", "h.cr"];
-
-			for (var i = 0; i < params.length; i++) {
-				if (configData[params[i]]) {
-					BOOMR.addVar(params[i], configData[params[i]]);
-
-					// strip from the data we give to other plugins
-					delete configData[params[i]];
+			// Update localStorage with config.
+			// When refresh is false then we are receiving the complete config, overwrite everything.
+			// When refresh is true then we are only receive crumb data, merge with existing config
+			logn = configRefresh ? BOOMR.utils.getLocalStorage("LOGN") || {} : {};
+			for (var key in configData) {
+				if (configData.hasOwnProperty(key)) {
+					logn[key] = configData[key];
 				}
 			}
 
-			BOOMR.init(configData);
+			// if storing is enabled then check the current and incomming configs
+			if (impl.storeConfig || (configData.LOGN && configData.LOGN.storeConfig)) {
+				BOOMR.utils.setLocalStorage("LOGN", logn, CONFIG_STORE_TIMEOUT);
+			}
+
+			// if this is the complete config response then queue the first config refresh
+			if (!configRefresh) {
+				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
+			}
+
+			BOOMR.debug("Loading config from JSON response", "LOGN");
+			return loadJsonConfig(configData);
 		}
+		return false;
 	}
 	/* END_CONFIG_AS_JSON */
 
@@ -153,7 +199,7 @@
 	/* END_CONFIG_AS_JS */
 
 	/**
-	 * Loads a config.js[on]
+	 * Checks localStorage for an existing config and initiates a server config.js[on] request
 	 */
 	function load() {
 		/* BEGIN_CONFIG_AS_JS */
@@ -166,6 +212,24 @@
 		    plugins = [],
 		    pluginName,
 		    url;
+
+		/* BEGIN_CONFIG_AS_JSON */
+		// we'll always try to load config from localStorage since we don't know
+		// at this point if storeConfig is enabled or not
+		var configData;
+		if (!complete) {
+			configData = BOOMR.utils.getLocalStorage("LOGN");
+			if (configData) {
+				// we found the config in localStorage
+				BOOMR.debug("Loading config from localStorage", "LOGN");
+				if (loadJsonConfig(configData)) {
+					// add config time to beacon
+					BOOMR.addVar("t_configls", Math.round(BOOMR.hrNow()));
+					BOOMR.setImmediate(loaded);
+				}
+			}
+		}
+		/* END_CONFIG_AS_JSON */
 
 		for (pluginName in BOOMR.plugins) {
 			if (BOOMR.plugins.hasOwnProperty(pluginName)) {
@@ -185,17 +249,20 @@
 		    "&v=" + BOOMR.version +
 		    // if this is running in an iframe, we need to look for config vars in parent window
 		    (w === window ? "" : "&if=") +
-		    // is this a new session (0) or existing session (1).  New sessions may be rate limited
-		    "&sl=" + (BOOMR.session.length > 0 ? 1 : 0) +
+		    // is this a new session (0) or existing session (1).  New sessions may be rate limited.
 		    // We don't pass the actual session length so that the URL response can be cached
+		    "&sl=" + (BOOMR.session.length > 0 ? 1 : 0) +
+		    // session ID
 		    "&si=" + BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36) +
 		    // if this is running after complete, then we're just refreshing the crumb
 		    (complete ? "&r=" : "") +
 		    // Pass in the expected beacon URL so server can check if it has gone dead
 		    (bcn ? "&bcn=" + encodeURIComponent(bcn) : "") +
+		    // only need to send the plugin list on first config request
 		    (complete ? "" : "&plugins=" + plugins.join(","));
 
 		/* BEGIN_CONFIG_AS_JSON */
+		// request Access-Control-Allow-Origin in the response headers
 		url += "&acao=";
 		/* END_CONFIG_AS_JSON */
 
@@ -205,24 +272,27 @@
 
 		/* BEGIN_CONFIG_AS_JSON */
 		/*eslint-disable no-inner-declarations, no-empty*/
-		if (window.XDomainRequest) {
-			var xdr = new XDomainRequest();
-			xdr.open("GET", url);
-			xdr.onload = function() {
-				handleJsonResponse(xdr.responseText);
-			};
-			xdr.send();
-		}
-		else {
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", url, true);
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === 4 && xhr.status === 200) {
-					handleJsonResponse(xhr.responseText);
-				}
-			};
-			xhr.send(null);
-		}
+		// `complete` may change by the time the callback is called, save the value as `refresh`
+		(function(refresh) {
+			if (window.XDomainRequest) {
+				var xdr = new XDomainRequest();
+				xdr.open("GET", url);
+				xdr.onload = function() {
+					handleJsonResponse(xdr.responseText, refresh);
+				};
+				xdr.send();
+			}
+			else {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, true);
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						handleJsonResponse(xhr.responseText, refresh);
+					}
+				};
+				xhr.send(null);
+			}
+		}(complete));
 		/* END_CONFIG_AS_JSON */
 
 		/* BEGIN_CONFIG_AS_JS */
@@ -232,6 +302,7 @@
 		s0 = null;
 		/* END_CONFIG_AS_JS */
 
+		// we'll wait until we get our first config response before queuing the config refreshes here
 		if (complete) {
 			// remove this node and start another after CONFIG_RELOAD_TIMEOUT
 			setTimeout(function() {
@@ -254,6 +325,7 @@
 		// remove config timing vars
 		BOOMR.removeVar("t_configjs");
 		BOOMR.removeVar("t_configfb");
+		BOOMR.removeVar("t_configls");
 	}
 
 	//
@@ -273,20 +345,25 @@
 		init: function(config) {
 			var apiKey;
 
+			BOOMR.utils.pluginConfig(impl, config, "LOGN", ["storeConfig"]);
+
 			if (complete || BOOMR.session.rate_limited) {
 				return this;
 			}
 
-			if (config && config.rate_limited) {
-				BOOMR.session.rate_limited = true;
-				return this;
+			if (config) {
+				if (config.rate_limited) {
+					BOOMR.session.rate_limited = true;
+					return this;
+				}
+
+				if (typeof config.autorun !== "undefined") {
+					autorun = config.autorun;
+				}
 			}
 
-			if (config && typeof config.autorun !== "undefined") {
-				autorun = config.autorun;
-			}
-
-			// if we are called a second time while running, it means config.js has finished loading
+			// if we are called a second time while running, it means config.js[on] has finished loading
+			// either from a server response or localStorage
 			if (running) {
 				BOOMR.fireEvent("config", config);
 
@@ -295,12 +372,20 @@
 				// every change of readyState
 				ready = true;
 				BOOMR.setImmediate(loaded);
-				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
 
-				BOOMR.addVar("t_configjs", BOOMR.now() - t_start);
-				if (typeof BOOMR_configt === "number") {
-					BOOMR.addVar("t_configfb", BOOMR_configt - t_start);
-					delete BOOMR_configt;
+				/* BEGIN_CONFIG_AS_JS */
+				// queue the first config refresh.
+				// in JSON mode, the first config refresh will be queued in handleJsonResponse because
+				// we might arrive here from a localStorage config load
+				setTimeout(load, CONFIG_RELOAD_TIMEOUT);
+				/* END_CONFIG_AS_JS */
+
+				if (t_start) {
+					BOOMR.addVar("t_configjs", BOOMR.now() - t_start);
+					if (typeof BOOMR_configt === "number") {
+						BOOMR.addVar("t_configfb", BOOMR_configt - t_start);
+						delete BOOMR_configt;
+					}
 				}
 
 				return this;
@@ -354,12 +439,25 @@
 			BOOMR.subscribe("beacon", onBeacon, null, null);
 
 			running = true;
+
+			/* BEGIN_CONFIG_AS_JS */
+			// load config immediately if running in an iframe otherwise wait
+			// until onload so that we don't affect the page timing if the config
+			// request is slow
 			if (w === window) {
-				BOOMR.subscribe("page_ready", load, null, null);
+				// Issue 622: this doesn't work for SPA
+				BOOMR.subscribe("page_ready", load, null, null, true);
 			}
 			else {
 				load();
 			}
+			/* END_CONFIG_AS_JS */
+			/* BEGIN_CONFIG_AS_JSON */
+			// XHR config request shouldn't delay onload even if not in an iframe.
+			// Call with setImmediate because if config is found in localStorage it
+			// it will call init again
+			BOOMR.setImmediate(load);
+			/* END_CONFIG_AS_JSON */
 
 			return this;
 		},

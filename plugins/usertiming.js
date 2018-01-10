@@ -86,33 +86,6 @@
 		// Options
 		options: {"from": 0, "window": BOOMR.window},
 
-		/**
-		 * Get a timestamp to compare with performance marks and measures.
-		 *
-		 * This function needs to approximate the time since the Navigation Timing API's
-		 * `navigationStart` time. If available, `performance.now()` can provide this
-		 * value. If not we either get the navigation start time from the RT plugin or
-		 * from `t_lstart` or `t_start`. Those values are subtracted from the current
-		 * time to derive a time since `navigationStart` value.
-		 *
-		 * @returns {float} Exact or approximate time since navigation start.
-		 */
-		now: function() {
-			var now, navigationStart, p = BOOMR.getPerformance();
-
-			if (p && p.now) {
-				now = p.now();
-			}
-			else {
-				navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart &&
-					BOOMR.plugins.RT.navigationStart()) || BOOMR.t_lstart || BOOMR.t_start;
-
-				now = BOOMR.now() - navigationStart;
-			}
-
-			return now;
-		},
-
 		/*
 		 * Calls the UserTimingCompression library to get the compressed UserTiming
 		 * data that occurred since the last call.
@@ -120,8 +93,9 @@
 		 * @returns {string} Compressed UserTiming data
 		 */
 		getUserTiming: function() {
-			var timings, res, now = this.now();
-			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
+			var timings, res,
+			    now = BOOMR.hrNow(),  // Get a timestamp to compare with performance marks and measures.
+			    utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
 
 			timings = utc.getCompressedUserTiming(impl.options);
 			res = utc.compressForUri(timings);

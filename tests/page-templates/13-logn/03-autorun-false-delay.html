@@ -6,7 +6,6 @@ window.BOOMR_API_key = "13-logn-01-autorun-false";
 <script>
 function run() {
 	BOOMR.page_ready();
-	BOOMR_test.runTests();
 }
 
 if (document.addEventListener) {
@@ -20,6 +19,9 @@ else if (document.attachEvent) {
 		}
 	});
 }
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
 </script>
 <%= boomerangScript %>
 <script src="03-autorun-false-delay.js" type="text/javascript"></script>

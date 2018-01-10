@@ -368,6 +368,19 @@
 		return (ua.indexOf("phantomjs") === -1);  // this should be extended to include older IE and Safari
 	};
 
+	t.isLocalStorageSupported = function() {
+		var result = false, name = "_boomr_ilss";
+		try {
+			window.localStorage.setItem(name, name);
+			result = (window.localStorage.getItem(name) === name);
+			window.localStorage.removeItem(name);
+		}
+		catch (ignore) {
+			result = false;
+		}
+		return result;
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		if (!t.isResourceTimingSupported()) {
 			// need RT to validate

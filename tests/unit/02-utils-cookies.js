@@ -64,8 +64,8 @@ describe("BOOMR.utils cookies", function() {
 			assert.isNull(BOOMR.utils.getCookie(null));
 		});
 
-		it("Should return undefined when calling with not existing cookie", function() {
-			assert.isUndefined(BOOMR.utils.getCookie("some-none-existing-cooke"));
+		it("Should return undefined when calling with non existing cookie", function() {
+			assert.isUndefined(BOOMR.utils.getCookie("some-non-existing-cooke"));
 		});
 	});
 
@@ -123,6 +123,31 @@ describe("BOOMR.utils cookies", function() {
 				assert.strictEqual(BOOMR.utils.getCookie(cookieName), value);
 				assert.notStrictEqual(BOOMR.utils.getCookie(cookieName), value_strict_false);
 				BOOMR.utils.removeCookie(cookieName);
+			});
+
+			it("Should return the cookie value string that we've set previously with a large expiry", function() {
+				BOOMR.session.domain = cookieDomain;
+
+				var value = "1";
+				BOOMR.utils.setCookie(cookieName, value, 5 * 60);
+				assert.strictEqual(BOOMR.utils.getCookie(cookieName), value);
+				BOOMR.utils.removeCookie(cookieName);
+			});
+
+			it("Should return undefined for a cookie that we've set previously with a zero expiry", function() {
+				BOOMR.session.domain = cookieDomain;
+
+				var value = "1";
+				BOOMR.utils.setCookie(cookieName, value, 0);
+				assert.isUndefined(BOOMR.utils.getCookie(cookieName));
+			});
+
+			it("Should return undefined for a cookie that we've set previously with a negative expiry", function() {
+				BOOMR.session.domain = cookieDomain;
+
+				var value = "1";
+				BOOMR.utils.setCookie(cookieName, value, -1);
+				assert.isUndefined(BOOMR.utils.getCookie(cookieName));
 			});
 		}
 
@@ -242,11 +267,11 @@ describe("BOOMR.utils cookies", function() {
 		});
 
 		if (canSetCookies) {
-			it("Should return false when removing previously set Cookie", function() {
+			it("Should return true when removing a Cookie", function() {
 				BOOMR.session.domain = cookieDomain;
 
 				assert.isTrue(BOOMR.utils.setCookie(cookieName, "value"));
-				assert.isFalse(BOOMR.utils.removeCookie(cookieName));
+				assert.isTrue(BOOMR.utils.removeCookie(cookieName));
 			});
 		}
 	});

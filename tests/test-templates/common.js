@@ -28,9 +28,16 @@ describe("common", function() {
 	}
 
 	it("Should have sent beacons that pass basic validation", function() {
-		for (var i = 0; i < tf.beacons.length; i++) {
-			var b = tf.beacons[i], tm, now = BOOMR.now();
-			var prefix = "ensure beacon " + (i + 1) + " ";
+		var i, b, tm, now, prefix;
+
+		if (!tf.beacons.length) {
+			return this.skip();
+		}
+
+		for (i = 0; i < tf.beacons.length; i++) {
+			b = tf.beacons[i];
+			now = BOOMR.now();
+			prefix = "ensure beacon " + (i + 1) + " ";
 
 			assert.equal(b.v, BOOMR.version, prefix + "has the boomerang version");
 
@@ -145,10 +152,15 @@ describe("common", function() {
 	});
 
 	it("BUG: should have sent beacons without negative timers", function() {
-		var t_done, t_resp, t_page;
-		for (var i = 0; i < tf.beacons.length; i++) {
-			var b = tf.beacons[i];
-			var prefix = "ensure beacon " + (i + 1) + " ";
+		var i, b, prefix, t_done, t_resp, t_page, timers, timer;
+
+		if (!tf.beacons.length) {
+			return this.skip();
+		}
+
+		for (i = 0; i < tf.beacons.length; i++) {
+			b = tf.beacons[i];
+			prefix = "ensure beacon " + (i + 1) + " ";
 			if (b.t_done) {
 				t_done = parseInt(b.t_done, 10);
 				assert.operator(t_done, ">=", 0, prefix + "has a positive 't_done' timer");
@@ -165,8 +177,8 @@ describe("common", function() {
 			}
 
 			if (b.t_other) {
-				var timers = t.parseTimers(b.t_other);
-				for (var timer in timers) {
+				timers = t.parseTimers(b.t_other);
+				for (timer in timers) {
 					if (timers.hasOwnProperty(timer)) {
 						// TODO: this test reveals a bug, see https://github.com/SOASTA/soasta-boomerang/issues/626
 						//assert.isTrue(timers[timer] >= 0, prefix + "has a positive 't_other." + timer + "' timer");

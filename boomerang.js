@@ -712,6 +712,9 @@ BOOMR_check_doc_domain();
 
 		disabled_plugins: {},
 
+		localStorageSupported: false,
+		LOCAL_STORAGE_PREFIX: "_boomr_",
+
 		xb_handler: function(type) {
 			return function(ev) {
 				var target;
@@ -838,6 +841,30 @@ BOOMR_check_doc_domain();
 			}
 
 			return false;
+		},
+
+		/**
+		 * Checks browser for localStorage support
+		 */
+		checkLocalStorageSupport: function() {
+			var name = impl.LOCAL_STORAGE_PREFIX + "clss";
+			impl.localStorageSupported = false;
+
+			// we need JSON and localStorage support
+			if (!w.JSON || !w.localStorage) {
+				return;
+			}
+
+			// Browsers with cookies disabled or in private/incognito mode may throw an
+			// error when accessing the localStorage variable
+			try {
+				w.localStorage.setItem(name, name);
+				impl.localStorageSupported = (w.localStorage.getItem(name) === name);
+				w.localStorage.removeItem(name);
+			}
+			catch (ignore) {
+				impl.localStorageSupported = false;
+			}
 		}
 	};
 
@@ -988,7 +1015,7 @@ BOOMR_check_doc_domain();
 			 *
 			 * @param {object} o Object
 			 * @param {string} separator Member separator
-			 * @param {number} nest_level Number of levels to recruse
+			 * @param {number} nest_level Number of levels to recurse
 			 *
 			 * @returns {string} String representation of the object
 			 *
@@ -1102,35 +1129,35 @@ BOOMR_check_doc_domain();
 				var value, nameval, savedval, c, exp;
 
 				/* SOASTA PRIVATE START */
-				// NOTE: Private repo has session.domain instead of site_domain
+				// NOTE: Private repo has session.domain instead of impl.site_domain
 				/* SOASTA PRIVATE END */
-				if (!name || !BOOMR.session.domain) {
-					BOOMR.debug("No cookie name or site domain: " + name + "/" + BOOMR.session.domain);
-
+				if (!name || !BOOMR.session.domain || typeof subcookies === "undefined") {
+					BOOMR.debug("Invalid parameters or site domain: " + name + "/" + subcookies + "/" + BOOMR.session.domain);
 					BOOMR.addVar("nocookie", 1);
-
 					return false;
 				}
 
 				value = this.objectToString(subcookies, "&");
 				nameval = name + "=\"" + value + "\"";
 
-				/* SOASTA PRIVATE START */
-				// NOTE: Private repo has session.domain instead of site_domain
-				/* SOASTA PRIVATE END */
-				c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
-				if (max_age) {
-					exp = new Date();
-					exp.setTime(exp.getTime() + max_age * 1000);
-					exp = exp.toGMTString();
-					c.push("expires=" + exp);
-				}
-
 				if (nameval.length < 500) {
+					/* SOASTA PRIVATE START */
+					// NOTE: Private repo has session.domain instead of impl.site_domain
+					/* SOASTA PRIVATE END */
+					c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
+					if (typeof max_age === "number") {
+						exp = new Date();
+						exp.setTime(exp.getTime() + max_age * 1000);
+						exp = exp.toGMTString();
+						c.push("expires=" + exp);
+					}
+
 					d.cookie = c.join("; ");
 					// confirm cookie was set (could be blocked by user's settings, etc.)
 					savedval = this.getCookie(name);
-					if (value === savedval) {
+					// the saved cookie should be the same or undefined in the case of removeCookie
+					if (value === savedval ||
+					    (typeof savedval === "undefined" && typeof max_age === "number" && max_age <= 0)) {
 						return true;
 					}
 					BOOMR.warn("Saved cookie value doesn't match what we tried to set:\n" + value + "\n" + savedval);
@@ -1194,6 +1221,123 @@ BOOMR_check_doc_domain();
 			 */
 			removeCookie: function(name) {
 				return this.setCookie(name, {}, -86400);
+			},
+
+			/**
+			 * Retrieve items from localStorage
+			 *
+			 * @param {string} name Name of storage
+			 *
+			 * @returns {object|null} Returns object retrieved from localStorage.
+			 *                       Returns undefined if not found or expired.
+			 *                       Returns null if parameters are invalid or an error occured
+			 *
+			 * @memberof BOOMR.utils
+			 */
+			getLocalStorage: function(name) {
+				var value, data;
+				if (!name || !impl.localStorageSupported) {
+					return null;
+				}
+
+				try {
+					value = w.localStorage.getItem(impl.LOCAL_STORAGE_PREFIX + name);
+					if (value === null) {
+						return undefined;
+					}
+					data = w.JSON.parse(value);
+				}
+				catch (e) {
+					BOOMR.warn(e);
+					return null;
+				}
+
+				if (!data || typeof data.items !== "object") {
+					// Items are invalid
+					this.removeLocalStorage(name);
+					return null;
+				}
+				if (typeof data.expires === "number") {
+					if (BOOMR.now() >= data.expires) {
+						// Items are expired
+						this.removeLocalStorage(name);
+						return undefined;
+					}
+				}
+				return data.items;
+			},
+
+			/**
+			 * Saves items in localStorage
+			 * The value stored in localStorage will be a JSON string representation of {"items": items, "expiry": expiry}
+			 * where items is the object we're saving and expiry is an optional epoch number of when the data is to be
+			 * considered expired
+			 *
+			 * @param {string} name Name of storage
+			 * @param {object} items Items to be saved
+			 * @param {number} max_age Age in seconds before items are to be considered expired
+			 *
+			 * @returns {boolean} True if the localStorage was set successfully
+			 *
+			 * @memberof BOOMR.utils
+			 */
+			setLocalStorage: function(name, items, max_age) {
+				var data, value, savedval;
+
+				if (!name || !impl.localStorageSupported || typeof items !== "object") {
+					return false;
+				}
+
+				data = {"items": items};
+
+				if (typeof max_age === "number") {
+					data.expires = BOOMR.now() + (max_age * 1000);
+				}
+
+				value = w.JSON.stringify(data);
+
+				if (value.length < 50000) {
+					try {
+						w.localStorage.setItem(impl.LOCAL_STORAGE_PREFIX + name, value);
+						// confirm storage was set (could be blocked by user's settings, etc.)
+						savedval = w.localStorage.getItem(impl.LOCAL_STORAGE_PREFIX + name);
+						if (value === savedval) {
+							return true;
+						}
+					}
+					catch (ignore) {
+						// Empty
+					}
+					BOOMR.warn("Saved storage value doesn't match what we tried to set:\n" + value + "\n" + savedval);
+				}
+				else {
+					BOOMR.warn("Storage items too large: " + value.length + " " + value);
+				}
+
+				return false;
+			},
+
+			/**
+			 * Remove items from localStorage
+			 *
+			 * @param {string} name Name of storage
+			 *
+			 * @returns {boolean} True if item was removed from localStorage.
+			 *
+			 * @memberof BOOMR.utils
+			 */
+			removeLocalStorage: function(name) {
+				if (!name || !impl.localStorageSupported) {
+					return false;
+				}
+				try {
+					w.localStorage.removeItem(impl.LOCAL_STORAGE_PREFIX + name);
+					return true;
+				}
+				catch (ignore) {
+					// Empty
+				}
+				return false;
 			},
 
 			/**
@@ -1717,6 +1861,7 @@ BOOMR_check_doc_domain();
 			if (!this.pageId) {
 				// generate a random page ID for this page's lifetime
 				this.pageId = BOOMR.utils.generateId(8);
+				BOOMR.debug("Generated PageID: " + this.pageId);
 			}
 
 			if (config.primary && impl.handlers_attached) {
@@ -2109,6 +2254,35 @@ BOOMR_check_doc_domain();
 			catch (ignore) {
 				// empty
 			}
+		},
+
+		/**
+		 * Get high resolution delta timestamp from time origin
+		 *
+		 * This function needs to approximate the time since the performance timeOrigin
+		 * or Navigation Timing API's `navigationStart` time.
+		 * If available, `performance.now()` can provide this value.
+		 * If not we either get the navigation start time from the RT plugin or
+		 * from `t_lstart` or `t_start`. Those values are subtracted from the current
+		 * time to derive a time since `navigationStart` value.
+		 *
+		 * @returns {float} Exact or approximate time since the time origin.
+		 */
+		hrNow: function() {
+			var now, navigationStart, p = BOOMR.getPerformance();
+
+			if (p && p.now) {
+				now = p.now();
+			}
+			else {
+				navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart &&
+					BOOMR.plugins.RT.navigationStart()) || BOOMR.t_lstart || BOOMR.t_start;
+
+				// if navigationStart is undefined, we'll be returning NaN
+				now = BOOMR.now() - navigationStart;
+			}
+
+			return now;
 		},
 
 		/**
@@ -3334,6 +3508,8 @@ BOOMR_check_doc_domain();
 	catch (ignore) {
 		// empty
 	}
+
+	impl.checkLocalStorageSupport();
 
 	(function() {
 		var ident;

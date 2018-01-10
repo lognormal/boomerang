@@ -24,5 +24,6 @@
 	{"key":"autoxhr-management"},
 	{"key":"disable-page-params"},
 	{"key":"paint-timing"},
-	{"key":"pci-blacklist"}
+	{"key":"pci-blacklist"},
+	{"key":"localstorage"}
 ]

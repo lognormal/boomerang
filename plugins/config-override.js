@@ -144,6 +144,11 @@
 			UserTiming: {
 				enabled: true
 			},
+			/* SOASTA PRIVATE START */
+			LOGN: {
+				storeConfig: true
+			},
+			/* SOASTA PRIVATE END */
 			autorun: true
 		}
 	};
