@@ -263,8 +263,8 @@
 
 				if (pt) {
 					data = {
-						// start is `navigationStart` on .timing, `startTime` on timeline entry
-						nt_nav_st: calcNavTimingTimestamp(offset, pt.navigationStart || pt.startTime),
+						// start is `navigationStart` on .timing, `startTime` is always 0 on timeline entry
+						nt_nav_st: p.timing ? p.timing.navigationStart : 0,
 
 						// all other entries have the same name on .timing vs timeline entry
 						nt_red_st: calcNavTimingTimestamp(offset, pt.redirectStart),
@@ -335,6 +335,12 @@
 
 					data.nt_red_cnt  = pn.redirectCount;
 					data.nt_nav_type = pn.type;
+				}
+
+				for (k in data) {
+					if (data.hasOwnProperty(k) && !data[k]) {
+						delete data[k];
+					}
 				}
 
 				BOOMR.addVar(data);

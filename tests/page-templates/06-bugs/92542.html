@@ -5,7 +5,7 @@ shim was adding performance.getEntriesByName/Type on the root page, but we weren
 checking for its existence in the IFRAME when recursively calling page-param.js findResource()
 -->
 <script src="92542.js" type="text/javascript"></script>
-<script src="support/usertiming.js" type="text/javascript"></script>
+<script src="../../vendor/usertiming/src/usertiming.js" type="text/javascript"></script>
 <iframe src="support/92542-iframe.html"></iframe>
 <%= boomerangSnippet %>
 <script>

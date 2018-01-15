@@ -2722,9 +2722,8 @@
 			if (ename === "xhr" && edata && edata.initiator === "spa" &&
 			    edata.timing && edata.timing.requestStart) {
 
-				navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart) ?
-				    BOOMR.plugins.RT.navigationStart() :
-				    (BOOMR.t_lstart || BOOMR.t_start);
+				navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart &&
+				    BOOMR.plugins.RT.navigationStart()) || BOOMR.t_lstart || BOOMR.t_start;
 
 				impl.deltaFromNavStart = edata.timing.requestStart - navigationStart;
 			}
