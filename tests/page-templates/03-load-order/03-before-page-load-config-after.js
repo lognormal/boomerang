@@ -14,12 +14,18 @@ describe("e2e/03-load-order/03-before-page-load-config-after", function() {
 		if (window.performance && window.performance.timing) {
 			assert.equal(b["rt.start"], "navigation");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should be a 'none' (if NavTiming not supported)", function() {
 		var b = tf.lastBeacon();
 		if (!(window.performance && window.performance.timing)) {
 			assert.equal(b["rt.start"], "none");
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -28,12 +34,18 @@ describe("e2e/03-load-order/03-before-page-load-config-after", function() {
 		if (window.performance && window.performance.timing && window.performance.timing.navigationStart) {
 			assert.equal(b["rt.tstart"], window.performance.timing.navigationStart);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have a an empty rt.tstart (if NavTiming is not supported)", function() {
 		var b = tf.lastBeacon();
 		if (!(window.performance && window.performance.timing && window.performance.timing.navigationStart)) {
 			assert.isUndefined(b["rt.tstart"]);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -43,6 +55,9 @@ describe("e2e/03-load-order/03-before-page-load-config-after", function() {
 		if (window.performance && window.performance.timing && window.performance.timing.navigationStart) {
 			assert.operator(b["rt.end"], ">=", window.performance.timing.loadEventStart);
 			assert.operator(b["rt.end"], "<=", now);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -55,6 +70,9 @@ describe("e2e/03-load-order/03-before-page-load-config-after", function() {
 
 			// ended less than now
 			assert.operator(b["rt.end"], "<=", now);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

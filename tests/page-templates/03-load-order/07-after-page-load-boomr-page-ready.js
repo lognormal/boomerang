@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/03-load-order/01-after-page-load", function() {
+describe("e2e/03-load-order/07-after-page-load-boomr-page-ready", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -29,14 +29,9 @@ describe("e2e/03-load-order/01-after-page-load", function() {
 		}
 	});
 
-	it("Should have a end timestamp equal to NavigationTiming's loadEventStart timestamp (if NavTiming supported)", function() {
+	it("Should have a end timestamp equal to our simulated page ready timestamp", function() {
 		var b = tf.lastBeacon();
-		if (window.performance && window.performance.timing) {
-			assert.equal(b["rt.end"], window.performance.timing.loadEventStart);
-		}
-		else {
-			return this.skip();
-		}
+		assert.equal(b["rt.end"], window.pageReadyTs);
 	});
 
 	it("Should have a end timestamp sometime in the last hour (if NavTiming not supported)", function() {
@@ -69,5 +64,11 @@ describe("e2e/03-load-order/01-after-page-load", function() {
 		else {
 			return this.skip();
 		}
+	});
+
+	it("Should have set pr=1", function() {
+		var b = tf.lastBeacon();
+
+		assert.equal(b.pr, "1");
 	});
 });

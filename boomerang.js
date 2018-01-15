@@ -1885,9 +1885,12 @@ BOOMR_check_doc_domain();
 		 * only if you've set `autorun` to `false` when calling the {@link BOOMR.init}
 		 * method. You should call this method when you determine that your page
 		 * is ready to be used by your user. This will be the end-time used in
-		 * the page load time measurement.
+		 * the page load time measurement. Optionally, you can pass a Unix Epoch
+		 * timestamp as a parameter or set the global `BOOMR_page_ready` var that will
+		 * be used as the end-time instead.
 		 *
-		 * @param {Event} ev Ready event
+		 * @param {Event|number} [ev] Ready event or optional load event end timestamp if called manually
+		 * @param {boolean} auto True if called by `page_ready_autorun`
 		 *
 		 * @returns {BOOMR} Boomerang object
 		 *
@@ -1899,6 +1902,15 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		page_ready: function(ev, auto) {
+			var tm_page_ready;
+
+			// a number can be passed as the first argument if called manually which
+			// will be used as the loadEventEnd time
+			if (!auto && typeof ev === "number") {
+				tm_page_ready = ev;
+				ev = null;
+			}
+
 			if (!ev) {
 				ev = w.event;
 			}
@@ -1909,11 +1921,28 @@ BOOMR_check_doc_domain();
 				};
 			}
 
-			// if we were called manually, add the current timestamp and note
-			// this was 'pr' on the beacon
+			// if we were called manually or global BOOMR_page_ready was set then
+			// add loadEventEnd and note this was 'pr' on the beacon
 			if (!auto) {
 				ev.timing = ev.timing || {};
-				ev.timing.loadEventEnd = BOOMR.now();
+				// use timestamp parameter or global BOOMR_page_ready if set, otherwise use
+				// the current timestamp
+				if (tm_page_ready) {
+					ev.timing.loadEventEnd = tm_page_ready;
+				}
+				else if (typeof w.BOOMR_page_ready === "number") {
+					ev.timing.loadEventEnd = w.BOOMR_page_ready;
+				}
+				else {
+					ev.timing.loadEventEnd = BOOMR.now();
+				}
+
+				BOOMR.addVar("pr", 1, true);
+			}
+			else if (typeof w.BOOMR_page_ready === "number") {
+				ev.timing = ev.timing || {};
+				// the global BOOMR_page_ready will override our loadEventEnd
+				ev.timing.loadEventEnd = w.BOOMR_page_ready;
 
 				BOOMR.addVar("pr", 1, true);
 			}

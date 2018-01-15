@@ -1,0 +1,21 @@
+<%= header %>
+<!--
+	Tests setting `BOOMR_page_ready` before Boomerang loads
+-->
+<script src="07-after-page-load-boomr-page-ready.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+
+// add script after page load
+window.onload = function() {
+	window.BOOMR_page_ready = window.pageReadyTs = +(new Date()) - 1000;
+	setTimeout(function() {
+		<%= boomerangSnippetNoScript %>  // eslint is disabled for this file because it cannot parse this line
+	}, 0);
+};
+</script>
+<!-- delay the page load event -->
+<img src="/delay?delay=2000&file=/assets/img.jpg" />
+<%= footer %>

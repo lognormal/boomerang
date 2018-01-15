@@ -224,7 +224,9 @@ module.exports = function() {
 				"tests/page-templates/**/*.html",
 				"tests/page-templates/**/*.js",
 				"tests/test-templates/**/*.js",
-				"!tests/page-templates/12-react/support/*"
+				"!tests/page-templates/12-react/support/*",
+				"!tests/page-templates/03-load-order/01-after-page-load.html",  // fails on snippet include
+				"!tests/page-templates/03-load-order/07-after-page-load-boomr-page-ready.html"  // fails on snippet include
 			]
 		},
 		"string-replace": {
