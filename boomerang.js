@@ -1311,19 +1311,6 @@ BOOMR_check_doc_domain();
 			},
 
 			/**
-			 * The callback function may return a falsy value to disconnect the
-			 * observer after it returns, or a truthy value to keep watching for
-			 * mutations. If the return value is numeric and greater than 0, then
-			 * this will be the new timeout. If it is boolean instead, then the
-			 * timeout will not fire any more so the caller MUST call disconnect()
-			 * at some point.
-			 *
-			 * @callback BOOMR~addObserverCallback
-			 * @param {object[]} mutations List of mutations detected by the observer or `undefined` if the observer timed out
-			 * @param {object} callback_data Is the passed in `callback_data` parameter without modifications
-			 */
-
-			/**
 			 * `find` for Arrays
 			 *
 			 * @param {Array} array The array to iterate over
@@ -1357,6 +1344,19 @@ BOOMR_check_doc_domain();
 					return undefined;
 				}
 			},
+
+			/**
+			 * The callback function may return a falsy value to disconnect the
+			 * observer after it returns, or a truthy value to keep watching for
+			 * mutations. If the return value is numeric and greater than 0, then
+			 * this will be the new timeout. If it is boolean instead, then the
+			 * timeout will not fire any more so the caller MUST call disconnect()
+			 * at some point.
+			 *
+			 * @callback BOOMR~addObserverCallback
+			 * @param {object[]} mutations List of mutations detected by the observer or `undefined` if the observer timed out
+			 * @param {object} callback_data Is the passed in `callback_data` parameter without modifications
+			 */
 
 			/**
 			 * Add a MutationObserver for a given element and terminate after `timeout`ms.
@@ -2018,12 +2018,13 @@ BOOMR_check_doc_domain();
 		setImmediate: function(fn, data, cb_data, cb_scope) {
 			var cb, cstack;
 
+			/* BEGIN_DEBUG */
 			// DEBUG: This is to help debugging, we'll see where setImmediate calls were made from
 			if (typeof Error !== "undefined") {
 				cstack = new Error();
 				cstack = cstack.stack ? cstack.stack.replace(/^Error/, "Called") : undefined;
 			}
-			// END-DEBUG
+			/* END_DEBUG */
 
 			cb = function() {
 				fn.call(cb_scope || null, data, cb_data || {}, cstack);
@@ -3171,8 +3172,10 @@ BOOMR_check_doc_domain();
 	 */
 	if (typeof BOOMR.window.BOOMR_onload === "number") {
 		/**
-		 * Time the loader script started (if using the asynchronous loader snippet)
-		 * (`BOOMR_onload`)
+		 * Time the `window.onload` event fired (if using the asynchronous loader snippet).
+		 *
+		 * This timestamp is logged in the case boomerang.js loads after the onload event
+		 * for browsers that don't support NavigationTiming.
 		 *
 		 * @type {TimeStamp}
 		 * @memberof BOOMR
