@@ -1247,9 +1247,14 @@ describe("BOOMR.plugins.ResourceTiming", function() {
 		var opt;
 
 		it("Should get compressed & optimized timepoints", function() {
+			var scr = BOOMR.window.screen;
+			BOOMR.window.screen = { height: 768, width: 1024 };
+
 			opt = BOOMR.plugins.ResourceTiming.getOptimizedTimepoints(timePoints);
 
 			assert.strictEqual(opt, "a~b3b~3uw!5a~hd0~9n8!46~14ic~ibq!1e~4tm~n5c!1e-!~2s");
+
+			BOOMR.window.screen = scr;
 		});
 
 		it("Should decompress optimized timings", function() {

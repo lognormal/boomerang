@@ -678,11 +678,12 @@
 
 		/**
 		  * Called once the resource can be sent
-		  * @param markEnd Sets loadEventEnd once the function is run
+		  * @param {boolean} [markEnd] Sets loadEventEnd once the function is run
+		  * @param {number} [endTimestamp] End timestamp
 		 */
-		var sendResponseEnd = function(markEnd) {
+		var sendResponseEnd = function(markEnd, endTimestamp) {
 			if (markEnd) {
-				resource.timing.loadEventEnd = BOOMR.now();
+				resource.timing.loadEventEnd = endTimestamp || BOOMR.now();
 			}
 
 			// send any queued beacons first
@@ -736,7 +737,12 @@
 				// don't wait for onload if this was an aborted SPA navigation
 				if ((!ev || !ev.aborted) && d && d.readyState && d.readyState !== "complete") {
 					BOOMR.window.addEventListener("load", function() {
-						sendResponseEnd(true);
+						var loadTimestamp = BOOMR.now();
+
+						// run after the 'load' event handlers so loadEventEnd is captured
+						BOOMR.setImmediate(function() {
+							sendResponseEnd(true, loadTimestamp);
+						});
 					});
 
 					return;
@@ -1023,7 +1029,7 @@
 
 			// if the attribute change affected the src/currentSrc attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
-			if (node._bmr && node._bmr.res && node._bmr.end[node._bmr.res]) {
+			if (node._bmr && typeof node._bmr.res === "number" && node._bmr.end[node._bmr.res]) {
 				exisitingNodeSrcUrlChanged = true;
 			}
 
@@ -1110,6 +1116,7 @@
 			// update _bmr with details about this resource
 			node._bmr.res = resourceNum;
 			node._bmr.idx = index;
+			delete node._bmr.end[resourceNum];
 
 			node.addEventListener("load", function(ev) { self.load_cb(ev, resourceNum); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev, resourceNum); });

@@ -84,7 +84,6 @@ describe("e2e/14-errors/25-autorun-false-onload-happens", function() {
 	it("Should have put NavigationTiming metrics on the beacon (if NavigationTiming is supported)", function() {
 		if (t.isNavigationTimingSupported()) {
 			assert.isDefined(tf.beacons[0].nt_nav_st);
-			assert.isDefined(tf.beacons[0].nt_load_st);
 		}
 		else {
 			return this.skip();

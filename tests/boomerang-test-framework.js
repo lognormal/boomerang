@@ -19,6 +19,7 @@
 		fired_onbeacon: false,
 		fired_before_unload: false,
 		beacons: [],
+		sendBeacons: [],
 		page_ready: function() {
 			this.fired_page_ready = true;
 		},
@@ -56,6 +57,24 @@
 			return true;
 		}
 	};
+
+	(function() {
+		var savedSendBeacon;
+		if (window.navigator && typeof window.navigator.sendBeacon === "function") {
+			savedSendBeacon = window.navigator.sendBeacon;
+			window.navigator.sendBeacon = function(url, data) {
+				var result = savedSendBeacon.apply(window.navigator, arguments);
+				if (result) {
+					var reader = new FileReader();
+					reader.addEventListener("loadend", function() {
+						BOOMR.plugins.TestFramework.sendBeacons.push(reader.result);
+					});
+					reader.readAsText(data);
+				}
+				return result;
+			};
+		}
+	})();
 })(window);
 
 //
@@ -81,7 +100,7 @@
 	//
 	// Constants
 	//
-	t.BEACON_URL = "/blackhole";
+	t.BEACON_URL = "/beacon";
 	t.MAX_RESOURCE_WAIT = 500;
 
 	//
@@ -296,9 +315,9 @@
 	t.isUserTimingSupported = function() {
 		// don't check for PerformanceMark or PerformanceMeasure, they aren't polyfilled in usertiming.js
 		return (window.performance &&
-		        typeof window.performance.getEntriesByType === "function" &&
-		        typeof window.performance.mark === "function" &&
-		        typeof window.performance.measure === "function");
+		    typeof window.performance.getEntriesByType === "function" &&
+		    typeof window.performance.mark === "function" &&
+		    typeof window.performance.measure === "function");
 	};
 
 	t.isErrorObjInOnErrorSupported = function() {
@@ -359,10 +378,12 @@
 	};
 
 	t.clearCookies = function() {
+		var date = new Date();
+		date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
 		var cookies = document.cookie.split(";");
 		for (var i = 0; i < cookies.length; i++) {
-			var name = cookies[i].split("=")[0];
-			document.cookie = [name + "=", "expires" + new Date(), "path=/", "domain=" + location.hostname].join("; ");
+			var name = cookies[i].split("=")[0].trim();
+			document.cookie = [name + "=", "expires=" + date.toGMTString(), "path=/", "domain=" + location.hostname].join("; ");
 		}
 	};
 
@@ -718,9 +739,12 @@
 			var objName = objs[i];
 			var subObj = window.performance[objName];
 
-			copy[objName] = {};
-
 			if (subObj) {
+				if (typeof subObj === "function") {
+					copy[objName] = window.performance[objName];
+					continue;
+				}
+				copy[objName] = {};
 				for (var subObjAttr in subObj) {
 					copy[objName][subObjAttr] = subObj[subObjAttr];
 				}
@@ -762,5 +786,34 @@
 	// force LOGN plugin not to run. Individual tests will override this if needed.
 	// This only works if the test framework is loaded before boomerang
 	window.BOOMR_LOGN_always = false;
+
+	/*eslint-disable no-extend-native*/
+	// Polyfill via https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+	if (!Function.prototype.bind) {
+		Function.prototype.bind = function(oThis) {
+			if (typeof this !== "function") {
+				// closest thing possible to the ECMAScript 5
+				// internal IsCallable function
+				throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+			}
+
+			var aArgs   = Array.prototype.slice.call(arguments, 1),
+			fToBind = this,
+			fNOP    = function() {},
+			fBound  = function() {
+				return fToBind.apply(this instanceof fNOP ? this : oThis,
+					aArgs.concat(Array.prototype.slice.call(arguments)));
+			};
+
+			if (this.prototype) {
+				// Function.prototype doesn't have a prototype property
+				fNOP.prototype = this.prototype;
+			}
+			fBound.prototype = new fNOP();
+
+			return fBound;
+		};
+	}
+	/*eslint-enable no-extend-native*/
 
 }(window));

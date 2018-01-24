@@ -36,7 +36,8 @@ BOOMR_test.init({
 					setTimeout(function(delay) {
 						var xhr2 = new XMLHttpRequest();
 						// no Timing-Allow-Origin
-						xhr2.open("GET", urlPrefix + "/delay?delay=%2B1000&file=build/boomerang-latest-debug.js&TAO=0");
+						// NOTE: Use POST, otherwise Chrome delays multiple GET XHRs for the same URL (2 at a time)
+						xhr2.open("POST", urlPrefix + "/delay?delay=%2B1000&file=build/boomerang-latest-debug.js&TAO=0");
 						xhr2.send(null);
 					}, timeout, i * 1000);
 

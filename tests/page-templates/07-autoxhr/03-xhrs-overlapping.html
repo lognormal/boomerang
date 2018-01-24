@@ -2,23 +2,9 @@
 <script src="03-xhrs-overlapping.js" type="text/javascript"></script>
 <%= boomerangSnippet %>
 <script>
-var testAfterOnBeacon;
-// If we have AutoXHR and MutationObserver we're expecting MO to wait and thus combine the Requests
-if (BOOMR.plugins.AutoXHR && (window.MutationObserver && typeof window.MutationObserver === "function")) {
-	testAfterOnBeacon = 2;
-}
-// AutoXHR can't wait for more elements on the page to appear after an XHR thus only the XHR itself is measured
-// So both XHRs will appear as seperate beacons
-else if (BOOMR.plugins.AutoXHR && !window.MutationObserver) {
-	testAfterOnBeacon = 3;
-}
-// If neither AutoXHR or MutationObserver is available we expect there to be only 1 beacon for onload
-else if (!BOOMR.plugins.AutoXHR) {
-	testAfterOnBeacon = 1;
-}
 BOOMR_test.init({
 	"instrument_xhr": true,
-	testAfterOnBeacon: testAfterOnBeacon,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
 	AutoXHR: {
 		alwaysSendXhr: true
 	},

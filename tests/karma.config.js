@@ -15,9 +15,18 @@ module.exports = function(config) {
 		plugins: [
 			"karma-coverage",
 			"karma-mocha",
+
+			// reporters
 			"karma-tap-reporter",
 			"karma-mocha-reporter",
-			"karma-phantomjs-launcher"
+
+			// launchers
+			"karma-chrome-launcher",
+			"karma-firefox-launcher",
+			"karma-ie-launcher",
+			"karma-opera-launcher",
+			"karma-phantomjs-launcher",
+			"karma-safari-launcher"
 		],
 		browsers: ["PhantomJS"],
 

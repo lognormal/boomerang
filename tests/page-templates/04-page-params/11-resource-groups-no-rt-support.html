@@ -1,7 +1,11 @@
 <%= header %>
 <script type="text/javascript">
-// Disabling ResourceTiming for this TestCase
+// Disable ResourceTiming for this test
 window.performance = null;
+// Disable Chrome CSI for this test
+if (window.chrome && window.chrome.csi) {
+	window.chrome.csi = undefined;
+}
 </script>
 <%= boomerangScript %>
 

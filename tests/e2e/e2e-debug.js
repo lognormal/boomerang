@@ -4,7 +4,6 @@
 //
 // Imports
 //
-var fs = require("fs");
 var chai = require("chai");
 var assert = chai.assert;
 var path = require("path");
@@ -20,8 +19,18 @@ var ports = require(testsFile).ports;
 function run(testPath, file) {
 	describe(testPath, function() {
 		var fileName = file + ".html";
+
 		it("Should pass " + testPath + "/" + fileName, function(done) {
 			var logCount = 0;
+
+			if (typeof browser.waitForAngularEnabled === "function") {
+				browser.waitForAngularEnabled(false);
+			}
+
+			console.log(
+				"Navigating to",
+				"http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName
+			);
 
 			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName);
 
@@ -42,9 +51,10 @@ function run(testPath, file) {
 				return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));
 			});
 
-			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete){
+			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {
 				assert.equal(complete, true, "BOOMR_test.isComplete()");
-				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures){
+
+				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures) {
 					if (testFailures.length > 0) {
 						throw new Error(testFailures);
 					}

@@ -68,7 +68,11 @@ function respond301(req, res) {
 // Favicon empty response
 app.get("/favicon.ico", respond204);
 
-// /blackhole and /204: returns a 204
+// /beacon, /beacon/no-op and /blackhole: returns a 204
+app.get("/beacon", respond204);
+app.post("/beacon", respond204);
+app.get("/beacon/no-op", respond204);
+app.post("/beacon/no-op", respond204);
 app.get("/blackhole", respond204);
 app.post("/blackhole", respond204);
 
@@ -76,7 +80,7 @@ app.post("/blackhole", respond204);
 app.get("/delay", require("./route-delay"));
 app.post("/delay", require("./route-delay"));
 
-// /301 - 301 redirects
+// /redirect - 301 redirects
 app.get("/redirect", respond301);
 app.post("/redirect", respond301);
 
@@ -93,9 +97,6 @@ app.get("/api/v2/config.json", require("./route-config"));
 app.get("/concerto/api/config.json", require("./route-config"));
 app.get("/concerto/api/v2/config.json", require("./route-config"));
 /* SOASTA PRIVATE END */
-
-app.get("/blackhole/no-op", respond204);
-app.post("/blackhole/no-op", respond204);
 
 // for every GET, look for a file with the same name appended with ".headers"
 // if found, parse the headers and write them on the response

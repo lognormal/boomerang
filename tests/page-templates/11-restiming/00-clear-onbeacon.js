@@ -9,9 +9,18 @@ describe("e2e/11-restiming/00-clear-onbeacon", function() {
 	});
 
 	it("Should clear ResourceTiming array after beacon (if ResourceTiming is enabled)", function() {
+		var a;
 		if (t.isResourceTimingSupported()) {
 			var entries = window.performance.getEntriesByType("resource");
-			assert.equal(entries.length, 0);
+			if (entries.length === 1) {
+				// if we have 1 entry then it should be the beacon
+				a = document.createElement("a");
+				a.href = entries[0].name;
+				assert.equal(a.pathname, BOOMR.getBeaconURL());
+			}
+			else {
+				assert.equal(entries.length, 0);
+			}
 		}
 		else {
 			this.skip();

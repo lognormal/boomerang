@@ -273,7 +273,7 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have custom timer 8 less than timer 9", function() {
+		it("Should have custom timer 7 less than timer 8", function() {
 			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
 				var b = tf.beacons[i];
 				var timers = t.parseTimers(b.t_other);

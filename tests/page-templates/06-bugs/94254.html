@@ -4,7 +4,19 @@
 /*global BOOMR_CONFIG_RELOAD_TIMEOUT:true*/
 /*eslint-disable no-unused-vars*/
 BOOMR_CONFIG_RELOAD_TIMEOUT = 1000;
-/*eslint-enable no-unused-vars*/function runTests() {
+/*eslint-enable no-unused-vars*/
+function runTests() {
+	// don't run if no LOGN plugin
+	if (!BOOMR.plugins.LOGN) {
+		return false;
+	}
+
+	// don't run in JSON mode
+	if (BOOMR.plugins.LOGN.isJson) {
+		return false;
+	}
+
+	// don't run on localhost/etc
 	var dom = window.location.hostname;
 	if (dom === "localhost" || dom.match(/\.\d+$/) || dom.match(/^mhtml/) || dom.match(/^file:\//)) {
 		return false;

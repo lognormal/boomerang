@@ -54,12 +54,18 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 		if (t.isQuerySelectorSupported()) {
 			assert.equal(b["cdim.CD9"], "444.44");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should be having custom dimension 9 - QuerySelector return undefined if QuerySelector not supported", function() {
 		if (!t.isQuerySelectorSupported()) {
 			var b = tf.lastBeacon();
 			assert.equal(b["cdim.CD9"], undefined);
+		}
+		else {
+			return this.skip();
 		}
 	});
 
@@ -69,12 +75,18 @@ describe("e2e/04-page-params/03-custom-dimensions-js", function() {
 			var b = tf.lastBeacon();
 			assert.equal(b["cdim.CD10"], "444.44");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should be having custom dimension 11 - QuerySelector with multiple values if QuerySelector is supported", function() {
 		if (t.isQuerySelectorSupported()) {
 			var b = tf.lastBeacon();
 			assert.equal(b["cdim.CD11"], "444.44");
+		}
+		else {
+			return this.skip();
 		}
 	});
 

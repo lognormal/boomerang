@@ -8,7 +8,7 @@
 <script>
 window.backbone_imgs = [3000];
 
-window.backbone_html5_mode = true;
+window.backbone_html5_mode = false;
 
 // view a widget then come back so debugging (F5) is easier
 window.backbone_nav_routes = ["widgets/1", "26-page-params-spa-nav.html"];
@@ -50,7 +50,7 @@ BOOMR_test.init({
 		pageGroups: [
 			{
 				type: "Regexp",
-				parameter1: ".*/widgets/1",
+				parameter1: ".*widgets/1",
 				parameter2: "widget1"
 			},
 			{

@@ -11,12 +11,16 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 			done,
 			function() {
 				t.ensureBeaconCount(done, 2);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the first beacon be 'navigation' (if NavigationTiming is supported)", function() {
 		if (t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons[0]["rt.start"], "navigation");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -24,17 +28,26 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 		if (!t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons[0]["rt.start"], "none");
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have the first beacon have a restiming parameter (if ResourceTiming is supported)", function() {
 		if (t.isResourceTimingSupported()) {
 			assert.isDefined(tf.beacons[0].restiming);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have the first beacon have a rt.bmr parameter (if ResourceTiming is supported)", function() {
 		if (t.isResourceTimingSupported()) {
 			assert.isDefined(tf.beacons[0]["rt.bmr"]);
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -50,16 +63,13 @@ describe("05-xhr-before-onload-alwayssendxhr", function() {
 			assert.include(tf.beacons[0].t_other, "boomr_ld");
 			assert.include(tf.beacons[0].t_other, "boomr_lat");
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have the second beacon be an XHR", function() {
 		assert.equal(tf.beacons[1]["http.initiator"], "xhr");
-	});
-
-	it("Should have the second beacon have a restiming parameter (if ResourceTiming is supported)", function() {
-		if (t.isResourceTimingSupported()) {
-			assert.isDefined(tf.beacons[1].restiming);
-		}
 	});
 
 	it("Should have the second beacon be missing the rt.bmr parameter", function() {

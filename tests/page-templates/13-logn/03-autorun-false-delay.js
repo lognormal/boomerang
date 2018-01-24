@@ -11,12 +11,12 @@ describe("e2e/13-logn-config/03-autorun-false-delay", function() {
 	});
 
 	it("Should have a load time under 3 seconds (if NavigationTiming is supported)", function() {
-		var b = tf.lastBeacon();
-
-		if (!b.t_done) {
+		if (!t.isNavigationTimingSupported()) {
 			// non-NavTiming browsers won't know how to calculate Page Load time
 			return this.skip();
 		}
+
+		var b = tf.lastBeacon();
 
 		assert.operator(b.t_done, "<=", 3000);
 	});

@@ -16,7 +16,8 @@ describe("e2e/04-page-params/16-page-params-xhr-all", function() {
 			function() {
 				_this.timeout(5000);
 				t.ensureBeaconCount(done, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the Page Group of the first beacon 'Test Page'", function() {
@@ -31,7 +32,8 @@ describe("e2e/04-page-params/16-page-params-xhr-all", function() {
 				var b = tf.beacons[1];
 				assert.equal(b["xhr.pg"], "XHR Test Page 1");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the XHR Page Group of the second beacon 'XHR Test Page 2'", function(done) {
@@ -41,7 +43,8 @@ describe("e2e/04-page-params/16-page-params-xhr-all", function() {
 				var b = tf.beacons[2];
 				assert.equal(b["xhr.pg"], "XHR Test Page 2");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 });
 

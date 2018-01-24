@@ -17,11 +17,11 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 		}
 		else {
 			assert.lengthOf(tf.beacons, 1);
-			done();
+			this.skip();
 		}
 	});
 
-	it("Should get 2 beacons: 1st onload 2nd image fetch", function(done){
+	it("Should have the first beacon URL of the page as 'u'", function(done){
 		if (window.MutationObserver && typeof window.MutationObserver === "function") {
 			t.ifAutoXHR(
 				done,
@@ -31,11 +31,11 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 				});
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 
-	it("Should have a second beacon with the image URL in it", function(done){
+	it("Should have the second beacon URL of the image as 'u'", function(done){
 		if (window.MutationObserver && typeof window.MutationObserver === "function") {
 			t.ifAutoXHR(
 				done,
@@ -45,7 +45,21 @@ describe("e2e/07-autoxhr/02-onclick", function() {
 				});
 		}
 		else {
-			done();
+			this.skip();
+		}
+	});
+
+	it("Should have the second beacon http.initiator = 'click'", function(done){
+		if (window.MutationObserver && typeof window.MutationObserver === "function") {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[1]["http.initiator"], "click");
+					done();
+				});
+		}
+		else {
+			this.skip();
 		}
 	});
 });

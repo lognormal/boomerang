@@ -32,10 +32,11 @@ describe("e2e/06-bugs/94254", function() {
 				observer.disconnect();
 				done();
 			});
+
 			observer.observe(document.head, { attributes: true, childList: true, characterData: false });
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 });

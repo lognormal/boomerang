@@ -2,6 +2,9 @@
 <%= boomerangSnippet %>
 <script src="111096-2.js" type="text/javascript"></script>
 <script>
+// disable sendBeacon to ensure XHR is used
+window.navigator.sendBeacon = undefined;
+
 //
 // Use window.orig_XMLHttpRequest if available
 //

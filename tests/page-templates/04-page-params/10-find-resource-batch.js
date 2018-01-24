@@ -76,7 +76,7 @@ describe("e2e/04-page-params/10-find-resource-batch", function() {
 		if (t.isResourceTimingSupported()) {
 			var Handler = BOOMR.plugins.PageParams.Handler;
 			var handlerInstance = new Handler(handlerConfigFixture);
-			var resources = handlerInstance.findResources("*img.jpg", window, 2);
+			var resources = handlerInstance.findResources("*img.jpg", window, 0, 2);
 			assert.isDefined(resources);
 			assert.isArray(resources);
 			assert.lengthOf(resources, 2);

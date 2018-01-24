@@ -7,8 +7,6 @@ describe("e2e/19-navtiming/00-onload", function() {
 
 	var NT_PROPERTIES = [
 		"nt_nav_st",
-		"nt_red_st",
-		"nt_red_end",
 		"nt_fet_st",
 		"nt_dns_st",
 		"nt_dns_end",
@@ -23,7 +21,10 @@ describe("e2e/19-navtiming/00-onload", function() {
 		"nt_domcontloaded_end",
 		"nt_domcomp",
 		"nt_load_st",
-		"nt_load_end",
+		"nt_load_end"
+	];
+
+	var NT_PROPERTIES_OPTIONAL = [
 		"nt_unload_st",
 		"nt_unload_end"
 	];
@@ -71,6 +72,19 @@ describe("e2e/19-navtiming/00-onload", function() {
 			// make sure it's not decimal
 			assert.notInclude(tf.lastBeacon()[NT_PROPERTIES[i]], ".");
 		}
+
+		for (var i = 0; i < NT_PROPERTIES_OPTIONAL.length; i++) {
+			if (typeof tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]] !== "undefined") {
+				// Jan 1 2000
+				assert.operator(parseInt(tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]], 10), ">=", 946684800, NT_PROPERTIES_OPTIONAL[i]);
+
+				// Jan 1 2050
+				assert.operator(parseInt(tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]], 10), "<=", 2524658358000, NT_PROPERTIES_OPTIONAL[i]);
+
+				// make sure it's not decimal
+				assert.notInclude(tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]], ".");
+			}
+		}
 	});
 
 	it("Should have set set nt_* properties as full numbers, not decimals (if NavigationTiming is supported)", function() {
@@ -80,6 +94,12 @@ describe("e2e/19-navtiming/00-onload", function() {
 
 		for (var i = 0; i < NT_PROPERTIES.length; i++) {
 			assert.notInclude(tf.lastBeacon()[NT_PROPERTIES[i]], ".", NT_PROPERTIES[i]);
+		}
+
+		for (var i = 0; i < NT_PROPERTIES_OPTIONAL.length; i++) {
+			if (typeof tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]] !== "undefined") {
+				assert.notInclude(tf.lastBeacon()[NT_PROPERTIES_OPTIONAL[i]], ".", NT_PROPERTIES_OPTIONAL[i]);
+			}
 		}
 	});
 
@@ -142,12 +162,28 @@ describe("e2e/19-navtiming/00-onload", function() {
 		}
 	});
 
-	it("Should have set nt_* navigation properties (if NavigationTiming is supported)", function() {
+	it("Should have set nt_nav_type property (if NavigationTiming is supported)", function() {
 		if (!t.isNavigationTimingSupported()) {
 			return this.skip();
 		}
 
-		assert.isNumber(tf.lastBeacon().nt_red_cnt, "nt_red_cnt");
 		assert.isNumber(tf.lastBeacon().nt_nav_type, "nt_nav_type");
+	});
+
+	it("Should have set nt_red_cnt property to 0 (if NavigationTiming is supported)", function() {
+		if (!t.isNavigationTimingSupported()) {
+			return this.skip();
+		}
+
+		assert.equal(tf.lastBeacon().nt_red_cnt, 0);
+	});
+
+	it("Should not have set redirect timing properties (if NavigationTiming is supported)", function() {
+		if (!t.isNavigationTimingSupported()) {
+			return this.skip();
+		}
+
+		assert.isUndefined(tf.lastBeacon().nt_red_st, "nt_red_st");
+		assert.isUndefined(tf.lastBeacon().nt_red_end, "nt_red_end");
 	});
 });

@@ -3,7 +3,7 @@
 <script src="100343.js" type="text/javascript"></script>
 <script>
 // Set the beacon_url override
-BOOMR.sendBeacon("/blackhole");
+BOOMR.sendBeacon("/beacon");
 
 // Ensure we hold the beacon until after page load
 BOOMR.plugins.hold = {
@@ -19,7 +19,7 @@ setTimeout(function() {
 
 	// Initialize Boomerang
 	BOOMR_test.init({
-		beacon_url: "/blackhole2"
+		beacon_url: "/beacon/no-op"
 	});
 }, 1000);
 </script>

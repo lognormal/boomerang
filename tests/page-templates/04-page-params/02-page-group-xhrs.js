@@ -16,7 +16,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 			function() {
 				_this.timeout(25000);
 				t.ensureBeaconCount(done, 11);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the Page Group of the first beacon 'Test Pages'", function() {
@@ -36,7 +37,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[1];
 				assert.equal(b["xhr.pg"], "XHR subresource");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should not increase the Session Length on the second beacon", function(done) {
@@ -46,7 +48,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[1];
 				assert.equal(b["rt.sl"], "1");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the Page Group of the third beacon 'XHR not subresource'", function(done) {
@@ -56,7 +59,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[2];
 				assert.equal(b["xhr.pg"], "XHR not subresource");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should increase the Session Length on the third beacon", function(done) {
@@ -66,7 +70,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[2];
 				assert.equal(b["rt.sl"], "2");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should not set a Page Group on the fourth beacon", function(done) {
@@ -76,7 +81,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[3];
 				assert.equal(b["xhr.pg"], undefined);
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should increase the Session Length on the fourth beacon", function(done) {
@@ -86,7 +92,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[3];
 				assert.equal(b["rt.sl"], "3");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the Page Group of the fifth beacon 'XHR'", function(done) {
@@ -96,7 +103,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[4];
 				assert.equal(b["xhr.pg"], "XHR");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should not increase the Session Length on the fifth beacon", function(done) {
@@ -106,7 +114,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[4];
 				assert.equal(b["rt.sl"], "3");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have a sixth beacon matching QuerySelector based payload validation", function(done) {
@@ -116,7 +125,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[5];
 				assert.equal(b["xhr.pg"], "PageGroupQuerySelector");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have a seventh beacon matching XPath based payload validation", function(done) {
@@ -138,7 +148,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 
 				assert.equal(pg, "PageGroupXPath");
 				done();
-			}.bind(this));
+			}.bind(this),
+			this.skip.bind(this));
 	});
 
 	it("Should have a eigth beacon matching JSON based payload validation", function(done) {
@@ -148,7 +159,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[7];
 				assert.equal(b["xhr.pg"], "PageGroupJson");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have a ninth beacon matching text based payload validation", function(done) {
@@ -158,7 +170,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[8];
 				assert.equal(b["xhr.pg"], "PageGroupText");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have a tenth beacon matching onSendXHRPageGroup function based validation", function(done) {
@@ -168,7 +181,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[9];
 				assert.equal(b["xhr.pg"], "XHRPageGroupSendPayload");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have an eleventh beacon matching onSendXHRPageGroup function based validation with POST data", function(done) {
@@ -178,7 +192,8 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 				var b = tf.beacons[10];
 				assert.equal(b["xhr.pg"], "PageXHRPOST");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 });

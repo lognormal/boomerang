@@ -81,9 +81,11 @@ app.HomeView = Backbone.View.extend({
 				var template = Handlebars.compile(app.TEMPLATES.home);
 
 				var imgs = typeof window.backbone_imgs !== "undefined" ? window.backbone_imgs : [0];
+				var hide_imgs = imgs[0] === -1;
 
 				that.$el.html(template({
 					imgs: imgs,
+					hide_imgs: hide_imgs,
 					widgets: app.widgets.toJSON(),
 					rnd: Math.random()
 				}));

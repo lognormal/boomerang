@@ -21,10 +21,10 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 		assert.equal(window.childSessionData.si, BOOMR.session.ID);
 	});
 
-	it("Should have the cookies beacon URL pointing to /blackhole/no-op instead of /blackhole", function() {
+	it("Should have the cookies beacon URL pointing to /beacon/no-op instead of /beacon", function() {
 		var cookie = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie("RT"));
-		assert.equal(cookie.bcn, "/blackhole/no-op", "Beacon URL does not match primary domains session Beacon URL");
-		assert.equal(BOOMR.getBeaconURL(), "/blackhole/no-op", "getBeaconURL() did not return correct URL");
+		assert.equal(cookie.bcn, "/beacon/no-op", "Beacon URL does not match primary domains session Beacon URL");
+		assert.equal(BOOMR.getBeaconURL(), "/beacon/no-op", "getBeaconURL() did not return correct URL");
 	});
 
 	it("Should have a mocked Session ID in the cookie of \"mocked-id\"", function() {

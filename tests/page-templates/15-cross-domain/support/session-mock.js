@@ -113,7 +113,7 @@
 				"tt": impl.loadTime ? impl.loadTime : 433,
 				"obo": impl.offByOne ? impl.offByOne : 0,
 				"sh": this.buildSessionHistory(impl.sessionHistory),
-				"bcn": impl.beacon_url ? impl.beacon_url : "/blackhole"
+				"bcn": impl.beacon_url ? impl.beacon_url : "/beacon"
 			};
 			BOOMR.plugins.RT.updateCookie();
 

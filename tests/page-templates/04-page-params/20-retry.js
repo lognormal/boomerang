@@ -16,6 +16,9 @@ describe("e2e/04-page-params/20-retry", function() {
 			assert.isDefined(timers["ctim.CT1"]);
 			assert.operator(parseInt(timers["ctim.CT1"]), ">=", 0);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have the custom timer 2 - UserTiming", function(){
@@ -24,6 +27,9 @@ describe("e2e/04-page-params/20-retry", function() {
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT2"]);
 			assert.operator(parseInt(timers["ctim.CT2"]), ">=", 500);
+		}
+		else {
+			return this.skip();
 		}
 	});
 

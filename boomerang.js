@@ -2032,7 +2032,8 @@ BOOMR_check_doc_domain();
 			};
 
 			if (w.requestIdleCallback) {
-				w.requestIdleCallback(cb);
+				// set a timeout since rIC doesn't get called reliably in chrome headless
+				w.requestIdleCallback(cb, {timeout: 1000});
 			}
 			else if (w.setImmediate) {
 				w.setImmediate(cb);

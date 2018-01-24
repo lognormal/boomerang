@@ -10,10 +10,13 @@ describe("e2e/06-bugs/100343", function() {
 		t.ensureBeaconCount(done,  1);
 	});
 
-	it("The beacon URL should not have sent to blackhole2 (if ResourceTiming is enabled)", function() {
+	it("The beacon URL should not have sent to /beacon/no-op (if ResourceTiming is enabled)", function() {
 		if (t.isResourceTimingSupported) {
 			// Note only IE logs 404s.  Chrome currently does not.
-			assert.equal(null, t.findFirstResource("blackhole2"));
+			assert.equal(null, t.findFirstResource("/beacon/no-op"));
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

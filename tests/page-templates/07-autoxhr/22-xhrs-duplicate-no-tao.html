@@ -16,7 +16,7 @@ BOOMR_test.init({
 			}
 
 			// request waterfall, requests overlap (last 3 are same url/query):
-			// ************* (~0 ms)
+			// ************* (~3s)
 			//   ********* (~2s)
 			//     ***** (~1s)
 			//       * (~0s)
@@ -30,19 +30,20 @@ BOOMR_test.init({
 			xhr.send(null);
 
 			setTimeout(function() {
-				// send 3 XHRs with the same URL, increasing response time for each request
+				// send 3 XHRs with the same URL, decreasing response time for each request
 				var timeout = 0;
 				for (var i = 0; i < 3; i++) {
-					setTimeout(function(delay) {
+					setTimeout(function() {
 						var xhr2 = new XMLHttpRequest();
 						// no Timing-Allow-Origin
-						xhr2.open("GET", urlPrefix + "/delay?delay=-1000&file=build/boomerang-latest-debug.js&TAO=0");
+						// NOTE: Use POST, otherwise Chrome delays multiple GET XHRs for the same URL (2 at a time)
+						xhr2.open("POST", urlPrefix + "/delay?delay=-1000&file=build/boomerang-latest-debug.js&TAO=0");
 						xhr2.send(null);
-					}, timeout, i * 1000);
+					}, timeout);
 
 					timeout += 500;
 				}
-			}, 100);
+			}, 500);
 		}
 });
 </script>

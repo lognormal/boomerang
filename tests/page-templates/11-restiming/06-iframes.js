@@ -30,8 +30,13 @@ describe("e2e/11-restiming/06-iframes", function() {
 			for (var i = 0; i < pageResources.length; i++) {
 				var url = pageResources[i].name;
 
+				// ideally, we should skip anything in RT that is newer than our beacon
 				// skip beacon URL
-				if (url.indexOf("blackhole") !== -1) {
+				if (url.indexOf(BOOMR.getBeaconURL()) !== -1) {
+					continue;
+				}
+				// skip favicon which is requested after beacon
+				if (url.indexOf("/favicon.ico") !== -1) {
 					continue;
 				}
 

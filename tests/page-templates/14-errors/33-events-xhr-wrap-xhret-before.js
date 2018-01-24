@@ -118,12 +118,12 @@ describe("e2e/14-errors/33-events-xhr-wrap-xhret-before", function() {
 		}
 	});
 
-	it("Should have lineNumber ~ " + (HEADER_LINES + 36), function() {
+	it("Should have lineNumber ~ " + (HEADER_LINES + 43), function() {
 		var b = tf.lastBeacon();
 		var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
 		if (err.lineNumber) {
-			assert.closeTo(err.lineNumber, HEADER_LINES + 36, 5);
+			assert.closeTo(err.lineNumber, HEADER_LINES + 43, 5);
 		}
 		else {
 			return this.skip();

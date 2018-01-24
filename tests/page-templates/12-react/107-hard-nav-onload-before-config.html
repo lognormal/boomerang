@@ -1,7 +1,7 @@
 <%= header %>
 <script>
 window.BOOMR_LOGN_always = true;
-window.BOOMR_API_key = "12-react-107-hard-nav-onload-before-config";
+window.BOOMR_API_key = "12-react-107-hard-nav-onload-before-config&delay=5000";
 </script>
 <%= boomerangScript %>
 <!-- Fires onload before config came in -->
@@ -9,6 +9,6 @@ window.BOOMR_API_key = "12-react-107-hard-nav-onload-before-config";
 <script>
 setTimeout(function() {
 	BOOMR_test.runTests();
-}, 3000);
+}, 8000);
 </script>
 <%= footer %>

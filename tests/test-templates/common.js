@@ -43,6 +43,7 @@ describe("common", function() {
 
 			if (b["rt.start"] === "navigation") {
 				// page load beacon
+				// TODO
 			}
 			else if (b["rt.start"] === "manual") {
 				if (b["http.initiator"] === "spa_hard") {
@@ -55,6 +56,11 @@ describe("common", function() {
 				}
 				else if (b["http.initiator"] === "xhr") {
 					// xhr beacon
+					assert.isUndefined(b.api, prefix + "does not have the api param");
+					assert.isDefined(b.pgu, prefix + "has the pgu param");
+				}
+				else if (b["http.initiator"] === "click") {
+					// click (AutoXHR) beacon
 					assert.isUndefined(b.api, prefix + "does not have the api param");
 					assert.isDefined(b.pgu, prefix + "has the pgu param");
 				}
@@ -97,6 +103,12 @@ describe("common", function() {
 				}
 			}
 			else if (b["rt.start"] === "cookie") {
+				// TODO
+			}
+			else if (b["rt.start"] === "csi") {
+				// TODO
+			}
+			else if (b["rt.start"] === "gtb") {
 				// TODO
 			}
 			else if (typeof b["rt.start"] === "undefined") {

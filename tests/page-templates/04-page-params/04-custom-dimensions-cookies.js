@@ -19,12 +19,18 @@ describe("e2e/04-page-params/04-custom-dimensions-cookies", function() {
 			var b = tf.lastBeacon();
 			assert.equal(b["cdim.CD2"], "true");
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should be missing custom dimension 2 - Cookie - If cookies can't be set (on localhost or an IP)", function() {
 		if (!t.canSetCookies()) {
 			var b = tf.lastBeacon();
 			assert.equal(b["cdim.CD2"], undefined);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });

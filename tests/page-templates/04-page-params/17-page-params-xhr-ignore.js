@@ -16,7 +16,8 @@ describe("e2e/04-page-params/17-page-params-xhr-ignore", function() {
 			function() {
 				_this.timeout(5000);
 				t.ensureBeaconCount(done, 2);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should set the Page Group of the first beacon 'Test Page'", function() {
@@ -31,7 +32,8 @@ describe("e2e/04-page-params/17-page-params-xhr-ignore", function() {
 				var b = tf.beacons[1];
 				assert.include(b.u, "?id=2");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 });
 

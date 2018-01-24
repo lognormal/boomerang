@@ -49,11 +49,11 @@ describe("e2e/03-load-order/00-before-page-load", function() {
 		}
 	});
 
-	it("Should have a end timestamp sometime after the NavigationTiming's loadEventStart timestamp and before now (if NavTiming supported)", function() {
+	it("Should have a end timestamp sometime after the NavigationTiming's loadEventEnd timestamp and before now (if NavTiming supported)", function() {
 		var b = tf.lastBeacon();
 		var now = +(new Date());
 		if (window.performance && window.performance.timing && window.performance.timing.navigationStart) {
-			assert.operator(b["rt.end"], ">=", window.performance.timing.loadEventStart);
+			assert.operator(b["rt.end"], ">=", window.performance.timing.loadEventEnd);
 			assert.operator(b["rt.end"], "<=", now);
 		}
 		else {

@@ -29,10 +29,10 @@ describe("e2e/03-load-order/01-after-page-load", function() {
 		}
 	});
 
-	it("Should have a end timestamp equal to NavigationTiming's loadEventStart timestamp (if NavTiming supported)", function() {
+	it("Should have a end timestamp equal to NavigationTiming's loadEventEnd timestamp (if NavTiming supported)", function() {
 		var b = tf.lastBeacon();
 		if (window.performance && window.performance.timing) {
-			assert.equal(b["rt.end"], window.performance.timing.loadEventStart);
+			assert.equal(b["rt.end"], window.performance.timing.loadEventEnd);
 		}
 		else {
 			return this.skip();

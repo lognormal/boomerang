@@ -21,6 +21,7 @@ describe("e2e/04-page-params/15-page-params-xhr-none", function() {
 			function() {
 				_this.timeout(3000);
 				t.ensureBeaconCount(done, 1);
-			});
+			},
+			this.skip.bind(this));
 	});
 });

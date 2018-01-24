@@ -275,7 +275,7 @@ module.exports = function() {
 						{
 							// Send beacons to null
 							pattern: /beacon_url: .*/,
-							replacement: "beacon_url: \"/blackhole\","
+							replacement: "beacon_url: \"/beacon\","
 						},
 						/* SOASTA PRIVATE START */
 						{

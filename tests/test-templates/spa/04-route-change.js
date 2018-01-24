@@ -98,8 +98,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+	it("Should have a t_resp of the root page (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var pt = window.performance.timing;
 			var b = tf.beacons[0];
 			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
@@ -109,9 +109,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			var pt = window.performance.timing;
+	it("Should have a t_page of total - t_resp (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var b = tf.beacons[0];
 			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}
@@ -150,9 +149,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have sent the second beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			var pt = window.performance.timing;
+	it("Should have sent the second beacon with a t_resp value (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var b = tf.beacons[1];
 
 			assert.operator(b.t_resp, ">=", 0);
@@ -162,9 +160,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have sent the second beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			var pt = window.performance.timing;
+	it("Should have sent the second beacon with a t_page of total - t_resp (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var b = tf.beacons[1];
 			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}
@@ -201,9 +198,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have sent the third beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			var pt = window.performance.timing;
+	it("Should have sent the third beacon with a t_resp value (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var b = tf.beacons[2];
 
 			assert.operator(b.t_resp, ">=", 0);
@@ -213,9 +209,8 @@ BOOMR_test.templates.SPA["04-route-change"] = function() {
 		}
 	});
 
-	it("Should have sent the third beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-			var pt = window.performance.timing;
+	it("Should have sent the third beacon with a t_page of total - t_resp (if MutationObserver and ResourceTiming are supported)", function() {
+		if (window.MutationObserver && t.isResourceTimingSupported()) {
 			var b = tf.beacons[2];
 			assert.equal(b.t_page, b.t_done - b.t_resp);
 		}

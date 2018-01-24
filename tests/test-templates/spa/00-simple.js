@@ -83,11 +83,11 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
 		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
-			assert.isDefined(b.nt_red_cnt);
+			assert.equal(b.nt_red_cnt, 0);  // no redirects
 			assert.isDefined(b.nt_nav_type);
 			assert.isDefined(b.nt_nav_st);
-			assert.isDefined(b.nt_red_st);
-			assert.isDefined(b.nt_red_end);
+			assert.isUndefined(b.nt_red_st);  // no redirects
+			assert.isUndefined(b.nt_red_end);  // no redirects
 			assert.isDefined(b.nt_fet_st);
 			assert.isDefined(b.nt_dns_st);
 			assert.isDefined(b.nt_dns_end);

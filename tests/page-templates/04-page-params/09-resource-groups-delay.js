@@ -16,6 +16,9 @@ describe("e2e/04-page-params/09-resource-groups-delay", function() {
 			assert.isDefined(timers["ctim.CT1"], "ctim.CT1 - Does not exist on the beacon!");
 			assert.closeTo(parseInt(timers["ctim.CT1"]), 1000, 100);
 		}
+		else {
+			return this.skip();
+		}
 	});
 
 	it("Should have the custom timer 2 - RG with an element that does not exist until appended during onload", function() {
@@ -24,6 +27,9 @@ describe("e2e/04-page-params/09-resource-groups-delay", function() {
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Does not exist on the beacon!");
 			assert.closeTo(parseInt(timers["ctim.CT2"]), 1000, 100);
+		}
+		else {
+			return this.skip();
 		}
 	});
 });
