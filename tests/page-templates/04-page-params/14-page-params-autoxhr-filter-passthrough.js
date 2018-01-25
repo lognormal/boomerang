@@ -14,7 +14,7 @@ describe("e2e/04-page-params/14-page-params-autoxhr-filter-passthrough", functio
 		t.ifAutoXHR(
 			done,
 			function() {
-				_this.timeout(3000);
+				_this.timeout(5000);
 				t.ensureBeaconCount(done, 2);
 			},
 			this.skip.bind(this));
