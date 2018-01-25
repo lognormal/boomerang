@@ -332,6 +332,10 @@ BOOMR_check_doc_domain();
 		// Beacon URL
 		beacon_url: "",
 
+		// List of string regular expressions that must match the beacon_url.  If
+		// not set, or the list is empty, all beacon URLs are allowed.
+		beacon_urls_allowed: [],
+
 		// Beacon request method, either GET, POST or AUTO. AUTO will check the
 		// request size then use GET if the request URL is less than MAX_GET_LENGTH
 		// chars. Otherwise, it will fall back to a POST request.
@@ -812,6 +816,28 @@ BOOMR_check_doc_domain();
 		spaNavigation: function() {
 			// a SPA navigation occured, force onloadfired to true
 			impl.onloadfired = true;
+		},
+
+		/**
+		 * Determines whether a beacon URL is allowed based on
+		 * `beacon_urls_allowed` config
+		 *
+		 * @param {string} url URL to test
+		 *
+		 */
+		beaconUrlAllowed: function(url) {
+			if (!impl.beacon_urls_allowed || impl.beacon_urls_allowed.length === 0) {
+				return true;
+			}
+
+			for (var i = 0; i < impl.beacon_urls_allowed.length; i++) {
+				var regEx = new RegExp(impl.beacon_urls_allowed[i]);
+				if (regEx.exec(url)) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 	};
 
@@ -1649,7 +1675,6 @@ BOOMR_check_doc_domain();
 		 * @param {string} config.beacon_url The URL to beacon results back to.
 		 * If not set, no beacon will be sent.
 		 * @param {string} config.beacon_type `GET`, `POST` or `AUTO`
-		 * @param {string[]} [config.secondary_beacons] Additional beacon URLs to send data to
 		 * @param {string} [config.site_domain] The domain that all cookies should be set on
 		 * Boomerang will try to auto-detect this, but unless your site is of the
 		 * `foo.com` format, it will probably get it wrong. It's a good idea
@@ -1678,7 +1703,6 @@ BOOMR_check_doc_domain();
 				    "beacon_auth_token",
 				    "beacon_url",
 				    "beacon_type",
-				    "secondary_beacons",
 				    "site_domain",
 				    "strip_query_string",
 				    "user_ip"
@@ -2895,6 +2919,11 @@ BOOMR_check_doc_domain();
 				return false;
 			}
 
+			if (!impl.beaconUrlAllowed(impl.beacon_url)) {
+				BOOMR.debug("Beacon URL not allowed: " + impl.beacon_url);
+				return false;
+			}
+
 			// Check that we have data to send
 			if (data.length === 0) {
 				return false;
@@ -2971,15 +3000,6 @@ BOOMR_check_doc_domain();
 				}
 
 				img.src = url;
-
-				if (impl.secondary_beacons) {
-					for (k = 0; k < impl.secondary_beacons.length; k++) {
-						url = impl.secondary_beacons[k] + "?" + paramsJoined;
-
-						img = new Image();
-						img.src = url;
-					}
-				}
 			}
 			else {
 				//
@@ -3134,6 +3154,16 @@ BOOMR_check_doc_domain();
 			}
 		}
 
+		/* BEGIN_DEBUG */,
+		/**
+		 * Sets the list of allowed Beacon URLs
+		 *
+		 * @param {string[]} urls List of string regular expressions
+		 */
+		setBeaconUrlsAllowed: function(urls) {
+			impl.beacon_urls_allowed = urls;
+		}
+		/* END_DEBUG */
 	};
 
 	delete BOOMR_start;

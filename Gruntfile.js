@@ -141,7 +141,8 @@ module.exports = function() {
 	// Build configuration
 	//
 	var buildConfig = {
-		server: grunt.option("server") || DEFAULT_TEST_MAIN_DOMAIN || "localhost"
+		server: grunt.option("server") || DEFAULT_TEST_MAIN_DOMAIN || "localhost",
+		beaconUrlsAllowed: grunt.option("beacon-urls-allowed") || ""
 	};
 
 	var bannerFilePathRelative = "./lib/banner.txt";
@@ -261,6 +262,10 @@ module.exports = function() {
 							// strip out BOOMR.plugins = BOOMR.plugins || {}; in plugins
 							pattern: /BOOMR\.plugins\s*=\s*BOOMR\.plugins\s*\|\|\s*{};/g,
 							replacement: ""
+						},
+						{
+							pattern: /beacon_urls_allowed: \[\]/,
+							replacement: "beacon_urls_allowed: [" + buildConfig.beaconUrlsAllowed + "]"
 						}
 					]
 				}

@@ -141,7 +141,6 @@
 			UserTiming: {
 				enabled: true
 			},
-			secondary_beacons: true,
 			autorun: true
 		}
 	};

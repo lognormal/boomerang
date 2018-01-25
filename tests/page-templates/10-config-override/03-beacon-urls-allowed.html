@@ -1,0 +1,13 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="03-beacon-urls-allowed.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.setBeaconUrlsAllowed([
+	"^/beacon$",
+	"^/blackhole$"
+]);
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

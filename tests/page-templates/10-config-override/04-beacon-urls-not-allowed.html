@@ -1,0 +1,12 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="04-beacon-urls-not-allowed.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR.setBeaconUrlsAllowed([
+	"^/something-else$"
+]);
+BOOMR_test.init({
+	testAfterOnBeacon: false
+});
+</script>
+<%= footer %>
