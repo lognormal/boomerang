@@ -48,7 +48,7 @@ function run(testPath, file) {
 			}, 1000);
 
 			browser.driver.wait(function() {
-				return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));
+				return element(by.css("#BOOMR_test_complete")).isPresent();
 			});
 
 			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {

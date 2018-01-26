@@ -163,7 +163,7 @@ describe("e2e/19-navtiming/00-onload", function() {
 		assert.equal(tf.lastBeacon().nt_first_paint, p.timing.msFirstPaint);
 	});
 
-	it("Should have set nt_first_paint via PaintTiming (if PaintTiming is supported)", function() {
+	it("Should have set nt_first_paint via PaintTiming (if PaintTiming is supported and happened by load)", function() {
 		if (!t.isPaintTimingSupported()) {
 			return this.skip();
 		}
@@ -171,6 +171,11 @@ describe("e2e/19-navtiming/00-onload", function() {
 		var pt = BOOMR.utils.arrayFind(performance.getEntriesByType("paint"), function(entry) {
 			return entry.name === "first-paint";
 		});
+
+		// skip if it happened after onload
+		if (!pt || pt.startTime > parseInt(tf.lastBeacon().t_done, 10)) {
+			return this.skip();
+		}
 
 		// validation of firstPaint
 		assert.isNumber(tf.lastBeacon().nt_first_paint, "nt_first_paint");

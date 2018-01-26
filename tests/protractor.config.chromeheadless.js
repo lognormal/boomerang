@@ -15,7 +15,7 @@ exports.config = {
 			consolidate: true,
 			consolidateAll: true,
 			useDotNotation: true,
-			filePrefix: "e2e-debug"
+			filePrefix: "e2e"
 		}));
 	},
 	// needs to be specified here (instead of in Gruntfile.js) - grunt-protractor-runner seems

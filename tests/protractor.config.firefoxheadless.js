@@ -15,15 +15,15 @@ exports.config = {
 			consolidate: true,
 			consolidateAll: true,
 			useDotNotation: true,
-			filePrefix: "e2e-debug"
+			filePrefix: "e2e"
 		}));
 	},
 	// needs to be specified here (instead of in Gruntfile.js) - grunt-protractor-runner seems
 	// to have an issue passing in args
 	capabilities: {
-		browserName: "chrome",
-		chromeOptions: {
-			args: [ "--headless", "--disable-gpu", "--window-size=1024,768" ]
+		browserName: "firefox",
+		"moz:firefoxOptions": {
+			args: [ "--headless" ]
 		}
 	}
 };

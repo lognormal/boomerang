@@ -33,6 +33,8 @@ var TEST_URL_BASE = grunt.option("test-url") || "http://" + boomerangE2ETestDoma
 var SELENIUM_ADDRESS = "http://" + boomerangE2ETestDomain + ":4444/wd/hub";
 var E2E_BASE_URL = "http://" + boomerangE2ETestDomain + ":4002/";
 
+var DEFAULT_BROWSER = grunt.option("browser") || "ChromeHeadless";
+
 var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 	preserveComments: false,
 	mangle: {
@@ -652,25 +654,53 @@ module.exports = function() {
 				]
 			},
 			unit: {
-				browsers: ["PhantomJS"],
-				frameworks: ["mocha"]
+				browsers: [DEFAULT_BROWSER]
 			},
 			all: {
-				browsers: ["Chrome", "Firefox", "IE", "Opera", "Safari", "PhantomJS"]
+				browsers: [
+					"Chrome",
+					"ChromeHeadless",
+					"Edge",
+					"Firefox",
+					"FirefoxHeadless",
+					"IE",
+					"Opera",
+					"PhantomJS",
+					"Safari"
+				]
 			},
-			chrome: {
+			allHeadless: {
+				browsers: [
+					"ChromeHeadless",
+					"FirefoxHeadless",
+					"PhantomJS"
+				]
+			},
+			Chrome: {
 				browsers: ["Chrome"]
 			},
-			ie: {
-				browsers: ["IE"]
+			ChromeHeadless: {
+				browsers: ["ChromeHeadless"]
 			},
-			ff: {
+			Firefox: {
 				browsers: ["Firefox"]
 			},
-			opera: {
+			FirefoxHeadless: {
+				browsers: ["FirefoxHeadless"]
+			},
+			IE: {
+				browsers: ["IE"]
+			},
+			Edge: {
+				browsers: ["Edge"]
+			},
+			Opera: {
 				browsers: ["Opera"]
 			},
-			safari: {
+			PhantomJS: {
+				browsers: ["PhantomJS"]
+			},
+			Safari: {
 				browsers: ["Safari"]
 			},
 			debug: {
@@ -683,7 +713,7 @@ module.exports = function() {
 				noColor: false,
 				keepAlive: false
 			},
-			phantomjs: {
+			PhantomJS: {
 				options: {
 					configFile: "tests/protractor.config.phantom.js",
 					args: {
@@ -691,18 +721,51 @@ module.exports = function() {
 						specs: ["tests/e2e/e2e.js"],
 						baseUrl: E2E_BASE_URL,
 						capabilities: {
-							"browserName": "phantomjs",
+							browserName: "phantomjs",
 							"phantomjs.binary.path": require("phantomjs").path
 						}
 					}
 				}
 			},
-			chrome: {
+			Chrome: {
 				options: {
 					configFile: "tests/protractor.config.chrome.js",
 					args: {
 						seleniumAddress: SELENIUM_ADDRESS,
-						specs: ["e2e/*.js"],
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL,
+						capabilities: {
+							browserName: "chrome"
+						}
+					}
+				}
+			},
+			ChromeHeadless: {
+				options: {
+					configFile: "tests/protractor.config.chromeheadless.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
+			},
+			Firefox: {
+				options: {
+					configFile: "tests/protractor.config.firefox.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
+			},
+			FirefoxHeadless: {
+				options: {
+					configFile: "tests/protractor.config.firefoxheadless.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
 						baseUrl: E2E_BASE_URL
 					}
 				}
@@ -713,11 +776,7 @@ module.exports = function() {
 					args: {
 						seleniumAddress: SELENIUM_ADDRESS,
 						specs: ["tests/e2e/e2e-debug.js"],
-						baseUrl: E2E_BASE_URL,
-						capabilities: {
-							"browserName": "phantomjs",
-							"phantomjs.binary.path": require("phantomjs").path
-						}
+						baseUrl: E2E_BASE_URL
 					}
 				}
 			}
@@ -765,7 +824,7 @@ module.exports = function() {
 					urls: [TEST_URL_BASE + "unit/"],
 					testname: "Boomerang Unit Tests",
 					browsers: [{
-						"browserName": "internet explorer",
+						browserName: "internet explorer",
 						"version": "11",
 						"platform": "Windows 8.1"
 					}]
@@ -783,7 +842,7 @@ module.exports = function() {
 					urls: e2eUrls,
 					testname: "Boomerang E2E Tests",
 					browsers: [{
-						"browserName": "internet explorer",
+						browserName: "internet explorer",
 						"version":     "11",
 						"platform":    "Windows 8.1"
 					}]
@@ -986,20 +1045,30 @@ module.exports = function() {
 		"test:karma:debug": ["test:build", "build:test", "karma:debug"],
 
 		// unit tests
-		"test:unit": ["test:build", "build", "karma:unit"],
+		"test:unit": ["test:build", "build", "karma:unit:" + DEFAULT_BROWSER],
 		"test:unit:all": ["build", "karma:all"],
-		"test:unit:chrome": ["build", "karma:chrome"],
-		"test:unit:ff": ["build", "karma:ff"],
-		"test:unit:ie": ["build", "karma:ie"],
-		"test:unit:opera": ["build", "karma:opera"],
-		"test:unit:safari": ["build", "karma:safari"],
+		"test:unit:allHeadless": ["build", "karma:allHeadless"],
+		"test:unit:Chrome": ["build", "karma:Chrome"],
+		"test:unit:ChromeHeadless": ["build", "karma:ChromeHeadless"],
+		"test:unit:Firefox": ["build", "karma:Firefox"],
+		"test:unit:FirefoxHeadless": ["build", "karma:FirefoxHeadless"],
+		"test:unit:Edge": ["build", "karma:Edge"],
+		"test:unit:IE": ["build", "karma:IE"],
+		"test:unit:Opera": ["build", "karma:Opera"],
+		"test:unit:Safari": ["build", "karma:Safari"],
+		"test:unit:PhantomJS": ["build", "karma:PhantomJS"],
 
 		// End-to-End tests
-		"test:e2e": ["test:build", "build", "test:e2e:phantomjs"],
-		"test:e2e:chrome": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:chrome"],
-		"test:e2e:debug": ["build", "test:build", "build:test", "express:dev", "express:secondary", "protractor_webdriver", "protractor:debug"],
-		"test:e2e:phantomjs": ["build", "express:dev", "express:secondary", "protractor_webdriver", "protractor:phantomjs"],
+		"test:e2e": ["test:e2e:" + DEFAULT_BROWSER],
+		"test:e2e:browser": ["test:build", "build", "express:dev", "express:secondary", "protractor_webdriver"],
+		"test:e2e:debug": ["test:e2e:browser", "protractor:debug"],
+		"test:e2e:PhantomJS": ["test:e2e:browser", "protractor:PhantomJS"],
+		"test:e2e:Chrome": ["test:e2e:browser", "protractor:Chrome"],
+		"test:e2e:ChromeHeadless": ["test:e2e:browser", "protractor:ChromeHeadless"],
+		"test:e2e:Firefox": ["test:e2e:browser", "protractor:Firefox"],
+		"test:e2e:FirefoxHeadless": ["test:e2e:browser", "protractor:FirefoxHeadless"],
 
+		// Documentation
 		"test:doc": ["clean", "jsdoc", "express:doc", "watch:doc"],
 
 		// SauceLabs tests

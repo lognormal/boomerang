@@ -3,14 +3,19 @@
 
 exports.config = {
 	onPrepare: function() {
-		// The require statement must be down here, since jasmine-reporters
-		// needs jasmine to be in the global and protractor does not guarantee
-		// this until inside the onPrepare function.
-		require("jasmine-reporters");
+		var reporters = require("jasmine-reporters");
 
-		var junitReporter = new jasmine.JUnitXmlReporter("tests/results", true, true, "e2e", true);
+		jasmine.getEnv().addReporter(new jasmine.ConsoleReporter({
+			print: console.log,
+			showColors: true
+		}));
 
-		jasmine.getEnv().addReporter(new jasmine.ConsoleReporter());
-		jasmine.getEnv().addReporter(junitReporter);
+		jasmine.getEnv().addReporter(new reporters.JUnitXmlReporter({
+			savePath: "tests/results",
+			consolidate: true,
+			consolidateAll: true,
+			useDotNotation: true,
+			filePrefix: "e2e"
+		}));
 	}
 };

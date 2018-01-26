@@ -28,7 +28,6 @@ module.exports = function(config) {
 			"karma-phantomjs-launcher",
 			"karma-safari-launcher"
 		],
-		browsers: ["PhantomJS"],
 
 		coverageReporter: {
 			type: "html",

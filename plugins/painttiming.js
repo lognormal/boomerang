@@ -62,7 +62,7 @@
 		 * Executed on `page_ready` and `before_unload`
 		 */
 		done: function() {
-			var p, paintTimings;
+			var p, paintTimings, i;
 
 			if (this.complete) {
 				// we've already added data to the beacon
@@ -70,7 +70,7 @@
 			}
 
 			p = BOOMR.getPerformance();
-			if (!p) {
+			if (!p || typeof p.getEntriesByType !== "function") {
 				// can't do anything if window.performance isn't available
 				this.complete = true;
 
@@ -98,10 +98,11 @@
 							true);
 					}
 				}
-			}
 
-			this.complete = true;
-			BOOMR.sendBeacon();
+				this.complete = true;
+
+				BOOMR.sendBeacon();
+			}
 		}
 	};
 
@@ -143,7 +144,7 @@
 		 * @memberof BOOMR.plugins.PaintTiming
 		 */
 		is_complete: function() {
-			return impl.complete;
+			return true;
 		},
 
 		/**
@@ -187,7 +188,7 @@
 		 *@memberof BOOMR.plugins.PaintTiming
 		 */
 		getTimingFor: function(timingName) {
-			var p, paintTimings;
+			var p, paintTimings, i;
 
 			// look in our cache first
 			if (impl.timingCache[timingName]) {
@@ -201,7 +202,7 @@
 
 			// need to get the window.performance interface
 			var p = BOOMR.getPerformance();
-			if (!p) {
+			if (!p || typeof p.getEntriesByType !== "function") {
 				return;
 			}
 

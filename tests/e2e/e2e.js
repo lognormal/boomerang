@@ -36,7 +36,7 @@ function run(testPath, file) {
 			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName);
 
 			browser.driver.wait(function() {
-				return browser.driver.isElementPresent(by.css("#BOOMR_test_complete"));
+				return element(by.css("#BOOMR_test_complete")).isPresent();
 			});
 
 			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {
