@@ -7,7 +7,6 @@ var path = require("path");
 var fs = require("fs");
 var readline = require("readline");
 var express = require("express");
-var http = require("http");
 var compress = require("compression");
 
 //
@@ -35,13 +34,6 @@ if (!fs.existsSync(wwwRoot)) {
 }
 
 var app = express();
-var server = http.createServer(app);
-
-// listen
-var port = process.env.PORT || env.port;
-server.listen(port, function() {
-	console.log("Server starting on port " + port + " for " + wwwRoot);
-});
 
 // ensure content is compressed
 app.use(compress());
@@ -136,4 +128,11 @@ app.get("/*", function(req, res, next) {
 /*eslint dot-notation:0*/
 app.use(express.static(wwwRoot));
 
+// this needs to be before `app.listen(...)`
 require("express-middleware-server-timing")(app);
+
+// listen
+var port = process.env.PORT || env.port;
+app.listen(port, function() {
+	console.log(`Server starting on port ${port} for ${wwwRoot}`);
+});
