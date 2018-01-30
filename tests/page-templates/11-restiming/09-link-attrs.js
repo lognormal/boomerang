@@ -5,6 +5,21 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
+	function assertLinkRel(data, expectedRel) {
+		var RT = BOOMR.plugins.ResourceTiming;
+		var LINK_ATTR_EXPR = new RegExp("^.*\\" + RT.SPECIAL_DATA_PREFIX + RT.SPECIAL_DATA_LINK_ATTR_TYPE);
+
+		assert.match(data, LINK_ATTR_EXPR);
+		assert.strictEqual(data.replace(LINK_ATTR_EXPR, ""), String(expectedRel));
+	}
+
+	function getInteresting() {
+		var b = tf.beacons[0];
+		var trie = JSON.parse(b.restiming);
+		return trie[location.protocol + "//" + location.host + "/"]["pages/11-restiming/"]["support/09."];
+	}
+
+
 	it("Should pass basic beacon validation", function(done){
 		t.validateBeaconWasSent(done);
 	});
@@ -38,27 +53,54 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 
 	});
 
-	it("Should find `rel` for link elements", function() {
+	it("Should find stylesheet `rel` for link elements", function() {
 		if (!t.isResourceTimingSupported()) {
 			this.skip();
 			return;
 		}
 
-		var RT = BOOMR.plugins.ResourceTiming;
-		var LINK_ATTR_EXPR = new RegExp("^.*\\" + RT.SPECIAL_DATA_PREFIX + RT.SPECIAL_DATA_LINK_ATTR_TYPE);
+		var interesting = getInteresting();
+		assertLinkRel(interesting.css, BOOMR.plugins.ResourceTiming.REL_TYPES.stylesheet);
+	});
 
-		var b = tf.beacons[0];
-
-		var trie = JSON.parse(b.restiming);
-		var interesting = trie[location.protocol + "//" + location.host + "/"]["pages/11-restiming/"]["support/09."];
-
-		function assertLinkRel(data, expectedRel) {
-			assert.match(data, LINK_ATTR_EXPR);
-			assert.strictEqual(data.replace(LINK_ATTR_EXPR, ""), String(expectedRel));
+	it("Should find script `rel` for link elements", function() {
+		if (!t.isResourceTimingSupported()) {
+			return this.skip();
 		}
 
-		assertLinkRel(interesting.j.pg, RT.REL_TYPES.preload);
-		assertLinkRel(interesting.j.s, RT.REL_TYPES.preload);
-		assertLinkRel(interesting.css, RT.REL_TYPES.stylesheet);
+		var interesting = getInteresting();
+
+		var a = document.createElement("a");
+		a.href = "./support/09.js";
+		var resource = t.findFirstResource(a.href);
+		if (resource.initiatorType === "link") {
+			// Chrome sets initiatorType to link
+			assertLinkRel(interesting.j.s, BOOMR.plugins.ResourceTiming.REL_TYPES.preload);
+		}
+		else {
+			// FF, Edge and Safari set initiatorType to script
+			this.skip();
+		}
+	});
+
+	it("Should find image `rel` for link elements", function() {
+		if (!t.isResourceTimingSupported()) {
+			this.skip();
+			return;
+		}
+
+		var interesting = getInteresting();
+
+		var a = document.createElement("a");
+		a.href = "./support/09.jpg";
+		var resource = t.findFirstResource(a.href);
+		if (resource.initiatorType === "link") {
+			// Chrome sets initiatorType to link
+			assertLinkRel(interesting.j.pg, BOOMR.plugins.ResourceTiming.REL_TYPES.preload);
+		}
+		else {
+			// FF, Edge and Safari set initiatorType to img
+			this.skip();
+		}
 	});
 });
