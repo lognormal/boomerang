@@ -84,6 +84,7 @@
 				disableHardNav: true
 			},
 			PageParams: {
+				enabled: true,
 				pageGroups: true,
 				customMetrics: true,
 				customDimensions: true,

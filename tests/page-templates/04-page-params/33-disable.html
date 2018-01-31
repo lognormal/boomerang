@@ -1,0 +1,59 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="33-disable.js" type="text/javascript"></script>
+<script>
+/*eslint-disable no-unused-vars*/
+window.dimension = 111;
+
+// Config override to disable it
+window.BOOMR_config = {
+	PageParams: {
+		enabled: false
+	}
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	PageParams: {
+		abTests: [
+			{
+				"type": "Custom",
+				"parameter1": "dimension"
+			}
+		],
+		pageGroups: [
+			{
+				type: "Custom",
+				parameter1: "dimension"
+			}
+		],
+		customMetrics: [
+			{
+				varName: "dimension",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			}
+		],
+		customDimensions: [
+			{
+				"name": "JS1",
+				"index": 0,
+				"type": "JavaScriptVar",
+				"label": "cdim.JS1",
+				"dataType": "Text",
+				"varName": "dimension"
+			}
+		],
+		customTimers: [
+			{
+				"name": "JST1",
+				"index": 0,
+				"type": "Custom",
+				"label": "custom0",
+				"parameter1": "dimension"
+			}
+		]
+	}
+});
+</script>
+<%= footer %>

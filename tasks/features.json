@@ -21,5 +21,6 @@
 	{"key":"iframe-delay"},
 	{"key":"resource-groups-nav-start"},
 	{"key":"server-timing"},
-	{"key":"autoxhr-management"}
+	{"key":"autoxhr-management"},
+	{"key":"disable-page-params"}
 ]
