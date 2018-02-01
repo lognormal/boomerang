@@ -263,7 +263,9 @@
 				return false;
 			}
 
-			this.method.call(this.ctx, this.varname, value);
+			if (typeof this.method === "function") {
+				this.method.call(this.ctx, this.varname, value);
+			}
 			return true;
 		},
 
@@ -2547,8 +2549,14 @@
 		 * @returns {boolean} True on match
 		 */
 		excludeXhrFilter: function(anchor) {
-			var xhrPgIndex = 0, hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), pgArray, ret, foundMatch = false;
+			var xhrPgIndex = 0, hconfig, pgArray, ret, foundMatch = false;
 
+			// Only run the filter if we have an xhr flag in the config
+			if (!impl.xhr) {
+				return false;
+			}
+
+			hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
 			hconfig.pageGroups.varname = "xhr.pg";
 
 			// Only iterate over xhrPageroups if on:["xhr"] was set on the pageGroups
@@ -2560,49 +2568,49 @@
 			}
 
 			var handler = new Handler(hconfig.pageGroups);
-			// only run the filter if we have an xhr flag in the config
-			if (typeof impl.xhr !== "undefined") {
-				/*
-				 - match: Only instrument matching filters
-				 - none: Do not instrument at all
-				 - all: Instrument all XHRs
-				 - subresource: to be flagged as subresource
-				 */
-				// Match against the PageGroups
-				if (impl.xhr === "match") {
-					for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
-						// We're iterating over all items in the list. If we
-						// find one that matches: break the loop! Otherwise,
-						// keep going.
-						ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
-						if (ret && !pgArray[xhrPgIndex].ignore) {
-							foundMatch = true;
-							break;
-						}
-					}
+			// We need the handler to check for matches without being applied
+			handler.method = null;
 
-					if (!foundMatch) {
-						BOOMR.debug("excludeXhrFilter: No matching rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
-						return true;
+			/*
+			 - match: Only instrument matching filters
+			 - none: Do not instrument at all
+			 - all: Instrument all XHRs
+			 - subresource: to be flagged as subresource
+			 */
+			// Match against the PageGroups
+			if (impl.xhr === "match") {
+				for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
+					// We're iterating over all items in the list. If we
+					// find one that matches: break the loop! Otherwise,
+					// keep going.
+					ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
+					if (ret && !pgArray[xhrPgIndex].ignore) {
+						foundMatch = true;
+						break;
 					}
-
-					return false;
 				}
-				else {
-					if (impl.xhr === "none") {
-						return true;
-					}
-					else if (impl.xhr === "all" || impl.xhr === "subresource") {
-						// Even though our xhr flag was set to instrument all XHRs
-						// we need to honor ignore flags. If we find an entry with
-						// ignore and the Handler matches throw away that XH.
-						for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
-							if (pgArray[xhrPgIndex].ignore) {
-								ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
-								if (ret) {
-									BOOMR.debug("excludeXhrFilter: Ignore rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
-									return true;
-								}
+
+				if (!foundMatch) {
+					BOOMR.debug("excludeXhrFilter: No matching rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
+					return true;
+				}
+
+				return false;
+			}
+			else {
+				if (impl.xhr === "none") {
+					return true;
+				}
+				else if (impl.xhr === "all" || impl.xhr === "subresource") {
+					// Even though our xhr flag was set to instrument all XHRs
+					// we need to honor ignore flags. If we find an entry with
+					// ignore and the Handler matches then do not instrument the XHR.
+					for (xhrPgIndex = 0; xhrPgIndex < pgArray.length; xhrPgIndex++) {
+						if (pgArray[xhrPgIndex].ignore) {
+							ret = handler.handle(pgArray[xhrPgIndex], anchor.href);
+							if (ret) {
+								BOOMR.debug("excludeXhrFilter: Ignore rule found for XHR, skipping: " + BOOMR.utils.objectToString(ret), "PageParams");
+								return true;
 							}
 						}
 					}

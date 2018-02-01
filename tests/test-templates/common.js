@@ -5,12 +5,26 @@ describe("common", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
+	function testPageLoadBeacon(b, prefix) {
+		// TODO
+		assert.isUndefined(b.pgu, prefix + "does not have the pgu param");
+		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
+	}
+
 	function testSpaHardBeacon(b, prefix) {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
+		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
 	}
 
 	function testSpaSoftBeacon(b, prefix) {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
+		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
+	}
+
+	function testXhrBeacon(b, prefix) {
+		assert.isUndefined(b.api, prefix + "does not have the api param");
+		assert.isDefined(b.pgu, prefix + "has the pgu param");
+		assert.isUndefined(b["h.pg"], prefix + "does not have the h.pg param");
 	}
 
 	it("Should have sent beacons that pass basic validation", function() {
@@ -43,7 +57,7 @@ describe("common", function() {
 
 			if (b["rt.start"] === "navigation") {
 				// page load beacon
-				// TODO
+				testPageLoadBeacon(b, prefix);
 			}
 			else if (b["rt.start"] === "manual") {
 				if (b["http.initiator"] === "spa_hard") {
@@ -56,8 +70,7 @@ describe("common", function() {
 				}
 				else if (b["http.initiator"] === "xhr") {
 					// xhr beacon
-					assert.isUndefined(b.api, prefix + "does not have the api param");
-					assert.isDefined(b.pgu, prefix + "has the pgu param");
+					testXhrBeacon(b, prefix);
 				}
 				else if (b["http.initiator"] === "click") {
 					// click (AutoXHR) beacon

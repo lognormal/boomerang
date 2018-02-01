@@ -31,6 +31,8 @@ describe("e2e/04-page-params/17-page-params-xhr-ignore", function() {
 			function() {
 				var b = tf.beacons[1];
 				assert.include(b.u, "?id=2");
+				assert.isUndefined(b["h.pg"]);
+				assert.isUndefined(b["xhr.pg"]);
 				done();
 			},
 			this.skip.bind(this));
