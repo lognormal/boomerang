@@ -23,5 +23,6 @@
 	{"key":"server-timing"},
 	{"key":"autoxhr-management"},
 	{"key":"disable-page-params"},
-	{"key":"paint-timing"}
+	{"key":"paint-timing"},
+	{"key":"pci-blacklist"}
 ]

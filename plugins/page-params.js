@@ -67,6 +67,80 @@
 		["img", "iframe", "script", "link", "object", "svg", "video"];
 
 	/**
+	 * HTML5 autocomplete values that will block an <input> element from
+	 * being read in PCI mode.  See also wildcard matches below.
+	 *
+	 * @constant
+	 * @type {object}
+	 */
+	var PCI_AUTOCOMPLETE_BLOCK_LOOKUP = {
+		"name": 1,
+		"honorific-prefix": 1,
+		"given-name": 1,
+		"additional-name": 1,
+		"family-name": 1,
+		"honorific-suffix": 1,
+		"username": 1,
+		"new-password": 1,
+		"current-password": 1,
+		"street-address": 1,
+		"country": 1,
+		"country-name": 1,
+		"postal-code": 1,
+		"email": 1,
+		"tel": 1
+	};
+
+	/**
+	 * HTML5 autocomplete prefix matches that will block an <input>
+	 * element from being read in PCI mode.  See also known fields above.
+	 *
+	 * @constant
+	 * @type {RegExp[]}
+	 */
+	var PCI_AUTOCOMPLETE_BLOCK_PREFIXES = [
+		// cc-name, cc-given-name, cc-additional-name, cc-family-name,
+		// cc-number, cc-exp, cc-exp-month, cc-exp-year, cc-csc, cc-type
+		"cc-",
+
+		// address-line[1-3] and address-level[1-4]
+		"address-",
+
+		// tel-country-code, tel-national, tel-area-code, tel-local,
+		// tel-local-prefix, tel-local-suffix, tel-extension
+		"tel-"
+	];
+
+	/**
+	 * Blocked Regular expressions in PCI mode
+	 *
+	 * @constant
+	 * @type {RegExp[]}
+	 */
+	var PCI_BLOCK_REGEXP = [
+		// Credit Card numbers
+		// via https://github.com/kevva/credit-card-regex
+		// American Express
+		/(?:3[47][0-9]{13})/,
+		// Diners Club
+		/(?:3(?:0[0-5]|[68][0-9])[0-9]{11})/,
+		// Discover
+		/(?:6(?:011|5[0-9]{2})(?:[0-9]{12}))/,
+		// JCB
+		/(?:(?:2131|1800|35\d{3})\d{11})/,
+		// Maestro
+		/(?:(?:5[0678]\d\d|6304|6390|67\d\d)\d{8,15})/,
+		// MasterCard
+		/(?:(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12})/,
+		// Visa
+		/(?:4[0-9]{12})(?:[0-9]{3})?/,
+
+		// Email Regular Expression
+		// via https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type=email)
+		/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+	];
+
+	/**
 	 * Each handler config has a basic configuration. The configuration is used
 	 * when initializing the Handler. The configuration is may be modified for
 	 * initialization purposes of the specific Handler.
@@ -383,7 +457,16 @@
 		extractFromDOMElement: function(element, o) {
 			var m, re, elementValue = "";
 
-			if (element !== null && element.nodeName && (element.nodeName.toUpperCase() === "INPUT" || element.nodeName.toUpperCase() === "SELECT")) {
+			// check the field doesn't have sensitive data
+			if (impl.pci && this.hasSensitiveData(element)) {
+				BOOMR.appendVar("pci.redacted", o.label);
+				return false;
+			}
+
+			if (element !== null && element.nodeName && (
+				element.nodeName.toUpperCase() === "INPUT" ||
+				element.nodeName.toUpperCase() === "TEXTAREA" ||
+				element.nodeName.toUpperCase() === "SELECT")) {
 				// either it is not a checkbox/radio button or it is checked.
 				if ((element.type.toLowerCase() !== "checkbox" && element.type.toLowerCase() !== "radio") || element.checked) {
 					elementValue = element.value;
@@ -394,6 +477,12 @@
 				// both, but IE8 and lower only support innerText so, we test textContent
 				// first and fallback to innerText if that fails
 				elementValue = element.textContent || element.innerText;
+			}
+
+			// check the value isn't sensitive data
+			if (impl.pci && this.isSensitiveData(elementValue)) {
+				BOOMR.appendVar("pci.redacted", o.label);
+				return false;
 			}
 
 			if ((!o.match || o.match === "numeric")) {
@@ -424,6 +513,93 @@
 			}
 
 			return elementValue;
+		},
+
+		/**
+		 * Determines if the DOM element has sensitive data for PCI
+		 *
+		 * @param {Element} element DOM Element
+		 *
+		 * @returns {boolean} True if the element has sensitive data
+		 */
+		hasSensitiveData: function(element) {
+			var i;
+
+			if (!element) {
+				return false;
+			}
+
+			if (element.nodeName && (
+				element.nodeName.toUpperCase() === "INPUT" ||
+				element.nodeName.toUpperCase() === "TEXTAREA" ||
+				element.nodeName.toUpperCase() === "SELECT")) {
+				//
+				// Sensitive HTML <input autocomplete=""> fields:
+				// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+				// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
+				//
+				var ac = element.autocomplete || element.getAttribute("autocomplete");
+
+				if (ac && ac.length) {
+					ac = ac.toLowerCase();
+
+					// see if the autocomplete is in our direct map
+					if (PCI_AUTOCOMPLETE_BLOCK_LOOKUP[ac]) {
+						return true;
+					}
+
+					// loop through all prefixes
+					for (i = 0; i < PCI_AUTOCOMPLETE_BLOCK_PREFIXES.length; i++) {
+						if (ac.indexOf(PCI_AUTOCOMPLETE_BLOCK_PREFIXES[i]) === 0) {
+							return true;
+						}
+					}
+				}
+			}
+
+			// check for any Blacklisted elements
+			if (impl.pciBlacklist && impl.pciBlacklist.length) {
+				if (!impl.pciBlacklistQueried) {
+					impl.pciBlacklistMatch = this.runQuerySelector(impl.pciBlacklist, d, true);
+					impl.pciBlacklistQueried = true;
+				}
+
+				if (impl.pciBlacklistMatch && impl.pciBlacklistMatch.length) {
+					for (i = 0; i < impl.pciBlacklistMatch.length; i++) {
+						if (element === impl.pciBlacklistMatch[i]) {
+							return true;
+						}
+					}
+				}
+			}
+
+			// nothing sensitive found
+			return false;
+		},
+
+		/**
+		 * Determines if the value is detected as 'sensitive' for PCI
+		 *
+		 * @param {string} value Value
+		 *
+		 * @returns {boolean} True if the value has sensitive data
+		 */
+		isSensitiveData: function(value) {
+			var i;
+
+			if (!value || !value.length) {
+				return false;
+			}
+
+			// loop through all prefixes
+			for (i = 0; i < PCI_BLOCK_REGEXP.length; i++) {
+				if (PCI_BLOCK_REGEXP[i].exec(value)) {
+					return true;
+				}
+			}
+
+			// nothing sensitive found
+			return false;
 		},
 
 		/**
@@ -2467,6 +2643,10 @@
 		hasXhrOn: false,
 		hasXhrIgnore: false,
 		autorun: true,
+		pci: false,
+		pciBlacklist: [],
+		pciBlacklistQueried: false,
+		pciBlacklistMatch: [],
 
 		beaconQueue: [],
 
@@ -2833,7 +3013,10 @@
 				BOOMR.removeVar(label);
 			}
 
-			BOOMR.removeVar("h.pg", "h.ab", "xhr.pg");
+			BOOMR.removeVar("h.pg", "h.ab", "xhr.pg", "pci.redacted");
+
+			// After each beacon, reset the Queried flag so we run QSA again next time
+			impl.pciBlacklistQueried = false;
 
 			// TODO remove all resource timing components when start==="*"
 		},
@@ -3316,7 +3499,9 @@
 				"autorun",
 				"defaultDecimal",
 				"defaultThousands",
-				"xhr"
+				"xhr",
+				"pci",
+				"pciBlacklist"
 			];
 			var pgIndex = 0, pgList = [];
 
@@ -3355,6 +3540,11 @@
 
 			if (typeof config.autorun !== "undefined") {
 				impl.autorun = config.autorun;
+			}
+
+			if (impl.pci) {
+				// note we're in PCI mode
+				BOOMR.addVar("pci", 1);
 			}
 
 			if (impl.initialized) {

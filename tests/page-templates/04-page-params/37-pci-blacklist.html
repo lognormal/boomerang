@@ -1,0 +1,56 @@
+<%= header %>
+<%= boomerangScript %>
+<form id="form">
+	<input id="id0" type="text" value="good" />
+	<input id="id1" type="text" value="bad" />
+	<input id="id2" type="text" value="good" />
+	<input id="id3" type="text" value="bad" />
+</form>
+<script>
+var GOOD_INPUTS = [true, false, true, false];
+
+window.BOOMR_config = {
+	PageParams: {
+		pciBlacklist: "#id1, input#id3"
+	}
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		pci: true,
+		customDimensions: [
+			{
+				dataType: "Text",
+				index: 0,
+				parameter2: "//input[@id='id0']",
+				label: "cdim.0",
+				type: "URLPatternType"
+			},
+			{
+				dataType: "Text",
+				index: 1,
+				parameter2: "//input[@id='id1']",
+				label: "cdim.1",
+				type: "URLPatternType"
+			},
+			{
+				dataType: "Text",
+				index: 2,
+				parameter2: "//input[@id='id2']",
+				label: "cdim.2",
+				type: "URLPatternType"
+			},
+			{
+				dataType: "Text",
+				index: 3,
+				parameter2: "//input[@id='id3']",
+				label: "cdim.3",
+				type: "URLPatternType"
+			}
+		]
+	}
+});
+</script>
+<script src="37-pci-blacklist.js" type="text/javascript"></script>
+<%= footer %>

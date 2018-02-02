@@ -1,0 +1,66 @@
+<%= header %>
+<%= boomerangScript %>
+<form id="form">
+</form>
+<script>
+
+// Bad values
+var VALUES = [
+	// Block: (fake) Credit Card numbers
+	{ value: "6011881485017922", block: true },
+	{ value: "5441068611005540", block: true },
+	{ value: "4111111111111111", block: true },
+	{ value: "5500000000000004", block: true },
+	{ value: "2223000148400010", block: true },
+	{ value: "340000000000009 ", block: true },
+	{ value: "3566002020140006", block: true },
+	{ value: "6011000000000004", block: true },
+	{ value: "36438999960016", block: true },
+
+	// Block: Email addresses
+	{ value: "acme@acme.com", block: true },
+	{ value: "someone@whitehouse.gov", block: true },
+	{ value: "a@a.at", block: true },
+	{ value: "a@a", block: true },
+
+	// Invalid CC numbers
+	{ value: "ab11881485017922", block: false },
+	{ value: "0000000000000000", block: false },
+	{ value: "1919191919191919", block: false },
+
+	// Invalid Email addresses
+	{ value: "@acme.com", block: false, sanitized: "acme.com" },
+	{ value: "a@", block: false, sanitized: "a" }
+];
+
+var customDimensions = [];
+
+// for each value, create an INPUT element and the Custom Dimension definition
+for (var i = 0; i < VALUES.length; i++) {
+	// add to the DOM
+	var input = document.createElement("input");
+	input.id = "id" + i;
+	input.type = "text";
+	input.value = VALUES[i].value;
+	document.getElementById("form").appendChild(input);
+
+	// add to our Custom Dimensions list
+	customDimensions.push({
+		dataType: "Text",
+		index: i,
+		parameter2: "//input[@id='id" + i + "']",
+		label: "cdim." + i,
+		type: "URLPatternType"
+	});
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		pci: true,
+		customDimensions: customDimensions
+	}
+});
+</script>
+<script src="35-pci-input-values.js" type="text/javascript"></script>
+<%= footer %>

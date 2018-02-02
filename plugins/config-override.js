@@ -92,7 +92,9 @@
 				abTests: true,
 				defaultDecimal: true,
 				defaultThousands: true,
-				xhr: true
+				xhr: true,
+				pci: true,
+				pciBlacklist: true
 			},
 			CrossDomain: {
 				cross_domain_url: true,

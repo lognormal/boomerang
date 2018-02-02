@@ -1,0 +1,99 @@
+<%= header %>
+<%= boomerangScript %>
+<form id="form">
+</form>
+<script>
+
+var AUTOCOMPLETE_VALUES = [
+	// Known fields we should block
+	{ value: "name", block: true },
+	{ value: "honorific-prefix", block: true },
+	{ value: "given-name", block: true },
+	{ value: "additional-name", block: true },
+	{ value: "family-name", block: true },
+	{ value: "honorific-suffix", block: true },
+	{ value: "username", block: true },
+	{ value: "new-password", block: true },
+	{ value: "current-password", block: true },
+	{ value: "street-address", block: true },
+	{ value: "country", block: true },
+	{ value: "country-name", block: true },
+	{ value: "postal-code", block: true },
+	{ value: "email", block: true },
+	{ value: "tel", block: true },
+	{ value: "cc-name", block: true },
+	{ value: "cc-given-name", block: true },
+	{ value: "cc-additional-name", block: true },
+	{ value: "cc-family-name", block: true },
+	{ value: "cc-number", block: true },
+	{ value: "cc-exp", block: true },
+	{ value: "cc-exp-month", block: true },
+	{ value: "cc-exp-year", block: true },
+	{ value: "cc-csc", block: true },
+	{ value: "cc-type", block: true },
+	{ value: "address-line1", block: true },
+	{ value: "address-line2", block: true },
+	{ value: "address-line3", block: true },
+	{ value: "address-level1", block: true },
+	{ value: "address-level2", block: true },
+	{ value: "address-level3", block: true },
+	{ value: "address-level4", block: true },
+	{ value: "tel-country-code", block: true },
+	{ value: "tel-national", block: true },
+	{ value: "tel-area-code", block: true },
+	{ value: "tel-local", block: true },
+	{ value: "tel-local-prefix", block: true },
+	{ value: "tel-local-suffix", block: true },
+	{ value: "tel-extension", block: true },
+
+	// Fields we shouldn't block
+	{ value: "", block: false },
+	{ value: "on", block: false },
+	{ value: "off", block: false },
+	{ value: "nickname", block: false },
+	{ value: "organization-title", block: false },
+	{ value: "organization", block: false },
+	{ value: "transaction-currency", block: false },
+	{ value: "transaction-amount", block: false },
+	{ value: "language", block: false },
+	{ value: "bday", block: false },
+	{ value: "bday-day", block: false },
+	{ value: "bday-month", block: false },
+	{ value: "bday-year", block: false },
+	{ value: "sex", block: false },
+	{ value: "url", block: false },
+	{ value: "photo", block: false },
+	{ value: "impp", block: false }
+];
+
+var customMetrics = [];
+
+// for each value, create an INPUT element and the customMetric definition
+for (var i = 0; i < AUTOCOMPLETE_VALUES.length; i++) {
+	// add to the DOM
+	var input = document.createElement("input");
+	input.id = "id" + i;
+	input.value = i;
+	input.autocomplete = AUTOCOMPLETE_VALUES[i].value;
+	input.type = "text";
+	document.getElementById("form").appendChild(input);
+
+	// add to our Custom Metrics list
+	customMetrics.push({
+		parameter1: "",
+		parameter2: "//input[@id='id" + i + "']",
+		label: "cmet" + i,
+		type: "URLPatternType"
+	});
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		pci: true,
+		customMetrics: customMetrics
+	}
+});
+</script>
+<script src="34-pci-autocomplete.js" type="text/javascript"></script>
+<%= footer %>

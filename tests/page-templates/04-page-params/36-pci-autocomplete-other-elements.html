@@ -1,0 +1,32 @@
+<%= header %>
+<%= boomerangScript %>
+<form id="form">
+	<textarea id="id0" autocomplete="current-password">password</textarea>
+	<select id="id1" autocomplete="country"><option value="US">US</option></select>
+</form>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	PageParams: {
+		pci: true,
+		customDimensions: [
+			{
+				dataType: "Text",
+				index: 0,
+				parameter2: "//textarea[@id='id0']",
+				label: "cdim.0",
+				type: "URLPatternType"
+			},
+			{
+				dataType: "Text",
+				index: 1,
+				parameter2: "//select[@id='id1']",
+				label: "cdim.1",
+				type: "URLPatternType"
+			}
+		]
+	}
+});
+</script>
+<script src="36-pci-autocomplete-other-elements.js" type="text/javascript"></script>
+<%= footer %>
