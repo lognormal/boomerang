@@ -59,42 +59,6 @@
 	var RESOURCE_GROUPS_CHILDLISTENER_TIMEOUT = 500;
 
 	/**
-	 * Sets the priority of trying to run PageParam evaluation types.
-	 * Based on these priorities we can decide whether or not to run
-	 * these evaluation types to retrieve the right value for this
-	 * type of page param.
-	 *
-	 * Keys correspond to the type of page params under either
-	 * - custom timers, metrics, dimensions
-	 * - abTests
-	 * - pageGroups
-	 *
-	 * The value defines if the type is supposed to be evaluated
-	 * immediately (1) or evaluated when a subscribed event is
-	 * triggered (2) which are:
-	 * - page_ready
-	 * - before_unload
-	 * - xhr_load
-	 * @constant
-	 * @type {object}
-	 */
-	var PAGE_PARAM_TRY_PRIORITY = {
-		ResourceGroup: 1,
-		JavaScriptVar: 2,
-		Custom: 2,
-		URLPattern: 1,
-		URLSubstringEndOfText: 1,
-		URLSubstringTrailingText: 1,
-		UserAgentRegex: 1,
-		CookieRegex: 1,
-		URLRegex: 1,
-		Regexp: 1,
-		URLPatternType: 2,
-		ResourceTiming: 2,
-		UserTiming: 2
-	};
-
-	/**
 	 * Tag names matching element types that have a onload event
 	 * @constant
 	 * @type {string[]}
@@ -171,13 +135,6 @@
 	 * @property {function} customTimers.preProcessor Method to pre process the
 	 *   custom timers value before setting the timer with {@link HandlerConfig#customTimers~method}
 	 */
-
-	/**
- 	 * Names of PageParams types collected by this plugin
-	 * @constant
-	 * @type {string[]}
-	 */
-	var PAGE_PARAMS_NAMES = ["pageGroups", "abTests", "customTimers", "customMetrics", "customDimensions"];
 
 	/**
 	 * Nodes or Document element fetching new resources on a page may have one
@@ -1286,7 +1243,7 @@
 		 * @param {number} minStartTime the minumum resource startTime
 		 * @param {number} limit the maximum number of resources to look for
 		 *
-		 * @returns {PerformanceResourceTiming[]} Resources found matching a URL Pattern
+		 * @returns {PerformanceResourceTiming[]|null} Resources found matching a URL Pattern
 		 */
 		findResources: function(url, frame, minStartTime, limit) {
 			var i, slowestRes, reslist, frameIdx, frameCount, foundList = [], tempReslist;
@@ -2140,7 +2097,7 @@
 		 *
 		 * @param {number} index Resource index
 		 *
-		 * @return {Object[]} An array of resources mapping to the found
+		 * @return {Object[]|null} An array of resources mapping to the found
 		 * ResourceTiming entries.
 		 */
 		lookupResources: function(index) {
@@ -2209,7 +2166,7 @@
 		 * @param {ResourceTiming[]} resources ResourceTimings
 		 */
 		refreshResourceGroupTimings: function(resources, index) {
-			if (resources.length > 0) {
+			if (resources && resources.length > 0) {
 				// We found resources for this RG time to map
 				for (var resourceIndex = 0; resourceIndex < resources.length; resourceIndex++) {
 					this.updateResourceGroupDelta(resources[resourceIndex], index);
@@ -2438,7 +2395,7 @@
 					// matches the resource we're looking for.
 					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
 						resources = that.findResources(nodeURL);
-						if (resources.length > 0) {
+						if (resources && resources.length > 0) {
 							that.resourceSet[index].found = true;
 							that.refreshResourceGroupTimings(resources, index);
 						}
@@ -2496,7 +2453,7 @@
 		customMetrics: [],
 		customDimensions: [],
 		xhrPageGroups: [],
-		priorityHandler: {},
+		resourceGroupHandlers: {},
 
 		complete: false,
 		initialized: false,
@@ -2559,7 +2516,7 @@
 			hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
 			hconfig.pageGroups.varname = "xhr.pg";
 
-			// Only iterate over xhrPageroups if on:["xhr"] was set on the pageGroups
+			// Only iterate over xhrPageGroups if on:["xhr"] was set on the pageGroups
 			if (impl.hasXhrOn) {
 				pgArray = impl.xhrPageGroups;
 			}
@@ -2812,76 +2769,45 @@
 		},
 
 		/**
-		 * If configuration for PageParams contains a Handler type with a value of 1 in
-		 * {@link PAGE_PARAM_TRY_PRIORITY}, run them.
+		 * Run ResourceGroup Handlers
 		 *
-		 * This allows us to listen for later changes to the page via
-		 * EventListeners and fetch data to attach to the beacon as early as possible.
+		 * This will run early in order to setup EventListeners and MutationObservers to listen
+		 * for changes on the page.
 		 */
-		checkPrioritizedPageParams: function(type) {
-			var highPriorityParams = impl.checkHighPriorityParams(), hconfig, handleConfig, handler, handlerInstance, hpPpNameIndex, ppName, ppNameIndex;
-			if (highPriorityParams) {
-				for (ppNameIndex = 0; ppNameIndex < PAGE_PARAMS_NAMES.length; ppNameIndex++) {
-					ppName = PAGE_PARAMS_NAMES[ppNameIndex];
+		initResourceGroupHandlers: function(type) {
+			var hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG(), handleConfig, handler, handlerInstance;
 
-					if (!highPriorityParams[ppName]) {
-						continue;
-					}
+			if (!hconfig.hasOwnProperty("customTimers")) {
+				return;
+			}
 
-					for (hpPpNameIndex = 0; hpPpNameIndex < highPriorityParams[ppName].length; hpPpNameIndex++) {
-						hconfig = PAGE_PARAMS_BASE_HANDLER_CONFIG();
-						handleConfig = highPriorityParams[ppName][hpPpNameIndex];
+			for (var i = 0; i < impl.customTimers.length; i++) {
+				if (impl.customTimers[i].type !== "ResourceGroup") {
+					continue;
+				}
 
-						if (hconfig.hasOwnProperty(ppName) && !impl.priorityHandler.hasOwnProperty(handleConfig.label)) {
-							handler = new Handler(hconfig[ppName]);
-							handlerInstance = handler.handle(handleConfig, type);
-							if (handlerInstance) {
-								impl.priorityHandler[handleConfig.label] = handlerInstance;
-							}
-						}
+				handleConfig = impl.customTimers[i];
+
+				if (handleConfig.label && !impl.resourceGroupHandlers.hasOwnProperty(handleConfig.label)) {
+					handler = new Handler(hconfig.customTimers);
+					handlerInstance = handler.handle(handleConfig, type);
+					if (handlerInstance) {
+						impl.resourceGroupHandlers[handleConfig.label] = handlerInstance;
 					}
 				}
 			}
 		},
 
 		/**
-		 * Remove prioritized handlers that were resolved.
+		 * Remove ResourceGroup handlers that were resolved.
 		 */
-		removeDoneHandlers: function()  {
+		removeResolvedResourceGroupHandlers: function() {
 			var label;
-			for (label in impl.priorityHandler) {
-				if (impl.priorityHandler.hasOwnProperty(label) && impl.priorityHandler[label].resolved) {
-					delete impl.priorityHandler[label];
+			for (label in impl.resourceGroupHandlers) {
+				if (impl.resourceGroupHandlers.hasOwnProperty(label) && impl.resourceGroupHandlers[label].resolved) {
+					delete impl.resourceGroupHandlers[label];
 				}
 			}
-		},
-
-		/**
-		 * Iterate through page params and find elements that match the
-		 * {@link PAGE_PARAM_TRY_PRIORITY} high priority values (value = 1) thus
-		 * being able to be run at an earlier time.
-		 *
-		 * @return {object} Returns an object with keys corresponding to page
-		 * params and array holding objects containing the page param
-		 */
-		checkHighPriorityParams: function() {
-			var collected = {};
-
-			for (var ppIndex = 0; ppIndex < PAGE_PARAMS_NAMES.length; ppIndex++) {
-				var param = impl[PAGE_PARAMS_NAMES[ppIndex]];
-				if (param && param.hasOwnProperty("length") && param.length > 0) {
-					for (var paramIndex = 0; paramIndex < param.length; paramIndex++) {
-						if (param[paramIndex].type &&
-							PAGE_PARAM_TRY_PRIORITY[param[paramIndex].type] &&
-							PAGE_PARAM_TRY_PRIORITY[param[paramIndex].type] === 1) {
-
-							collected[PAGE_PARAMS_NAMES[ppIndex]] = collected[PAGE_PARAMS_NAMES[ppIndex]] || [];
-							collected[PAGE_PARAMS_NAMES[ppIndex]].push(param[paramIndex]);
-						}
-					}
-				}
-			}
-			return collected;
 		},
 
 		/**
@@ -3406,27 +3332,23 @@
 
 			if (impl.pageGroups && impl.pageGroups.length > 0) {
 				for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
-					if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.indexOf("xhr") > -1) || impl.pageGroups[pgIndex].ignore) {
+					if (impl.pageGroups[pgIndex]) {
+						if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.indexOf("xhr") > -1) || impl.pageGroups[pgIndex].ignore) {
 
-						impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
-						impl.hasXhrOn = true;
+							impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
+							impl.hasXhrOn = true;
 
-						if (impl.pageGroups[pgIndex].ignore) {
-							impl.hasXhrIgnore = true;
+							if (impl.pageGroups[pgIndex].ignore) {
+								impl.hasXhrIgnore = true;
+							}
+
+							// Ensure PGs definitions only matching XHRs are removed from PG List
+							if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.length === 1) || impl.pageGroups[pgIndex].ignore) {
+								continue;
+							}
 						}
-
-						// Ensure PGs definitions only matching XHRs are removed from PG List
-						if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.length === 1) || impl.pageGroups[pgIndex].ignore) {
-							delete impl.pageGroups[pgIndex];
-						}
+						pgList.push(impl.pageGroups[pgIndex]);
 					}
-				}
-			}
-
-			// Remove undefined array indices from pageGroups array
-			for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
-				if (impl.pageGroups[pgIndex]) {
-					pgList.push(impl.pageGroups[pgIndex]);
 				}
 			}
 			impl.pageGroups = pgList;
@@ -3439,7 +3361,7 @@
 				// second init is from config.js
 				impl.configReceived = true;
 
-				impl.checkPrioritizedPageParams("init");
+				impl.initResourceGroupHandlers("init");
 
 				// process Custom Dimensions for any Custom Metrics/Timers that
 				// were queued before config.js was loaded
@@ -3565,8 +3487,8 @@
 				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
 				BOOMR.subscribe("page_ready", impl.done, "load", impl);
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
-				BOOMR.subscribe("spa_init", impl.checkPrioritizedPageParams);
-				BOOMR.subscribe("xhr_init", impl.checkPrioritizedPageParams);
+				BOOMR.subscribe("spa_init", impl.initResourceGroupHandlers);
+				BOOMR.subscribe("xhr_init", impl.initResourceGroupHandlers);
 			}
 			else if (impl.autorun) {
 				// If the page has already loaded by the time we get here,
@@ -3580,7 +3502,7 @@
 				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
 				BOOMR.subscribe("beacon", impl.clearMetrics, null, impl);
-				BOOMR.subscribe("beacon", impl.removeDoneHandlers);
+				BOOMR.subscribe("beacon", impl.removeResolvedResourceGroupHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 				BOOMR.subscribe("before_beacon", impl.onBeforeBeacon, null, impl);
 				if (BOOMR.plugins.AutoXHR) {
