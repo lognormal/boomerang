@@ -1,0 +1,14 @@
+<%= header %>
+<!-- add an image so the screen is painted before Boomerang loads -->
+<img src="/assets/img.jpg" />
+<%= boomerangSnippet %>
+<script src="00-onload.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	PaintTiming: {
+		enabled: false
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

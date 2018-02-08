@@ -312,6 +312,49 @@
 		return typeof BOOMR.plugins.RT.navigationStart() !== "undefined";
 	};
 
+	t.isNavigationTiming2Supported = function() {
+		// check for NavTiming1 first
+		if (!t.isNavigationTimingSupported()) {
+			return false;
+		}
+
+		return window.performance &&
+		    typeof window.performance.getEntriesByType === "function" &&
+		    window.performance.getEntriesByType("navigation").length > 0;
+	};
+
+	t.isNavigationTiming2WithNextHopProtocolSupported = function() {
+		// check for NavTiming1 first
+		if (!t.isNavigationTimingSupported()) {
+			return false;
+		}
+
+		return window.performance &&
+		    typeof window.performance.getEntriesByType === "function" &&
+		    window.performance.getEntriesByType("navigation").length > 0 &&
+		    window.performance.getEntriesByType("navigation")[0].nextHopProtocol;
+	};
+
+	t.isChromeLoadTimesSupported = function() {
+		var pt;
+		if (window.chrome && window.chrome.loadTimes) {
+			pt = window.chrome.loadTimes();
+		}
+
+		if (!pt) {
+			// Not supported
+			return false;
+		}
+
+		return true;
+	};
+
+	t.isPaintTimingSupported = function() {
+		return window.performance &&
+		    typeof window.PerformancePaintTiming !== "undefined" &&
+		    typeof window.performance.getEntriesByType === "function";
+	};
+
 	t.isUserTimingSupported = function() {
 		// don't check for PerformanceMark or PerformanceMeasure, they aren't polyfilled in usertiming.js
 		return (window.performance &&

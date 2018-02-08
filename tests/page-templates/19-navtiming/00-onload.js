@@ -103,25 +103,55 @@ describe("e2e/19-navtiming/00-onload", function() {
 		}
 	});
 
-	it("Should have set Chrome nt_* properties (if Chrome)", function() {
-		var pt;
-		if (window.chrome && window.chrome.loadTimes) {
-			pt = window.chrome.loadTimes();
-		}
-		if (!pt) {
-			// Not supported
+	it("Should have set Chrome nt_spdy (if the browser is Chrome, and if NavigationTiming2 w/ nextHopProtocol isn't supported)", function() {
+		if (!t.isChromeLoadTimesSupported() || t.isNavigationTiming2WithNextHopProtocolSupported()) {
 			return this.skip();
 		}
 
 		assert.isNumber(tf.lastBeacon().nt_spdy, "nt_spdy");
-		assert.isDefined(tf.lastBeacon().nt_cinf, "nt_cinf");
-
-		// validation of firstPaint
-		assert.isNumber(tf.lastBeacon().nt_first_paint, "nt_first_paint");
-		assert.operator(parseInt(tf.lastBeacon().nt_first_paint, 10), ">=", parseInt(tf.lastBeacon().nt_nav_st, 10));
 	});
 
-	it("Should have set IE's nt_first_paint property (if IE)", function() {
+	it("Should not have set Chrome nt_spdy (if the browser is Chrome, and if NavigationTiming2  w/ nextHopProtocol is supported)", function() {
+		if (!t.isChromeLoadTimesSupported() || !t.isNavigationTiming2WithNextHopProtocolSupported()) {
+			return this.skip();
+		}
+
+		assert.isUndefined(tf.lastBeacon().nt_spdy);
+	});
+
+	it("Should have set Chrome nt_cinf (if the browser is Chrome, and if NavigationTiming2 w/ nextHopProtocol isn't supported)", function() {
+		if (!t.isChromeLoadTimesSupported() || t.isNavigationTiming2WithNextHopProtocolSupported()) {
+			return this.skip();
+		}
+
+		assert.isDefined(tf.lastBeacon().nt_cinf, "nt_cinf");
+	});
+
+	it("Should not have set Chrome nt_cinf (if the browser is Chrome, and if NavigationTiming2 w/ nextHopProtocol is supported)", function() {
+		if (!t.isChromeLoadTimesSupported() || !t.isNavigationTiming2WithNextHopProtocolSupported()) {
+			return this.skip();
+		}
+
+		assert.isUndefined(tf.lastBeacon().nt_cinf);
+	});
+
+	it("Should have set Chrome nt_first_paint via Chrome loadTimes (if the browser is Chrome, and PaintTiming is not supported)", function() {
+		if (!t.isChromeLoadTimesSupported() || t.isPaintTimingSupported()) {
+			return this.skip();
+		}
+
+		var pt;
+		if (window.chrome && window.chrome.loadTimes) {
+			pt = window.chrome.loadTimes();
+		}
+
+		// validation of firstPaintTime
+		assert.isNumber(tf.lastBeacon().nt_first_paint, "nt_first_paint");
+		assert.operator(parseInt(tf.lastBeacon().nt_first_paint, 10), ">=", parseInt(tf.lastBeacon().nt_nav_st, 10));
+		assert.equal(tf.lastBeacon().nt_first_paint, Math.round(pt.firstPaintTime * 1000));
+	});
+
+	it("Should have set nt_first_paint via msFirstPaint (if IE)", function() {
 		var p = BOOMR.getPerformance();
 		if (!p || !p.timing || !p.timing.msFirstPaint) {
 			// NT first paint not supported
@@ -130,6 +160,22 @@ describe("e2e/19-navtiming/00-onload", function() {
 
 		assert.isNumber(tf.lastBeacon().nt_first_paint, "nt_first_paint");
 		assert.operator(parseInt(tf.lastBeacon().nt_first_paint, 10), ">=", parseInt(tf.lastBeacon().nt_nav_st, 10));
+		assert.equal(tf.lastBeacon().nt_first_paint, p.timing.msFirstPaint);
+	});
+
+	it("Should have set nt_first_paint via PaintTiming (if PaintTiming is supported)", function() {
+		if (!t.isPaintTimingSupported()) {
+			return this.skip();
+		}
+
+		var pt = BOOMR.utils.arrayFind(performance.getEntriesByType("paint"), function(entry) {
+			return entry.name === "first-paint";
+		});
+
+		// validation of firstPaint
+		assert.isNumber(tf.lastBeacon().nt_first_paint, "nt_first_paint");
+		assert.operator(parseInt(tf.lastBeacon().nt_first_paint, 10), ">=", parseInt(tf.lastBeacon().nt_nav_st, 10));
+		assert.equal(tf.lastBeacon().nt_first_paint, Math.floor(pt.startTime + performance.timing.navigationStart));
 	});
 
 	it("Should have set NT2 properties (if NavigationTiming2 is supported)", function() {
@@ -157,8 +203,8 @@ describe("e2e/19-navtiming/00-onload", function() {
 		}
 
 		if (pt.nextHopProtocol) {
-			assert.isDefined(tf.lastBeacon().nt_cinf, "nt_cinf");
-			assert.equal(tf.lastBeacon().nt_cinf, pt.nextHopProtocol, "nt_cinf");
+			assert.isDefined(tf.lastBeacon().nt_protocol, "nt_protocol");
+			assert.equal(tf.lastBeacon().nt_protocol, pt.nextHopProtocol, "nt_protocol");
 		}
 	});
 

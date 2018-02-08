@@ -40,14 +40,25 @@
  * * `nt_unload_st`: `performance.timing.unloadEventStart`
  * * `nt_unload_end`: `performance.timing.unloadEventEnd`
  * * `nt_ssl_st`: `performance.timing.secureConnectionStart`
- * * `nt_spdy`: `1` if page was loaded over SPDY, `0` otherwise
- * * `nt_first_paint`: The time when the first paint happened. On Internet Explorer,
- *   this is milliseconds since the epoch, while on Chrome this is
- *   seconds.microseconds since the epoch. If you detect a decimal point in
- *   this number, multiply it by 1000 to compare it to the other timers
- * * `nt_cinf`: Chrome `chrome.loadTimes().connectionInfo`
+ * * `nt_spdy`: `1` if page was loaded over SPDY, `0` otherwise.  Only available
+ *   in Chrome when it _doesn't_ support NavigationTiming2.  If NavigationTiming2
+ *   is supported, `nt_protocol` will be added instead.
+ * * `nt_first_paint`: The time when the first paint happened. If the browser
+ *   supports the Paint Timing API, this is the `first-paint` time in milliseconds
+ *   since the epoch. Else, on Internet Explorer, this is the `msFirstPaint`
+ *   value, in milliseconds since the epoch. On Chrome, this is using
+ *   `loadTimes().firstPaintTime` and is converted from seconds.microseconds
+ *   into milliseconds since the epoch.
+ * * `nt_cinf`: Chrome `chrome.loadTimes().connectionInfo`.  Only available
+ *   in Chrome when it _doesn't_ support NavigationTiming2.  If NavigationTiming2
+ *   is supported, `nt_protocol` will be added instead.
+ * * `nt_protocol`: NavigationTiming2's `nextHopProtocol`
  * * `nt_bad`: If we detected that any NavigationTiming metrics looked odd,
  *   such as `responseEnd` in the far future or `fetchStart` before `navigationStart`.
+ * * `nt_worker_start`: NavigationTiming2 `workerStart`
+ * * `nt_enc_size`: NavigationTiming2 `encodedBodySize`
+ * * `nt_dec_size`: NavigationTiming2 `decodedBodySize`
+ * * `nt_trn_size`: NavigationTiming2 `transferSize`
  *
  * For XHR beacons, the following parameters are added (via ResourceTiming):
  *
@@ -200,7 +211,8 @@
 		},
 
 		done: function() {
-			var w = BOOMR.window, p, pn, chromeTimes, pt, data, cinf, offset = 0;
+			var w = BOOMR.window, p, pn, chromeTimes, pt, data = {}, offset = 0, i,
+			    paintTiming;
 
 			if (this.complete) {
 				return this;
@@ -209,36 +221,6 @@
 			impl.addedVars = [];
 
 			p = BOOMR.getPerformance();
-
-			// This is Chrome only, so will not conflict with nt_first_paint below
-			if (w.chrome && w.chrome.loadTimes) {
-				chromeTimes = w.chrome.loadTimes();
-				if (chromeTimes) {
-					cinf = chromeTimes.connectionInfo;
-
-					data = {
-						nt_spdy: (chromeTimes.wasFetchedViaSpdy ? 1 : 0),
-						nt_cinf: cinf
-					};
-
-					// Chrome firstPaintTime is in seconds.microseconds, so
-					// we need to multiply it by 1000 to be consistent with
-					// msFirstPaint and other NavigationTiming timestamps that
-					// are in milliseconds.microseconds.
-					if (typeof chromeTimes.firstPaintTime === "number" && chromeTimes.firstPaintTime !== 0) {
-						data.nt_first_paint = Math.round(chromeTimes.firstPaintTime * 1000);
-					}
-
-					BOOMR.addVar(data);
-
-					try {
-						impl.addedVars.push.apply(impl.addedVars, Object.keys(data));
-					}
-					catch (ignore) {
-						// NOP
-					}
-				}
-			}
 
 			if (p) {
 				if (typeof p.getEntriesByType === "function") {
@@ -322,14 +304,55 @@
 
 					if (pt.nextHopProtocol) {
 						data.nt_protocol = pt.nextHopProtocol;
-
-						if (!cinf) {
-							data.nt_cinf = pt.nextHopProtocol;	// Maintain this for legacy code that only looks at nt_cinf
-						}
 					}
-
 				}
 
+				//
+				// Get First Paint from Paint Timing API
+				// https://www.w3.org/TR/paint-timing/
+				//
+				if (!data.nt_first_paint && BOOMR.plugins.PaintTiming) {
+					paintTiming = BOOMR.plugins.PaintTiming.getTimingFor("first-paint");
+
+					if (paintTiming) {
+						data.nt_first_paint = calcNavTimingTimestamp(offset, paintTiming);
+					}
+				}
+
+				//
+				// Chrome provides window.chrome.loadTimes(), but this is deprecated
+				// in Chrome 64+ and will be removed at some point.  The data it
+				// provides may be available in more modern performance APIs:
+				//
+				// * .connectionInfo (nt_cinf): Navigation Timing 2 nextHopProtocol
+				// * .wasFetchedViaSpdy (nt_spdy): Could be calculated via above,
+				//       so we don't need to add if it's not available directly
+				// * .firstPaintTime (nt_first_paint): Paint Timing's first-paint
+				//
+				// If we've already queried that data, don't also query
+				// loadTimes() as it will generate a console warning.
+				//
+				if ((!data.nt_protocol || !data.nt_first_paint) &&
+					w.chrome &&
+					typeof w.chrome.loadTimes === "function") {
+					chromeTimes = w.chrome.loadTimes();
+					if (chromeTimes) {
+						data.nt_spdy = (chromeTimes.wasFetchedViaSpdy ? 1 : 0);
+						data.nt_cinf = chromeTimes.connectionInfo;
+
+						// Chrome firstPaintTime is in seconds.microseconds, so
+						// we need to multiply it by 1000 to be consistent with
+						// msFirstPaint and other NavigationTiming timestamps that
+						// are in milliseconds.microseconds.
+						if (typeof chromeTimes.firstPaintTime === "number" && chromeTimes.firstPaintTime !== 0) {
+							data.nt_first_paint = Math.round(chromeTimes.firstPaintTime * 1000);
+						}
+					}
+				}
+
+				//
+				// Navigation Type and Redirect Count
+				//
 				if (p.navigation) {
 					pn = p.navigation;
 
@@ -337,6 +360,7 @@
 					data.nt_nav_type = pn.type;
 				}
 
+				// Remove any properties that are undefined
 				for (k in data) {
 					if (data.hasOwnProperty(k) && data[k] === undefined) {
 						delete data[k];
@@ -360,8 +384,13 @@
 					impl.addedVars.push("nt_bad");
 				}
 
-				try { impl.addedVars.push.apply(impl.addedVars, Object.keys(data)); }
-				catch (ignore) { /* empty */ }
+				// ensure all vars are removed at beacon
+				try {
+					impl.addedVars.push.apply(impl.addedVars, Object.keys(data));
+				}
+				catch (ignore) {
+					/* empty */
+				}
 			}
 
 			impl.sendBeacon();
@@ -393,7 +422,7 @@
 		 * Initializes the plugin.
 		 *
 		 * This plugin does not have any configuration.
-		 * @returns {@link BOOMR.plugins.NavigationTiming} The IPv6 plugin for chaining
+		 * @returns {@link BOOMR.plugins.NavigationTiming} The NavigationTiming plugin for chaining
 		 * @memberof BOOMR.plugins.NavigationTiming
 		 */
 		init: function() {

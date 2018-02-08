@@ -12,6 +12,7 @@
         "plugins/rt.js",
         "plugins/cross-domain.js",
         "plugins/bw.js",
+        "plugins/painttiming.js",
         "plugins/navtiming.js",
         "plugins/restiming.js",
         "plugins/mobile.js",
