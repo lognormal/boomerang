@@ -30,7 +30,8 @@ module.exports = function(req, res) {
 
 		// if they've requested a specific non-refresh config, send that file
 		if (q.key && !q.key.startsWith("API_KEY") && !r) {
-			var ending = json ? ".json" : ".js";
+			var ending = r ? "-reload" : "";
+			ending += json ? ".json" : ".js";
 			var file = path.join(__dirname, "config", q.key + ending);
 
 			if (!fs.existsSync(file)) {

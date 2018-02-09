@@ -125,8 +125,10 @@
 	 */
 	function loadJsonConfig(configData) {
 		// save the session ID first
-		BOOMR.session.ID = configData.session_id;
-		delete configData.session_id;
+		if (configData.session_id) {
+			BOOMR.session.ID = configData.session_id;
+			delete configData.session_id;
+		}
 
 		// addVar other key config
 		var params = ["h.key", "h.d", "h.t", "h.cr"];
@@ -158,7 +160,6 @@
 		w.BOOMR_configt = BOOMR.now();
 
 		var configData = parseJson(responseText), logn;
-
 		if (configData) {
 			// Update localStorage with config.
 			// When refresh is false then we are receiving the complete config, overwrite everything.
