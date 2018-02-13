@@ -26,16 +26,17 @@ BOOMR_test.templates.SPA["18-autoxhr-before-page-load-alwayssendxhr"] = function
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 3 beacons (AutoXHR is enabled)", function() {
+	it("Should have sent three beacons (AutoXHR is enabled)", function(done) {
 		if (BOOMR.plugins.AutoXHR) {
-			assert.equal(tf.beacons.length, 3);
+			this.timeout(10000);
+			t.ensureBeaconCount(done, 3);
 		}
 		else {
 			return this.skip();
 		}
 	});
 
-	it("Should have sent 1 beacons (if AutoXHR is not enabled)", function() {
+	it("Should have sent one beacon (if AutoXHR is not enabled)", function() {
 		if (!BOOMR.plugins.AutoXHR) {
 			assert.equal(tf.beacons.length, 1);
 		}

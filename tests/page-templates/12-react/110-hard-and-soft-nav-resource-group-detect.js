@@ -5,12 +5,9 @@ describe("e2e/12-react/110-hard-and-soft-nav-resource-group-detect", function() 
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	it("Should have sent a beacon", function(done) {
-		t.validateBeaconWasSent(done);
-	});
-
-	it("Should have sent 3 beacons", function() {
-		assert.equal(tf.beacons.length, 3);
+	it("Should have sent 3 beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 3);
 	});
 
 	it("Should have the first beacon as spa_hard beacon", function() {

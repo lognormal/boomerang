@@ -25,6 +25,10 @@ if (window.route_wait) {
 	hookOptions.routeChangeWaitFilter = window.route_wait;
 }
 
+if (window.history_route_filter) {
+	hookOptions.routeFilter = window.history_route_filter;
+}
+
 function hookHistoryBoomerang() {
 	if (window.BOOMR && BOOMR.version) {
 		if (BOOMR.plugins && BOOMR.plugins.History) {
@@ -34,7 +38,7 @@ function hookHistoryBoomerang() {
 	}
 }
 
-if (!window.reactDisableBoomerangHook) {
+if (!window.disableBoomerangHook) {
 	if (!hookHistoryBoomerang()) {
 		if (document.addEventListener) {
 			document.addEventListener("onBoomerangLoaded", hookHistoryBoomerang);
@@ -106,7 +110,7 @@ const Home = React.createClass({
 		if (typeof window.imgs !== "undefined" && window.imgs.hasOwnProperty("length")) {
 			images = window.imgs;
 		} else {
-			images = [];
+			images = [0];
 		}
 
 		var state =  {

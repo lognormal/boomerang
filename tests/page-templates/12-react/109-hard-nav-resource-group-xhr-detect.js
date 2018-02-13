@@ -5,12 +5,9 @@ describe("e2e/12-react/109-hard-nav-resource-group-xhr-detect", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	it("Should have sent a beacon", function(done) {
-		t.validateBeaconWasSent(done);
-	});
-
-	it("Should have sent one beacon", function() {
-		assert.equal(tf.beacons.length, 1);
+	it("Should have sent one beacon", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	it("Should have the first beacon as spa_hard beacon", function() {

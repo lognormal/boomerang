@@ -9,8 +9,9 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 5 beacons", function() {
-		assert.equal(tf.beacons.length, 5);
+	it("Should have sent five beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 5);
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {

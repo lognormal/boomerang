@@ -2,6 +2,7 @@
 	"h.t": {{H_T}},
 	"h.cr": "{{H_CR}}",
 	"h.d": "{{DOMAIN}}",
+	"instrument_xhr": true,
 	"autorun": false,
 	"History": {
 		"enabled": true,

@@ -9,9 +9,9 @@ BOOMR_test.templates.SPA["06-hard-nav-resources"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have only sent one beacon", function() {
-		// only one beacon should've been sent
-		assert.equal(tf.beacons.length, 1);
+	it("Should have only sent one beacon", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming is supported)", function() {

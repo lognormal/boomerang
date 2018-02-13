@@ -5,9 +5,10 @@ BOOMR_test.templates.SPA["23-hard-wait-for-onload"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
-	it("Should have only sent one beacon", function() {
+	it("Should have only sent one beacon", function(done) {
+		this.timeout(10000);
 		// only one beacon should've been sent
-		assert.equal(tf.beacons.length, 1);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	it("Should have been a spa_hard beacon (if MutationObserver and NavigationTiming are supported)", function() {

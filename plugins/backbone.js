@@ -106,7 +106,7 @@
 		 * @param {string} msg Message
 		 */
 		function log(msg) {
-			BOOMR.debug(msg, "backbone");
+			BOOMR.debug(msg, "Backbone");
 		}
 
 		log("Startup");

@@ -23,7 +23,7 @@ window.backbone_html5_mode = true;
 // view a widget then come back so debugging (F5) is easier
 window.backbone_nav_routes = ["widgets/1", "24-route-filter.html"];
 
-// ensure
+// filter out the 2nd home nav
 var navs = 0;
 window.backbone_route_filter = function() {
 	return (++navs) <= 2;

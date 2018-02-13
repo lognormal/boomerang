@@ -63,9 +63,10 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent " + BEACONS_SENT + " beacons (AutoXHR is enabled and MutationObserver is supported)", function() {
+	it("Should have sent " + BEACONS_SENT + " beacons (AutoXHR is enabled and MutationObserver is supported)", function(done) {
 		if (BOOMR.plugins.AutoXHR && t.isMutationObserverSupported()) {
-			assert.equal(tf.beacons.length, BEACONS_SENT);
+			this.timeout(10000);
+			t.ensureBeaconCount(done, BEACONS_SENT);
 		}
 		else {
 			return this.skip();
@@ -99,9 +100,10 @@ BOOMR_test.templates.SPA["19-autoxhr-during-nav-alwayssendxhr"] = function() {
 		}
 	});
 
-	it("Should have sent 1 beacons (if AutoXHR is not enabled)", function() {
+	it("Should have sent one beacon (if AutoXHR is not enabled)", function(done) {
 		if (!BOOMR.plugins.AutoXHR) {
-			assert.equal(tf.beacons.length, 1);
+			this.timeout(10000);
+			t.ensureBeaconCount(done, 1);
 		}
 		else {
 			return this.skip();

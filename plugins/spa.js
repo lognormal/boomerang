@@ -130,7 +130,7 @@
 	 * @param {string} msg Message
 	 */
 	function log(msg) {
-		BOOMR.debug(msg, "spa");
+		BOOMR.debug(msg, "SPA");
 	}
 
 	var impl = {
@@ -150,32 +150,28 @@
 		 * @param {BOOMR.plugins.AutoXHR.Resource} resource Resource
 		 */
 		spaHardMissedOnComplete: function(resource) {
+			var p, navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart());
+
 			waitingOnHardMissedComplete = false;
-
-			var p = BOOMR.getPerformance(), startTime, stopTime;
-
-			// gather start times from NavigationTiming if available
-			if (p && p.timing && p.timing.navigationStart && p.timing.loadEventEnd) {
-				startTime = p.timing.navigationStart;
-				stopTime = p.timing.loadEventEnd;
-			}
-			else {
-				startTime = BOOMR.t_start;
-			}
 
 			// note that we missed the route change on the beacon for debugging
 			BOOMR.addVar("spa.missed", "1");
 
 			// ensure t_done is the time we've specified
-			BOOMR.plugins.RT.clearTimer("t_done");
+			if (BOOMR.plugins.RT) {
+				BOOMR.plugins.RT.clearTimer("t_done");
+			}
 
 			// always use the start time of navigationStart
-			resource.timing.requestStart = startTime;
+			resource.timing.requestStart = navigationStart;
 
-			if (resource.resources.length === 0 && stopTime) {
+			if (resource.resources.length === 0) {
 				// No other resources were fetched, so set the end time
-				// to NavigationTiming's performance.loadEventEnd (instead of 'now')
-				resource.timing.loadEventEnd = stopTime;
+				// to NavigationTiming's performance.loadEventEnd if available (instead of 'now')
+				p = BOOMR.getPerformance();
+				if (p && p.timing && p.timing.navigationStart && p.timing.loadEventEnd) {
+					resource.timing.loadEventEnd = p.timing.loadEventEnd;
+				}
 			}
 		},
 
@@ -278,6 +274,8 @@
 			waitingOnHardMissedComplete = true;
 
 			if (!disableHardNav) {
+				// `this` is unbound, use BOOMR.plugins.SPA
+				BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
 				// Trigger a route change
 				BOOMR.plugins.SPA.route_change(impl.spaHardMissedOnComplete);
 			}
@@ -389,7 +387,8 @@
 
 			// If this was the first request, use navStart as the begin timestamp.  Otherwise, use
 			// "now" as the begin timestamp.
-			var requestStart = initialRouteChangeCompleted ? BOOMR.now() : BOOMR.plugins.RT.navigationStart();
+			var navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart());
+			var requestStart = firstSpaNav ? navigationStart : BOOMR.now();
 
 			// use the document.URL even though it may be the URL of the previous nav. We will updated
 			// it in AutoXHR sendEvent

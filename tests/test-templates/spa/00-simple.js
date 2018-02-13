@@ -9,9 +9,9 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have only sent one beacon", function() {
-		// only one beacon should've been sent
-		assert.equal(tf.beacons.length, 1);
+	it("Should have only sent one beacon", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
@@ -84,35 +84,31 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
 		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
-			assert.equal(b.nt_red_cnt, 0);  // no redirects
-			assert.isDefined(b.nt_nav_type);
-			assert.isDefined(b.nt_nav_st);
-			assert.isUndefined(b.nt_red_st);  // no redirects
-			assert.isUndefined(b.nt_red_end);  // no redirects
-			assert.isDefined(b.nt_fet_st);
-			assert.isDefined(b.nt_dns_st);
-			assert.isDefined(b.nt_dns_end);
-			assert.isDefined(b.nt_con_st);
-			assert.isDefined(b.nt_con_end);
-			assert.isDefined(b.nt_req_st);
-			assert.isDefined(b.nt_res_st);
-			assert.isDefined(b.nt_res_end);
-			assert.isDefined(b.nt_domloading);
-			assert.isDefined(b.nt_domint);
-			assert.isDefined(b.nt_domcontloaded_st);
-			assert.isDefined(b.nt_domcontloaded_end);
-			assert.isDefined(b.nt_domcomp);
-			assert.isDefined(b.nt_load_st);
-			assert.isDefined(b.nt_load_end);
-			assert.isDefined(b.nt_unload_st);
-			assert.isDefined(b.nt_unload_end);
+			assert.equal(b.nt_red_cnt, 0, "nt_red_cnt is 0");  // no redirects
+			assert.isDefined(b.nt_nav_type, "nt_nav_type is defined");
+			assert.isDefined(b.nt_nav_st, "nt_nav_st is defined");
+			assert.isUndefined(b.nt_red_st, "nt_red_st is undefined");  // no redirects
+			assert.isUndefined(b.nt_red_end, "nt_red_end is undefined");  // no redirects
+			assert.isDefined(b.nt_fet_st, "nt_fet_st is defined");
+			assert.isDefined(b.nt_dns_st, "nt_dns_st is defined");
+			assert.isDefined(b.nt_dns_end, "nt_dns_end is defined");
+			assert.isDefined(b.nt_con_st, "nt_con_st is defined");
+			assert.isDefined(b.nt_con_end, "nt_con_end is defined");
+			assert.isDefined(b.nt_req_st, "nt_req_st is defined");
+			assert.isDefined(b.nt_res_st, "nt_res_st is defined");
+			assert.isDefined(b.nt_res_end, "nt_res_end is defined");
+			assert.isDefined(b.nt_domloading, "nt_domloading is defined");
+			assert.isDefined(b.nt_domint, "nt_domint is defined");
+			assert.isDefined(b.nt_domcontloaded_st, "nt_domcontloaded_st is defined");
+			assert.isDefined(b.nt_domcontloaded_end, "nt_domcontloaded_end is defined");
+			assert.isDefined(b.nt_domcomp, "nt_domcomp is defined");
+			assert.isDefined(b.nt_load_st, "nt_load_st is defined");
+			assert.isDefined(b.nt_load_end, "nt_load_end is defined");
+			assert.isDefined(b.nt_unload_st, "nt_unload_st is defined");
+			assert.isDefined(b.nt_unload_end, "nt_unload_end is defined");
 		}
 		else {
 			return this.skip();
 		}
-	});
-
-	it("Should have set Page ID (pid)", function() {
-		assert.isString(tf.lastBeacon().pid, "pid");
 	});
 };

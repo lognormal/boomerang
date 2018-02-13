@@ -587,6 +587,15 @@ BOOMR_check_doc_domain();
 			/**
 			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
 			 *
+			 * Fired whenever a SPA navigation is cancelled.
+			 *
+			 * @event BOOMR#spa_cancel
+			 */
+			"spa_cancel": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
 			 * Fired whenever `XMLHttpRequest.send` is called.
 			 *
 			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.

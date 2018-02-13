@@ -93,6 +93,7 @@
 	var beaconsSeen = 0;
 
 	var doNotTestErrorsParam = false;
+	var doNotTestSpaAbort = false;
 
 	// test framework
 	var assert;
@@ -143,7 +144,8 @@
 		ResourceTiming: {
 			enabled: false
 		},
-		doNotTestErrorsParam: false
+		doNotTestErrorsParam: false,
+		doNotTestSpaAbort: false
 	};
 
 	t.flattenTestTitles = function(test) {
@@ -215,6 +217,7 @@
 		}
 
 		t.doNotTestErrorsParam = config.doNotTestErrorsParam;
+		t.doNotTestSpaAbort = config.doNotTestSpaAbort;
 
 		if (window.BOOMR_LOGN_always !== true) {
 			// initialize boomerang if LOGN is disabled

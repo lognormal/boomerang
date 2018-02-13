@@ -4,7 +4,7 @@ BOOMR_test.templates.SPA = BOOMR_test.templates.SPA || {};
 BOOMR_test.templates.SPA["22-config-after-onload"] = function() {
 	var t = BOOMR_test;
 
-	it("Should have sent 2 beacons (if MutationObserver is supported)", function(done) {
+	it("Should have sent two beacons (if MutationObserver is supported)", function(done) {
 		this.timeout(10000);
 
 		// 2 beacons because of the forced BOOMR.page_ready() call
@@ -13,15 +13,16 @@ BOOMR_test.templates.SPA["22-config-after-onload"] = function() {
 			done,
 			function() {
 				t.ensureBeaconCount(done, 2);
-			});
+			},
+			this.skip.bind(this));
 	});
 
-	it("Should have sent 1 beacons (if MutationObserver is not supported)", function(done) {
+	it("Should have sent one beacon (if MutationObserver is not supported)", function(done) {
 		this.timeout(10000);
 
 		t.ifAutoXHR(
 			done,
-			false,
+			this.skip.bind(this),
 			function() {
 				t.ensureBeaconCount(done, 1);
 			});

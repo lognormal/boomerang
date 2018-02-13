@@ -9,6 +9,9 @@ window.navigator.sendBeacon = null;
 window.imgs = [-1];
 window.late_imgs = [1000];
 window.nav_routes = ["/widgets/1", "/"];
+
+// disable the hook and use window.history (via auto:true)
+window.disableBoomerangHook = true;
 </script>
 
 <div id="root"></div>

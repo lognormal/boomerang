@@ -162,18 +162,19 @@ App.Router.map(function() {
 		}
 	}
 
-
-	if (!hookEmberBoomerang()) {
-		if (document.addEventListener) {
-			document.addEventListener("onBoomerangLoaded", hookEmberBoomerang);
-		}
-		else if (document.attachEvent) {
-			document.attachEvent("onpropertychange", function(e) {
-				e = e || window.event;
-				if (e && e.propertyName === "onBoomerangLoaded") {
-					hookEmberBoomerang();
-				}
-			});
+	if (!window.disableBoomerangHook) {
+		if (!hookEmberBoomerang()) {
+			if (document.addEventListener) {
+				document.addEventListener("onBoomerangLoaded", hookEmberBoomerang);
+			}
+			else if (document.attachEvent) {
+				document.attachEvent("onpropertychange", function(e) {
+					e = e || window.event;
+					if (e && e.propertyName === "onBoomerangLoaded") {
+						hookEmberBoomerang();
+					}
+				});
+			}
 		}
 	}
 });

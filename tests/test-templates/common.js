@@ -14,11 +14,19 @@ describe("common", function() {
 	function testSpaHardBeacon(b, prefix) {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
 		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
+		if (!t.doNotTestSpaAbort) {
+			assert.isUndefined(b["rt.abld"]);
+			assert.isUndefined(b["rt.quit"]);
+		}
 	}
 
 	function testSpaSoftBeacon(b, prefix) {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
 		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
+		if (!t.doNotTestSpaAbort) {
+			assert.isUndefined(b["rt.abld"]);
+			assert.isUndefined(b["rt.quit"]);
+		}
 	}
 
 	function testXhrBeacon(b, prefix) {
@@ -58,7 +66,7 @@ describe("common", function() {
 			}
 			/* SOASTA_PRIVATE_END */
 
-			assert.lengthOf(b.pid, 8, prefix + "has a page ID (pid) with a length equal to 8");
+
 
 			if (!t.doNotTestErrorsParam) {
 				assert.isUndefined(b.errors, prefix + "does not have the errors param");
@@ -154,6 +162,21 @@ describe("common", function() {
 				// invalid
 				assert.fail(prefix + "has a valid rt.start, was: " + b["rt.start"]);
 			}
+		}
+	});
+
+	it("Should have sent beacons with the same Page ID (pid)", function() {
+		var pid, i, prefix, b;
+		if (!tf.beacons.length) {
+			return this.skip();
+		}
+
+		pid = tf.beacons[0].pid;
+		for (i = 0; i < tf.beacons.length; i++) {
+			b = tf.beacons[i];
+			prefix = "ensure beacon " + (i + 1) + " ";
+			assert.lengthOf(b.pid, 8, prefix + "has a page ID (pid) with a length equal to 8");
+			assert.equal(b.pid, pid, prefix + "has the same pid as first beacon");
 		}
 	});
 

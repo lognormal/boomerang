@@ -189,17 +189,19 @@ function hookBackboneBoomerang() {
 	}
 }
 
-if (!hookBackboneBoomerang()) {
-	if (document.addEventListener) {
-		document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
-	}
-	else if (document.attachEvent) {
-		document.attachEvent("onpropertychange", function(e) {
-			e = e || window.event;
-			if (e && e.propertyName === "onBoomerangLoaded") {
-				hookBackboneBoomerang();
-			}
-		});
+if (!window.disableBoomerangHook) {
+	if (!hookBackboneBoomerang()) {
+		if (document.addEventListener) {
+			document.addEventListener("onBoomerangLoaded", hookBackboneBoomerang);
+		}
+		else if (document.attachEvent) {
+			document.attachEvent("onpropertychange", function(e) {
+				e = e || window.event;
+				if (e && e.propertyName === "onBoomerangLoaded") {
+					hookBackboneBoomerang();
+				}
+			});
+		}
 	}
 }
 
@@ -218,7 +220,7 @@ if (!window.backbone_delay_startup) {
 }
 
 if (typeof window.backbone_nav_routes !== "undefined" &&
-	Object.prototype.toString.call(window.backbone_nav_routes) === "[object Array]") {
+    Object.prototype.toString.call(window.backbone_nav_routes) === "[object Array]") {
 
 	BOOMR.subscribe("beacon", function(beacon) {
 		// only continue for SPA beacons
@@ -232,7 +234,7 @@ if (typeof window.backbone_nav_routes !== "undefined" &&
 			setTimeout(function() {
 				app.Router.navigate(nextRoute, {
 					trigger: true,
-					replace: true
+					replace: false  // use pushState instead of replaceState
 				});
 			}, 100);
 		}

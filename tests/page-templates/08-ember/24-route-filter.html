@@ -13,7 +13,7 @@ window.imgs = [3000];
 // view a widget then come back so debugging (F5) is easier
 window.ember_nav_routes = ["/widgets/1", ""];
 
-// ensure
+// filter out the 2nd home nav
 var navs = 0;
 window.ember_route_filter = function() {
 	return (++navs) <= 2;

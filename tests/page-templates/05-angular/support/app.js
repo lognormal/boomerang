@@ -138,17 +138,19 @@ app.run(["$rootScope", "$location", "$timeout", function($rootScope, $location, 
 		}
 	}
 
-	if (!hookAngularBoomerang()) {
-		if (document.addEventListener) {
-			document.addEventListener("onBoomerangLoaded", hookAngularBoomerang);
-		}
-		else if (document.attachEvent) {
-			document.attachEvent("onpropertychange", function(e) {
-				e = e || window.event;
-				if (e && e.propertyName === "onBoomerangLoaded") {
-					hookAngularBoomerang();
-				}
-			});
+	if (!window.disableBoomerangHook) {
+		if (!hookAngularBoomerang()) {
+			if (document.addEventListener) {
+				document.addEventListener("onBoomerangLoaded", hookAngularBoomerang);
+			}
+			else if (document.attachEvent) {
+				document.attachEvent("onpropertychange", function(e) {
+					e = e || window.event;
+					if (e && e.propertyName === "onBoomerangLoaded") {
+						hookAngularBoomerang();
+					}
+				});
+			}
 		}
 	}
 

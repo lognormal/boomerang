@@ -9,8 +9,9 @@ BOOMR_test.templates.SPA["05-route-change-hashtags"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent three beacons", function() {
-		assert.equal(tf.beacons.length, 3);
+	it("Should have sent three beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 3);
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {

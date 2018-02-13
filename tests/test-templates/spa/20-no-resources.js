@@ -9,8 +9,9 @@ BOOMR_test.templates.SPA["20-no-resources"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent three beacons", function() {
-		assert.equal(tf.beacons.length, 3);
+	it("Should have sent three beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 3);
 	});
 
 	it("Should have sent the first beacons as http.initiator = spa_hard", function() {

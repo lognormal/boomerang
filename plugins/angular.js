@@ -121,7 +121,7 @@
 		 * @param {string} msg Message
 		 */
 		function log(msg) {
-			BOOMR.debug($rootScope.$id + ": " + msg, "angular");
+			BOOMR.debug($rootScope.$id + ": " + msg, "Angular");
 		}
 
 		/**

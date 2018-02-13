@@ -9,9 +9,9 @@ BOOMR_test.templates.SPA["08-no-images"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have only sent one beacon", function() {
-		// only one beacon should've been sent
-		assert.equal(tf.beacons.length, 1);
+	it("Should have only sent one beacon", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	it("Should take as long as the widgets.json take to load (if NavigationTiming is supported)", function() {

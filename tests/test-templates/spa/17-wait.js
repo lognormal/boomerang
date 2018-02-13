@@ -9,8 +9,9 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent four beacons", function() {
-		assert.equal(tf.beacons.length, 4);
+	it("Should have sent four beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 4);
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
@@ -32,14 +33,18 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 	});
 
 	it("Should have sent the first beacon with the time it took to run the 5 second wait (if MutationObserver is supported)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				if (t.isMutationObserverSupported()) {
+		if (t.isMutationObserverSupported()) {
+			t.ifAutoXHR(
+				done,
+				function() {
 					assert.operator(tf.beacons[0].t_done, ">=", 5000);
-				}
-				done();
-			});
+					done();
+				},
+				this.skip.bind(this));
+		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have sent the first beacon with the end time (rt.end) of when the 5 second wait fired", function(done) {
@@ -48,7 +53,8 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 			function() {
 				assert.closeTo(tf.beacons[0]["rt.end"], window.spaWaitCompleteTimes[0], 100);
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	//
@@ -65,7 +71,8 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 			function() {
 				assert.operator(tf.beacons[1].t_done, ">=", 5000);
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have sent the second beacon with the end time (rt.end) of when the 5 second wait fired", function(done) {
@@ -74,7 +81,8 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 			function() {
 				assert.closeTo(tf.beacons[1]["rt.end"], window.spaWaitCompleteTimes[1], 100);
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	//
@@ -108,14 +116,17 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 	});
 
 	it("Should have sent the third beacon with the end time (rt.end) different from when the 1ms wait fired (if MutationObserver is supported)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				if (t.isMutationObserverSupported()) {
+		if (t.isMutationObserverSupported()) {
+			t.ifAutoXHR(
+				done,
+				function() {
 					assert.operator(tf.beacons[2]["rt.end"], ">=", window.spaWaitCompleteTimes[2] + 10);
-				}
-				done();
-			});
+					done();
+				});
+		}
+		else {
+			this.skip();
+		}
 	});
 
 	//

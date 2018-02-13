@@ -12,7 +12,8 @@ BOOMR_test.templates.SPA["25-delayed-boomerang-pre-config-snippet"] = function()
 			done,
 			function() {
 				t.ensureBeaconCount(done, 2);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have had the first beacon be a spa_hard beacon", function() {

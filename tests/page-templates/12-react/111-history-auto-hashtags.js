@@ -1,18 +1,15 @@
 /*eslint-env mocha*/
 /*global BOOMR_test*/
 
-describe("e2e/12-react/100-history-auto", function() {
+describe("e2e/12-react/111-history-auto-hashtags", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
 	var pathName = window.location.pathname;
 
-	it("Should pass basic beacon validation", function(done) {
-		t.validateBeaconWasSent(done);
-	});
-
-	it("Should have sent three beacons", function() {
-		assert.equal(tf.beacons.length, 3);
+	it("Should have sent three beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 3);
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {

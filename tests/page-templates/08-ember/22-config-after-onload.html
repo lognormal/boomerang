@@ -48,7 +48,7 @@ BOOMR.plugins.hold = {
 	}
 };
 BOOMR_test.init({
-	testAfterOnBeacon: 1,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
 	Ember: {
 		enabled: true
 	},

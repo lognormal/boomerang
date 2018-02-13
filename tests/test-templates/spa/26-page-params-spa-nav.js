@@ -9,8 +9,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent four beacons", function() {
-		assert.equal(tf.beacons.length, 4);
+	it("Should have sent four beacons", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 4);
 	});
 
 	//

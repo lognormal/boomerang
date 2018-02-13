@@ -11,13 +11,9 @@ BOOMR_test.templates.SPA["24-route-filter"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have sent 2 beacons", function(done) {
+	it("Should have sent two beacons", function(done) {
 		this.timeout(10000);
-
-		setTimeout(function() {
-			assert.equal(tf.beacons.length, 2);
-			done();
-		}, 5000);
+		t.ensureBeaconCount(done, 2);
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {

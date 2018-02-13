@@ -12,7 +12,7 @@ window.angular_html5_mode = true;
 // view a widget then come back so debugging (F5) is easier
 window.angular_nav_routes = ["/widgets/1", "/24-route-filter.html"];
 
-// ensure
+// filter out the 2nd home nav
 var homeNavs = 0;
 window.angular_route_filter = function(event, next, current) {
 	if (next && next.$$route && next.$$route.controller === "mainCtrl") {

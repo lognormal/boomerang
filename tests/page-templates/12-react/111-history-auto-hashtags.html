@@ -11,8 +11,8 @@ window.html5_mode = false;
 // view a widget then come back so debugging (F5) is easier
 window.nav_routes = ["/widgets/1", "/"];
 
-// disable the React hook and use window.history (via auto:true)
-window.reactDisableBoomerangHook = true;
+// disable the hook and use window.history (via auto:true)
+window.disableBoomerangHook = true;
 </script>
 
 <div id="root"></div>
@@ -32,6 +32,6 @@ BOOMR_test.init({
 </script>
 
 <script src="support/app.js"></script>
-<script src="100-history-auto.js"></script>
+<script src="111-history-auto-hashtags.js"></script>
 
 <%= footer %>

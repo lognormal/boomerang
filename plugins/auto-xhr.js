@@ -503,6 +503,7 @@
 			nodes_to_wait: 0,  // MO resources + xhrs currently outstanding
 			total_nodes: 0,  // total MO resources + xhrs
 			resources: [],  // resources reported to MO handler (no xhrs)
+			aborted: false,  // this event was aborted
 			complete: false
 		},
 		    i,
@@ -548,7 +549,7 @@
 				// If we have a pending SPA event, send an aborted load beacon before
 				// adding the new SPA event
 				if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
-					BOOMR.debug("Aborting previous SPA navigation");
+					log("Aborting previous SPA navigation");
 
 					// mark the end of this navigation as now
 					last_ev.resource.timing.loadEventEnd = BOOMR.now();
@@ -638,6 +639,7 @@
 			// then we will not send a beacon
 			if (ev.type === "spa" && ev.total_nodes === 0 && ev.resource.url === self.lastSpaLocation) {
 				log("SPA beacon cancelled, no URL change or resources triggered");
+				BOOMR.fireEvent("spa_cancel");
 				this.pending_events[i] = undefined;
 				return;
 			}
@@ -735,7 +737,7 @@
 			// if this is a SPA Hard navigation, make sure it doesn't fire until onload
 			if (resource.initiator === "spa_hard") {
 				// don't wait for onload if this was an aborted SPA navigation
-				if ((!ev || !ev.aborted) && d && d.readyState && d.readyState !== "complete") {
+				if ((!ev || !ev.aborted) && !BOOMR.hasBrowserOnloadFired()) {
 					BOOMR.window.addEventListener("load", function() {
 						var loadTimestamp = BOOMR.now();
 
@@ -1039,6 +1041,19 @@
 			// but does not return a string
 			url = node.src || node.getAttribute("xlink:href") || node.href;
 
+			// no URL or javascript: or about: or data: URL, so no network activity
+			if (!url || url.match(/^(about:|javascript:|data:)/i)) {
+				return false;
+			}
+
+			// we get called from src/href attribute changes but also from nodes being added
+			// which may or may not have been seen here before.
+			// Check that if we've seen this node before, that the src/href in this case is
+			// different which means we need to fetch a new Resource from the server
+			if (node._bmr && node._bmr.url !== url) {
+				exisitingNodeSrcUrlChanged = true;
+			}
+
 			if (node.nodeName === "IMG") {
 				if (node.naturalWidth && !exisitingNodeSrcUrlChanged) {
 					// img already loaded
@@ -1048,11 +1063,6 @@
 					// placeholder IMG
 					return false;
 				}
-			}
-
-			// no URL or javascript: or about: or data: URL, so no network activity
-			if (!url || url.match(/^(about:|javascript:|data:)/i)) {
-				return false;
 			}
 
 			current_event = this.pending_events[index];
@@ -1107,7 +1117,7 @@
 				a.href = url;
 
 				if (impl.excludeFilter(a)) {
-					BOOMR.debug("Exclude for " + a.href + " matched. Excluding", "AutoXHR");
+					log("Exclude for " + a.href + " matched. Excluding");
 					// excluded resource, so abort
 					return false;
 				}
@@ -1119,6 +1129,7 @@
 			node._bmr.res = resourceNum;
 			node._bmr.idx = index;
 			delete node._bmr.end[resourceNum];
+			node._bmr.url = url;
 
 			node.addEventListener("load", function(ev) { self.load_cb(ev, resourceNum); });
 			node.addEventListener("error", function(ev) { self.load_cb(ev, resourceNum); });
@@ -1422,7 +1433,7 @@
 				if (impl.excludeFilter(a)) {
 					// this xhr should be excluded from instrumentation
 					excluded = true;
-					BOOMR.debug("Exclude found for resource: " + a.href + " Skipping instrumentation!", "AutoXHR");
+					log("Exclude found for resource: " + a.href + " Skipping instrumentation!");
 					// call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -1739,9 +1750,9 @@
 					try {
 						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
 						if (ret) {
-							BOOMR.debug("Found matching filter at: " +
+							log("Found matching filter at: " +
 								impl.excludeFilters[idx].name + " for URL: " +
-								anchor.href, "AutoXHR");
+								anchor.href);
 							return true;
 						}
 					}

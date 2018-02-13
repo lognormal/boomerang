@@ -9,9 +9,9 @@ BOOMR_test.templates.SPA["02-custom-timers"] = function() {
 		t.validateBeaconWasSent(done);
 	});
 
-	it("Should have only sent one beacon", function() {
-		// only one beacon should've been sent
-		assert.equal(tf.beacons.length, 1);
+	it("Should have only sent one beacon", function(done) {
+		this.timeout(10000);
+		t.ensureBeaconCount(done, 1);
 	});
 
 	describe("Beacon 1", function() {
