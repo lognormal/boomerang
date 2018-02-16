@@ -946,9 +946,17 @@ module.exports = function() {
 			"build",
 			"test",
 			"copy:webserver",
-			"filesize:csv",
+			"filesize:csv"
+		],
+
+		"repository-build": [
+			"build",
+			"mpulse-build-repository-xml:build"
+		],
+
+		"repository-upload": [
 			"jenkins-build-properties:build",
-			"mpulse-build-repository-xml:build",
+			"repository-build",
 			"mpulse-build-repository-xml-upload:build"
 		],
 		/* SOASTA PRIVATE END */
