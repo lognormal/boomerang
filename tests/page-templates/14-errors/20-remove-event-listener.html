@@ -13,6 +13,9 @@ BOOMR_test.init({
 	}
 });
 
+window.aELPassiveSupported = false;
+window.aELCaptureSupported = false;
+
 var img1 = new Image(); // "load" tracked, capture = false
 var img2 = new Image(); // "load" tracked, capture = true
 var img3 = new Image(); // "load" tracked, then removed, capture = false
@@ -20,6 +23,7 @@ var img4 = new Image(); // "load" tracked, then removed, capture = true
 var img5 = new Image(); // "load" tracked using same as img3, then removed, capture = true
 var img6 = new Image(); // "load" tracked using same fn as img1, then removed, capture = false
 var img7 = new Image(); // "load" tracked using same fn as img1, then removed, capture = true
+var img8 = new Image(); // "load" tracked then removed several times
 
 function errorFunction1() {
 	// called 1x from img1
@@ -36,6 +40,10 @@ function errorFunction3() {
 function errorFunction4() {
 	// called 1x from img4
 	a.foo4 = false;
+}
+function errorFunction5() {
+	// never called
+	a.foo5 = false;
 }
 
 if (window.addEventListener) {
@@ -58,6 +66,60 @@ if (window.addEventListener) {
 
 	img7.addEventListener("load", errorFunction1, true);
 	img7.removeEventListener("load", errorFunction1, true);
+
+	try {
+		var options = {};
+		Object.defineProperty(options, "passive", {
+			get: function() {
+				window.aELPassiveSupported = true;
+			}
+		});
+		Object.defineProperty(options, "capture", {
+			get: function() {
+				window.aELCaptureSupported = true;
+			}
+		});
+		window.addEventListener("test", null, options);
+	}
+	catch (err) {
+		// ignore
+	}
+
+	img8.addEventListener("load", errorFunction5);  // useCapture defaults to false
+	img8.removeEventListener("load", errorFunction5);  // useCapture defaults to false
+
+	if (aELPassiveSupported) {
+		img8.addEventListener("load", errorFunction5, {passive: true});  // useCapture defaults to false
+		img8.removeEventListener("load", errorFunction5);  // useCapture defaults to false
+
+		img8.addEventListener("load", errorFunction5, {passive: true});  // useCapture defaults to false
+		img8.removeEventListener("load", errorFunction5, {passive: true});  // useCapture defaults to false
+
+		img8.addEventListener("load", errorFunction5, {passive: true});  // useCapture defaults to false
+		// passive flag should not be considered by rEL
+		img8.removeEventListener("load", errorFunction5, {passive: false});  // useCapture defaults to false
+	}
+
+	if (aELCaptureSupported) {
+		img8.addEventListener("load", errorFunction5, {capture: false});
+		img8.removeEventListener("load", errorFunction5, {capture: false});
+
+		img8.addEventListener("load", errorFunction5, {capture: true});
+		img8.removeEventListener("load", errorFunction5, {capture: true});
+
+		img8.addEventListener("load", errorFunction5, {capture: true});
+		img8.removeEventListener("load", errorFunction5, true);
+
+		if (navigator.userAgent.indexOf("Phantom") === -1) {
+			// these doesn't work in phantom, the event isn't removed
+
+			img8.addEventListener("load", errorFunction5, {capture: false});
+			img8.removeEventListener("load", errorFunction5, false);  // useCapture defaults to false
+
+			img8.addEventListener("load", errorFunction5, {capture: false});
+			img8.removeEventListener("load", errorFunction5);  // useCapture defaults to false
+		}
+	}
 }
 
 img1.src = "/assets/img.jpg?1";
@@ -67,6 +129,7 @@ img4.src = "/assets/img.jpg?4";
 img5.src = "/assets/img.jpg?5";
 img6.src = "/assets/img.jpg?6";
 img7.src = "/assets/img.jpg?7";
+img8.src = "/assets/img.jpg?8";
 
 </script>
 <!-- delay the page by 1second so an error can fire -->
