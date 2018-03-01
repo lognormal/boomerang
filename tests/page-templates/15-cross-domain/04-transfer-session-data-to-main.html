@@ -3,7 +3,7 @@
 window.sessionMock = {
 	ID: "mocked-id2",
 	length: 5,
-	start: (new Date().getTime()) - 64000,
+	start: (new Date().getTime()) - (5 * 60 * 1000),  // 5mins in the past
 	loadTime: 666,
 	sessionHistory: [],
 	offByOne: 0,

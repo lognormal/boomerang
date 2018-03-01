@@ -433,13 +433,20 @@
 		return (" " + document.cookie + ";").indexOf(" " + testCookieName + "=") !== -1;
 	};
 
-	t.clearCookies = function() {
+	t.clearCookies = function(domain) {
 		var date = new Date();
 		date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
 		var cookies = document.cookie.split(";");
 		for (var i = 0; i < cookies.length; i++) {
 			var name = cookies[i].split("=")[0].trim();
-			document.cookie = [name + "=", "expires=" + date.toGMTString(), "path=/", "domain=" + location.hostname].join("; ");
+			document.cookie = [name + "=", "expires=" + date.toGMTString(), "path=/", "domain=" + (domain || location.hostname)].join("; ");
+		}
+	};
+
+	t.clearLocalStorage = function() {
+		// Clear localstorage
+		if (typeof window.localStorage === "object" && typeof window.localStorage.clear === "function") {
+			window.localStorage.clear();
 		}
 	};
 

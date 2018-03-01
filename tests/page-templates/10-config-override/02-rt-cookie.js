@@ -10,7 +10,7 @@ describe("e2e/10-config-override/02-rt-cookie", function() {
 		assert.isTrue(document.cookie.indexOf("BOOMR=") !== -1);
 	});
 
-	it("Should have an empty RT cookie", function() {
-		assert.isTrue(document.cookie.indexOf("RT=\"\";") !== -1);
+	it("Should not have set RT cookie", function() {
+		assert.isFalse(document.cookie.indexOf("RT=") !== -1);
 	});
 });

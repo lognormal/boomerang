@@ -13,39 +13,23 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
 	<script type="text/javascript">
-	// Clear localstorage
-	if (typeof window.localStorage === "object" && typeof window.localStorage.clear === "function") {
-		window.localStorage.clear();
-	}
 	// BOOMR API Key is required so LOGN doesn't fail to setup
 	window.BOOMR_API_key="API_KEY";
-	// Set RT Cookie to empty, preventing navigation related issues with session tests
-	document.cookie = "RT=\"\";domain=.<%= mainServer %>;path=/";
-	// Prevent Boomerang from setting a cookie on unload so as to prevent cookies to show up when we load the next E2E test
-	function preventCookie(e) {
-		if (BOOMR) {
-			BOOMR.disable();
-		}
-
-		if (e) {
-			e.preventDefault();
-		}
-	}
-
-	if (window.addEventListener) {
-		window.addEventListener("beforeunload", preventCookie);
-	} else {
-		window.onbeforeunload = preventCookie;
-	}
 
 	// approx number of lines in the header
-	window.HEADER_LINES = 55;
-
+	window.HEADER_LINES = 39;
 	</script>
 	<script src="../../vendor/mocha/mocha.js"></script>
 	<script src="../../vendor/assertive-chai/dist/assertive-chai.js"></script>
 	<script src="../../vendor/lodash/lodash.js"></script>
 	<script src="../../boomerang-test-framework.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		// Clear RT Cookie, preventing navigation related issues with session tests
+		window.BOOMR_test.clearCookies();
+
+		// Clear localstorage
+		window.BOOMR_test.clearLocalStorage();
+	</script>
 	</head>
 <body>
 	<div id="mocha"></div>
