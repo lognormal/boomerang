@@ -11,7 +11,7 @@ describe("e2e/13-logn/04-localstorage-expired", function() {
 	});
 
 	it("Should have a h.cr from server when using JSON config and localStorage is supported", function() {
-		if (t.isLocalStorageSupported() && BOOMR.plugins.LOGN.isJson) {
+		if (t.isLocalStorageSupported() && t.isJSONSupported() && BOOMR.plugins.LOGN.isJson) {
 			var b = tf.lastBeacon();
 			assert.notEqual(b["h.cr"], "abc");
 		}
@@ -41,7 +41,7 @@ describe("e2e/13-logn/04-localstorage-expired", function() {
 	});
 
 	it("Should have stored server config in localStorage", function() {
-		if (t.isLocalStorageSupported() && BOOMR.plugins.LOGN.isJson) {
+		if (t.isLocalStorageSupported() && t.isJSONSupported() && BOOMR.plugins.LOGN.isJson) {
 			var config = BOOMR.utils.getLocalStorage("LOGN");
 			assert.equal(config.PageParams.pageGroups[0].parameter2, "FROMSERVER");
 		}

@@ -3,7 +3,7 @@
 // ensure we wait for LOGN
 window.BOOMR_LOGN_always = true;
 // we can use the fact that the api key is pasted into the config query request to delay config
-window.BOOMR_API_key = "13-logn-04-localstorage-expired&delay=2000";
+window.BOOMR_API_key = "13-logn-05-localstorage&delay=2000";
 
 config = {
 	"h.t": new Date().getTime(),
@@ -22,14 +22,14 @@ config = {
 
 // we need to set the localStorage config before loading boomerang to avoid timing issues
 if (BOOMR_test.isLocalStorageSupported() && BOOMR_test.isJSONSupported()) {
-	var value = {"items": config, "expires": new Date().getTime() - 1};
+	var value = {"items": config, "expires": new Date().getTime() + (5 * 60 * 1000)};
 	window.localStorage.setItem("_boomr_LOGN", JSON.stringify(value));
 }
 </script>
 <!-- ensure the script is on the page before onload -->
 <%= boomerangScript %>
 
-<script src="04-localstorage-expired.js" type="text/javascript"></script>
+<script src="05-localstorage.js" type="text/javascript"></script>
 <script type="text/javascript">
 BOOMR_test.init({
 	testAfterOnBeacon: 1

@@ -381,6 +381,12 @@
 		return result;
 	};
 
+	t.isJSONSupported = function() {
+		return (typeof window.JSON === "object" &&
+		    typeof window.JSON.stringify === "function" &&
+		    typeof window.JSON.parse === "function");
+	};
+
 	t.validateBeaconWasImg = function(done) {
 		if (!t.isResourceTimingSupported()) {
 			// need RT to validate
