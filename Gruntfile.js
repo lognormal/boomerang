@@ -30,7 +30,7 @@ var TEST_RESULTS_PATH = path.join("tests", "results");
 var TEST_DEBUG_PORT = 4002;
 var TEST_URL_BASE = grunt.option("test-url") || "http://" + boomerangE2ETestDomain + ":4002";
 
-var SELENIUM_ADDRESS = "http://" + boomerangE2ETestDomain + ":4444/wd/hub";
+var SELENIUM_ADDRESS = grunt.option("selenium-address") || "http://" + boomerangE2ETestDomain + ":4444/wd/hub";
 var E2E_BASE_URL = "http://" + boomerangE2ETestDomain + ":4002/";
 
 var DEFAULT_BROWSER = grunt.option("browser") || "ChromeHeadless";
@@ -666,7 +666,8 @@ module.exports = function() {
 					"IE",
 					"Opera",
 					"PhantomJS",
-					"Safari"
+					"Safari",
+					"Edge"
 				]
 			},
 			allHeadless: {
@@ -763,6 +764,36 @@ module.exports = function() {
 			FirefoxHeadless: {
 				options: {
 					configFile: "tests/protractor.config.firefoxheadless.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
+			},
+			Edge: {
+				options: {
+					configFile: "tests/protractor.config.edge.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
+			},
+			IE: {
+				options: {
+					configFile: "tests/protractor.config.ie.js",
+					args: {
+						seleniumAddress: SELENIUM_ADDRESS,
+						specs: ["tests/e2e/e2e.js"],
+						baseUrl: E2E_BASE_URL
+					}
+				}
+			},
+			Safari: {
+				options: {
+					configFile: "tests/protractor.config.safari.js",
 					args: {
 						seleniumAddress: SELENIUM_ADDRESS,
 						specs: ["tests/e2e/e2e.js"],
@@ -1060,13 +1091,16 @@ module.exports = function() {
 
 		// End-to-End tests
 		"test:e2e": ["test:e2e:" + DEFAULT_BROWSER],
-		"test:e2e:browser": ["test:build", "build", "express:dev", "express:secondary", "protractor_webdriver"],
+		"test:e2e:browser": ["test:build", "build", "express:dev", "express:secondary"],
 		"test:e2e:debug": ["test:e2e:browser", "protractor:debug"],
 		"test:e2e:PhantomJS": ["test:e2e:browser", "protractor:PhantomJS"],
 		"test:e2e:Chrome": ["test:e2e:browser", "protractor:Chrome"],
 		"test:e2e:ChromeHeadless": ["test:e2e:browser", "protractor:ChromeHeadless"],
 		"test:e2e:Firefox": ["test:e2e:browser", "protractor:Firefox"],
 		"test:e2e:FirefoxHeadless": ["test:e2e:browser", "protractor:FirefoxHeadless"],
+		"test:e2e:Edge": ["test:e2e:browser", "protractor:Edge"],
+		"test:e2e:IE": ["test:e2e:browser", "protractor:IE"],
+		"test:e2e:Safari": ["test:e2e:browser", "protractor:Safari"],
 
 		// Documentation
 		"test:doc": ["clean", "jsdoc", "express:doc", "watch:doc"],
@@ -1078,6 +1112,11 @@ module.exports = function() {
 		"test:matrix:unit": ["saucelabs-mocha:unit"],
 		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"]
 	};
+
+	// launch selenium if another address wasn't provided
+	if (!grunt.option("selenium-address")) {
+		aliases["test:e2e:browser"].push("protractor_webdriver");
+	}
 
 	/* SOASTA PRIVATE START */
 	//
