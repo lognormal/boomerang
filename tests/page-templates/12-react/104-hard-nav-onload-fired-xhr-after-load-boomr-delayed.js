@@ -9,7 +9,7 @@ describe("e2e/12-react/104-hard-nav-onload-fired-xhr-after-load-boomr-delayed", 
 			t.validateBeaconWasSent(done);
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 
@@ -17,11 +17,17 @@ describe("e2e/12-react/104-hard-nav-onload-fired-xhr-after-load-boomr-delayed", 
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons.length, 1);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -29,6 +35,9 @@ describe("e2e/12-react/104-hard-nav-onload-fired-xhr-after-load-boomr-delayed", 
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported() && t.isResourceTimingSupported()) {
 			var img = t.findFirstResource("img.jpg&id=xhr");
 			assert.closeTo(tf.beacons[0].t_done, img.responseEnd, 50);
+		}
+		else {
+			this.skip();
 		}
 	});
 });

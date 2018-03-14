@@ -40,7 +40,12 @@ describe("e2e/11-restiming/06-iframes", function() {
 					continue;
 				}
 
-				assert.isDefined(resources.find(function(r) {
+				// skip about:blank (IE 11)
+				if (url.indexOf("about:blank") !== -1) {
+					continue;
+				}
+
+				assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 					return r.name === url;
 				}), "Finding " + url);
 			}
@@ -56,7 +61,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("support/iframe.html?same-origin") !== -1;
 			}), "Finding support/iframe.html?same-origin");
 		}
@@ -71,7 +76,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("/assets/img.jpg?iframe") !== -1;
 			}), "Finding /assets/img.jpg?iframe in the IFRAME");
 		}
@@ -86,7 +91,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("support/iframe.html?cross-origin") !== -1;
 			}), "Finding support/iframe.html?cross-origin");
 		}
@@ -101,7 +106,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			assert.isUndefined(resources.find(function(r) {
+			assert.isUndefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("/assets/img.jpg?afteriframe") !== -1 &&
 				       r.name.indexOf(":" + window.crossOriginPort) !== -1;
 			}), "Not finding /assets/img.jpg?afteriframe from cross-origin iframe");

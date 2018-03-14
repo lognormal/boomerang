@@ -29,7 +29,7 @@
 <script>
 var eventFired = false;
 BOOMR_test.init({
-	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 2 : 1,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && BOOMR_test.isMutationObserverSupported()) ? 2 : 1,
 	instrument_xhr: true,
 	ResourceTiming: {
 		enabled: true

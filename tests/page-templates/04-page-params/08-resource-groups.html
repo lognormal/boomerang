@@ -24,7 +24,19 @@
 -->
 <img src="/delay?delay=3000&amp;id=last&amp;file=/pages/04-page-params/support/img.jpg?last-image" style="width:100px;"/>
 
+<div id="late"></div>
+
 <script type="text/javascript">
+// load image dynamically after ResourceGroups has initialized
+// total time (timeout + delay) must be less than onload or beacon will go out before the img is loaded
+setTimeout(function() {
+	var image = document.createElement("img");
+	image.src = "/delay?delay=1000&file=/assets/img.jpg";
+
+	var container = document.getElementById("late");
+	container.appendChild(image);
+}, 1000);
+
 BOOMR_test.init({
 	testAfterOnBeacon: true,
 	ResourceTiming: {
@@ -207,7 +219,7 @@ BOOMR_test.init({
 						on: ["onload"],
 						resources: [{
 							type: "resource",
-							value: "*img.jpg"
+							value: "*support/img.jpg"
 						}]
 					}
 				}
@@ -245,6 +257,21 @@ BOOMR_test.init({
 						resources: [{
 							type: "queryselector",
 							value: ".single"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup Element that starts after init",
+				index: 15,
+				label: "ctim.CT15",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "*assets/img.jpg"
 						}]
 					}
 				}

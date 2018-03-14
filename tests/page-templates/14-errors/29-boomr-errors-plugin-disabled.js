@@ -28,7 +28,7 @@ describe("e2e/14-errors/29-boomr-errors-plugin-disabled", function() {
 	it("Should have error #1 match expected", function() {
 		var b = tf.lastBeacon();
 		var err = b.errors.split("\n")[0];
-		assert.match(err, /^\[BOOMRtest:\d{13}\] ReferenceError: (?:'?a'? is not defined|Can't find variable: a)$/);
+		assert.match(err, /^\[BOOMRtest:\d{13}\] ReferenceError: (?:'?a'? is not defined|Can't find variable: a|'?a'? is undefined)$/);
 	});
 
 	it("Should have error #2 match expected", function() {

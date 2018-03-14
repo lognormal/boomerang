@@ -77,6 +77,9 @@
  * [MutationObserver]{@link https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver}
  * and [XMLHttpRequest]{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest}.
  *
+ * We will not use MutationObserver in IE 11 due to several browser bugs.
+ * See {@link BOOMR.utils.isMutationObserverSupported} for details.
+ *
  * ## Excluding Certain Requests From Instrumentation
  *
  * Whenever Boomerang intercepts an `XMLHttpRequest`, it will check if that request
@@ -222,8 +225,7 @@
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
 	    alwaysSendXhr = false,
-	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"],
-	    ie10or11;
+	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
 
 	/**
 	 * Single Page Applications get an additional timeout for all XHR Requests to settle in.
@@ -314,14 +316,6 @@
 		// Nothing to instrument
 		return;
 	}
-
-	// User-agent sniff IE 10 and IE 11 to apply a workaround for an XHR bug (see below when
-	// this variable is used).  We can only detect this bug by UA sniffing.  IE 11 requires a
-	// different way of detection than IE 11.
-	ie10or11 = (w.navigator && w.navigator.appVersion && w.navigator.appVersion.indexOf("MSIE 10") !== -1) ||
-	           (w.navigator && w.navigator.userAgent && w.navigator.userAgent.match(/Trident.*rv[ :]*11\./));
-
-
 
 	function log(msg) {
 		BOOMR.debug(msg, "AutoXHR");
@@ -1546,19 +1540,6 @@
 							if (ename === "readystatechange") {
 								resource.timing[readyStateMap[req.readyState]] = BOOMR.now();
 
-								// For IE 10 and 11, we need to turn off the MutationObserver before responseXML
-								// is first referenced, otherwise responseXML might be malformed due to a browser
-								// bug (where extra newlines get added in nodes with UTF-8 content)
-								if (impl.ie1011fix && ie10or11 && req.readyState === 4) {
-									MutationHandler.pause();
-
-									// this reference to responseXML with MO off is enough to ensure the browser
-									// bug is not triggered
-									var nop = req.responseXML;
-
-									MutationHandler.resume();
-								}
-
 								// Listen here as well, as DOM changes might happen on other listeners
 								// of readyState = 4 (complete), and we want to make sure we've
 								// started the addEvent() if so.  Only listen if the status is non-zero,
@@ -1702,8 +1683,6 @@
 	 * Container for AutoXHR plugin Closure specific state configuration data
 	 *
 	 * @property {string[]} spaBackendResources Default resources to count as Back-End during a SPA nav
-	 * @property {boolean} ie1011fix If true, the MutationObserver  will be paused on
-	 * IE10/11 to avoid delayed processing, see {@link ProxyXHRImplementation#addListener} for more info
 	 * @property {FilterObject[]} filters Array of {@link FilterObject} that is used to apply filters on XHR Requests
 	 * @property {boolean} initialized Set to true after the first run of
 	 * @property {string[]} addedVars Vars added to the next beacon only
@@ -1711,7 +1690,6 @@
 	 */
 	impl = {
 		spaBackEndResources: SPA_RESOURCES_BACK_END,
-		ie1011fix: true,
 		excludeFilters: [],
 		initialized: false,
 		addedVars: [],
@@ -1788,8 +1766,6 @@
 		 * @param {boolean} [config.instrument_xhr] Whether or not to instrument XHR
 		 * @param {string[]} [config.AutoXHR.spaBackEndResources] Default resources to count as
 		 * Back-End during a SPA nav
-		 * @param {boolean} [config.AutoXHR.ie1011fix] If true, the MutationObserver will be paused on
-		 * IE10/11 to avoid delayed processing
 		 * @param {boolean} [config.AutoXHR.alwaysSendXhr] Whether or not to send XHR
 		 * beacons for every XHR.
 		 *
@@ -1808,7 +1784,7 @@
 			a = BOOMR.window.document.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "ie1011fix"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;

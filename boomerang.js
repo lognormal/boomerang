@@ -1517,6 +1517,24 @@ BOOMR_check_doc_domain();
 			},
 
 			/**
+			 * MutationObserver feature detection
+			 *
+			 * @returns {boolean} Returns true if MutationObserver is supported.
+			 * Always returns false for IE 11 due several bugs in it's implementation that MS flagged as Won't Fix.
+			 * In IE11, XHR responseXML might be malformed if MO is enabled (where extra newlines get added in nodes with UTF-8 content).
+			 * Another IE 11 MO bug can cause the process to crash when certain mutations occur.
+			 * For the process crash issue, see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/8137215/ and
+			 * https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/15167323/
+			 *
+			 * @memberof BOOMR.utils
+			 */
+			isMutationObserverSupported: function() {
+				// We can only detect IE 11 bugs by UA sniffing.
+				var ie11 = (w && w.navigator && w.navigator.userAgent && w.navigator.userAgent.match(/Trident.*rv[ :]*11\./));
+				return (!ie11 && w && w.MutationObserver && typeof w.MutationObserver === "function");
+			},
+
+			/**
 			 * The callback function may return a falsy value to disconnect the
 			 * observer after it returns, or a truthy value to keep watching for
 			 * mutations. If the return value is numeric and greater than 0, then
@@ -1555,7 +1573,7 @@ BOOMR_check_doc_domain();
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 				var o = {observer: null, timer: null};
 
-				if (!BOOMR.window || !BOOMR.window.MutationObserver || !callback || !el) {
+				if (!this.isMutationObserverSupported() || !callback || !el) {
 					return null;
 				}
 

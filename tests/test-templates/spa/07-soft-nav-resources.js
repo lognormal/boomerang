@@ -43,7 +43,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have the first beacon take as long as the first img load (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000);
 		}
 		else {
@@ -52,7 +52,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have the first beacon take as long as the first img load (if MutationObserver is supported but NavigationTiming is not)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 		}
@@ -62,7 +62,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have the first beacon take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, false);
 		}
 		else {
@@ -71,7 +71,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Shouldn't have the first beacon have a load time (if MutationObserver and NavigationTiming are not supported)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
@@ -90,7 +90,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the second beacon with a timestamp of at least 1 seconds (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 1000);
@@ -101,7 +101,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the second beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 0);
@@ -126,7 +126,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the third beacon with a timestamp of at least 2 seconds (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 2 second
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 2000);
@@ -137,7 +137,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the third beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 2 seconds but we couldn't track it because no MO support
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 0);
@@ -159,7 +159,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the fourth beacon with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 3 second
 			var b = tf.beacons[3];
 			assert.operator(b.t_done, ">=", 3000);
@@ -170,7 +170,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the fourth beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 3 seconds but we couldn't track it because no MO support
 			var b = tf.beacons[3];
 			assert.operator(b.t_done, ">=", 0);
@@ -201,7 +201,7 @@ BOOMR_test.templates.SPA["07-soft-nav-resources"] = function() {
 	});
 
 	it("Should have sent the fifth beacon without any NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
-		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
 			assert.isUndefined(b.nt_red_cnt);
 			assert.isUndefined(b.nt_nav_type);

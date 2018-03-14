@@ -65,13 +65,13 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the first beacon with a load time of when the completion happened (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			assert.closeTo(tf.beacons[0].t_done, window.nav1time - BOOMR.plugins.RT.navigationStart(), 100);
 		}
 	});
 
 	it("Should have sent the first beacon without a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
@@ -79,7 +79,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the first beacon with a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[0];
 			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
@@ -87,7 +87,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the first beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[0];
 			assert.equal(b.t_page, b.t_done - b.t_resp);
@@ -95,7 +95,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the first beacon without rt.quit or rt.abld (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[0];
 			assert.isUndefined(b["rt.quit"]);
 			assert.isUndefined(b["rt.abld"]);
@@ -103,14 +103,14 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the first beacon with spa.forced (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b["spa.forced"], "1");
 		}
 	});
 
 	it("Should have sent the first beacon with spa.waiting (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[0];
 			assert.operator(parseInt(b["spa.forced"], 10), ">=", 1);
 		}
@@ -151,14 +151,14 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the second beacon with a timestamp of when the completion happened (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			var b = tf.beacons[1];
 			assert.closeTo(b.t_done, window.nav2time - b["rt.tstart"], 100);
 		}
 	});
 
 	it("Should have sent the second beacon with a timestamp of around 1 second (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[1];
 			assert.closeTo(parseInt(b.t_done, 10), 1000, 50);
@@ -166,7 +166,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the second beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[1];
 
@@ -175,7 +175,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the second beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[1];
 			assert.equal(b.t_page, b.t_done - b.t_resp);
@@ -183,7 +183,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the second beacon without rt.quit and rt.abld (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[1];
 			assert.isUndefined(b["rt.quit"]);
 			assert.isUndefined(b["rt.abld"]);
@@ -191,14 +191,14 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the second beacon with spa.forced (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[1];
 			assert.equal(b["spa.forced"], "1");
 		}
 	});
 
 	it("Should have sent the second beacon with spa.waiting (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[1];
 			assert.operator(parseInt(b["spa.forced"], 10), ">=", 1);
 		}
@@ -239,21 +239,21 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			var b = tf.beacons[2];
 			assert.operator(parseInt(b.t_done, 10), ">=", 3000);
 		}
 	});
 
 	it("Should have sent the third with a timestamp of under 1 second (if MutationObserver is not supported)", function() {
-		if (!window.MutationObserver) {
+		if (!t.isMutationObserverSupported()) {
 			var b = tf.beacons[2];
 			assert.operator(parseInt(b.t_done, 10), "<=", 1000);
 		}
 	});
 
 	it("Should have sent the third beacon with a t_resp value (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[2];
 
@@ -262,7 +262,7 @@ describe("e2e/05-angular/117-route-change-markcomplete", function() {
 	});
 
 	it("Should have sent the third beacon with a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.beacons[2];
 			assert.equal(b.t_page, b.t_done - b.t_resp);

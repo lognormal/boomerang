@@ -33,26 +33,26 @@ describe("e2e/05-angular/102-ui-router", function() {
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg&id=home", 500, 3000, 30000, 0);
 		}
 	});
 
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 		}
 	});
 
 	it("Should take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "widgets.json", 500, 0, 30000, false);
 		}
 	});
 
 	it("Shouldn't have a load time (if MutationObserver and NavigationTiming are not supported)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.beacons[0];
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
@@ -68,7 +68,7 @@ describe("e2e/05-angular/102-ui-router", function() {
 	});
 
 	it("Should have sent the second beacon with a timestamp of at least 1 second (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 1000);
@@ -76,7 +76,7 @@ describe("e2e/05-angular/102-ui-router", function() {
 	});
 
 	it("Should have sent the second beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[1];
 			assert.operator(b.t_done, ">=", 0);
@@ -92,14 +92,14 @@ describe("e2e/05-angular/102-ui-router", function() {
 	});
 
 	it("Should have sent the third with a timestamp of at least 3 seconds (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 3000);
 		}
 	});
 
 	it("Should have sent the third with a timestamp of under 1 second (if MutationObserver is not supported)", function() {
-		if (!window.MutationObserver) {
+		if (!t.isMutationObserverSupported()) {
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, "<=", 1000);
 		}

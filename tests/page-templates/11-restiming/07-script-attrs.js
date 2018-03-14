@@ -8,7 +8,7 @@ describe("e2e/11-restiming/07-script-attrs", function() {
 	function getInterestingScripts(resources) {
 		var interesting = [];
 		for (var i = 0; i < resources.length; i++) {
-			if (resources[i].name.endsWith("/mocha.js") || resources[i].name.match(/\/07-script-attrs(\.\w+)?\.js$/)) {
+			if (resources[i].name.indexOf("/mocha.js") !== -1 || resources[i].name.match(/\/07-script-attrs(\.\w+)?\.js$/)) {
 				interesting.push(resources[i]);
 			}
 		}

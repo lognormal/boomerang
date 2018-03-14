@@ -15,7 +15,7 @@ describe("e2e/07-autoxhr/37-xhr-after-click", function() {
 	});
 
 	it("Should have a first beacon have the URL of the page", function(done){
-		if (window.MutationObserver && typeof window.MutationObserver === "function") {
+		if (t.isMutationObserverSupported()) {
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -29,7 +29,7 @@ describe("e2e/07-autoxhr/37-xhr-after-click", function() {
 	});
 
 	it("Should have a second beacon with the XHR URL in it", function(done){
-		if (window.MutationObserver && typeof window.MutationObserver === "function") {
+		if (t.isMutationObserverSupported()) {
 			t.ifAutoXHR(
 				done,
 				function() {

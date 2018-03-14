@@ -12,6 +12,9 @@ describe("e2e/12-react/106-mo-disabled-before-nav", function() {
 		if (t.isMutationObserverSupported()) {
 			assert.isDefined(BOOMR.proxy_XMLHttpRequest);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 });

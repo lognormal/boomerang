@@ -11,7 +11,8 @@ describe("e2e/07-autoxhr/30-ie1011-bug", function() {
 			done,
 			function() {
 				t.ensureBeaconCount(done, 2);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the XHR beacon have the complete data", function(done) {
@@ -20,19 +21,38 @@ describe("e2e/07-autoxhr/30-ie1011-bug", function() {
 			function() {
 				assert.isTrue(t.xhrValue.indexOf("1340") !== -1, "XHR data is complete");
 				done();
-			});
+			},
+			this.skip.bind(this));
 	});
 
-	it("Should have waited for the IMG to load (if ResourceTiming is supported)", function(done) {
+	it("Should have waited for the IMG to load (if MutationObserver is supported)", function(done) {
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (t.isResourceTimingSupported()) {
+				if (t.isMutationObserverSupported()) {
 					assert.operator(tf.beacons[1].t_done, ">=", 3000);
+					done();
 				}
+				else {
+					this.skip();
+				}
+			}.bind(this),
+			this.skip.bind(this));
+	});
 
-				done();
-			});
+	it("Should not have waited for the IMG to load (if MutationObserver is not supported)", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				if (!t.isMutationObserverSupported()) {
+					assert.operator(tf.beacons[1].t_done, "<", 1000);
+					done();
+				}
+				else {
+					this.skip();
+				}
+			}.bind(this),
+			this.skip.bind(this));
 	});
 
 	it("Should have loaded right away (if ResourceTiming is not supported)", function(done) {
@@ -41,9 +61,12 @@ describe("e2e/07-autoxhr/30-ie1011-bug", function() {
 			function() {
 				if (!t.isResourceTimingSupported()) {
 					assert.operator(tf.beacons[1].t_done, ">=", 0);
+					done();
 				}
-
-				done();
-			});
+				else {
+					this.skip();
+				}
+			}.bind(this),
+			this.skip.bind(this));
 	});
 });

@@ -11,7 +11,8 @@ describe("e2e/07-autoxhr/29-xhrs-in-succession", function() {
 			done,
 			function() {
 				t.ensureBeaconCount(done, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the second beacon contain a time of around 3s", function(done) {
@@ -23,7 +24,8 @@ describe("e2e/07-autoxhr/29-xhrs-in-succession", function() {
 					assert.closeTo(tf.beacons[1].t_done, 3000, 100);
 					done();
 				}, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the second beacon contain the URL of the first XHR", function(done) {
@@ -35,7 +37,8 @@ describe("e2e/07-autoxhr/29-xhrs-in-succession", function() {
 					assert.include(tf.beacons[1].u, "?1");
 					done();
 				}, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the third beacon contain a time of around 10ms", function(done) {
@@ -47,7 +50,8 @@ describe("e2e/07-autoxhr/29-xhrs-in-succession", function() {
 					assert.operator(tf.beacons[2].t_done, "<",  100);
 					done();
 				}, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 
 	it("Should have the third beacon contain the URL of the second XHR", function(done) {
@@ -59,6 +63,7 @@ describe("e2e/07-autoxhr/29-xhrs-in-succession", function() {
 					assert.include(tf.beacons[2].u, "?2");
 					done();
 				}, 3);
-			});
+			},
+			this.skip.bind(this));
 	});
 });

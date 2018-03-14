@@ -9,7 +9,7 @@ BOOMR.subscribe("beacon", function(vars) {
 	if (beaconCount === 1) {
 		setTimeout(function() {
 			xhr = new XMLHttpRequest();
-			xhr.open("GET", "/delay?delay=100&file=/pages/07-autoxhr/support/script200.js");
+			xhr.open("GET", "/delay?delay=400&file=/pages/07-autoxhr/support/script200.js");
 			xhr.addEventListener("load", function() {
 				img = document.createElement("img");
 				img.src = "/delay?delay=1000&id=xhr&file=/pages/07-autoxhr/support/img.jpg";

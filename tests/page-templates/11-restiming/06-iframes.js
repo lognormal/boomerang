@@ -40,7 +40,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 					continue;
 				}
 
-				assert.isDefined(resources.find(function(r) {
+				assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 					return r.name === url;
 				}), "Finding " + url);
 			}
@@ -56,7 +56,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("/assets/img.jpg?iframe") !== -1;
 			}), "Finding /assets/img.jpg?iframe in the IFRAME");
 		}

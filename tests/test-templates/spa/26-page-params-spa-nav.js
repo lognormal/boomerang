@@ -99,8 +99,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			assert.isUndefined(t.parseTimers(b.t_other).custom5);
 		});
 
-		it("Should have custom timer 6 timing of 3000", function() {
-			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
+		it("Should have custom timer 6 timing of 3000 (if MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa_hard beacon will fire before our resource was loaded
+			if (t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				var timers = t.parseTimers(b.t_other);
 				assert.isDefined(timers.custom6, "custom6 - Should exist on the beacon");
@@ -127,8 +128,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			assert.isUndefined(t.parseTimers(b.t_other).custom9);
 		});
 
-		it("Should have the custom timer 10 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 10 - ResourceTiming (if ResourceTiming and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa_hard beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom10, "Should have custom timer 10");
 				assert.isTrue(t.parseTimers(b.t_other).custom10 > 0, "Should have custom timer 10 > 0");
@@ -140,8 +142,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have the custom timer 11 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 11 - ResourceTiming (if ResourceTiming and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa_hard beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom11, "Should have custom timer 11");
 				assert.isTrue(t.parseTimers(b.t_other).custom11 > 0, "Should have custom timer 11 > 0"); // TODO: check value
@@ -152,8 +155,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have the custom timer 10 be less than custom timer 11 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 10 be less than custom timer 11 - ResourceTiming (if ResourceTiming is supported and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa_hard beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom10, "Should have custom timer 10");
 				assert.isDefined(t.parseTimers(b.t_other).custom11, "Should have custom timer 11");
@@ -247,8 +251,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			assert.isUndefined(t.parseTimers(b.t_other).custom6);
 		});
 
-		it("Should have custom timer 7 timing of 1000", function() {
-			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
+		it("Should have custom timer 7 timing of 1000 (if MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				var timers = t.parseTimers(b.t_other);
 				assert.isDefined(timers.custom7, "custom7 - Should exist on the beacon");
@@ -260,8 +265,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have custom timer 8", function() {
-			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
+		it("Should have custom timer 8 (if MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				var timers = t.parseTimers(b.t_other);
 				assert.isDefined(timers.custom7, "custom8 - Should exist on the beacon");
@@ -273,8 +279,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have custom timer 7 less than timer 8", function() {
-			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
+		it("Should have custom timer 7 less than timer 8 (if MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				var timers = t.parseTimers(b.t_other);
 				assert.isTrue(timers.custom7 < timers.custom8, "custom7 should be less than custom8");
@@ -389,17 +396,10 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			assert.isUndefined(t.parseTimers(b.t_other).custom6);
 		});
 
-		it("Should custom timer 7 timing of 1000", function() {
-			if (t.isMutationObserverSupported() || t.isResourceTimingSupported()) {
-				var b = tf.beacons[i];
-				var timers = t.parseTimers(b.t_other);
-				assert.isDefined(timers.custom7, "custom7 - Should exist on the beacon");
-				assert.closeTo(timers.custom7, 1000, 200);
-				assert.operator(b.custom7_st, ">", 0);  // TODO: better check
-			}
-			else {
-				return this.skip();
-			}
+		it("BUG: Should be missing custom timer 7", function() {
+			return this.skip();  // TODO: this test reveals a bug, see https://github.com/SOASTA/soasta-boomerang/issues/626
+			var b = tf.beacons[i];
+			assert.isUndefined(t.parseTimers(b.t_other).custom7);
 		});
 
 		it("BUG: Should be missing custom timer 8", function() {
@@ -413,8 +413,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			assert.isUndefined(t.parseTimers(b.t_other).custom9);
 		});
 
-		it("Should have the custom timer 10 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 10 - ResourceTiming (if ResourceTiming and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom10, "Should have custom timer 10");
 				assert.isTrue(t.parseTimers(b.t_other).custom10 > 0, "Should have custom timer 10 > 0");
@@ -426,8 +427,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have the custom timer 11 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 11 - ResourceTiming (if ResourceTiming and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom11, "Should have custom timer 11");
 				assert.isTrue(t.parseTimers(b.t_other).custom11 > 0, "Should have custom timer 11 > 0"); // TODO: check value
@@ -438,8 +440,9 @@ BOOMR_test.templates.SPA["26-page-params-spa-nav"] = function() {
 			}
 		});
 
-		it("Should have the custom timer 10 be less than custom timer 11 - ResourceTiming (if ResourceTiming is supported)", function() {
-			if (t.isResourceTimingSupported()) {
+		it("Should have the custom timer 10 be less than custom timer 11 - ResourceTiming (if ResourceTiming and MutationObserver is supported)", function() {
+			// If we don't have MutationObserver, the spa beacon will fire before our resource was loaded
+			if (t.isResourceTimingSupported() && t.isMutationObserverSupported()) {
 				var b = tf.beacons[i];
 				assert.isDefined(t.parseTimers(b.t_other).custom10, "Should have custom timer 10");
 				assert.isDefined(t.parseTimers(b.t_other).custom11, "Should have custom timer 11");

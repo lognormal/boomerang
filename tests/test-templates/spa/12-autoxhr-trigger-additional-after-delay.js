@@ -67,7 +67,7 @@ BOOMR_test.templates.SPA["12-autoxhr-trigger-additional-after-delay"] = function
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (window.MutationObserver) {
+				if (t.isMutationObserverSupported()) {
 					assert.closeTo(tf.beacons[1].t_done, 4000, 500);
 				}
 				done();
@@ -78,7 +78,7 @@ BOOMR_test.templates.SPA["12-autoxhr-trigger-additional-after-delay"] = function
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (typeof window.MutationObserver === "undefined") {
+				if (!t.isMutationObserverSupported()) {
 					assert.closeTo(tf.beacons[1].t_done, 2000, 500);
 				}
 				done();

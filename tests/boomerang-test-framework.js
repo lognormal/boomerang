@@ -401,7 +401,11 @@
 	};
 
 	t.isMutationObserverSupported = function() {
-		return (window.MutationObserver && typeof window.MutationObserver === "function");
+		var w = window;
+		// Use the same logic as BOOM.utils.isMutationObserverSupported.
+		// Boomerang will not use MO in IE 11 due to browser bugs
+		var ie11 = (w && w.navigator && w.navigator.userAgent && w.navigator.userAgent.match(/Trident.*rv[ :]*11\./));
+		return (!ie11 && w && w.MutationObserver && typeof w.MutationObserver === "function");
 	};
 
 	t.validateBeaconWasXhr = function(done) {

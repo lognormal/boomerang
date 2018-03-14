@@ -3,19 +3,20 @@
 
 describe("e2e/06-bugs/94254", function() {
 	var tf = BOOMR.plugins.TestFramework;
+	var t = BOOMR_test;
 
 	it("Should send a beacon", function(done){
-		if (runTests() && window.MutationObserver) {
+		if (runTests() && t.isMutationObserverSupported()) {
 			assert.isTrue(tf.fired_onbeacon);
 			done();
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 
 	it("Should not have an element in the iframe", function(done){
-		if (window.MutationObserver && runTests()) {
+		if (t.isMutationObserverSupported() && runTests()) {
 			var observer = new MutationObserver(function(mutations) {
 				assert.isArray(mutations);
 				assert.lengthOf(mutations, 2);

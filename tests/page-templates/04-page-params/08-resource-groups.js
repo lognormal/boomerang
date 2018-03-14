@@ -199,4 +199,19 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			return this.skip();
 		}
 	});
+
+	it("Should have the custom timer 15 - RG with Resource URL loaded late", function() {
+		if (t.isResourceTimingSupported()) {
+			var b = tf.lastBeacon();
+			var timers = t.parseTimers(b.t_other);
+			assert.isDefined(timers["ctim.CT15"], "ctim.CT15 - Does not exist on the beacon!");
+			assert.closeTo(
+				parseInt(timers["ctim.CT15"]),
+				t.findFirstResource("assets/img.jpg").duration,
+				2);
+		}
+		else {
+			return this.skip();
+		}
+	});
 });

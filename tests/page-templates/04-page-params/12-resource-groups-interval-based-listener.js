@@ -10,7 +10,7 @@ describe("e2e/04-page-params/12-resource-groups-interval-based-listener", functi
 	});
 
 	it("Should have the custom timer 1 - Only timeout based interval attaching to element added to children of container", function() {
-		if (!window.MutationObserver && !window.performance) {
+		if (!t.isMutationObserverSupported() && !window.performance) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT1"], "ctim.CT1 - Does not exist on the beacon!");
@@ -22,7 +22,7 @@ describe("e2e/04-page-params/12-resource-groups-interval-based-listener", functi
 	});
 
 	it("Should have the custom timer 2 - Only timeout based interval attaching to elements matching the URL in the ResourceURL", function() {
-		if (!window.MutationObserver && !window.performance) {
+		if (!t.isMutationObserverSupported() && !window.performance) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Does not exist on the beacon!");
@@ -34,7 +34,7 @@ describe("e2e/04-page-params/12-resource-groups-interval-based-listener", functi
 	});
 
 	it("Should have the custom timer 3 - Resource Node is found and it's an image", function() {
-		if (!window.MutationObserver && !window.performance) {
+		if (!t.isMutationObserverSupported() && !window.performance) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
 			assert.isDefined(timers["ctim.CT3"], "ctim.CT3 - Does not exist on the beacon!");

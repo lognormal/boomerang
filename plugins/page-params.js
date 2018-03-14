@@ -1818,9 +1818,7 @@
 				this.RTSupport = true;
 			}
 
-			if (BOOMR.window && BOOMR.window.MutationObserver) {
-				this.MOSupport = true;
-			}
+			this.MOSupport = BOOMR.utils.isMutationObserverSupported();
 
 			this.eventsrc = src;
 
@@ -1833,6 +1831,7 @@
 						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex), resourceSetIndex);
 					}
 
+					// TODO: check that this MO is still needed now that we re-check RT in before_beacon (see !778)
 					if (this.MOSupport && (src === "init" || this.isOnPageEvent())) {
 						this.obs = this.setupMutationObserver(resourceSetIndex);
 					}
@@ -1855,11 +1854,21 @@
 				}
 			}
 
+			// TODO: change this to run on the 2nd pass of the handler call instead.
+			// this before_beacon callback is run after the `addTimersToBeacon` callback in RT that adds timers
+			// to `t_other` causing us to report incorrect timer values in some cases (see !778)
 			var self = this;
 			BOOMR.subscribe("before_beacon", function(vars) {
 				// not applying on unload beacon
 				if (vars.hasOwnProperty("rt.quit")) {
 					return;
+				}
+
+				// if we have RT support then double check resources in case MutationObserver is not supported
+				if (self.RTSupport) {
+					for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
+						self.refreshResourceGroupTimings(self.lookupResources(resourceSetIndex), resourceSetIndex);
+					}
 				}
 
 				if (!self.attached) {
@@ -2908,6 +2917,8 @@
 								BOOMR.constants.BEACON_TYPE_SPAS) ?
 									edata.initiator : ename;
 
+						// TODO: this will duplicate ResourceGroup handlers that were created in
+						// initResourceGroupHandlers (see !778)
 						if (handler.handle(limpl[v][i], beaconType, data) && hconfig[v].stopOnFirst) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";

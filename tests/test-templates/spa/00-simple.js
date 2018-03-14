@@ -15,7 +15,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should take as long as the longest img load (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			t.validateBeaconWasSentAfter(0, "img.jpg", 100, 3000, 30000, true);
 		}
 		else {
@@ -24,7 +24,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should have a t_resp of the root page (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.lastBeacon();
 			assert.equal(b.t_resp, pt.responseStart - pt.navigationStart);
@@ -35,7 +35,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should have a t_page of total - t_resp (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var pt = window.performance.timing;
 			var b = tf.lastBeacon();
 			assert.equal(b.t_page, b.t_done - b.t_resp);
@@ -46,7 +46,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should not have a load time (if MutationObserver is supported but NavigationTiming is not)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 		}
@@ -56,7 +56,8 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should take as long as the XHRs (if MutationObserver is not supported but NavigationTiming is)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+			// this fails in react, onload happens later than the XHR
 			t.validateBeaconWasSentAfter(0, "widgets.json", 100, 0, 30000, true);
 		}
 		else {
@@ -65,7 +66,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Shouldn't have a load time (if MutationObserver and NavigationTiming are not supported)", function() {
-		if (typeof window.MutationObserver === "undefined" && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
+		if (!t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() === "undefined") {
 			var b = tf.lastBeacon();
 			assert.equal(b.t_done, undefined);
 			assert.equal(b["rt.start"], "none");
@@ -81,7 +82,7 @@ BOOMR_test.templates.SPA["00-simple"] = function() {
 	});
 
 	it("Should have NavigationTiming metrics (if MutationObserver and NavigationTiming are supported)", function() {
-		if (typeof window.MutationObserver !== "undefined" && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.lastBeacon();
 			assert.equal(b.nt_red_cnt, 0);  // no redirects
 			assert.isDefined(b.nt_nav_type);

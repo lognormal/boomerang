@@ -9,7 +9,7 @@ describe("e2e/12-react/103-hard-nav-onload-fired-no-xhr-boomr-delayed", function
 			t.validateBeaconWasSent(done);
 		}
 		else {
-			done();
+			this.skip();
 		}
 	});
 
@@ -17,11 +17,17 @@ describe("e2e/12-react/103-hard-nav-onload-fired-no-xhr-boomr-delayed", function
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons.length, 1);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have sent the first beacon as http.initiator = spa_hard", function() {
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported()) {
 			assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -31,6 +37,9 @@ describe("e2e/12-react/103-hard-nav-onload-fired-no-xhr-boomr-delayed", function
 			var pt = p.timing;
 			var pageLoad = (pt.loadEventStart - pt.navigationStart);
 			assert.closeTo(tf.beacons[0].t_done, pageLoad, 1);
+		}
+		else {
+			this.skip();
 		}
 	});
 });

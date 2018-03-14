@@ -3,6 +3,7 @@
 BOOMR_test.templates.SPA = BOOMR_test.templates.SPA || {};
 BOOMR_test.templates.SPA["23-hard-wait-for-onload"] = function() {
 	var tf = BOOMR.plugins.TestFramework;
+	var t = BOOMR_test;
 
 	it("Should have only sent one beacon", function() {
 		// only one beacon should've been sent
@@ -10,7 +11,7 @@ BOOMR_test.templates.SPA["23-hard-wait-for-onload"] = function() {
 	});
 
 	it("Should have been a spa_hard beacon (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
 		}
 		else {
@@ -19,7 +20,7 @@ BOOMR_test.templates.SPA["23-hard-wait-for-onload"] = function() {
 	});
 
 	it("Should have fired after onload (if MutationObserver and NavigationTiming are supported)", function() {
-		if (window.MutationObserver && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
+		if (t.isMutationObserverSupported() && typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
 			var b = tf.beacons[0];
 
 			assert.notEqual(b.nt_load_st, 0, "performance.timing.loadEventStart should not be 0");

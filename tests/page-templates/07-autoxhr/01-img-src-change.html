@@ -4,7 +4,7 @@
 <script src="01-img-src-change.js" type="text/javascript"></script>
 <script>
 BOOMR_test.init({
-	testAfterOnBeacon: (typeof window.MutationObserver !== "undefined") ? 2 : 1,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
 	afterFirstBeacon: function() {
 		if (!BOOMR.plugins.AutoXHR) {
 			return;

@@ -35,7 +35,7 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (window.MutationObserver) {
+				if (t.isMutationObserverSupported()) {
 					assert.operator(tf.beacons[0].t_done, ">=", 5000);
 				}
 				done();
@@ -86,7 +86,7 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 	});
 
 	it("Should have sent the third beacon with a timestamp of at least 1 second (if MutationObserver is supported)", function() {
-		if (window.MutationObserver) {
+		if (t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 1000);
@@ -97,7 +97,7 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 	});
 
 	it("Should have sent the third beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (typeof window.MutationObserver === "undefined") {
+		if (!t.isMutationObserverSupported()) {
 			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
 			var b = tf.beacons[2];
 			assert.operator(b.t_done, ">=", 0);
@@ -111,7 +111,7 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 		t.ifAutoXHR(
 			done,
 			function() {
-				if (window.MutationObserver) {
+				if (t.isMutationObserverSupported()) {
 					assert.operator(tf.beacons[2]["rt.end"], ">=", window.spaWaitCompleteTimes[2] + 10);
 				}
 				done();

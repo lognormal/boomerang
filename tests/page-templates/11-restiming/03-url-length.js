@@ -26,7 +26,7 @@ describe("e2e/11-restiming/03-url-length", function() {
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			// find our img
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("blackhole?...") !== -1;
 			}), "Find blackhole?...");
 		}
@@ -41,7 +41,7 @@ describe("e2e/11-restiming/03-url-length", function() {
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			// find our img
-			assert.isDefined(resources.find(function(r) {
+			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
 				return r.name.indexOf("/foo/...") !== -1;
 			}), "Find /foo/...");
 		}

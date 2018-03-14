@@ -5,7 +5,7 @@
 <script>
 BOOMR_test.init({
 	"instrument_xhr": true,
-	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && window.MutationObserver) ? 5 : 1,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR && BOOMR_test.isMutationObserverSupported()) ? 5 : 1,
 	AutoXHR: {
 		alwaysSendXhr: true
 	},
