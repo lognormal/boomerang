@@ -30,8 +30,8 @@ describe("e2e/11-restiming/06-iframes", function() {
 			for (var i = 0; i < pageResources.length; i++) {
 				var url = pageResources[i].name;
 
-				// skip beacon URL
-				if (url.indexOf("beacon") !== -1) {
+				// skip beacon, boomerang, & config URLs
+				if (url.indexOf(BOOMR.getBeaconURL()) !== -1 || url === BOOMR.url || url === BOOMR.config_url) {
 					continue;
 				}
 

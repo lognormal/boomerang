@@ -156,8 +156,9 @@ BOOMR_check_doc_domain();
 	    document.getElementById("boomr-if-as") &&
 	    document.getElementById("boomr-if-as").nodeName.toLowerCase() === "script") {
 		w = w.parent;
-		myurl = document.getElementById("boomr-if-as").src;
 	}
+
+	myurl = (document.currentScript || document.getElementById("boomr-if-as") || document.getElementById("boomr-scr-as")).src;
 
 	d = w.document;
 
