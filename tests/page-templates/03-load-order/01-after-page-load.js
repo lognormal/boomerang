@@ -5,6 +5,11 @@ describe("e2e/03-load-order/01-after-page-load", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
+	it("Should contain BOOMR.url set to boomerang's URL", function() {
+		assert.isString(BOOMR.url, "is not a string");
+		assert.match(BOOMR.url, /\/boomerang-latest-debug.js($|\?)/, "does not match: " + BOOMR.url);
+	});
+
 	it("Should pass basic beacon validation", function(done) {
 		t.validateBeaconWasSent(done);
 	});

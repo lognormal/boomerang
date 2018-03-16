@@ -29,4 +29,8 @@ describe("BOOMR exports", function() {
 	it("Should have an existing BOOMR.plugins Object", function(){
 		assert.isObject(BOOMR.plugins);
 	});
+
+	it("Should have an existing BOOMR.url value", function(){
+		assert.isString(BOOMR.url);
+	});
 });

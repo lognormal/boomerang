@@ -149,16 +149,23 @@ BOOMR_check_doc_domain();
 // Construct BOOMR
 // w is window
 (function(w) {
-	var impl, boomr, d, myurl, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
+	var impl, boomr, d, createCustomEvent, dispatchEvent, visibilityState, visibilityChange, orig_w = w;
 
-	// This is the only block where we use document without the w. qualifier
+	// If the window that boomerang is running in is not top level (ie, we're running in an iframe)
+	// and if this iframe contains a script node with an id of "boomr-if-as",
+	// Then that indicates that we are using the iframe loader, so the page we're trying to measure
+	// is w.parent
+	//
+	// Note that we use `document` rather than `w.document` because we're specifically interested in
+	// the document of the currently executing context rather than a passed in proxy.
+	//
+	// The only other place we do this is in `BOOMR.utils.getMyURL` below, for the same reason, we
+	// need the full URL of the currently executing (boomerang) script.
 	if (w.parent !== w &&
 	    document.getElementById("boomr-if-as") &&
 	    document.getElementById("boomr-if-as").nodeName.toLowerCase() === "script") {
 		w = w.parent;
 	}
-
-	myurl = (document.currentScript || document.getElementById("boomr-if-as") || document.getElementById("boomr-scr-as")).src;
 
 	d = w.document;
 
@@ -310,19 +317,19 @@ BOOMR_check_doc_domain();
 	// https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
 
 	// Set the name of the hidden property and the change event for visibility
-	if (typeof document.hidden !== "undefined") {
+	if (typeof d.hidden !== "undefined") {
 		visibilityState = "visibilityState";
 		visibilityChange = "visibilitychange";
 	}
-	else if (typeof document.mozHidden !== "undefined") {
+	else if (typeof d.mozHidden !== "undefined") {
 		visibilityState = "mozVisibilityState";
 		visibilityChange = "mozvisibilitychange";
 	}
-	else if (typeof document.msHidden !== "undefined") {
+	else if (typeof d.msHidden !== "undefined") {
 		visibilityState = "msVisibilityState";
 		visibilityChange = "msvisibilitychange";
 	}
-	else if (typeof document.webkitHidden !== "undefined") {
+	else if (typeof d.webkitHidden !== "undefined") {
 		visibilityState = "webkitVisibilityState";
 		visibilityChange = "webkitvisibilitychange";
 	}
@@ -894,13 +901,13 @@ BOOMR_check_doc_domain();
 		t_end: undefined,
 
 		/**
-		 * URL of boomerang.js.  This is only set if using the asynchronous loader snippet.
+		 * URL of boomerang.js.
 		 *
 		 * @type {string}
 		 *
 		 * @memberof BOOMR
 		 */
-		url: myurl,
+		url: "",
 
 		/* SOASTA PRIVATE START */
 		/**
@@ -1804,6 +1811,58 @@ BOOMR_check_doc_domain();
 				}
 				// not supported
 				BOOMR.debug("JSON is not supported");
+				return "";
+			},
+
+			/**
+			 * Attempt to identify the URL of boomerang itself using multiple methods for cross-browser support
+			 *
+			 * This method uses document.currentScript (which cannot be called from an event handler), script.readyState (IE6-10),
+			 * and the stack property of a caught Error object.
+			 *
+			 * @returns {string} The URL of the currently executing boomerang script.
+			 */
+			getMyURL: function() {
+				// document.currentScript works in all browsers except for IE: https://caniuse.com/#feat=document-currentscript
+				// #boomr-if-as works in all browsers if the page uses our standard iframe loader
+				// #boomr-scr-as works in all browsers if the page uses our preloader loader
+				// BOOMR_script will be undefined on IE for pages that do not use our standard loaders
+
+				// Note that we do not use `w.document` or `d` here because we need the current execution context
+				var BOOMR_script = (document.currentScript || document.getElementById("boomr-if-as") || document.getElementById("boomr-scr-as"));
+
+				if (BOOMR_script) {
+					return BOOMR_script.src;
+				}
+
+				// For IE 6-10 users on pages not using the standard loader, we iterate through all scripts backwards
+				var scripts = document.getElementsByTagName("script"), i;
+
+				// i-- is both a decrement as well as a condition, ie, the loop will terminate when i goes from 0 to -1
+				for (i = scripts.length; i--;) {
+					// We stop at the first script that has its readyState set to interactive indicating that it is currently executing
+					if (scripts[i].readyState === "interactive") {
+						return scripts[i].src;
+					}
+				}
+
+				// For IE 11, we throw an Error and inspect its stack property in the catch block
+				// This also works on IE10, but throwing is disruptive so we try to avoid it and use
+				// the less disruptive script iterator above
+				try {
+					throw new Error();
+				}
+				catch (e) {
+					if ("stack" in e) {
+						return boomr.utils.arrayFilter(e.stack.split(/\n/), function(l) { return l.match(/https?:\/\//); })[0].replace(/.*(https?:\/\/.+):\d+:\d+\D*$/m, "$1");
+					}
+					// FWIW, on IE 8 & 9, the Error object does not contain a stack property, but if you have an uncaught error,
+					// and a `window.onerror` handler (not using addEventListener), then the second argument to that handler is
+					// the URL of the script that threw. The handler needs to `return true;` to prevent the default error handler
+					// This flow is asynchronous though (due to the event handler), so won't work in a function return scenario
+					// like this (we can't use promises because we would only need this hack in browsers that don't support promises).
+				}
+
 				return "";
 			}
 
@@ -3379,6 +3438,10 @@ BOOMR_check_doc_domain();
 		}
 		/* END_DEBUG */
 	};
+
+	boomr.url = boomr.utils.getMyURL();
+
+
 
 	delete BOOMR_start;
 
