@@ -1477,7 +1477,7 @@ BOOMR_check_doc_domain();
 			arrayFilter: function(array, predicate) {
 				var result = [];
 
-				if (!(BOOMR.utils.isArray(array) || (array && typeof array.length === "number")) ||
+				if (!(this.isArray(array) || (array && typeof array.length === "number")) ||
 				    typeof predicate !== "function") {
 					return result;
 				}
@@ -1512,7 +1512,7 @@ BOOMR_check_doc_domain();
 			 * @memberof BOOMR.utils
 			 */
 			arrayFind: function(array, predicate) {
-				if (!(BOOMR.utils.isArray(array) || (array && typeof array.length === "number")) ||
+				if (!(this.isArray(array) || (array && typeof array.length === "number")) ||
 				    typeof predicate !== "function") {
 					return undefined;
 				}
@@ -1847,6 +1847,7 @@ BOOMR_check_doc_domain();
 			 * @returns {string} The URL of the currently executing boomerang script.
 			 */
 			getMyURL: function() {
+				var stack;
 				// document.currentScript works in all browsers except for IE: https://caniuse.com/#feat=document-currentscript
 				// #boomr-if-as works in all browsers if the page uses our standard iframe loader
 				// #boomr-scr-as works in all browsers if the page uses our preloader loader
@@ -1878,7 +1879,10 @@ BOOMR_check_doc_domain();
 				}
 				catch (e) {
 					if ("stack" in e) {
-						return boomr.utils.arrayFilter(e.stack.split(/\n/), function(l) { return l.match(/https?:\/\//); })[0].replace(/.*(https?:\/\/.+):\d+:\d+\D*$/m, "$1");
+						stack = this.arrayFilter(e.stack.split(/\n/), function(l) { return l.match(/https?:\/\//); });
+						if (stack && stack.length) {
+							return stack[0].replace(/.*(https?:\/\/.+?)(:\d+)+\D*$/m, "$1");
+						}
 					}
 					// FWIW, on IE 8 & 9, the Error object does not contain a stack property, but if you have an uncaught error,
 					// and a `window.onerror` handler (not using addEventListener), then the second argument to that handler is
