@@ -20,16 +20,7 @@ BOOMR_test.init({
 
 				setTimeout(function() {
 					// do 2 seconds of busy work
-					var startTime = (new Date()).getTime();
-					var now = startTime;
-					var endTime = startTime + (2 * 1000);
-					var math = 1;
-
-					while (now < endTime) {
-						now = (new Date()).getTime();
-						math *= 2;
-						math *= 0.5;
-					}
+					BOOMR_test.busy(2000);
 				}, 100);
 			}, 10);
 		}

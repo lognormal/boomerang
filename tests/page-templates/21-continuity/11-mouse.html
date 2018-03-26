@@ -1,0 +1,28 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="11-mouse.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+
+function mouseMove(x, y) {
+	var ev = document.createEvent("Event");
+	ev.initEvent("mousemove", true, true);
+	ev.clientX = x;
+	ev.clientY = y;
+
+	document.dispatchEvent(ev);
+}
+
+// move the mouse from upper-left to lower-right and back
+mouseMove(0, 0);
+mouseMove(window.innerHeight, window.innerWidth);
+mouseMove(0, 0);
+mouseMove(window.innerHeight, window.innerWidth);
+</script>
+<img src="/delay?delay=3000&amp;file=assets/img.jpg"/>
+<%= footer %>

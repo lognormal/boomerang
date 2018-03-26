@@ -1,0 +1,17 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<script src="00-fps.js" type="text/javascript"></script>
+<img src="/delay?delay=3000&amp;file=assets/img.jpg"/>
+<script>
+// loop for 300ms to trigger a long frame
+BOOMR_test.busy(300);
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

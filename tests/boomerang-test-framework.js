@@ -355,6 +355,10 @@
 		    typeof window.performance.getEntriesByType === "function";
 	};
 
+	t.isLongTasksSupported = function() {
+		return window.PerformanceObserver && window.PerformanceLongTaskTiming;
+	};
+
 	t.isUserTimingSupported = function() {
 		// don't check for PerformanceMark or PerformanceMeasure, they aren't polyfilled in usertiming.js
 		return (window.performance &&
@@ -825,6 +829,45 @@
 		}
 
 		return copy;
+	};
+
+	/**
+	 * Gets the latest of First Paint or First Contentful Paint
+	 *
+	 * @returns {number} FP or FCP
+	 */
+	t.getFirstOrContentfulPaint = function() {
+		var fp = 0;
+		var p = window.performance;
+
+		// use First Paint (if available)
+		if (BOOMR.plugins.PaintTiming &&
+			BOOMR.plugins.PaintTiming.is_supported() &&
+			p &&
+			p.timeOrigin) {
+			fp = BOOMR.plugins.PaintTiming.getTimingFor("first-contentful-paint");
+			if (!fp) {
+				// or get First Paint directly from PaintTiming
+				fp = BOOMR.plugins.PaintTiming.getTimingFor("first-paint");
+			}
+
+			if (fp) {
+				// convert to epoch
+				fp = Math.round(fp + p.timeOrigin);
+			}
+		}
+		else if (p && p.timing && p.timing.msFirstPaint) {
+			fp = p.timing.msFirstPaint;
+		}
+		else if (window.chrome &&
+			typeof window.chrome.loadTimes === "function") {
+			var loadTimes = window.chrome.loadTimes();
+			if (loadTimes && loadTimes.firstPaintTime) {
+				fp = loadTimes.firstPaintTime * 1000;
+			}
+		}
+
+		return fp;
 	};
 
 	/**

@@ -58,8 +58,7 @@ describe("e2e/07-autoxhr/04-xhr-use-rt", function() {
 
 	it("Should have the second beacon contain t_page at least 1 second (if ResourceTiming is enabled)", function() {
 		if (t.isResourceTimingSupported()) {
-			if (tf.beacons[1].t_page >= 1000)
-			{
+			if (tf.beacons[1].t_page >= 1000) {
 				assert.operator(tf.beacons[1].t_page, ">=", 1000, "t_page is above 1000 ms");
 			}
 			else {

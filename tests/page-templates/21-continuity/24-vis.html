@@ -1,0 +1,31 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+</script>
+<script src="24-vis.js" type="text/javascript"></script>
+<script>
+// fire visibility change events
+BOOMR.visibilityState = function() {
+	return "prerender";
+};
+BOOMR.fireEvent("visibility_changed");
+BOOMR.visibilityState = function() {
+	return "visible";
+};
+BOOMR.fireEvent("visibility_changed");
+BOOMR.visibilityState = function() {
+	return "hidden";
+};
+BOOMR.fireEvent("visibility_changed");
+BOOMR.visibilityState = function() {
+	return "visible";
+};
+BOOMR.fireEvent("visibility_changed");
+</script>
+<%= footer %>

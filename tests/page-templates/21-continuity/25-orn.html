@@ -1,0 +1,26 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+</script>
+<script src="25-orn.js" type="text/javascript"></script>
+<script>
+function orientationChange() {
+	var ev = document.createEvent("Event");
+	ev.initEvent("orientationchange", true, true);
+	document.dispatchEvent(ev);
+}
+
+/* eslint-disable no-native-reassign */
+screen = { orientation: { angle: 0 } };
+orientationChange();
+screen = { orientation: { angle: 90 } };
+orientationChange();
+/* eslint-enable no-native-reassign */
+</script>
+<%= footer %>

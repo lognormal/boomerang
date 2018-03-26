@@ -141,6 +141,23 @@
 			TPAnalytics: {
 				enabled: true
 			},
+			Continuity: {
+				enabled: true,
+				monitorLongTasks: true,
+				monitorPageBusy: true,
+				monitorFrameRate: true,
+				monitorInteractions: true,
+				monitorStats: true,
+				afterOnload: true,
+				afterOnloadMaxLength: true,
+				afterOnloadMinWait: 5000,
+				waitAfterOnload: true,
+				ttiWaitForFrameworkReady: true,
+				ttiWaitForHeroImages: true,
+				sendLog: true,
+				logMaxEntries: 100,
+				sendTimeline: true
+			},
 			UserTiming: {
 				enabled: true
 			},

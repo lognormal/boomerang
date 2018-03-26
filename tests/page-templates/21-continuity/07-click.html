@@ -1,0 +1,54 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="07-click.js" type="text/javascript"></script>
+<img src="/assets/img.jpg?1" id="img-1" width="200" height="10000" />
+<img src="/assets/img.jpg?2" id="img-2" width="200" height="10000" />
+<img src="/assets/img.jpg?3" id="img-3" width="200" height="10000" />
+<img src="/assets/img.jpg?4" id="img-4" width="200" height="10000" />
+<img src="/assets/img.jpg?5" id="img-5" width="200" height="10000" />
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+
+try {
+	var ev1 = new MouseEvent("click", {
+		"view": window,
+		"bubbles": true,
+		"cancelable": true,
+		"clientX": 100,
+		"clientY": 100
+	});
+
+	var ev2 = new MouseEvent("click", {
+		"view": window,
+		"bubbles": true,
+		"cancelable": true,
+		"clientX": 200,
+		"clientY": 200
+	});
+}
+catch (e) {
+	window.cannotCreateMouseEvent = true;
+}
+
+// click on an area 3x to trigger a rage click
+document.getElementById("img-1").dispatchEvent(ev1);
+document.getElementById("img-1").dispatchEvent(ev1);
+document.getElementById("img-1").dispatchEvent(ev1);
+
+// click somewhere else 3x to trigger a rage click
+document.getElementById("img-2").dispatchEvent(ev2);
+document.getElementById("img-2").dispatchEvent(ev2);
+document.getElementById("img-2").dispatchEvent(ev2);
+
+// click somewhere twice, then elsewhere, then the same spot - no rage click
+document.getElementById("img-1").dispatchEvent(ev1);
+document.getElementById("img-1").dispatchEvent(ev1);
+document.getElementById("img-2").dispatchEvent(ev2);
+document.getElementById("img-1").dispatchEvent(ev1);
+</script>
+<%= footer %>

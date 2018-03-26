@@ -1,0 +1,43 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>31-tti-raf</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="31-tti-raf.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true,
+		monitorLongTasks: false,
+		monitorFrameRate: true,
+		waitAfterOnload: 5000
+	}
+});
+
+//
+// Visual busy timeline (each character is 100ms, * = busy, _ = idle)
+// **********___***___*** (~2200ms)
+
+// loop for 1000ms to trigger a bunch of work
+window.workStart = BOOMR.now();
+BOOMR_test.busy(1000);
+
+// sleep for 300ms of idle
+setTimeout(function() {
+	// do another 300ms of work
+	BOOMR_test.busy(300);
+
+	// sleep for 300ms of idle
+	setTimeout(function() {
+		// do another 300ms of work
+		BOOMR_test.busy(300);
+
+		// time to interactive should be around this timestamp
+		window.workDone = BOOMR.now();
+	}, 300);
+}, 300);
+</script>
+<%= footer %>

@@ -1015,7 +1015,7 @@
 			impl._iterable_click("Click", "A", etarget, function(t) { return t.href; });
 		},
 
-		onerror: function() {
+		markComplete: function() {
 			if (this.onloadfired) {
 				// allow error beacons to send outside of page load without adding
 				// RT variables to the beacon
@@ -1182,9 +1182,10 @@
 			BOOMR.subscribe("form_submit", impl.onsubmit, null, impl);
 			BOOMR.subscribe("before_beacon", this.addTimersToBeacon, "beacon", this);
 			BOOMR.subscribe("beacon", impl.clear, null, impl);
-			BOOMR.subscribe("error", impl.onerror, null, impl);
+			BOOMR.subscribe("error", impl.markComplete, null, impl);
 			BOOMR.subscribe("config", impl.onconfig, null, impl);
 			BOOMR.subscribe("spa_navigation", impl.spaNavigation, null, impl);
+			BOOMR.subscribe("interaction", impl.markComplete, null, impl);
 
 			// Override any getBeaconURL method to make sure we return the one from the
 			// cookie and not the one hardcoded into boomerang

@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 			filePrefix: "",
 			template: path.join(__dirname, "mpulse-build-repository-xml.tmpl"),
 			version: "1.0",
-			schema_version: grunt.option("schema-version") || 1
+			schema_version: grunt.option("schema-version") || 9120
 		});
 
 		// read in the XML .tmpl file

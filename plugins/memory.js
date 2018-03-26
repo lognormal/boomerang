@@ -200,14 +200,10 @@
 					if (w.devicePixelRatio > 1) {
 						BOOMR.addVar("scr.dpx", w.devicePixelRatio);
 					}
-					if (w.scrollX || w.scrollY) {
-						// Apparently some frameworks set scrollX and scrollY to functions that return the actual values
-						sx = typeof w.scrollX === "function" ? w.scrollX() : w.scrollX;
-						sy = typeof w.scrollY === "function" ? w.scrollY() : w.scrollY;
 
-						if (typeof sx === "number" && typeof sy === "number") {
-							BOOMR.addVar("scr.sxy", sx + "x" + sy);
-						}
+					var scroll = BOOMR.utils.scroll();
+					if (scroll.x || scroll.y) {
+						BOOMR.addVar("scr.sxy", scroll.x + "x" + scroll.y);
 					}
 				},
 				"screen"

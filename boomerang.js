@@ -648,7 +648,19 @@ BOOMR_check_doc_domain();
 			 * @event BOOMR#netinfo
 			 * @property {object} connection `navigator.connection`
 			 */
-			"netinfo": []
+			"netinfo": [],
+
+			/**
+			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+			 *
+			 * Fired whenever a Rage Click is detected.
+			 *
+			 * This event will only happen if {@link BOOMR.plugins.Continuity} is enabled.
+			 *
+			 * @event BOOMR#rage_click
+			 * @property {Event} e Event
+			 */
+			"rage_click": []
 		},
 
 		/**
@@ -1627,12 +1639,21 @@ BOOMR_check_doc_domain();
 			 * @param {DOMElement} el DOM element
 			 * @param {string} type Event name
 			 * @param {function} fn Callback function
+			 * @param {boolean} passive Passive mode
 			 *
 			 * @memberof BOOMR.utils
 			 */
-			addListener: function(el, type, fn) {
+			addListener: function(el, type, fn, passive) {
+				var opts = false;
 				if (el.addEventListener) {
-					el.addEventListener(type, fn, false);
+					if (passive && BOOMR.browser.supportsPassive()) {
+						opts = {
+							capture: false,
+							passive: true
+						};
+					}
+
+					el.addEventListener(type, fn, opts);
 				}
 				else if (el.attachEvent) {
 					el.attachEvent("on" + type, fn);
@@ -1658,6 +1679,9 @@ BOOMR_check_doc_domain();
 				var i;
 
 				if (el.removeEventListener) {
+					// NOTE: We don't need to match any other options (e.g. passive)
+					// from addEventListener, as removeEventListener only cares
+					// about captive.
 					el.removeEventListener(type, fn, false);
 				}
 				else if (el.detachEvent) {
@@ -1864,6 +1888,71 @@ BOOMR_check_doc_domain();
 				}
 
 				return "";
+			},
+
+			/*
+			 * Gets the Scroll x and y (rounded) for a page
+			 *
+			 * @returns {object} Scroll x and y coordinates
+			 */
+			scroll: function() {
+				// Adapted from:
+				// https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY
+				var supportPageOffset = w.pageXOffset !== undefined;
+				var isCSS1Compat = ((w.document.compatMode || "") === "CSS1Compat");
+
+				var ret = {
+					x: 0,
+					y: 0
+				};
+
+				if (supportPageOffset) {
+					if (typeof w.pageXOffset === "function") {
+						ret.x = w.pageXOffset();
+						ret.y = w.pageYOffset();
+					}
+					else {
+						ret.x = w.pageXOffset;
+						ret.y = w.pageYOffset;
+					}
+				}
+				else if (isCSS1Compat) {
+					ret.x = w.document.documentElement.scrollLeft;
+					ret.y = w.document.documentElement.scrollTop;
+				}
+				else {
+					ret.x = w.document.body.scrollLeft;
+					ret.y = w.document.body.scrollTop;
+				}
+
+				// round to full numbers
+				if (typeof ret.sx === "number") {
+					ret.sx = Math.round(ret.sx);
+				}
+
+				if (typeof ret.sy === "number") {
+					ret.sy = Math.round(ret.sy);
+				}
+
+				return ret;
+			},
+
+			/**
+			 * Gets the window height
+			 *
+			 * @returns {number} Window height
+			 */
+			windowHeight: function() {
+				return w.innerHeight || w.document.documentElement.clientHeight || w.document.body.clientHeight;
+			},
+
+			/**
+			 * Gets the window width
+			 *
+			 * @returns {number} Window width
+			 */
+			windowWidth: function() {
+				return w.innerWidth || w.document.documentElement.clientWidth || w.document.body.clientWidth;
 			}
 
 			/* BEGIN_DEBUG */
@@ -1881,6 +1970,45 @@ BOOMR_check_doc_domain();
 			/* END_DEBUG */
 
 		}, // closes `utils`
+
+		/**
+		 * Browser feature detection flags.
+		 *
+		 * @class BOOMR.browser
+		 */
+		browser: {
+			results: {},
+
+			/**
+			 * Whether or not the browser supports 'passive' mode for event
+			 * listeners
+			 *
+			 * @returns {boolean} True if the browser supports passive mode
+			 */
+			supportsPassive: function() {
+				if (typeof BOOMR.browser.results.supportsPassive === "undefined") {
+					BOOMR.browser.results.supportsPassive = false;
+
+					if (!Object.defineProperty) {
+						return false;
+					}
+
+					try {
+						var opts = Object.defineProperty({}, "passive", {
+							get: function() {
+								BOOMR.browser.results.supportsPassive = true;
+							}
+						});
+						window.addEventListener("test", null, opts);
+					}
+					catch (e) {
+						// NOP
+					}
+				}
+
+				return BOOMR.browser.results.supportsPassive;
+			}
+		},
 
 		/**
 		 * Initializes Boomerang by applying the specified configuration.
@@ -3513,6 +3641,10 @@ BOOMR_check_doc_domain();
 					": [" + l + "] " +
 					m);
 			};
+		}
+		else {
+			// NOP for browsers that don't support it
+			boomr.log = function() {};
 		}
 
 		make_logger = function(l) {

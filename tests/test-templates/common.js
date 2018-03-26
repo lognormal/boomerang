@@ -100,6 +100,10 @@ describe("common", function() {
 					// error beacon
 					assert.equal(b.api, "1", prefix + "has the api param value equal to 1");
 				}
+				else if (b["http.initiator"] === "interaction") {
+					// Interaction beacon
+					// nothing special
+				}
 				else if (typeof b["http.initiator"] === "undefined") {
 					// requestStart and/or responseEnd initiated beacon
 					// TODO

@@ -56,4 +56,3 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 		}
 	});
 });
-

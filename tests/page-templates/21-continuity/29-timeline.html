@@ -1,0 +1,36 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+// create an event to use later
+var ev = document.createEvent("Event");
+ev.initEvent("keydown", true, true);
+ev.keyCode = 27;
+</script>
+<script>
+setInterval(function() {
+	// add a couple DOM nodes every 500ms so dom.sz grows
+	var div = document.createElement("div");
+	div.innerHTML = "hi";
+	document.getElementById("out").appendChild(div);
+}, 500);
+
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Continuity: {
+		enabled: true,
+		afterOnload: true,
+		afterOnloadMaxLength: 60000,
+		afterOnloadMinWait: 1000
+	},
+	afterFirstBeacon: function() {
+		// wait 5 seconds before sending an interaction beacon
+		setTimeout(function() {
+			// hit ESC key once
+			document.dispatchEvent(ev);
+		}, 5000);
+	}
+});
+</script>
+<script src="29-timeline.js" type="text/javascript"></script>
+<div id="out" />
+<%= footer %>

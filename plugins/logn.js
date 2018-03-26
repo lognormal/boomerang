@@ -525,6 +525,9 @@ BOOMR.init({
 	UserTiming: {
 		enabled: false
 	},
+	Continuity: {
+		enabled: false
+	},
 	IFrameDelay: {
 		enabled: false
 	}

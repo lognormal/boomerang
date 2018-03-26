@@ -17,7 +17,7 @@ BOOMR_test.init({
 	onBoomerangLoaded: function() {
 		// start an XHR so we get MutationObserver listening
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/blackhole", true);
+		xhr.open("GET", "/abc", true);
 
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState !== 4) {

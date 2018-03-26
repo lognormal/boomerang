@@ -370,8 +370,15 @@
 	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 	function shouldExcludeXhr(anchor) {
-		if (anchor.href && anchor.href.match(/^(about:|javascript:|data:)/i)) {
-			return true;
+		if (anchor.href) {
+			if (anchor.href.match(/^(about:|javascript:|data:)/i)) {
+				return true;
+			}
+
+			// don't track our own beacons
+			if (anchor.href.indexOf(BOOMR.getBeaconURL()) === 0) {
+				return true;
+			}
 		}
 
 		return BOOMR.xhr_excludes.hasOwnProperty(anchor.href) ||
@@ -1117,6 +1124,10 @@
 
 			// increase the number of outstanding resources by one
 			current_event.nodes_to_wait++;
+
+			// ensure the timeout is cleared
+			this.clearTimeout();
+
 			// increase the number of total resources by one
 			current_event.total_nodes++;
 

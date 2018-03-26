@@ -11,7 +11,7 @@ so Boomerang doesn't make these changes automatically.
 
 If you are using one of the Boomerang SPA plugins, the browser might hit the
 150 limit quickly, as the browser will not clear the resources for SPA
-navigtations.  Therefore, you may want to increase the buffer size or clear the
+navigations.  Therefore, you may want to increase the buffer size or clear the
 resources every time a beacon is sent.
 
 The following code examples show how you can increase the limit, or clear the

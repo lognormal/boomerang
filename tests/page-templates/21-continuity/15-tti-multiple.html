@@ -1,0 +1,36 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>15-tti-multiple</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="15-tti-multiple.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+
+// loop for 500ms to trigger a bunch of work
+BOOMR_test.busy(500);
+
+// sleep for 250ms of idle
+setTimeout(function() {
+	// do another 100ms of work
+	BOOMR_test.busy(100);
+
+	// sleep for 100ms of idle
+	setTimeout(function() {
+		// do another 300ms of work
+		BOOMR_test.busy(300);
+
+		// time to interactive should be around this timestamp
+		window.workDone = BOOMR.now();
+	}, 100);
+}, 250);
+
+</script>
+<%= footer %>

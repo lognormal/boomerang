@@ -2,16 +2,14 @@
 <%= boomerangScript %>
 
 <div id="clickable">Click Me!</div>
-<div id="picture"></div>
 
 <script type="text/javascript">
 (function(w, d) {
-	var imageHolder = d.getElementById("picture");
 	var clickable = d.getElementById("clickable");
 	function clickCb() {
 		// next, add an IFRAME so it gets tracked
 		var iframe = document.createElement("IFRAME");
-		iframe.src = "/delay?delay=0&file=/pages/07-autoxhr/support/img.jpg?id=iframe&rnd=" + Math.random();
+		iframe.src = "/delay?delay=1000&file=/pages/07-autoxhr/support/img.jpg?id=iframe&rnd=" + Math.random();
 		document.body.appendChild(iframe);
 	}
 
@@ -56,7 +54,7 @@ BOOMR_test.init({
 				eventFired = true;
 			}
 			eventFire("mouseup");
-		}, 100);
+		}, 500);
 	}
 });
 </script>
