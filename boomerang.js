@@ -2739,11 +2739,12 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		isCrossOriginError: function(err) {
-			// These are expected for cross-origin iframe access, although the Internet Explorer check will only
-			// work for browsers using English.
+			// These are expected for cross-origin iframe access.
+			// For IE and Edge, we'll also check the error number for non-English browsers
 			return err.name === "SecurityError" ||
 				(err.name === "TypeError" && err.message === "Permission denied") ||
-				(err.name === "Error" && err.message && err.message.match(/^(Permission|Access is) denied/));
+				(err.name === "Error" && err.message && err.message.match(/^(Permission|Access is) denied/)) ||
+				err.number === -2146828218;  // IE/Edge error number for "Permission Denied"
 		},
 
 		/**

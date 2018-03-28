@@ -13,10 +13,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT1"], "ctim.CT1 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT1"], "ctim.CT1 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT1"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -25,10 +26,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT2"], "ctim.CT2 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT2"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -37,10 +39,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT3"], "ctim.CT3 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT3"], "ctim.CT3 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT3"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -49,10 +52,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT4"], "ctim.CT4 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT4"], "ctim.CT4 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT4"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -61,10 +65,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT5"], "ctim.CT5 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT5"], "ctim.CT5 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT5"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -73,7 +78,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isUndefined(timers["ctim.CT6"], "ctim.CT6 - Is not supposed to be on the beacon!");
+			assert.isUndefined(timers["ctim.CT6"], "ctim.CT6 - Is not on the beacon");
 		}
 		else {
 			return this.skip();
@@ -84,7 +89,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isUndefined(timers["ctim.CT7"], "ctim.CT7 - Is not supposed to be on the beacon!");
+			assert.isUndefined(timers["ctim.CT7"], "ctim.CT7 - Is not on the beacon");
 		}
 		else {
 			return this.skip();
@@ -95,7 +100,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isUndefined(timers["ctim.CT8"], "ctim.CT8 - Is not supposed to be on the beacon!");
+			assert.isUndefined(timers["ctim.CT8"], "ctim.CT8 - Is not on the beacon");
 		}
 		else {
 			return this.skip();
@@ -106,7 +111,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isUndefined(timers["ctim.CT9"], "ctim.CT9 - Is not supposed to be on the beacon!");
+			assert.isUndefined(timers["ctim.CT9"], "ctim.CT9 - Is not on the beacon");
 		}
 		else {
 			return this.skip();
@@ -117,7 +122,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT10"], "ctim.CT10 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT10"], "ctim.CT10 - Exists on the beacon");
 			assert.closeTo(
 				parseInt(timers["ctim.CT10"]),
 				Math.max(
@@ -127,6 +132,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 				2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -135,7 +141,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT11"], "ctim.CT11 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT11"], "ctim.CT11 - Exists on the beacon");
 			assert.closeTo(
 				parseInt(timers["ctim.CT11"]),
 				Math.max(
@@ -145,6 +151,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 				2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -153,7 +160,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT12"], "ctim.CT12 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT12"], "ctim.CT12 - Exists on the beacon");
 
 			assert.closeTo(
 				parseInt(timers["ctim.CT12"]),
@@ -166,6 +173,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 				10);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -174,10 +182,11 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT13"], "ctim.CT13 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT13"], "ctim.CT13 - Exists on the beacon");
 			assert.closeTo(parseInt(timers["ctim.CT13"]), t.findFirstResource("id=abc").duration, 2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -186,7 +195,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT14"], "ctim.CT14 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT14"], "ctim.CT14 - Exists on the beacon");
 			assert.closeTo(
 				parseInt(timers["ctim.CT14"]),
 				Math.max(
@@ -196,6 +205,7 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 				2);
 		}
 		else {
+			// TODO: we should check the value since it may exist even if RT is not supported
 			return this.skip();
 		}
 	});
@@ -204,10 +214,25 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT15"], "ctim.CT15 - Does not exist on the beacon!");
+			assert.isDefined(timers["ctim.CT15"], "ctim.CT15 - Exists on the beacon");
 			assert.closeTo(
 				parseInt(timers["ctim.CT15"]),
 				t.findFirstResource("assets/img.jpg").duration,
+				2);
+		}
+		else {
+			return this.skip();
+		}
+	});
+
+	it("Should have the custom timer 16 - RG with slowest resource", function() {
+		if (t.isResourceTimingSupported()) {
+			var b = tf.lastBeacon();
+			var timers = t.parseTimers(b.t_other);
+			assert.isDefined(timers["ctim.CT16"], "ctim.CT16 - Exists on the beacon");
+			assert.closeTo(
+				parseInt(timers["ctim.CT16"]),
+				t.findFirstResource("delay=3000").duration,
 				2);
 		}
 		else {

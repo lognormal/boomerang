@@ -316,8 +316,15 @@
 			}
 
 			if (o.label) {
-				h = new Handler(this);
-				h.varname = o.label;
+				// ResourceGroup handler may already be initialized, we'll reuse the handler
+				// if it exists since it keeps state
+				if (o.type ===  "ResourceGroup" && impl.resourceGroupHandlers[o.label]) {
+					h = impl.resourceGroupHandlers[o.label];
+				}
+				else {
+					h = new Handler(this);
+					h.varname = o.label;
+				}
 			}
 
 			return h[o.type](o, eventSrc, edata);
@@ -1362,15 +1369,17 @@
 
 		/**
 		 * Check if we are allowed to access perfomance timing information on a given frame
+		 * and return its resource timing entries
 		 *
-		 * @param {string} url URL of a given Resource Timing entry
 		 * @param {HTMLFrameElement} frame Frame to access performance timing on
+		 * @param {string} url Optional URL of a given Resource Timing entry
 		 *
-		 * @return {PerformanceResourceTiming[]|null} Either the
-		 * PerformanceResourceTiming object associated with the URL or null if
-		 * access is denied.
+		 * @return {PerformanceResourceTiming[]|null} If url is given, return the
+		 * PerformanceResourceTiming object associated with the URL. If url is omitted
+		 * return all PerformanceResourceTiming objects for the frame.
+		 * Returns null if access to the frame is denied.
 		 */
-		getFrameResourcesForUrl: function(url, frame) {
+		getFrameResources: function(frame, url) {
 			var frameLoc;
 
 			try {
@@ -1388,7 +1397,12 @@
 					return null;
 				}
 
-				return frame.performance.getEntriesByName(url);
+				if (url) {
+					return frame.performance.getEntriesByName(url);
+				}
+				else {
+					return frame.performance.getEntriesByType("resource");
+				}
 			}
 			catch (e) {
 				if (BOOMR.isCrossOriginError(e)) {
@@ -1398,14 +1412,14 @@
 				try {
 					// PDFs in IE will throw this exception
 					if (e.name === "TypeError" &&
-						e.message === "Invalid calling object" &&
-						frame.document.location.pathname.match(/\.pdf$/)) {
+					    e.message === "Invalid calling object" &&
+					    frame.document.location.pathname.match(/\.pdf$/)) {
 						return null;
 					}
 				}
 				catch (ignore) { /* empty */ }
 
-				BOOMR.addError(e, "PageVars.getFrameResourcesForUrl");
+				BOOMR.addError(e, "PageVars.getFrameResources");
 				return null;
 			}
 		},
@@ -1422,7 +1436,7 @@
 		 * @returns {PerformanceResourceTiming[]|null} Resources found matching a URL Pattern
 		 */
 		findResources: function(url, frame, minStartTime, limit) {
-			var i, slowestRes, reslist, frameIdx, frameCount, foundList = [], tempReslist;
+			var i, slowestRes, reslist, frameIdx, frameCount, foundList = [], tempReslist, subFrame;
 
 			if (!frame) {
 				frame = w;
@@ -1433,10 +1447,11 @@
 			}
 
 			if (url !== "slowest") {
-				reslist = this.getFrameResourcesForUrl(url, frame);
+				reslist = this.getFrameResources(frame, url);
 
+				// will return null if we can't access RT for the frame
 				if (reslist === null) {
-					return reslist;
+					return null;
 				}
 
 				if (reslist && reslist.length > 0) {
@@ -1455,7 +1470,7 @@
 
 			// no exact match, maybe it has wildcards
 			if (url && (url.indexOf("*") !== -1 || url === "slowest")) {
-				reslist = frame.performance.getEntriesByType("resource");
+				reslist = this.getFrameResources(frame);
 				if (reslist && reslist.length > 0) {
 					for (i = 0; i < reslist.length; i++) {
 						if (reslist[i].startTime < minStartTime) {
@@ -1463,7 +1478,7 @@
 						}
 
 						// if we want the slowest url, then iterate through all
-						// till we find it
+						// until we find it
 						if (url === "slowest") {
 							if (!slowestRes || reslist[i].duration > slowestRes.duration) {
 								slowestRes = reslist[i];
@@ -1483,10 +1498,15 @@
 			if (frame.frames) {
 				frameCount = getFrameCount(frame);
 				for (frameIdx = 0; frameIdx < frameCount; frameIdx++) {
-					tempReslist = this.findResources(url, frame.frames[frameIdx], minStartTime, limit ? limit - foundList.length : 0);
+					subFrame = frame.frames[frameIdx];
+					if (!subFrame || subFrame === frame) {
+						// shouldn't happen, but avoid infinite recursion if it does
+						continue;
+					}
+					tempReslist = this.findResources(url, subFrame, minStartTime, limit ? limit - foundList.length : 0);
 					if (tempReslist) {
 						for (i = 0; i < tempReslist.length; i++) {
-							// if we want the slowest url, then iterate through all till we find it
+							// if we want the slowest url, then iterate through all until we find it
 							if (url === "slowest") {
 								if (!slowestRes || tempReslist[i].duration > slowestRes.duration) {
 									slowestRes = tempReslist[i];
@@ -1776,8 +1796,8 @@
 					// Match the URL against current location if that matches
 					// check resource property is available and is populated
 					if (this.checkURLPattern(path, url) &&
-						(config.value[path].resources &&
-						 config.value[path].resources.length > 0)) {
+					    (config.value[path].resources &&
+					    config.value[path].resources.length > 0)) {
 
 						// Check the event this resource is supposed to be
 						// tracked on (spa_hard, spa, xhr, onload). If we are
@@ -1785,12 +1805,11 @@
 						// them as well as they might be added after boomerang
 						// is loaded via JavaScript.
 						if (config.value[path].on &&
-							config.value[path].on.length > 0 &&
-							(BOOMR.utils.inArray(src, config.value[path].on) || src === "init" && BOOMR.utils.inArray("onload", config.value[path].on))) {
+						    config.value[path].on.length > 0 &&
+						    (BOOMR.utils.inArray(src, config.value[path].on) || src === "init" && BOOMR.utils.inArray("onload", config.value[path].on))) {
 
 							// For each Resource in resource[]
 							for (var resourceIndex in config.value[path].resources) {
-
 								if (config.value[path].resources.hasOwnProperty(resourceIndex)) {
 									// If `on` is defined and has more than one
 									// element in it we check against the eventsrc.
@@ -1814,7 +1833,9 @@
 			this.resourceSet = resourceSet;
 			performance = BOOMR.getPerformance();
 
-			if (performance && typeof performance.getEntriesByType === "function") {
+			if (performance &&
+			    typeof performance.getEntriesByName === "function" &&
+			    typeof performance.getEntriesByType === "function") {
 				this.RTSupport = true;
 			}
 
@@ -1831,7 +1852,7 @@
 						this.refreshResourceGroupTimings(this.lookupResources(resourceSetIndex), resourceSetIndex);
 					}
 
-					// TODO: check that this MO is still needed now that we re-check RT in before_beacon (see !778)
+					// TODO: check that this MO is still needed now that we re-check RT when src is onload (see !778)
 					if (this.MOSupport && (src === "init" || this.isOnPageEvent())) {
 						this.obs = this.setupMutationObserver(resourceSetIndex);
 					}
@@ -1854,29 +1875,10 @@
 				}
 			}
 
-			// TODO: change this to run on the 2nd pass of the handler call instead.
-			// this before_beacon callback is run after the `addTimersToBeacon` callback in RT that adds timers
-			// to `t_other` causing us to report incorrect timer values in some cases (see !778)
-			var self = this;
-			BOOMR.subscribe("before_beacon", function(vars) {
-				// not applying on unload beacon
-				if (vars.hasOwnProperty("rt.quit")) {
-					return;
-				}
-
-				// if we have RT support then double check resources in case MutationObserver is not supported
-				if (self.RTSupport) {
-					for (resourceSetIndex = 0; resourceSetIndex < resourceSet.length; resourceSetIndex++) {
-						self.refreshResourceGroupTimings(self.lookupResources(resourceSetIndex), resourceSetIndex);
-					}
-				}
-
-				if (!self.attached) {
-					self.applyTimedResources(true);
-					self.attached = true;
-				}
-				return;
-			});
+			if (src === "onload" && !this.attached) {
+				this.applyTimedResources(true);
+				this.attached = true;
+			}
 
 			return this;
 		},
@@ -2221,7 +2223,8 @@
 				var unresolvedIndex = this.getUnresolvedIndex();
 				BOOMR.addVar(this.varname + "_rg.err", "nf|" + unresolvedIndex);
 				this.resolved = false;
-				BOOMR.debug("Resource Group '" + this.config.label + "' has not been resolved fully, not going to apply timer!", "PageVars.ResourceGroup");
+				BOOMR.debug("Resource Group '" + this.config.label +
+					"' has not been resolved fully, not going to apply timer!", "PageVars.ResourceGroup");
 
 				return true;
 			}
@@ -2241,13 +2244,15 @@
 		 */
 		applyTimedResources: function(log) {
 			if (isNaN(this.resourceTime.start) || isNaN(this.resourceTime.stop)) {
-				BOOMR.debug("Start or stop time for this resource group were not numeric (" +
-					this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars");
+				BOOMR.debug("Resource Group '" + this.config.label +
+					"' start or stop time were not numeric (" +
+					this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars.ResourceGroup");
 				return false;
 			}
 
 			if (this.resourceTime.stop === 0) {
-				BOOMR.debug("Stop time was 0, this should not happen!", "PageVars");
+				BOOMR.debug("Resource Group '" + this.config.label +
+					"' stop time was 0, this should not happen!", "PageVars.ResourceGroup");
 				BOOMR.addVar(this.varname + "_rg.err", "ne|-");
 				return false;
 			}
@@ -2501,11 +2506,19 @@
 		 * and last response ending time.
 		 */
 		updateResourceGroupDelta: function(resource, index) {
-			var start = this.getStartTime(index);
+			var start = this.getStartTime(index), responseEnd;
 
-			if (!resource || (resource && !resource.responseEnd)) {
-				BOOMR.debug("Tried to update ResourceGroup delta with unfinished resource!", "PageVars");
+			if (!resource) {
 				return;
+			}
+
+			responseEnd = resource.responseEnd;
+			if (!responseEnd) {
+				// This can happen in IE/Edge if the RT entry is added before responseEnd is set
+				// See https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12947899/
+				// We'll use now() as an estimate, the resource is either still in flight or has finished recently
+				BOOMR.debug("Tried to update ResourceGroup delta with unfinished resource! Using now as responseEnd", "PageVars.ResourceGroup");
+				responseEnd = BOOMR.hrNow();
 			}
 
 			if (start !== "navigationStart") {
@@ -2517,8 +2530,8 @@
 				this.resourceTime.start = impl.deltaFromNavStart;
 			}
 
-			if (!this.resourceTime.stop || this.resourceTime.stop < resource.responseEnd) {
-				this.resourceTime.stop = resource.responseEnd;
+			if (!this.resourceTime.stop || this.resourceTime.stop < responseEnd) {
+				this.resourceTime.stop = responseEnd;
 			}
 
 			BOOMR.debug("New Resource Times for resource: '" + this.config.label +
@@ -2541,7 +2554,7 @@
 			var resource = this.resourceSet[index], tempRG, start = this.getStartTime(index);
 
 			nodeChild._bmr_rg = nodeChild._bmr_rg || {};
-			nodeChild._bmr_rg[start] = nodeChild._bmr_rg[start] ? nodeChild._bmr_rg[start] : BOOMR.now();
+			nodeChild._bmr_rg[start] = nodeChild._bmr_rg[start] ? nodeChild._bmr_rg[start] : BOOMR.hrNow();
 
 			// this may be run twice on the same element if the resource is part
 			// of multiple overlapping resource groups
@@ -2551,7 +2564,7 @@
 				return;
 			}
 			else if (nodeChild._bmr_rg_resource &&
-				!nodeChild._bmr_rg_resource.hasOwnProperty("length")) {
+			    !nodeChild._bmr_rg_resource.hasOwnProperty("length")) {
 				tempRG = nodeChild._bmr_rg_resource;
 				nodeChild._bmr_rg_resource = [];
 			}
@@ -2592,7 +2605,7 @@
 				else {
 					nodeURL = that.getNodeURL(nodeTarget);
 					if (resource.type === "resource" && nodeURL && that.checkURLPattern(resource.value, nodeURL)) {
-						nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
+						nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.hrNow();
 						that.updateResourceGroupDelta(nodeTarget._bmr_rg, index);
 					}
 					else {
@@ -2602,7 +2615,7 @@
 						}
 						else {
 							// Prevent overlapping elements to update the end value
-							nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.now();
+							nodeTarget._bmr_rg.responseEnd = nodeTarget._bmr_rg.responseEnd || BOOMR.hrNow();
 							that.updateResourceGroupDelta(nodeTarget._bmr_rg, index);
 						}
 					}
@@ -2917,8 +2930,6 @@
 								BOOMR.constants.BEACON_TYPE_SPAS) ?
 									edata.initiator : ename;
 
-						// TODO: this will duplicate ResourceGroup handlers that were created in
-						// initResourceGroupHandlers (see !778)
 						if (handler.handle(limpl[v][i], beaconType, data) && hconfig[v].stopOnFirst) {
 							if (limpl[v][i].subresource && ename === "xhr" && edata) {
 								edata.subresource = "active";
@@ -2972,15 +2983,14 @@
 				return;
 			}
 
+			handler = new Handler(hconfig.customTimers);
 			for (var i = 0; i < impl.customTimers.length; i++) {
 				if (impl.customTimers[i].type !== "ResourceGroup") {
 					continue;
 				}
 
 				handleConfig = impl.customTimers[i];
-
 				if (handleConfig.label && !impl.resourceGroupHandlers.hasOwnProperty(handleConfig.label)) {
-					handler = new Handler(hconfig.customTimers);
 					handlerInstance = handler.handle(handleConfig, type);
 					if (handlerInstance) {
 						impl.resourceGroupHandlers[handleConfig.label] = handlerInstance;

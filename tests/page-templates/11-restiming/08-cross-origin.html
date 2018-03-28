@@ -17,12 +17,12 @@ BOOMR_test.init({
 });
 </script>
 
-<!-- won't be able to get any resources from this frame -->
+<!-- won't be able to get any resources from this frame (changing only the port isn't XO in IE11) -->
 <iframe id="cross-origin"></iframe>
 <script>
-var host = window.location.hostname;
-var port = (parseInt(window.location.port) || 4002) + 1;
-window.crossOriginPort = port;
+var host = "<%= secondaryServer %>";
+var port = (parseInt(window.location.port) || 4002);
+window.crossOriginHost = host;
 document.getElementById("cross-origin").src = "//" + host + ":" + port + "/pages/11-restiming/support/iframe.html?cross-origin";
 </script>
 

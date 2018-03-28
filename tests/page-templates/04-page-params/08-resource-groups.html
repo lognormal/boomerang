@@ -26,6 +26,16 @@
 
 <div id="late"></div>
 
+<!-- won't be able to get any resources from this frame (changing only the port isn't XO in IE11) -->
+<iframe id="cross-origin"></iframe>
+<script>
+setTimeout(function() {
+	var host = "<%= secondaryServer %>";
+	var port = (parseInt(window.location.port) || 4002);
+	document.getElementById("cross-origin").src = "//" + host + ":" + port + "/delay?delay=1000&file=/pages/04-page-params/support/iframe-img.html";
+}, 100);
+</script>
+
 <script type="text/javascript">
 // load image dynamically after ResourceGroups has initialized
 // total time (timeout + delay) must be less than onload or beacon will go out before the img is loaded
@@ -272,6 +282,21 @@ BOOMR_test.init({
 						resources: [{
 							type: "resource",
 							value: "*assets/img.jpg"
+						}]
+					}
+				}
+			},
+			{
+				name: "ResourceGroup slowest",
+				index: 16,
+				label: "ctim.CT16",
+				type: "ResourceGroup",
+				value: {
+					"*/08-resource-groups.html": {
+						on: ["onload"],
+						resources: [{
+							type: "resource",
+							value: "slowest"
 						}]
 					}
 				}

@@ -897,6 +897,16 @@
 			window.navigator.appVersion.indexOf("Trident/") > 0);
 	};
 
+	/**
+	 * Determines the user agent is Edge or not
+	 *
+	 * @returns {boolean} True if the user agent is Edge
+	 */
+	t.isEdge = function() {
+		return window.navigator &&
+			(window.navigator.userAgent.indexOf("Edge") !== -1);
+	};
+
 	window.BOOMR_test = t;
 
 	// force LOGN plugin not to run. Individual tests will override this if needed.

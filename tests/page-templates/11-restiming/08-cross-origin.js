@@ -107,9 +107,9 @@ describe("e2e/11-restiming/06-iframes", function() {
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isUndefined(BOOMR.utils.arrayFind(resources, function(r) {
-				return r.name.indexOf("/assets/img.jpg?afteriframe") !== -1 &&
-				       r.name.indexOf(":" + window.crossOriginPort) !== -1;
-			}), "Not finding /assets/img.jpg?afteriframe from cross-origin iframe");
+				return r.name.indexOf("/assets/img.jpg?iframe") !== -1 &&
+				       r.name.indexOf(window.crossOriginHost) !== -1;
+			}), "Not finding /assets/img.jpg?iframe from cross-origin iframe");
 		}
 		else {
 			this.skip();
