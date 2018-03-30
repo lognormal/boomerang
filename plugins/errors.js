@@ -1316,7 +1316,11 @@
 				try {
 					var args = Array.prototype.slice.call(arguments);
 					var callbackFn = args[callbackIndex];
-					var targetObj = useCallingObject ? this : that;
+
+					// Determine the calling object: if 'this' is the Boomerang frame, we should swap it
+					// to the correct top level window context.  If Boomerang isn't running in a frame,
+					// BOOMR.window will still point to the top-level window.
+					var targetObj = useCallingObject ? (this === window ? BOOMR.window : this) : that;
 					var wrappedFn = impl.wrap(callbackFn, targetObj, via);
 
 					args[callbackIndex] = wrappedFn;
