@@ -2068,6 +2068,15 @@ BOOMR_check_doc_domain();
 				config = {};
 			}
 
+			// ensure logging is setup properly (or null'd out for production)
+			if (config.log !== undefined) {
+				this.log = config.log;
+			}
+
+			if (!this.log) {
+				this.log = function(/* m,l,s */) {};
+			}
+
 			if (!this.pageId) {
 				// generate a random page ID for this page's lifetime
 				this.pageId = BOOMR.utils.generateId(8);
@@ -2083,13 +2092,6 @@ BOOMR_check_doc_domain();
 				this.session.domain = config.site_domain;
 			}
 			/* SOASTA PRIVATE END */
-
-			if (config.log !== undefined) {
-				this.log = config.log;
-			}
-			if (!this.log) {
-				this.log = function(/* m,l,s */) {};
-			}
 
 			// Set autorun if in config right now, as plugins that listen for page_ready
 			// event may fire when they .init() if onload has already fired, and whether
