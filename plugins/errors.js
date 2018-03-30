@@ -1312,6 +1312,12 @@
 				return;
 			}
 
+			var rEL;
+			if (functionName === "addEventListener") {
+				// grab the native
+				rEL = that.removeEventListener;
+			}
+
 			that[functionName] = function() {
 				try {
 					var args = Array.prototype.slice.call(arguments);
@@ -1335,6 +1341,14 @@
 						if (!impl.trackFn(targetObj, args[0], callbackFn, args[2], wrappedFn)) {
 							// if the callback is already tracked, we won't call addEventListener
 							return;
+						}
+						if (rEL) {
+							// Remove the listener before adding it back in.
+							// This takes care of the (pathological) case where code is relying on the native
+							// de-dupping that the browser provides and BOOMR instruments `addEventListener` between
+							// their redundant calls to `addEventListener`.
+							// We detach with the native because there's no point in calling our wrapped version.
+							rEL.apply(targetObj, arguments);
 						}
 					}
 

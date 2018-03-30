@@ -1,0 +1,27 @@
+<%= header %>
+<%= boomerangDelayedSnippet %>
+<script src="./41-addEventListener-dedupping.js" type="text/javascript"></script>
+<script>
+  function handler() {
+	BOOMR.appendVar("foo", "bar");
+  }
+  function attach() {
+	window.addEventListener("foo", handler);
+  }
+
+  BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+		sendAfterOnload: true
+	},
+	onBoomerangLoaded: function() {
+		attach();
+		window.dispatchEvent(new Event("foo"));
+	}
+  });
+
+  attach();
+</script>
+<%= footer %>
