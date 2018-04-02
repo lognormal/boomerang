@@ -13,6 +13,9 @@ window.XMLHttpRequest = function() {
 	};
 };
 
+// disable sendBeacon
+window.navigator.sendBeacon = undefined;
+
 BOOMR_test.init({
 	testAfterOnBeacon: 1,
 	onBoomerangLoaded: function() {

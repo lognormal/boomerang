@@ -10,4 +10,8 @@ describe("e2e/06-bugs/111096-1", function() {
 			assert.notEqual(null, t.findResourceTimingBeacon());
 		}
 	});
+
+	it("Should not have used sendBeacon", function() {
+		assert.isUndefined(tf.beacons[0].sb);
+	});
 });
