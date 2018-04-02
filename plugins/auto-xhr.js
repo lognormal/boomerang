@@ -224,7 +224,6 @@
 	var w, d, handler, a, impl,
 	    singlePageApp = false,
 	    autoXhrEnabled = false,
-	    alwaysSendXhr = false,
 	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
 
 	/**
@@ -1520,7 +1519,7 @@
 						// load_finished handler for that event.
 						handler.load_finished(resource.index, resource.timing.responseEnd);
 					}
-					else if (alwaysSendXhr) {
+					else if (impl.alwaysSendXhr) {
 						handler.sendResource(resource);
 					}
 					else if (!singlePageApp || autoXhrEnabled) {
@@ -1641,7 +1640,7 @@
 				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
 
-				if (singlePageApp && handler.watch && !alwaysSendXhr) {
+				if (singlePageApp && handler.watch && !impl.alwaysSendXhr) {
 					// If this is a SPA and we're already watching for resources due
 					// to a route change or other interesting event, add this to the
 					// current event.
@@ -1701,6 +1700,7 @@
 	 */
 	impl = {
 		spaBackEndResources: SPA_RESOURCES_BACK_END,
+		alwaysSendXhr: false,
 		excludeFilters: [],
 		initialized: false,
 		addedVars: [],
@@ -1795,7 +1795,7 @@
 			a = BOOMR.window.document.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "alwaysSendXhr"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
@@ -1831,8 +1831,7 @@
 			// Whether or not to always send XHRs.  If a SPA is enabled, this means it will
 			// send XHRs during the hard and soft navs.  If enabled, it will also disable
 			// listening for MutationObserver events after an XHR is complete.
-			alwaysSendXhr = config.AutoXHR && config.AutoXHR.alwaysSendXhr;
-			if (alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
+			if (impl.alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
 				function sendXhrs(resources) {
 					if (resources.length) {
 						for (i = 0; i < resources.length; i++) {
@@ -1853,7 +1852,7 @@
 			}
 
 			if (singlePageApp) {
-				if (!alwaysSendXhr) {
+				if (!impl.alwaysSendXhr) {
 					// Disable auto-xhr until the SPA has fired its first beacon.  The
 					// plugin will re-enable after it's ready.
 					autoXhrEnabled = false;
