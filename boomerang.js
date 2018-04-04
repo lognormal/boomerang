@@ -1773,7 +1773,7 @@ BOOMR_check_doc_domain();
 					if (params[i]) {
 						kv = params[i].split("=");
 						if (kv.length && kv[0] === param) {
-							return decodeURIComponent(kv[1].replace(/\+/g, " "));
+							return kv.length > 1 ? decodeURIComponent(kv.splice(1).join("=").replace(/\+/g, " ")) : "";
 						}
 					}
 				}
