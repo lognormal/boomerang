@@ -1,5 +1,4 @@
 plugins/config_override.js
-plugins/config-override.js
 plugins/cross-domain.js
 plugins/logn.js
 plugins/page-params.js
@@ -12,8 +11,7 @@ tests/page-templates/05-angular/01-*
 tests/page-templates/05-angular/02-*
 tests/page-templates/05-angular/103-*
 tests/page-templates/05-angular/104-*
-tests/page-templates/05-angular/26-page-params-spa-nav.html
-tests/page-templates/05-angular/26-page-params-spa-nav.js
+tests/page-templates/05-angular/26-*
 tests/page-templates/06-bugs/100343.*
 tests/page-templates/06-bugs/92542.*
 tests/page-templates/06-bugs/94254.*
@@ -22,11 +20,16 @@ tests/page-templates/06-bugs/96883.*
 tests/page-templates/07-autoxhr/09-*
 tests/page-templates/08-ember/01-*
 tests/page-templates/08-ember/02-*
+tests/page-templates/08-ember/26-*
 tests/page-templates/09-backbone/01-*
 tests/page-templates/09-backbone/02-*
+tests/page-templates/08-backbone/26-*
 tests/page-templates/10-config-override/*
 tests/page-templates/12-react/01-*
 tests/page-templates/12-react/02-*
+tests/page-templates/12-react/109-*
+tests/page-templates/12-react/110-*
+tests/page-templates/12-react/26-*
 tests/page-templates/13-logn_config/*
 tests/page-templates/13-logn/*
 tests/page-templates/15-cross-domain/*

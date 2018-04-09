@@ -13,11 +13,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
 	<script type="text/javascript">
+	/* SOASTA_PRIVATE_START */
 	// BOOMR API Key is required so LOGN doesn't fail to setup
 	window.BOOMR_API_key="API_KEY";
+	/* SOASTA_PRIVATE_END */
 
 	// approx number of lines in the header
-	window.HEADER_LINES = 39;
+	window.HEADER_LINES = 41;
 	</script>
 	<script src="../../vendor/mocha/mocha.js"></script>
 	<script src="../../vendor/assertive-chai/dist/assertive-chai.js"></script>

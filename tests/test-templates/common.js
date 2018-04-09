@@ -41,6 +41,7 @@ describe("common", function() {
 
 			assert.equal(b.v, BOOMR.version, prefix + "has the boomerang version");
 
+			/* SOASTA_PRIVATE_START */
 			assert.equal(b["h.key"], window.BOOMR_API_key, prefix + "has the correct API key (h.key)");
 			assert.isDefined(b["h.d"], prefix + "has the domain (h.d) param");
 
@@ -55,6 +56,7 @@ describe("common", function() {
 			else {
 				assert.isDefined(b["h.cr"], prefix + "has the crumb (h.cr)");
 			}
+			/* SOASTA_PRIVATE_END */
 
 			assert.lengthOf(b.pid, 8, prefix + "has a page ID (pid) with a length equal to 8");
 

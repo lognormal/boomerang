@@ -24,7 +24,8 @@
 		"effectiveType": "etype",
 		"downlinkMax": "lm",
 		"downlink": "dl",
-		"rtt": "rtt"
+		"rtt": "rtt",
+		"saveData": "sd"
 	};
 
 	BOOMR = window.BOOMR || {};
@@ -45,7 +46,7 @@
 		var k;
 
 		for (k in param_map) {
-			if (connection.hasOwnProperty(k)) {
+			if (typeof connection[k] !== "undefined") {
 				// Remove old parameter value from the beacon because new value might be falsy which won't overwrite old value
 				BOOMR.removeVar("mob." + param_map[k]);
 				if (connection[k]) {

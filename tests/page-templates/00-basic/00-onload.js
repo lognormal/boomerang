@@ -89,7 +89,9 @@ describe("e2e/00-basic/00-onload", function() {
 		assert.isString(tf.lastBeacon().pid, "pid");
 	});
 
+	/* SOASTA_PRIVATE_START - changes from OS version */
 	it("Should have set nocookie=1", function() {
 		assert.equal(tf.lastBeacon().nocookie, "1");
 	});
+	/* SOASTA_PRIVATE_END */
 });

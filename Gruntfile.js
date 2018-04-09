@@ -108,7 +108,8 @@ module.exports = function() {
 	//
 	var e2eTests = [];
 	if (grunt.file.exists("tests/e2e/e2e.json")) {
-		e2eTests = JSON.parse(stripJsonComments(grunt.file.read("tests/e2e/e2e.json"))).tests;
+		var e2eData = JSON.parse(stripJsonComments(grunt.file.read("tests/e2e/e2e.json")));
+		e2eTests = e2eData.tests || e2eData;
 	}
 	var e2eUrls = [];
 

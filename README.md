@@ -279,11 +279,15 @@ grunt jsdoc
 
 HTML files will be built under `build/docs`.
 
-Documentation is also currently published at [docs.soasta.com/boomerang-api/](https://docs.soasta.com/boomerang-api/).
+Open-source Boomerang Documentation is currently published at
+[soasta.github.io/boomerang/](https://soasta.github.io/boomerang/).
 
-mPulse-specific Boomerang documentation is also available at [docs.soasta.com/boomerang/](https://docs.soasta.com/boomerang/).
+The team at Akamai works on mPulse Boomerang, which contains a few mPulse-specific plugins and may have additional
+changes being tested before being backported to the open-source Boomerang.  mPulse Boomerang usage documentation is
+available at [docs.soasta.com/boomerang/](https://docs.soasta.com/boomerang/) and mPulse Boomerang API documentation
+is at [docs.soasta.com/boomerang-api/](https://docs.soasta.com/boomerang-api/).
 
-There is a lot more documentation available:
+Additional documentation:
 
 - [API Documentation](https://docs.soasta.com/boomerang-api/): The `BOOMR` API
 - [Building Boomerang](https://docs.soasta.com/boomerang-api/tutorial-building.html): How to build boomerang with plugins
@@ -296,10 +300,10 @@ There is a lot more documentation available:
 
 The boomerang source code is primarily on GitHub at [github.com/SOASTA/boomerang](https://github.com/SOASTA/boomerang).
 
-Feel free to fork it and [contribute](https://docs.soasta.com/boomerang-api/tutorial-contributing.html) to it.
+Feel free to fork it and [contribute](https://soasta.github.io/boomerang/tutorial-contributing.html) to it.
 
 You can also get a [check out the releases](https://github.com/SOASTA/boomerang/releases)
-or download a [tarball](https://github.com/SOASTA/boomerang/archive/master.tar.gz) or 
+or download a [tarball](https://github.com/SOASTA/boomerang/archive/master.tar.gz) or
 [zip](http://github.com/SOASTA/boomerang/archive/master.zip) of the code.
 
 # Support
@@ -323,4 +327,4 @@ Boomerang is brought to you by:
 * the mPulse team at [Akamai](https://www.akamai.com/), and
 * many independent contributors whose contributions are cemented in our git history
 
-To help out, please read our [contributing](https://docs.soasta.com/boomerang-api/tutorial-contributing.html) page.
+To help out, please read our [contributing](https://soasta.github.io/boomerang/tutorial-contributing.html) page.

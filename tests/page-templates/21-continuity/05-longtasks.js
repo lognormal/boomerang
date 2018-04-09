@@ -39,7 +39,7 @@ describe("e2e/21-continuity/05-longtasks", function() {
 		assert.isDefined(b["c.lt.tt"]);
 
 		// we caused 3000ms
-		assert.operator(parseInt(b["c.lt.tt"], 10), ">=", 3000);
+		assert.operator(parseInt(b["c.lt.tt"], 10), ">=", 2900);
 
 		// should be less less than 10 seconds
 		assert.operator(parseInt(b["c.lt.tt"], 10), "<=", 10000);

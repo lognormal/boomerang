@@ -1,5 +1,15 @@
 <%= header %>
 <%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Backbone: {
+		enabled: true
+	},
+	instrument_xhr: false,
+	autorun: false
+});
+</script>
 <script src="../../vendor/jquery/dist/jquery.js"></script>
 <script src="../../vendor/handlebars/handlebars.js"></script>
 <script src="../../vendor/backbone/backbone.js"></script>
@@ -22,14 +32,4 @@ window.backbone_route_filter = function() {
 <script src="support/app.js"></script>
 <script src="/test-templates/spa/24-route-filter.js" type="text/javascript"></script>
 <script src="24-route-filter.js" type="text/javascript"></script>
-<script>
-BOOMR_test.init({
-	testAfterOnBeacon: 2,
-	Backbone: {
-		enabled: true
-	},
-	instrument_xhr: false,
-	autorun: false
-});
-</script>
 <%= footer %>

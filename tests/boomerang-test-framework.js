@@ -240,6 +240,7 @@
 				});
 		}
 
+		/* SOASTA_PRIVATE_START - changes from OS version */
 		if (window.BOOMR_LOGN_always !== true) {
 			// fake session details so beacons send if LOGN is disabled
 			BOOMR.addVar({
@@ -249,6 +250,7 @@
 				"h.cr": "abc"
 			});
 		}
+		/* SOASTA_PRIVATE_END */
 
 		t.configureTestEnvironment();
 
@@ -365,6 +367,14 @@
 		    typeof window.performance.getEntriesByType === "function" &&
 		    typeof window.performance.mark === "function" &&
 		    typeof window.performance.measure === "function");
+	};
+
+	t.isNetworkAPISupported = function() {
+		return (navigator && typeof navigator === "object" &&
+			navigator.connection ||
+			navigator.mozConnection ||
+			navigator.webkitConnection ||
+			navigator.msConnection);
 	};
 
 	t.isErrorObjInOnErrorSupported = function() {

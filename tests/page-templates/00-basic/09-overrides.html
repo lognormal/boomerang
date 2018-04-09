@@ -10,7 +10,12 @@
 
 <script>
 BOOMR_test.init({
-	testAfterOnBeacon: true
+	testAfterOnBeacon: true,
+
+	// error tracking will wrap some globals by default
+	Errors: {
+		enabled: false
+	}
 });
 </script>
 <%= footer %>
