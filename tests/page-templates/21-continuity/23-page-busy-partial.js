@@ -39,16 +39,14 @@ describe("e2e/21-continuity/23-page-busy-partial", function() {
 		// count buckets
 		var busyCount = 0;
 		for (var i = 0; i < buckets.length; i++) {
-			if (buckets[i] <= 50) {
-				// not reported
-				continue;
-			}
-
-			busyCount++;
+			// add the partial percentage of busy
+			busyCount += buckets[i] / 100;
 		}
 
-		// calculation is within 10% of c.b
+		// calculation is within 20% of c.b - we can't be exact, as the actual
+		// c.b is calculated from each individual poll while c.t.busy has a
+		// summarized timeline of each 100ms
 		var calcBusy = Math.round(busyCount / buckets.length * 100);
-		assert.closeTo(parseInt(b["c.b"], 10), calcBusy, 30);
+		assert.closeTo(parseInt(b["c.b"], 10), calcBusy, 20);
 	});
 });

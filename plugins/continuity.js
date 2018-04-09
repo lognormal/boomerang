@@ -2055,10 +2055,6 @@
 			var curTime = reportTime;
 			var missedReports = 0;
 
-			// update the total stats
-			overallTotal += total;
-			overallLate += late;
-
 			if (total === 0) {
 				return;
 			}
@@ -2080,6 +2076,10 @@
 
 				missedReports++;
 			}
+
+			// update the total stats
+			overallTotal += total;
+			overallLate += late;
 
 			t.set("busy", Math.round(late / total * 100), reportTime);
 
