@@ -122,7 +122,7 @@
  * * A timeline (`c.t.busy`) and the overall Page Busy % (`c.b`) will be added to the
  *     beacon (see Beacon Parameters details below)
  *
- * Enabling Page Busy monitoring should not have a noticable effect on the page load
+ * Enabling Page Busy monitoring should not have a noticeable effect on the page load
  * experience.  The 32-millisecond polling is lightweight and should barely register
  * on JavaScript CPU profiles.
  *
@@ -147,7 +147,7 @@
  * * A timeline (`c.t.fps`) and many Frame Rate metrics (`c.f.*`) will be added to the
  *     beacon (see Beacon Parameters details below)
  *
- * Enabling Frame Rate monitoring should not have a noticable effect on the page load
+ * Enabling Frame Rate monitoring should not have a noticeable effect on the page load
  * experience.  The frame callback may happen up to the device's refresh rate (which
  * is often 60 FPS), and the work done in the callback should be barely visible
  * in JavaScript CPU profiles (often less than 5ms over a page load).
@@ -488,12 +488,12 @@
  *
  * ```
  * c.t.fps =
- *     [3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 7, 5, 7, 6, 5, 7, 6, 5, 6, 6, 7, 6,
- *     6, 5, 0, 7, 5, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5];
+ *     [3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 7, 5, 7, 6, 5, 7, 6, 5, 6, 6, 7, 6, 6,
+ *     5, 0, 7, 5, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5];
  *
  * c.t.domsz = [2163, 2164];
  *
- * c.t.mousepct = [0, 0, 0, 0, 0, 53, 0, 5, 7, 18];
+ * c.t.mousepct = [0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 5, 7, 18];
  * ```
  *
  * The timeline can be decompressed via
