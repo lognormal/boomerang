@@ -1447,19 +1447,20 @@
 			}
 
 			that[fn] = function(type, listener, useCapture) {
-				idx = impl.trackedFnIdx(this, type, listener, useCapture);
+				var targetObj = this === window ? BOOMR.window : this;
+				idx = impl.trackedFnIdx(targetObj, type, listener, useCapture);
 				if (idx !== -1) {
-					wrappedFn = this._bmrEvents[idx][3];
+					wrappedFn = targetObj._bmrEvents[idx][3];
 
 					// remove our wrapped function instead
-					origFn.call(this, type, wrappedFn, useCapture);
+					origFn.call(targetObj, type, wrappedFn, useCapture);
 
 					// remove bookkeeping
-					this._bmrEvents.splice(idx, 1);
+					targetObj._bmrEvents.splice(idx, 1);
 				}
 				else {
 					// unknown, pass original args
-					origFn.call(this, type, listener, useCapture);
+					origFn.call(targetObj, type, listener, useCapture);
 				}
 			};
 		},
