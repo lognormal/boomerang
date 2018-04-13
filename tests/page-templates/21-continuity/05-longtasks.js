@@ -65,7 +65,7 @@ describe("e2e/21-continuity/05-longtasks", function() {
 		var b = tf.lastBeacon();
 
 		var ltData = findMyLongTasks(b, 1);
-		assert.operator(parseInt(ltData.d, 36), ">=", 1500);
+		assert.operator(parseInt(ltData.d, 36), ">=", 1400);
 		assert.operator(parseInt(ltData.d, 36), "<=", 3000);
 	});
 
@@ -100,7 +100,7 @@ describe("e2e/21-continuity/05-longtasks", function() {
 		var b = tf.lastBeacon();
 
 		var ltData = findMyLongTasks(b, 3);
-		assert.operator(parseInt(ltData.d, 36), ">=", 1500);
+		assert.operator(parseInt(ltData.d, 36), ">=", 1400);
 		assert.operator(parseInt(ltData.d, 36), "<=", 3000);
 	});
 
