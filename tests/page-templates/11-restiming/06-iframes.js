@@ -24,6 +24,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 			var pageResources = window.performance.getEntriesByType("resource");
 
@@ -54,6 +55,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {

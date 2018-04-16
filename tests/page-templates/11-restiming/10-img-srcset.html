@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="10-img-srcset.js" type="text/javascript"></script>
+<script src="../../vendor/resourcetiming-compression/src/resourcetiming-decompression.js" type="text/javascript"></script>
+
+<!-- Note that the px values in `sizes` are density corrected for retina devices. I don't know how this will work for standard density screens -->
+<!-- Keep the order of srcset and sizes consistent because 10-img-srcset.js expects them to be in the same order -->
+<img id="srcset-img">
+<script>
+var widths = [800, 480, 320];
+(function() {
+	var srcset = [];
+	var sizes = [];
+	var img = document.getElementById("srcset-img");
+	for (var i = 0; i < widths.length; i++) {
+		srcset.push("support/09-" + widths[i] + ".jpg?" + Math.random() + " " + widths[i] + "w");
+	}
+
+	img.srcset = srcset.join(", ");
+	img.src = "support/09-" + widths[widths.length - 1] + ".jpg?" + Math.random();
+})();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

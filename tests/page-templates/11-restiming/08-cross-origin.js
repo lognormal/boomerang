@@ -2,7 +2,7 @@
 /*eslint-disable no-loop-func*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/11-restiming/06-iframes", function() {
+describe("e2e/11-restiming/08-cross-origin", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
@@ -24,6 +24,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 			var pageResources = window.performance.getEntriesByType("resource");
 
@@ -59,6 +60,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
@@ -74,6 +76,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
@@ -89,6 +92,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isDefined(BOOMR.utils.arrayFind(resources, function(r) {
@@ -104,6 +108,7 @@ describe("e2e/11-restiming/06-iframes", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.lastBeacon();
 
+			ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 
 			assert.isUndefined(BOOMR.utils.arrayFind(resources, function(r) {

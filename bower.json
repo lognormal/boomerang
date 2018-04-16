@@ -43,7 +43,7 @@
     "json3": "~3.3.2",
     "lodash": "~3.0.0",
     "mocha": "~3.4.2",
-    "resourcetiming-compression": "^0.3.3",
+    "resourcetiming-compression": "^1.0.1",
     "usertiming": "~0.1.8",
     "usertiming-compression": "~0.1.4"
   },

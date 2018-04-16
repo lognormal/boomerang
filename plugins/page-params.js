@@ -1269,7 +1269,7 @@
 			}
 
 			if (el) {
-				url = el.src || el.href;
+				url = el.currentSrc || el.src || el.getAttribute("xlink:href") || el.href;
 			}
 			else if (!url) {
 				return false;

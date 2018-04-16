@@ -12,7 +12,7 @@ describe("e2e/11-restiming/06-svg-image", function() {
 			}
 		}
 
-		return null;
+		return undefined;
 	}
 
 	it("Should pass basic beacon validation", function(done) {

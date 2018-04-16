@@ -625,7 +625,7 @@
 			.forEach
 			.call(a.ownerDocument.getElementsByTagName(tagName), function(r) {
 				// Get canonical URL
-				a.href = r.src || r.href;
+				a.href = r.currentSrc || r.src || r.getAttribute("xlink:href") || r.href;
 
 				// only get external resource
 				if (a.href.match(/^https?:\/\//)) {
@@ -678,36 +678,63 @@
 			for (i = 0; i < elements.length; i++) {
 				el = elements[i];
 
+				if (!el) {
+					continue;
+				}
+
 				// look at this element if it has a src attribute or xlink:href, and we haven't already looked at it
-				if (el) {
-					// src = IMG, IFRAME
-					// xlink:href = svg:IMAGE
-					src = el.src || el.getAttribute("src") || el.getAttribute("xlink:href");
+				// currentSrc = IMG inside a PICTURE element or IMG srcset
+				// src = IMG, IFRAME
+				// xlink:href = svg:IMAGE
+				src = el.currentSrc || el.src || el.getAttribute("src") || el.getAttribute("xlink:href");
 
-					// change src to be relative
-					a.href = src;
-					src = a.href;
+				// make src absolute
+				a.href = src;
+				src = a.href;
 
-					if (src && !entries[src]) {
-						rect = el.getBoundingClientRect();
+				if (!src || entries[src]) {
+					continue;
+				}
 
-						// Require both height & width to be non-zero
-						// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
-						if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
-							entries[src] = [
-								rect.height || el.offsetHeight,
-								rect.width || el.offsetWidth,
-								Math.round(rect.top + y),
-								Math.round(rect.left + x)
-							];
+				rect = el.getBoundingClientRect();
 
-							// If this is an image, it has a naturalHeight & naturalWidth
-							// if these are different from its display height and width, we should report that
-							// because it indicates scaling in HTML
-							if ((el.naturalHeight || el.naturalWidth) && (entries[src][0] !== el.naturalHeight || entries[src][1] !== el.naturalWidth)) {
-								entries[src].push(el.naturalHeight, el.naturalWidth);
-							}
-						}
+				// Require both height & width to be non-zero
+				// IE <= 8 does not report rect.height/rect.width so we need offsetHeight & width
+				if ((rect.height || el.offsetHeight) && (rect.width || el.offsetWidth)) {
+					entries[src] = [
+						rect.height || el.offsetHeight,
+						rect.width || el.offsetWidth,
+						Math.round(rect.top + y),
+						Math.round(rect.left + x)
+					];
+
+					// If this is an image, it has a naturalHeight & naturalWidth
+					// if these are different from its display height and width, we should report that
+					// because it indicates scaling in HTML
+					if (!el.naturalHeight && !el.naturalWidth) {
+						continue;
+					}
+
+					// If the image came from a srcset, then the naturalHeight/Width will be density corrected.
+					// We get the actual physical dimensions by assigning the image to an uncorrected Image object.
+					// This should load from in-memory cache, so there should be no extra load.
+					var realImg, nH, nW;
+
+					if (el.currentSrc && (el.srcset || el.parentNode.nodeName.toUpperCase() === "PICTURE")) {
+						// We need to create this Image in the window that contains the element, and not
+						// the boomerang window.
+						realImg = el.isConnected ? el.ownerDocument.createElement("IMG") : new BOOMR.window.Image();
+						realImg.src = src;
+					}
+					else {
+						realImg = el;
+					}
+
+					nH = realImg.naturalHeight || el.naturalHeight;
+					nW = realImg.naturalWidth  || el.naturalWidth;
+
+					if ((nH || nW) && (entries[src][0] !== nH || entries[src][1] !== nW)) {
+						entries[src].push(nH, nW);
 					}
 				}
 			}
@@ -810,9 +837,9 @@
 			// transferSize: how many bytes were over the wire. It can be 0 in the case of X-O,
 			// or if it was fetched from a cache.
 			//
-			// encodedBodySize: the size after applying encoding (e.g. gzipped size).  It is 0 if X-O.
+			// encodedBodySize: the size after applying encoding (e.g. gzipped size).  It is 0 if X-O or no content (eg: beacon).
 			//
-			// decodedBodySize: the size after removing encoding (e.g. the original content size).  It is 0 if X-O.
+			// decodedBodySize: the size after removing encoding (e.g. the original content size).  It is 0 if X-O or no content (eg: beacon).
 			//
 			// Here are the possible combinations of values: [encodedBodySize, transferSize, decodedBodySize]
 			//

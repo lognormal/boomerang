@@ -32,6 +32,7 @@ describe("e2e/11-restiming/09-link-attrs", function() {
 
 		var b = tf.beacons[0];
 
+		ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 		var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 		var foundURLs = resources.reduce(function(arr, r) {
 			arr.push(r.name);

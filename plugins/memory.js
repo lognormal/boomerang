@@ -245,7 +245,7 @@
 							return el.src && !el.src.toLowerCase().match(/^(?:about:|javascript:|data:|#)/);
 						},
 						function(el) {
-							return !(uniqUrls[el.src] = uniqUrls.hasOwnProperty(el.src));
+							return !(uniqUrls[el.currentSrc || el.src] = uniqUrls.hasOwnProperty(el.currentSrc || el.src));
 						}
 					));
 
