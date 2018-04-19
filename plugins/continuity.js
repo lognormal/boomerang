@@ -1370,13 +1370,13 @@
 			}
 
 			// find any images matching this selector or underneath this selector
-			combinedSelector = selector + ", " + selector + " * img";
+			combinedSelector = selector + ", " + selector + " * img, " + selector + " * image";
 
 			// use QSA to find all matching
 			elements = BOOMR.window.document.querySelectorAll(combinedSelector);
 			if (elements && elements.length) {
 				for (i = 0; i < elements.length; i++) {
-					src = elements[i].currentSrc || elements[i].src;
+					src = elements[i].currentSrc || elements[i].src || elements[i].getAttribute("xlink:href");
 					if (src) {
 						entries = p.getEntriesByName(src);
 						if (entries && entries.length) {
