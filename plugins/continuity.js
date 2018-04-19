@@ -1376,7 +1376,7 @@
 			elements = BOOMR.window.document.querySelectorAll(combinedSelector);
 			if (elements && elements.length) {
 				for (i = 0; i < elements.length; i++) {
-					src = elements[i].src;
+					src = elements[i].currentSrc || elements[i].src;
 					if (src) {
 						entries = p.getEntriesByName(src);
 						if (entries && entries.length) {
