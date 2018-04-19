@@ -1654,7 +1654,7 @@
 					}
 					else if (data.response.raw) {
 						try {
-							if (JSON && typeof JSON.parse === "function") {
+							if (window.JSON && typeof JSON.parse === "function") {
 								var parsed = JSON.parse(data.response.raw);
 								return this.extractJavaScriptVariable(o.parameter2, o, parsed);
 							}

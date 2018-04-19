@@ -12,6 +12,10 @@
  *   * `mem.total`: [`memory.totalJSHeapSize`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
  *   * `mem.limit`: [`memory.jsHeapSizeLimit`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
  *   * `mem.used`: [`m.usedJSHeapSize`](https://webplatform.github.io/docs/apis/timing/properties/memory/)
+ *   * `mem.lssz`: Number of localStorage bytes used
+ *   * `mem.lsln`: Number of localStorage keys used
+ *   * `mem.sssz`: Number of sessionStorage bytes used
+ *   * `mem.ssln`: Number of sessionStorage keys used
  * * Screen
  *   * `scr.xy`: [`screen.width`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/width)
  *     and [`screen.height`](https://developer.mozilla.org/en-US/docs/Web/API/Screen/height) (e.g. `100x200`)
@@ -29,6 +33,7 @@
  * * DOM
  *   * `dom.ln`: Number of DOM nodes in the main frame
  *   * `dom.sz`: Number of HTML bytes of of the main frame
+ *   * `dom.ck`: Number of bytes stored as cookies available to JavaScript on the current domain
  *   * `dom.img`: Number of `IMG` nodes in the main frame
  *   * `dom.img.ext`: Number of external (e.g. not `data:` URI) `IMG` nodes in the main frame
  *   * `dom.img.uniq`: Number of unique `IMG src` nodes in the main frame
@@ -45,7 +50,7 @@
  * @class BOOMR.plugins.Memory
  */
 (function() {
-	var w, p = {}, d, m, s, n, b, impl;
+	var w, p = {}, d, m, s, n, b, ls, ss, impl;
 
 	BOOMR = window.BOOMR || {};
 	BOOMR.plugins = BOOMR.plugins || {};
@@ -147,7 +152,8 @@
 	impl = {
 		done: function() {
 			if (!w) {
-				return;		// this can happen for an unload beacon
+				// this can happen for an unload beacon
+				return;
 			}
 
 			// If we have resource timing, get number of resources
@@ -186,6 +192,23 @@
 					"mem.used": m.usedJSHeapSize
 				});
 			}
+
+			errorWrap(ls && ss,
+				function() {
+					BOOMR.addVar({
+						"mem.lsln": ls.length,
+						"mem.ssln": ss.length
+					});
+
+					if (window.JSON && typeof JSON.stringify === "function") {
+						BOOMR.addVar({
+							"mem.lssz": JSON.stringify(ls).length,
+							"mem.sssz": JSON.stringify(ss).length
+						});
+					}
+				},
+				"localStorage"
+			);
 
 			errorWrap(s,
 				function() {
@@ -234,7 +257,8 @@
 
 					BOOMR.addVar({
 						"dom.ln": nodeCount("*"),
-						"dom.sz": d.documentElement.innerHTML.length
+						"dom.sz": d.documentElement.innerHTML.length,
+						"dom.ck": d.cookie.length
 					});
 
 					uniqUrls = {};
@@ -312,6 +336,15 @@
 				c = w.console;
 				s = w.screen;
 				n = w.navigator;
+
+				try {
+					ls = w.localStorage;
+					ss = w.sessionStorage;
+				}
+				catch (e) {
+					// NOP - some browsers will throw on access to var
+				}
+
 				if (n && n.battery) {
 					b = n.battery;
 				}
