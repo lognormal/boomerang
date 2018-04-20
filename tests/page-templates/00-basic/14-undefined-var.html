@@ -1,0 +1,15 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="14-undefined-var.js" type="text/javascript"></script>
+<script>
+// don't use sendBeacon so we can easily inspect the URL
+window.navigator.sendBeacon = null;
+
+// add an undefined var, should end up as ''
+BOOMR.addVar("undef", undefined);
+
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

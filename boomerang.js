@@ -3485,29 +3485,20 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		getVarsOfPriority: function(vars, pri) {
-			var name, url = [];
+			var name, url = [],
+			    // if we were given a priority, iterate over that list
+			    // else iterate over vars
+			    iterVars = (pri !== 0 ? impl.varPriority[pri] : vars);
 
-			if (pri !== 0) {
-				// if we were given a priority, iterate over that list
-				for (name in impl.varPriority[pri]) {
-					if (impl.varPriority[pri].hasOwnProperty(name)) {
-						// if this var is set, add it to our URL array
-						if (vars.hasOwnProperty(name)) {
-							url.push(this.getUriEncodedVar(name, vars[name]));
+			for (name in iterVars) {
+				// if this var is set, add it to our URL array
+				if (iterVars.hasOwnProperty(name) && vars.hasOwnProperty(name)) {
+					url.push(this.getUriEncodedVar(name, typeof vars[name] === "undefined" ? "" : vars[name]));
 
-							// remove this name from vars so it isn't also added
-							// to the non-prioritized list when pri=0 is called
-							delete vars[name];
-						}
-					}
-				}
-			}
-			else {
-				// if we weren't given a priority, iterate over all of the vars
-				// that are left (from not being removed via earlier pri -1 or 1)
-				for (name in vars) {
-					if (vars.hasOwnProperty(name)) {
-						url.push(this.getUriEncodedVar(name, vars[name]));
+					// remove this name from vars so it isn't also added
+					// to the non-prioritized list when pri=0 is called
+					if (pri !== 0) {
+						delete vars[name];
 					}
 				}
 			}
