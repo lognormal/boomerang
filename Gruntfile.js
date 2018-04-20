@@ -815,7 +815,8 @@ module.exports = function() {
 		},
 		protractor_webdriver: {
 			options: {
-				keepAlive: true
+				keepAlive: true,
+				command: "webdriver-manager start " + grunt.option("webdriver-versions")
 			},
 			e2e: {
 			}
