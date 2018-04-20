@@ -120,7 +120,8 @@
 				enabled: true,
 				clearOnBeacon: true,
 				trimUrls: true,
-				serverTiming: true
+				serverTiming: true,
+				monitorClearResourceTimings: true
 			},
 			AutoXHR: {
 				alwaysSendXhr: true,

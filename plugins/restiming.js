@@ -544,6 +544,10 @@
 			// offset all of the entries by the specified offset for this frame
 			var frameEntries = frame.performance.getEntriesByType("resource"),
 			    frameFixedEntries = [];
+			if (frame === BOOMR.window && impl.collectedEntries) {
+				Array.prototype.push.apply(frameEntries, impl.collectedEntries);
+				impl.collectedEntries = [];
+			}
 
 			for (i = 0; frameEntries && i < frameEntries.length; i++) {
 				t = frameEntries[i];
@@ -1643,14 +1647,19 @@
 		},
 		xssBreakWords: DEFAULT_XSS_BREAK_WORDS,
 		urlLimit: DEFAULT_URL_LIMIT,
+
+		// overridable
 		clearOnBeacon: false,
 		trimUrls: [],
+		serverTiming: true,
+		monitorClearResourceTimings: false,
+		// overridable
+
 		/**
 		 * Array of resource types to track, or "*" for all.
 		 *  @type {string[]|string}
 		 */
 		trackedResourceTypes: "*",
-		serverTiming: true,
 		done: function() {
 			// Stop if we've already sent a nav beacon (both xhr and spa* beacons
 			// add restiming manually).
@@ -1710,13 +1719,16 @@
 		 * @param {number} [config.ResourceTiming.urlLimit] URL length limit, after which `...` will be used
 		 * @param {string[]|RegExp[]} [config.ResourceTiming.trimUrls] List of strings of RegExps
 		 * to trim from URLs.
+		 * @param {boolean} [config.ResourceTiming.monitorClearResourceTimings] Whether or not to instrument
+		 * `performance.clearResourceTimings`
 		 *
 		 * @returns {@link BOOMR.plugins.ResourceTiming} The ResourceTiming plugin for chaining
 		 * @memberof BOOMR.plugins.ResourceTiming
 		 */
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "ResourceTiming",
-				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls", "trackedResourceTypes", "serverTiming"]);
+				["xssBreakWords", "clearOnBeacon", "urlLimit", "trimUrls", "trackedResourceTypes", "serverTiming",
+					"monitorClearResourceTimings"]);
 
 			if (impl.initialized) {
 				return this;
@@ -1728,6 +1740,16 @@
 				BOOMR.subscribe("xhr_load", impl.xhr_load, null, impl);
 				BOOMR.subscribe("beacon", impl.onBeacon, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
+
+				if (impl.monitorClearResourceTimings) {
+					BOOMR.window.performance.clearResourceTimings = (function(_){
+						return function() {
+							impl.collectedEntries = impl.collectedEntries || [];
+							Array.prototype.push.apply(impl.collectedEntries, BOOMR.window.performance.getEntriesByType("resource"));
+							_.apply(BOOMR.window.performance, arguments);
+						};
+					})(BOOMR.window.performance.clearResourceTimings);
+				}
 			}
 			else {
 				impl.complete = true;
