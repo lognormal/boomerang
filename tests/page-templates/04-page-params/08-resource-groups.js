@@ -224,19 +224,4 @@ describe("e2e/04-page-params/08-resource-groups", function() {
 			return this.skip();
 		}
 	});
-
-	it("Should have the custom timer 16 - RG with slowest resource", function() {
-		if (t.isResourceTimingSupported()) {
-			var b = tf.lastBeacon();
-			var timers = t.parseTimers(b.t_other);
-			assert.isDefined(timers["ctim.CT16"], "ctim.CT16 - Exists on the beacon");
-			assert.closeTo(
-				parseInt(timers["ctim.CT16"]),
-				t.findFirstResource("delay=3000").duration,
-				2);
-		}
-		else {
-			return this.skip();
-		}
-	});
 });
