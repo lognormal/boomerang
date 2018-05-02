@@ -51,7 +51,7 @@
  *     {"name":"mark2","startTime":200,"duration":0,"entryType":"mark"},
  *     {"name":"measure2","startTime":200,"duration":200,"entryType":"measure"}]
  *
- * Uncompressed measures only send their duration in contrast to comrpressed measures, which also send their startTime.
+ * Uncompressed measures only send their duration in contrast to compressed measures, which also send their startTime.
  *
  * ## Compatibility
  *
@@ -93,33 +93,25 @@
 		options: {"from": 0, "window": BOOMR.window},
 
 		/*
-		 * Gets the user timings, filters out those that have already been sent
+		 * Gets the user timings, filters out those that have already been sent.
 		 * Calls the UserTimingCompression library to get the compressed UserTiming
-		 * data that occurred since the last call
+		 * data that occurred since the last call.
 		 *
 		 * @returns {string} UserTiming data
 		 */
 		getUserTiming: function() {
-			var frame, entries, options;
-
-			options = impl.options || {};
-			frame = options.window || window;
-			entries = this.findUserTimingForFrame(frame);
+			var entries = this.findUserTimingForFrame(impl.options.window);
 
 			// 'from' minimum time
-			if (options.from) {
+			if (impl.options.from) {
 				entries = entries.filter(function(e) {
-					return e.startTime + e.duration >= options.from;
+					return e.startTime + e.duration >= impl.options.from;
 				});
 			}
 
 			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
 
 			if (typeof utc === "undefined") {
-				var timings, res;
-				timings = utc.compressUserTiming(entries);
-				return utc.compressForUri(timings);
-			} else {
 				if (entries.length == 0) {
 					return null;
 				} else {
@@ -135,6 +127,10 @@
 					}
 					return JSON.stringify(res);
 				}
+			} else {
+				var timings, res;
+				timings = utc.compressUserTiming(entries);
+				return utc.compressForUri(timings);
 			}
 		},
 
