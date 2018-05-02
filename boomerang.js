@@ -748,6 +748,7 @@ BOOMR_check_doc_domain();
 				// don't capture events on flash objects
 				// because of context slowdowns in PepperFlash
 				if (target &&
+				    target.nodeName &&
 				    target.nodeName.toUpperCase() === "OBJECT" &&
 				    target.type === "application/x-shockwave-flash") {
 					return;
