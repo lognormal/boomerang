@@ -15,6 +15,8 @@ module.exports = function(req, res) {
 	    typeof q.acao !== "undefined";  // assume json if the acao param exists
 	var delay = q.delay || 0;
 	var domain = q.d || "";
+	var statusCode = q["status-code"] || 200;
+	var empty = q.empty || 0;
 
 	setTimeout(function() {
 		var hash = crypto.createHash("sha1");
@@ -26,6 +28,11 @@ module.exports = function(req, res) {
 
 		if (typeof q.acao !== "undefined") {
 			res.header("Access-Control-Allow-Origin", "*");
+		}
+
+		if (empty) {
+			res.status(statusCode).send();
+			return;
 		}
 
 		// if they've requested a specific non-refresh config, send that file
@@ -46,27 +53,27 @@ module.exports = function(req, res) {
 			contents = contents.replace("{{H_CR}}", hcr);
 			contents = contents.replace("{{DOMAIN}}", domain);
 
-			res.send(contents);
+			res.status(statusCode).send(contents);
 		}
 		// config refresh
 		else if (r) {
 			var content = util.format('{"h.t":%d,"h.cr":"%s"}', ht, hcr);
 			if (json) {
-				res.send(content);
+				res.status(statusCode).send(content);
 			}
 			else {
 				var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.addVar(%s);", content);
-				res.send(wrap);
+				res.status(statusCode).send(wrap);
 			}
 		}
 		else {
 			var content = util.format('{"h.t":%d,"h.cr":"%s","h.d":"%s","autorun":true}', ht, hcr, domain);
 			if (json) {
-				res.send(content);
+				res.status(statusCode).send(content);
 			}
 			else {
 				var wrap = util.format("BOOMR_configt=new Date().getTime();BOOMR.init(%s);", content);
-				res.send(wrap);
+				res.status(statusCode).send(wrap);
 			}
 		}
 	}, delay);
