@@ -151,7 +151,7 @@ The main build targets are:
 * `clean` cleans the `build/` directory
 * `build` builds a new version of Boomerang from scratch
 * `lint` runs lint on the project
-* `test` runs tests
+* `test` runs {@tutorial tests}
 
 A full list of build targets are avaialble in `Gruntfile.js`.
 
