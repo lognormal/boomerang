@@ -36,5 +36,8 @@
 	},
 	"loader-snippet": {
 		"title": "Non-Blocking Loader Snippet"
+	},
+	"tests": {
+		"title": "Tests"
 	}
 }
