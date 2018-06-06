@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="38-page-group-null.js" type="text/javascript"></script>
+<script>
+
+window.page_group_var = null;
+window.page_group_var2 = {};
+window.page_group_var3 = undefined;
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	PageParams: {
+		pageGroups: [
+			{
+				type: "Custom",
+				parameter1: "page_group_var"
+			},
+			{
+				type: "Custom",
+				parameter1: "page_group_var2"
+			},
+			{
+				type: "Custom",
+				parameter1: "page_group_var3"
+			}
+		]
+	}
+});
+</script>
+<%= footer %>

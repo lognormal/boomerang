@@ -1000,7 +1000,10 @@
 				}
 			}
 
-			if (value === undefined || typeof value === "object" && value !== null) {
+			// ignore for undefined, objects, functions and null
+			if (typeof value === "undefined" ||
+			    typeof value === "object" ||
+			    typeof value === "function") {
 				return false;
 			}
 
@@ -3118,7 +3121,7 @@
 
 					for (i = 0; i < impl[section.impl].length; i++) {
 						if (impl[section.impl][i].name === itemName) {
-							if (value === undefined) {
+							if (typeof value === "undefined") {
 								// If no predefined value, then go through the flow
 								limpl[section.impl].push(impl[section.impl][i]);
 							}
