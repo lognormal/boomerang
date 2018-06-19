@@ -879,14 +879,14 @@ BOOMR_check_doc_domain();
 			var name = impl.LOCAL_STORAGE_PREFIX + "clss";
 			impl.localStorageSupported = false;
 
-			// we need JSON and localStorage support
-			if (!w.JSON || !w.localStorage) {
-				return;
-			}
-
 			// Browsers with cookies disabled or in private/incognito mode may throw an
 			// error when accessing the localStorage variable
 			try {
+				// we need JSON and localStorage support
+				if (!w.JSON || !w.localStorage) {
+					return;
+				}
+
 				w.localStorage.setItem(name, name);
 				impl.localStorageSupported = (w.localStorage.getItem(name) === name);
 				w.localStorage.removeItem(name);

@@ -1,0 +1,23 @@
+<%= header %>
+<script type="text/javascript">
+// ensure we wait for LOGN
+window.BOOMR_LOGN_always = true;
+// we can use the fact that the api key is pasted into the config query request to delay config
+window.BOOMR_API_key = "13-logn-07-localstorage-error&delay=2000";
+
+// accessing localStorage will throw an error
+window.__defineGetter__("localStorage", function() {
+	throw new Error("Security Exception");
+});
+
+</script>
+<!-- ensure the script is on the page before onload -->
+<%= boomerangScript %>
+
+<script src="07-localstorage-error.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 1
+});
+</script>
+<%= footer %>
