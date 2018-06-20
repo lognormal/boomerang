@@ -3284,7 +3284,11 @@ BOOMR_check_doc_domain();
 			//
 			if (w && w.navigator &&
 			    typeof w.navigator.sendBeacon === "function" &&
-			    typeof w.Blob === "function") {
+			    typeof w.Blob === "function" && 
+			    // As per W3C, The sendBeacon method does not provide ability to pass any
+			    // header other than 'Content-Type'. So if we need to send data with 
+			    // 'Authorization' header, we need to fallback to good old xhr.
+			    typeof impl.beacon_auth_token === "undefined") {
 				// note we're using sendBeacon with &sb=1
 				var blobData = new w.Blob([paramsJoined + "&sb=1"], {
 					type: "application/x-www-form-urlencoded"
