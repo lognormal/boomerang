@@ -132,10 +132,10 @@ module.exports = function() {
 	//
 
 	// build file name is based on the version number
-	var buildFilePrefix = pkg.name + "-" + boomerangVersion;
+	var buildFilePrefix = "boomerang-" + boomerangVersion;
 	var buildPathPrefix = path.join(BUILD_PATH, buildFilePrefix);
 
-	var testBuildFilePrefix = pkg.name;
+	var testBuildFilePrefix = "boomerang";
 	var testBuildPathPrefix = path.join(TEST_BUILD_PATH, testBuildFilePrefix);
 
 	var buildDebug = buildPathPrefix + "-debug." + buildSuffix + "js";
