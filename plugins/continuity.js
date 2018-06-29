@@ -3808,8 +3808,13 @@
 		 * Callback after the beacon is ready to send, so we can clear
 		 * our added vars and do other cleanup.
 		 */
-		onBeacon: function() {
+		onBeacon: function(edata) {
 			var i;
+
+			// if it's an early beacon we want to keep the vars for the next beacon
+			if (edata && typeof edata.early !== "undefined") {
+				return;
+			}
 
 			// remove added vars
 			if (impl.addedVars && impl.addedVars.length > 0) {
@@ -4074,8 +4079,8 @@
 		 * @memberof BOOMR.plugins.Continuity
 		 */
 		is_complete: function(vars) {
-			// allow error beacons to go through even if we're not complete
-			return impl.complete || (vars && vars["http.initiator"] === "error");
+			// allow error and early beacons to go through even if we're not complete
+			return impl.complete || (vars && (vars["http.initiator"] === "error" || typeof vars.early !== "undefined"));
 		},
 
 		/**

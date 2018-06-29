@@ -142,10 +142,11 @@
 		 *
 		 * Adds the `usertiming` param to the beacon.
 		 */
-		addEntriesToBeacon: function() {
+		addEntriesToBeacon: function(vars) {
 			var r, now = BOOMR.hrNow();
 
-			if (this.complete) {
+			// Add entries to all beacon types except early beacons
+			if (this.complete || (vars && typeof vars.early !== "undefined")) {
 				return;
 			}
 

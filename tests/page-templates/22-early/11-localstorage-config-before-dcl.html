@@ -1,0 +1,58 @@
+<%= header %>
+<!--
+locastorage -> logn receives config -> DOMContentLoaded -> early beacon -> onload -> normal beacon
+-->
+<script>
+// ensure we wait for LOGN
+window.BOOMR_LOGN_always = true;
+window.BOOMR_API_key = "22-early-localstorage";
+
+// store a config in localStorage
+var config = {
+	"autorun": true,
+	"h.key": window.BOOMR_API_key,
+	"h.d": window.location.hostname,
+	"h.t": new Date().getTime(),
+	"h.cr": "abc",
+
+	"PageParams": {
+		"pageGroups": [
+			{
+				"type": "Regexp",
+				"parameter1": "/pages/",
+				"parameter2": "FROMLOCALSTORAGE"
+			}
+		]
+	},
+	LOGN: {
+		storeConfig: true
+	},
+	Early: {
+		enabled: true
+	}
+};
+
+// onBoomerangLoaded doesn't fire early enough and BOOMR.utils isn't available yet
+// so we need to set the cache manually
+window.localStorage.setItem("_boomr_" + "LOGN", JSON.stringify({ items: config }));
+
+// Force navigation to TYPE_NAVIGATE
+if (window.performance) {
+	window.performance.__defineGetter__("navigation", function() {
+		return {type: 0, redirectCount: 0};
+	});
+}
+</script>
+<%= boomerangScript %>
+
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 2
+});
+</script>
+<!-- delay the following script in order to delay DOMContentLoaded -->
+<script src="/delay?delay=4000&amp;file=/page-templates/22-early/11-localstorage-config-before-dcl.js" type="text/javascript"></script>
+<!-- delay onload even more -->
+<img src="/delay?delay=8000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

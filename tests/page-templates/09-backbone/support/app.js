@@ -223,8 +223,9 @@ if (typeof window.backbone_nav_routes !== "undefined" &&
     Object.prototype.toString.call(window.backbone_nav_routes) === "[object Array]") {
 
 	BOOMR.subscribe("beacon", function(beacon) {
-		// only continue for SPA beacons
-		if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS)) {
+		// only continue for non-early SPA beacons
+		if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS) ||
+		    typeof beacon.early !== "undefined") {
 			return;
 		}
 

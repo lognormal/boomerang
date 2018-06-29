@@ -1,0 +1,56 @@
+<%= header %>
+<!--
+locastorage -> early beacon -> onload -> normal beacon -> logn receives config
+-->
+<script>
+// ensure we wait for LOGN
+window.BOOMR_LOGN_always = true;
+// we can use the fact that the api key is pasted into the config query request to delay config
+window.BOOMR_API_key = "22-early-localstorage&delay=5000";
+
+// store a config in localStorage
+var config = {
+	"autorun": true,
+	"h.key": window.BOOMR_API_key,
+	"h.d": window.location.hostname,
+	"h.t": new Date().getTime(),
+	"h.cr": "abc",
+
+	"PageParams": {
+		"pageGroups": [
+			{
+				"type": "Regexp",
+				"parameter1": "/pages/",
+				"parameter2": "FROMLOCALSTORAGE"
+			}
+		]
+	},
+	LOGN: {
+		storeConfig: true
+	},
+	Early: {
+		enabled: true
+	}
+};
+
+// onBoomerangLoaded doesn't fire early enough and BOOMR.utils isn't available yet
+// so we need to set the cache manually
+window.localStorage.setItem("_boomr_" + "LOGN", JSON.stringify({ items: config }));
+
+// Force navigation to TYPE_NAVIGATE
+if (window.performance) {
+	window.performance.__defineGetter__("navigation", function() {
+		return {type: 0, redirectCount: 0};
+	});
+}
+</script>
+<%= boomerangScript %>
+
+<script src="07-localstorage-config-after-onload.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 2
+});
+</script>
+<img src="/delay?delay=2000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

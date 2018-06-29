@@ -251,6 +251,7 @@
 			});
 
 			BOOMR.init(config);
+			BOOMR.fireEvent("config", config);  // this might unblock a waiting beacon
 		}
 
 		if (config.onBoomerangLoaded) {
@@ -959,6 +960,181 @@
 		return window.navigator &&
 			(window.navigator.userAgent.indexOf("MSIE") !== -1 ||
 			window.navigator.appVersion.indexOf("Trident/") > 0);
+	};
+
+	/**
+	 * Validates an early beacon against the load beacon
+	 */
+	t.validateEarlyBeacon = function(early, normal) {
+		var i, field, timer, timers, early_timers = {}, normal_timers = {};
+
+		// Don't test h.pg, we'll do some magic in the tests to make sure page params runs twice
+
+		// Not yet tested:
+		// "vis.st",
+		// "dom.res",
+		// "dom.doms",
+		// "mem.total",
+		// "mem.limit",
+		// "mem.used",
+		// "scr.xyv",
+		// "scr.bpp",
+		// "scr.orn",
+		// "scr.dpx",
+		// "cpu.cnc",
+		// "bat.lvl",
+		// "dom.ln",
+		// "dom.sz",
+		// "dom.img",
+		// "dom.script",
+		// "dom.script.ext",
+		// "dom.iframe",
+		// "dom.iframe.ext",
+		// "dom.link",
+
+		// fields that should be the same on both beacons
+		var fieldsEqual = [
+			"h.key",
+			"rt.start",
+			"rt.bmr",
+			"rt.tstart",
+			"rt.nstart",
+			"rt.bstart",
+			"rt.blstart",
+			"rt.si",
+			"rt.ss",
+			"rt.sstr_dur",
+			"rt.sstr_to",
+			"v",
+			"pid",
+			"ua.plt",
+			"ua.vnd",
+			"u",
+			"nt_red_cnt",
+			"nt_nav_type",
+			"nt_nav_st",
+			"nt_red_st",
+			"nt_red_end",
+			"nt_fet_st",
+			"nt_dns_st",
+			"nt_dns_end",
+			"nt_con_st",
+			"nt_con_end",
+			"nt_req_st",
+			"nt_res_st",
+			"nt_res_end",
+			"nt_domloading",
+			"nt_domint",
+			"nt_domcontloaded_st",
+			"nt_domcontloaded_end",
+			"nt_unload_st",
+			"nt_unload_end",
+			"nt_domcomp",
+			"nt_load_st",
+			"nt_load_end",  // load could have ended in the case of SPA hard
+			"nt_first_paint",
+			"nt_spdy",
+			"nt_cinf",
+			"if",
+			"vis.pre",
+			"t_configls",
+			"t_domloaded",
+			"t_load",
+			"t_prerender",
+			"t_postrender"
+		];
+
+		// fields that should not be on early beacon
+		var fieldsUndefined = [
+			// no page load timing available yet
+			"t_resp",
+			"t_page",
+			"t_done",
+			"restiming"  // no restiming on early beacons
+		];
+
+		// fields that should be the same on both beacons if available
+		var fieldsEqualIfExists = [
+			"rt.cnf",  // may not be there if config loaded from localStorage
+			"t_configfb",
+			"t_configjs"
+		];
+
+		// fields that must be on the early beacon
+		var fieldsMustExist = [
+			/* SOASTA PRIVATE START */
+			"h.t",
+			"h.cr",  // crumb data may be different if config loaded from localStorage
+			/* SOASTA PRIVATE END */
+			"rt.end",
+			"rt.tt",
+			"early"
+		];
+
+		for (i = 0; i < fieldsEqual.length; i++) {
+			field = fieldsEqual[i];
+			if (field.indexOf("nt_") === 0 && (!(field in early) || early[field] === 0)) {
+				// nav timing fields may be 0 or missing on the early beacon
+				continue;
+			}
+			if (typeof normal[field] === "undefined") {
+				assert.isUndefined(early[field], field + " must not be on early beacon if not on the load beacon");
+			}
+			else {
+				assert.equal(normal[field], early[field], field + " " + normal[field] + " === " +  early[field]);
+			}
+		}
+
+		for (i = 0; i < fieldsUndefined.length; i++) {
+			field = fieldsUndefined[i];
+			assert.isUndefined(early[field], field + " must not be on early beacon");
+		}
+
+		for (i = 0; i < fieldsEqualIfExists.length; i++) {
+			field = fieldsEqualIfExists[i];
+			if (typeof early[field] !== "undefined") {
+				assert.equal(normal[field], early[field], field + " " + normal[field] + " === " +  early[field]);
+			}
+		}
+
+		for (i = 0; i < fieldsMustExist.length; i++) {
+			field = fieldsMustExist[i];
+			assert.isDefined(early[field], field + " must exist");
+		}
+
+		// rt.sl should be 1 less on the early beacon
+		assert.equal(parseInt(normal["rt.sl"], 10), parseInt(early["rt.sl"], 10) + 1,
+		    "session length " + normal["rt.sl"] + " === " +  early["rt.sl"] + " + 1");
+
+		// rt.obo should be equal or 1 more on the normal beacon (if navtiming not supported)
+		if (early["rt.obo"] !== normal["rt.obo"] && (parseInt(early["rt.obo"], 10) + 1) !== parseInt(normal["rt.obo"], 10)) {
+			assert.fail("rt.obo must be equal or 1 more on normal beacon");
+		}
+
+		// t_other, if a timer is on the early beacon then it must be on the normal beacon
+		if (early.t_other) {
+			if (normal.t_other) {
+				normal_timers = this.parseTimers(normal.t_other);
+				early_timers = this.parseTimers(early.t_other);
+
+				for (timer in early_timers) {
+					if (early_timers.hasOwnProperty(timer)) {
+						if (timer.indexOf("custom") === 0) {
+							//custom timers may get longer (eg. ResourceGroups matching several resources)
+							assert.operator(normal_timers[timer], ">=", early_timers[timer],
+						    "t_other  " + timer + " " + normal_timers[timer] + " >= " +  early_timers[timer]);
+						}
+						else {
+							assert.equal(normal_timers[timer], early_timers[timer],
+							    "t_other  " + timer + " " + normal_timers[timer] + " === " +  early_timers[timer]);
+						}
+					}
+				}
+			}
+			else {
+				assert.fail("t_other on early beacon but missing on the normal beacon");
+			}
+		}
 	};
 
 	/**

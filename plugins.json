@@ -27,6 +27,7 @@
         "plugins/usertiming.js",
         "plugins/mq.js",
         "plugins/akamai.js",
+        "plugins/early.js",
         "plugins/logn.js"
     ]
 }

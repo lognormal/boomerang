@@ -179,6 +179,9 @@
 			LOGN: {
 				storeConfig: true
 			},
+			Early: {
+				enabled: true
+			},
 			autorun: true
 		}
 	};

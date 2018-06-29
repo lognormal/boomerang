@@ -2892,7 +2892,12 @@
 			}
 			else {
 				l = w.location;
-				this.complete = true;
+				// mark complete if not an error or early beacon.
+				// error beacons will only include dimensions
+				// and we want load beacons to re-run this after an early beacon
+				if (ename !== "error" && ename !== "early") {
+					this.complete = true;
+				}
 			}
 
 			if (ename === "error") {
@@ -3179,7 +3184,19 @@
 			}
 		},
 
-		/*
+		/**
+		 * Fired on before_early_beacon
+		 */
+		onBeforeEarlyBeacon: function(vars) {
+			// ensure we add our data to the beacon even if we had added it
+			// during a previous nav
+			this.complete = false;
+
+			// add our data to the beacon
+			this.done({}, "early");
+		},
+
+		/**
 		 * Fired when the state changes from pre-render to visible
 		 */
 		prerenderToVisible: function() {
@@ -3738,21 +3755,21 @@
 			* 1 beacon
 			*/
 
-			if (!impl.onloadfired) {
-				BOOMR.subscribe("page_ready", impl.onload, "load", impl);
-				BOOMR.subscribe("page_ready", impl.done, "load", impl);
-				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
-				BOOMR.subscribe("spa_init", impl.initResourceGroupHandlers);
-				BOOMR.subscribe("xhr_init", impl.initResourceGroupHandlers);
-			}
-			else if (impl.autorun) {
-				// If the page has already loaded by the time we get here,
-				// then we just run immediately
-				impl.done("load");
-			}
-
 			if (!impl.initialized) {
-				// We do not want to subscribe to unload or beacon more than once
+				if (!impl.onloadfired) {
+					BOOMR.subscribe("page_ready", impl.onload, "load", impl);
+					BOOMR.subscribe("page_ready", impl.done, "load", impl);
+					BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
+					BOOMR.subscribe("spa_init", impl.initResourceGroupHandlers);
+					BOOMR.subscribe("xhr_init", impl.initResourceGroupHandlers);
+				}
+				else if (impl.autorun) {
+					// If the page has already loaded by the time we get here,
+					// then we just run immediately
+					impl.done("load");
+				}
+
+				// We do not want to subscribe to unload or onbeacon more than once
 				// because this will just create too many references
 				BOOMR.subscribe("before_unload", impl.onunload, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, "unload", impl);
@@ -3760,6 +3777,7 @@
 				BOOMR.subscribe("beacon", impl.removeResolvedResourceGroupHandlers);
 				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 				BOOMR.subscribe("before_beacon", impl.onBeforeBeacon, null, impl);
+				BOOMR.subscribe("before_early_beacon", impl.onBeforeEarlyBeacon, null, impl);
 				if (BOOMR.plugins.AutoXHR) {
 					BOOMR.plugins.AutoXHR.addExcludeFilter(impl.excludeXhrFilter, impl, "BOOMR.plugins.PageParams.PageGroups");
 				}

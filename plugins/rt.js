@@ -572,7 +572,7 @@
 			BOOMR.debug("Incrementing Session Details... ", "RT");
 			BOOMR.session.length++;
 
-			if (isNaN(impl.timers.t_done.delta)) {
+			if (!impl.timers.t_done || isNaN(impl.timers.t_done.delta)) {
 				impl.oboError++;
 			}
 			else {
@@ -864,7 +864,8 @@
 				t_resp_start = impl.t_fb_approx;
 			}
 
-			if (t_resp_start) {
+			// early beacons should not have t_resp and t_page since the load hasn't occurred yet
+			if (t_resp_start && ename !== "early") {
 				// if we have a fetch start as well, set the specific timestamps instead of from rt.start
 				if (t_fetch_start) {
 					BOOMR.plugins.RT.setTimer("t_resp", t_fetch_start, t_resp_start);
@@ -911,8 +912,9 @@
 		 * - rt.end:    The timestamp when the t_done timer ended
 		 *
 		 * @param t_start The value of t_start that we plan to use
+		 * @param ename The event name that resulted in this call
 		 */
-		setSupportingTimestamps: function(t_start) {
+		setSupportingTimestamps: function(t_start, ename) {
 			if (t_start) {
 				BOOMR.addVar("rt.tstart", t_start);
 			}
@@ -926,7 +928,16 @@
 			if (BOOMR.t_lstart) {
 				BOOMR.addVar("rt.blstart", BOOMR.t_lstart);
 			}
-			BOOMR.addVar("rt.end", impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
+
+			// early beacons don't have t_done, send t_start (or now) as rt.end
+			if (ename === "early") {
+				BOOMR.addVar("rt.end", t_start ? t_start : BOOMR.now());
+			}
+			else {
+				if (impl.timers.t_done) {
+					BOOMR.addVar("rt.end", impl.timers.t_done.end);	// don't just use t_done because dev may have called endTimer before we did
+				}
+			}
 		},
 
 		/**
@@ -937,17 +948,17 @@
 		 * Else, if we have a cached timestamp from an earlier call, use that
 		 * Else, give up
 		 *
-		 * @param ename	The event name that resulted in this call. Special consideration for "xhr"
+		 * @param ename The event name that resulted in this call. Special consideration for "xhr"
 		 * @param data  Data passed in from the event caller. If the event name is "xhr",
 		 *              this should contain the page group name for the xhr call in an attribute called `name`
-		 *		and optionally, detailed timing information in a sub-object called `timing`
+		 *              and optionally, detailed timing information in a sub-object called `timing`
 		 *              and resource information in a sub-object called `resource`
 		 *
 		 * @returns the determined value of t_start or undefined if unknown
 		 */
 		determineTStart: function(ename, data) {
 			var t_start;
-			if (ename === "xhr") {
+			if (ename === "xhr" || (ename === "early" && data && data.initiator === "spa")) {
 				if (data && data.name && impl.timers[data.name]) {
 					// For xhr timers, t_start is stored in impl.timers.xhr_{page group name}
 					// and xhr.pg is set to {page group name}
@@ -1123,8 +1134,11 @@
 			BOOMR.plugins.RT.endTimer("t_domloaded");
 		},
 
-		clear: function() {
-			BOOMR.removeVar("rt.start");
+		clear: function(edata) {
+			// if it's an early beacon we want to keep rt.start for the next beacon
+			if (!edata || typeof edata.early === "undefined") {
+				BOOMR.removeVar("rt.start");
+			}
 			if (impl.addedVars && impl.addedVars.length > 0) {
 				BOOMR.removeVar(impl.addedVars);
 				impl.addedVars = [];
@@ -1243,6 +1257,7 @@
 			BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
 			BOOMR.subscribe("page_ready", this.done, "load", this);
 			BOOMR.subscribe("xhr_load", this.done, "xhr", this);
+			BOOMR.subscribe("before_early_beacon", this.done, "early", this);
 			BOOMR.subscribe("dom_loaded", impl.domloaded, null, impl);
 			BOOMR.subscribe("page_unload", impl.page_unload, null, impl);
 			BOOMR.subscribe("click", impl.onclick, null, impl);
@@ -1419,9 +1434,9 @@
 				impl.addedVars.push("t_other");
 			}
 
-			if (source === "beacon") {
+			if (source === "beacon" && (!vars || typeof vars.early === "undefined")) {
 				impl.timers = {};
-				impl.complete = false;	// reset this state for the next call
+				impl.complete = false;  // reset this state for the next call
 			}
 		},
 
@@ -1448,7 +1463,7 @@
 
 			t_done = impl.validateLoadTimestamp(t_now, edata, ename);
 
-			if (ename === "load" || ename === "visible" || ename === "xhr") {
+			if (ename === "load" || ename === "visible" || ename === "xhr" || ename === "early") {
 				if (!impl.setPageLoadTimers(ename, t_done, edata)) {
 					return this;
 				}
@@ -1456,8 +1471,12 @@
 
 			if (ename === "load" ||
 			    ename === "visible" ||
+			    (ename === "early" &&
+			        (!edata /* dom_loaded */ ||
+			        typeof edata.initiator === "undefined" /* onconfig */ ||
+			        edata.initiator === "spa_hard")) ||
 			    (ename === "xhr" && edata && edata.initiator === "spa_hard")) {
-				// Only add Boomerang timings to page load and SPA beacons
+				// Only add Boomerang timings to normal or early page load and SPA hard beacons
 				impl.getBoomerangTimings();
 			}
 
@@ -1469,7 +1488,9 @@
 
 			// If the dev has already called endTimer, then this call will do nothing
 			// else, it will stop the page load timer
-			this.endTimer("t_done", t_done);
+			if (ename !== "early") {
+				this.endTimer("t_done", t_done);
+			}
 
 			// For XHR events, ensure t_done is set with the proper start, end, and
 			// delta timestamps.  Until Issue #195 is fixed, if this XHR is firing
@@ -1488,7 +1509,7 @@
 				"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 			);
 
-			impl.setSupportingTimestamps(t_start);
+			impl.setSupportingTimestamps(t_start, ename);
 
 			this.addTimersToBeacon(null, ename);
 
@@ -1579,7 +1600,11 @@
 				}
 			}
 
-			impl.complete = true;
+			// mark complete if not an early beacon.
+			// We want load beacons to re-run this after an early beacon
+			if (ename !== "early") {
+				impl.complete = true;
+			}
 
 			BOOMR.sendBeacon(impl.beacon_url);
 
@@ -1593,8 +1618,10 @@
 		 * @memberof BOOMR.plugins.RT
 		 */
 		is_complete: function(vars) {
-			// allow error beacons to go through even if we're not complete
-			return impl.complete || (vars && vars["http.initiator"] === "error");
+			// allow error and early beacons to go through even if we're not complete
+			return impl.complete ||
+			    (vars && vars["http.initiator"] === "error") ||
+			    (vars && typeof vars.early !== "undefined");
 		},
 
 		/**

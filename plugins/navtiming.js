@@ -412,6 +412,15 @@
 
 			// add our data to the beacon
 			this.done();
+		},
+
+		onBeforeEarlyBeacon: function(edata) {
+			// Add our data to the early beacon
+			if (!edata /* dom_loaded */ ||
+			    typeof edata.initiator === "undefined" /* onconfig */ ||
+			    edata.initiator === "spa_hard") {
+				this.done();
+			}
 		}
 	};
 
@@ -431,6 +440,7 @@
 				// we'll fire on whichever happens first
 				BOOMR.subscribe("page_ready", impl.done, null, impl);
 				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, null, impl);
+				BOOMR.subscribe("before_early_beacon", impl.onBeforeEarlyBeacon, null, impl);
 				BOOMR.subscribe("xhr_load", impl.xhr_done, null, impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 				BOOMR.subscribe("beacon", impl.clear, null, impl);

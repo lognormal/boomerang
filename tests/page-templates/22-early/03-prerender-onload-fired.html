@@ -1,0 +1,62 @@
+<%= header %>
+<!--
+Onload and onconfig should happen during prerender and no early beacon should get sent
+prerender -> onload -> config -> visible -> normal beacon
+-->
+<script>
+window.localStorage.removeItem("_boomr_" + "LOGN");
+
+// polyfill document.hidden if needed
+if (typeof document.hidden === "undefined") {
+	document.hidden = false;
+}
+
+// Force navigation to TYPE_NAVIGATE
+if (window.performance) {
+	window.performance.__defineGetter__("navigation", function() {
+		return {type: 0, redirectCount: 0};
+	});
+}
+</script>
+<%= boomerangScript %>
+
+<script src="03-prerender-onload-fired.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+// pretend the browser is in prerender
+BOOMR.visibilityState = function() {
+	return "prerender";
+};
+BOOMR.fireEvent("visibility_changed");
+
+// simulate delayed config
+setTimeout(function() {
+	BOOMR_test.init({
+		testAfterOnBeacon: 1,
+		"autorun": true,
+		"PageParams": {
+			"pageGroups": [
+				{
+					"type": "Regexp",
+					"parameter1": "/pages/",
+					"parameter2": "MYPAGEGROUP"
+				}
+			]
+		},
+		Early: {
+			enabled: true
+		}
+	});
+}, 200);
+
+setTimeout(function() {
+	// fake visible event
+	BOOMR.visibilityState = function() {
+		return "visible";
+	};
+	BOOMR.fireEvent("visibility_changed");
+}, 1000);
+
+</script>
+<img src="/delay?delay=10&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

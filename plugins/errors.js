@@ -1297,8 +1297,11 @@
 		/**
 		 * Fired 'before_beacon'
 		 */
-		beforeBeacon: function() {
-			impl.addErrorsToBeacon();
+		beforeBeacon: function(vars) {
+			// Add errors to all beacon types except early beacons
+			if (!vars || typeof vars.early === "undefined") {
+				impl.addErrorsToBeacon();
+			}
 		},
 
 		/**

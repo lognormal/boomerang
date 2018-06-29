@@ -29,5 +29,6 @@
 	{"key":"continuity"},
 	{"key":"fetch-api"},
 	{"key":"errors-monitor-rejection"},
-	{"key":"errors-monitor-reporting-api"}
+	{"key":"errors-monitor-reporting-api"},
+	{"key":"early"}
 ]

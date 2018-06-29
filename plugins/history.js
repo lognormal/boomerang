@@ -123,12 +123,15 @@
 		/**
 		 * Clears routeChangeInProgress flag
 		 */
-		resetRouteChangeInProgress: function() {
-			debugLog("resetting routeChangeInProgress");
-			if (impl.routeChangeInProgress) {
-				clearTimeout(impl.routeChangeInProgress);
+		resetRouteChangeInProgress: function(edata) {
+			// if it's an early beacon we want to keep the state unchanged
+			if (!edata || typeof edata.early === "undefined") {
+				debugLog("resetting routeChangeInProgress");
+				if (impl.routeChangeInProgress) {
+					clearTimeout(impl.routeChangeInProgress);
+				}
+				impl.routeChangeInProgress = false;
 			}
-			impl.routeChangeInProgress = false;
 		},
 
 		/**

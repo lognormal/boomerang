@@ -59,8 +59,9 @@ const App = React.createClass({
 		if ( window.nav_routes && window.nav_routes.hasOwnProperty("length") && window.nav_routes.length > 0) {
 			if (!subscribed) {
 				BOOMR.subscribe("beacon", function(beacon) {
-					// only continue for SPA beacons
-					if (!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS) && !window.call_page_ready) {
+					// only continue for non-early SPA beacons
+					if ((!BOOMR.utils.inArray(beacon["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS) ||
+					    typeof beacon.early !== "undefined") && !window.call_page_ready) {
 						return;
 					}
 

@@ -1,0 +1,39 @@
+<%= header %>
+<!--
+Early plugin disabled by default
+-->
+<script>
+window.localStorage.removeItem("_boomr_" + "LOGN");
+
+// Force navigation to TYPE_NAVIGATE
+if (window.performance) {
+	window.performance.__defineGetter__("navigation", function() {
+		return {type: 0, redirectCount: 0};
+	});
+}
+</script>
+<%= boomerangSnippet %>
+
+<script src="05-disabled.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+// simulate delayed config, Early not enabled
+setTimeout(function() {
+	BOOMR_test.init({
+		testAfterOnBeacon: 1,
+		"autorun": true,
+		"PageParams": {
+			"pageGroups": [
+				{
+					"type": "Regexp",
+					"parameter1": "/pages/",
+					"parameter2": "MYPAGEGROUP"
+				}
+			]
+		}
+	});
+}, 200);
+
+</script>
+<img src="/delay?delay=2000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

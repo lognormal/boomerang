@@ -237,6 +237,19 @@
 	var SPA_TIMEOUT = 1000;
 
 	/**
+	 * @constant
+	 * @desc
+	 * For early beacons.
+	 * Single Page Applications get an additional timeout after the resource requests in
+	 * flight reaches 0 for the first time.
+	 * We want to allow some time for the SPA to fill in any custom dimensions that we
+	 * capture on the early beacon.
+	 * @type {number}
+	 * @default
+	 */
+	var SPA_EARLY_TIMEOUT = 100;
+
+	/**
 	 * Clicks and XHR events get 50ms for an interesting thing to happen before
 	 * being cancelled.
 	 * @type {number}
@@ -522,8 +535,9 @@
 			nodes_to_wait: 0,  // MO resources + xhrs currently outstanding
 			total_nodes: 0,  // total MO resources + xhrs
 			resources: [],  // resources reported to MO handler (no xhrs)
+			complete: false,
 			aborted: false,  // this event was aborted
-			complete: false
+			firedEarlyBeacon: false
 		},
 		    i,
 		    last_ev,
@@ -1022,6 +1036,15 @@
 			// complete.  If nothing else is added, the end event will be the
 			// timestamp for when this load_finished(), not 1 second from now.
 			if (BOOMR.utils.inArray(current_event.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+				// if this is the first time reaching here then at least one resource was fetched.
+				// Send our SPA early beacon
+				if (!current_event.firedEarlyBeacon && BOOMR.plugins.Early && BOOMR.plugins.Early.is_supported()) {
+					current_event.firedEarlyBeacon = true;
+					setTimeout(function() {
+						// give the SPA framework a bit of time to load the resource
+						BOOMR.plugins.Early.sendEarlyBeacon(current_event.resource, current_event.type);
+					}, SPA_EARLY_TIMEOUT);
+				}
 				this.setTimeout(SPA_TIMEOUT, index);
 			}
 			else {
@@ -2382,16 +2405,7 @@
 			impl.autoXhrEnabled = config.instrument_xhr;
 
 			// check to see if any of the SPAs were enabled
-			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
-				var supported = BOOMR.plugins.SPA.supported_frameworks();
-				for (i = 0; i < supported.length; i++) {
-					var spa = supported[i];
-					if (config[spa] && config[spa].enabled) {
-						impl.singlePageApp = true;
-						break;
-					}
-				}
-			}
+			impl.singlePageApp = BOOMR.plugins.SPA && BOOMR.plugins.SPA.isSinglePageApp(config);
 
 			// Whether or not to always send XHRs.  If a SPA is enabled, this means it will
 			// send XHRs during the hard and soft navs.  If enabled, it will also disable
@@ -2440,6 +2454,7 @@
 			}
 
 			BOOMR.registerEvent("xhr_error");
+			BOOMR.registerEvent("spa_early");
 
 			BOOMR.subscribe("beacon", impl.clear, null, impl);
 		},

@@ -1,0 +1,152 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="support/function-bind-polyfill.js" type="text/javascript"></script>
+
+<base href="/pages/12-react/29-route-change-early-beacon.html" />
+
+<script type="text/javascript">
+// Force navigation to TYPE_NAVIGATE
+if (window.performance) {
+	window.performance.__defineGetter__("navigation", function() {
+		return {type: 0, redirectCount: 0};
+	});
+}
+
+window.imgs = [3000];
+window.html5_mode = false;
+
+// view a widget then come back so debugging (F5) is easier
+window.nav_routes = ["/widgets/1", "/"];
+</script>
+
+<div id="root"></div>
+
+<script src="/test-templates/spa/29-route-change-early-beacon.js" type="text/javascript"></script>
+<script src="27-route-change-early-beacon.js" type="text/javascript"></script>
+<script>
+
+// these will be overwritten by the app
+custom_metric_1 = 111;
+custom_metric_2 = function() {
+	return 222;
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: 6,
+	History: {
+		enabled: true
+	},
+	Early: {
+		enabled: true
+	},
+	PageParams: {
+		pageGroups: [
+			{
+				type: "Regexp",
+				parameter1: ".*/27-route-change-early-beacon.html",
+				parameter2: "home"
+			},
+			{
+				type: "Regexp",
+				parameter1: ".*/widgets/1",
+				parameter2: "widget1"
+			}
+		],
+		customMetrics: [
+			{
+				varName: "custom_metric_1",
+				label: "cmet1",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "custom_metric_2",
+				label: "cmet2",
+				type: "JavaScriptVar"
+			},
+			{
+				varName: "missing_metric",
+				label: "cmet3",
+				type: "JavaScriptVar"
+			},
+			{
+				parameter1: "",
+				parameter2: "//div[@id='cart-total']",
+				label: "cmet4",
+				type: "URLPatternType"
+			},
+			{
+				parameter1: "*",
+				parameter2: "",
+				label: "cmet5",
+				type: "URLPatternType"
+			}
+		],
+		customTimers: [
+			{
+				name: "Timer NavigationTiming",
+				index: 0,
+				type: "NavigationTiming",
+				label: "custom0",
+				"start": "navigationStart",
+				"end": "responseEnd"
+			},
+			{
+				name: "Timer JavaScript Variable",
+				index: 1,
+				type: "Custom",
+				label: "custom1",
+				parameter1: "custom_timer_1"
+			},
+			{
+				name: "Timer JavaScript Function",
+				index: 2,
+				type: "Custom",
+				label: "custom2",
+				parameter1: "custom_timer_2"
+			},
+			{
+				name: "Timer UserTiming",
+				index: 3,
+				type: "UserTiming",
+				label: "custom3",
+				parameter1: "",
+				parameter2: "mark_usertiming"
+			},
+			{
+				name: "Missing Timer JavaScript Variable",
+				index: 4,
+				type: "Custom",
+				label: "custom4",
+				parameter1: "custom_timer_missing"
+			},
+			{
+				name: "Missing Timer UserTiming",
+				index: 5,
+				type: "UserTiming",
+				label: "custom5",
+				parameter1: "",
+				parameter2: "missing_mark_usertiming"
+			}
+		]
+	},
+	ResourceTiming: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<script src="support/app.js"></script>
+<script>
+	// the react app sets up too fast, add another mutation here for our spa_hard to catch
+	BOOMR.subscribe("spa_init", function() {
+		setTimeout(function() {
+			console.log("add somethign");
+			img = document.createElement("img");
+			img.src = "/delay?delay=1000&id=xhr&file=/pages/05-angular/support/img.jpg&rnd=" + Math.random();
+			document.body.appendChild(img);
+		}, 10);
+	}, null, null, true);
+</script>
+
+<%= footer %>

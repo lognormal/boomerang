@@ -9,12 +9,14 @@ BOOMR_test.init({
 		afterOnload: true
 	},
 	afterFirstBeacon: function() {
-		var st = BOOMR.requestStart("test");
+		setTimeout(function() {
+			var st = BOOMR.requestStart("test");
 
-		// loop for 1500ms to trigger a long task
-		BOOMR_test.busy(1500);
+			// loop for 1500ms to trigger a long task
+			BOOMR_test.busy(1500);
 
-		st.loaded();
+			st.loaded();
+		}, 100);
 	}
 });
 </script>

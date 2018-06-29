@@ -342,7 +342,12 @@
 	/**
 	 * Fired 'beacon'
 	 */
-	function onBeacon() {
+	function onBeacon(edata) {
+		// if it's an early beacon we want to keep the timing vars for the next beacon
+		if (edata && typeof edata.early !== "undefined") {
+			return;
+		}
+
 		// remove config timing vars
 		BOOMR.removeVar("t_configjs");
 		BOOMR.removeVar("t_configfb");
@@ -550,5 +555,8 @@ BOOMR.init({
 	},
 	Akamai: {
 		enabled: true
+	},
+	Early: {
+		enabled: false
 	}
 });

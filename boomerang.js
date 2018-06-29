@@ -872,7 +872,7 @@ BOOMR_check_doc_domain();
 
 			// Before we fire any event listeners, let's call real_sendBeacon() to flush
 			// any beacon that is being held by the setImmediate.
-			if (e_name !== "before_beacon" && e_name !== "beacon") {
+			if (e_name !== "before_beacon" && e_name !== "beacon" && e_name !== "before_early_beacon") {
 				BOOMR.real_sendBeacon();
 			}
 
@@ -3112,7 +3112,7 @@ BOOMR_check_doc_domain();
 		 * as names.
 		 *
 		 * Parameters will be on all subsequent beacons unless `singleBeacon` is
-		 * set.
+		 * set. Early beacons will not clear vars that were set with `singleBeacon`.
 		 *
 		 * @param {string} name Variable name
 		 * @param {string|object} val Value
@@ -3624,24 +3624,28 @@ BOOMR_check_doc_domain();
 
 			BOOMR.removeVar(["qt", "pgu"]);
 
-			// remove any vars that should only be on a single beacon
-			for (var singleVarName in impl.singleBeaconVars) {
-				if (impl.singleBeaconVars.hasOwnProperty(singleVarName)) {
-					BOOMR.removeVar(singleVarName);
+			if (typeof impl.vars.early === "undefined") {
+				// remove any vars that should only be on a single beacon.
+				// Early beacons don't clear vars even if flagged as `singleBeacon` so
+				// that they can be re-sent on the next normal beacon
+				for (var singleVarName in impl.singleBeaconVars) {
+					if (impl.singleBeaconVars.hasOwnProperty(singleVarName)) {
+						BOOMR.removeVar(singleVarName);
+					}
 				}
-			}
 
-			// clear single beacon vars list
-			impl.singleBeaconVars = {};
+				// clear single beacon vars list
+				impl.singleBeaconVars = {};
 
-			// keep track of page load beacons
-			if (!impl.hasSentPageLoadBeacon && isPageLoad) {
-				impl.hasSentPageLoadBeacon = true;
+				// keep track of page load beacons
+				if (!impl.hasSentPageLoadBeacon && isPageLoad) {
+					impl.hasSentPageLoadBeacon = true;
 
-				// let this beacon go out first
-				BOOMR.setImmediate(function() {
-					impl.fireEvent("page_load_beacon", varsSent);
-				});
+					// let this beacon go out first
+					BOOMR.setImmediate(function() {
+						impl.fireEvent("page_load_beacon", varsSent);
+					});
+				}
 			}
 
 			// Stop at this point if we are rate limited

@@ -556,6 +556,27 @@
 				}
 			}
 			return false;
+		},
+
+		/**
+		 * Check to see if any of the SPAs are enabled.
+		 * Takes a config object so that it can be called from other plugins' init without
+		 * worrying about plugin order
+		 *
+		 * @param {object} config
+		 *
+		 * @returns {boolean} true if one of the SPA frameworks is enabled
+		 */
+		isSinglePageApp: function(config) {
+			var singlePageApp = false, frameworks = this.supported_frameworks();
+			for (i = 0; i < frameworks.length; i++) {
+				var spa = frameworks[i];
+				if (config[spa] && config[spa].enabled) {
+					singlePageApp = true;
+					break;
+				}
+			}
+			return singlePageApp;
 		}
 
 	};
