@@ -1574,12 +1574,35 @@
 										resource.status = req.status;
 									}
 
-									resource.response = {
-										text: (req.responseType === "" || req.responseType === "text") ? req.responseText : null,
-										xml: (req.responseType === "" || req.responseType === "document") ? req.responseXML : null,
-										raw: req.response,
-										json: req.responseJSON
-									};
+									if (impl.captureXhrRequestResponse) {
+										resource.response = {
+											text: (req.responseType === "" || req.responseType === "text") ? req.responseText : null,
+											xml: (req.responseType === "" || req.responseType === "document") ? req.responseXML : null,
+											raw: req.response,
+											json: req.responseJSON
+										};
+
+										//
+										// Work around browser bugs where our Boomerang frame's Object is not equal
+										// to the main frame's Object.  This affects "isPlainObj()"-like checks that
+										// validate the .constructor is equal to the main frame's Object.
+										// e.g.
+										// https://github.com/facebook/immutable-js/blob/master/src/utils/isPlainObj.js
+										// This seems to mostly affect Safari 11.1.
+										//
+										if (req.response &&
+										    req.response.constructor &&
+										    req.response.constructor === BOOMR.boomerang_frame.Object &&
+										    BOOMR.boomerang_frame.Object !== BOOMR.window.Object) {
+											try {
+												// try to switch the constructor to the main window
+												req.response.constructor = BOOMR.window.Object;
+											}
+											catch (e) {
+												// NOP
+											}
+										}
+									}
 
 									loadFinished();
 								}
@@ -1649,7 +1672,10 @@
 					return orig_send.apply(req, arguments);
 				}
 
-				req.resource.requestPayload = data;
+				if (impl.captureXhrRequestResponse) {
+					req.resource.requestPayload = data;
+				}
+
 				BOOMR.fireEvent("xhr_send", req);
 				resource.timing.requestStart = BOOMR.now();
 
@@ -1717,6 +1743,7 @@
 		excludeFilters: [],
 		initialized: false,
 		addedVars: [],
+		captureXhrRequestResponse: false,
 
 		/**
 		 * Filter function iterating over all available {@link FilterObject}s if
@@ -1792,6 +1819,8 @@
 		 * Back-End during a SPA nav
 		 * @param {boolean} [config.AutoXHR.alwaysSendXhr] Whether or not to send XHR
 		 * beacons for every XHR.
+		 * @param {boolean} [config.captureXhrRequestResponse] Whether or not to capture an XHR's
+		 * request and response bodies on for the {@link event:BOOMR#xhr_load xhr_load} event.
 		 *
 		 * @returns {@link BOOMR.plugins.AutoXHR} The AutoXHR plugin for chaining
 		 * @memberof BOOMR.plugins.AutoXHR
@@ -1941,6 +1970,16 @@
 		 */
 		addExcludeFilter: function(cb, ctx, name) {
 			impl.excludeFilters.push({cb: cb, ctx: ctx, name: name});
+		},
+
+		/**
+		 * Enables or disables XHR request and response capturing for
+		 * the {@link event:BOOMR#xhr_load xhr_load} event.
+		 *
+		 * @param {boolean} enabled Whether or not to enable capturing
+		 */
+		setXhrRequestResponseCapturing: function(enabled) {
+			impl.captureXhrRequestResponse = enabled;
 		}
 	};
 

@@ -3553,6 +3553,12 @@
 								continue;
 							}
 						}
+
+						// determine if we need to enable XHR payload inspection
+						if (BOOMR.plugins.AutoXHR && impl.pageGroups[pgIndex].type === "Payload") {
+							BOOMR.plugins.AutoXHR.setXhrRequestResponseCapturing(true);
+						}
+
 						pgList.push(impl.pageGroups[pgIndex]);
 					}
 				}

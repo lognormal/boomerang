@@ -80,6 +80,10 @@ app.post("/redirect", respond301);
 app.get("/chunked", require("./route-chunked"));
 app.post("/chunked", require("./route-chunked"));
 
+// /json - JSON output
+app.get("/json", require("./route-json"));
+app.post("/json", require("./route-json"));
+
 /* SOASTA PRIVATE START */
 // potential config locations
 app.get("/config", require("./route-config"));
