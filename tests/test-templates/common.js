@@ -169,7 +169,7 @@ describe("common", function() {
 				timers = t.parseTimers(b.t_other);
 				for (timer in timers) {
 					if (timers.hasOwnProperty(timer)) {
-						// TODO: this test reveals a bug, see https://github.com/SOASTA/soasta-boomerang/issues/626
+						// TODO: this test reveals a bug, see Issue #626
 						//assert.isTrue(timers[timer] >= 0, prefix + "has a positive 't_other." + timer + "' timer");
 						if (timers[timer] < 0) {
 							return this.skip();
