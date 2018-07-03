@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/17-usertiming/00-usertiming-none", function() {
+describe("e2e/18-usertiming/00-usertiming-none", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 

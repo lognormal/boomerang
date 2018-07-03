@@ -2,7 +2,7 @@
 /*eslint-env mocha*/
 /*global assert*/
 
-describe("e2e/17-usertiming/02-usertiming-polyfill", function() {
+describe("e2e/18-usertiming/02-usertiming-polyfill", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
