@@ -112,16 +112,16 @@
 			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
 
 			if (typeof utc === "undefined") {
-				if (entries.length == 0) {
+				if (entries.length === 0) {
 					return null;
 				} else {
 					var res = {};
 					for (var i = 0, l = entries.length; i < l; i++) {
 						var entry = entries[i];
 						res[entry.entryType] = res[entry.entryType] || {};
-						if (entry.entryType == "mark") {
+						if (entry.entryType === "mark") {
 							res[entry.entryType][entry.name] = entry.startTime;
-						} else if (entry.entryType == "measure") {
+						} else if (entry.entryType === "measure") {
 							res[entry.entryType][entry.name] = entry.duration;
 						}
 					}
