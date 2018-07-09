@@ -19,7 +19,7 @@
 	/* SOASTA_PRIVATE_END */
 
 	// approx number of lines in the header
-	window.HEADER_LINES = 41;
+	window.HEADER_LINES = 44;
 	</script>
 	<script src="../../vendor/mocha/mocha.js"></script>
 	<script src="../../vendor/assertive-chai/dist/assertive-chai.js"></script>
@@ -29,8 +29,11 @@
 		// Clear RT Cookie, preventing navigation related issues with session tests
 		window.BOOMR_test.clearCookies();
 
-		// Clear localstorage
+		// Clear localStorage
 		window.BOOMR_test.clearLocalStorage();
+
+		// Clear sessionStorage
+		window.BOOMR_test.clearSessionStorage();
 	</script>
 	</head>
 <body>

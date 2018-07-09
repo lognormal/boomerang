@@ -471,9 +471,16 @@
 	};
 
 	t.clearLocalStorage = function() {
-		// Clear localstorage
+		// Clear localStorage
 		if (typeof window.localStorage === "object" && typeof window.localStorage.clear === "function") {
 			window.localStorage.clear();
+		}
+	};
+
+	t.clearSessionStorage = function() {
+		// Clear sessionStorage
+		if (typeof window.sessionStorage === "object" && typeof window.sessionStorage.clear === "function") {
+			window.sessionStorage.clear();
 		}
 	};
 
