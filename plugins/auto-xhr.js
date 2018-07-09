@@ -14,7 +14,8 @@
  * When `AutoXHR` is enabled, after the Page Load has occurred, this plugin will
  * monitor several events:
  *
- * - `XMLHttpRequest` fetches
+ * - `XMLHttpRequest` requests
+ * - `Fetch` API requests
  * - Clicks
  * - `window.History` changes
  *
@@ -117,7 +118,7 @@
  * - All of the `nt_*` parameters are ResourceTiming, see {@link BOOMR.plugins.NavigationTiming}
  * - `u`: the URL of the resource that was fetched
  * - `pgu`: The URL of the page the resource was fetched on
- * - `http.initiator`: `xhr`
+ * - `http.initiator`: `xhr` for both XHR and Fetch requests
  *
  * ## Algorithm
  *
@@ -171,8 +172,8 @@
  *       - Once all listeners have fired, we stop watching, fire the event and
  *         clear the resource
  *
- * - `2` XHR initiated
- *   - XHR request is sent
+ * - `2` XHR/Fetch initiated
+ *   - XHR or Fetch request is sent
  *   - We create a resource with the start time and the request URL
  *   - If a history event happened recently/will happen shortly, use the URL as
  *     the resource.url
@@ -192,7 +193,7 @@
  *
  * What about overlap?
  *
- * - `3.1` XHR initiated while click watcher is on
+ * - `3.1` XHR/Fetch initiated while click watcher is on
  *
  *   - If first click watcher has not detected anything interesting or does not
  *     have a URL, abort it
@@ -202,7 +203,7 @@
  *       - once all resources click is waiting for have completed, fire the event
  *         and clear click resource
  *
- * - `3.2` click initiated while XHR watcher is on
+ * - `3.2` click initiated while XHR/Fetch watcher is on
  *
  *   - Ignore click
  *
@@ -212,18 +213,16 @@
  *     have a URL, abort it
  *   - Else proceed with parallel resource steps from 3.1 above
  *
- * - `3.4` XHR initiated while XHR watcher is on
+ * - `3.4` XHR/Fetch initiated while XHR/Fetch watcher is on
  *
- *   - Allow anything interesting detected by first XHR watcher to complete and
+ *   - Allow anything interesting detected by first XHR/Fetch watcher to complete and
  *     fire event
- *   - Start watching for second XHR and proceed with 2 above.
+ *   - Start watching for second XHR/Fetch and proceed with 2 above.
  *
  * @class BOOMR.plugins.AutoXHR
  */
 (function() {
 	var w, d, handler, a, impl,
-	    singlePageApp = false,
-	    autoXhrEnabled = false,
 	    readyStateMap = ["uninitialized", "open", "responseStart", "domInteractive", "responseEnd"];
 
 	/**
@@ -279,7 +278,7 @@
 	var XHR_STATUS_ABORT          = -999;
 
 	/**
-	 * An error code was returned by the HTTP Server
+	 * An error occured fetching XMLHttpRequest/Fetch resource
 	 * @constant
 	 * @type {number}
 	 * @default
@@ -738,7 +737,7 @@
 			if (resource.initiator === "spa_hard") {
 				// don't wait for onload if this was an aborted SPA navigation
 				if ((!ev || !ev.aborted) && !BOOMR.hasBrowserOnloadFired()) {
-					BOOMR.window.addEventListener("load", function() {
+					w.addEventListener("load", function() {
 						var loadTimestamp = BOOMR.now();
 
 						// run after the 'load' event handlers so loadEventEnd is captured
@@ -1091,7 +1090,7 @@
 				return false;
 			}
 
-			if (node.nodeName === "SCRIPT" && singlePageApp) {
+			if (node.nodeName === "SCRIPT" && impl.singlePageApp) {
 				// TODO: we currently can't reliably tell when a SCRIPT has already loaded
 				return false;
 				/*
@@ -1177,8 +1176,8 @@
 	 *
 	 * @return Event index, or -1 on failure
 	 *
- 	 * @method
- 	 * @memberof MutationHandler
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.add_event_resource = function(resource) {
 		var index = this.pending_events.length - 1, current_event;
@@ -1345,7 +1344,7 @@
 	function instrumentClick() {
 		// Capture clicks and wait 50ms to see if they result in DOM mutations
 		BOOMR.subscribe("click", function() {
-			if (singlePageApp) {
+			if (impl.singlePageApp) {
 				// In a SPA scenario, only route changes (or events from the SPA
 				// framework) trigger an interesting event.
 				return;
@@ -1354,15 +1353,293 @@
 			var resource = { timing: {}, initiator: "click" };
 
 			if (!BOOMR.orig_XMLHttpRequest ||
-			    BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+			    BOOMR.orig_XMLHttpRequest === w.XMLHttpRequest) {
 				// do nothing if we have un-instrumented XHR
 				return;
 			}
 
 			resource.timing.requestStart = BOOMR.now();
-
 			handler.addEvent(resource);
 		});
+	}
+
+	/**
+	 * Replace original window.fetch with our implementation instrumenting
+	 * any fetch requests happening afterwards
+	 */
+	function instrumentFetch() {
+		if (!impl.monitorFetch ||
+		    typeof w.fetch !== "function" ||
+		    typeof w.Request !== "function" ||
+		    typeof w.Response !== "function" ||
+		    typeof w.Promise !== "function") {
+			return;
+		}
+
+		if (BOOMR.proxy_fetch &&
+		    BOOMR.proxy_fetch === w.fetch) {
+			// already instrumented
+			return;
+		}
+
+		if (BOOMR.proxy_fetch &&
+		    BOOMR.orig_fetch &&
+		    BOOMR.orig_fetch === w.fetch) {
+
+			// was once instrumented and then uninstrumented, so just reapply the old instrumented object
+			w.fetch = BOOMR.proxy_fetch;
+
+			return;
+		}
+
+		// if there's a orig_fetch on the window, use that first (if another lib is overwriting fetch)
+		BOOMR.orig_fetch = w.orig_fetch || w.fetch;
+
+		BOOMR.proxy_fetch = function(input, init) {
+			var url, method, payload,
+			    // we want to keep initiator type as `xhr` for backwards compatibility.
+			    // We'll differentiate fetch by `http.type=f` beacon param
+			    resource = { timing: {}, initiator: "xhr" };
+
+			// case where fetch() is called with a Request object
+			if (typeof input === "object" && input instanceof w.Request) {
+				url = input.url;
+
+				// init overrides input
+				method = (init && init.method) || input.method || "GET";
+				if (impl.captureXhrRequestResponse) {
+					payload = (init && init.body) || input.body || undefined;
+				}
+			}
+			// case where fetch() is called with a string url (or anything else)
+			else {
+				url = input;
+				method = (init && init.method) || "GET";
+				if (impl.captureXhrRequestResponse) {
+					payload = (init && init.body) || undefined;
+				}
+			}
+
+			a.href = url;
+			if (impl.excludeFilter(a)) {
+				// this fetch should be excluded from instrumentation
+				BOOMR.debug("Exclude found for resource: " + a.href + " Skipping Fetch instrumentation!", "AutoXHR");
+				// call the original open method
+				return BOOMR.orig_fetch.apply(w, arguments);
+			}
+			BOOMR.fireEvent("xhr_init", "fetch");
+
+			resource.url = a.href;
+			resource.method = method;
+			resource.type = "fetch";
+			if (payload) {
+				resource.requestPayload = payload;
+			}
+
+			BOOMR.fireEvent("xhr_send", {resource: resource});
+
+			if (impl.singlePageApp && handler.watch && !impl.alwaysSendXhr) {
+				// If this is a SPA and we're already watching for resources due
+				// to a route change or other interesting event, add this to the
+				// current event.
+				handler.add_event_resource(resource);
+			}
+
+			try {
+				resource.timing.requestStart = BOOMR.now();
+				var promise = BOOMR.orig_fetch.apply(this, arguments);
+
+				/**
+				 * wraps a onFulfilled or onRejection function that is passed to
+				 * a promise's `.then` method. Will attempt to detect when there
+				 * are no other promises in the chain that need to be executed and
+				 * then mark the resource as finished. For simplicity, we only track
+				 * the first `.then` call of each promise.
+				 *
+				 * @param {Promise} Promise that the callback is attached to
+				 * @param {function} onFulfilled or onRejection callback function
+				 * @param {Object} Fetch resource that we're handling in this promise
+				 *
+				 * @returns {function} Wrapped callback function
+				 */
+				function wrapCallback(_promise, _fn, _resource) {
+					/**
+					 * @returns {Promise} Promise result of callback or rethrows exception from callback
+					 */
+					return function() {
+						var np = _promise._bmrNextP;
+						try {
+							var p = _fn.apply((this === window ? BOOMR.window : this), arguments);
+
+							// no exception thrown, check if there's a onFulfilled
+							// callback in the chain
+							while (np && !np._bmrHasOnFulfilled) {
+								np = np._bmrNextP;  // next promise in the chain
+							}
+							if (!np) {
+								// we didn't find one, if the callback result is a promise
+								// then we'll wait for it to complete, if not mark this
+								// resource as finished now
+								if (p instanceof w.Promise) {
+									p.then = wrapThen(p, p.then, _resource);
+								}
+								else {
+									impl.loadFinished(_resource);
+								}
+							}
+							return p;
+						}
+						catch (e) {
+							// exception thrown, check if there's a onRejected
+							// callback in the chain
+							while (np && !np._bmrHasOnRejected) {
+								np = np._bmrNextP;  // next promise in the chain
+							}
+							if (!np) {
+								// we didn't find one, mark the resource as complete
+								impl.loadFinished(_resource);
+							}
+							throw e;  // rethrow exception
+						}
+					};
+				};
+
+				/**
+				 * wraps `.then` so that we can in turn wrap onFulfilled or onRejection that
+				 * are passed to it. Wrapping `.then` will also trap calls from `.catch` and `.finally`
+				 *
+				 * @param {Promise} Promise that we're wrapping `.then` method for
+				 * @param {function} `.then` function that will be wrapped
+				 * @param {Object} Fetch resource that we're handling in this promise
+				 *
+				 * @returns {function} Wrapped `.then` function or original `.then` function
+				 * if `.then` was already called on this promise
+				 */
+				function wrapThen(_promise, _then, _resource) {
+					// only track the first `.then` call
+					if (_promise._bmrNextP) {
+						return _then;  // return unwrapped `.then`
+					}
+					/**
+					 * @returns {Promise} Result of `.then` call
+					 */
+					return function(/* onFulfilled, onRejection */) {
+						var args = Array.prototype.slice.call(arguments);
+						if (args.length > 0) {
+							if (typeof args[0] === "function") {
+								args[0] = wrapCallback(_promise, args[0], _resource);
+								_promise._bmrHasOnFulfilled = true;
+							}
+							if (args.length > 1) {
+								if (typeof args[1] === "function") {
+									args[1] = wrapCallback(_promise, args[1], _resource);
+									_promise._bmrHasOnRejected = true;
+								}
+							}
+						}
+						var p = _then.apply(_promise, args);
+						_promise._bmrNextP = p; // next promise in the chain
+						// p should always be a Promise
+						p.then = wrapThen(p, p.then, _resource);
+						return p;
+					};
+				};
+
+				// we can't just wrap functions that read the response (e.g.`.text`, `json`, etc.) or
+				// instrument `.body.getReader`'s stream because they might never be called.
+				// We'll wrap `.then` and all the callback handlers to figure out which
+				// is the last handler to execute. Once the last handler runs, we'll mark the resource
+				// as finished. For simplicity, we only track the first `.then` call of each promise
+				promise.then = wrapThen(promise, promise.then, resource);
+
+				return promise.then(function(response) {
+					var i, res, ct, parseJson = false, parseXML = false;
+
+					if (response.status < 200 || response.status >= 400) {
+						// put the HTTP error code on the resource if it's not a success
+						resource.status = response.status;
+					}
+
+					if (impl.captureXhrRequestResponse) {
+						// clone not supported in Safari yet
+						if (typeof response.clone === "function") {
+							// content-type detection to determine if we should parse json or xml
+							ct = response.headers.get("content-type");
+							if (ct) {
+								parseJson = ct.indexOf("json") !== -1;
+								parseXML = ct.indexOf("xml") !== -1;
+							}
+
+							resource.response = {};
+							try {
+								res = response.clone();
+								res.text().then(function(text) {
+									resource.response.text = text;
+									resource.response.raw = text;  // for fetch, we'll set raw to text value
+									if (parseXML && typeof window.DOMParser === "function") {
+										resource.response.xml = (new window.DOMParser()).parseFromString(text, "text/xml");
+									}
+								}).then(null, function(reason) {  // `.catch` will cause parse errors in old browsers
+									// empty (avoid unhandled rejection)
+								});
+							}
+							catch (e) {
+								// empty
+							}
+
+							if (parseJson) {
+								try {
+									res = response.clone();
+									res.json().then(function(json) {
+										resource.response.json = json;
+									}).then(null, function(reason) {  // `.catch` will cause parse errors in old browsers
+										// empty (avoid unhandled rejection)
+									});
+								}
+								catch (e) {
+									// empty
+								}
+							}
+						}
+					}
+					return response;
+				}, function(reason) {
+					// fetch() request failed (eg. cross-origin error, aborted, connection dropped, etc.)
+					// we'll let the `.then` wrapper call finished for this resource
+
+					// check if the fetch was aborted otherwise mark it as an error
+					if (reason && (reason.name === "AbortError" || reason.code === 20)) {
+						resource.status = XHR_STATUS_ABORT;
+					}
+					else {
+						resource.status = XHR_STATUS_ERROR;
+					}
+
+					// rethrow the native method's exception
+					throw reason;
+				});
+			}
+			catch (e) {
+				// there was an exception during fetch()
+				resource.status = XHR_STATUS_OPEN_EXCEPTION;
+				impl.loadFinished(resource);
+
+				// rethrow the native method's exception
+				throw e;
+			}
+		};
+
+		w.fetch = BOOMR.proxy_fetch;
+	}
+
+	/**
+	 * Put original fetch function back into place
+	 */
+	function uninstrumentFetch() {
+		if (typeof w.fetch === "function" &&
+		    BOOMR.orig_fetch && BOOMR.orig_fetch !== w.fetch) {
+			w.fetch = BOOMR.orig_fetch;
+		}
 	}
 
 	/**
@@ -1372,23 +1649,24 @@
 	 */
 	function instrumentXHR() {
 		if (BOOMR.proxy_XMLHttpRequest &&
-			BOOMR.proxy_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+			BOOMR.proxy_XMLHttpRequest === w.XMLHttpRequest) {
 			// already instrumented
 			return;
 		}
+
 		if (BOOMR.proxy_XMLHttpRequest &&
 			BOOMR.orig_XMLHttpRequest &&
-			BOOMR.orig_XMLHttpRequest === BOOMR.window.XMLHttpRequest) {
+			BOOMR.orig_XMLHttpRequest === w.XMLHttpRequest) {
 			// was once instrumented and then uninstrumented, so just reapply the old instrumented object
 
-			BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
+			w.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
 			MutationHandler.start();
 
 			return;
 		}
 
 		// if there's a orig_XMLHttpRequest on the window, use that first (if another lib is overwriting XHR)
-		BOOMR.orig_XMLHttpRequest = BOOMR.window.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest;
+		BOOMR.orig_XMLHttpRequest = w.orig_XMLHttpRequest || w.XMLHttpRequest;
 
 		MutationHandler.start();
 
@@ -1433,7 +1711,7 @@
 				if (impl.excludeFilter(a)) {
 					// this xhr should be excluded from instrumentation
 					excluded = true;
-					log("Exclude found for resource: " + a.href + " Skipping instrumentation!");
+					log("Exclude found for resource: " + a.href + " Skipping XHR instrumentation!");
 					// call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -1445,103 +1723,6 @@
 				}
 
 				BOOMR.fireEvent("xhr_init", "xhr");
-
-				/**
-				 * Mark this as the time load ended via resources loadEventEnd property, if this resource has been added
-				 * to the {@link MutationHandler} already notify that the resource has finished.
-				 * Otherwise add this call to the lise of Events that occured.
-				 *
-				 * @memberof ProxyXHRImplementation
-				 */
-				function loadFinished() {
-					var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
-
-					// if we already finished via readystatechange or an error event,
-					// don't do work again
-					if (resource.timing.loadEventEnd) {
-						return;
-					}
-
-					// fire an event for anyone listening
-					if (resource.status) {
-						BOOMR.fireEvent("xhr_error", resource);
-					}
-
-					// set the loadEventEnd timestamp to when this callback fired
-					resource.timing.loadEventEnd = now;
-
-					// if ResourceTiming is available, fix-up the .timings with ResourceTiming
-					// data, as it will be more accurate
-					entry = BOOMR.getResourceTiming(resource.url, function(x, y) {
-						return x.responseEnd - y.responseEnd;
-					});
-
-					if (entry) {
-						navSt = BOOMR.getPerformance().timing.navigationStart;
-
-						// re-set the loadEventEnd timestamp to make sure it's greater
-						// than values in ResourceTiming entry
-						resource.timing.loadEventEnd = BOOMR.now();
-
-						// convert the start time to Epoch
-						entryStartTime = Math.floor(navSt + entry.startTime);
-
-						// validate the start time to make sure it's not from another entry
-						if (resource.timing.requestStart - entryStartTime >= 2) {
-							// if the ResourceTiming startTime is more than 2ms earlier
-							// than when we thought the XHR started, this is probably
-							// an entry for a different fetch
-							useRT = false;
-						}
-						else {
-							// set responseEnd as long as it looks sane
-							if (entry.responseEnd !== 0) {
-								// convert to Epoch
-								entryResponseEnd = Math.floor(navSt + entry.responseEnd);
-
-								// sanity check to see if the entry should be used for this resource
-								if (entryResponseEnd <= resource.timing.loadEventEnd) {
-									resource.timing.responseEnd = entryResponseEnd;
-
-									// use this entry's other timestamps
-									useRT = true;
-
-									// save the entry for later use
-									resource.restiming = entry;
-								}
-							}
-
-							// set more timestamps if we think the entry is valid
-							if (useRT) {
-								// use the startTime from ResourceTiming instead
-								resource.timing.requestStart = entryStartTime;
-
-								// also track it as the fetchStart time
-								resource.timing.fetchStart = entryStartTime;
-
-								// use responseStart if it's valid
-								if (entry.responseStart !== 0) {
-									resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
-								}
-							}
-						}
-					}
-
-					if (resource.index > -1) {
-						// If this XHR was added to an existing event, fire the
-						// load_finished handler for that event.
-						handler.load_finished(resource.index, resource.timing.responseEnd);
-					}
-					else if (impl.alwaysSendXhr) {
-						handler.sendResource(resource);
-					}
-					else if (!singlePageApp || autoXhrEnabled) {
-						// Otherwise, if this is a SPA+AutoXHR or just plain
-						// AutoXHR, use addEvent() to see if this will trigger
-						// a new interesting event.
-						handler.addEvent(resource);
-					}
-				}
 
 				/**
 				 * Setup an {EventListener} for Event @param{ename}. This function will
@@ -1593,10 +1774,10 @@
 										if (req.response &&
 										    req.response.constructor &&
 										    req.response.constructor === BOOMR.boomerang_frame.Object &&
-										    BOOMR.boomerang_frame.Object !== BOOMR.window.Object) {
+										    BOOMR.boomerang_frame.Object !== w.Object) {
 											try {
 												// try to switch the constructor to the main window
-												req.response.constructor = BOOMR.window.Object;
+												req.response.constructor = w.Object;
 											}
 											catch (e) {
 												// NOP
@@ -1604,18 +1785,18 @@
 										}
 									}
 
-									loadFinished();
+									impl.loadFinished(resource);
 								}
 								else if (req.readyState === 0 && typeof resource.timing.open === "number") {
 									// something called .abort() after the request was started
 									resource.status = XHR_STATUS_ABORT;
-									loadFinished();
+									impl.loadFinished(resource);
 								}
 							}
 							else {
 								// load, timeout, error, abort
 								resource.status = (stat === undefined ? req.status : stat);
-								loadFinished();
+								impl.loadFinished(resource);
 							}
 						},
 						false
@@ -1638,6 +1819,7 @@
 
 				resource.url = a.href;
 				resource.method = method;
+				resource.type = "xhr";
 
 				// reset any statuses from previous calls to .open()
 				delete resource.status;
@@ -1657,7 +1839,7 @@
 					// if there was an exception during .open(), .send() won't work either,
 					// so let's fire loadFinished now
 					resource.status = XHR_STATUS_OPEN_EXCEPTION;
-					loadFinished();
+					impl.loadFinished(resource);
 
 					// rethrow the native method's exception
 					throw e;
@@ -1683,15 +1865,15 @@
 				}
 
 				BOOMR.fireEvent("xhr_send", req);
-				resource.timing.requestStart = BOOMR.now();
 
-				if (singlePageApp && handler.watch && !impl.alwaysSendXhr) {
+				if (impl.singlePageApp && handler.watch && !impl.alwaysSendXhr) {
 					// If this is a SPA and we're already watching for resources due
 					// to a route change or other interesting event, add this to the
 					// current event.
 					handler.add_event_resource(resource);
 				}
 
+				resource.timing.requestStart = BOOMR.now();
 				// call the original send method unless there was an error
 				// during .open
 				if (typeof resource.status === "undefined" ||
@@ -1714,15 +1896,15 @@
 		// is using it to save state
 		BOOMR.proxy_XMLHttpRequest.prototype = BOOMR.orig_XMLHttpRequest.prototype;
 
-		BOOMR.window.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
+		w.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
 	}
 
 	/**
 	 * Put original XMLHttpRequest Configuration back into place
 	 */
 	function uninstrumentXHR() {
-		if (BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest !== BOOMR.window.XMLHttpRequest) {
-			BOOMR.window.XMLHttpRequest = BOOMR.orig_XMLHttpRequest;
+		if (BOOMR.orig_XMLHttpRequest && BOOMR.orig_XMLHttpRequest !== w.XMLHttpRequest) {
+			w.XMLHttpRequest = BOOMR.orig_XMLHttpRequest;
 		}
 	}
 
@@ -1750,6 +1932,9 @@
 		initialized: false,
 		addedVars: [],
 		captureXhrRequestResponse: false,
+		singlePageApp: false,
+		autoXhrEnabled: false,
+		monitorFetch: false,  // new feature, off by default
 
 		/**
 		 * Filter function iterating over all available {@link FilterObject}s if
@@ -1796,11 +1981,111 @@
 			}
 			return false;
 		},
-
+		/**
+		 * Remove any added variables from this plugin from the beacon and clear internal collection of addedVars
+		 */
 		clear: function() {
 			if (impl.addedVars && impl.addedVars.length > 0) {
 				BOOMR.removeVar(impl.addedVars);
 				impl.addedVars = [];
+			}
+		},
+		/**
+		 * Mark this as the time load ended via resources loadEventEnd property, if this resource has been added
+		 * to the {@link MutationHandler} already notify that the resource has finished.
+		 * Otherwise add this call to the lise of Events that occured.
+		 *
+		 * @param {object} resource Resource
+		 *
+		 * @memberof BOOMR.plugins.AutoXHR
+		 */
+		loadFinished: function(resource) {
+			var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
+
+			// if we already finished via readystatechange or an error event,
+			// don't do work again
+			if (resource.timing.loadEventEnd) {
+				return;
+			}
+
+			// fire an event for anyone listening
+			if (resource.status) {
+				BOOMR.fireEvent("xhr_error", resource);
+			}
+
+			// set the loadEventEnd timestamp to when this callback fired
+			resource.timing.loadEventEnd = now;
+
+			// if ResourceTiming is available, fix-up the .timings with ResourceTiming
+			// data, as it will be more accurate
+			entry = BOOMR.getResourceTiming(resource.url, function(x, y) {
+				return x.responseEnd - y.responseEnd;
+			});
+
+			if (entry) {
+				navSt = BOOMR.getPerformance().timing.navigationStart;
+
+				// re-set the loadEventEnd timestamp to make sure it's greater
+				// than values in ResourceTiming entry
+				resource.timing.loadEventEnd = BOOMR.now();
+
+				// convert the start time to Epoch
+				entryStartTime = Math.floor(navSt + entry.startTime);
+
+				// validate the start time to make sure it's not from another entry
+				if (resource.timing.requestStart - entryStartTime >= 2) {
+					// if the ResourceTiming startTime is more than 2ms earlier
+					// than when we thought the XHR started, this is probably
+					// an entry for a different fetch
+					useRT = false;
+				}
+				else {
+					// set responseEnd as long as it looks sane
+					if (entry.responseEnd !== 0) {
+						// convert to Epoch
+						entryResponseEnd = Math.floor(navSt + entry.responseEnd);
+
+						// sanity check to see if the entry should be used for this resource
+						if (entryResponseEnd <= resource.timing.loadEventEnd) {
+							resource.timing.responseEnd = entryResponseEnd;
+
+							// use this entry's other timestamps
+							useRT = true;
+
+							// save the entry for later use
+							resource.restiming = entry;
+						}
+					}
+
+					// set more timestamps if we think the entry is valid
+					if (useRT) {
+						// use the startTime from ResourceTiming instead
+						resource.timing.requestStart = entryStartTime;
+
+						// also track it as the fetchStart time
+						resource.timing.fetchStart = entryStartTime;
+
+						// use responseStart if it's valid
+						if (entry.responseStart !== 0) {
+							resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
+						}
+					}
+				}
+			}
+
+			if (resource.index > -1) {
+				// If this XHR was added to an existing event, fire the
+				// load_finished handler for that event.
+				handler.load_finished(resource.index, resource.timing.responseEnd);
+			}
+			else if (impl.alwaysSendXhr) {
+				handler.sendResource(resource);
+			}
+			else if (!impl.singlePageApp || impl.autoXhrEnabled) {
+				// Otherwise, if this is a SPA+AutoXHR or just plain
+				// AutoXHR, use addEvent() to see if this will trigger
+				// a new interesting event.
+				handler.addEvent(resource);
 			}
 		}
 	};
@@ -1822,6 +2107,7 @@
 		 * @param {object} config Configuration
 		 * @param {boolean} [config.instrument_xhr] Whether or not to instrument XHR
 		 * @param {string[]} [config.AutoXHR.spaBackEndResources] Default resources to count as
+		 * @param {boolean} [config.AutoXHR.monitorFetch] Wether or not to instrument fetch()
 		 * Back-End during a SPA nav
 		 * @param {boolean} [config.AutoXHR.alwaysSendXhr] Whether or not to send XHR
 		 * beacons for every XHR.
@@ -1834,19 +2120,22 @@
 		init: function(config) {
 			var i, idx;
 
+			d = w.document;
+
 			// if we don't have window, abort
-			if (!BOOMR.window || !BOOMR.window.document) {
+			if (!w || !d) {
 				return;
 			}
 
-			d = BOOMR.window.document;
-			a = BOOMR.window.document.createElement("A");
+			a = d.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "alwaysSendXhr"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "alwaysSendXhr", "monitorFetch"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;
+			BOOMR.instrumentFetch = instrumentFetch;
+			BOOMR.uninstrumentFetch = uninstrumentFetch;
 
 			// Ensure we're only once adding the shouldExcludeXhr
 			if (!impl.initialized) {
@@ -1862,7 +2151,7 @@
 				}
 			}
 
-			autoXhrEnabled = config.instrument_xhr;
+			impl.autoXhrEnabled = config.instrument_xhr;
 
 			// check to see if any of the SPAs were enabled
 			if (BOOMR.plugins.SPA && BOOMR.plugins.SPA.supported_frameworks) {
@@ -1870,7 +2159,7 @@
 				for (i = 0; i < supported.length; i++) {
 					var spa = supported[i];
 					if (config[spa] && config[spa].enabled) {
-						singlePageApp = true;
+						impl.singlePageApp = true;
 						break;
 					}
 				}
@@ -1879,7 +2168,7 @@
 			// Whether or not to always send XHRs.  If a SPA is enabled, this means it will
 			// send XHRs during the hard and soft navs.  If enabled, it will also disable
 			// listening for MutationObserver events after an XHR is complete.
-			if (impl.alwaysSendXhr && autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
+			if (impl.alwaysSendXhr && impl.autoXhrEnabled && BOOMR.xhr && typeof BOOMR.xhr.stop === "function") {
 				function sendXhrs(resources) {
 					if (resources.length) {
 						for (i = 0; i < resources.length; i++) {
@@ -1899,22 +2188,28 @@
 				}
 			}
 
-			if (singlePageApp) {
+			if (impl.singlePageApp) {
 				if (!impl.alwaysSendXhr) {
 					// Disable auto-xhr until the SPA has fired its first beacon.  The
 					// plugin will re-enable after it's ready.
-					autoXhrEnabled = false;
+					impl.autoXhrEnabled = false;
+					impl.monitorFetch = false;
 				}
 
-				if (autoXhrEnabled) {
+				if (impl.autoXhrEnabled) {
 					BOOMR.instrumentXHR();
+					BOOMR.instrumentFetch();
 				}
 			}
-			else if (autoXhrEnabled) {
-				BOOMR.instrumentXHR();
-			}
-			else if (autoXhrEnabled === false) {
-				BOOMR.uninstrumentXHR();
+			else {
+				if (impl.autoXhrEnabled) {
+					BOOMR.instrumentXHR();
+					BOOMR.instrumentFetch();
+				}
+				else if (impl.autoXhrEnabled === false) {
+					BOOMR.uninstrumentXHR();
+					BOOMR.uninstrumentFetch();
+				}
 			}
 
 			BOOMR.registerEvent("xhr_error");
@@ -1940,11 +2235,12 @@
 		 * @memberof BOOMR.plugins.AutoXHR
 		 */
 		enableAutoXhr: function() {
-			if (!autoXhrEnabled) {
+			if (!impl.autoXhrEnabled) {
 				BOOMR.instrumentXHR();
+				BOOMR.instrumentFetch();
 			}
 
-			autoXhrEnabled = true;
+			impl.autoXhrEnabled = true;
 		},
 
 		/**
@@ -2049,3 +2345,4 @@
 	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 })();
+

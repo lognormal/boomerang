@@ -26,5 +26,6 @@
 	{"key":"paint-timing"},
 	{"key":"pci-blacklist"},
 	{"key":"localstorage"},
-	{"key":"continuity"}
+	{"key":"continuity"},
+	{"key":"fetch-api"}
 ]

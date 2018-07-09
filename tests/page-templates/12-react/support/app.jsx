@@ -126,27 +126,51 @@ const Home = React.createClass({
 		return state;
 	},
 	componentDidMount() {
-		var homeXHR = new XMLHttpRequest();
-		homeXHR.addEventListener("load", function (homeHtml) {
-			if(this.isMounted()) {
-				this.setState({
-					home: homeHtml.target.response
-				});
-			}
-		}.bind(this));
-		homeXHR.open("GET", "support/home.html?rnd=" + (Math.round(Math.random() * 1000)));
-		homeXHR.send(null);
+		if (!window.use_fetch) {
+			var homeXHR = new XMLHttpRequest();
+			homeXHR.addEventListener("load", function(homeHtml) {
+				if (this.isMounted()) {
+					this.setState({
+						home: homeHtml.target.response
+					});
+				}
+			}.bind(this));
+			homeXHR.open("GET", "support/home.html?rnd=" + (Math.round(Math.random() * 1000)));
+			homeXHR.send(null);
 
-		var widgetsXHR = new XMLHttpRequest();
-		widgetsXHR.addEventListener("load", function (result) {
-			if(this.isMounted()) {
-				this.setState({
-					widgets: JSON.parse(result.target.response)
+			var widgetsXHR = new XMLHttpRequest();
+			widgetsXHR.addEventListener("load", function(result) {
+				if (this.isMounted()) {
+					this.setState({
+						widgets: JSON.parse(result.target.response)
+					});
+				}
+			}.bind(this));
+			widgetsXHR.open("GET", "support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)));
+			widgetsXHR.send(null);
+		}
+		else {
+			var that = this;
+			fetch("support/home.html?rnd=" + (Math.round(Math.random() * 1000)))
+				.then((response) => response.text())
+				.then(function(data) {
+					if (that.isMounted()) {
+						that.setState({
+							home: data
+						});
+					}
 				});
-			}
-		}.bind(this));
-		widgetsXHR.open("GET", "support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)));
-		widgetsXHR.send(null);
+
+			fetch("support/widgets.json?rnd=" + (Math.round(Math.random() * 1000)))
+				.then((response) => response.json())
+				.then(function(data) {
+					if (that.isMounted()) {
+						that.setState({
+							widgets: data
+						});
+					}
+				});
+		}
 	},
 	cartMarkup() {
 		return { __html: this.state.home };
@@ -244,16 +268,30 @@ const Widget = React.createClass({
 		};
 	},
 	componentDidMount() {
-		var widgetXHR = new XMLHttpRequest();
-		widgetXHR.addEventListener("load", function(widgetHtml) {
-			if(this.isMounted()) {
-				this.setState({
-					widgetHtml: widgetHtml.target.response
-				});
-			}
-		}.bind(this));
-		widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)));
-		widgetXHR.send(null);
+		if (!window.use_fetch) {
+			var widgetXHR = new XMLHttpRequest();
+			widgetXHR.addEventListener("load", function(widgetHtml) {
+				if (this.isMounted()) {
+					this.setState({
+						widgetHtml: widgetHtml.target.response
+					});
+				}
+			}.bind(this));
+			widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)));
+			widgetXHR.send(null);
+		}
+		else {
+			var that = this;
+			fetch("support/widget.html?rnd=" + (Math.round(Math.random() * 1000)))
+			.then((response) => response.text())
+			.then(function(data) {
+				if (that.isMounted()) {
+					that.setState({
+						widgetHtml: data
+					});
+				}
+			});
+		}
 	},
 	widgetMarkup() {
 		return { __html: this.state.widgetHtml };

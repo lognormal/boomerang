@@ -374,10 +374,10 @@
 
 	t.isNetworkAPISupported = function() {
 		return (navigator && typeof navigator === "object" &&
-			navigator.connection ||
-			navigator.mozConnection ||
-			navigator.webkitConnection ||
-			navigator.msConnection);
+		    navigator.connection ||
+		    navigator.mozConnection ||
+		    navigator.webkitConnection ||
+		    navigator.msConnection);
 	};
 
 	t.isErrorObjInOnErrorSupported = function() {
@@ -402,6 +402,12 @@
 		return (typeof window.JSON === "object" &&
 		    typeof window.JSON.stringify === "function" &&
 		    typeof window.JSON.parse === "function");
+	};
+
+	t.isFetchApiSupported = function() {
+		return (typeof window.fetch === "function" &&
+		    typeof window.Request === "function" &&
+		    typeof window.Response === "function");
 	};
 
 	t.validateBeaconWasImg = function(done) {
@@ -465,7 +471,7 @@
 		date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
 		var cookies = document.cookie.split(";");
 		for (var i = 0; i < cookies.length; i++) {
-			var name = cookies[i].split("=")[0].trim();
+			var name = cookies[i].split("=")[0].replace(/^\s+|\s+$/g, "");  // trim spaces
 			document.cookie = [name + "=", "expires=" + date.toGMTString(), "path=/", "domain=" + (domain || location.hostname)].join("; ");
 		}
 	};

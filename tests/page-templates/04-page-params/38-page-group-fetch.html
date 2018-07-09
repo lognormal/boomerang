@@ -1,0 +1,185 @@
+<%= header %>
+<!--
+	Fetch API version of 02-page-group-xhrs.js
+-->
+<%= boomerangScript %>
+<script src="38-page-group-fetch.js" type="text/javascript"></script>
+
+<script>
+function onXhrSend(req) {
+	var m = req.resource.url.match(/id=xhr$/g);
+	if (m && m.length) {
+		req.resource.pg = "XHRPageGroupSendPayload";
+		return;
+	}
+
+	if (req.resource.requestPayload) {
+		try {
+			var data = JSON.parse(req.resource.requestPayload);
+			if (data && data.operationName) {
+				req.resource.pg = data.operationName;
+				return;
+			}
+		}
+		catch (ex) {
+			return;
+		}
+	}
+	return;
+};
+
+function hookXhrSend() {
+	if (window.BOOMR && BOOMR.version) {
+		if (BOOMR.plugins && BOOMR.plugins.AutoXHR) {
+			BOOMR.subscribe("xhr_send", onXhrSend);
+		}
+		return true;
+	}
+}
+
+if (!hookXhrSend()) {
+	var eventName = "onBoomerangLoaded";
+	if (document.addEventListener) {
+		document.addEventListener(eventName, hookXhrSend);
+	}
+	else if (document.attachEvent) {
+		document.attachEvent("onpropertychange", function(e) {
+			e = e || window.event;
+			if (e && e.propertyName === eventName) {
+				hookXhrSend();
+			}
+		});
+	}
+}
+</script>
+
+<script>
+var t = BOOMR_test;
+
+BOOMR_test.init({
+	instrument_xhr: true,
+	AutoXHR: {
+		monitorFetch: true
+	},
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR && t.isFetchApiSupported() ? 13 : 1,
+	PageParams: {
+		pageGroups: [
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "queryselector",
+				parameter2: "elem content queryselector"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "xpath",
+				parameter2: "//elem/content/xpath"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "json",
+				parameter2: "operationName"
+			},
+			{
+				type: "Payload",
+				url: "*support*",
+				parameter1: "substring",
+				parameter2: "PageGroupText"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/pages/04-page-params/support/.*",
+				parameter2: "Support Pages"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/pages/.*",
+				parameter2: "Test Pages"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/blackhole.subresource",
+				parameter2: "XHR subresource",
+				subresource: true
+			},
+			{
+				type: "Regexp",
+				parameter1: "/blackhole.not-subresource",
+				parameter2: "XHR not subresource"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/blackhole.passive-subresource",
+				// endswith "_subresource" will be flagged as passive subresource
+				parameter2: "XHR_subresource"
+			}
+		]
+	},
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR || !t.isFetchApiSupported()) {
+			return;
+		}
+
+		function consume(response) {
+			return response.blob();
+		}
+
+		function logFail(reason) {
+			console.error(reason);
+		}
+
+		setTimeout(function() {
+			fetch("/blackhole?subresource").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 0);
+
+		setTimeout(function() {
+			fetch("/blackhole?not-subresource").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 2000);
+
+		setTimeout(function() {
+			fetch("/blackhole?not-pagegroup").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 4000);
+
+		setTimeout(function() {
+			fetch("/blackhole?passive-subresource").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 6000);
+
+		setTimeout(function() {
+			fetch("/pages/04-page-params/support/payload-queryselector.xml").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 8000);
+
+		setTimeout(function() {
+			fetch("/pages/04-page-params/support/payload-xpath.xml").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 10000);
+
+		setTimeout(function() {
+			fetch("/pages/04-page-params/support/payload.json").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 12000);
+
+		setTimeout(function() {
+			fetch("/pages/04-page-params/support/payload.txt").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 14000);
+
+		setTimeout(function() {
+			fetch("/blackhole?id=xhr", {method: "POST"}).then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 16000);
+
+		setTimeout(function() {
+			fetch("/blackhole?id=xhr_post", {method: "POST", body: "{\"operationName\": \"PageXHRPOST\"}"}).then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 18000);
+
+		setTimeout(function() {
+			// invalid xml, queryselector and xpath selectors shouldn't run
+			fetch("/pages/04-page-params/support/payload-bad.xml").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 20000);
+
+		setTimeout(function() {
+			// invalid json, json selector shouldn't run
+			fetch("/pages/04-page-params/support/payload-bad.json").then(consume).catch(logFail);  /*eslint dot-notation:0*/
+		}, 22000);
+	}
+});
+</script>
+<%= footer %>

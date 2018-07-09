@@ -1,7 +1,12 @@
 <%= header %>
-<%= boomerangSnippet %>
+<!--
+	Tests xhr:subresource
+-->
+<%= boomerangScript %>
 <script src="19-xhrs-as-subresources.js" type="text/javascript"></script>
 <script>
+var t = BOOMR_test;
+
 (function(w, d) {
 	w.addEventListener("load", function() {
 		function hookBoomerang() {
@@ -9,14 +14,25 @@
 				if (BOOMR.plugins && BOOMR.plugins.AutoXHR) {
 					setTimeout(function() {
 						var xhr1 = new XMLHttpRequest();
-						xhr1.open("GET", "/delay?id=1&delay=1000&file=/pages/04-page-params/support/img.jpg");
+						xhr1.open("GET", "/delay?id=1&delay=5000&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
 						xhr1.send(null);
 
 						setTimeout(function() {
 							var xhr2 = new XMLHttpRequest();
-							xhr2.open("GET", "/delay?id=2&delay=1000&file=/pages/04-page-params/support/img.jpg");
+							xhr2.open("GET", "/delay?id=2&delay=5000&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
 							xhr2.send(null);
 						}, 1000);
+
+						if (t.isFetchApiSupported()) {
+							setTimeout(function() {
+								var f1 = fetch("/delay?id=1&delay=500&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
+								f1.then(function(response) { response.text(); });
+							}, 2000);
+							setTimeout(function() {
+								var f2 = fetch("/delay?id=2&delay=500&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
+								f2.then(function(response) { response.text(); });
+							}, 3000);
+						}
 					}, 1000);
 				}
 				return true;
@@ -42,9 +58,10 @@
 
 <script type="text/javascript">
 BOOMR_test.init({
-	testAfterOnBeacon: 1,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? (t.isFetchApiSupported() ? 5 : 3) : 1,
 	AutoXHR: {
-		alwaysSendXhr: true
+		alwaysSendXhr: true,
+		monitorFetch: true
 	},
 	PageParams: {
 		xhr: "subresource",

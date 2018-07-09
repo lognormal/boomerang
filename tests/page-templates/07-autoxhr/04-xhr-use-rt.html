@@ -1,29 +1,64 @@
 <%= header %>
+<%= boomerangScript %>
 <script src="04-xhr-use-rt.js" type="text/javascript"></script>
-<%= boomerangSnippet %>
+
 <script>
+var t = BOOMR_test;
+
 BOOMR_test.init({
-	"instrument_xhr": true,
-	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 2 : 1,
-	afterFirstBeacon:
-		function() {
-			if (!BOOMR.plugins.AutoXHR) {
-				return;
-			}
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? (t.isFetchApiSupported() ? 3 : 2) : 1,
+	instrument_xhr: true,
+	AutoXHR: {
+		monitorFetch: true
+	},
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		setTimeout(function() {
+			var xhr1 = new XMLHttpRequest();
+			window.XHR_URL = "/delay?delay=3000&file=build/boomerang-latest-debug.js&id=xhr&rnd=" + Math.random();
+			xhr1.open("GET", XHR_URL);
+
+			// start sending the first
+			xhr1.send(null);
 
 			setTimeout(function() {
-				var xhr1 = new XMLHttpRequest();
-				xhr1.open("GET", "/delay?delay=1000&file=build/boomerang-latest-debug.js&rnd=" + Math.random());
+				// do 2 seconds of busy work
+				BOOMR_test.busy(2000);
+			}, 100);
+		}, 10);
 
-				// start sending the first
-				xhr1.send(null);
+		if (t.isFetchApiSupported()) {
+			setTimeout(function() {
+				// 3 sec so that the promise resolve happens later
+				window.FETCH_URL = "/delay?delay=3000&file=build/boomerang-latest-debug.js&id=fetch&rnd=" + Math.random();
+				var f1 = fetch(FETCH_URL);
 
+				// do 2 seconds of busy work,
+				// should have no side effects
 				setTimeout(function() {
-					// do 2 seconds of busy work
 					BOOMR_test.busy(2000);
 				}, 100);
-			}, 10);
+
+				f1.then(function(response) {
+					// wait 2 seconds before reading response,
+					// this can cause a delayed responseEnd in Chrome.
+					// In other browsers it will be added to t_page
+					return new Promise(function(resolve) {
+						setTimeout(function() {
+							resolve(response.text());
+						}, 2000);
+					});
+				}).then(function(text) {
+					// do 2 seconds of busy work after reading response,
+					// should increase t_page
+					BOOMR_test.busy(1000);
+				});
+			}, 5000);
 		}
+	}
 });
 </script>
 <%= footer %>

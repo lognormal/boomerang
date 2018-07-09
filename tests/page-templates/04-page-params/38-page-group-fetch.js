@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/04-page-params/02-page-group-xhrs", function() {
+describe("e2e/04-page-params/38-page-group-fetch", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -43,8 +43,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 2 (xhr)", function() {
+	describe("Beacon 2 (xhr) (if Fetch API is supported)", function() {
 		it("Should not increase the Session Length on the second beacon", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -56,8 +59,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 3 (xhr)", function() {
+	describe("Beacon 3 (xhr) (if Fetch API is supported)", function() {
 		it("Should set the Page Group of the third beacon 'XHR not subresource'", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -69,6 +75,9 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 
 		it("Should increase the Session Length on the third beacon", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -80,8 +89,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 4 (xhr)", function() {
+	describe("Beacon 4 (xhr) (if Fetch API is supported)", function() {
 		it("Should not set a Page Group on the fourth beacon", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -93,6 +105,9 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 
 		it("Should increase the Session Length on the fourth beacon", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -104,8 +119,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 5 (xhr)", function() {
+	describe("Beacon 5 (xhr) (if Fetch API is supported)", function() {
 		it("Should set the Page Group of the fifth beacon 'XHR'", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -117,6 +135,9 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 
 		it("Should not increase the Session Length on the fifth beacon", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -128,8 +149,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 6 (xhr)", function() {
+	describe("Beacon 6 (xhr) (if Fetch API is supported)", function() {
 		it("Should have a sixth beacon matching QuerySelector based payload validation", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -141,8 +165,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 7 (xhr)", function() {
+	describe("Beacon 7 (xhr) (if Fetch API is supported)", function() {
 		it("Should have a seventh beacon matching XPath based payload validation", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			if (!Function.prototype.bind) {
 				return this.skip();
 			}
@@ -166,8 +193,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 8 (xhr)", function() {
+	describe("Beacon 8 (xhr) (if Fetch API is supported)", function() {
 		it("Should have a eigth beacon matching JSON based payload validation", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -179,8 +209,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 9 (xhr)", function() {
+	describe("Beacon 9 (xhr) (if Fetch API is supported)", function() {
 		it("Should have a ninth beacon matching text based payload validation", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -192,8 +225,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 10 (xhr)", function() {
+	describe("Beacon 10 (xhr) (if Fetch API is supported)", function() {
 		it("Should have a tenth beacon matching onSendXHRPageGroup function based validation", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -205,8 +241,11 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 11 (xhr)", function() {
+	describe("Beacon 11 (xhr) (if Fetch API is supported)", function() {
 		it("Should have an eleventh beacon matching onSendXHRPageGroup function based validation with POST data", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -218,7 +257,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 12 (xhr)", function() {
+	describe("Beacon 12 (xhr) (if Fetch API is supported)", function() {
 		it("Should set the Page Group of the twelth beacon 'Support Pages'", function(done) {
 			t.ifAutoXHR(
 				done,
@@ -231,7 +270,7 @@ describe("e2e/04-page-params/02-page-group-xhrs", function() {
 		});
 	});
 
-	describe("Beacon 13 (xhr)", function() {
+	describe("Beacon 13 (xhr) (if Fetch API is supported)", function() {
 		it("Should set the Page Group of the thirteenth beacon 'Support Pages'", function(done) {
 			t.ifAutoXHR(
 				done,

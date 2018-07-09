@@ -5,111 +5,378 @@ describe("e2e/07-autoxhr/00-xhrs", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
-	it("Should get 8 beacons: 1 onload, 7 xhr (XMLHttpRequest !== null)", function(done) {
+	it("Should get 13 beacons: 1 onload, 12 xhr (XMLHttpRequest is supported)", function(done) {
 		this.timeout(10000);
 		t.ifAutoXHR(
 			done,
 			function() {
-				t.ensureBeaconCount(done, 8);
-			});
+				t.ensureBeaconCount(done, 13);
+			},
+			this.skip.bind(this)
+		);
 	});
 
-	it("Should get 8 beacons: 1st onload beacon (XMLHttpRequest !== null)", function(done) {
+	it("Should get 1 beacons: 1 onload, 0 xhr (XMLHttpRequest is not supported)", function(done) {
 		t.ifAutoXHR(
 			done,
-			function() {
-				assert.include(tf.beacons[0].u, "00-xhrs.html");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 2nd XHR 200 async beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[1].u, "script200.js");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 3rd XHR 200 sync beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[2].u, "script200.js");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 4th XHR 404 async beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[3].u, "script404.js");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 5th XHR 404 sync beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[4].u, "script404.js");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 6th X-O beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[5].u, "soasta.com");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 7th abort beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[6].u, "script200.js");
-				done();
-			});
-	});
-
-	it("Should get 8 beacons: 8th timeout beacon (XMLHttpRequest !== null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.include(tf.beacons[7].u, "script200.js");
-				done();
-			});
-	});
-
-	it("Should get 1 beacons: 1 onload, 0 xhr (XMLHttpRequest === null)", function(done) {
-		t.ifAutoXHR(
-			done,
-			undefined,
+			this.skip.bind(this),
 			function() {
 				t.ensureBeaconCount(done, 1);
 			});
 	});
 
-	it("Should have all beacons set rt.nstart = navigationTiming (if NavigationTiming is supported)", function(done) {
+	it("Should have all XHR beacons set rt.nstart = navigationTiming (if NavigationTiming is supported)", function(done) {
+		var that = this;
 		t.ifAutoXHR(
 			done,
-			undefined,
 			function() {
 				if (typeof BOOMR.plugins.RT.navigationStart() !== "undefined") {
-					for (var i = 0; i <= 7; i++) {
+					for (var i = 1; i <= 9; i++) {
 						assert.equal(tf.beacons[i]["rt.nstart"], BOOMR.plugins.RT.navigationStart());
 					}
-				}
-				else {
 					done();
 				}
-			}
+				else {
+					that.skip();
+				}
+			},
+			this.skip.bind(this)
 		);
 	});
 
+	describe("Beacon 1 (onload)", function() {
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[0].u, "00-xhrs.html");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 2 (xhr) for 200 async XHR (XMLHttpRequest is supported)", function() {
+		var i = 1;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "script200.js");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should not contain status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isUndefined(tf.beacons[i]["http.errno"]);
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 3 (xhr) for 200 sync (XMLHttpRequest is supported)", function() {
+		var i = 2;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "script200.js");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should not contain status (XMLHttpRequest is supported)", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isUndefined(tf.beacons[i]["http.errno"]);
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 4 (xhr) for 404 async XHR (XMLHttpRequest is supported)", function() {
+		var i = 3;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/404");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain 404 status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "404");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 5 (xhr) for 404 sync XHR (XMLHttpRequest is supported)", function() {
+		var i = 4;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/404");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain 404 status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "404");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 6 (xhr) for X-O XHR (XMLHttpRequest is supported)", function() {
+		var i = 5;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, window.xoUrl);
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain XHR_STATUS_ERROR status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "-998");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 7 (xhr) for Aborted XHR (XMLHttpRequest is supported)", function() {
+		var i = 6;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "script200.js");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain XHR_STATUS_ABORT status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "-999");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 8 (xhr) for timedout XHR (XMLHttpRequest is supported)", function() {
+		var i = 7;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "script200.js");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain XHR_STATUS_TIMEOUT status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "-1001");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 9 (xhr) for POST XHR (XMLHttpRequest is supported)", function() {
+		var i = 8;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/blackhole");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should not contain status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isUndefined(tf.beacons[i]["http.errno"]);
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain POST method", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.method"], "POST");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 10 (xhr) for timedout POST XHR (XMLHttpRequest is supported)", function() {
+		var i = 9;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/blackhole");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain XHR_STATUS_TIMEOUT status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "-1001");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain POST method", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.method"], "POST");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 11 (xhr) for server dropped connection XHR (XMLHttpRequest is supported)", function() {
+		var i = 10;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/drop");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain XHR_STATUS_ERROR status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "-998");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+
+	describe("Beacon 12 (xhr) for 500 async XHR (XMLHttpRequest is supported)", function() {
+		var i = 11;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/500");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain 500 status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["http.errno"], "500");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
+
+	describe("Beacon 13 (xhr) for 200 chunked async XHR (XMLHttpRequest is supported)", function() {
+		var i = 12;
+		it("Should have correct url", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.include(tf.beacons[i].u, "/chunked");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should not contain status", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isUndefined(tf.beacons[i]["http.errno"]);
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+	});
 });

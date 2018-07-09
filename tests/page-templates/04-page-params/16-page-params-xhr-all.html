@@ -1,9 +1,14 @@
 <%= header %>
-<%= boomerangSnippet %>
+<!--
+	Tests xhr:all
+-->
+<%= boomerangScript %>
 <script src="16-page-params-xhr-all.js" type="text/javascript"></script>
 <script>
+var t = BOOMR_test;
+
 BOOMR_test.init({
-	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? (t.isFetchApiSupported() ? 7 : 4) : 1,
 	afterFirstBeacon: function() {
 		if (!BOOMR.plugins.AutoXHR) {
 			return;
@@ -11,18 +16,41 @@ BOOMR_test.init({
 		setTimeout(function() {
 			setTimeout(function() {
 				var xhr1 = new XMLHttpRequest();
-				xhr1.open("GET", "/delay?id=1&delay=1000&file=/pages/04-page-params/support/img.jpg");
+				xhr1.open("GET", "/delay?id=1&delay=500&file=/pages/04-page-params/support/img.jpg");
 				xhr1.send(null);
 			}, 0);
 			setTimeout(function() {
 				var xhr2 = new XMLHttpRequest();
-				xhr2.open("GET", "/delay?id=2&delay=1000&file=/pages/04-page-params/support/img.jpg");
+				xhr2.open("GET", "/delay?id=2&delay=500&file=/pages/04-page-params/support/img.jpg");
 				xhr2.send(null);
 			}, 1000);
+			setTimeout(function() {
+				// no PG for this XHR
+				var xhr3 = new XMLHttpRequest();
+				xhr3.open("GET", "/delay?id=0&delay=500&file=/pages/04-page-params/support/img.jpg");
+				xhr3.send(null);
+			}, 2000);
+
+			if (t.isFetchApiSupported()) {
+				setTimeout(function() {
+					var f1 = fetch("/delay?id=1&delay=500&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
+					f1.then(function(response) { response.text(); });
+				}, 3000);
+				setTimeout(function() {
+					var f2 = fetch("/delay?id=2&delay=500&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
+					f2.then(function(response) { response.text(); });
+				}, 4000);
+				setTimeout(function() {
+					// no PG for this fetch
+					var f3 = fetch("/delay?id=0&delay=500&file=/pages/04-page-params/support/img.jpg&rnd=" + Math.random());
+					f3.then(function(response) { response.text(); });
+				}, 5000);
+			}
 		}, 100);
 	},
 	AutoXHR: {
-		alwaysSendXhr: true
+		alwaysSendXhr: true,
+		monitorFetch: true
 	},
 	PageParams: {
 		xhr: "all",

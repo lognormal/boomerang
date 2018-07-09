@@ -6,6 +6,8 @@
 <img src="/assets/img.jpg?1" style="position: absolute; top: 500px; left: 100px; width: 400px; height: 200px" />
 
 <script>
+var t = BOOMR_test;
+
 BOOMR_test.init({
 	testAfterOnBeacon: true,
 	ResourceTiming: {
@@ -13,7 +15,7 @@ BOOMR_test.init({
 	}
 });
 
-// send 2 xhrs with the same img so that we have multiple entries for the same resource name
+// send 2 xhrs and 2 fetches with the same img so that we have multiple entries for the same partial resource name
 var xhr1 = new XMLHttpRequest();
 xhr1.open("GET", "/assets/img.jpg?2");
 xhr1.send(null);
@@ -21,6 +23,12 @@ xhr1.send(null);
 var xhr2 = new XMLHttpRequest();
 xhr2.open("GET", "/assets/img.jpg?3");
 xhr2.send(null);
+
+if (t.isFetchApiSupported()) {
+	var f1 = fetch("/assets/img.jpg?4");
+
+	var f2 = fetch("/assets/img.jpg?5");
+}
 </script>
 
 <!-- a final image to ensure the above resources are finished before onload fires -->

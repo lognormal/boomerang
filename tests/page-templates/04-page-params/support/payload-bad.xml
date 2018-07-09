@@ -1,0 +1,5 @@
+<elem <!-- missing > -->
+  <content>
+    <xpath>PageGroupXPath</xpath>
+  </content>
+</elem>

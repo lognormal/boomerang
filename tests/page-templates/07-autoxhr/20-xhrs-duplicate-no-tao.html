@@ -21,8 +21,9 @@ BOOMR_test.init({
 			//         ********* (~2s)
 			//                   ************* (~3s)
 
-			// use secondary port to simulate 3rd party resource
-			var urlPrefix = "//" + window.location.hostname + ":" + (parseInt(window.location.port, 10) + 1);
+			// use secondary hostname to simulate 3rd party resource
+			var urlPrefix = "//<%= secondaryServer %>:" + window.location.port;
+
 
 			// reset saved server delay to 0
 			var xhr = new XMLHttpRequest();

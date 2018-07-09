@@ -28,7 +28,7 @@ module.exports = function(req, res) {
 
 	// set a few headers
 	res.setHeader("Last-Modified", (new Date()).toUTCString());
-	res.setHeader("Content-Length", contentLength);
+	res.setHeader("Transfer-Encoding", "chunked");
 
 	var cur = 0;
 

@@ -2,18 +2,33 @@
 <%= boomerangScriptMin %>
 <script src="08-network.js" type="text/javascript"></script>
 <script>
+var t = BOOMR_test;
+
 BOOMR_test.init({
-	testAfterOnBeacon: true,
+	testAfterOnBeacon: t.isFetchApiSupported() ? 2 : 1,
 	Errors: {
 		enabled: true,
 		monitorNetwork: true,
 		sendAfterOnload: true
 	},
 	instrument_xhr: true,
+	AutoXHR: { monitorFetch: true },
 	afterFirstBeacon: function() {
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/404");
-		xhr.send(null);
+		setTimeout(function() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/404?rnd=" + Math.random());
+			xhr.send(null);
+
+			if (!t.isFetchApiSupported()) {
+				return;
+			}
+
+			BOOMR.subscribe("beacon", function() {
+				setTimeout(function() {
+					fetch("/404?rnd=" + Math.random());
+				}, 100);
+			}, null, null, true);
+		}, 100);
 	}
 });
 </script>

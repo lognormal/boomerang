@@ -3068,8 +3068,8 @@ BOOMR_check_doc_domain();
 		},
 
 		//
-		// uninstrumentXHR and instrumentXHR are stubs that will be replaced
-		// by auto-xhr.js if active.
+		// uninstrumentXHR, instrumentXHR, uninstrumentFetch and instrumentFetch
+		// are stubs that will be replaced by auto-xhr.js if active.
 		//
 		/**
 		 * Undo XMLHttpRequest instrumentation and reset the original `XMLHttpRequest`
@@ -3079,8 +3079,7 @@ BOOMR_check_doc_domain();
 		 *
 		 * @memberof BOOMR
 		 */
-		uninstrumentXHR: function() {
-		},
+		uninstrumentXHR: function() { },
 
 		/**
 		 * Instrument all requests made via XMLHttpRequest to send beacons.
@@ -3090,6 +3089,25 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		instrumentXHR: function() { },
+
+		/**
+		 * Undo fetch instrumentation and reset the original `fetch`
+		 * function
+		 *
+		 * This is implemented in `plugins/auto-xhr.js` {@link BOOMR.plugins.AutoXHR}.
+		 *
+		 * @memberof BOOMR
+		 */
+		uninstrumentFetch: function() { },
+
+		/**
+		 * Instrument all requests made via fetch to send beacons.
+		 *
+		 * This is implemented in `plugins/auto-xhr.js` {@link BOOMR.plugins.AutoXHR}.
+		 *
+		 * @memberof BOOMR
+		 */
+		instrumentFetch: function() { },
 
 		/**
 		 * Request boomerang to send its beacon with all queued beacon data

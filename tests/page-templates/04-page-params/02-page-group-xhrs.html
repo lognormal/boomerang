@@ -1,5 +1,5 @@
 <%= header %>
-<%= boomerangSnippet %>
+<%= boomerangScript %>
 <script src="02-page-group-xhrs.js" type="text/javascript"></script>
 
 <script>
@@ -53,7 +53,7 @@ if (!hookXhrSend()) {
 <script>
 BOOMR_test.init({
 	instrument_xhr: true,
-	testAfterOnBeacon: true,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 13 : 1,
 	PageParams: {
 		pageGroups: [
 			{
@@ -79,6 +79,11 @@ BOOMR_test.init({
 				url: "*support*",
 				parameter1: "substring",
 				parameter2: "PageGroupText"
+			},
+			{
+				type: "Regexp",
+				parameter1: "/pages/04-page-params/support/.*",
+				parameter2: "Support Pages"
 			},
 			{
 				type: "Regexp",
@@ -167,8 +172,22 @@ BOOMR_test.init({
 			setTimeout(function() {
 				var xhr = new XMLHttpRequest();
 				xhr.open("POST", "/blackhole?id=xhr_post", true);
-				xhr.send("{ \"operationName\": \"PageXHRPOST\"}");
+				xhr.send("{\"operationName\": \"PageXHRPOST\"}");
 			}, 18000);
+
+			setTimeout(function() {
+				// invalid xml, queryselector and xpath selectors shouldn't run
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload-bad.xml", true);
+				xhr.send(null);
+			}, 20000);
+
+			setTimeout(function() {
+				// invalid json, json selector shouldn't run
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/pages/04-page-params/support/payload-bad.json", true);
+				xhr.send(null);
+			}, 22000);
 		}
 });
 </script>
