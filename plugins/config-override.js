@@ -145,6 +145,7 @@
 				monitorConsole: true,
 				monitorEvents: true,
 				monitorTimeout: true,
+				monitorRejection: true,
 				sendAfterOnload: true,
 				maxErrors: true,
 				sendInterval: true

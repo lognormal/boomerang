@@ -23,6 +23,9 @@
  * * Manually sent errors via {@link BOOMR.plugins.Errors.send}
  * * Functions that threw an exception that were wrapped via {@link BOOMR.plugins.Errors.wrap}
  * * Functions that threw an exception that were run via {@link BOOMR.plugins.Errors.test}
+ * * JavaScript runtime errors captured via the
+ *   [`unhandledrejection`](https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection)
+ *   global event handler. Disabled by default.
  *
  * These are all enabled by default, and can be
  * {@link BOOMR.plugins.Errors.init manually turned off}.
@@ -368,6 +371,7 @@
  * * `BOOMR_plugins_errors_console_error`
  * * `BOOMR_plugins_errors_wrap`
  * * `BOOMR.window.console.error`
+ * * `BOOMR_plugins_errors_onrejection`
  *
  * ## Beacon Parameters
  *
@@ -993,6 +997,7 @@
 		monitorConsole: true,
 		monitorEvents: true,
 		monitorTimeout: true,
+		monitorRejections: false,  // new feature, off by default
 		sendAfterOnload: false,
 		maxErrors: 10,
 		// How often to send an error beacon after onload
@@ -1551,7 +1556,7 @@
 		 * @returns {string} String version of the object
 		 */
 		normalizeToString: function(obj) {
-			if (obj === undefined) {
+			if (typeof obj === "undefined") {
 				return "undefined";
 			}
 			else if (obj === null) {
@@ -1927,9 +1932,11 @@
 		 * @param {boolean} [config.Errors.monitorNetwork] Monitor XHR errors
 		 * @param {boolean} [config.Errors.monitorConsole] Monitor `console.error`
 		 * @param {boolean} [config.Errors.monitorEvents] Monitor event callbacks
-		 * (from `addEventListener`)
+		 * (from `addEventListener`).
 		 * @param {boolean} [config.Errors.monitorTimeout] Monitor `setTimout`
 		 * and `setInterval`.
+		 * @param {boolean} [config.Errors.monitorRejections] Monitor unhandled
+		 * promise rejections.
 		 * @param {boolean} [config.Errors.sendAfterOnload] Whether or not to
 		 * send errors after the page load beacon.  If set to false, only errors
 		 * that happened up to the page load beacon will be captured.
@@ -1945,7 +1952,7 @@
 		init: function(config) {
 			BOOMR.utils.pluginConfig(impl, config, "Errors",
 				["onError", "monitorGlobal", "monitorNetwork", "monitorConsole",
-				 "monitorEvents", "monitorTimeout", "sendAfterOnload",
+				 "monitorEvents", "monitorTimeout", "monitorRejections", "sendAfterOnload",
 				 "sendInterval", "maxErrors"]);
 
 			if (impl.initialized) {
@@ -2046,6 +2053,36 @@
 						noStack: true
 					}, E.VIA_NETWORK);
 				});
+			}
+
+
+			// listen for unhandled promise rejections
+			if (impl.monitorRejections && BOOMR.window.PromiseRejectionEvent) {
+				// add event listener instead of window.onunhandledrejection
+				BOOMR.utils.addListener(BOOMR.window, "unhandledrejection", function BOOMR_plugins_errors_onrejection(event) {
+					var stack, message = "Unhandled Promise Rejection";
+					if (event && event.reason) {
+						if (typeof event.reason === "string") {
+							message = event.reason;
+						}
+						else {
+							if (typeof event.reason.stack === "string") {
+								stack = event.reason.stack;
+							}
+							if (typeof event.reason.message === "undefined") {
+								message = impl.normalizeToString(event.reason);
+							}
+							else {
+								message = impl.normalizeToString(event.reason.message);
+							}
+						}
+						impl.send({
+							message: message,
+							stack: stack,
+							noStack: stack ? false : true
+						}, E.VIA_REJECTION);
+					}
+				}, true);
 			}
 
 			// listen for calls to console.error
@@ -2191,6 +2228,11 @@
 		 * This was caught by monitoring `setTimeout()` or `setInterval()`
 		 */
 		VIA_TIMEOUT: 6,
+
+		/**
+		 * This was caught by monitoring unhandled promise rejection events
+		 */
+		VIA_REJECTION: 7,
 
 		//
 		// Events
