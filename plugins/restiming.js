@@ -341,9 +341,9 @@
 	/**
 	 * Trims the timing, returning an offset from the startTime in ms
 	 *
-	 * @param [number] time Time
-	 * @param [number] startTime Start time
-	 * @returns [number] Number of ms from start time
+	 * @param {number} time Time
+	 * @param {number} startTime Start time
+	 * @returns {number} Number of ms from start time
 	 */
 	function trimTiming(time, startTime) {
 		if (typeof time !== "number") {
@@ -617,12 +617,12 @@
 		return entries;
 	}
 
-    /**
+	/**
 	 * Collect external resources by tagName
 	 *
-	 * @param [Element] a an anchor element
-	 * @param [Object] obj object of resources where the key is the url
-	 * @param [string] tagName tag name to collect
+	 * @param {Element} a an anchor element
+	 * @param {Object} obj object of resources where the key is the url
+	 * @param {string} tagName tag name to collect
 	 */
 	function collectResources(a, obj, tagName) {
 		Array.prototype
@@ -647,7 +647,7 @@
 	 *
 	 * If a string, return a string.
 	 *
-	 * @param [number] n Number
+	 * @param {number} n Number
 	 * @returns {string} Base-36 number, empty string, or string
 	 */
 	function toBase36(n) {
@@ -874,8 +874,8 @@
 	/**
 	 * Decompresses size information back into the specified resource
 	 *
-	 * @param [string] compressed Compressed string
-	 * @param [ResourceTiming] resource ResourceTiming object
+	 * @param {string} compressed Compressed string
+	 * @param {ResourceTiming} resource ResourceTiming object
 	 */
 	function decompressSize(compressed, resource) {
 		var split, i;
@@ -1160,10 +1160,10 @@
 	/**
 	 * Gathers performance entries and compresses the result.
 	 *
-	 * @param [number] from Only get timings from
-	 * @param [number] to Only get timings up to
+	 * @param {number} from Only get timings from
+	 * @param {number} to Only get timings up to
 	 *
-	 * @returns An object containing the Optimized performance entries trie and
+	 * @returns {object} An object containing the Optimized performance entries trie and
 	 * the optimized server timing lookup
 	 * @memberof BOOMR.plugins.ResourceTiming
 	 */
@@ -1291,7 +1291,7 @@
 	 *
 	 * Array must be pre-sorted by fetchStart, then by responseStart||responseEnd
 	 *
-	 * @param [ResourceTiming[]] resources ResourceTiming-like resources, with just
+	 * @param {ResourceTiming[]} resources ResourceTiming-like resources, with just
 	 *  a fetchStart and responseEnd
 	 *
 	 * @returns Duration, in milliseconds
@@ -1328,7 +1328,7 @@
 	 * Calculates the union of durations of the specified resources.  If
 	 * any resources overlap, those timeslices are not double-counted.
 	 *
-	 * @param [ResourceTiming[]] resources Resources
+	 * @param {ResourceTiming[]} resources Resources
 	 *
 	 * @returns Duration, in milliseconds
 	 * @memberof BOOMR.plugins.ResourceTiming
@@ -1395,8 +1395,8 @@
 	/**
 	 * Adds 'restiming' and 'servertiming' to the beacon
 	 *
-	 * @param [number] from Only get timings from
-	 * @param [number] to Only get timings up to
+	 * @param {number} from Only get timings from
+	 * @param {number} to Only get timings up to
 	 *
 	 * @memberof BOOMR.plugins.ResourceTiming
 	 */
