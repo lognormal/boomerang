@@ -1606,8 +1606,14 @@
 
 									loadFinished();
 								}
+								else if (req.readyState === 0 && typeof resource.timing.open === "number") {
+									// something called .abort() after the request was started
+									resource.status = XHR_STATUS_ABORT;
+									loadFinished();
+								}
 							}
-							else {// load, timeout, error, abort
+							else {
+								// load, timeout, error, abort
 								resource.status = (stat === undefined ? req.status : stat);
 								loadFinished();
 							}
