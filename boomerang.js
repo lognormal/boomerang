@@ -3272,7 +3272,7 @@ BOOMR_check_doc_domain();
 				}
 			}
 
-			BOOMR.removeVar("qt");
+			BOOMR.removeVar(["qt", "pgu"]);
 
 			// remove any vars that should only be on a single beacon
 			for (var singleVarName in impl.singleBeaconVars) {
