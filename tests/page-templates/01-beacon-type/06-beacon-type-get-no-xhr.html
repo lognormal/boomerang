@@ -1,0 +1,27 @@
+<%= header %>
+<script>
+window.boomrxhr = "TestString";
+window.xhrparams = "TestString";
+
+// disable the navigator sendBeacon API
+if (window.navigator && typeof window.navigator.sendBeacon === "function") {
+	window.navigator.sendBeacon = undefined;
+}
+</script>
+<%= boomerangSnippet %>
+<script src="06-beacon-type-get-no-xhr.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	beacon_type: "GET",
+	onBoomerangLoaded: function() {
+		if (BOOMR && typeof BOOMR.sendXhrPostBeacon === "function") {
+			BOOMR.sendXhrPostBeacon = function(xhr, paramsJoined) {
+				boomrxhr = xhr;
+				xhrparams = paramsJoined;
+			};
+		}
+	}
+});
+</script>
+<%= footer %>
