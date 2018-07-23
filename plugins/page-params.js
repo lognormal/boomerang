@@ -3542,7 +3542,7 @@
 			if (impl.pageGroups && impl.pageGroups.length > 0) {
 				for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
 					if (impl.pageGroups[pgIndex]) {
-						if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.indexOf("xhr") > -1) || impl.pageGroups[pgIndex].ignore) {
+						if ((impl.pageGroups[pgIndex].on && BOOMR.utils.inArray("xhr", impl.pageGroups[pgIndex].on)) || impl.pageGroups[pgIndex].ignore) {
 
 							impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
 							impl.hasXhrOn = true;

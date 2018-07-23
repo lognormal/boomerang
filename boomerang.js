@@ -2692,6 +2692,8 @@ BOOMR_check_doc_domain();
 		addError: function BOOMR_addError(err, src, extra) {
 			var str, E = BOOMR.plugins.Errors;
 
+			BOOMR.error("Boomerang caught error: " + err + ", src: " + src + ", extra: " + extra);
+
 			//
 			// Use the Errors plugin if it's enabled
 			//
