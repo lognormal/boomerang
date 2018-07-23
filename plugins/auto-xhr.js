@@ -1369,10 +1369,18 @@
 	 */
 	function instrumentFetch() {
 		if (!impl.monitorFetch ||
+		    // we don't check that fetch is a native function in case it was already wrapped
+		    // by another vendor
 		    typeof w.fetch !== "function" ||
+		    // native fetch support will define these, some polyfills like `unfetch` will not
 		    typeof w.Request !== "function" ||
 		    typeof w.Response !== "function" ||
-		    typeof w.Promise !== "function") {
+		    // native fetch needs Promise support
+		    typeof w.Promise !== "function" ||
+		    // if our window doesn't have fetch then it was probably polyfilled in the top window
+		    typeof window.fetch !== "function" ||
+		    // Github's `whatwg-fetch` polyfill sets this flag
+		    w.fetch.polyfill) {
 			return;
 		}
 
@@ -1576,8 +1584,8 @@
 								res.text().then(function(text) {
 									resource.response.text = text;
 									resource.response.raw = text;  // for fetch, we'll set raw to text value
-									if (parseXML && typeof window.DOMParser === "function") {
-										resource.response.xml = (new window.DOMParser()).parseFromString(text, "text/xml");
+									if (parseXML && typeof w.DOMParser === "function") {
+										resource.response.xml = (new w.DOMParser()).parseFromString(text, "text/xml");
 									}
 								}).then(null, function(reason) {  // `.catch` will cause parse errors in old browsers
 									// empty (avoid unhandled rejection)
