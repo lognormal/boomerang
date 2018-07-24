@@ -3558,28 +3558,36 @@ BOOMR_check_doc_domain();
 		 *
 		 * @param {string} url Resource URL
 		 * @param {function} [sort] Sort the entries before returning the last one
+		 * @param {function} [filter] Filter the entries. Will be applied before sorting
 		 *
 		 * @returns {PerformanceEntry|undefined} Entry, or undefined if ResourceTiming is not
 		 *  supported or if the entry doesn't exist
 		 *
 		 * @memberof BOOMR
 		 */
-		getResourceTiming: function(url, sort) {
+		getResourceTiming: function(url, sort, filter) {
 			var entries, p = BOOMR.getPerformance();
 
 			try {
 				if (p && typeof p.getEntriesByName === "function") {
 					entries = p.getEntriesByName(url);
-					if (entries && entries.length) {
-						if (typeof sort === "function") {
-							entries.sort(sort);
-						}
-						return entries[entries.length - 1];
+					if (!entries || !entries.length) {
+						return;
 					}
+					if (typeof filter === "function") {
+						entries = BOOMR.utils.arrayFilter(entries, filter);
+						if (!entries || !entries.length) {
+							return;
+						}
+					}
+					if (entries.length > 1 && typeof sort === "function") {
+						entries.sort(sort);
+					}
+					return entries[entries.length - 1];
 				}
 			}
-			catch (ignore) {
-				// empty
+			catch (e) {
+				BOOMR.warn("getResourceTiming:" + e);
 			}
 		}
 

@@ -185,16 +185,17 @@ describe("e2e/07-autoxhr/42-fetch-api", function() {
 		});
 	});
 
-	describe("Beacon 8 (xhr) for POST fetch with string url (if Fetch API is supported)", function() {
-		it("Should contain '/blackhole'", function(done) {
+	describe("Beacon 8 (xhr) for POST fetch with string url and response body not used (if Fetch API is supported)", function() {
+		var i = 7;
+		it("Should contain '/chunked'", function(done) {
 			if (!t.isFetchApiSupported()) {
 				return this.skip();
 			}
 			t.ifAutoXHR(
 				done,
 				function() {
-					assert.include(tf.beacons[7].u, "/blackhole");
-					assert.include(tf.beacons[7].u, "req=0");
+					assert.include(tf.beacons[i].u, "/chunked");
+					assert.include(tf.beacons[i].u, "req=0");
 					done();
 				},
 				this.skip.bind(this)
@@ -208,7 +209,37 @@ describe("e2e/07-autoxhr/42-fetch-api", function() {
 			t.ifAutoXHR(
 				done,
 				function() {
-					assert.equal(tf.beacons[7]["http.method"], "POST");
+					assert.equal(tf.beacons[i]["http.method"], "POST");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain fetch.bnu=1", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["fetch.bnu"], "1");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain t_page and t_resp (if ResourceTiming is supported)", function(done) {
+			// response should have been fast enough for us to capture the RT entry
+			if (!t.isFetchApiSupported() || !t.isResourceTimingSupported()) {
+				return this.skip();
+			}
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isDefined(tf.beacons[i].t_page);
+					assert.isDefined(tf.beacons[i].t_resp);
 					done();
 				},
 				this.skip.bind(this)
@@ -216,16 +247,16 @@ describe("e2e/07-autoxhr/42-fetch-api", function() {
 		});
 	});
 
-	describe("Beacon 9 (xhr) for POST fetch with Request object (if Fetch API is supported)", function() {
+	describe("Beacon 9 (xhr) for POST fetch with Request object and response body not used (if Fetch API is supported)", function() {
 		var i = 8;
-		it("Should contain '/blackhole'", function(done) {
+		it("Should contain '/chunked'", function(done) {
 			if (!t.isFetchApiSupported()) {
 				return this.skip();
 			}
 			t.ifAutoXHR(
 				done,
 				function() {
-					assert.include(tf.beacons[i].u, "/blackhole");
+					assert.include(tf.beacons[i].u, "/chunked");
 					assert.include(tf.beacons[i].u, "req=1");
 					done();
 				},
@@ -241,6 +272,36 @@ describe("e2e/07-autoxhr/42-fetch-api", function() {
 				done,
 				function() {
 					assert.equal(tf.beacons[i]["http.method"], "POST");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should contain fetch.bnu=1", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.equal(tf.beacons[i]["fetch.bnu"], "1");
+					done();
+				},
+				this.skip.bind(this)
+			);
+		});
+
+		it("Should not contain t_page and t_resp (if ResourceTiming is supported)", function(done) {
+			// response should have been received too late for us to capture the RT entry
+			if (!t.isFetchApiSupported() || !t.isResourceTimingSupported()) {
+				return this.skip();
+			}
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.isUndefined(tf.beacons[i].t_page);
+					assert.isUndefined(tf.beacons[i].t_resp);
 					done();
 				},
 				this.skip.bind(this)

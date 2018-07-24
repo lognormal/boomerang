@@ -31,7 +31,6 @@ BOOMR_test.templates.XHR["00-xhrs-duplicate"] = function() {
 	}
 
 	it("Should have the second beacon contain a time of around around 0 seconds", function(done) {
-		this.timeout(30000);
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -42,7 +41,6 @@ BOOMR_test.templates.XHR["00-xhrs-duplicate"] = function() {
 	});
 
 	it("Should have the third beacon contain a time of around around 1 seconds", function(done) {
-		this.timeout(30000);
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -53,7 +51,6 @@ BOOMR_test.templates.XHR["00-xhrs-duplicate"] = function() {
 	});
 
 	it("Should have the fourth beacon contain a time of around around 2 seconds", function(done) {
-		this.timeout(30000);
 		t.ifAutoXHR(
 			done,
 			function() {
@@ -64,7 +61,6 @@ BOOMR_test.templates.XHR["00-xhrs-duplicate"] = function() {
 	});
 
 	it("Should have the fifth beacon contain a time of around around 3 seconds", function(done) {
-		this.timeout(30000);
 		t.ifAutoXHR(
 			done,
 			function() {

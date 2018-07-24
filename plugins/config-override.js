@@ -126,7 +126,8 @@
 			AutoXHR: {
 				alwaysSendXhr: true,
 				filters: true,
-				monitorFetch: true
+				monitorFetch: true,
+				fetchBodyUsedWait: true
 			},
 			Errors: {
 				enabled: true,

@@ -243,6 +243,17 @@
 	 */
 	var CLICK_XHR_TIMEOUT = 50;
 
+
+	/**
+	 * Fetch events that don't read the body of the response get an extra wait time before
+	 * we look for it's corresponding ResourceTiming entry.
+	 * Default is 200ms, overridable with fetchBodyUsedWait
+	 * @type {number}
+	 * @constant
+	 * @default
+	 */
+	var FETCH_BODY_USED_WAIT_DEFAULT = 200;
+
 	/**
 	 * If we get a Mutation event that doesn't have any interesting nodes after
 	 * a Click or XHR event started, wait up to 1,000ms for an interesting one
@@ -1471,13 +1482,32 @@
 				 * @returns {function} Wrapped callback function
 				 */
 				function wrapCallback(_promise, _fn, _resource) {
+					function done() {
+						var now;
+						// check if the response body was used, if not then we'll
+						// wait a little bit longer. Hopefully it is a short response
+						// (posibly only containing headers and status) and the entry
+						// will be available in RT if we wait.
+						// We don't detect if the response was consumed from a cloned object
+						if (_resource.fetchResponse && !_resource.fetchResponse.bodyUsed && impl.fetchBodyUsedWait) {
+							now = BOOMR.now();
+							_resource.responseBodyNotUsed = true;
+							setTimeout(function() {
+								impl.loadFinished(_resource, now);
+							}, impl.fetchBodyUsedWait);
+						}
+						else {
+							impl.loadFinished(_resource);
+						}
+					}
+
 					/**
 					 * @returns {Promise} Promise result of callback or rethrows exception from callback
 					 */
 					return function() {
-						var np = _promise._bmrNextP;
+						var p, np = _promise._bmrNextP;
 						try {
-							var p = _fn.apply((this === window ? BOOMR.window : this), arguments);
+							p = _fn.apply((this === window ? BOOMR.window : this), arguments);
 
 							// no exception thrown, check if there's a onFulfilled
 							// callback in the chain
@@ -1492,7 +1522,7 @@
 									p.then = wrapThen(p, p.then, _resource);
 								}
 								else {
-									impl.loadFinished(_resource);
+									done();
 								}
 							}
 							return p;
@@ -1505,7 +1535,7 @@
 							}
 							if (!np) {
 								// we didn't find one, mark the resource as complete
-								impl.loadFinished(_resource);
+								done();
 							}
 							throw e;  // rethrow exception
 						}
@@ -1567,6 +1597,8 @@
 						// put the HTTP error code on the resource if it's not a success
 						resource.status = response.status;
 					}
+
+					resource.fetchResponse = response;
 
 					if (impl.captureXhrRequestResponse) {
 						// clone not supported in Safari yet
@@ -1943,6 +1975,7 @@
 		singlePageApp: false,
 		autoXhrEnabled: false,
 		monitorFetch: false,  // new feature, off by default
+		fetchBodyUsedWait: FETCH_BODY_USED_WAIT_DEFAULT,
 
 		/**
 		 * Filter function iterating over all available {@link FilterObject}s if
@@ -2007,8 +2040,10 @@
 		 *
 		 * @memberof BOOMR.plugins.AutoXHR
 		 */
-		loadFinished: function(resource) {
-			var entry, navSt, useRT = false, now = BOOMR.now(), entryStartTime, entryResponseEnd;
+		loadFinished: function(resource, now) {
+			var entry, navSt, useRT = false, entryStartTime, entryResponseEnd;
+
+			now = now || BOOMR.now();
 
 			// if we already finished via readystatechange or an error event,
 			// don't do work again
@@ -2024,60 +2059,59 @@
 			// set the loadEventEnd timestamp to when this callback fired
 			resource.timing.loadEventEnd = now;
 
+			navSt = BOOMR.getPerformance().timing.navigationStart;
+
 			// if ResourceTiming is available, fix-up the .timings with ResourceTiming
 			// data, as it will be more accurate
-			entry = BOOMR.getResourceTiming(resource.url, function(x, y) {
-				return x.responseEnd - y.responseEnd;
-			});
+			entry = BOOMR.getResourceTiming(resource.url,
+				function(rt1, rt2) {
+					// sort by desc responseEnd so that we'll get the one that finished closest to now
+					return rt1.responseEnd - rt2.responseEnd;
+				},
+				function(rt) {
+					// filter out requests that started before our tracked resource.
+					// We set `requestStart` right before calling the original xhr.send or fetch call.
+					// If the ResourceTiming startTime is more than 2ms earlier
+					// than when we thought the XHR/fetch started then this is probably
+					// an entry for a different resource.
+					// The RT entry's startTime needs to be converted to an Epoch
+					return ((Math.ceil(navSt + rt.startTime + 2) >= resource.timing.requestStart)) &&
+					    (rt.responseEnd !== 0);
+				}
+			);
 
 			if (entry) {
-				navSt = BOOMR.getPerformance().timing.navigationStart;
-
-				// re-set the loadEventEnd timestamp to make sure it's greater
-				// than values in ResourceTiming entry
-				resource.timing.loadEventEnd = BOOMR.now();
-
 				// convert the start time to Epoch
 				entryStartTime = Math.floor(navSt + entry.startTime);
 
-				// validate the start time to make sure it's not from another entry
-				if (resource.timing.requestStart - entryStartTime >= 2) {
-					// if the ResourceTiming startTime is more than 2ms earlier
-					// than when we thought the XHR started, this is probably
-					// an entry for a different fetch
-					useRT = false;
-				}
-				else {
-					// set responseEnd as long as it looks sane
-					if (entry.responseEnd !== 0) {
-						// convert to Epoch
-						entryResponseEnd = Math.floor(navSt + entry.responseEnd);
+				// set responseEnd, convert to Epoch
+				entryResponseEnd = Math.floor(navSt + entry.responseEnd);
 
-						// sanity check to see if the entry should be used for this resource
-						if (entryResponseEnd <= resource.timing.loadEventEnd) {
-							resource.timing.responseEnd = entryResponseEnd;
+				// sanity check to see if the entry should be used for this resource
+				if (entryResponseEnd <= BOOMR.now()) {  // this check could be moved into the fiter above
+					resource.timing.responseEnd = entryResponseEnd;
 
-							// use this entry's other timestamps
-							useRT = true;
-
-							// save the entry for later use
-							resource.restiming = entry;
-						}
+					// make sure loadEventEnd is greater or equal to the RT
+					// entry's responseEnd.
+					// This will happen when fetch API is used without consuming the
+					// response body
+					if (resource.timing.loadEventEnd < entryResponseEnd) {
+						resource.timing.loadEventEnd = entryResponseEnd;
 					}
 
-					// set more timestamps if we think the entry is valid
-					if (useRT) {
-						// use the startTime from ResourceTiming instead
-						resource.timing.requestStart = entryStartTime;
+					// use the startTime from ResourceTiming instead
+					resource.timing.requestStart = entryStartTime;
 
-						// also track it as the fetchStart time
-						resource.timing.fetchStart = entryStartTime;
+					// also track it as the fetchStart time
+					resource.timing.fetchStart = entryStartTime;
 
-						// use responseStart if it's valid
-						if (entry.responseStart !== 0) {
-							resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
-						}
+					// use responseStart if it's valid
+					if (entry.responseStart !== 0) {
+						resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
 					}
+
+					// save the entry for later use
+					resource.restiming = entry;
 				}
 			}
 
@@ -2115,8 +2149,10 @@
 		 * @param {object} config Configuration
 		 * @param {boolean} [config.instrument_xhr] Whether or not to instrument XHR
 		 * @param {string[]} [config.AutoXHR.spaBackEndResources] Default resources to count as
-		 * @param {boolean} [config.AutoXHR.monitorFetch] Wether or not to instrument fetch()
 		 * Back-End during a SPA nav
+		 * @param {boolean} [config.AutoXHR.monitorFetch] Whether or not to instrument fetch()
+		 * @param {number} [config.AuthXHR.fetchBodyUsedWait] If the fetch response's bodyUsed flag is false,
+		 * we'll wait this amount of ms before checking RT for an entry. Setting to 0 will disable this feature
 		 * @param {boolean} [config.AutoXHR.alwaysSendXhr] Whether or not to send XHR
 		 * beacons for every XHR.
 		 * @param {boolean} [config.captureXhrRequestResponse] Whether or not to capture an XHR's
@@ -2138,7 +2174,8 @@
 			a = d.createElement("A");
 
 			// gather config and config overrides
-			BOOMR.utils.pluginConfig(impl, config, "AutoXHR", ["spaBackEndResources", "alwaysSendXhr", "monitorFetch"]);
+			BOOMR.utils.pluginConfig(impl, config, "AutoXHR",
+			    ["spaBackEndResources", "alwaysSendXhr", "monitorFetch", "fetchBodyUsedWait"]);
 
 			BOOMR.instrumentXHR = instrumentXHR;
 			BOOMR.uninstrumentXHR = uninstrumentXHR;

@@ -101,14 +101,14 @@ function afterFirstBeacon() {
 			}
 			else if (xhrNum === 6) {
 				// POST fetch with string url
-				f = window.fetch("/blackhole?req=0&rnd=" + Math.random(), {method: "POST"});
-				// as a test, don't consume the response
+				f = window.fetch("/chunked?chunkSize=1000&chunkCount=1&chunkDelay=50&req=0&rnd=" + Math.random(), {method: "POST"});
+				// as a test, don't consume the response. The response should be fast enough that we get a RT entry when done
 			}
 			else if (xhrNum === 7) {
 				// POST fetch with Request object
-				req = new Request("/blackhole?req=1&rnd=" + Math.random(), {method: "POST"});
+				req = new Request("/chunked?chunkSize=1000&chunkCount=10&chunkDelay=500&req=1&rnd==" + Math.random(), {method: "POST"});
 				f = window.fetch(req);
-				// as a test, don't consume the response
+				// as a test, don't consume the response. The response should be slow enough that we do not get a RT entry when done
 			}
 			else if (xhrNum === 8) {
 				// POST fetch with Request object using init override
@@ -203,7 +203,8 @@ BOOMR_test.init({
 		xhr: "all"
 	},
 	AutoXHR: {
-		monitorFetch: true
+		monitorFetch: true,
+		fetchBodyUsedWait: 250
 	},
 	instrument_xhr: true,
 	autorun: true,

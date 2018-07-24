@@ -62,13 +62,14 @@
  * * `http.method`: For XHR beacons, the HTTP method if not `GET`.
  * * `http.errno`: For XHR beacons, the HTTP result code if not 200.
  * * `http.hdr`: For XHR beacons, headers if available.
- * * `http.type`: For XHR beacons, value of `f` for fetch requests. Not set for XHRs.
+ * * `http.type`: For XHR beacons, value of `f` for fetch API requests. Not set for XHRs.
  * * `xhr.sync`: For XHR beacons, `1` if it was sent synchronously.
  * * `http.initiator`: The initiator of the beacon:
  *   - (empty/missing) for the page load beacon
  *   - `xhr` for XHR beacons
  *   - `spa` for SPA Soft Navigations
  *   - `spa_hard` for SPA Hard Navigations
+ * * `fetch.bnu`: For XHR beacons from fetch API requests, `1` if fetch response body was not used.
  * @class BOOMR.plugins.RT
  */
 
@@ -1420,7 +1421,7 @@
 			BOOMR.removeVar(
 				"t_done", "t_page", "t_resp", "t_postrender", "t_prerender", "t_load", "t_other",
 				"rt.tstart", "rt.nstart", "rt.cstart", "rt.bstart", "rt.end", "rt.subres",
-				"http.errno", "http.method", "http.type", "xhr.sync",
+				"http.errno", "http.method", "http.type", "xhr.sync", "fetch.bnu",
 				/* SOASTA PRIVATE START */
 				"rt.ss", "rt.sl", "rt.tt", "rt.lt"
 				/* SOASTA PRIVATE END */
@@ -1470,7 +1471,11 @@
 					BOOMR.addVar("http.initiator", edata.initiator);
 				}
 
-				impl.addedVars.push("http.errno", "http.method", "http.hdr", "xhr.sync", "http.initiator");
+				if (edata.responseBodyNotUsed) {
+					BOOMR.addVar("fetch.bnu", 1);
+				}
+
+				impl.addedVars.push("http.errno", "http.method", "http.hdr", "xhr.sync", "http.initiator", "fetch.bnu");
 			}
 
 			// This is an explicit subresource
