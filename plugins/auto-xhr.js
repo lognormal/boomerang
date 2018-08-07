@@ -375,7 +375,7 @@
 			}
 
 			// don't track our own beacons
-			if (anchor.href.indexOf(BOOMR.getBeaconURL()) === 0) {
+			if (typeof BOOMR.getBeaconURL === "function" && BOOMR.getBeaconURL() && anchor.href.indexOf(BOOMR.getBeaconURL()) === 0) {
 				return true;
 			}
 		}
