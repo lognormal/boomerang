@@ -246,7 +246,9 @@
 
 			errorWrap(b,
 				function() {
-					BOOMR.addVar("bat.lvl", b.level);
+					if (b && typeof b.level === "number") {
+						BOOMR.addVar("bat.lvl", b.level);
+					}
 				},
 				"battery"
 			);

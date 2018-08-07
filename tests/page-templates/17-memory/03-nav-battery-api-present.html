@@ -1,0 +1,35 @@
+<%= header %>
+<script>
+// fake battery API
+var battery = {
+	level: 50
+};
+
+// Override the existing Navigator API to return the fake Battery API
+Object.defineProperty(window, "navigator", {
+	get: function() {
+		return {
+			userAgent: "ABC",
+			getBattery: function() {
+				return {
+					then: function(callback) {
+						callback(battery);
+
+						if (typeof battery.onlevelchange === "function") {
+							battery.onlevelchange();
+						}
+					}
+				};
+			}
+		};
+	}
+});
+</script>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<script src="03-nav-battery-api-present.js" type="text/javascript"></script>
+<%= footer %>
