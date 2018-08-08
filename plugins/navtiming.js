@@ -333,8 +333,9 @@
 				// loadTimes() as it will generate a console warning.
 				//
 				if ((!data.nt_protocol || !data.nt_first_paint) &&
-					w.chrome &&
-					typeof w.chrome.loadTimes === "function") {
+				    (!pt || pt.nextHopProtocol !== "") &&
+				    w.chrome &&
+				    typeof w.chrome.loadTimes === "function") {
 					chromeTimes = w.chrome.loadTimes();
 					if (chromeTimes) {
 						data.nt_spdy = (chromeTimes.wasFetchedViaSpdy ? 1 : 0);

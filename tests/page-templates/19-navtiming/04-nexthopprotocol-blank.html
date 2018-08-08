@@ -1,0 +1,43 @@
+<%= header %>
+<!-- add an image so the screen is painted before Boomerang loads -->
+<img src="/assets/img.jpg" />
+<%= boomerangScript %>
+<script src="04-nextHopProtocol-blank.js" type="text/javascript"></script>
+<script>
+
+window.loadTimesCalled = false;
+if (BOOMR_test.isNavigationTiming2Supported()) {
+	window.performance.getEntriesByType = (function(_getEntriesByType) {
+		return function(type) {
+			var result = _getEntriesByType.apply(this, arguments);
+			if (type === "navigation" && result.length) {
+				var copy = {};
+				for (var objAttr in result[0]) {
+					copy[objAttr] = result[0][objAttr];
+				}
+				copy.nextHopProtocol = "";
+				result = [copy];
+			}
+			return result;
+		};
+	})(window.performance.getEntriesByType);
+
+	if (typeof window.chrome !== "undefined") {
+		window.chrome.loadTimes = (function(_loadTimes) {
+			return function() {
+				var result = _loadTimes.apply(this);
+				loadTimesCalled = true;
+				return result;
+			};
+		})(window.chrome.loadTimes);
+	}
+}
+
+BOOMR_test.init({
+	ResourceTiming: {
+		enabled: false
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
