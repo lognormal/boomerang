@@ -54,7 +54,7 @@ describe("e2e/21-continuity/02-fps-after-load", function() {
 		assert.operator(parseInt(b["c.f.d"], 10), ">", 0);
 
 		// close to t_done
-		assert.closeTo(parseInt(b["c.f.d"], 10), b.t_done, 100);
+		assert.closeTo(parseInt(b["c.f.d"], 10), b.t_done + 100, 100);
 	});
 
 	it("Should have sent the FPS long frames (c.f.l) (if rAF is supported)", function() {

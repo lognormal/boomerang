@@ -23,6 +23,24 @@ window.ga = function(cb) {
 setTimeout(function() {
 	BOOMR_test.init({
 		testAfterOnBeacon: 3,
+		afterFirstBeacon: function() {
+			setTimeout(function() {
+				// fire fake visibility changed events
+				BOOMR.visibilityState = function() {
+					return "prerender";
+				};
+				BOOMR.fireEvent("visibility_changed");
+
+				// fire another beacon
+				BOOMR.responseEnd("foo");
+
+				// fake visible event
+				BOOMR.visibilityState = function() {
+					return "visible";
+				};
+				BOOMR.fireEvent("visibility_changed");
+			}, 250);
+		},
 		/* SOASTA PRIVATE START */
 		PageParams: {
 			pageGroups: [
@@ -43,22 +61,5 @@ setTimeout(function() {
 		}
 	});
 }, 1000);
-
-setTimeout(function() {
-	// fire fake visibility changed events
-	BOOMR.visibilityState = function() {
-		return "prerender";
-	};
-	BOOMR.fireEvent("visibility_changed");
-
-	// fire another beacon
-	BOOMR.responseEnd("foo");
-
-	// fake visible event
-	BOOMR.visibilityState = function() {
-		return "visible";
-	};
-	BOOMR.fireEvent("visibility_changed");
-}, 1500);
 </script>
 <%= footer %>

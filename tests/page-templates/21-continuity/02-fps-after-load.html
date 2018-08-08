@@ -11,12 +11,14 @@ BOOMR_test.init({
 		afterOnload: true
 	},
 	afterFirstBeacon: function() {
-		var st = BOOMR.requestStart("test");
+		setTimeout(function() {
+			var st = BOOMR.requestStart("test");
 
-		// loop for 300ms to trigger a long frame
-		BOOMR_test.busy(300);
+			// loop for 300ms to trigger a long frame
+			BOOMR_test.busy(300);
 
-		st.loaded();
+			st.loaded();
+		}, 100);
 	}
 });
 </script>

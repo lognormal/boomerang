@@ -1,0 +1,15 @@
+<%= header %>
+<!-- Fires onload before boomerang and config came in -->
+<script type="text/javascript">
+window.BOOMR_LOGN_always = true;
+window.BOOMR_API_key = "21-continuity-32-delayed-boomerang&delay=100";
+</script>
+<%= boomerangDelayedSnippet %>
+
+<script src="32-delayed-boomerang.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 1
+});
+</script>
+<%= footer %>

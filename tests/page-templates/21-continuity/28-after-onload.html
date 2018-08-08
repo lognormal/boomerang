@@ -16,16 +16,18 @@ BOOMR_test.init({
 		afterOnloadMinWait: 1000
 	},
 	afterFirstBeacon: function() {
-		// hit ESC key twice
-		document.dispatchEvent(ev);
-		document.dispatchEvent(ev);
-
-		// wait for 7 seconds after that beacon goes out
 		setTimeout(function() {
-
-			// hit ESC key once more
+			// hit ESC key twice
 			document.dispatchEvent(ev);
-		}, 2000);
+			document.dispatchEvent(ev);
+
+			// wait for 2 seconds after that beacon goes out
+			setTimeout(function() {
+
+				// hit ESC key once more
+				document.dispatchEvent(ev);
+			}, 2000);
+		}, 100);
 	}
 });
 </script>

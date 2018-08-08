@@ -2,9 +2,6 @@
 <%= boomerangScript %>
 <script src="100343.js" type="text/javascript"></script>
 <script>
-// Set the beacon_url override
-BOOMR.sendBeacon("/beacon");
-
 // Ensure we hold the beacon until after page load
 BOOMR.plugins.hold = {
 	complete: false,
@@ -14,13 +11,19 @@ BOOMR.plugins.hold = {
 };
 
 setTimeout(function() {
-	// Allow the beacon to go through now
-	BOOMR.plugins.hold.complete = true;
-
 	// Initialize Boomerang
 	BOOMR_test.init({
-		beacon_url: "/beacon/no-op"
+		autorun: false,
+		beacon_url: "/beacon/no-op",
+		testAfterOnBeacon: true
 	});
+
+	BOOMR.page_ready();
+
+	// Allow the beacon to go through now
+	BOOMR.plugins.hold.complete = true;
+	// Set the beacon_url override
+	BOOMR.sendBeacon("/beacon");
 }, 1000);
 </script>
 <%= footer %>

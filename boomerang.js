@@ -386,6 +386,9 @@ BOOMR_check_doc_domain();
 		// onloadfired: false,
 
 		// handlers_attached: false,
+
+		// waiting_for_config: false,
+
 		events: {
 			/**
 			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
@@ -2161,19 +2164,41 @@ BOOMR_check_doc_domain();
 				}
 			}
 
+			// if it's the first call to init (handlers aren't attached) and we're not asked to wait OR
+			// it's the second init call (handlers are attached) and we were previously waiting
+			// then we set up the page ready autorun functionality
+			if ((!impl.handlers_attached && !config.wait) || (impl.handlers_attached && impl.waiting_for_config)) {
+				// The developer can override onload by setting autorun to false
+				if (!impl.onloadfired && (impl.autorun === undefined || impl.autorun !== false)) {
+					if (BOOMR.hasBrowserOnloadFired()) {
+						BOOMR.loadedLate = true;
+					}
+					BOOMR.attach_page_ready(BOOMR.page_ready_autorun);
+				}
+				impl.waiting_for_config = false;
+			}
+
+			// only attach handlers once
 			if (impl.handlers_attached) {
 				return this;
 			}
 
-			// The developer can override onload by setting autorun to false
-			if (!impl.onloadfired && (config.autorun === undefined || config.autorun !== false)) {
-				if (BOOMR.hasBrowserOnloadFired()) {
-					BOOMR.loadedLate = true;
-				}
-				BOOMR.attach_page_ready(BOOMR.page_ready_autorun);
+			if (config.wait) {
+				impl.waiting_for_config = true;
 			}
 
+			BOOMR.attach_page_ready(function() {
+				// if we're not using the loader snippet, save the onload time for
+				// browsers that do not support NavigationTiming.
+				// This will be later than onload if boomerang arrives late on the
+				// page but it's the best we can do
+				if (!BOOMR.t_onload) {
+					BOOMR.t_onload = BOOMR.now();
+				}
+			});
+
 			BOOMR.utils.addListener(w, "DOMContentLoaded", function() { impl.fireEvent("dom_loaded"); });
+
 			BOOMR.fireEvent("config", config);
 			BOOMR.subscribe("config", function(beaconConfig) {
 				if (beaconConfig.beacon_url) {

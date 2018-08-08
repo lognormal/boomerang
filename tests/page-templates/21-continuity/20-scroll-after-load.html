@@ -10,25 +10,27 @@ BOOMR_test.init({
 		afterOnload: true
 	},
 	afterFirstBeacon: function() {
-		var st = BOOMR.requestStart("test");
-
-		// scroll to bottom then back to top
-		window.scrollTo(0, document.body.scrollHeight);
-
 		setTimeout(function() {
-			window.scrollTo(0, 0);
+			var st = BOOMR.requestStart("test");
+
+			// scroll to bottom then back to top
+			window.scrollTo(0, document.body.scrollHeight);
 
 			setTimeout(function() {
-				// scroll to bottom then back to top
-				window.scrollTo(0, document.body.scrollHeight);
+				window.scrollTo(0, 0);
 
 				setTimeout(function() {
-					window.scrollTo(0, 0);
+					// scroll to bottom then back to top
+					window.scrollTo(0, document.body.scrollHeight);
 
-					st.loaded();
-				}, 250);
-			}, 3000);
-		}, 250);
+					setTimeout(function() {
+						window.scrollTo(0, 0);
+
+						st.loaded();
+					}, 250);
+				}, 3000);
+			}, 250);
+		}, 100);
 	}
 });
 </script>

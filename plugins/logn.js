@@ -110,7 +110,7 @@
 			return parse(text);
 		}
 		catch (e) {
-			// NOP
+			BOOMR.debug("Parsing config failed for text: '" + text + "'", "LOGN");
 		}
 
 		return null;
@@ -392,8 +392,6 @@
 				return this;
 			}
 			else {
-				BOOMR.registerEvent("config");
-
 				// get the API key from a global BOOMR_API_key or the script loader URL
 				if (w && w.BOOMR_API_key) {
 					apiKey = w.BOOMR_API_key;

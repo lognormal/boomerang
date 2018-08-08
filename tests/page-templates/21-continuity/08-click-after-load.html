@@ -35,25 +35,27 @@ BOOMR_test.init({
 		afterOnload: true
 	},
 	afterFirstBeacon: function() {
-		var st = BOOMR.requestStart("test");
+		setTimeout(function() {
+			var st = BOOMR.requestStart("test");
 
-		// click on an area 3x to trigger a rage click
-		document.getElementById("img-1").dispatchEvent(ev1);
-		document.getElementById("img-1").dispatchEvent(ev1);
-		document.getElementById("img-1").dispatchEvent(ev1);
+			// click on an area 3x to trigger a rage click
+			document.getElementById("img-1").dispatchEvent(ev1);
+			document.getElementById("img-1").dispatchEvent(ev1);
+			document.getElementById("img-1").dispatchEvent(ev1);
 
-		// click somewhere else 3x to trigger a rage click
-		document.getElementById("img-2").dispatchEvent(ev2);
-		document.getElementById("img-2").dispatchEvent(ev2);
-		document.getElementById("img-2").dispatchEvent(ev2);
+			// click somewhere else 3x to trigger a rage click
+			document.getElementById("img-2").dispatchEvent(ev2);
+			document.getElementById("img-2").dispatchEvent(ev2);
+			document.getElementById("img-2").dispatchEvent(ev2);
 
-		// click somewhere twice, then elsewhere, then the same spot - no rage click
-		document.getElementById("img-1").dispatchEvent(ev1);
-		document.getElementById("img-1").dispatchEvent(ev1);
-		document.getElementById("img-2").dispatchEvent(ev2);
-		document.getElementById("img-1").dispatchEvent(ev1);
+			// click somewhere twice, then elsewhere, then the same spot - no rage click
+			document.getElementById("img-1").dispatchEvent(ev1);
+			document.getElementById("img-1").dispatchEvent(ev1);
+			document.getElementById("img-2").dispatchEvent(ev2);
+			document.getElementById("img-1").dispatchEvent(ev1);
 
-		st.loaded();
+			st.loaded();
+		}, 100);
 	}
 });
 

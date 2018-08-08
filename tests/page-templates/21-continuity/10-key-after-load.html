@@ -13,16 +13,18 @@ BOOMR_test.init({
 		afterOnload: true
 	},
 	afterFirstBeacon: function() {
-		var st = BOOMR.requestStart("test");
+		setTimeout(function() {
+			var st = BOOMR.requestStart("test");
 
-		// ESC key 5x
-		document.dispatchEvent(ev);
-		document.dispatchEvent(ev);
-		document.dispatchEvent(ev);
-		document.dispatchEvent(ev);
-		document.dispatchEvent(ev);
+			// ESC key 5x
+			document.dispatchEvent(ev);
+			document.dispatchEvent(ev);
+			document.dispatchEvent(ev);
+			document.dispatchEvent(ev);
+			document.dispatchEvent(ev);
 
-		st.loaded();
+			st.loaded();
+		}, 100);
 	}
 });
 

@@ -13,4 +13,9 @@ BOOMR_test.templates.SPA["15-delayed-boomerang"] = function() {
 		// only one beacon should've been sent
 		assert.equal(tf.beacons.length, 1);
 	});
+
+	it("Should have sent a spa hard beacon", function() {
+		// only one beacon should've been sent
+		assert.equal(tf.beacons[0]["http.initiator"], "spa_hard");
+	});
 };
