@@ -23,7 +23,7 @@
  * monitors navigations on traditional websites.
  *
  * On traditional websites, the browser completes a full navigation for every page.
- * During this navigation, the browser requests the page’s HTML, JavaScript,
+ * During this navigation, the browser requests the page's HTML, JavaScript,
  * CSS, etc., from the server, and builds the page from these components. Boomerang
  * monitors this entire process.
  *
@@ -31,7 +31,7 @@
  * navigation. All subsequent navigations are handled by the SPA framework
  * itself (i.e. AngularJS), where they dynamically pull in the content they
  * need to render the new page. This is done without executing a full navigation
- * from the browser’s point of view.
+ * from the browser's point of view.
  *
  * Boomerang was designed for traditional websites, where a full navigation
  * occurs on each page load. During the navigation, Boomerang tracks the
@@ -46,8 +46,8 @@
  * navigations beyond the first, initial navigation.
  *
  * To do so, the Boomerang SPA plugins listen for several life cycle events from
- * the framework, such as AngularJS’s `$routeChangeStart`. Once it gets notified
- * of these events, the Boomerang SPA plugins start monitoring the page’s markup
+ * the framework, such as AngularJS's `$routeChangeStart`. Once it gets notified
+ * of these events, the Boomerang SPA plugins start monitoring the page's markup
  * (DOM) for changes. If any of these changes trigger a download, such as a
  * XHR, image, CSS, or JavaScript, then the Boomerang SPA plugins monitor those
  * resources as well. Only once all of these new resources have been fetched do

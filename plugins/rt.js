@@ -1099,7 +1099,7 @@
 		 * while their RT cookie was still valid, and this could render the page
 		 * load time invalid.
 		 *
-		 * There may be cases, though, when this is a valid flow — for example,
+		 * There may be cases, though, when this is a valid flow - for example,
 		 * you have an SSL page in between and the referrer isn't passed through.
 		 *
 		 * In this case, you'll want to set `strict_referrer` to `false`.

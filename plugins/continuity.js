@@ -309,7 +309,7 @@
  * a button has a click handler registered), you can add an
  * option {@link BOOMR.plugins.Continuity.init `ttiWaitForFrameworkReady`}.
  *
- * Once enabled, TTI won’t be calculated until the following is called:
+ * Once enabled, TTI won't be calculated until the following is called:
  *
  * ```
  * // my framework is ready
@@ -335,7 +335,7 @@
  * };
  * ```
  *
- * Note this only works in ResourceTiming-supported browsers (and won’t be used in
+ * Note this only works in ResourceTiming-supported browsers (and won't be used in
  * older browsers).
  *
  * If no images match the CSS selector at Page Load, this setting will be ignored
@@ -379,7 +379,7 @@
  *
  * If you set {@link BOOMR.plugins.Continuity.init `waitAfterOnload`} to `0`
  * (or it's not set), Boomerang will send the beacon at the regular page load
- * event.  If TTI didn’t yet happen, it won’t be reported.
+ * event.  If TTI didn't yet happen, it won't be reported.
  *
  * If you want to set {@link BOOMR.plugins.Continuity.init `waitAfterOnload`},
  * we'd recommend a value between `1000` and `5000` (1 and 5 seconds).
