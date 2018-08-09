@@ -49,4 +49,18 @@ describe("e2e/13-logn/04-localstorage-expired", function() {
 			this.skip();
 		}
 	});
+
+	it("Should have stored server config in localStorage with the correct expiry", function() {
+		if (t.isLocalStorageSupported() && t.isJSONSupported() && BOOMR.plugins.LOGN.isJson) {
+			var value = window.localStorage.getItem("_boomr_LOGN");
+			assert.isDefined(value);
+			value = JSON.parse(value);
+			assert.isDefined(value.expires);
+			// test default LOGN CONFIG_STORE_TIMEOUT
+			assert.closeTo(value.expires, BOOMR.now() + (8 * 60 * 1000), 10000);
+		}
+		else {
+			this.skip();
+		}
+	});
 });
