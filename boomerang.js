@@ -1023,7 +1023,16 @@ BOOMR_check_doc_domain();
 			 *
 			 * @memberof BOOMR.session
 			 */
-			length: 0
+			length: 0,
+
+			/**
+			 * Session enabled (Are session cookies enabled?)
+			 *
+			 * @type {boolean}
+			 *
+			 * @memberof BOOMR.session
+			 */
+			enabled: true
 		},
 		/* SOASTA PRIVATE END */
 
@@ -3266,9 +3275,11 @@ BOOMR_check_doc_domain();
 			impl.vars.v = BOOMR.version;
 
 			/* SOASTA PRIVATE START */
-			impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36);
-			impl.vars["rt.ss"] = BOOMR.session.start;
-			impl.vars["rt.sl"] = BOOMR.session.length;
+			if (BOOMR.session.enabled) {
+				impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36);
+				impl.vars["rt.ss"] = BOOMR.session.start;
+				impl.vars["rt.sl"] = BOOMR.session.length;
+			}
 			/* SOASTA PRIVATE END */
 
 			if (BOOMR.visibilityState()) {

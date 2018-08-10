@@ -441,6 +441,9 @@
 			var url, subcookies;
 			subcookies = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie(this.cookie));
 
+			if (!this.cookie) {
+				BOOMR.session.enabled = false;
+			}
 			if (!subcookies) {
 				return;
 			}
