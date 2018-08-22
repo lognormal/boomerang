@@ -207,7 +207,7 @@
 		 * @param {string} timingName PaintTiming name
 		 *
 		 * @returns {DOMHighResTimestamp} Timestamp
-		 *@memberof BOOMR.plugins.PaintTiming
+		 * @memberof BOOMR.plugins.PaintTiming
 		 */
 		getTimingFor: function(timingName) {
 			var p, paintTimings, i;

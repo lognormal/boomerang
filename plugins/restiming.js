@@ -166,6 +166,22 @@
 		"stylesheet": 4
 	};
 
+	var RT_FIELDS_TIMESTAMPS = [
+		"startTime",
+		"redirectStart",
+		"redirectEnd",
+		"fetchStart",
+		"domainLookupStart",
+		"domainLookupEnd",
+		"connectStart",
+		"secureConnectionStart",
+		"connectEnd",
+		"requestStart",
+		"responseStart",
+		"responseEnd",
+		"workerStart"
+	];
+
 	// Words that will be broken (by ensuring the optimized trie doesn't contain
 	// the whole string) in URLs, to ensure NoScript doesn't think this is an XSS attack
 	var DEFAULT_XSS_BREAK_WORDS = [
@@ -202,6 +218,9 @@
 
 	// Link attributes
 	var SPECIAL_DATA_LINK_ATTR_TYPE = "4";
+
+	// Namespaced data
+	var SPECIAL_DATA_NAMESPACED_TYPE = "5";
 
 	/**
 	 * Converts entries to a Trie:
@@ -554,19 +573,6 @@
 				rtEntry = {
 					name: t.name,
 					initiatorType: t.initiatorType,
-					startTime: t.startTime + offset,
-					redirectStart: t.redirectStart ? (t.redirectStart + offset) : 0,
-					redirectEnd: t.redirectEnd ? (t.redirectEnd + offset) : 0,
-					fetchStart: t.fetchStart ? (t.fetchStart + offset) : 0,
-					domainLookupStart: t.domainLookupStart ? (t.domainLookupStart + offset) : 0,
-					domainLookupEnd: t.domainLookupEnd ? (t.domainLookupEnd + offset) : 0,
-					connectStart: t.connectStart ? (t.connectStart + offset) : 0,
-					secureConnectionStart: t.secureConnectionStart ? (t.secureConnectionStart + offset) : 0,
-					connectEnd: t.connectEnd ? (t.connectEnd + offset) : 0,
-					requestStart: t.requestStart ? (t.requestStart + offset) : 0,
-					responseStart: t.responseStart ? (t.responseStart + offset) : 0,
-					responseEnd: t.responseEnd ? (t.responseEnd + offset) : 0,
-					workerStart: t.workerStart ? (t.workerStart + offset) : 0,
 					encodedBodySize: t.encodedBodySize,
 					decodedBodySize: t.decodedBodySize,
 					transferSize: t.transferSize,
@@ -574,6 +580,14 @@
 					visibleDimensions: visibleEntries[t.name],
 					latestTime: getResourceLatestTime(t)
 				};
+				for (var field = 0; field < RT_FIELDS_TIMESTAMPS.length; field++) {
+					var key = RT_FIELDS_TIMESTAMPS[field];
+					rtEntry[key] = ((key === "startTime") || t[key]) ? (t[key] + offset) : 0;
+				}
+
+				if (t.hasOwnProperty("_data")) {
+					rtEntry._data = t._data;
+				}
 
 				// If this is a script, set its flags
 				if ((t.initiatorType === "script" || t.initiatorType === "link") && scripts[t.name]) {
@@ -759,7 +773,7 @@
 	 */
 	function getFilteredResourceTiming(from, to, initiatorTypes) {
 		var entries = findPerformanceEntriesForFrame(BOOMR.window, true, 0, 0),
-		    i, e, results = {}, initiatorType, url, data,
+		    i, e,
 		    navStart = getNavStartTime(BOOMR.window), countCollector = {};
 
 		if (!entries || !entries.length) {
@@ -1243,31 +1257,50 @@
 					}, "");
 			}
 
-
 			if (e.hasOwnProperty("linkAttrs")) {
 				data += SPECIAL_DATA_PREFIX + SPECIAL_DATA_LINK_ATTR_TYPE + e.linkAttrs;
 			}
 
 			url = trimUrl(e.name, impl.trimUrls);
 
-			// if this entry already exists, add a pipe as a separator
-			if (results[url] !== undefined) {
-				results[url] += "|" + data;
-			}
-			else if (e.visibleDimensions) {
-				// We use * as an additional separator to indicate it is not a new resource entry
-				// The following characters will not be URL encoded:
-				// *!-.()~_ but - and . are special to number representation so we don't use them
-				// After the *, the type of special data (ResourceTiming = 0) is added
-				results[url] =
-					SPECIAL_DATA_PREFIX +
-					SPECIAL_DATA_DIMENSION_TYPE +
-					e.visibleDimensions.map(Math.round).map(toBase36).join(",").replace(/,+$/, "") +
-					"|" +
-					data;
+			if (!e.hasOwnProperty("_data")) {
+				// if this entry already exists, add a pipe as a separator
+				if (results[url] !== undefined) {
+					results[url] += "|" + data;
+				}
+				else if (e.visibleDimensions) {
+					// We use * as an additional separator to indicate it is not a new resource entry
+					// The following characters will not be URL encoded:
+					// *!-.()~_ but - and . are special to number representation so we don't use them
+					// After the *, the type of special data (ResourceTiming = 0) is added
+					results[url] =
+						SPECIAL_DATA_PREFIX +
+						SPECIAL_DATA_DIMENSION_TYPE +
+						e.visibleDimensions.map(Math.round).map(toBase36).join(",").replace(/,+$/, "") +
+						"|" +
+						data;
+				}
+				else {
+					results[url] = data;
+				}
 			}
 			else {
-				results[url] = data;
+				var namespacedData = "";
+				for (var key in e._data) {
+					if (e._data.hasOwnProperty(key)) {
+						namespacedData += SPECIAL_DATA_PREFIX + SPECIAL_DATA_NAMESPACED_TYPE + key + ":" + e._data[key];
+					}
+				}
+
+				if (typeof results[url] === "undefined") {
+					// we haven't seen this resource yet, treat this potential stub as the canonical version
+					results[url] = data + namespacedData;
+				}
+				else {
+					// we have seen this resource before
+					// forget the timing data of `e`, just supplement the previous entry with the new `namespacedData`
+					results[url] += namespacedData;
+				}
 			}
 
 			if (e.visibleDimensions) {
@@ -1742,10 +1775,10 @@
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 
 				if (impl.monitorClearResourceTimings) {
+					var self = this;
 					BOOMR.window.performance.clearResourceTimings = (function(_){
 						return function() {
-							impl.collectedEntries = impl.collectedEntries || [];
-							Array.prototype.push.apply(impl.collectedEntries, BOOMR.window.performance.getEntriesByType("resource"));
+							self.addResources(BOOMR.window.performance.getEntriesByType("resource"));
 							_.apply(BOOMR.window.performance, arguments);
 						};
 					})(BOOMR.window.performance.clearResourceTimings);
@@ -1800,6 +1833,36 @@
 			    typeof window.PerformanceResourceTiming !== "undefined";
 
 			return impl.supported;
+		},
+
+		/**
+		 * Saves an array of `PerformanceResourceTiming`-shaped objects which we will later insert into the trie.
+		 *
+		 * @param {array<object>} resources Array of objects that are shaped like `PerformanceResourceTiming`s
+		 * @param {high-resolution-timestamp} epoch Optional epoch for all of the timestamps of all of the resources
+		 *
+		 * @memberof BOOMR.plugins.ResourceTiming
+		 */
+		addResources: function(resources, epoch) {
+			if (!this.is_supported() || !BOOMR.utils.isArray(resources)) {
+				return;
+			}
+
+			impl.collectedEntries = impl.collectedEntries || [];
+			if (typeof epoch === "number") {
+				var topEpoch = BOOMR.window.performance.timeOrigin || BOOMR.window.performance.timing.navigationStart;
+				var offset = epoch - topEpoch;
+				resources = BOOMR.utils.arrayFilter(resources, function(entry) {
+					for (var field = 0; field < RT_FIELDS_TIMESTAMPS.length; field++) {
+						var key = RT_FIELDS_TIMESTAMPS[field];
+						if (entry.hasOwnProperty(key)) {
+							entry[key] += offset;
+						}
+					}
+					return true;
+				});
+			}
+			Array.prototype.push.apply(impl.collectedEntries, resources);
 		},
 
 		//
