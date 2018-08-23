@@ -92,6 +92,10 @@ if (!window.angular_no_route) {
 				templateUrl: "/pages/05-angular/support/widget.html",
 				controller: "widgetDetailCtrl"
 			}).
+			when("/widgets/delay/:widgetId", {
+				templateUrl: "/delay?delay=2000&file=/pages/05-angular/support/widget.html",
+				controller: "widgetDetailCtrl"
+			}).
 			when("/04-route-change.html", {
 				templateUrl: "/pages/05-angular/support/home.html",
 				controller: "mainCtrl"

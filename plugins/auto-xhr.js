@@ -11,8 +11,7 @@
  *
  * ## What is Measured
  *
- * When `AutoXHR` is enabled, after the Page Load has occurred, this plugin will
- * monitor several events:
+ * When `AutoXHR` is enabled, this plugin will monitor several events:
  *
  * - `XMLHttpRequest` requests
  * - `Fetch` API requests
@@ -65,6 +64,9 @@
  * If you don't want this behavior, and want to measure *every* XHR on the page, you
  * can enable {@link BOOMR.plugins.AutoXHR.init|alwaysSendXhr=true}.  When set, every
  * distinct XHR will get its own XHR beacon.
+ * {@link BOOMR.plugins.AutoXHR.init|alwaysSendXhr} can also be a list of strings
+ * (matching URLs), regular expressions (matching URLs), or a function which returns
+ * true for URLs to always send XHRs for.
  *
  * ### Compatibility and Browser Support
  *
@@ -921,6 +923,7 @@
 			if (this.watch > 0) {
 				this.watch--;
 			}
+
 			this.pending_events[index] = undefined;
 		}
 	};
@@ -1318,6 +1321,35 @@
 	};
 
 	/**
+	 * Determines if there's an active event happening.
+	 *
+	 * 'Active' means any event that will result in a beacon, such as an XHR
+	 * or SPA. 'Active' specifically excludes 'click' events.
+	 *
+	 * @return {boolean} True if there's an active event happening
+	 */
+	MutationHandler.prototype.hasActiveEvent = function() {
+		if (this.pending_events.length === 0) {
+			return false;
+		}
+
+		var index = this.pending_events.length - 1;
+
+		var ev = this.pending_events[index];
+
+		if (!ev) {
+			return false;
+		}
+
+		// 'click' events are not considered active
+		if (ev.type === "click") {
+			return false;
+		}
+
+		return true;
+	};
+
+	/**
 	 * Completes the current event, marking the end time as 'now'.
 	 */
 	MutationHandler.prototype.completeEvent = function() {
@@ -1372,6 +1404,62 @@
 			resource.timing.requestStart = BOOMR.now();
 			handler.addEvent(resource);
 		});
+	}
+
+	/**
+	 * Determines whether or not the specified url matches the
+	 * {@link BOOMR.plugins.AutoXHR.init|alwaysSendXhr} list.
+	 *
+	 * `alwaysSendXhr` can be:
+	 * * a `boolean`, if `true` meaning every XHR will send a beacon
+	 * * a `function` which returns `true` for XHRs that should send a beacon
+	 * * an array of `strings` or regular expressions which match to XHRs
+	 *   that should send a beacon
+	 *
+	 * @param {string} url URL to match
+	 * @param {string[]|RegExp[]|function|boolean} alwaysSendXhr Configuration
+	 *
+	 * @returns {boolean} True if the URL should always send a beacon
+	 */
+	function matchesAlwaysSendXhr(url, alwaysSendXhr) {
+		var i, rule;
+
+		if (!alwaysSendXhr || !url) {
+			return false;
+		}
+
+		// alwaysSendXhr is a boolean
+		if (typeof alwaysSendXhr === "boolean") {
+			return alwaysSendXhr === true;
+		}
+
+		// alwaysSendXhr is a function
+		if (typeof alwaysSendXhr === "function") {
+			try {
+				return alwaysSendXhr(url) === true;
+			}
+			catch (e) {
+				return false;
+			}
+		}
+
+		// alwaysSendXhr is a list of strings or regular expressions
+		if (BOOMR.utils.isArray(alwaysSendXhr)) {
+			for (i = 0; i < alwaysSendXhr.length; i++) {
+				rule = alwaysSendXhr[i];
+
+				if (typeof rule === "string" && rule === url) {
+					return true;
+				}
+				else if (rule instanceof RegExp) {
+					if (rule.test(url)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1457,7 +1545,9 @@
 
 			BOOMR.fireEvent("xhr_send", {resource: resource});
 
-			if (impl.singlePageApp && handler.watch && !impl.alwaysSendXhr) {
+			if (impl.singlePageApp &&
+			    handler.watch &&
+			    !matchesAlwaysSendXhr(resource.url, impl.alwaysSendXhr)) {
 				// If this is a SPA and we're already watching for resources due
 				// to a route change or other interesting event, add this to the
 				// current event.
@@ -1906,7 +1996,7 @@
 
 				BOOMR.fireEvent("xhr_send", req);
 
-				if (impl.singlePageApp && handler.watch && !impl.alwaysSendXhr) {
+				if (impl.singlePageApp && handler.watch) {
 					// If this is a SPA and we're already watching for resources due
 					// to a route change or other interesting event, add this to the
 					// current event.
@@ -2118,15 +2208,18 @@
 				}
 			}
 
+			// if there's an active XHR event happening, and alwaysSendXhr is true, make sure this
+			// XHR goes out on its own beacon too
+			if (handler.hasActiveEvent() && matchesAlwaysSendXhr(resource.url, impl.alwaysSendXhr)) {
+				handler.sendResource(resource);
+			}
+
 			if (resource.index > -1) {
 				// If this XHR was added to an existing event, fire the
 				// load_finished handler for that event.
 				handler.load_finished(resource.index, resource.timing.responseEnd);
 			}
-			else if (impl.alwaysSendXhr) {
-				handler.sendResource(resource);
-			}
-			else if (!impl.singlePageApp || impl.autoXhrEnabled) {
+			else if (!handler.hasActiveEvent() && (!impl.singlePageApp || impl.autoXhrEnabled)) {
 				// Otherwise, if this is a SPA+AutoXHR or just plain
 				// AutoXHR, use addEvent() to see if this will trigger
 				// a new interesting event.
@@ -2330,6 +2423,10 @@
 		setXhrRequestResponseCapturing: function(enabled) {
 			impl.captureXhrRequestResponse = enabled;
 		}
+
+		/* BEGIN_DEBUG */,
+		matchesAlwaysSendXhr: matchesAlwaysSendXhr
+		/* END_DEBUG */
 	};
 
 	/**
@@ -2392,4 +2489,3 @@
 	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 })();
-
