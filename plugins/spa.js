@@ -388,7 +388,7 @@
 			// If this was the first request, use navStart as the begin timestamp.  Otherwise, use
 			// "now" as the begin timestamp.
 			var navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart());
-			var requestStart = firstSpaNav ? navigationStart : BOOMR.now();
+			var requestStart = initialRouteChangeCompleted ? BOOMR.now() : navigationStart;
 
 			// use the document.URL even though it may be the URL of the previous nav. We will updated
 			// it in AutoXHR sendEvent
