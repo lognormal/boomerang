@@ -2041,7 +2041,7 @@
 		 * @memberof BOOMR.plugins.AutoXHR
 		 */
 		loadFinished: function(resource, now) {
-			var entry, navSt, useRT = false, entryStartTime, entryResponseEnd;
+			var entry, navSt, useRT = false, entryStartTime, entryResponseEnd, p;
 
 			now = now || BOOMR.now();
 
@@ -2059,59 +2059,62 @@
 			// set the loadEventEnd timestamp to when this callback fired
 			resource.timing.loadEventEnd = now;
 
-			navSt = BOOMR.getPerformance().timing.navigationStart;
+			p = BOOMR.getPerformance();
+			if (p && p.timing) {
+				navSt = p.timing.navigationStart;
 
-			// if ResourceTiming is available, fix-up the .timings with ResourceTiming
-			// data, as it will be more accurate
-			entry = BOOMR.getResourceTiming(resource.url,
-				function(rt1, rt2) {
-					// sort by desc responseEnd so that we'll get the one that finished closest to now
-					return rt1.responseEnd - rt2.responseEnd;
-				},
-				function(rt) {
-					// filter out requests that started before our tracked resource.
-					// We set `requestStart` right before calling the original xhr.send or fetch call.
-					// If the ResourceTiming startTime is more than 2ms earlier
-					// than when we thought the XHR/fetch started then this is probably
-					// an entry for a different resource.
-					// The RT entry's startTime needs to be converted to an Epoch
-					return ((Math.ceil(navSt + rt.startTime + 2) >= resource.timing.requestStart)) &&
-					    (rt.responseEnd !== 0);
-				}
-			);
-
-			if (entry) {
-				// convert the start time to Epoch
-				entryStartTime = Math.floor(navSt + entry.startTime);
-
-				// set responseEnd, convert to Epoch
-				entryResponseEnd = Math.floor(navSt + entry.responseEnd);
-
-				// sanity check to see if the entry should be used for this resource
-				if (entryResponseEnd <= BOOMR.now()) {  // this check could be moved into the fiter above
-					resource.timing.responseEnd = entryResponseEnd;
-
-					// make sure loadEventEnd is greater or equal to the RT
-					// entry's responseEnd.
-					// This will happen when fetch API is used without consuming the
-					// response body
-					if (resource.timing.loadEventEnd < entryResponseEnd) {
-						resource.timing.loadEventEnd = entryResponseEnd;
+				// if ResourceTiming is available, fix-up the .timings with ResourceTiming
+				// data, as it will be more accurate
+				entry = BOOMR.getResourceTiming(resource.url,
+					function(rt1, rt2) {
+						// sort by desc responseEnd so that we'll get the one that finished closest to now
+						return rt1.responseEnd - rt2.responseEnd;
+					},
+					function(rt) {
+						// filter out requests that started before our tracked resource.
+						// We set `requestStart` right before calling the original xhr.send or fetch call.
+						// If the ResourceTiming startTime is more than 2ms earlier
+						// than when we thought the XHR/fetch started then this is probably
+						// an entry for a different resource.
+						// The RT entry's startTime needs to be converted to an Epoch
+						return ((Math.ceil(navSt + rt.startTime + 2) >= resource.timing.requestStart)) &&
+						    (rt.responseEnd !== 0);
 					}
+				);
 
-					// use the startTime from ResourceTiming instead
-					resource.timing.requestStart = entryStartTime;
+				if (entry) {
+					// convert the start time to Epoch
+					entryStartTime = Math.floor(navSt + entry.startTime);
 
-					// also track it as the fetchStart time
-					resource.timing.fetchStart = entryStartTime;
+					// set responseEnd, convert to Epoch
+					entryResponseEnd = Math.floor(navSt + entry.responseEnd);
 
-					// use responseStart if it's valid
-					if (entry.responseStart !== 0) {
-						resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
+					// sanity check to see if the entry should be used for this resource
+					if (entryResponseEnd <= BOOMR.now()) {  // this check could be moved into the fiter above
+						resource.timing.responseEnd = entryResponseEnd;
+
+						// make sure loadEventEnd is greater or equal to the RT
+						// entry's responseEnd.
+						// This will happen when fetch API is used without consuming the
+						// response body
+						if (resource.timing.loadEventEnd < entryResponseEnd) {
+							resource.timing.loadEventEnd = entryResponseEnd;
+						}
+
+						// use the startTime from ResourceTiming instead
+						resource.timing.requestStart = entryStartTime;
+
+						// also track it as the fetchStart time
+						resource.timing.fetchStart = entryStartTime;
+
+						// use responseStart if it's valid
+						if (entry.responseStart !== 0) {
+							resource.timing.responseStart = Math.floor(navSt + entry.responseStart);
+						}
+
+						// save the entry for later use
+						resource.restiming = entry;
 					}
-
-					// save the entry for later use
-					resource.restiming = entry;
 				}
 			}
 
