@@ -2241,7 +2241,6 @@
 					// Disable auto-xhr until the SPA has fired its first beacon.  The
 					// plugin will re-enable after it's ready.
 					impl.autoXhrEnabled = false;
-					impl.monitorFetch = false;
 				}
 
 				if (impl.autoXhrEnabled) {

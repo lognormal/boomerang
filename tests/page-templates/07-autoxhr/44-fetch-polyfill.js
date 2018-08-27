@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR,BOOMR_test,describe,it,assert*/
 
-describe("e2e/07-autoxhr/43-fetch-polyfill", function() {
+describe("e2e/07-autoxhr/44-fetch-polyfill", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -27,7 +27,7 @@ describe("e2e/07-autoxhr/43-fetch-polyfill", function() {
 
 	describe("Beacon 1 (onload)", function() {
 		it("Should be an onload beacon", function() {
-			assert.include(tf.beacons[0].u, "43-fetch-polyfill.html");
+			assert.include(tf.beacons[0].u, "44-fetch-polyfill.html");
 			assert.equal(tf.beacons[0]["rt.start"], "navigation");
 		});
 	});

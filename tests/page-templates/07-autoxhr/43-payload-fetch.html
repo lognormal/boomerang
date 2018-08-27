@@ -8,7 +8,7 @@ BOOMR_test.init({
 	AutoXHR: {
 		monitorFetch: true
 	},
-	testAfterOnBeacon: BOOMR.plugins.AutoXHR & t.isFetchApiSupported() ? 3 : 1,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR && t.isFetchApiSupported() ? 3 : 1,
 	afterFirstBeacon:
 		function() {
 			if (!BOOMR.plugins.AutoXHR || !t.isFetchApiSupported()) {

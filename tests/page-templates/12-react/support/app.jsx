@@ -268,6 +268,14 @@ const Widget = React.createClass({
 		};
 	},
 	componentDidMount() {
+		var url;
+		if (this.props.params.delay) {
+			url = "/delay?delay=" + this.props.params.delay + "&file=/pages/12-react/support/widget.html?rnd=" + (Math.round(Math.random() * 1000));
+		}
+		else {
+			url = "support/widget.html?rnd=" + (Math.round(Math.random() * 1000));
+		}
+
 		if (!window.use_fetch) {
 			var widgetXHR = new XMLHttpRequest();
 			widgetXHR.addEventListener("load", function(widgetHtml) {
@@ -277,12 +285,12 @@ const Widget = React.createClass({
 					});
 				}
 			}.bind(this));
-			widgetXHR.open("GET", "support/widget.html?rnd=" + (Math.round(Math.random() * 1000)));
+			widgetXHR.open("GET", url);
 			widgetXHR.send(null);
 		}
 		else {
 			var that = this;
-			fetch("support/widget.html?rnd=" + (Math.round(Math.random() * 1000)))
+			fetch(url)
 			.then((response) => response.text())
 			.then(function(data) {
 				if (that.isMounted()) {
@@ -320,6 +328,7 @@ var routerInstance = render((
 			<Route path="/" component={App}>
 				<IndexRoute component={Home}/>
 				<Route path="widgets/:id" component={Widget}/>
+				<Route path="delay/:delay/widgets/:id" component={Widget}/>
 			</Route>
 		</Router>
 ), document.getElementById("root"));

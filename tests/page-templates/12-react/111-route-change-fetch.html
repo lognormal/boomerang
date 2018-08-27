@@ -9,7 +9,7 @@ window.imgs = [3000];
 window.html5_mode = false;
 
 // view a widget then come back so debugging (F5) is easier
-window.nav_routes = ["/widgets/1", "/"];
+window.nav_routes = ["/delay/2000/widgets/1", "/"];
 
 window.use_fetch = true;
 </script>
@@ -21,7 +21,7 @@ window.use_fetch = true;
 
 <script>
 BOOMR_test.init({
-	testAfterOnBeacon: 3,
+	testAfterOnBeacon: BOOMR_test.isFetchApiSupported() ? 3 : 1,
 	AutoXHR: {
 		monitorFetch: true
 	},
