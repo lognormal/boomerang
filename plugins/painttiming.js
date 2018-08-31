@@ -12,6 +12,8 @@
  *
  * * `pt.fp`: `first-paint` in `DOMHighResTimestamp`
  * * `pt.fcp`: `first-contentful-paint` in `DOMHighResTimestamp`
+ * * `pt.hid`: The document was loaded hidden (at some point), so FP and FCP are
+ *             user-driven events, and thus won't be added to the beacon.
  *
  * @see {@link https://www.w3.org/TR/paint-timing/}
  * @class BOOMR.plugins.PaintTiming
@@ -61,11 +63,22 @@
 		/**
 		 * Executed on `page_ready` and `before_unload`
 		 */
-		done: function() {
+		done: function(edata, ename) {
 			var p, paintTimings, i;
 
 			if (this.complete) {
 				// we've already added data to the beacon
+				return this;
+			}
+
+			//
+			// Don't add PaintTimings to SPA Soft or XHR beacons --
+			// Only add to Page Load (ename: load) and SPA Hard (ename: xhr
+			// and initiator: spa_hard) beacons.
+			//
+			if (ename !== "load" && (!edata || edata.initiator !== "spa_hard")) {
+				this.complete = true;
+
 				return this;
 			}
 
@@ -125,10 +138,19 @@
 				impl.initialized = true;
 			}
 
+			// If we haven't added PaintTiming data and the page is currently
+			// hidden, don't add anything to the beacon as the paint might
+			// happen only when the visitor makes the document visible.
+			if (!impl.complete && BOOMR.visibilityState() === "hidden") {
+				BOOMR.addVar("pt.hid", 1, true);
+
+				impl.complete = true;
+			}
+
 			if (!impl.initialized) {
 				// we'll add data to the beacon on whichever happens first
-				BOOMR.subscribe("page_ready", impl.done, null, impl);
-				BOOMR.subscribe("xhr_load", impl.done, null, impl);
+				BOOMR.subscribe("page_ready", impl.done, "load", impl);
+				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 				BOOMR.subscribe("before_unload", impl.done, null, impl);
 
 				impl.initialized = true;
