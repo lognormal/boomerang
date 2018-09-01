@@ -67,6 +67,7 @@
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-safari-launcher": "^1.0.0",
     "karma-tap-reporter": "0.0.3",
+    "karma-webdriver-launcher": "^1.0.5",
     "mocha": "^3.0.2",
     "phantomjs": "^1.9.13",
     "protractor": "^5.2.0",

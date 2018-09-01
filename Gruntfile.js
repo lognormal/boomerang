@@ -33,7 +33,7 @@ var TEST_URL_BASE = grunt.option("test-url") || "http://" + boomerangE2ETestDoma
 var SELENIUM_ADDRESS = grunt.option("selenium-address") || "http://" + boomerangE2ETestDomain + ":4444/wd/hub";
 var E2E_BASE_URL = "http://" + boomerangE2ETestDomain + ":4002/";
 
-var DEFAULT_BROWSER = grunt.option("browser") || "ChromeHeadless";
+var DEFAULT_BROWSER = grunt.option("test-browser") || "ChromeHeadless";
 
 var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 	preserveComments: false,
@@ -652,7 +652,9 @@ module.exports = function() {
 					"boomerang-test-framework.js",
 					"unit/*.js",
 					"build/*.js"
-				]
+				],
+				hostname: DEFAULT_TEST_MAIN_DOMAIN,
+				SELENIUM_ADDRESS: grunt.option("selenium-address")
 			},
 			unit: {
 				browsers: [DEFAULT_BROWSER]
