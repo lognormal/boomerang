@@ -28,7 +28,7 @@
  *
  *     // mark current timestamp as mark1
  *     performance.mark('mark1');
- *     // mark current timestamp as mark1
+ *     // mark current timestamp as mark2
  *     performance.mark('mark2');
  *     // measure1 will be the delta between mark1 and mark2 timestamps
  *     performance.measure('measure1', 'mark1', 'mark2');
