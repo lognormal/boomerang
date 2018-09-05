@@ -995,7 +995,9 @@
 					value = value.call(ctx, this.varname);
 				}
 				catch (err) {
-					BOOMR.addError(err, "PageVars.extractJavaScriptVariable", varname + "()");
+					if (BOOMR.plugins.Errors) {
+						BOOMR.plugins.Errors.send(err);
+					}
 					return false;
 				}
 			}
