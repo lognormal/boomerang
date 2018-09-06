@@ -3328,9 +3328,11 @@
 			// update the timeline
 			t.increment("orn");
 
+      var orientation = screen.msOrientation || (screen.orientation || screen.mozOrientation || {});
+
 			// add to the log (don't track the actual keys)
 			t.log(LOG_TYPE_ORIENTATION, now, {
-				a: screen.orientation.angle
+				a: orientation.angle
 			});
 
 			// update the interaction monitor
