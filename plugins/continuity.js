@@ -3322,7 +3322,7 @@
 		 * @param {Event} e Event
 		 */
 		function onOrientationChange(e) {
-			var now = BOOMR.now();
+			var now = BOOMR.now(), angle = window.orientation;
 
 			if (!enabled) {
 				return;
@@ -3331,10 +3331,17 @@
 			// update the timeline
 			t.increment("orn");
 
-			// add to the log (don't track the actual keys)
-			t.log(LOG_TYPE_ORIENTATION, now, {
-				a: screen.orientation.angle
-			});
+			// override with Screen Orientation API if available
+			if (window.screen && screen.orientation && typeof screen.orientation.angle === "number") {
+				angle = screen.orientation.angle;
+			}
+
+			if (typeof angle === "number") {
+				// add to the log (don't track the actual keys)
+				t.log(LOG_TYPE_ORIENTATION, now, {
+					a: angle
+				});
+			}
 
 			// update the interaction monitor
 			i.interact("orn", now, e);

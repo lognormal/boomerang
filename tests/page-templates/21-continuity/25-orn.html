@@ -19,7 +19,14 @@ function orientationChange() {
 /* eslint-disable no-native-reassign */
 screen = { orientation: { angle: 0 } };
 orientationChange();
+
 screen = { orientation: { angle: 90 } };
+orientationChange();
+
+screen = { orientation: undefined };  // simulate no Screen Orientation API
+window.__defineGetter__("orientation", function() {
+	return -90;
+});
 orientationChange();
 /* eslint-enable no-native-reassign */
 </script>

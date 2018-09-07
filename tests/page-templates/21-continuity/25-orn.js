@@ -23,9 +23,10 @@ describe("e2e/21-continuity/25-orn", function() {
 			return obj.type === 5;
 		});
 
-		assert.equal(logs.length, 2);
+		assert.equal(logs.length, 3);
 
 		assert.equal(parseInt(logs[0].a, 36), 0);
 		assert.equal(parseInt(logs[1].a, 36), 90);
+		assert.equal(parseInt(logs[2].a, 36), -90);
 	});
 });
