@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/04-page-params/38-page-group-fetch", function() {
+describe("e2e/04-page-params/39-page-group-fetch", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var t = BOOMR_test;
 
@@ -10,6 +10,9 @@ describe("e2e/04-page-params/38-page-group-fetch", function() {
 	});
 
 	it("Should have sent 13 beacons", function(done) {
+		if (!t.isFetchApiSupported()) {
+			return this.skip();
+		}
 		var _this = this;
 		t.ifAutoXHR(
 			done,
@@ -30,8 +33,13 @@ describe("e2e/04-page-params/38-page-group-fetch", function() {
 			var b = tf.beacons[0];
 			assert.equal(b["rt.sl"], "1");
 		});
+	});
 
+	describe("Beacon 2 (xhr) (if Fetch API is supported)", function() {
 		it("Should set the Page Group of the second beacon 'XHR subresource'", function(done) {
+			if (!t.isFetchApiSupported()) {
+				return this.skip();
+			}
 			t.ifAutoXHR(
 				done,
 				function() {
@@ -41,9 +49,7 @@ describe("e2e/04-page-params/38-page-group-fetch", function() {
 				},
 				this.skip.bind(this));
 		});
-	});
 
-	describe("Beacon 2 (xhr) (if Fetch API is supported)", function() {
 		it("Should not increase the Session Length on the second beacon", function(done) {
 			if (!t.isFetchApiSupported()) {
 				return this.skip();

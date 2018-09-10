@@ -37,7 +37,7 @@ describe("e2e/14-errors/08-network", function() {
 		});
 
 		it("Should have had a single error", function() {
-			var b = tf.lastBeacon();
+			var b = tf.beacons[i];
 			assert.equal(C.jsUrlDecompress(b.err).length, 1);
 		});
 
@@ -69,6 +69,12 @@ describe("e2e/14-errors/08-network", function() {
 			var b = tf.beacons[i];
 			var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 			assert.equal(err.via, BOOMR.plugins.Errors.VIA_NETWORK);
+		});
+
+		it("Should have code = 404", function() {
+			var b = tf.beacons[i];
+			var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
+			assert.equal(err.code, "404");
 		});
 	});
 
@@ -133,6 +139,12 @@ describe("e2e/14-errors/08-network", function() {
 			var b = tf.beacons[i];
 			var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 			assert.equal(err.via, BOOMR.plugins.Errors.VIA_NETWORK);
+		});
+
+		it("Should have code = 404", function() {
+			var b = tf.beacons[i];
+			var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
+			assert.equal(err.code, "404");
 		});
 	});
 });

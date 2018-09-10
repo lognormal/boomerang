@@ -11,7 +11,7 @@ BOOMR_test.init({
 		monitorClearResourceTimings: true
 	},
 	onBoomerangLoaded: function() {
-		if (window.performance) {
+		if (BOOMR_test.isResourceTimingSupported()) {
 			var where = document.getElementsByTagName("script")[0].parentNode;
 			var script = document.createElement("script");
 			script.src = "./support/one.js";
@@ -32,6 +32,9 @@ BOOMR_test.init({
 			});
 
 			where.appendChild(script);
+		}
+		else {
+			BOOMR.page_ready();
 		}
 	}
 });

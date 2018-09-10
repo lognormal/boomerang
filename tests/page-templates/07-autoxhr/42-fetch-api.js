@@ -41,7 +41,12 @@ describe("e2e/07-autoxhr/42-fetch-api", function() {
 	describe("Beacon 1 (onload)", function() {
 		it("Should be an onload beacon", function() {
 			assert.include(tf.beacons[0].u, "42-fetch-api.html");
-			assert.equal(tf.beacons[0]["rt.start"], "navigation");
+			if (t.isNavigationTimingSupported()) {
+				assert.equal(tf.beacons[0]["rt.start"], "navigation");
+			}
+			else {
+				assert.equal(tf.beacons[0]["rt.start"], "none");
+			}
 		});
 	});
 

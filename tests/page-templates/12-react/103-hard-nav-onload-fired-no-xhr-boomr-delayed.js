@@ -17,7 +17,7 @@ describe("e2e/12-react/103-hard-nav-onload-fired-no-xhr-boomr-delayed", function
 		if (t.isMutationObserverSupported() && t.isNavigationTimingSupported()) {
 			var p = BOOMR.getPerformance();
 			var pt = p.timing;
-			var pageLoad = (pt.loadEventStart - pt.navigationStart);
+			var pageLoad = (pt.loadEventEnd - pt.navigationStart);
 			assert.closeTo(tf.beacons[0].t_done, pageLoad, 2);
 		}
 		else {

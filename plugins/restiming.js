@@ -126,7 +126,7 @@
 	var INITIATOR_TYPES = {
 		/** Unknown type */
 		"other": 0,
-		/** IMG element */
+		/** IMG element (or IMAGE element inside a SVG for IE, Edge and Firefox) */
 		"img": 1,
 		/** LINK element (i.e. CSS) */
 		"link": 2,

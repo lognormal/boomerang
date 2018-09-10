@@ -77,11 +77,6 @@ function afterFirstBeacon() {
 							throw e;
 						}
 					}
-					else {
-						// send a plain xhr beacon, the test will be skipped
-						f = window.fetch("/blackhole?req=skip&rnd=" + Math.random());
-						f.then(consume);
-					}
 				}).then(consume);  // if we don't consume it, our stream will never be read and the timings will be wrong
 			}
 			else if (xhrNum === 3) {

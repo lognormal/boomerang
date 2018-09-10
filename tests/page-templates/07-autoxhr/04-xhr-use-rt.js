@@ -49,7 +49,12 @@ describe("e2e/07-autoxhr/04-xhr-use-rt", function() {
 	describe("Beacon 1 (onload)", function() {
 		var i = 0;
 		it("Should be an onload beacon", function() {
-			assert.equal(tf.beacons[i]["rt.start"], "navigation");
+			if (t.isNavigationTimingSupported()) {
+				assert.equal(tf.beacons[i]["rt.start"], "navigation");
+			}
+			else {
+				assert.equal(tf.beacons[i]["rt.start"], "none");
+			}
 		});
 	});
 

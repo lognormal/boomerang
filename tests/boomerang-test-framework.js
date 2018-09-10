@@ -933,6 +933,26 @@
 			(window.navigator.userAgent.indexOf("Edge") !== -1);
 	};
 
+	/**
+	 * Determines the user agent is Firefox or not
+	 *
+	 * @returns {boolean} True if the user agent is Firefox
+	 */
+	t.isFirefox = function() {
+		return window.navigator &&
+			(window.navigator.userAgent.indexOf("Firefox") !== -1);
+	};
+
+	/**
+	 * Determines the user agent is Chrome or not
+	 *
+	 * @returns {boolean} True if the user agent is Chrome
+	 */
+	t.isChrome = function() {
+		return window.navigator &&
+			(window.navigator.userAgent.indexOf("Chrome") !== -1);
+	};
+
 	window.BOOMR_test = t;
 
 	// force LOGN plugin not to run. Individual tests will override this if needed.

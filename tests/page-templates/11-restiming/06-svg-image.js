@@ -32,13 +32,26 @@ describe("e2e/11-restiming/06-svg-image", function() {
 		}
 	});
 
-	it("Should have set the SVG:image initiatorType to IMAGE", function() {
+	it("Should have set the SVG:image initiatorType to IMAGE (or IMG, OTHER)", function() {
 		if (t.isResourceTimingSupported()) {
 			var b = tf.beacons[0];
 
 			var resources = ResourceTimingDecompression.decompressResources(JSON.parse(b.restiming));
 			var img = findSvgImage(resources);
-			assert.equal(img.initiatorType, "image");
+
+
+			if (t.isFirefox()) {
+				// Firefox initiator type may change depending on cache?
+				// Looks to be `other` (soft reload), `img` (first hit) or `image` (hard reload)
+				assert.isTrue(BOOMR.utils.inArray(img.initiatorType, ["image", "img", "other"]));
+			}
+			else if (t.isIE() || t.isEdge()) {
+				assert.equal(img.initiatorType, "img");
+			}
+			else {
+				// Chrome, Safari
+				assert.equal(img.initiatorType, "image");
+			}
 		}
 		else {
 			this.skip();

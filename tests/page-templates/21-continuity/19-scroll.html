@@ -1,20 +1,39 @@
 <%= header %>
 <%= boomerangScript %>
 <script src="19-scroll.js" type="text/javascript"></script>
-<img src="/delay?delay=3000&amp;file=assets/img.jpg" width="200" height="10000" />
+<img src="/assets/img.jpg" width="200" height="10000" />
 <script>
-BOOMR_test.init({
-	testAfterOnBeacon: true,
-	Continuity: {
-		enabled: true
-	}
-});
+function onLoad() {
+	// wait until onload so that the page height isn't changing during the test
+	setTimeout(function() {
+		// reset the scroll height for test consistency
+		window.scrollTo(0, 0);
 
-// scroll to bottom then back to top
-window.scrollTo(0, document.body.scrollHeight);
+		BOOMR_test.init({
+			testAfterOnBeacon: true,
+			Continuity: {
+				enabled: true
+			},
+			autorun: false
+		});
 
-setTimeout(function() {
-	window.scrollTo(0, 0);
-}, 250);
+		// scroll to bottom then back to top
+		window.scrollTo(0, document.body.scrollHeight);
+
+		setTimeout(function() {
+			window.scrollTo(0, 0);
+			setTimeout(function() {
+				BOOMR.page_ready();
+			}, 100);
+		}, 250);
+	}, 100);
+}
+
+if (window.addEventListener) {
+	window.addEventListener("load", onLoad, false);
+}
+else if (window.attachEvent) {
+	window.attachEvent("onLoad", onLoad);
+}
 </script>
 <%= footer %>
