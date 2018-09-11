@@ -63,6 +63,9 @@
 		if (window.navigator && typeof window.navigator.sendBeacon === "function") {
 			savedSendBeacon = window.navigator.sendBeacon;
 			window.navigator.sendBeacon = function(url, data) {
+				"[native code]";
+				// ^ fool ourselves
+
 				var result = savedSendBeacon.apply(window.navigator, arguments);
 				if (result) {
 					var reader = new FileReader();

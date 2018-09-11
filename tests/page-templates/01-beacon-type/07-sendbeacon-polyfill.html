@@ -1,0 +1,20 @@
+<%= header %>
+<script>
+window.usedPolyfilledSendBeacon = false;
+
+if (window.navigator && typeof window.navigator.sendBeacon === "function") {
+	window.hasNativeSendBeacon = true;
+
+	window.navigator.sendBeacon = function(url, data) {
+		window.usedPolyfilledSendBeacon = true;
+	};
+}
+</script>
+<%= boomerangSnippet %>
+<script src="07-sendbeacon-polyfill.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

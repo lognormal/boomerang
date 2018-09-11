@@ -4,6 +4,9 @@ window.sendBeaconUrl = undefined;
 window.sendBeaconData = undefined;
 if (window.navigator && typeof window.navigator.sendBeacon === "function") {
 	window.navigator.sendBeacon = function(url, data) {
+		"[native code]";
+		// ^ fool ourselves
+
 		sendBeaconUrl = url;
 		sendBeaconData = data;
 	};

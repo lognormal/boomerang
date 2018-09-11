@@ -381,13 +381,16 @@
 	 * @memberof BOOMR.plugins.AutoXHR
 	 */
 	function shouldExcludeXhr(anchor) {
+		var urlIdx;
+
 		if (anchor.href) {
 			if (anchor.href.match(/^(about:|javascript:|data:)/i)) {
 				return true;
 			}
 
-			// don't track our own beacons
-			if (anchor.href.indexOf(BOOMR.getBeaconURL()) === 0) {
+			// don't track our own beacons (allow for protocol-relative URLs)
+			urlIdx = anchor.href.indexOf(BOOMR.getBeaconURL());
+			if (urlIdx === 0 || urlIdx === 5 || urlIdx === 6) {
 				return true;
 			}
 		}
@@ -1925,7 +1928,17 @@
 							}
 							else {
 								// load, timeout, error, abort
-								resource.status = (stat === undefined ? req.status : stat);
+								if (ename === "load") {
+									if (req.status < 200 || req.status >= 400) {
+										// put the HTTP error code on the resource if it's not a success
+										resource.status = req.status;
+									}
+								}
+								else {
+									// this is a timeout/error/abort, so add the status code
+									resource.status = (stat === undefined ? req.status : stat);
+								}
+
 								impl.loadFinished(resource);
 							}
 						},
