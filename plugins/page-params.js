@@ -3437,6 +3437,9 @@
 				}
 			}
 
+			// add beacon number
+			data.n = ++BOOMR.beaconsSent;
+
 			// send the beacon
 			impl.sendBeacon(data);
 

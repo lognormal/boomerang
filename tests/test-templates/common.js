@@ -47,6 +47,8 @@ describe("common", function() {
 			now = BOOMR.now();
 			prefix = "ensure beacon " + (i + 1) + " ";
 
+			assert.equal(b.n, i + 1, prefix + "has the correct beacon number");
+
 			assert.equal(b.v, BOOMR.version, prefix + "has the boomerang version");
 
 			/* SOASTA_PRIVATE_START */

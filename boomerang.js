@@ -955,6 +955,16 @@ BOOMR_check_doc_domain();
 		loadedLate: false,
 
 		/**
+		 * Current number of beacons sent.
+		 *
+		 * Will be incremented and added to outgoing beacon as `n`.
+		 *
+		 * @type {number}
+		 *
+		 */
+		beaconsSent: 0,
+
+		/**
 		 * Constants visible to the world
 		 * @class BOOMR.constants
 		 */
@@ -3312,6 +3322,9 @@ BOOMR_check_doc_domain();
 			if (this.pageId) {
 				impl.vars.pid = this.pageId;
 			}
+
+			// add beacon number
+			impl.vars.n = ++this.beaconsSent;
 
 			if (w !== window) {
 				_if = "if";  // work around uglifyJS minification that breaks in IE8 and quirks mode
