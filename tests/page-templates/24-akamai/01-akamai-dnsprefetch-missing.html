@@ -1,0 +1,14 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="01-akamai-dnsprefetch-missing.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled : true,
+			// dont define dns_prefetch_url to missing missing parameter in config response.
+			placeholder : "bla"
+		}
+	});
+</script>
+<%= footer %>

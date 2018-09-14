@@ -528,5 +528,8 @@ BOOMR.init({
 	},
 	IFrameDelay: {
 		enabled: false
+	},
+	Akamai: {
+		enabled: false
 	}
 });

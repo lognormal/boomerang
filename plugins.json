@@ -26,6 +26,7 @@
         "node_modules/usertiming-compression/src/usertiming-compression.js",
         "plugins/usertiming.js",
         "plugins/mq.js",
+        "plugins/akamai.js",
         "plugins/logn.js"
     ]
 }

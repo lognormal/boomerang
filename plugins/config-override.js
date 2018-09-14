@@ -69,6 +69,10 @@
 		 * Other properties set by the override not set here.
 		 */
 		allowedConfigOverrides: {
+			Akamai: {
+				enabled: true,
+				dns_prefetch_url: true
+			},
 			Angular: {
 				enabled: true
 			},
