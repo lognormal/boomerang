@@ -992,10 +992,10 @@
 				return;
 			}
 			BOOMR.debug(name + " called with " + etarget.nodeName, "rt");
-			while (etarget && etarget.nodeName.toUpperCase() !== element) {
+			while (etarget && etarget.nodeName && etarget.nodeName.toUpperCase() !== element) {
 				etarget = etarget.parentNode;
 			}
-			if (etarget && etarget.nodeName.toUpperCase() === element) {
+			if (etarget && etarget.nodeName && etarget.nodeName.toUpperCase() === element) {
 				BOOMR.debug("passing through", "rt");
 
 				/* SOASTA PRIVATE START */

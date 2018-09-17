@@ -1042,8 +1042,9 @@
 
 		// only images, scripts, iframes and links if stylesheet
 		// nodeName for SVG:IMAGE returns `image` in lowercase
-		if (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) ||
-		   (node.nodeName === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i))) {
+		if (node && node.nodeName &&
+		    (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) ||
+		    (node.nodeName.toUpperCase() === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i)))) {
 
 			// if the attribute change affected the src attributes we want to know that
 			// as that means we need to fetch a new Resource from the server

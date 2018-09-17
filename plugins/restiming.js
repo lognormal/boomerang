@@ -738,7 +738,7 @@
 					// This should load from in-memory cache, so there should be no extra load.
 					var realImg, nH, nW;
 
-					if (el.currentSrc && (el.srcset || el.parentNode.nodeName.toUpperCase() === "PICTURE")) {
+					if (el.currentSrc && (el.srcset || (el.parentNode && el.parentNode.nodeName && el.parentNode.nodeName.toUpperCase() === "PICTURE"))) {
 						// We need to create this Image in the window that contains the element, and not
 						// the boomerang window.
 						realImg = el.isConnected ? el.ownerDocument.createElement("IMG") : new BOOMR.window.Image();
