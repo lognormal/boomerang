@@ -1,0 +1,32 @@
+<%= header %>
+<script>
+window.testV4Url = undefined;
+window.testV4ReqMethod = undefined;
+window.origXMLHttpRequestOpen = undefined;
+
+// Override the XMLHttpRequest method with our own to test
+// whether a v4 request is made using this API.
+if (window.XMLHttpRequest && typeof window.XMLHttpRequest.prototype.open === "function") {
+	origXMLHttpRequestOpen = window.XMLHttpRequest.prototype.open;
+
+	window.XMLHttpRequest.prototype.open = function(methodType, destUrl, asynReq) {
+		testV4ReqMethod = methodType;
+		testV4Url = destUrl;
+		origXMLHttpRequestOpen.call(this, methodType, destUrl, asynReq);
+	};
+}
+</script>
+<%= boomerangScript %>
+<script src="02-akamai-mapping-xhr-v4.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled: true,
+			mapping_xhr_base_url: "akamaihd.net",
+			mapping_xhr_url_path: "/eum/getdns.txt",
+			mapping_xhr_url_v4_prefix: "trial-eum-clientnsv4-s"
+		}
+	});
+</script>
+<%= footer %>

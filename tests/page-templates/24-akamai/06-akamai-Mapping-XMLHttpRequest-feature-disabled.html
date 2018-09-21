@@ -1,0 +1,36 @@
+<%= header %>
+<script>
+window.testV4Url = "test05";
+window.testV4ReqMethod = "test05";
+window.origXMLHttpRequest = undefined;
+
+// Override the XMLHttpRequest method with our own to test
+// whether a v4 request is made using this API.
+if (window.XMLHttpRequest) {
+	origXMLHttpRequest = window.XMLHttpRequest;
+	// disable XMLHttpRequest feature.
+	window.XMLHttpRequest = undefined;
+
+	origXMLHttpRequest.prototype.open = function(methodType, destUrl, asynReq) {
+		testV4ReqMethod = methodType;
+		testV4Url = destUrl;
+		origXMLHttpRequestOpen.call(this, methodType, destUrl, asynReq);
+	};
+}
+</script>
+<%= boomerangScript %>
+<script src="06-akamai-mapping-xmlhttprequest-feature-disabled.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled: true,
+			mapping_xhr_base_url: "akamaihd.net",
+			mapping_xhr_url_path: "/eum/getdns.txt",
+			mapping_xhr_url_v4_prefix: "trial-eum-clientnsv4-s",
+			mapping_xhr_url_v6_prefix: "trial-eum-clientnsv6-s"
+		}
+	});
+	BOOMR.addVar("ak.ipv", "6");
+</script>
+<%= footer %>

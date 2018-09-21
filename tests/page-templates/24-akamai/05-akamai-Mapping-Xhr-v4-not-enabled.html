@@ -1,0 +1,36 @@
+<%= header %>
+<script>
+window.testV4Url = "test05";
+window.testV4ReqMethod = "test05";
+window.origXMLHttpRequestOpen = undefined;
+
+// Override the XMLHttpRequest method with our own to test
+// whether a v4 request is made using this API.
+if (window.XMLHttpRequest && typeof window.XMLHttpRequest.prototype.open === "function") {
+	origXMLHttpRequestOpen = window.XMLHttpRequest.prototype.open;
+
+	window.XMLHttpRequest.prototype.open = function(methodType, destUrl, asynReq) {
+		testV4ReqMethod = methodType;
+		testV4Url = destUrl;
+		origXMLHttpRequestOpen.call(this, methodType, destUrl, asynReq);
+	};
+}
+</script>
+<%= boomerangScript %>
+<script src="05-akamai-mapping-xhr-v4-not-enabled.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled: true,
+			mapping_xhr_base_url: "akamaihd.net",
+			mapping_xhr_url_path: "/eum/getdns.txt",
+			// Turn on config response for V6 so that the v4/v6 condition get evaluated. Disable V6
+			// via the ak.ipv add var parameter so that no V6 XHR actually happens. So end result,
+			// we dont expect any XHR (v4/v6) to be issued.
+			mapping_xhr_url_v6_prefix: "trial-eum-clientnsv6-s"
+		}
+	});
+	BOOMR.addVar("ak.ipv", "4");
+</script>
+<%= footer %>
