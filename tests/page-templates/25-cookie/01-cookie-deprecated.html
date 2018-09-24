@@ -1,0 +1,15 @@
+<%= header %>
+<script>
+BOOMR_test.setCookie({
+	sh: 12345
+});
+</script>
+<%= boomerangScript %>
+<script src="01-cookie-deprecated.js" type="text/javascript"></script>
+<script>
+BOOMR.session.domain = document.domain;
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

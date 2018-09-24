@@ -1,0 +1,13 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="15-session-expiry.js" type="text/javascript"></script>
+<script>
+BOOMR.session.domain = document.domain;
+BOOMR_test.init({
+	RT: {
+		session_exp: 100
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

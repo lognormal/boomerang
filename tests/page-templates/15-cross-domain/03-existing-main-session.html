@@ -7,6 +7,10 @@ BOOMR.utils.removeCookie("RT");
 
 <script type="text/javascript">
 function handler(event) {
+	if (!event || typeof event.data !== "string") {
+		return;
+	}
+
 	var data = JSON.parse(event.data);
 	if (data && data.dm) {
 		window.childSessionData = data;
@@ -44,5 +48,3 @@ Ensure Main Session that existed before this session gets merged with the sessio
 +-------+   +------+             +-------+   +--------------------------+
 </pre>
 <%= footer %>
-
-

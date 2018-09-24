@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/00-basic/15-cookie-null", function() {
+describe("e2e/25-cookie/00-cookie-null", function() {
 	var tf = BOOMR.plugins.TestFramework;
 
 	it("Should have sent a beacon", function() {

@@ -35,10 +35,10 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 	it("Should have a session length of 11 from the 10 prior to loading the page", function() {
 		var cookie = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie("RT"));
 		var b = tf.lastBeacon();
-		assert.equal(parseInt(cookie.sl), 11);
+		assert.equal(parseInt(cookie.sl, 36), 11);
 	});
 
-	it("Should have a rt.tt of 666 (mocked session total time across session) + beacons t_done", function() {
+	it("Should have a rt.tt of 66666 (mocked session total time across session) + beacons t_done", function() {
 		var cookie = BOOMR.utils.getSubCookies(BOOMR.utils.getCookie("RT"));
 		var b = tf.lastBeacon();
 
@@ -50,9 +50,9 @@ describe("e2e/15-cross-domain/03-existing-main-session", function() {
 			assert.isDefined(b.t_done, "t_done is not defined");
 			assert.isNumber(b.t_done, "t_done is not a number");
 
-			// CookieTT equals RT's impl.loadTime.delta + t_done (for the current page) + 666 taken from the mocked session;
-			var allLoadTimes = b["rt.end"] - b["rt.tstart"] + b.t_done + 666;
-			assert.equal(parseInt(cookie.tt), allLoadTimes);
+			// CookieTT equals RT's impl.loadTime.delta + t_done (for the current page) + 66666 taken from the mocked session;
+			var allLoadTimes = b["rt.end"] - b["rt.tstart"] + b.t_done + 66666;
+			assert.equal(parseInt(cookie.tt, 36), allLoadTimes);
 		}
 	});
 });

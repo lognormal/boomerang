@@ -8,14 +8,6 @@
 	BOOMR.plugins = BOOMR.plugins || {};
 
 	/**
-	 * @typedef {Obeject} HistoryEntry
-	 *
-	 * @property {TimeStamp} timestamp timestamp of the start of the session or now()
-	 * @property {Number} offByOne number of times t_done was not set for a page for a reason or another
-	 * @property {loadTime} loadTime load time of the specific history entry page
-	 */
-
-	/**
 	 * @name BOOMR.plugins.MockSession.impl
 	 * @desc
 	 * Implementation object for the session mocking Plugin used in Boomerang End To End tests to reflect real
@@ -31,7 +23,6 @@
 	 * @property {Number} length Session length
 	 * @property {TimeStamp} start Time when the session started
 	 * @property {Number} loadTime Duration until page was loaded
-	 * @property {HistoryEntry[]} sessionHistory Session history entries
 	 * @property {Number} offByOne Off By one error number for a session
 	 * @property {string} beacon_url Beacon URL destination
 	 *
@@ -49,7 +40,6 @@
 		length: -1,
 		start: 0,
 		loadTime: 0,
-		sessionHistory: [],
 		offByOne: 0,
 		beacon_url: "/no-op"
 	};
@@ -108,63 +98,19 @@
 			var cookieObject = {
 				"dm": BOOMR.session.domain,
 				"si": BOOMR.session.ID,
-				"ss": BOOMR.session.start,
-				"sl": BOOMR.session.length,
-				"tt": impl.loadTime ? impl.loadTime : 433,
-				"obo": impl.offByOne ? impl.offByOne : 0,
-				"sh": this.buildSessionHistory(impl.sessionHistory),
-				"bcn": impl.beacon_url ? impl.beacon_url : "/beacon"
+				"ss": (BOOMR.session.start).toString(36),
+				"sl": (BOOMR.session.length).toString(36),
+				"tt": impl.loadTime ? (impl.loadTime).toString(36) : (433).toString(36),
+				"obo": impl.offByOne ? (impl.offByOne).toString(36) : 0,
+				"bcn": impl.beacon_url ? impl.beacon_url : "/beacon",
+				"z": 1
 			};
 			BOOMR.plugins.RT.updateCookie();
 
 			var secondsOneDay = 24 * 60 * 60;
 			BOOMR.utils.setCookie("RT", cookieObject, secondsOneDay);
 		},
-		/**
-		 * @desc
-		 * Build a session history for storage in a cookie
-		 *
-		 * @param {HistoryEntry[]} sessionHistoryEntries - an array of session history entries
-		 * @param {Number} [optional] baseLength - if passed used as base number to increment from when
-		 *  iterating over sessionHistoryEntries and creating length values
-		 *
-		 * @returns {string} Stringified session history
-		 */
-		buildSessionHistory: function(sessionHistoryEntries, baseLength) {
-			var sessionHistory = "", sessionHistoryCollection = [];
 
-			// Use random values to prefill if we are not given a valid choice for session history
-			if (!sessionHistoryEntries || sessionHistoryEntries.length === 0) {
-				var collection = [];
-				for (var i = 0; i < 5; i++) {
-					collection.push({
-						timestamp: BOOMR.now() - Math.floor(Math.random() * 1000000),
-						offByOne: Math.floor(Math.random() * 1),
-						loadTime: Math.floor(Math.random() * 1000)
-					});
-				}
-
-				return this.buildSessionHistory(collection, baseLength);
-			}
-
-			for (var shIndex = 0; shIndex < sessionHistoryEntries.length; shIndex++) {
-				// expecting session history to be an ordered list of entries we can
-				// organize the temporary string based on index as the current session length
-				// plus 1 since session length will never be 0. If passed in take a base Length
-				// to apply
-				var tmp = sessionHistoryEntries[shIndex].timestamp +
-					"=" +
-					((baseLength ? baseLength : 0) + shIndex + 1) +
-					":" +
-					sessionHistoryEntries[shIndex].offByOne +
-					":" +
-					sessionHistoryEntries[shIndex].loadTime;
-
-				sessionHistoryCollection.push(tmp);
-			}
-
-			return sessionHistoryCollection.join(",");
-		},
 		is_complete: function() {
 			return true;
 		}

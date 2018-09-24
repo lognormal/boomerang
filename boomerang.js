@@ -33,8 +33,7 @@
  * * `u`: The page's URL (for most beacons), or the `XMLHttpRequest` URL
  * * `pgu`: The page's URL (for `XMLHttpRequest` beacons)
  * * `pid`: Page ID (8 characters)
- * * `r`: Navigation referrer (from the cookie)
- * * `r2`: Navigation referrer (from `document.location`, if different than `r`)
+ * * `r`: Navigation referrer (from `document.location`)
  * * `vis.pre`: `1` if the page transitioned from prerender to visible
  * * `xhr.pg`: The `XMLHttpRequest` page group
  * * `errors`: Error messages of errors detected in Boomerang code, separated by a newline
@@ -375,11 +374,8 @@ BOOMR_check_doc_domain();
 		// Whether or not we've sent a page load beacon
 		hasSentPageLoadBeacon: false,
 
-		// cookie referrer
-		r: undefined,
-
 		// document.referrer
-		r2: undefined,
+		r: undefined,
 
 		// strip_query_string: false,
 
@@ -2981,24 +2977,15 @@ BOOMR_check_doc_domain();
 		},
 
 		/**
-		 * Sets the Referrers variables.
+		 * Sets the Referrers variable.
 		 *
-		 * @param {string} r Referrer from the cookie
-		 * @param {string} [r2] Referrer from document.referrer, if different
+		 * @param {string} r Referrer from the document.referrer
 		 *
 		 * @memberof BOOMR
 		 */
-		setReferrer: function(r, r2) {
-			// cookie referrer
+		setReferrer: function(r) {
+			// document.referrer
 			impl.r = r;
-
-			// document.referrer, if different
-			if (r2 && r !== r2) {
-				impl.r2 = r2;
-			}
-			else {
-				impl.r2 = undefined;
-			}
 		},
 
 		/**
@@ -3287,13 +3274,6 @@ BOOMR_check_doc_domain();
 			}
 			else {
 				delete impl.vars.r;
-			}
-
-			if (impl.r2) {
-				impl.vars.r2 = BOOMR.utils.cleanupURL(impl.r2);
-			}
-			else {
-				delete impl.vars.r2;
 			}
 
 			impl.vars.v = BOOMR.version;

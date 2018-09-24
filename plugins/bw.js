@@ -51,7 +51,7 @@
  *
  * If the visitor has an IPv6 address, we use the entire address.
  *
- * ## The Cookie
+ * ## Cookie
  *
  * The bandwidth results are stored within a cookie.  This helps ensure the bandwidth
  * test isn't repeated for the same user repeatedly (slowing down their experience).
