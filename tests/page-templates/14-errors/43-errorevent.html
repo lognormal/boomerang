@@ -1,0 +1,29 @@
+<%= header %>
+<!--
+	call window.onerror with an ErrorEvent object, simulates issue https://github.com/angular/zone.js/issues/1108
+-->
+<%= boomerangScriptMin %>
+<script src="43-errorevent.js" type="text/javascript"></script>
+<script>
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true
+	}
+});
+
+if (window.ErrorEvent) {
+	function errorFunction() {
+		var error = new ErrorEvent("error", {
+			error: new Error("errorMessage")
+		});
+
+		window.onerror(error);
+	}
+
+	errorFunction();
+}
+
+</script>
+<%= footer %>

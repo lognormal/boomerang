@@ -952,7 +952,7 @@
 		}
 
 		// fixup some old browser types
-		if (error.message &&
+		if (typeof error.message === "string" &&
 		    error.message.indexOf("ReferenceError:") !== -1 &&
 		    error.name === "Error") {
 			error.name = "ReferenceError";
@@ -1990,6 +1990,12 @@
 					}
 
 					BOOMR.window.onerror = function BOOMR_plugins_errors_onerror(message, fileName, lineNumber, columnNumber, error) {
+						// onerror may be called with an `ErrorEvent` object (eg. https://github.com/angular/zone.js/issues/1108)
+						if (typeof error === "undefined" &&
+						    typeof message === "object" && typeof message.error === "object" && message.error !== null) {
+							error = message.error;
+						}
+
 						// a SyntaxError can produce a null error
 						if (typeof error !== "undefined" && error !== null) {
 							impl.send(error, E.VIA_GLOBAL_EXCEPTION_HANDLER);
@@ -2011,8 +2017,10 @@
 						}
 
 						if (typeof BOOMR.globalOnError === "function") {
-							BOOMR.globalOnError.apply(window, arguments);
+							return BOOMR.globalOnError.apply(BOOMR.window, arguments);
 						}
+
+						return false; // don't prevent the firing of the default event handler
 					};
 
 					// send any errors from the loader snippet

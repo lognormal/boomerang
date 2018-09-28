@@ -39,6 +39,9 @@ describe("e2e/14-errors/00-send", function() {
 		if (err.fileName) {
 			assert.include(err.fileName, "00-send.html");
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have functionName of 'errorFunction'", function() {
@@ -47,6 +50,9 @@ describe("e2e/14-errors/00-send", function() {
 
 		if (err.functionName) {
 			assert.equal(err.functionName, "errorFunction");
+		}
+		else {
+			this.skip();
 		}
 	});
 
@@ -87,6 +93,9 @@ describe("e2e/14-errors/00-send", function() {
 		if (typeof err.columnNumber !== "undefined") {
 			assert.isTrue(err.columnNumber >= 0);
 		}
+		else {
+			this.skip();
+		}
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 3), function() {
@@ -95,6 +104,9 @@ describe("e2e/14-errors/00-send", function() {
 
 		if (err.lineNumber) {
 			assert.closeTo(err.lineNumber, HEADER_LINES + 3, 5);
+		}
+		else {
+			this.skip();
 		}
 	});
 });
