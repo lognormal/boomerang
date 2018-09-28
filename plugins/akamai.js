@@ -22,6 +22,11 @@
 	}
 
 	/**
+	 * Marker for identifing if XHR was perform recently.
+	 */
+	var XHR_RETRY_LOCALSTORAGE_NAME = "akamaiXhrRetry";
+
+	/**
 	 * Debug logging
 	 *
 	 * @param {string} msg Message
@@ -37,6 +42,7 @@
 		mapping_xhr_url_path: undefined,
 		mapping_xhr_url_v4_prefix: undefined,
 		mapping_xhr_url_v6_prefix: undefined,
+		xhrRetryMarker: XHR_RETRY_LOCALSTORAGE_NAME,
 
 		/**
 		 * Adds a Link Rel DNS-prefetch element to the Head of the Boomerang iFrame
@@ -60,9 +66,13 @@
 			}
 
 			// Check if information for Mapping XHR calls are present. If so prepare
-			// and issue XHR requests.
+			// and issue XHR requests. Only issue XHR request if we havent issued in the
+			// last 30 minutes.
 			log("Evaluating XHR call requirements if XMLHttpRequest feature is enabled");
-			if (window.XMLHttpRequest && impl.mapping_xhr_base_url && impl.mapping_xhr_url_path &&
+
+			if (window.XMLHttpRequest &&
+				!BOOMR.utils.getLocalStorage(impl.xhrRetryMarker) &&
+				impl.mapping_xhr_base_url && impl.mapping_xhr_url_path &&
 				(impl.mapping_xhr_url_v4_prefix || impl.mapping_xhr_url_v6_prefix)) {
 
 				// Example endpoint for XHR request:
@@ -89,6 +99,15 @@
 					setTimeout(function() {
 						mappingXhrV6Req.send();
 					}, 200);
+				}
+
+				// Mark the localStorage to let us know that we have already made the XHR call
+				// and should wait atleast 30 mins (1800 seconds) before resending XHR requests.
+				BOOMR.utils.setLocalStorage(impl.xhrRetryMarker, {}, 1800);
+			}
+			else {
+				if (BOOMR.utils.getLocalStorage(impl.xhrRetryMarker)) {
+					log("Not resending XHR request as LocalStorage indicates request was sent recently");
 				}
 			}
 		}
