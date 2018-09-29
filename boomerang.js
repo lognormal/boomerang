@@ -354,7 +354,8 @@ BOOMR_check_doc_domain();
 		beacon_auth_key: "Authorization",
 
 		// Beacon authorization token. This is only needed if your are using a POST
-		// and the beacon requires an Authorization token to accept your data.
+		// and the beacon requires an Authorization token to accept your data.  This
+		// disables use of the browser sendBeacon() API.
 		beacon_auth_token: undefined,
 
 		// Strip out everything except last two parts of hostname.
@@ -3458,7 +3459,11 @@ BOOMR_check_doc_domain();
 			    typeof w.navigator.sendBeacon === "function" &&
 			    BOOMR.utils.isNative(w.navigator.sendBeacon) &&
 			    typeof w.Blob === "function" &&
-			    impl.beacon_type !== "GET") {
+			    impl.beacon_type !== "GET" &&
+			    // As per W3C, The sendBeacon method does not provide ability to pass any
+			    // header other than 'Content-Type'. So if we need to send data with
+			    // 'Authorization' header, we need to fallback to good old xhr.
+			    typeof impl.beacon_auth_token === "undefined") {
 				// note we're using sendBeacon with &sb=1
 				var blobData = new w.Blob([paramsJoined + "&sb=1"], {
 					type: "application/x-www-form-urlencoded"
