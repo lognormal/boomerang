@@ -389,9 +389,11 @@
 			}
 
 			// don't track our own beacons (allow for protocol-relative URLs)
-			urlIdx = anchor.href.indexOf(BOOMR.getBeaconURL());
-			if (urlIdx === 0 || urlIdx === 5 || urlIdx === 6) {
-				return true;
+			if (typeof BOOMR.getBeaconURL === "function" && BOOMR.getBeaconURL()) {
+				urlIdx = anchor.href.indexOf(BOOMR.getBeaconURL());
+				if (urlIdx === 0 || urlIdx === 5 || urlIdx === 6) {
+					return true;
+				}
 			}
 		}
 
