@@ -675,7 +675,7 @@
  * * `c.t.scroll`: Scroll timeline (compressed)
  * * `c.t.scrollpct`:Scroll percentage (of full page) timeline (compressed)
  * * `c.t.mut`: DOM Mutations timeline (compressed)
- * * `c.ttfi`: Time to First Interactive (Base-10)
+ * * `c.ttfi`: Time to First Interaction (Base-10)
  * * `c.tti.fr`: Framework Ready (Base-10)
  * * `c.tti.hi`: Hero Images ready (Base-10)
  * * `c.tti.m`: Time to Interactive Method (`lt`, `raf`, `b`)
