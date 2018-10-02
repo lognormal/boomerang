@@ -53,7 +53,6 @@ module.exports = function(config) {
 			"karma-firefox-launcher",
 			"karma-ie-launcher",
 			"karma-opera-launcher",
-			"karma-phantomjs-launcher",
 			"karma-safari-launcher");
 	}
 	else {
