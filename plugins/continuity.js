@@ -3328,8 +3328,10 @@
 			// update the timeline
 			t.increment("orn");
 
+			var orientation = window.screen && (screen.msOrientation || (screen.orientation || screen.mozOrientation || {}));
+
 			// override with Screen Orientation API if available
-			if (window.screen && screen.orientation && typeof screen.orientation.angle === "number") {
+			if (orientation && typeof orientation.angle === "number") {
 				angle = screen.orientation.angle;
 			}
 
