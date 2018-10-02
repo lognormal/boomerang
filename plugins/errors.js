@@ -26,6 +26,8 @@
  * * JavaScript runtime errors captured via the
  *   [`unhandledrejection`](https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection)
  *   global event handler. Disabled by default.
+ * * JavaScript runtime warnings captured via the
+ *   [`Reporting API`](https://www.w3.org/TR/reporting/#reporting-observer). Disabled by default.
  *
  * These are all enabled by default, and can be
  * {@link BOOMR.plugins.Errors.init manually turned off}.
@@ -998,6 +1000,7 @@
 		monitorEvents: true,
 		monitorTimeout: true,
 		monitorRejections: false,  // new feature, off by default
+		monitorReporting: false,  // new feature, off by default
 		sendAfterOnload: false,
 		maxErrors: 10,
 		// How often to send an error beacon after onload
@@ -1027,6 +1030,9 @@
 		 * Circular event buffer
 		 */
 		events: [],
+
+		// Reporting API observer
+		reportingObserver: undefined,
 
 		//
 		// Public Functions
@@ -1937,6 +1943,8 @@
 		 * and `setInterval`.
 		 * @param {boolean} [config.Errors.monitorRejections] Monitor unhandled
 		 * promise rejections.
+		 * @param {boolean} [config.Errors.monitorReporting] Monitor Reporting API
+		 * warnings.
 		 * @param {boolean} [config.Errors.sendAfterOnload] Whether or not to
 		 * send errors after the page load beacon.  If set to false, only errors
 		 * that happened up to the page load beacon will be captured.
@@ -1950,10 +1958,12 @@
 		 */
 
 		init: function(config) {
+			var i, report, msg;
+
 			BOOMR.utils.pluginConfig(impl, config, "Errors",
 				["onError", "monitorGlobal", "monitorNetwork", "monitorConsole",
-				 "monitorEvents", "monitorTimeout", "monitorRejections", "sendAfterOnload",
-				 "sendInterval", "maxErrors"]);
+				 "monitorEvents", "monitorTimeout", "monitorReporting", "monitorRejections",
+				 "sendAfterOnload", "sendInterval", "maxErrors"]);
 
 			if (impl.initialized) {
 				return this;
@@ -2157,6 +2167,29 @@
 				impl.wrapFn("setInterval", BOOMR.window, false, 0, E.VIA_TIMEOUT);
 			}
 
+			// listen for Reporting API warnings
+			if (impl.monitorReporting && BOOMR.window.ReportingObserver) {
+				impl.reportingObserver = new BOOMR.window.ReportingObserver(function(reports, observer) {
+					if (BOOMR.utils.isArray(reports)) {
+						for (i = 0; i < reports.length; i++) {
+							report = reports[i];
+							msg = report && report.body && (report.body.message || report.body.reason);
+							if (msg) {
+								impl.send({
+									message: msg,
+									fileName: report.body.sourceFile || report.url,
+									lineNumber: report.body.lineNumber,
+									columnNumber: report.body.columnNumber,
+									noStack: true
+								}, E.VIA_REPORTING_API);
+							}
+						}
+					}
+				}, {buffered: true});
+				impl.reportingObserver.observe();
+			}
+
+
 			return this;
 		},
 
@@ -2233,6 +2266,11 @@
 		 * This was caught by monitoring unhandled promise rejection events
 		 */
 		VIA_REJECTION: 7,
+
+		/**
+		 * Observed with the Reporting API
+		 */
+		VIA_REPORTING_API: 8,
 
 		//
 		// Events

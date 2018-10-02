@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="45-reporting-api.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+	if (BOOMR_test.isChrome() && window.ReportingObserver) {
+		return chrome.loadTimes().firstPaintTime;  // cause a deprecation warning
+	}
+}
+errorFunction();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorReporting: true
+	}
+});
+</script>
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

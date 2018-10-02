@@ -146,6 +146,7 @@
 				monitorEvents: true,
 				monitorTimeout: true,
 				monitorRejection: true,
+				monitorReporting: true,
 				sendAfterOnload: true,
 				maxErrors: true,
 				sendInterval: true
