@@ -1152,7 +1152,7 @@
 			//    we want to send out errors (after a small delay) in case the
 			//    page never loads (e.g. due to the error).
 			//
-			if ((!impl.isDuringLoad || !impl.autorun) && impl.sendIntervalId === -1) {
+			if ((BOOMR.hasSentPageLoadBeacon() || !impl.autorun) && impl.sendIntervalId === -1) {
 				if (dup) {
 					// If this is not during a load, and it's a duplicate of
 					// a previous error, don't send a beacon just for itself
@@ -1179,13 +1179,9 @@
 					// add our errors to the beacon
 					impl.addErrorsToBeacon();
 
-					// ensure start/end timestamps are on the beacon since the RT
-					// plugin won't run until onload
-					if (impl.isDuringLoad) {
-						BOOMR.addVar("rt.tstart", now);
-						BOOMR.addVar("rt.end", now);
-						BOOMR.addVar("rt.start", "manual");
-					}
+					BOOMR.addVar("rt.tstart", now);
+					BOOMR.addVar("rt.end", now);
+					BOOMR.addVar("rt.start", "manual");
 
 					// send it!
 					BOOMR.sendBeacon();

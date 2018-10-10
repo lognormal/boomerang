@@ -1,0 +1,59 @@
+<%= header %>
+<script>
+	(function() {
+		BOOMR = window.BOOMR || {};
+		BOOMR.plugins = BOOMR.plugins || {};
+
+		if (BOOMR.plugins.DelayBeaconPlugin) {
+			return;
+		}
+
+		var impl = {
+			complete: false
+		};
+
+		BOOMR.plugins.DelayBeaconPlugin = {
+			init: function(config) {
+
+				function delayBeacon() {
+					setTimeout(function(){
+						impl.complete = true;
+						BOOMR.sendBeacon();
+					}, 3000);
+				};
+
+				BOOMR.subscribe("page_ready", delayBeacon, null, impl);
+				impl.initialized = true;
+
+				return this;
+			},
+
+			is_complete: function() {
+				// Set initially to false, it will be switched over shortly after pageready event
+				return impl.complete;
+			}
+		};
+
+}());
+</script>
+<%= boomerangScriptMin %>
+<script src="46-error-during-onload.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+
+	setTimeout(function() {
+		BOOMR.plugins.Errors.send("ERROR!");
+	}, 500);
+}
+
+BOOMR.subscribe("page_ready", errorFunction, null, null);
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true
+	}
+});
+</script>
+<%= footer %>
