@@ -3547,7 +3547,7 @@
 		}
 
 		// MutationObserver
-		if (typeof w.MutationObserver === "function") {
+		if (BOOMR.utils.isMutationObserverSupported()) {
 			observer = new w.MutationObserver(onMutationObserver);
 
 			// configure the observer
