@@ -27,5 +27,7 @@
 	{"key":"pci-blacklist"},
 	{"key":"localstorage"},
 	{"key":"continuity"},
-	{"key":"fetch-api"}
+	{"key":"fetch-api"},
+	{"key":"errors-monitor-rejection"},
+	{"key":"errors-monitor-reporting-api"}
 ]
