@@ -545,7 +545,8 @@
 				// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 				// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
 				//
-				var ac = element.autocomplete || element.getAttribute("autocomplete");
+				var ac = element.autocomplete ||
+					(typeof element.getAttribute === "function" && element.getAttribute("autocomplete"));
 
 				if (ac && ac.length) {
 					ac = ac.toLowerCase();
@@ -1274,7 +1275,10 @@
 			}
 
 			if (el) {
-				url = el.currentSrc || el.src || el.getAttribute("xlink:href") || el.href;
+				url = el.currentSrc ||
+					el.src ||
+					(typeof el.getAttribute === "function" && el.getAttribute("xlink:href")) ||
+					el.href;
 			}
 			else if (!url) {
 				return false;

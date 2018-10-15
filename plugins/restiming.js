@@ -643,7 +643,10 @@
 			.forEach
 			.call(a.ownerDocument.getElementsByTagName(tagName), function(r) {
 				// Get canonical URL
-				a.href = r.currentSrc || r.src || r.getAttribute("xlink:href") || r.href;
+				a.href = r.currentSrc ||
+					r.src ||
+					(typeof r.getAttribute === "function" && r.getAttribute("xlink:href")) ||
+					r.href;
 
 				// only get external resource
 				if (a.href.match(/^https?:\/\//)) {
@@ -704,7 +707,10 @@
 				// currentSrc = IMG inside a PICTURE element or IMG srcset
 				// src = IMG, IFRAME
 				// xlink:href = svg:IMAGE
-				src = el.currentSrc || el.src || el.getAttribute("src") || el.getAttribute("xlink:href");
+				src = el.currentSrc ||
+					el.src ||
+					(typeof el.getAttribute === "function" &&
+						(el.getAttribute("src")) || el.getAttribute("xlink:href"));
 
 				// make src absolute
 				a.href = src;

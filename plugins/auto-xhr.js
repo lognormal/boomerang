@@ -1040,7 +1040,7 @@
 	 */
 	MutationHandler.prototype.wait_for_node = function(node, index) {
 		var self = this, current_event, els, interesting = false, i, l, url,
-		    exisitingNodeSrcUrlChanged = false, resourceNum;
+		    exisitingNodeSrcUrlChanged = false, resourceNum, domHeight, domWidth;
 
 		// only images, scripts, iframes and links if stylesheet
 		// nodeName for SVG:IMAGE returns `image` in lowercase
@@ -1058,7 +1058,9 @@
 
 			// we put xlink:href before href because node.href works for <SVG:IMAGE> elements,
 			// but does not return a string
-			url = node.src || node.getAttribute("xlink:href") || node.href;
+			url = node.src ||
+				(typeof node.getAttribute === "function" && node.getAttribute("xlink:href")) ||
+				node.href;
 
 			// no URL or javascript: or about: or data: URL, so no network activity
 			if (!url || url.match(/^(about:|javascript:|data:)/i)) {
@@ -1078,10 +1080,59 @@
 					// img already loaded
 					return false;
 				}
-				else if (node.getAttribute("src") === "") {
+				else if (typeof node.getAttribute === "function" && node.getAttribute("src") === "") {
 					// placeholder IMG
 					return false;
 				}
+			}
+
+			// IFRAMEs whose SRC has changed will not fire a load event again
+			if (node.nodeName === "IFRAME" && exisitingNodeSrcUrlChanged) {
+				return false;
+			}
+
+			//
+			// Don't track pixels: <= 1px, display:none or visibility:hidden.
+			// Only use attributes, not computed styles, to avoid forcing layout
+			//
+
+			// First try to get the number of pixels from width or height attributes
+			if (typeof node.getAttribute === "function") {
+				domHeight = parseInt(node.getAttribute("height"), 10);
+				domWidth = parseInt(node.getAttribute("width"), 10);
+			}
+
+			// If not specified, we can look at the style height/width.  We can
+			// only be confident about "0", "0px" or "1px" that it's small -- things
+			// like "0em" or "0in" would be relative.  Some things that are actually
+			// small might not match this list, but it's safer to only check against
+			// a known list.
+			if (isNaN(domHeight)) {
+				domHeight = (node.style &&
+				   (node.style.height === "0" ||
+					node.style.height === "0px" ||
+					node.style.height === "1px")) ? 0 : undefined;
+			}
+
+			if (isNaN(domWidth)) {
+				domWidth = (node.style &&
+				   (node.style.width === "0" ||
+					node.style.width === "0px" ||
+					node.style.width === "1px")) ? 0 : undefined;
+			}
+
+			if (!isNaN(domHeight) && domHeight <= 1 && !isNaN(domWidth) && domWidth <= 1) {
+				return false;
+			}
+
+			// Check against display:none
+			if (node.style && node.style.display === "none") {
+				return false;
+			}
+
+			// Check against visibility:hidden
+			if (node.style && node.style.visibility === "hidden") {
+				return false;
 			}
 
 			current_event = this.pending_events[index];

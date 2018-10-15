@@ -1,0 +1,42 @@
+<%= header %>
+<script src="46-iframes-reused.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 2 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			// first, start an XHR to trigger AutoXHR
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/pages/07-autoxhr/support/img.jpg?id=xhr&rnd=" + Math.random(), true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState !== 4) {
+					return;
+				}
+
+				// next, add a 3-second IFRAME so it gets tracked
+				var iframe1 = document.createElement("IFRAME");
+				iframe1.src = "/delay?delay=3000&file=/assets/blank.html?rnd=" + Math.random();
+				document.body.appendChild(iframe1);
+
+				// and a 1-second IFRAME that we're going to change to a 60s
+				var iframe2 = document.createElement("IFRAME");
+				iframe2.src = "/delay?delay=1000&file=/assets/blank.html?rnd=" + Math.random();
+				document.body.appendChild(iframe2);
+				iframe2.addEventListener("load", function() {
+					setTimeout(function() {
+						// change the src to another 60-second URL that shouldn't be tracked
+						iframe2.src = "/delay?delay=60000&file=/assets/blank.html?rnd=" + Math.random();
+					}, 0);
+				});
+			};
+			xhr.send(null);
+		}
+});
+</script>
+<%= footer %>

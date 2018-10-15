@@ -1,0 +1,78 @@
+<%= header %>
+<script src="47-pixels.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 2 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			// first, start an XHR to trigger AutoXHR
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/pages/07-autoxhr/support/img.jpg?id=xhr&rnd=" + Math.random(), true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState !== 4) {
+					return;
+				}
+
+				// next, add a 1-second IFRAME that will get tracked
+				var iframeGood1 = document.createElement("IFRAME");
+				iframeGood1.src = "/delay?delay=1000&file=/assets/blank.html?rnd=" + Math.random();
+				document.body.appendChild(iframeGood1);
+
+				// next, add a 2-second IFRAME that will get tracked
+				var iframeGood2 = document.createElement("IFRAME");
+				iframeGood2.src = "/delay?delay=2000&file=/assets/blank.html?rnd=" + Math.random();
+				iframeGood2.width = iframeGood2.height = 10;
+				iframeGood2.style.cssText = "height: 10px; width: 10px";
+				document.body.appendChild(iframeGood2);
+
+				//
+				// Things that won't get tracked:
+				//
+
+				// a 10-second frame with height: 0 and width: 0
+				var iframe2 = document.createElement("IFRAME");
+				iframe2.src = "/delay?delay=10000&file=/assets/blank.html?rnd=" + Math.random();
+				iframe2.width = iframe2.height = 0;
+				document.body.appendChild(iframe2);
+
+				// a 10-second frame with DOM height: 1 and width: 1
+				var iframe3 = document.createElement("IFRAME");
+				iframe3.src = "/delay?delay=10000&file=/assets/blank.html?rnd=" + Math.random();
+				iframe3.width = iframe3.height = 1;
+				document.body.appendChild(iframe3);
+
+				// a 10-second frame with style height: 1 and width: 1
+				var iframe4 = document.createElement("IFRAME");
+				iframe4.src = "/delay?delay=10000&file=/assets/blank.html?rnd=" + Math.random();
+				iframe4.style.cssText = "height: 1px; width: 1px";
+				document.body.appendChild(iframe4);
+
+				// a 10-second frame with display: none
+				var iframe5 = document.createElement("IFRAME");
+				iframe5.src = "/delay?delay=10000&file=/assets/blank.html?rnd=" + Math.random();
+				iframe5.style = "display: none";
+				document.body.appendChild(iframe5);
+
+				// a 10-second frame with visibility: hidden
+				var iframe6 = document.createElement("IFRAME");
+				iframe6.src = "/delay?delay=10000&file=/assets/blank.html?rnd=" + Math.random();
+				iframe6.style = "visibility: hidden";
+				document.body.appendChild(iframe6);
+
+				// an IMG with height: 0 and width: 0
+				var img1 = document.createElement("IMG");
+				img1.src = "/delay?delay=10000&file=/assets/img.jpg?rnd=" + Math.random();
+				img1.width = img1.height = 1;
+				document.body.appendChild(img1);
+			};
+			xhr.send(null);
+		}
+});
+</script>
+<%= footer %>

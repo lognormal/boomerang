@@ -1116,7 +1116,7 @@
 
 		onsubmit: function(etarget) {
 			impl._iterable_click("Submit", "FORM", etarget, function(t) {
-				var v = t.getAttribute("action") || d.URL || "";
+				var v = (typeof t.getAttribute === "function" && t.getAttribute("action")) || d.URL || "";
 				return v.match(/\?/) ? v : v + "?";
 			});
 		},

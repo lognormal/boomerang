@@ -1379,7 +1379,10 @@
 			elements = BOOMR.window.document.querySelectorAll(combinedSelector);
 			if (elements && elements.length) {
 				for (i = 0; i < elements.length; i++) {
-					src = elements[i].currentSrc || elements[i].src || elements[i].getAttribute("xlink:href");
+					src = elements[i].currentSrc ||
+						elements[i].src ||
+						(typeof elements[i].getAttribute === "function" && elements[i].getAttribute("xlink:href"));
+
 					if (src) {
 						entries = p.getEntriesByName(src);
 						if (entries && entries.length) {
