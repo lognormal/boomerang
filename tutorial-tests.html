@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Boomerang Tutorial: Delaying the Page Load time</title>
+	<title>Boomerang Tutorial: Tests</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -87,33 +87,83 @@
 			<section class="tutorial-section">
 
 <header>
-    <h1>Delaying the Page Load time</h1>
+    <h1>Tests</h1>
 </header>
 
 <article>
-    <p>By default, Boomerang will wait for the
-<a href="https://developer.mozilla.org/en-US/docs/Web/Events/load">window <code>load</code> event</a>
-before it sends a beacon, and the Page Load timestamp (<a href="BOOMR.plugins.RT.html"><code>t_done</code></a>)
-will be measured until the end of that <code>load</code> event.</p>
-<p>For some cases, you may want to have the Page Load time measure to a timestamp
-other than the window <code>load</code> event.  For example, your application may load
-additional libraries or images at <code>load</code>, and you want the Page Load time to
-reflect that.</p>
-<p>To have Boomerang ignore the window <code>load</code> event, you must do two things:</p>
-<ol>
-<li>Set <code>autorun</code> to <code>false</code> in <a href="BOOMR.html#.init"><code>BOOMR.init</code></a></li>
-<li>When you want to mark the Page Load time done, you need to call
- <a href="BOOMR.html#.page_ready"><code>BOOMR.page_ready</code></a></li>
-</ol>
-<p>Example code:</p>
-<pre class="prettyprint source lang-javascript"><code>BOOMR.init({
-  beacon_url: &quot;http://yoursite.com/beacon/&quot;,
-  autorun: false
-});
-
-// ...
-// at some later point, when the page is loaded:
-BOOMR.page_ready();</code></pre><p>Boomerang will send the Page Load beacon when <a href="BOOMR.html#.page_ready"><code>BOOMR.page_ready</code></a> is called.</p>
+    <p>Boomerang has extensive test coverage in the form of Unit Tests and End-to-End (E2E)
+Test suites.</p>
+<h2>Test Environment</h2><p>To configure the test environment, you will need to install all of the required
+NPM and Bower dependencies:</p>
+<pre class="prettyprint source"><code>npm install
+bower install</code></pre><p>In addition, you should map the following two domains to <code>127.0.0.1</code>:</p>
+<ul>
+<li><code>boomerang-test.local</code></li>
+<li><code>boomerang-test2.local</code></li>
+</ul>
+<p>e.g.</p>
+<pre class="prettyprint source"><code># /etc/hosts or C:\windows\system32\drivers\etc\hosts
+127.0.0.1 boomerang-test.local boomerang-test2.local</code></pre><h2>Unit Tests</h2><p>Boomerang's Unit Tests validate Boomerang's public APIs and utility functions.</p>
+<p>Unit Tests should not depend on the environment (e.g. HTML structure, a specific
+browser, or other environment setup).  If you need a specific environment, you
+should create an End-to-End (E2E) test.</p>
+<p>Unit Tests are located in <code>tests/unit/*.js</code>.  They are loosely organized into
+components or plugins.</p>
+<p>Boomerang's Unit Tests can be run from your local browser or in headless mode.</p>
+<p>To build, run or debug the Unit Tests in your local browser, you will need to spawn
+a local webserver to host the <code>tests/unit/*</code> files.  You can do this by running
+the following:</p>
+<pre class="prettyprint source"><code>grunt test:debug</code></pre><p>Once the webserver has started, you should be able to visit the following URL
+in your browser:</p>
+<p>http://boomerang-test.local:4002/unit/</p>
+<p>All Unit Test files are manually included via <code>tests/unit/index.html</code>.</p>
+<p>In addition, you can run any of the following combinations to automatically run
+all <code>tests/unit/*.js</code> files via Grunt and <a href="https://karma-runner.github.io/">Karma</a>:</p>
+<ul>
+<li><code>test:unit</code></li>
+<li><code>test:unit:all</code></li>
+<li><code>test:unit:allHeadless</code></li>
+<li><code>test:unit:Chrome</code></li>
+<li><code>test:unit:ChromeHeadless</code></li>
+<li><code>test:unit:Firefox</code></li>
+<li><code>test:unit:FirefoxHeadless</code></li>
+<li><code>test:unit:Edge</code></li>
+<li><code>test:unit:IE</code></li>
+<li><code>test:unit:Opera</code></li>
+<li><code>test:unit:Safari</code></li>
+<li><code>test:unit:PhantomJS</code></li>
+</ul>
+<p>The Unit Tests utilize <a href="http://www.chaijs.com/api/assert/">Chai Assert</a> for validations.</p>
+<h2>End-to-End (E2E) Tests</h2><p>Boomerang's End-to-End (E2E) Tests validate how Boomerang behaves in various
+scenarios and environments: user actions (e.g. navigating between pages), page
+constructions (e.g. with specific DOM elements), frameworks (e.g. SPAs), etc.</p>
+<p>E2E Tests are located in <code>tests/page-templates/**/*.[js|html]</code>.  They are loosely organized into
+subdirectories of scenarios or plugins.</p>
+<p>Each E2E test has two files: <code>01-name.html</code> contains the scenario (e.g. what is happening
+in the test) while <code>01-name.js</code> contains the test validations.</p>
+<p>When <code>grunt test</code> or <code>grunt build:test</code> is called, the <code>tests/page-templates/**/*</code>
+files are processed (templates applied) and output into <code>tests/pages/</code>, whose
+files are loaded by the browser during test execution.  Some of the templates live in <code>tests/page-templates/*</code>.</p>
+<p>The E2E Tests utilize <a href="http://www.chaijs.com/api/assert/">Chai Assert</a> for validations.</p>
+<p>Boomerang's E2E Tests can be run from your local browser or in headless mode.</p>
+<p>To build, run or debug the E2E Tests in your local browser, you will need to spawn
+a local webserver to host the <code>tests/pages/*</code> files.  You can do this by running
+the following:</p>
+<pre class="prettyprint source"><code>test:debug</code></pre><p>In addition, you can run any of the following combinations to automatically run
+all E2E tests files via Grunt and <a href="https://www.protractortest.org/">Protractor</a>:</p>
+<ul>
+<li><code>test:e2e</code></li>
+<li><code>test:e2e:browser</code></li>
+<li><code>test:e2e:debug</code> - will only run tests in <code>tests/e2e/e2e-debug.json</code></li>
+<li><code>test:e2e:PhantomJS</code></li>
+<li><code>test:e2e:Chrome</code></li>
+<li><code>test:e2e:ChromeHeadless</code></li>
+<li><code>test:e2e:Firefox</code></li>
+<li><code>test:e2e:FirefoxHeadless</code></li>
+<li><code>test:e2e:Edge</code></li>
+<li><code>test:e2e:IE</code></li>
+<li><code>test:e2e:Safari</code></li>
+</ul>
 </article>
 
 
