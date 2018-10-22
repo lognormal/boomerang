@@ -23,7 +23,16 @@ exports.config = {
 	capabilities: {
 		browserName: "chrome",
 		chromeOptions: {
-			args: [ "--headless", "--disable-gpu", "--window-size=1024,768" ]
+			args: [
+				"--headless",
+				"--disable-gpu",
+				"--window-size=1024,768",
+				"--remote-debugging-port=9222"
+			]
+		},
+		loggingPrefs: {
+			"driver": "INFO",
+			"browser": "INFO"
 		}
 	}
 };

@@ -1,6 +1,6 @@
 {
   "name": "boomerangjs",
-  "version": "1.568.0",
+  "version": "1.621.0",
   "releaseVersion": "1",
   "description": "boomerang always comes back, except when it hits something",
   "main": "boomerang.js",
@@ -84,7 +84,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SOASTA/boomerang.git"
+    "url": "https://github.com/akamai/boomerang.git"
   },
   "keywords": [
     "NavigationTiming",
@@ -202,11 +202,15 @@
     {
       "name": "Charles Vazac",
       "email": "cvazac@gmail.com"
+    },
+    {
+      "name": "Avinash Shenoy",
+      "email": "nash.shenoy@gmail.com"
     }
   ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/SOASTA/boomerang/issues"
+    "url": "https://github.com/akamai/boomerang/issues"
   },
-  "homepage": "https://github.com/SOASTA/boomerang"
+  "homepage": "https://github.com/akamai/boomerang"
 }

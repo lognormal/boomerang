@@ -71,7 +71,6 @@ describe("common", function() {
 
 			assert.equal(b.v, BOOMR.version, prefix + "has the boomerang version");
 
-			/* SOASTA_PRIVATE_START */
 			assert.equal(b["h.key"], window.BOOMR_API_key, prefix + "has the correct API key (h.key)");
 			assert.isDefined(b["h.d"], prefix + "has the domain (h.d) param");
 
@@ -86,9 +85,6 @@ describe("common", function() {
 			else {
 				assert.isDefined(b["h.cr"], prefix + "has the crumb (h.cr)");
 			}
-			/* SOASTA_PRIVATE_END */
-
-
 
 			if (!t.doNotTestErrorsParam) {
 				assert.isUndefined(b.errors, prefix + "does not have the errors param");
@@ -231,7 +227,7 @@ describe("common", function() {
 				timers = t.parseTimers(b.t_other);
 				for (timer in timers) {
 					if (timers.hasOwnProperty(timer)) {
-						// TODO: this test reveals a bug, see https://github.com/SOASTA/soasta-boomerang/issues/626
+						// TODO: this test reveals a bug, see Issue #626
 						//assert.isTrue(timers[timer] >= 0, prefix + "has a positive 't_other." + timer + "' timer");
 						if (timers[timer] < 0) {
 							return this.skip();

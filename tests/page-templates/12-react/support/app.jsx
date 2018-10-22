@@ -196,7 +196,7 @@ const Home = React.createClass({
 			this.state.addedLates = true;
 			setTimeout(function() {
 				var content = document.getElementById("root");
-				
+
 				window.window.late_imgs.forEach(function(imgDelay) {
 					var img = document.createElement("img");
 					if (imgDelay > 0) {
@@ -221,7 +221,7 @@ const Home = React.createClass({
 			return (
 				<div className="content">
 					<div dangerouslySetInnerHTML={this.cartMarkup()} />
-					<div class="cart-container" style={{display: "none"}}>
+					<div className="cart-container" style={{display: "none"}}>
 						<div id="cart-total">$444.44</div>
 					</div>
 					{images}
@@ -314,7 +314,7 @@ const Widget = React.createClass({
 		return (
 			<div>
 				<div dangerouslySetInnerHTML={this.widgetMarkup()} />
-				<div class="cart-container" style={{display: "none"}}>
+				<div className="cart-container" style={{display: "none"}}>
 					<div id="cart-total">${carttotal}</div>
 				</div>
 				{image}

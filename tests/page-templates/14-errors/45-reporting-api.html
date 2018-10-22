@@ -1,10 +1,14 @@
 <%= header %>
 <%= boomerangScriptMin %>
-<script src="45-reporting-api.js" type="text/javascript"></script>
 <script>
+window.willReportDeprecation = BOOMR_test.isChrome() &&
+	window.ReportingObserver &&
+	window.chrome &&
+	typeof window.chrome.loadTimes === "function";
+
 function errorFunction() {
-	if (BOOMR_test.isChrome() && window.ReportingObserver) {
-		return chrome.loadTimes().firstPaintTime;  // cause a deprecation warning
+	if (window.willReportDeprecation) {
+		return window.chrome.loadTimes().firstPaintTime;  // cause a deprecation warning
 	}
 }
 errorFunction();

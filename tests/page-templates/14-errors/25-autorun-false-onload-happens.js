@@ -52,12 +52,10 @@ describe("e2e/14-errors/25-autorun-false-onload-happens", function() {
 		}
 	});
 
-	/* SOASTA PRIVATE START */
 	it("Should have rt.sl = 1", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["rt.sl"], 1);
 	});
-	/* SOASTA PRIVATE END */
 
 	it("Should have rt.end", function() {
 		var b = tf.lastBeacon();

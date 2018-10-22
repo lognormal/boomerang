@@ -57,12 +57,10 @@ describe("e2e/14-errors/23-autorun-false", function() {
 		assert.isDefined(b["rt.end"]);
 	});
 
-	/* SOASTA PRIVATE START */
 	it("Should have rt.sl = 0", function() {
 		var b = tf.lastBeacon();
 		assert.equal(b["rt.sl"], 0);
 	});
-	/* SOASTA PRIVATE END */
 
 	it("Should have rt.tstart", function() {
 		var b = tf.lastBeacon();

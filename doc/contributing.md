@@ -6,7 +6,7 @@ new code:
 1. Ensure your code passes the lint checks: `grunt lint`
 2. Ensure your code passes all existing tests: `grunt test`
 3. New code must be accompanied by new Unit or End-to-End {@tutorial tests}
-4. [Open a Pull Request](github.com/SOASTA/boomerang/pull) with a thorough
+4. [Open a Pull Request](github.com/akamai/boomerang/pulls) with a thorough
     description of your change
 
 ## Browser Compatibility

@@ -97,7 +97,6 @@ describe("e2e/14-errors/24-autorun-false-multiple-then-load", function() {
 		}
 	});
 
-	/* SOASTA PRIVATE START */
 	it("Should have rt.sl = 0 on the first beacon", function() {
 		var b = tf.beacons[0];
 		assert.equal(b["rt.sl"], 0);
@@ -107,5 +106,4 @@ describe("e2e/14-errors/24-autorun-false-multiple-then-load", function() {
 		var b = tf.beacons[1];
 		assert.equal(b["rt.sl"], 1);
 	});
-	/* SOASTA PRIVATE END */
 });

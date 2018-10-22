@@ -475,10 +475,8 @@
 					if (!isNaN(impl.session.length) && impl.session.length > BOOMR.session.length) {
 						BOOMR.session.length = impl.session.length;
 
-						/* SOASTA PRIVATE START */
 						// Increment it for current session navigation
 						BOOMR.plugins.RT.incrementSessionDetails();
-						/* SOASTA PRIVATE END */
 					}
 
 					BOOMR.session.ID = impl.session.ID;

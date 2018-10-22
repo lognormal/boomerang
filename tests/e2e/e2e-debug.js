@@ -21,8 +21,6 @@ function run(testPath, file) {
 		var fileName = file + ".html";
 
 		it("Should pass " + testPath + "/" + fileName, function(done) {
-			var logCount = 0;
-
 			if (typeof browser.waitForAngularEnabled === "function") {
 				browser.waitForAngularEnabled(false);
 			}
@@ -32,36 +30,46 @@ function run(testPath, file) {
 				"http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName
 			);
 
+			browser.driver.executeScript("return navigator.userAgent;").then(function(ua) {
+				console.log("User-Agent:", ua);
+			});
+
 			browser.driver.get("http://" + servers.main + ":" + ports.main + "/pages/" + testPath + "/" + fileName);
 
-			setInterval(function() {
+			// poll every 100ms for new logs or the test framework to note we're complete
+			(function poll() {
+				// get browser logs
 				browser.manage().logs().get("browser").then(function(browserLog) {
-					if (browserLog.length > logCount) {
-						for (var i = logCount; i < browserLog.length; i++) {
-							var log = browserLog[i];
-							console.log("[" + new Date(log.timestamp).toLocaleTimeString() + "] " + log.message);
+					browserLog.forEach(function(log) {
+						console.log("[" + new Date(log.timestamp).toLocaleTimeString() + "] " + log.message);
+					});
+				});
+
+				// check if our element is there
+				browser.isElementPresent(by.css("#BOOMR_test_complete"))
+					.then(function(present) {
+						if (!present) {
+							setTimeout(poll, 100);
+
+							return;
 						}
 
-						logCount = browserLog.length;
-					}
-				});
-			}, 1000);
+						// get error messages
+						browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {
+							assert.equal(complete, true, "BOOMR_test.isComplete()");
 
-			browser.driver.wait(function() {
-				return element(by.css("#BOOMR_test_complete")).isPresent();
-			});
+							console.log("Navigation complete");
 
-			browser.driver.executeScript("return BOOMR_test.isComplete()").then(function(complete) {
-				assert.equal(complete, true, "BOOMR_test.isComplete()");
+							browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures) {
+								if (testFailures.length > 0) {
+									throw new Error(testFailures);
+								}
 
-				browser.driver.executeScript("return BOOMR_test.getTestFailureMessages()").then(function(testFailures) {
-					if (testFailures.length > 0) {
-						throw new Error(testFailures);
-					}
-
-					done();
-				});
-			});
+								done();
+							});
+						});
+					});
+			})();
 		});
 	});
 }

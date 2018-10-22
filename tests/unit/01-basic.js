@@ -16,11 +16,9 @@ describe("BOOMR exports", function() {
 		assert.isString(BOOMR.version);
 	});
 
-	/* SOASTA PRIVATE START */
 	it("Should have an existing BOOMR.session Object", function() {
 		assert.isObject(BOOMR.session);
 	});
-	/* SOASTA PRIVATE END */
 
 	it("Should have an existing BOOMR.init() Function", function() {
 		assert.isFunction(BOOMR.init);

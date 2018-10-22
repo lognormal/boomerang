@@ -10,6 +10,7 @@ describe("e2e/17-memory/01-cookie-length", function() {
 	});
 
 	it("Should have cookie length of 37 or 38 for HTTPS pages", function() {
-		assert.equal(tf.lastBeacon()["dom.ck"], 37 + location.protocol === "https:" ? 1 : 0);
+		// Cookie length should include at least Foo and baz.  Y will be included on HTTPS.  RT might have data too.
+		assert.operator(parseInt(tf.lastBeacon()["dom.ck"], 10), ">=", "Foo=bar; baz=abcdefghijklmnopqrstuvwxyz; RT=\"\"".length);
 	});
 });

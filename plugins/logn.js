@@ -511,7 +511,6 @@
 BOOMR.init({
 	primary: true,
 	/* BEGIN_PROD */log: null, /* END_PROD */
-	site_domain: "",
 	wait: true,
 	site_domain: null,
 	ResourceTiming: {

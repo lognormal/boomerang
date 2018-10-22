@@ -151,14 +151,14 @@ Include the following code at the *top* of your HTML document:
 ```
 
 Best practices will suggest including all scripts at the bottom of your page.
-However, that only applies to scripts that block downloading of other resources.  
+However, that only applies to scripts that block downloading of other resources.
 
 Including a script this way will not block other resources, however it _will_
 block `onload`.
 
 Including the script at the top of your page gives it a good chance of loading
 before the rest of your page does, thereby reducing the probability of it
-blocking the `onload` event.  
+blocking the `onload` event.
 
 If you don't want to block `onload` either, use the following IFRAME method:
 
@@ -294,38 +294,38 @@ grunt jsdoc
 HTML files will be built under `build/docs`.
 
 Open-source Boomerang Documentation is currently published at
-[soasta.github.io/boomerang/](https://soasta.github.io/boomerang/).
+[akamai.github.io/boomerang/](https://akamai.github.io/boomerang/).
 
 The team at Akamai works on mPulse Boomerang, which contains a few mPulse-specific plugins and may have additional
 changes being tested before being backported to the open-source Boomerang.  mPulse Boomerang usage documentation is
 available at [docs.soasta.com/boomerang/](https://docs.soasta.com/boomerang/) and mPulse Boomerang API documentation
-is at [docs.soasta.com/boomerang-api/](https://docs.soasta.com/boomerang-api/).
+is at [developer.akamai.com/tools/boomerang/docs/](https://developer.akamai.com/tools/boomerang/docs/).
 
 Additional documentation:
 
-- [API Documentation](https://docs.soasta.com/boomerang-api/): The `BOOMR` API
-- [Building Boomerang](https://docs.soasta.com/boomerang-api/tutorial-building.html): How to build boomerang with plugins
-- [Contributing](https://docs.soasta.com/boomerang-api/tutorial-contributing.html): Contributing to the open-source project
-- [Creating Plugins](https://docs.soasta.com/boomerang-api/tutorial-creating-plugins.html): Creating a plugin
-- [Methodology](https://docs.soasta.com/boomerang-api/tutorial-methodology.html): How boomerang works internally
-- [How-Tos](https://docs.soasta.com/boomerang-api/tutorial-howtos.html): Short recipes on how to do a bunch of things with boomerang
+- [API Documentation](https://akamai.github.io/boomerang/): The `BOOMR` API
+- [Building Boomerang](https://akamai.github.io/boomerang/tutorial-building.html): How to build boomerang with plugins
+- [Contributing](https://akamai.github.io/boomerang/tutorial-contributing.html): Contributing to the open-source project
+- [Creating Plugins](https://akamai.github.io/boomerang/tutorial-creating-plugins.html): Creating a plugin
+- [Methodology](https://akamai.github.io/boomerang/tutorial-methodology.html): How boomerang works internally
+- [How-Tos](https://akamai.github.io/boomerang/tutorial-howtos.html): Short recipes on how to do a bunch of things with boomerang
 
 # Source code
 
-The boomerang source code is primarily on GitHub at [github.com/SOASTA/boomerang](https://github.com/SOASTA/boomerang).
+The boomerang source code is primarily on GitHub at [github.com/akamai/boomerang](https://github.com/akamai/boomerang).
 
-Feel free to fork it and [contribute](https://soasta.github.io/boomerang/tutorial-contributing.html) to it.
+Feel free to fork it and [contribute](https://akamai.github.io/boomerang/tutorial-contributing.html) to it.
 
-You can also get a [check out the releases](https://github.com/SOASTA/boomerang/releases)
-or download a [tarball](https://github.com/SOASTA/boomerang/archive/master.tar.gz) or
-[zip](http://github.com/SOASTA/boomerang/archive/master.zip) of the code.
+You can also get a [check out the releases](https://github.com/akamai/boomerang/releases)
+or download a [tarball](https://github.com/akamai/boomerang/archive/master.tar.gz) or
+[zip](http://github.com/akamai/boomerang/archive/master.zip) of the code.
 
 # Support
 
-We use [GitHub Issues](https://github.com/SOASTA/boomerang/issues) for discussions,
+We use [GitHub Issues](https://github.com/akamai/boomerang/issues) for discussions,
 feature requests and bug reports.
 
-Get in touch at [github.com/SOASTA/boomerang/issues](https://github.com/SOASTA/boomerang/issues).
+Get in touch at [github.com/akamai/boomerang/issues](https://github.com/akamai/boomerang/issues).
 
 boomerang is supported by the developers at [Akamai](http://akamai.com/), and the
 awesome community of open-source developers that use and hack it.  That's you.  Thank you!
@@ -341,4 +341,4 @@ Boomerang is brought to you by:
 * the mPulse team at [Akamai](https://www.akamai.com/), and
 * many independent contributors whose contributions are cemented in our git history
 
-To help out, please read our [contributing](https://soasta.github.io/boomerang/tutorial-contributing.html) page.
+To help out, please read our [contributing](https://akamai.github.io/boomerang/tutorial-contributing.html) page.

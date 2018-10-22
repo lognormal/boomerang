@@ -26,6 +26,12 @@ describe("e2e/06-bugs/104197", function() {
 		assert.equal(tf.beacons[2]["vis.pre"], 1);
 	});
 
+	/* SOASTA PRIVATE START */
+	it("Should have the third beacon have PageParams (Page Group)", function() {
+		assert.equal(tf.beacons[2]["h.pg"], "Page Group");
+	});
+	/* SOASTA PRIVATE END */
+
 	it("Should have the third beacon have NavigationTiming data (if available)", function() {
 		if (t.isNavigationTimingSupported()) {
 			assert.isDefined(tf.beacons[2].nt_nav_st);

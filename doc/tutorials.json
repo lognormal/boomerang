@@ -42,5 +42,8 @@
 	},
 	"page-overrides": {
 		"title": "Page Overrides"
+	},
+	"version-history": {
+		"title": "Version History"
 	}
 }

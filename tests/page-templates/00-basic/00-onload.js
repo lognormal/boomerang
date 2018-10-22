@@ -48,11 +48,9 @@ describe("e2e/00-basic/00-onload", function() {
 
 		assert.isNumber(tf.lastBeacon()["rt.bstart"], "rt.bstart");
 		assert.isNumber(tf.lastBeacon()["rt.end"], "rt.end");
-		/* SOASTA PRIVATE START */
 		assert.isString(tf.lastBeacon()["rt.si"], "rt.si");
 		assert.isNumber(tf.lastBeacon()["rt.sl"], "rt.sl");
 		assert.isNumber(tf.lastBeacon()["rt.ss"], "rt.ss");
-		/* SOASTA PRIVATE END */
 		assert.isString(tf.lastBeacon()["rt.start"], "rt.start");
 
 		// optional
@@ -89,9 +87,7 @@ describe("e2e/00-basic/00-onload", function() {
 		assert.isString(tf.lastBeacon().pid, "pid");
 	});
 
-	/* SOASTA_PRIVATE_START - changes from OS version */
-	it("Should have set nocookie=1", function() {
-		assert.equal(tf.lastBeacon().nocookie, "1");
+	it("Should have not set nocookie", function() {
+		assert.isUndefined(tf.lastBeacon().nocookie);
 	});
-	/* SOASTA_PRIVATE_END */
 });

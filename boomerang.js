@@ -354,6 +354,9 @@ BOOMR_check_doc_domain();
 		// Beacon URL
 		beacon_url: "",
 
+		// Forces protocol-relative URLs to HTTPS
+		beacon_url_force_https: true,
+
 		// List of string regular expressions that must match the beacon_url.  If
 		// not set, or the list is empty, all beacon URLs are allowed.
 		beacon_urls_allowed: [],
@@ -973,16 +976,14 @@ BOOMR_check_doc_domain();
 		 */
 		url: "",
 
-		/* SOASTA PRIVATE START */
 		/**
-		 * URL of config.js.
+		 * (Optional) URL of configuration file
 		 *
 		 * @type {string}
 		 *
 		 * @memberof BOOMR
 		 */
 		config_url: null,
-		/* SOASTA PRIVATE END */
 
 		/**
 		 * Whether or not Boomerang was loaded after the `onload` event.
@@ -1037,7 +1038,6 @@ BOOMR_check_doc_domain();
 			MAX_GET_LENGTH: 2000
 		},
 
-		/* SOASTA PRIVATE START */
 		/**
 		 * Session data
 		 * @class BOOMR.session
@@ -1052,7 +1052,7 @@ BOOMR_check_doc_domain();
 			 *
 			 * @memberof BOOMR.session
 			 */
-			domain: null,
+			domain: impl.site_domain,
 
 			/**
 			 * Session ID.  This will be randomly generated in the client but may
@@ -1091,7 +1091,6 @@ BOOMR_check_doc_domain();
 			 */
 			enabled: true
 		},
-		/* SOASTA PRIVATE END */
 
 		/**
 		 * @class BOOMR.utils
@@ -1227,11 +1226,9 @@ BOOMR_check_doc_domain();
 			setCookie: function(name, subcookies, max_age) {
 				var value, nameval, savedval, c, exp;
 
-				/* SOASTA PRIVATE START */
-				// NOTE: Private repo has session.domain instead of impl.site_domain
-				/* SOASTA PRIVATE END */
 				if (!name || !BOOMR.session.domain || typeof subcookies === "undefined") {
 					BOOMR.debug("Invalid parameters or site domain: " + name + "/" + subcookies + "/" + BOOMR.session.domain);
+
 					BOOMR.addVar("nocookie", 1);
 					return false;
 				}
@@ -1240,9 +1237,6 @@ BOOMR_check_doc_domain();
 				nameval = name + "=\"" + value + "\"";
 
 				if (nameval.length < 500) {
-					/* SOASTA PRIVATE START */
-					// NOTE: Private repo has session.domain instead of impl.site_domain
-					/* SOASTA PRIVATE END */
 					c = [nameval, "path=/", "domain=" + BOOMR.session.domain];
 					if (typeof max_age === "number") {
 						exp = new Date();
@@ -2192,6 +2186,7 @@ BOOMR_check_doc_domain();
 		 * @param {string} config.beacon_auth_token Beacon authorization token.
 		 * @param {string} config.beacon_url The URL to beacon results back to.
 		 * If not set, no beacon will be sent.
+		 * @param {boolean} config.beacon_url_force_https Forces protocol-relative Beacon URLs to HTTPS
 		 * @param {string} config.beacon_type `GET`, `POST` or `AUTO`
 		 * @param {string} [config.site_domain] The domain that all cookies should be set on
 		 * Boomerang will try to auto-detect this, but unless your site is of the
@@ -2220,6 +2215,7 @@ BOOMR_check_doc_domain();
 				    "beacon_auth_key",
 				    "beacon_auth_token",
 				    "beacon_url",
+				    "beacon_url_force_https",
 				    "beacon_type",
 				    "site_domain",
 				    "strip_query_string",
@@ -2251,11 +2247,9 @@ BOOMR_check_doc_domain();
 				return this;
 			}
 
-			/* SOASTA PRIVATE START */
-			if (config.site_domain !== undefined) {
+			if (typeof config.site_domain === "string") {
 				this.session.domain = config.site_domain;
 			}
-			/* SOASTA PRIVATE END */
 
 			// Set autorun if in config right now, as plugins that listen for page_ready
 			// event may fire when they .init() if onload has already fired, and whether
@@ -3407,13 +3401,11 @@ BOOMR_check_doc_domain();
 
 			impl.vars.v = BOOMR.version;
 
-			/* SOASTA PRIVATE START */
 			if (BOOMR.session.enabled) {
 				impl.vars["rt.si"] = BOOMR.session.ID + "-" + Math.round(BOOMR.session.start / 1000).toString(36);
 				impl.vars["rt.ss"] = BOOMR.session.start;
 				impl.vars["rt.sl"] = BOOMR.session.length;
 			}
-			/* SOASTA PRIVATE END */
 
 			if (BOOMR.visibilityState()) {
 				impl.vars["vis.st"] = BOOMR.visibilityState();
@@ -3486,13 +3478,11 @@ BOOMR_check_doc_domain();
 				});
 			}
 
-			/* SOASTA PRIVATE START */
 			// Stop at this point if we are rate limited
 			if (BOOMR.session.rate_limited) {
 				BOOMR.debug("Skipping because we're rate limited");
 				return false;
 			}
-			/* SOASTA PRIVATE END */
 
 			// send the beacon data
 			BOOMR.sendBeaconData(varsSent);
@@ -3551,12 +3541,10 @@ BOOMR_check_doc_domain();
 			params = urlFirst.concat(this.getVarsOfPriority(data, 0), urlLast);
 			paramsJoined = params.join("&");
 
-			/* SOASTA PRIVATE START */
 			// If beacon_url is protocol relative, make it https only
-			if (impl.beacon_url.match(/^\/\//)) {
+			if (impl.beacon_url_force_https && impl.beacon_url.match(/^\/\//)) {
 				impl.beacon_url = "https:" + impl.beacon_url;
 			}
-			/* SOASTA PRIVATE END */
 
 			// if there are already url parameters in the beacon url,
 			// change the first parameter prefix for the boomerang url parameters to &

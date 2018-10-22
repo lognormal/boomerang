@@ -18,14 +18,16 @@ in the OS repository.
 * `plugins/config-override.js`
 * `plugins/page-params.js`
 * `plugins/cross-domain.js`
+* `plugins/akamai.js`
 * `plugins/logn.js`
 
 The following files should have blocks with `/* SOASTA PRIVATE START */`
-through `/* SOASTA PRIVATE END */` different:
+through `/* SOASTA PRIVATE END */`, or have other differences:
 
-* `Gruntfile.js`
-* `boomerang.js`
-* `plugins/rt.js`
+* `doc/version-history.md` (has Akamai-specific changes)
+* `tests/unit/index.html` (has two additional test files for Akamai plugins)
+* `Gruntfile.js` (has Akamai-specific tasks and config)
+* `package.json` and `package-lock.json` (has `soasta-repostitory` package)
 
 We use `/* SOASTA PRIVATE START */` to make it easier to notice any private code
 when comparing to the OS repo.

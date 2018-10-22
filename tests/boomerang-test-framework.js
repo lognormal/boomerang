@@ -232,16 +232,17 @@
 					}
 					xhrSent = true;
 
-					config.afterFirstBeacon();
+					setTimeout(function() {
+						config.afterFirstBeacon();
+					}, 0);
 				});
 		}
 
 		t.configureTestEnvironment(config);
 
-		/* SOASTA_PRIVATE_START - changes from OS version */
-		if (window.BOOMR_LOGN_always !== true) {
-			// initialize boomerang if LOGN is disabled
-			// fake session details so beacons send if LOGN is disabled
+		// Initialize if waiting for LOGN plugin or if the plugin doesn't exist
+		if (window.BOOMR_LOGN_always !== true || !BOOMR.plugins.LOGN) {
+			// fake session details so beacons send
 			BOOMR.addVar({
 				"h.key": window.BOOMR_API_key ? window.BOOMR_API_key : "aaaaa-bbbbb-ccccc-ddddd-eeeee",
 				"h.d": window.location.hostname,
@@ -251,7 +252,6 @@
 
 			BOOMR.init(config);
 		}
-		/* SOASTA_PRIVATE_END */
 
 		if (config.onBoomerangLoaded) {
 			config.onBoomerangLoaded();

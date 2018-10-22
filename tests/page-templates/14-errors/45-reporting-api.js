@@ -11,7 +11,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have put the err on the beacon", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -19,7 +19,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have had a single error", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -27,7 +27,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have count = 1", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -36,7 +36,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have had a recent timestamp", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -45,7 +45,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have fileName of the page (if set)", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -60,7 +60,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have functionName of 'errorFunction'", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -75,7 +75,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have correct message", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -84,7 +84,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have source = APP", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -93,7 +93,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have stack with the stack", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -103,7 +103,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have type = 'Error'", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -112,7 +112,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have via = REPORTING", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -121,7 +121,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have columNumber to be a number if specified", function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();
@@ -135,7 +135,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
 	});
 
 	it("Should have lineNumber ~ " + (HEADER_LINES + 7), function() {
-		if (!BOOMR.window.ReportingObserver) {
+		if (!window.willReportDeprecation) {
 			return this.skip();
 		}
 		var b = tf.lastBeacon();

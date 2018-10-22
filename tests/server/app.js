@@ -101,15 +101,10 @@ app.post("/json", require("./route-json"));
 app.get("/drop", dropRequest);
 app.post("/drop", dropRequest);
 
-/* SOASTA PRIVATE START */
-// potential config locations
-app.get("/config", require("./route-config"));
-app.get("/config.json", require("./route-config"));
-app.get("/api/config.json", require("./route-config"));
-app.get("/api/v2/config.json", require("./route-config"));
-app.get("/concerto/api/config.json", require("./route-config"));
-app.get("/concerto/api/v2/config.json", require("./route-config"));
-/* SOASTA PRIVATE END */
+// load in any additional routes
+if (fs.existsSync(path.resolve(path.join(__dirname, "routes.js")))) {
+	require("./routes")(app);
+}
 
 // for every GET, look for a file with the same name appended with ".headers"
 // if found, parse the headers and write them on the response
