@@ -25,7 +25,7 @@ to your site's needs.  It has an extensive plugin architecture, and works with
 both traditional and modern websites (including Single Page Apps).
 
 boomerang's goal is to not affect the load time of the page (avoiding the
-[Observer Effect](https://en.wikipedia.org/wiki/Observer_effect_(information_technology)).
+[Observer Effect](https://en.wikipedia.org/wiki/Observer_effect_(information_technology))).
 It can be loaded in an asynchronous way that will not delay the page load even
 if `boomerang.js` is unavailable.
 
