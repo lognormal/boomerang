@@ -1619,7 +1619,7 @@ BOOMR_check_doc_domain();
 			 * @memberof BOOMR.utils
 			 */
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
-				var o = {observer: null, timer: null};
+				var MO, zs, o = {observer: null, timer: null};
 
 				if (!this.isMutationObserverSupported() || !callback || !el) {
 					return null;
@@ -1651,7 +1651,16 @@ BOOMR_check_doc_domain();
 					}
 				}
 
-				o.observer = new BOOMR.window.MutationObserver(done);
+				MO = w.MutationObserver;
+				// if the site uses Zone.js then get the native MutationObserver
+				if (w.Zone && typeof w.Zone.__symbol__ === "function") {
+					zs = w.Zone.__symbol__("MutationObserver");
+					if (zs && typeof zs === "string" && w.hasOwnProperty(zs) && typeof w[zs] === "function") {
+						BOOMR.debug("Detected Zone.js, using native MutationObserver");
+						MO = w[zs];
+					}
+				}
+				o.observer = new MO(done);
 
 				if (timeout) {
 					o.timer = setTimeout(done, o.timeout);

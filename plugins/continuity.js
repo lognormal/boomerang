@@ -3492,7 +3492,7 @@
 			mutations.forEach(function(mutation) {
 				// only listen for childList changes
 				if (mutation.type !== "childList") {
-					return;
+					return true;
 				}
 
 				for (var i = 0; i < mutation.addedNodes.length; i++) {
@@ -3504,6 +3504,7 @@
 						node.getElementsByTagName("*").length : 0;
 				}
 			});
+			return true;
 		}
 
 		/**
@@ -3519,8 +3520,9 @@
 			}
 
 			// disconnect MO
-			if (observer) {
-				observer.disconnect();
+			if (observer && observer.observer) {
+				observer.observer.disconnect();
+				observer = null;
 			}
 
 			// stop listening for battery info
@@ -3551,10 +3553,15 @@
 
 		// MutationObserver
 		if (BOOMR.utils.isMutationObserverSupported()) {
-			observer = new w.MutationObserver(onMutationObserver);
-
-			// configure the observer
-			observer.observe(d, { childList: true, subtree: true });
+			// setup the observer
+			observer = BOOMR.utils.addObserver(
+				d,
+				{ childList: true, subtree: true },
+				null, // no timeout
+				onMutationObserver, // will always return true
+				null, // no callback data
+				this
+			);
 		}
 
 		return {

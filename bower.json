@@ -47,7 +47,8 @@
     "promise-polyfill": "^7.1.2",
     "resourcetiming-compression": "^1.1.0",
     "usertiming": "~0.1.8",
-    "usertiming-compression": "~0.1.4"
+    "usertiming-compression": "~0.1.4",
+    "zone": "^0.8.26"
   },
   "resolutions": {
     "angular": "1.4.6"

@@ -1,31 +1,36 @@
 /*eslint-env mocha*/
-/*global BOOMR_test,assert*/
+/*global assert*/
 
-describe("e2e/07-autoxhr/28-wait-for-all-nodes", function() {
+describe("e2e/07-autoxhr/48-zonejs-mo", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
-	it("Should have sent at least 2 beacons, 1x onload, 1x xhr", function(done) {
+	it("Should get 2 beacons: 1 onload, 1 xhr (XMLHttpRequest !== null)", function(done) {
+		this.timeout(10000);
+		t.ifAutoXHR(
+			done,
+			function() {
+				t.ensureBeaconCount(done, 2);
+			},
+			this.skip.bind(this));
+	});
+
+	it("Should get 1 beacons: 1 onload (XMLHttpRequest === null)", function(done) {
+		this.timeout(10000);
+		t.ifAutoXHR(
+			done,
+			this.skip.bind(this),
+			function() {
+				t.ensureBeaconCount(done, 1);
+			});
+	});
+
+	it("Should not have invoked our MutationObserver callback in a zone.js zone", function() {
 		if (t.isMutationObserverSupported()) {
-			t.ifAutoXHR(
-				done,
-				function() {
-					assert.lengthOf(tf.beacons, 2);
-					done();
-				},
-				this.skip.bind(this)
-			);
+			assert.isFalse(window.ZONE_MO_USED);
 		}
 		else {
-			// Will still send 2 beacons but the second one will only contain the XHR timing not MO...
-			t.ifAutoXHR(
-				done,
-				function() {
-					assert.lengthOf(tf.beacons, 2);
-					done();
-				},
-				this.skip.bind(this)
-			);
+			this.skip();
 		}
 	});
 

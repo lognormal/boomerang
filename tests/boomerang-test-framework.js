@@ -236,7 +236,7 @@
 				});
 		}
 
-		t.configureTestEnvironment();
+		t.configureTestEnvironment(config);
 
 		/* SOASTA_PRIVATE_START - changes from OS version */
 		if (window.BOOMR_LOGN_always !== true) {
@@ -264,9 +264,13 @@
 		initialized = true;
 	};
 
-	t.configureTestEnvironment = function() {
+	t.configureTestEnvironment = function(config) {
 		// setup Mocha
-		window.mocha.globals(["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt", "_bmrEvents"]);
+		var globals = ["BOOMR", "PageGroupVariable", "mochaResults", "BOOMR_configt", "_bmrEvents"];
+		if (config && config.ignoreGlobals) {
+			Array.prototype.push.apply(globals, config.ignoreGlobals);
+		}
+		window.mocha.globals(globals);
 		window.mocha.checkLeaks();
 
 		// set globals
@@ -310,7 +314,8 @@
 	};
 
 	t.isQuerySelectorSupported = function() {
-		return typeof window.document.querySelector === "function";
+		return typeof window.document.querySelector === "function" ||
+		    typeof window.document.querySelector === "object";  // old IE
 	};
 
 	t.isNavigationTimingSupported = function() {
