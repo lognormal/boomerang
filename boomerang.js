@@ -2098,6 +2098,29 @@ BOOMR_check_doc_domain();
 				}
 
 				obj[functionName] = newFn;
+			},
+
+			/**
+			 * Determines if the given input is an Integer.
+			 * Relies on standard Number.isInteger() function that available
+			 * is most browsers except IE. For IE, this relies on the polyfill
+			 * provided by MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
+			 *
+			 * @param {number} input dat
+			 *
+			 * @returns {string} Random ID
+			 *
+			 * @memberof BOOMR.utils
+			 *
+			 */
+			isInteger: function(data) {
+				var isInt = Number.isInteger || function(value) {
+					return typeof value === "number" &&
+						isFinite(value) &&
+						Math.floor(value) === value;
+				};
+
+				return isInt(data);
 			}
 
 			/* BEGIN_DEBUG */

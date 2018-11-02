@@ -15,6 +15,11 @@
  * * `t_configfb`: The time the config.js[on] data's first bytes were received
  * * `t_configls`: The time the config was read from localStorage (delta from navStart)
  *
+ *
+ * This Plugin may add the following parameter[s] to the config request when available from noted sources:
+ *
+ * * `ak.ai`: If AK plugin is available and has `ak.ai` property on akVars object.
+ *
  * @class BOOMR.plugins.LOGN
  */
 (function(w) {
@@ -266,6 +271,16 @@
 		// request Access-Control-Allow-Origin in the response headers
 		url += "&acao=";
 		/* END_CONFIG_AS_JSON */
+
+		// Check if AK plugin is available and exposes `ak.ai` property in akVars.
+		if (BOOMR.plugins.AK && BOOMR.plugins.AK.akVars) {
+			// Check if `ak.ai` property is defined and if its an integer.
+			var akai = BOOMR.plugins.AK.akVars["ak.ai"];
+			if (BOOMR.utils.isInteger(akai)) {
+				// valid integer expected for ARL ID. Tag it to the config request.
+				url += "&ak.ai=" + akai;
+			}
+		}
 
 		// absolutize the url
 		a.href = url;
@@ -530,6 +545,6 @@ BOOMR.init({
 		enabled: false
 	},
 	Akamai: {
-		enabled: false
+		enabled: true
 	}
 });

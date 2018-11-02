@@ -1,0 +1,32 @@
+<%= header %>
+<script>
+
+BOOMR_LOGN_always = true;
+BOOMR_API_key = "13-logn-02-config-json-reload";
+window.xhrConfigRequestUrl = undefined;
+
+var XMLHttpRequestBk = window.XMLHttpRequest;
+window.XMLHttpRequest = function() {
+	var xhrSub = new XMLHttpRequestBk();
+	var orig_open = xhrSub.open;
+
+	xhrSub.open = function() {
+		console.log("Called my open for method: " + arguments[0] + "; URL: " + arguments[1]);
+		window.xhrConfigRequestUrl = arguments[1];
+		return orig_open.apply(xhrSub, arguments);
+	};
+
+	return xhrSub;
+};
+
+// Dont define an AK plugin. Exercise code check for absense of AK plugin (Non-edge injected customers)
+</script>
+
+<%= boomerangScript %>
+<script src="12-AK-plugin-missing-config-req.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>
