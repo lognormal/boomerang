@@ -491,19 +491,33 @@
 		 * Marks the current navigation as complete and sends a beacon.
 		 */
 		markNavigationComplete: function() {
-			log("Navigation being marked complete");
+			var i, ev, waiting, mh = BOOMR.plugins.AutoXHR.getMutationHandler();
+			if (mh && mh.pending_events.length > 0) {
+				for (i = mh.pending_events.length - 1; i >= 0; i--) {
+					ev = mh.pending_events[i];
+					if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+						if (ev.complete) {
+							// latest spa is not in progress
+							break;
+						}
 
-			var mh = BOOMR.plugins.AutoXHR.getMutationHandler();
-			if (mh) {
-				// note that the navigation was forced complete
-				BOOMR.addVar("spa.forced", "1");
+						waiting = mh.nodesWaitingFor(i);
 
-				// add the count of nodes we were waiting for
-				BOOMR.addVar("spa.waiting", mh.nodesWaitingFor());
+						log("SPA Navigation being marked complete; nodes waiting for: " + waiting);
 
-				// finalize this navigation
-				mh.completeEvent();
+						// note that the navigation was forced complete
+						BOOMR.addVar("spa.forced", "1");
+
+						// add the count of nodes we were waiting for
+						BOOMR.addVar("spa.waiting", waiting);
+
+						// finalize this navigation
+						mh.completeEvent(i);
+						return;
+					}
+				}
 			}
+			log("No SPA navigation in progress to mark as complete");
 		}
 	};
 

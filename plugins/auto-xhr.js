@@ -625,14 +625,14 @@
 	 * beacon will be sent immediately. If that is not the case we wait 5 seconds and attempt to send the
 	 * event again.
 	 *
-	 * @param {number} i Index in event list to send
+	 * @param {number} index Index in event list to send
 	 *
-	 * @returns {undefined} Rturns early if the event already completed
+	 * @returns {undefined} Returns early if the event already completed
 	 * @method
 	 * @memberof MutationHandler
 	 */
-	MutationHandler.prototype.sendEvent = function(i) {
-		var ev = this.pending_events[i], self = this, now = BOOMR.now();
+	MutationHandler.prototype.sendEvent = function(index) {
+		var ev = this.pending_events[index], self = this, now = BOOMR.now();
 
 		if (!ev || ev.complete) {
 			return;
@@ -657,7 +657,7 @@
 			if (ev.type === "spa" && ev.total_nodes === 0 && ev.resource.url === self.lastSpaLocation) {
 				log("SPA beacon cancelled, no URL change or resources triggered");
 				BOOMR.fireEvent("spa_cancel");
-				this.pending_events[i] = undefined;
+				this.pending_events[index] = undefined;
 				return;
 			}
 
@@ -672,11 +672,11 @@
 				}
 			}
 
-			this.sendResource(ev.resource, i);
+			this.sendResource(ev.resource, index);
 		}
 		else {
 			// No crumb, so try again after 500ms seconds
-			setTimeout(function() { self.sendEvent(i); }, READY_TO_SEND_WAIT);
+			setTimeout(function() { self.sendEvent(index); }, READY_TO_SEND_WAIT);
 		}
 	};
 
@@ -755,7 +755,7 @@
 			if (resource.initiator === "spa_hard") {
 				// don't wait for onload if this was an aborted SPA navigation
 				if ((!ev || !ev.aborted) && !BOOMR.hasBrowserOnloadFired()) {
-					w.addEventListener("load", function() {
+					BOOMR.utils.addListener(w, "load", function() {
 						var loadTimestamp = BOOMR.now();
 
 						// run after the 'load' event handlers so loadEventEnd is captured
@@ -993,7 +993,7 @@
 	 * timestamp for when this load_finished(), not 1 second from now.
 	 *
 	 * @param {number} index - Index of the event found in the pending_events array
-	 * @param {TimeStamp} loadEventEnd - TimeStamp at which the resource was finnished loading
+	 * @param {TimeStamp} loadEventEnd - TimeStamp at which the resource was finished loading
 	 *
 	 * @method
 	 * @memberof MutationHandler
@@ -1029,7 +1029,7 @@
 	};
 
 	/**
-	 * Determines if we sohuld wait for resources that would be fetched by the
+	 * Determines if we should wait for resources that would be fetched by the
 	 * specified node.
 	 *
 	 * @param {Element} node DOM node
@@ -1361,20 +1361,30 @@
 
 	/**
 	 * Determines how many nodes are being waited on
+	 * @param {number} [index] Optional Event index, defaults to last event
+	 *
 	 * @return {number} Number of nodes being waited on
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
-	MutationHandler.prototype.nodesWaitingFor = function() {
+	MutationHandler.prototype.nodesWaitingFor = function(index) {
+		var ev;
+
 		if (this.pending_events.length === 0) {
 			return 0;
 		}
 
-		var index = this.pending_events.length - 1;
+		if (typeof index === "undefined") {
+			index = this.pending_events.length - 1;
+		}
 
-		if (!this.pending_events[index]) {
+		ev = this.pending_events[index];
+		if (!ev) {
 			return 0;
 		}
 
-		return this.pending_events[index].nodes_to_wait;
+		return ev.nodes_to_wait;
 	};
 
 	/**
@@ -1384,15 +1394,20 @@
 	 * or SPA. 'Active' specifically excludes 'click' events.
 	 *
 	 * @return {boolean} True if there's an active event happening
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
 	MutationHandler.prototype.hasActiveEvent = function() {
+		var index, ev;
+
 		if (this.pending_events.length === 0) {
 			return false;
 		}
 
-		var index = this.pending_events.length - 1;
+		index = this.pending_events.length - 1;
 
-		var ev = this.pending_events[index];
+		ev = this.pending_events[index];
 
 		if (!ev) {
 			return false;
@@ -1408,16 +1423,23 @@
 
 	/**
 	 * Completes the current event, marking the end time as 'now'.
+	 * @param {number} [index] Optional Event index, defaults to last event
+	 *
+	 * @method
+	 * @memberof MutationHandler
 	 */
-	MutationHandler.prototype.completeEvent = function() {
-		var now = BOOMR.now(), index, ev;
+	MutationHandler.prototype.completeEvent = function(index) {
+		var now = BOOMR.now(), ev;
 
 		if (this.pending_events.length === 0) {
 			// no active events
 			return;
 		}
 
-		index = this.pending_events.length - 1;
+		if (typeof index === "undefined") {
+			index = this.pending_events.length - 1;
+		}
+
 		ev = this.pending_events[index];
 		if (!ev) {
 			// unknown event
@@ -1654,7 +1676,7 @@
 					return function() {
 						var p, np = _promise._bmrNextP;
 						try {
-							p = _fn.apply((this === window ? BOOMR.window : this), arguments);
+							p = _fn.apply((this === window ? w : this), arguments);
 
 							// no exception thrown, check if there's a onFulfilled
 							// callback in the chain

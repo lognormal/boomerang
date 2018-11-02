@@ -4,6 +4,7 @@
 describe("common", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
+	var assert = window.chai.assert;
 
 	function testPageLoadBeacon(b, prefix) {
 		// TODO
@@ -15,8 +16,8 @@ describe("common", function() {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
 		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
 		if (!t.doNotTestSpaAbort) {
-			assert.isUndefined(b["rt.abld"]);
-			assert.isUndefined(b["rt.quit"]);
+			assert.isUndefined(b["rt.abld"], prefix + "does not have the rt.abld param");
+			assert.isUndefined(b["rt.quit"], prefix + "does not have the rt.quit param");
 		}
 	}
 
@@ -24,8 +25,8 @@ describe("common", function() {
 		assert.isUndefined(b.api, prefix + "does not have the api param");
 		assert.isUndefined(b["xhr.pg"], prefix + "does not have the xhr.pg param");
 		if (!t.doNotTestSpaAbort) {
-			assert.isUndefined(b["rt.abld"]);
-			assert.isUndefined(b["rt.quit"]);
+			assert.isUndefined(b["rt.abld"], prefix + "does not have the rt.abld param");
+			assert.isUndefined(b["rt.quit"], prefix + "does not have the rt.quit param");
 		}
 	}
 
@@ -223,5 +224,18 @@ describe("common", function() {
 				}
 			}
 		}
+	});
+
+	it("AutoXHR: Should not have pending events", function(done) {
+		t.ifAutoXHR(
+			done,
+			function() {
+				var events = BOOMR.plugins.AutoXHR.getMutationHandler().pending_events;
+				events = BOOMR.utils.arrayFilter(events, function(val) { return typeof val !== "undefined"; });
+				assert.lengthOf(events, 0);
+				done();
+			},
+			this.skip.bind(this)
+		);
 	});
 });
