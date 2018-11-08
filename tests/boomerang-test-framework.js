@@ -257,7 +257,7 @@
 			config.onBoomerangLoaded();
 		}
 
-		if (!config.testAfterOnBeacon) {
+		if (!config.testAfterOnBeacon && config.testAfterOnBeacon !== false) {
 			BOOMR.setImmediate(t.runTests);
 		}
 

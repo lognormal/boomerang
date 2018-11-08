@@ -1838,7 +1838,10 @@
 			}
 		};
 
-		w.fetch = BOOMR.proxy_fetch;
+		// Overwrite window.fetch, ensuring the original is swapped back in
+		// if the Boomerang IFRAME is unloaded.  uninstrumentFetch() may also
+		// be used to swap the original back in.
+		BOOMR.utils.overwriteNative(w, "fetch", BOOMR.proxy_fetch);
 	}
 
 	/**
@@ -2115,7 +2118,10 @@
 		// is using it to save state
 		BOOMR.proxy_XMLHttpRequest.prototype = BOOMR.orig_XMLHttpRequest.prototype;
 
-		w.XMLHttpRequest = BOOMR.proxy_XMLHttpRequest;
+		// Overwrite window.XMLHttpRequest, ensuring the original is swapped back in
+		// if the Boomerang IFRAME is unloaded.  uninstrumentXHR() may also
+		// be used to swap the original back in.
+		BOOMR.utils.overwriteNative(w, "XMLHttpRequest", BOOMR.proxy_XMLHttpRequest);
 	}
 
 	/**
@@ -2201,6 +2207,7 @@
 			}
 			return false;
 		},
+
 		/**
 		 * Remove any added variables from this plugin from the beacon and clear internal collection of addedVars
 		 */
@@ -2210,6 +2217,7 @@
 				impl.addedVars = [];
 			}
 		},
+
 		/**
 		 * Mark this as the time load ended via resources loadEventEnd property, if this resource has been added
 		 * to the {@link MutationHandler} already notify that the resource has finished.

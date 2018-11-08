@@ -118,8 +118,14 @@ function BOOMR_check_doc_domain(domain) {
 		domain = document.domain;
 	}
 
-	if (domain.indexOf(".") === -1) {
+	if (!domain || domain.indexOf(".") === -1) {
 		return;// false;	// not okay, but we did our best
+	}
+
+	// window.parent might be null if we're running during unload from
+	// a detached iframe
+	if (!window.parent) {
+		return;
 	}
 
 	// 1. Test without setting document.domain
@@ -129,8 +135,17 @@ function BOOMR_check_doc_domain(domain) {
 	}
 	// 2. Test with document.domain
 	catch (err) {
-		document.domain = domain;
+		try {
+			document.domain = domain;
+		}
+		catch (err2) {
+			// An exception might be thrown if the document is unloaded
+			// or when the domain is incorrect.  If so, we can't do anything
+			// more, so bail.
+			return;
+		}
 	}
+
 	try {
 		test = window.parent.document;
 		return;// test !== undefined;	// all okay
@@ -744,6 +759,12 @@ BOOMR_check_doc_domain();
 		localStorageSupported: false,
 		LOCAL_STORAGE_PREFIX: "_boomr_",
 
+		/**
+		 * Native functions that were overwritten and should be restored when
+		 * the Boomerang IFRAME is unloaded
+		 */
+		nativeOverwrites: [],
+
 		xb_handler: function(type) {
 			return function(ev) {
 				var target;
@@ -895,6 +916,27 @@ BOOMR_check_doc_domain();
 			catch (ignore) {
 				impl.localStorageSupported = false;
 			}
+		},
+
+		/**
+		 * Fired when the Boomerang IFRAME is unloaded.
+		 *
+		 * If Boomerang was loaded into the root document, this code
+		 * will not run.
+		 */
+		onFrameUnloaded: function() {
+			var i, prop;
+
+			BOOMR.isUnloaded = true;
+
+			// swap the original function back in for any overwrites
+			for (i = 0; i < impl.nativeOverwrites.length; i++) {
+				prop = impl.nativeOverwrites[i];
+
+				prop.obj[prop.functionName] = prop.origFn;
+			}
+
+			impl.nativeOverwrites = [];
 		}
 	};
 
@@ -960,6 +1002,14 @@ BOOMR_check_doc_domain();
 		 *
 		 */
 		beaconsSent: 0,
+
+		/**
+		 * Whether or not Boomerang thinks it has been unloaded (if it was
+		 * loaded in an IFRAME)
+		 *
+		 * @type {boolean}
+		 */
+		isUnloaded: false,
 
 		/**
 		 * Constants visible to the world
@@ -2009,6 +2059,45 @@ BOOMR_check_doc_domain();
 				    fn.toString &&
 				    !fn.hasOwnProperty("toString") &&
 				    /\[native code\]/.test(String(fn));
+			},
+
+			/**
+			 * Overwrites a function on the specified object.
+			 *
+			 * When the Boomerang IFRAME unloads, it will swap the old
+			 * function back in, so calls to the functions are successful.
+			 *
+			 * If this isn't done, callers of the overwritten functions may still
+			 * call into freed Boomerang code or the IFRAME that is partially unloaded,
+			 * leading to "Freed script" errors or exceptions from accessing
+			 * unloaded DOM properties.
+			 *
+			 * This tracking isn't needed if Boomerang is loaded in the root
+			 * document, as everthing will be cleaned up along with Boomerang
+			 * on unload.
+			 *
+			 * @param {object} obj Object whose property will be overwritten
+			 * @param {string} functionName Function name
+			 * @param {function} newFn New function
+			 */
+			overwriteNative: function(obj, functionName, newFn) {
+				// bail if the object doesn't exist
+				if (!obj || !newFn) {
+					return;
+				}
+
+				// we only need to keep track if we're running Boomerang in
+				// an IFRAME
+				if (BOOMR.boomerang_frame !== BOOMR.window) {
+					// note we overwrote this
+					impl.nativeOverwrites.push({
+						obj: obj,
+						functionName: functionName,
+						origFn: obj[functionName]
+					});
+				}
+
+				obj[functionName] = newFn;
 			}
 
 			/* BEGIN_DEBUG */
@@ -2288,7 +2377,14 @@ BOOMR_check_doc_domain();
 					// We only clear w on browsers that don't support onpagehide because
 					// those that do are new enough to not have memory leak problems of
 					// some older browsers
-					BOOMR.utils.addListener(w, "unload", function() { BOOMR.window = w = null; });
+					BOOMR.utils.addListener(w, "unload", function() {
+						BOOMR.window = w = null;
+					});
+				}
+
+				// if we were loaded in an IFRAME, try to keep track if the IFRAME was unloaded
+				if (BOOMR.boomerang_frame !== BOOMR.window) {
+					BOOMR.utils.addListener(BOOMR.boomerang_frame, "unload", impl.onFrameUnloaded);
 				}
 			}());
 

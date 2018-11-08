@@ -4,6 +4,7 @@
 window.performance.now = function() {
 	return 0;
 };
+window.performance.now.isCustom = true;
 </script>
 <%= boomerangScript %>
 <script src="issue-545.js" type="text/javascript"></script>

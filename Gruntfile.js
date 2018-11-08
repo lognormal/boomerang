@@ -46,7 +46,9 @@ var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 			"BOOMR_plugins_errors_onerror",
 			"BOOMR_plugins_errors_onxhrerror",
 			"BOOMR_plugins_errors_console_error",
-			"BOOMR_plugins_errors_wrap"
+			"BOOMR_plugins_errors_wrap",
+			"BOOMR_plugins_errors_wrapped_function",
+			"BOOMR_plugins_errors_wrapped_removeEventListener"
 		]
 	},
 	sourceMap: true,

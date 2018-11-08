@@ -3,6 +3,7 @@
 <script type="text/javascript">
 /*global BOOMR_CONFIG_RELOAD_TIMEOUT:true*/
 /*eslint-disable no-unused-vars*/
+window.BOOMR_LOGN_always = true;
 BOOMR_CONFIG_RELOAD_TIMEOUT = 1000;
 /*eslint-enable no-unused-vars*/
 function runTests() {
@@ -32,7 +33,7 @@ function runTests() {
 <script type="text/javascript">
 BOOMR_test.init({
 	autorun: true,
-	testAfterOnBeacon: runTests()
+	testAfterOnBeacon: runTests() ? true : undefined
 });
 </script>
 <%= footer %>

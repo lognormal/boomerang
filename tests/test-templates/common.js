@@ -6,6 +6,25 @@ describe("common", function() {
 	var tf = BOOMR.plugins.TestFramework;
 	var assert = window.chai.assert;
 
+	// Get a performance.now() polyfill that doesn't rely on BOOMR.now
+	var dateNow =
+		(function() {
+			return Date.now || function() { return new Date().getTime(); };
+		}());
+	var perfNow = dateNow;
+
+	if ("performance" in window && window.performance && typeof window.performance.now === "function") {
+		perfNow = function() {
+			if (window.performance && typeof window.performance.now === "function" && !window.performance.now.isCustom) {
+				return Math.round(window.performance.now() + window.performance.timing.navigationStart);
+			}
+			else {
+				// might've been deleted via BOOMR_test.removeNavigationTimingSupport()
+				return dateNow();
+			}
+		};
+	}
+
 	function testPageLoadBeacon(b, prefix) {
 		// TODO
 		assert.isUndefined(b.pgu, prefix + "does not have the pgu param");
@@ -45,7 +64,7 @@ describe("common", function() {
 
 		for (i = 0; i < tf.beacons.length; i++) {
 			b = tf.beacons[i];
-			now = BOOMR.now();
+			now = perfNow();
 			prefix = "ensure beacon " + (i + 1) + " ";
 
 			assert.equal(b.n, i + 1, prefix + "has the correct beacon number");

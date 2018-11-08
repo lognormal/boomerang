@@ -1013,7 +1013,6 @@
 		// state
 		isDuringLoad: true,
 		initialized: false,
-		supported: false,
 		autorun: true,
 
 		/**
@@ -1325,7 +1324,7 @@
 				rEL = that.removeEventListener;
 			}
 
-			that[functionName] = function() {
+			BOOMR.utils.overwriteNative(that, functionName, function BOOMR_plugins_errors_wrapped_function() {
 				try {
 					var args = Array.prototype.slice.call(arguments);
 					var callbackFn = args[callbackIndex];
@@ -1349,6 +1348,7 @@
 							// if the callback is already tracked, we won't call addEventListener
 							return;
 						}
+
 						if (rEL) {
 							// Remove the listener before adding it back in.
 							// This takes care of the (pathological) case where code is relying on the native
@@ -1368,7 +1368,7 @@
 					// re-throw
 					throw e;
 				}
-			};
+			});
 		},
 
 		/**
@@ -1453,9 +1453,11 @@
 				return;
 			}
 
-			that[fn] = function(type, listener, useCapture) {
+			BOOMR.utils.overwriteNative(that, fn, function BOOMR_plugins_errors_wrapped_removeEventListener(type, listener, useCapture) {
 				var targetObj = this === window ? BOOMR.window : this;
+
 				idx = impl.trackedFnIdx(targetObj, type, listener, useCapture);
+
 				if (idx !== -1) {
 					wrappedFn = targetObj._bmrEvents[idx][3];
 
@@ -1469,7 +1471,7 @@
 					// unknown, pass original args
 					origFn.call(targetObj, type, listener, useCapture);
 				}
-			};
+			});
 		},
 
 		/**
@@ -1511,8 +1513,10 @@
 						return;
 					}
 
-					// Report error during callback
-					impl.send(e, via);
+					if (!BOOMR.isUnloaded) {
+						// Report error during callback
+						impl.send(e, via);
+					}
 
 					// re-throw
 					throw e;
@@ -1971,14 +1975,7 @@
 
 			impl.initialized = true;
 
-			// TODO determine what we don't support
-			impl.supported = true;
-
-			if (!impl.supported) {
-				return this;
-			}
-
-			// only if we're supported
+			// subscribe to events
 			BOOMR.subscribe("before_beacon", impl.beforeBeacon, null, impl);
 			BOOMR.subscribe("beacon", impl.onBeacon, null, impl);
 			BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
@@ -2002,7 +1999,7 @@
 						}
 					}
 
-					BOOMR.window.onerror = function BOOMR_plugins_errors_onerror(message, fileName, lineNumber, columnNumber, error) {
+					BOOMR.utils.overwriteNative(BOOMR.window, "onerror", function BOOMR_plugins_errors_onerror(message, fileName, lineNumber, columnNumber, error) {
 						// onerror may be called with an `ErrorEvent` object (eg. https://github.com/angular/zone.js/issues/1108)
 						if (typeof error === "undefined" &&
 						    typeof message === "object" && typeof message.error === "object" && message.error !== null) {
@@ -2034,7 +2031,7 @@
 						}
 
 						return false; // don't prevent the firing of the default event handler
-					};
+					});
 
 					// send any errors from the loader snippet
 					if (BOOMR.globalErrors) {
@@ -2082,6 +2079,7 @@
 								message = impl.normalizeToString(event.reason.message);
 							}
 						}
+
 						impl.send({
 							message: message,
 							stack: stack,
@@ -2097,10 +2095,10 @@
 					BOOMR.window.console = {};
 				}
 
-				var globalConsole = BOOMR.window.console.error;
+				BOOMR.globalConsole = BOOMR.window.console.error;
 
 				try {
-					BOOMR.window.console.error = function BOOMR_plugins_errors_console_error() {
+					BOOMR.utils.overwriteNative(BOOMR.window.console, "error", function BOOMR_plugins_errors_console_error() {
 						// get a copy of the args
 						var args = Array.prototype.slice.call(arguments);
 
@@ -2113,15 +2111,15 @@
 							impl.send(impl.normalizeToString(args), E.VIA_CONSOLE);
 						}
 
-						if (typeof globalConsole === "function") {
-							if (typeof globalConsole.apply === "function") {
-								globalConsole.apply(this, args);
+						if (typeof BOOMR.globalConsole === "function") {
+							if (typeof BOOMR.globalConsole.apply === "function") {
+								BOOMR.globalConsole.apply(this, args);
 							}
 							else {
-								globalConsole(args[0], args[1], args[2]);
+								BOOMR.globalConsole(args[0], args[1], args[2]);
 							}
 						}
-					};
+					});
 				}
 				catch (h) {
 					BOOMR.debug("Exception in the window.console.error handler", "Errors");
@@ -2182,6 +2180,7 @@
 						}
 					}
 				}, {buffered: true});
+
 				impl.reportingObserver.observe();
 			}
 
@@ -2200,13 +2199,13 @@
 		},
 
 		/**
-		 * Determines if Error tracking is initialized and supported.
+		 * Determines if Error tracking is initialized.
 		 *
 		 * @returns {boolean} `true`
 		 * @memberof BOOMR.plugins.Errors
 		 */
 		is_supported: function() {
-			return impl.initialized && impl.supported;
+			return impl.initialized;
 		},
 
 		//

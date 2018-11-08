@@ -39,5 +39,8 @@
 	},
 	"tests": {
 		"title": "Tests"
+	},
+	"page-overrides": {
+		"title": "Page Overrides"
 	}
 }
