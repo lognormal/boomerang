@@ -212,7 +212,7 @@
 
 		done: function() {
 			var w = BOOMR.window, p, pn, chromeTimes, pt, data = {}, offset = 0, i,
-			    paintTiming;
+			    paintTiming, k;
 
 			if (this.complete) {
 				return this;

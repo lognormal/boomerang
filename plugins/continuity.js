@@ -685,6 +685,8 @@
  * @class BOOMR.plugins.Continuity
  */
 (function() {
+	var impl;
+
 	BOOMR = window.BOOMR || {};
 
 	BOOMR.plugins = BOOMR.plugins || {};

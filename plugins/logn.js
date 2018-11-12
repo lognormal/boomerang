@@ -38,7 +38,7 @@
 	    // When true, the plugin will always run
 	    alwaysRun = w.BOOMR_LOGN_always,
 	    CONFIG_RELOAD_TIMEOUT = w.BOOMR_CONFIG_RELOAD_TIMEOUT || 5.5 * 60 * 1000,  // milliseconds
-	    CONFIG_STORE_TIMEOUT = w.BOOMR_CONFIG_STORE_TIMEOUT || 8 * 60;  // seconds
+	    CONFIG_STORE_TIMEOUT = w.BOOMR_CONFIG_STORE_TIMEOUT || 8 * 60,  // seconds
 	    ready = false;
 
 	BOOMR = window.BOOMR || {};
