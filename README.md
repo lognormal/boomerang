@@ -265,6 +265,20 @@ which is Chrome (including Android), Firefox 6+ (including Android), Opera
 boomerang also fires the `onBeforeBoomerangBeacon` and `onBoomerangBeacon`
 events just before and during beaconing.
 
+<a name="installation"></a>
+# Installation
+
+There are several ways of including Boomerang in your project:
+
+1. Boomerang can be downloaded from the official [Boomerang Github repository](https://github.com/akamai/boomerang).
+
+2. NPM: `npm install boomerangjs`
+
+3. Bower: `bower install boomerang`
+
+Once fetched, see [Building Boomerang](https://akamai.github.io/boomerang/tutorial-building.html)
+for more details on how to include the plugins you require.
+
 <a name="documentation"></a>
 # Documentation
 
