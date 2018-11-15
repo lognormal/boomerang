@@ -61,7 +61,7 @@
 		timingCache: {},
 
 		/**
-		 * Executed on `page_ready` and `before_unload`
+		 * Executed on `page_ready`, `xhr_load` and `before_unload`
 		 */
 		done: function(edata, ename) {
 			var p, paintTimings, i;

@@ -57,7 +57,7 @@
 	}
 
 	var impl = {
-		addedVars: [],
+		complete: false,
 
 		// collect client IDs, default to false
 		// overridable by config
@@ -338,9 +338,10 @@
 			return data;
 		},
 
-		pageReady: function() {
-			this.addedVars = [];
-
+		/**
+		 * Executed on `page_ready` and `xhr_load`
+		 */
+		done: function(edata, ename) {
 			var vendor, data, key, beaconParam;
 			var vendors = {
 				"ga": this.googleAnalytics,
@@ -348,26 +349,45 @@
 				"ia": this.ibmAnalytics
 			};
 
+			if (this.complete) {
+				// we've already added data to the beacon
+				return;
+			}
+
+			//
+			// Don't add TPAnalytics to SPA Soft or XHR beacons --
+			// Only add to Page Load (ename: load) and SPA Hard (ename: xhr
+			// and initiator: spa_hard) beacons.
+			//
+			if (ename !== "load" && (!edata || edata.initiator !== "spa_hard")) {
+				return;
+			}
+
 			for (vendor in vendors) {
 				data = vendors[vendor]();
 				for (var key in data) {
 					var beaconParam = "tp." + vendor + "." + key;
 					if (!BOOMR.utils.inArray(beaconParam, this.dropParams)) {
-						BOOMR.addVar(beaconParam, data[key]);
-						impl.addedVars.push(beaconParam);
+						BOOMR.addVar(beaconParam, data[key], true);
 					}
 				}
 			}
-			if (this.addedVars.length > 0) {
-				BOOMR.sendBeacon();
-			}
+
+			this.complete = true;
+
+			BOOMR.sendBeacon();
 		},
 
-		onBeacon: function() {
-			if (this.addedVars && this.addedVars.length > 0) {
-				BOOMR.removeVar(this.addedVars);
-				this.addedVars = [];
-			}
+		/*
+		 * Fired when the state changes from pre-render to visible
+		 */
+		prerenderToVisible: function() {
+			// ensure we add our data to the beacon even if we had added it
+			// during prerender (in case another beacon went out in between)
+			this.complete = false;
+
+			// add our data to the beacon
+			this.done({}, "load");
 		}
 	};
 
@@ -400,9 +420,10 @@
 				if (!BOOMR.utils.isArray(impl.dropParams)) {
 					impl.dropParams = [];
 				}
-				BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
-				BOOMR.subscribe("beacon", impl.onBeacon, null, impl);
-				BOOMR.subscribe("prerender_to_visible", impl.pageReady, null, impl);
+				// we'll add data to the beacon on whichever happens first
+				BOOMR.subscribe("page_ready", impl.done, "load", impl);
+				BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
+				BOOMR.subscribe("prerender_to_visible", impl.prerenderToVisible, "load", impl);
 				impl.initialized = true;
 			}
 
