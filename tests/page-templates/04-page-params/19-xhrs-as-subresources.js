@@ -23,7 +23,7 @@ describe("e2e/04-page-params/19-xhrs-as-subresources", function() {
 			this.skip.bind(this));
 	});
 
-	it("Should have sent 3 beacons (if XHR is supported by Fetch API is not supported)", function(done) {
+	it("Should have sent 3 beacons (if XHR is supported but Fetch API is not supported)", function(done) {
 		if (t.isFetchApiSupported()) {
 			return this.skip();
 		}

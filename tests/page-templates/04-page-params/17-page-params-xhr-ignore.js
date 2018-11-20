@@ -23,7 +23,7 @@ describe("e2e/04-page-params/17-page-params-xhr-ignore", function() {
 			this.skip.bind(this));
 	});
 
-	it("Should have sent 2 beacons (if XHR is supported by Fetch API is not supported)", function(done) {
+	it("Should have sent 2 beacons (if XHR is supported but Fetch API is not supported)", function(done) {
 		if (t.isFetchApiSupported()) {
 			return this.skip();
 		}

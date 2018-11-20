@@ -3536,7 +3536,7 @@
 				"pci",
 				"pciBlacklist"
 			];
-			var pgIndex = 0, pgList = [];
+			var pgIndex = 0, pgList = [], i;
 
 			w = BOOMR.window;
 			// if client uses history.pushState, parent location might be different
@@ -3548,34 +3548,37 @@
 			BOOMR.utils.pluginConfig(impl, config, "PageParams", properties);
 			impl.complete = false;
 
-			if (impl.pageGroups && impl.pageGroups.length > 0) {
-				for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
-					if (impl.pageGroups[pgIndex]) {
-						if ((impl.pageGroups[pgIndex].on && BOOMR.utils.inArray("xhr", impl.pageGroups[pgIndex].on)) || impl.pageGroups[pgIndex].ignore) {
+			// no need to run on config refresh which doesn't have PageParams
+			if (typeof config.PageParams !== "undefined") {
+				if (impl.pageGroups && impl.pageGroups.length > 0) {
+					for (pgIndex = 0; pgIndex < impl.pageGroups.length; pgIndex++) {
+						if (impl.pageGroups[pgIndex]) {
+							if ((impl.pageGroups[pgIndex].on && BOOMR.utils.inArray("xhr", impl.pageGroups[pgIndex].on)) || impl.pageGroups[pgIndex].ignore) {
 
-							impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
-							impl.hasXhrOn = true;
+								impl.xhrPageGroups.push(impl.pageGroups[pgIndex]);
+								impl.hasXhrOn = true;
 
-							if (impl.pageGroups[pgIndex].ignore) {
-								impl.hasXhrIgnore = true;
+								if (impl.pageGroups[pgIndex].ignore) {
+									impl.hasXhrIgnore = true;
+								}
+
+								// Ensure PGs definitions only matching XHRs are removed from PG List
+								if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.length === 1) || impl.pageGroups[pgIndex].ignore) {
+									continue;
+								}
 							}
 
-							// Ensure PGs definitions only matching XHRs are removed from PG List
-							if ((impl.pageGroups[pgIndex].on && impl.pageGroups[pgIndex].on.length === 1) || impl.pageGroups[pgIndex].ignore) {
-								continue;
+							// determine if we need to enable XHR payload inspection
+							if (BOOMR.plugins.AutoXHR && impl.pageGroups[pgIndex].type === "Payload") {
+								BOOMR.plugins.AutoXHR.setXhrRequestResponseCapturing(true);
 							}
-						}
 
-						// determine if we need to enable XHR payload inspection
-						if (BOOMR.plugins.AutoXHR && impl.pageGroups[pgIndex].type === "Payload") {
-							BOOMR.plugins.AutoXHR.setXhrRequestResponseCapturing(true);
+							pgList.push(impl.pageGroups[pgIndex]);
 						}
-
-						pgList.push(impl.pageGroups[pgIndex]);
 					}
 				}
+				impl.pageGroups = pgList;
 			}
-			impl.pageGroups = pgList;
 
 			if (typeof config.autorun !== "undefined") {
 				impl.autorun = config.autorun;
@@ -3586,6 +3589,15 @@
 				BOOMR.addVar("pci", 1);
 			}
 
+			// stop if we have already configured and initialized.
+			// Check this after reading config since we may first get config from
+			// localStorage and then receive updates from config.js.
+			// To keep it simple, we won't re-init resource groups or re-process
+			// dimensions in this case.
+			if (impl.initialized && impl.configReceived) {
+				return this;
+			}
+
 			if (impl.initialized) {
 				// second init is from config.js
 				impl.configReceived = true;
@@ -3594,7 +3606,7 @@
 
 				// process Custom Dimensions for any Custom Metrics/Timers that
 				// were queued before config.js was loaded
-				for (var i = 0; i < impl.beaconQueue.length; i++) {
+				for (i = 0; i < impl.beaconQueue.length; i++) {
 					if (impl.beaconQueue[i].needsDimensions) {
 						/*eslint-disable no-loop-func*/
 						impl.runAllDimensions(function(name, val) {
