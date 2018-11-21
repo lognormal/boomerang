@@ -23,7 +23,7 @@
         "plugins/compression.js",
         "plugins/errors.js",
         "plugins/third-party-analytics.js",
-        "node_modules/usertiming-compression/src/usertiming-compression.js",
+        "node_modules/usertiming-compression/dist/usertiming-compression.vanilla.js",
         "plugins/usertiming.js",
         "plugins/mq.js",
         "plugins/akamai.js",
