@@ -357,7 +357,8 @@
 		},
 
 		/**
-		 * Called by a framework when a route change has happened
+		 * Called by a framework when a route change has started.  The SPA plugin will
+		 * begin monitoring downloadable resources to measure the SPA soft navigation.
 		 *
 		 * @param {function} onComplete Called on completion
 		 * @param {object[]} routeFilterArgs Route Filter arguments
