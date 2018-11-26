@@ -3,9 +3,9 @@
  * The UserTiming plugin to collect metrics from the W3C
  * [UserTiming]{@link http://www.w3.org/TR/user-timing/} API.
  *
- * This plugin is dependent on the
+ * This plugin can make use of the
  * [UserTimingCompression library]{@link https://github.com/nicjansma/usertiming-compression.js}.
- * `UserTimingCompression` must be loaded before this plugin's `init()` is called.
+ * In order to use compression, `UserTimingCompression` must be loaded before this plugin's `init()` is called.
  *
  * This plugin collects all marks and measures that were added since
  * navigation start or since the last beacon fired for the current navigation.
@@ -16,9 +16,9 @@
  *
  * This plugin adds the following parameters to the beacon:
  *
- * * `usertiming`: Compressed ResourceTiming data
+ * * `usertiming`: UserTiming data
  *
- * The value is a compressed string using
+ * The value is either plain json or a compressed string using
  * [UserTimingCompression library]{@link https://github.com/nicjansma/usertiming-compression.js}.
  * A decompression function is also available in the library.
  *
@@ -35,7 +35,11 @@
  *     //measure2 will be the delta between the mark2 timestamp and the current time
  *     performance.measure('measure2', 'mark2');
  *
- * The compressed data added to the beacon will look similar to the following:
+ * When not using compression, data added to the beacon will look similar to the following:
+ *
+ *     usertiming={"mark":{"mark1":100,"mark2":200},"measure":{"measure1":100,"measure2":200}}
+ *
+ * When using compression, data added to the beacon will look similar to the following:
  *
  *     usertiming=~(m~(ark~(1~'2s~2~'5k)~easure~(1~'2s_2s~2~'5k_5k)))
  *
@@ -46,6 +50,8 @@
  *     {"name":"measure1","startTime":100,"duration":100,"entryType":"measure"},
  *     {"name":"mark2","startTime":200,"duration":0,"entryType":"mark"},
  *     {"name":"measure2","startTime":200,"duration":200,"entryType":"measure"}]
+ *
+ * Uncompressed measures only send their duration in contrast to compressed measures, which also send their startTime.
  *
  * ## Compatibility
  *
@@ -87,21 +93,45 @@
 		options: {"from": 0, "window": BOOMR.window},
 
 		/*
+		 * Gets the user timings, filters out those that have already been sent.
 		 * Calls the UserTimingCompression library to get the compressed UserTiming
 		 * data that occurred since the last call.
 		 *
-		 * @returns {string} Compressed UserTiming data
+		 * @returns {string} UserTiming data
 		 */
 		getUserTiming: function() {
-			var timings, res,
-			    now = BOOMR.hrNow(),  // Get a timestamp to compare with performance marks and measures.
-			    utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
+			var entries = this.findUserTimingForFrame(impl.options.window);
 
-			timings = utc.getCompressedUserTiming(impl.options);
-			res = utc.compressForUri(timings);
-			this.options.from = now;
+			// 'from' minimum time
+			if (impl.options.from) {
+				entries = entries.filter(function(e) {
+					return e.startTime + e.duration >= impl.options.from;
+				});
+			}
 
-			return res;
+			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
+
+			if (typeof utc === "undefined") {
+				if (entries.length === 0) {
+					return null;
+				} else {
+					var res = {};
+					for (var i = 0, l = entries.length; i < l; i++) {
+						var entry = entries[i];
+						res[entry.entryType] = res[entry.entryType] || {};
+						if (entry.entryType === "mark") {
+							res[entry.entryType][entry.name] = entry.startTime;
+						} else if (entry.entryType === "measure") {
+							res[entry.entryType][entry.name] = entry.duration;
+						}
+					}
+					return JSON.stringify(res);
+				}
+			} else {
+				var timings, res;
+				timings = utc.compressUserTiming(entries);
+				return utc.compressForUri(timings);
+			}
 		},
 
 		/**
@@ -110,7 +140,7 @@
 		 * Adds the `usertiming` param to the beacon.
 		 */
 		addEntriesToBeacon: function() {
-			var r;
+			var r, now = BOOMR.hrNow();
 
 			if (this.complete) {
 				return;
@@ -124,7 +154,50 @@
 				});
 			}
 
+			this.options.from = now;
+
 			this.complete = true;
+		},
+
+		/**
+		 * Gets all of the UserTiming entries for a frame
+
+		 * @param {object} frame Window or frame DOM object
+		 *
+		 * @returns {PerformanceEntry[]} UserTiming entries
+		 */
+		findUserTimingForFrame: function(frame) {
+			var entries;
+
+			if (!frame) {
+				return [];
+			}
+
+			try {
+				// Try to access location.href first to trigger any Cross-Origin
+				// warnings.  There's also a bug in Chrome ~48 that might cause
+				// the browser to crash if accessing X-O frame.performance.
+				// https://code.google.com/p/chromium/issues/detail?id=585871
+				// This variable is not otherwise used.
+				/* eslint-disable no-unused-vars */
+				var frameLoc = frame.location && frame.location.href;
+				/* eslint-enable no-unused-vars */
+
+				if (!("performance" in frame) ||
+					!frame.performance ||
+					!frame.performance.getEntriesByType) {
+					return entries;
+				}
+
+				// gather marks and measures for this frame
+				// TODO do we need to offset startTime?
+				entries = frame.performance.getEntriesByType("mark");
+				entries = entries.concat(frame.performance.getEntriesByType("measure"));
+			} catch (e) {
+				return entries;
+			}
+
+			return entries;
 		},
 
 		/**
@@ -169,13 +242,6 @@
 		checkSupport: function() {
 			if (this.supported) {
 				return true;
-			}
-
-			// Check that the required UserTimingCompression library is available
-			var utc = window.UserTimingCompression || BOOMR.window.UserTimingCompression;
-			if (typeof utc === "undefined") {
-				BOOMR.warn("UserTimingCompression library not found", "usertiming");
-				return false;
 			}
 
 			var p = BOOMR.getPerformance();
