@@ -9,6 +9,7 @@ NPM and Bower dependencies:
 ```
 npm install
 bower install
+node node_modules/protractor/bin/webdriver-manager update
 ```
 
 In addition, you should map the following two domains to `127.0.0.1`:
