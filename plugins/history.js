@@ -11,8 +11,8 @@
  *
  * The History plugin should be used for React apps.
  *
- * **Note**: This plugins requires the {@link BOOMR.plugins.SPA} and
- * {@link BOOMR.plugins.AutoXHR} plugin as well.
+ * **Note**: This plugin requires the {@link BOOMR.plugins.AutoXHR} and
+ * {@link BOOMR.plugins.SPA} plugins to be loaded first (in that order).
  *
  * For details on how Boomerang Single Page App instrumentation works, see the
  * {@link BOOMR.plugins.SPA} documentation.

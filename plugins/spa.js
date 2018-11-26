@@ -2,7 +2,7 @@
  * Enables Single Page App (SPA) performance monitoring.
  *
  * **Note**: The `SPA` plugin requires the {@link BOOMR.plugins.AutoXHR} plugin
- * and one of the following SPA plugins to work:
+ * to be loaded before `SPA`, and one of the following SPA plugins to work:
  *
  * * {@link BOOMR.plugins.Angular}
  * * {@link BOOMR.plugins.Backbone}
