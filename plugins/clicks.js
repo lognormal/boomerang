@@ -144,7 +144,7 @@
 				"onbeforeunload" // Send the beacon when page is closed?
 			];
 
-			BOOMR.utils.pluginConfig(impl, config, "clicks", properties);
+			BOOMR.utils.pluginConfig(impl, config, "Clicks", properties);
 
 			// Other initialisation code here
 			w.addEventListener("click", impl.handleEvent, true);
