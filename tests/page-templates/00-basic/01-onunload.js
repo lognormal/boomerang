@@ -2,9 +2,12 @@
 /*global assert*/
 
 describe("e2e/00-basic/01-onunload", function() {
+	var beaconData;
+
 	it("Should have sent an unload beacon", function(done) {
 		var unloadBeaconHandler = function(data) {
-			assert.isString(data["rt.quit"]);
+			beaconData = data;
+			assert.isString(beaconData["rt.quit"]);
 			done();
 		};
 
@@ -13,4 +16,7 @@ describe("e2e/00-basic/01-onunload", function() {
 		testFrame.src = "about:blank";
 	});
 
+	it("Should have run all unload plugins for the unload beacon", function() {
+		assert.isDefined(beaconData.nt_nav_st);
+	});
 });

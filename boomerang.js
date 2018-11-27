@@ -740,6 +740,16 @@ BOOMR_check_doc_domain();
 			"onxhrerror": "xhr_error"
 		},
 
+		/**
+		 * Number of page_unload or before_unload callbacks registered
+		 */
+		unloadEventsCount: 0,
+
+		/**
+		 * Number of page_unload or before_unload callbacks called
+		 */
+		unloadEventCalled: 0,
+
 		listenerCallbacks: {},
 
 		vars: {},
@@ -2821,6 +2831,9 @@ BOOMR_check_doc_domain();
 			// support it.  This allows us to fall back to onunload when onbeforeunload
 			// isn't implemented
 			if (e_name === "page_unload" || e_name === "before_unload") {
+				// Keep track of how many pagehide/unload/beforeunload handlers we're registering
+				impl.unloadEventsCount++;
+
 				(function() {
 					var unload_handler, evt_idx = ev.length;
 
@@ -2829,9 +2842,10 @@ BOOMR_check_doc_domain();
 							fn.call(cb_scope, evt || w.event, cb_data);
 						}
 
-						// If this was the last unload handler, we'll try to send the beacon immediately after it is done
-						// The beacon will only be sent if one of the handlers has queued it
-						if (e_name === "page_unload" && evt_idx === impl.events[e_name].length) {
+						// If this was the last pagehide/unload/beforeunload handler,
+						// we'll try to send the beacon immediately after it is done.
+						// The beacon will only be sent if one of the handlers has queued it.
+						if (++impl.unloadEventCalled === impl.unloadEventsCount) {
 							BOOMR.real_sendBeacon();
 						}
 					};
