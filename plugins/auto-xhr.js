@@ -1042,10 +1042,11 @@
 		var self = this, current_event, els, interesting = false, i, l, url,
 		    exisitingNodeSrcUrlChanged = false, resourceNum, domHeight, domWidth;
 
-		// only images, scripts, iframes and links if stylesheet
+		// only images, iframes and links if stylesheet
 		// nodeName for SVG:IMAGE returns `image` in lowercase
+		// scripts would be nice to track but their onload event is not reliable
 		if (node && node.nodeName &&
-		    (node.nodeName.toUpperCase().match(/^(IMG|SCRIPT|IFRAME|IMAGE)$/) ||
+		    (node.nodeName.toUpperCase().match(/^(IMG|IFRAME|IMAGE)$/) ||
 		    (node.nodeName.toUpperCase() === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i)))) {
 
 			// if the attribute change affected the src attributes we want to know that
@@ -1159,26 +1160,6 @@
 			if (current_event.urls[url]) {
 				// we've already seen this URL, no point in waiting on it twice
 				return false;
-			}
-
-			if (node.nodeName === "SCRIPT" && impl.singlePageApp) {
-				// TODO: we currently can't reliably tell when a SCRIPT has already loaded
-				return false;
-				/*
-				 a.href = url;
-
-				 var p = BOOMR.getPerformance()
-
-				 // Check ResourceTiming to see if this was already seen.  If so,
-				 // we won't see a 'load' or 'error' event fire, so skip this.
-				 if (p && typeof p.getEntriesByType === "function") {
-				 entries = p.getEntriesByName(a.href);
-				 if (entries && entries.length > 0) {
-				 console.error("Skipping " + a.href);
-				 return false;
-				 }
-				 }
-				 */
 			}
 
 			// if we don't have a URL yet (i.e. a click started this), use
