@@ -1,0 +1,42 @@
+<%= header %>
+<script>
+window.testV4Url = undefined;
+window.testV4ReqMethod = undefined;
+window.origXMLHttpRequestOpen = undefined;
+window.xhrCounter = 0;
+
+// Override the XMLHttpRequest method with our own to test
+// whether a v4 request is made using this API.
+if (window.XMLHttpRequest && typeof window.XMLHttpRequest.prototype.open === "function") {
+	origXMLHttpRequestOpen = window.XMLHttpRequest.prototype.open;
+
+	window.XMLHttpRequest.prototype.open = function(methodType, destUrl, asynReq) {
+		testV4ReqMethod = methodType;
+		testV4Url = destUrl;
+		xhrCounter += 1;
+		origXMLHttpRequestOpen.call(this, methodType, destUrl, asynReq);
+	};
+}
+</script>
+<%= boomerangScript %>
+<script src="09-akamai-mapping-multiple-event-triggers-handled-exactly-once.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled: true,
+			mapping_xhr_base_url: "akamaihd.net",
+			mapping_xhr_url_path: "/eum/getdns.txt",
+			mapping_xhr_url_v4_prefix: "trial-eum-clientnsv4-s"
+		}
+	});
+
+	function pageReadyCB() {
+		// when page_ready fires, kick off xhr_load event to trigger the second callback registered in
+		// in the Akamai plugin. This call should not result in any additional behaviour as page_ready
+		// event handling should have already statified the requirements of the Akamai plugins responsiblity.
+		BOOMR.fireEvent("xhr_load");
+	};
+	BOOMR.subscribe("page_ready", pageReadyCB, "xhr", null);
+</script>
+<%= footer %>

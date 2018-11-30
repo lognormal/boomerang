@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/24-akamai/00-akamai-dnsprefetch", function() {
+describe("e2e/24-akamai/00-akamai-dnsprefetch-enabled", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 
@@ -10,7 +10,7 @@ describe("e2e/24-akamai/00-akamai-dnsprefetch", function() {
 	});
 
 	it("Should have rel dns-prefetch link element in the Head", function() {
-		var expectedHref = "http://testhostnamednsprefetch.com/";
+		var expectedHref = "http://vqjxdonmdayiixaaqgkq-p-aac8b7aec-clientnsv4-s.akamaihd.net/";
 		var boomrIframe = document.getElementsByTagName("iframe");
 		assert.isDefined(boomrIframe);
 		var preFetchLinkRel = boomrIframe[0].contentDocument.getElementById("dnsprefetchlink");

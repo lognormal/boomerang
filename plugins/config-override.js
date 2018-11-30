@@ -71,7 +71,7 @@
 		allowedConfigOverrides: {
 			Akamai: {
 				enabled: true,
-				dns_prefetch_url: true,
+				dns_prefetch_enabled: true,
 				mapping_xhr_base_url: true,
 				mapping_xhr_url_path: true,
 				mapping_xhr_url_v4_prefix: true,

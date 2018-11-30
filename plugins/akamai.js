@@ -2,10 +2,13 @@
 /**
  * This plugin will house logic specific to Akamai infrastructure.
  *
- * This plugin responds to the dns_prefetch_url parameter in the Akamai section of the config response.
- * When dns_prefetch_url parameter is present in the config response, this plugin will append a Link
- * element to perform a DNS prefetch against he host specified in the config request. This request would
+ * This plugin responds to the dns_prefetch_enabled parameter in the Akamai section of the config response.
+ * When dns_prefetch_enabled parameter is present in the config response, this plugin checks the BOOMR.plugins.AK
+ * plugin to see if a host is specified for dns prefetch. If so, this plugin will append a Link element
+ * to perform a DNS prefetch against he host specified in the AK plugin. This request would
  * only be done after the page load event so as to not interfere with the page's intended behavior.
+ * This plugin also perform two additional XHR requests against Mapping v4 and v6 hosts if instructed to
+ * do so in the config response.
  *
  * ## Beacon Parameters
  *
@@ -37,32 +40,48 @@
 
 	var impl = {
 		initialized: false,
-		dns_prefetch_url: undefined,
+		dns_prefetch_enabled: undefined,
 		mapping_xhr_base_url: undefined,
 		mapping_xhr_url_path: undefined,
 		mapping_xhr_url_v4_prefix: undefined,
 		mapping_xhr_url_v6_prefix: undefined,
 		xhrRetryMarker: XHR_RETRY_LOCALSTORAGE_NAME,
+		complete: false,
 
 		/**
-		 * Adds a Link Rel DNS-prefetch element to the Head of the Boomerang iFrame
-		 * if the dns_prefetch_url config parameter is present.
+		 * There are two behavior being performed here. First, when the dns_prefetch_enabled config parameter
+		 * is present, this adds a Link Rel DNS-prefetch element to the Head Element of the Boomerang iFrame
+		 * if Boomerang is loaded in an iFrame. Otherwise this adds a Link Rel DNS-prefetch element
+		 * directly under the Head Element of the page.
+		 * Second, if the IPv4|IPv6 pieces are present in the config, this will result in potentially one XHR
+		 * each being issued IPv4 and IPV6 hosts specified in the config parameter.
 		 */
-		pageReady: function() {
+		done: function(edata, ename) {
+
+			if (this.complete) {
+				// We have already handled either a page_ready or a xhr_load event.
+				return;
+			}
 
 			log("Evaluating DNS prefetch requirements");
-			if (impl.dns_prefetch_url) {
-				// We got the dns_prefetch_url parameter from the config
-				// response, so let's insert it now into the page. We are doing this
+			if (impl.dns_prefetch_enabled) {
+				// We got the dns_prefetch_enabled parameter from the config
+				// response, so we will perform a DNS prefetch against the host, if any,
+				// that is specified in the AK plugin. We are doing this
 				// after page_ready state so that we don't block any needed actions
 				// on the page and also page_ready guarantees that we only execute this
 				// once.
-				log("Setting up DNS prefetch in Boomerang iFrame");
-				var linkRel = document.createElement("link");
-				linkRel.setAttribute("id", "dnsprefetchlink");
-				linkRel.setAttribute("rel", "dns-prefetch");
-				linkRel.setAttribute("href", impl.dns_prefetch_url);
-				document.getElementsByTagName("head")[0].appendChild(linkRel);
+
+				if (BOOMR.plugins.AK && BOOMR.plugins.AK.akDNSPreFetchDomain) {
+					// akDNSPreFetchDomain is the Mapping host against which we are to
+					// perform a DNS prefetch request.
+					log("Setting up DNS prefetch link tag, against domain: " + BOOMR.plugins.AK.akDNSPreFetchDomain);
+					var linkRel = document.createElement("link");
+					linkRel.setAttribute("id", "dnsprefetchlink");
+					linkRel.setAttribute("rel", "dns-prefetch");
+					linkRel.setAttribute("href", "//" + BOOMR.plugins.AK.akDNSPreFetchDomain);
+					document.getElementsByTagName("head")[0].appendChild(linkRel);
+				}
 			}
 
 			// Check if information for Mapping XHR calls are present. If so prepare
@@ -110,6 +129,10 @@
 					log("Not resending XHR request as LocalStorage indicates request was sent recently");
 				}
 			}
+
+			// There are two events (page_ready and xhr_load) that could trigger this call back. So
+			// mark that we have completed handling for either of these events.
+			this.complete = true;
 		}
 	};
 
@@ -117,16 +140,14 @@
 		/**
 		 * Initializes the plugin.
 		 * @param {object} config Configuration
-		 * @param {string} config.Akamai.dns_prefetch_url The `dns_prefetch_url` parameter
-		 * tells the Akamai plugin what hostname, if any, the plugin should make a DNS Prefetch
-		 * request to.
+		 * @param {string} config.Akamai.dns_prefetch_enabled The `dns_prefetch_enabled` parameter
+		 * tells the Akamai plugin should make a DNS Prefetch request.
 		 *
 		 * @returns {@link BOOMR.plugins.Akamai} The Akamai plugin for chaining
 		 * @example
 		 * BOOMR.init({
 		 *   Akamai: {
-		 *      dns_prefetch_url : "//hostnametodnsprefetch.com"
-		 *
+		 *      dns_prefetch_enabled : "true"
 		 *   }
 		 * });
 		 * @memberof BOOMR.plugins.Akamai
@@ -134,13 +155,14 @@
 		init: function(config) {
 
 			BOOMR.utils.pluginConfig(impl, config, "Akamai",
-				["dns_prefetch_url", "mapping_xhr_base_url", "mapping_xhr_url_path", "mapping_xhr_url_v4_prefix", "mapping_xhr_url_v6_prefix"]);
+				["dns_prefetch_enabled", "mapping_xhr_base_url", "mapping_xhr_url_path", "mapping_xhr_url_v4_prefix", "mapping_xhr_url_v6_prefix"]);
 
 			if (impl.initialized) {
 				return this;
 			}
 
-			BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
+			BOOMR.subscribe("page_ready", impl.done, "load", impl);
+			BOOMR.subscribe("xhr_load", impl.done, "xhr", impl);
 			impl.initialized = true;
 
 			return this;

@@ -1,7 +1,7 @@
 /*eslint-env mocha*/
 /*global BOOMR_test,assert*/
 
-describe("e2e/24-akamai/01-akamai-dnsprefetch-missing", function() {
+describe("e2e/24-akamai/01-akamai-dnsprefetch-ak-plugin-disabled", function() {
 	var t = BOOMR_test;
 	var tf = BOOMR.plugins.TestFramework;
 

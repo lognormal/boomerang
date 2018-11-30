@@ -1,0 +1,23 @@
+<%= header %>
+<script>
+	BOOMR = window.BOOMR || {};
+	BOOMR.plugins = BOOMR.plugins || {};
+	BOOMR.plugins.AK = {
+		akDNSPreFetchDomain: "vqjxdonmdayiixaaqgkq-p-aac8b7aec-clientnsv4-s.akamaihd.net",
+		is_complete: function() {
+			return true;
+		}
+	};
+</script>
+<%= boomerangSnippet %>
+<script src="08-akamai-dnsprefetch-config-disabled.js" type="text/javascript"></script>
+<script>
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		Akamai: {
+			enabled: true,
+			dns_prefetch_enabled: false
+		}
+	});
+</script>
+<%= footer %>
