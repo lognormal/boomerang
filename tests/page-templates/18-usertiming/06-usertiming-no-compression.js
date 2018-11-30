@@ -10,16 +10,17 @@ describe("e2e/18-usertiming/06-usertiming-no-compression", function() {
 	});
 
 	it("Should have usertiming (if UserTiming is supported)", function() {
+		var b, data, marks, measures;
 		if (t.isUserTimingSupported()) {
-			var b = tf.beacons[0];
+			b = tf.beacons[0];
 			assert.isString(b.usertiming);
-			var data = JSON.parse(b.usertiming);
+			data = JSON.parse(b.usertiming);
 			assert.isTrue("mark" in data);
-			var marks = data.mark
+			marks = data.mark;
 			assert.isTrue("mark1" in marks);
 			assert.isTrue("mark2" in marks);
 			assert.isTrue("measure" in data);
-			var measures = data.measure;
+			measures = data.measure;
 			assert.isTrue("measure1" in measures);
 		}
 	});
