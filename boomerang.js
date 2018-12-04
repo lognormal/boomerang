@@ -3507,12 +3507,12 @@ BOOMR_check_doc_domain();
 				// Send a form-encoded XHR POST beacon
 				xhr = new (BOOMR.window.orig_XMLHttpRequest || BOOMR.orig_XMLHttpRequest || BOOMR.window.XMLHttpRequest)();
 				try {
-					this.sendXhrPostBeacon(xhr, paramsJoined);
+					this.sendXhrPostBeacon(xhr, paramsJoined, impl.beacon_url, impl.beacon_auth_token, impl.beacon_auth_key, impl.beacon_with_credentials);
 				}
 				catch (e) {
 					// if we had an exception with the window XHR object, try our IFRAME XHR
 					xhr = new BOOMR.boomerang_frame.XMLHttpRequest();
-					this.sendXhrPostBeacon(xhr, paramsJoined);
+					this.sendXhrPostBeacon(xhr, paramsJoined, impl.beacon_url, impl.beacon_auth_token, impl.beacon_auth_key, impl.beacon_with_credentials);
 				}
 			}
 
@@ -3535,23 +3535,27 @@ BOOMR_check_doc_domain();
 		 *
 		 * @param {object} xhr XMLHttpRequest object
 		 * @param {object} [paramsJoined] XMLHttpRequest.send() argument
+		 * @param {string} url URL of the request
+		 * @param {string} beaconAuthToken Beacon authorization token
+		 * @param {string} beaconAuthKey Beacon authorization key
+		 * @param {boolean} beaconWithCredentials Controls sending beacon with credentials
 		 *
 		 * @memberof BOOMR
 		 */
-		sendXhrPostBeacon: function(xhr, paramsJoined) {
-			xhr.open("POST", impl.beacon_url);
+		sendXhrPostBeacon: function(xhr, paramsJoined, url, beaconAuthToken, beaconAuthKey, beaconWithCredentials) {
+			xhr.open("POST", url);
 
 			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-			if (typeof impl.beacon_auth_token !== "undefined") {
-				if (typeof impl.beacon_auth_key === "undefined") {
-					impl.beacon_auth_key = "Authorization";
+			if (typeof beaconAuthToken !== "undefined") {
+				if (typeof beaconAuthKey === "undefined") {
+					beaconAuthKey = "Authorization";
 				}
 
-				xhr.setRequestHeader(impl.beacon_auth_key, impl.beacon_auth_token);
+				xhr.setRequestHeader(beaconAuthKey, beaconAuthToken);
 			}
 
-			if (impl.beacon_with_credentials) {
+			if (beaconWithCredentials) {
 				xhr.withCredentials = true;
 			}
 
