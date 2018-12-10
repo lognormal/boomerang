@@ -41,6 +41,15 @@ window.route_wait = function() {
 			BOOMR.plugins.SPA.wait_complete();
 		}, routeWaits[routeNumber]);
 
+		// this will test that a history event issued while a routeChangeWaitFilter
+		// is in progress will be ignored
+		if (routeNumber === 1) {
+			setTimeout(function() {
+				history.state.foo = "bar";
+				history.replaceState(history.state, document.title);  // update the state object
+			}, 1000);
+		}
+
 		routeNumber++;
 
 		return true;

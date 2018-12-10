@@ -663,18 +663,6 @@ BOOMR_check_doc_domain();
 			/**
 			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
 			 *
-			 * Fired whenever an `XMLHttpRequest.send()` is called
-			 *
-			 * This event will only happen if {@link BOOMR.plugins.AutoXHR} is enabled.
-			 *
-			 * @event BOOMR#xhr_send
-			 * @property {object} req XMLHttpRequest
-			 */
-			"xhr_send": [],
-
-			/**
-			 * Boomerang event, subscribe via {@link BOOMR.subscribe}.
-			 *
 			 * Fired whenever connection information changes via the
 			 * Network Information API.
 			 *

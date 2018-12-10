@@ -370,6 +370,11 @@
 
 			var firedEvent = false;
 
+			if (latestResource && latestResource.wait) {
+				log("Route change wait filter not complete; not tracking this route");
+				return;
+			}
+
 			// if we have a routeFilter, see if they want to track this route
 			if (routeFilter) {
 				try {
