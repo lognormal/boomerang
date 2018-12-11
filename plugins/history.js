@@ -116,6 +116,7 @@
 		hadMissedRouteChange: false,
 		routeChangeInProgress: false,  // will store the setTimeout id when set
 		disableHardNav: false,
+		a: undefined,  // helper anchor object used to cleanup urls
 
 		/**
 		 * Clears routeChangeInProgress flag
@@ -207,6 +208,8 @@
 	// register as a SPA plugin
 	BOOMR.plugins.SPA.register("History");
 
+	impl.a = BOOMR.window.document.createElement("A");
+
 	/**
 	 * Debug logging for this instance
 	 *
@@ -259,8 +262,23 @@
 		if (typeof history.replaceState === "function") {
 			history.replaceState = (function(_replaceState) {
 				return function(state, title, url) {
-					log("replaceState, title: " + title + " url: " + url);
-					impl.routeChange(title, url);
+					var fromUrl = BOOMR.window.document.URL, toUrl = fromUrl;
+
+					// url is an optional param
+					if (arguments.length >= 3 && typeof url !== "undefined" && url !== null) {
+						impl.a.href = url;  // normalize url
+						toUrl = impl.a.href;
+					}
+
+					// only issue route change if a nav is not in progress or the URL is changing
+					if (!BOOMR.plugins.SPA.isSpaNavInProgress() || toUrl !== fromUrl) {
+						log("replaceState, title: " + title + " url: " + url);
+						impl.routeChange(title, url);
+					}
+					else {
+						log("replaceState ignored (no URL change and a SPA nav is in progress), title: " + title + " url: " + url);
+					}
+
 					return _replaceState.apply(this, arguments);
 				};
 			})(history.replaceState);
@@ -314,7 +332,7 @@
 			aelPopstate();
 		}
 		else {
-			// the event listener will be registered early enough to to get an unwanted event if we don't use setTimeout
+			// the event listener will be registered early enough to get an unwanted event if we don't use setTimeout
 			BOOMR.window.addEventListener("load", function() { setTimeout(aelPopstate, 0); });
 		}
 
@@ -324,7 +342,7 @@
 		// listen for spa cancellations
 		BOOMR.subscribe("spa_cancel", impl.resetRouteChangeInProgress);
 
-		// listent for spa inits. We're adding this to catch the event sent by the SPA plugin
+		// listen for spa inits. We're adding this to catch the event sent by the SPA plugin
 		BOOMR.subscribe("spa_init", impl.setRouteChangeInProgress);
 
 		return true;

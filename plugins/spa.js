@@ -495,6 +495,8 @@
 
 		/**
 		 * Marks the current navigation as complete and sends a beacon.
+		 *
+		 * @memberof BOOMR.plugins.SPA
 		 */
 		markNavigationComplete: function() {
 			var i, ev, waiting, mh = BOOMR.plugins.AutoXHR.getMutationHandler();
@@ -524,7 +526,26 @@
 				}
 			}
 			log("No SPA navigation in progress to mark as complete");
+		},
+
+		/**
+		 * Determines if a SPA navigation is in progress
+		 *
+		 * @memberof BOOMR.plugins.SPA
+		 */
+		isSpaNavInProgress: function() {
+			var i, ev, waiting, mh = BOOMR.plugins.AutoXHR.getMutationHandler();
+			if (mh && mh.pending_events.length > 0) {
+				for (i = mh.pending_events.length - 1; i >= 0; i--) {
+					ev = mh.pending_events[i];
+					if (ev && BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
+						return !ev.complete;  // true if the latest spa nav is not complete
+					}
+				}
+			}
+			return false;
 		}
+
 	};
 
 }());
