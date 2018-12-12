@@ -25,121 +25,121 @@ BOOMR_test.templates.SPA["17-wait"] = function() {
 	});
 
 	//
-	// Beacon 1 (page load)
+	// Beacon 1
 	//
-	it("Should have sent the first beacon for /17-wait.html", function() {
-		var b = tf.beacons[0];
-		assert.isTrue(b.u.indexOf("/17-wait.html") !== -1);
-	});
+	describe("Beacon 1 (spa_hard)", function() {
+		var i = 0;
+		it("Should have sent the first beacon for *-wait.html", function() {
+			var b = tf.beacons[i];
+			assert.isTrue(b.u.indexOf("-wait.html") !== -1);
+		});
 
-	it("Should have sent the first beacon with the time it took to run the 5 second wait (if MutationObserver is supported)", function(done) {
-		if (t.isMutationObserverSupported()) {
-			t.ifAutoXHR(
-				done,
-				function() {
-					assert.operator(tf.beacons[0].t_done, ">=", 5000);
-					done();
-				},
-				this.skip.bind(this));
-		}
-		else {
-			this.skip();
-		}
-	});
-
-	it("Should have sent the first beacon with the end time (rt.end) of when the 5 second wait fired", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.closeTo(tf.beacons[0]["rt.end"], window.spaWaitCompleteTimes[0], 100);
-				done();
-			},
-			this.skip.bind(this));
+		it("Should have sent the first beacon without an additional wait (if NavigationTiming is supported)", function() {
+			if (t.isNavigationTimingSupported()) {
+				var b = tf.beacons[i];
+				var load = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+				assert.isDefined(b.t_done);
+				// no other spa resources loaded on home page, t_done should be close to load time
+				assert.closeTo(load, b.t_done, 100);
+			}
+			else {
+				this.skip();
+			}
+		});
 	});
 
 	//
 	// Beacon 2
 	//
-	it("Should have sent the second beacon for /widgets/1", function() {
-		var b = tf.beacons[1];
-		assert.isTrue(b.u.indexOf("/widgets/1") !== -1);
-	});
+	describe("Beacon 2 (spa)", function() {
+		var i = 1;
+		it("Should have sent the second beacon for /widgets/1", function() {
+			var b = tf.beacons[i];
+			assert.isTrue(b.u.indexOf("/widgets/1") !== -1);
+		});
 
-	it("Should have sent the second beacon with the time it took to run the 5 second wait", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.operator(tf.beacons[1].t_done, ">=", 5000);
-				done();
-			},
-			this.skip.bind(this));
-	});
+		it("Should have sent the second beacon with the time it took to run the 5 second wait", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.operator(tf.beacons[i].t_done, ">=", 5000);
+					done();
+				},
+				this.skip.bind(this));
+		});
 
-	it("Should have sent the second beacon with the end time (rt.end) of when the 5 second wait fired", function(done) {
-		t.ifAutoXHR(
-			done,
-			function() {
-				assert.closeTo(tf.beacons[1]["rt.end"], window.spaWaitCompleteTimes[1], 100);
-				done();
-			},
-			this.skip.bind(this));
+		it("Should have sent the second beacon with the end time (rt.end) of when the 5 second wait fired", function(done) {
+			t.ifAutoXHR(
+				done,
+				function() {
+					assert.closeTo(tf.beacons[i]["rt.end"], window.spaWaitCompleteTimes[i - 1], 100);
+					done();
+				},
+				this.skip.bind(this));
+		});
 	});
 
 	//
 	// Beacon 3
 	//
-	it("Should have sent the third beacon for /widgets/2", function() {
-		var b = tf.beacons[2];
-		assert.isTrue(b.u.indexOf("/widgets/2") !== -1);
-	});
+	describe("Beacon 3 (spa)", function() {
+		var i = 2;
+		it("Should have sent the third beacon for /widgets/2", function() {
+			var b = tf.beacons[i];
+			assert.isTrue(b.u.indexOf("/widgets/2") !== -1);
+		});
 
-	it("Should have sent the third beacon with a timestamp of at least 1 second (if MutationObserver is supported)", function() {
-		if (t.isMutationObserverSupported()) {
-			// because of the widget IMG delaying 1 second
-			var b = tf.beacons[2];
-			assert.operator(b.t_done, ">=", 1000);
-		}
-		else {
-			return this.skip();
-		}
-	});
+		it("Should have sent the third beacon with a timestamp of at least 1 second (if MutationObserver is supported)", function() {
+			if (t.isMutationObserverSupported()) {
+				// because of the widget IMG delaying 1 second
+				var b = tf.beacons[i];
+				assert.operator(b.t_done, ">=", 1000);
+			}
+			else {
+				return this.skip();
+			}
+		});
 
-	it("Should have sent the third beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
-		if (!t.isMutationObserverSupported()) {
-			// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
-			var b = tf.beacons[2];
-			assert.operator(b.t_done, ">=", 0);
-		}
-		else {
-			return this.skip();
-		}
-	});
+		it("Should have sent the third beacon with a timestamp of at least 1 millisecond (if MutationObserver is not supported)", function() {
+			if (!t.isMutationObserverSupported()) {
+				// because of the widget IMG delaying 1 second but we couldn't track it because no MO support
+				var b = tf.beacons[i];
+				assert.operator(b.t_done, ">=", 0);
+			}
+			else {
+				return this.skip();
+			}
+		});
 
-	it("Should have sent the third beacon with the end time (rt.end) different from when the 1ms wait fired (if MutationObserver is supported)", function(done) {
-		if (t.isMutationObserverSupported()) {
-			t.ifAutoXHR(
-				done,
-				function() {
-					assert.operator(tf.beacons[2]["rt.end"], ">=", window.spaWaitCompleteTimes[2] + 10);
-					done();
-				});
-		}
-		else {
-			this.skip();
-		}
+		it("Should have sent the third beacon with the end time (rt.end) different from when the 1ms wait fired (if MutationObserver is supported)", function(done) {
+			if (t.isMutationObserverSupported()) {
+				t.ifAutoXHR(
+					done,
+					function() {
+						assert.operator(tf.beacons[i]["rt.end"], ">=", window.spaWaitCompleteTimes[i - 1] + 10);
+						done();
+					});
+			}
+			else {
+				this.skip();
+			}
+		});
 	});
 
 	//
 	// Beacon 4
 	//
-	it("Should have sent the fourth beacon for /17-wait.html", function() {
-		var b = tf.beacons[3];
-		assert.isTrue(b.u.indexOf("/17-wait.html") !== -1);
-	});
+	describe("Beacon 4 (spa)", function() {
+		var i = 3;
+		it("Should have sent the fourth beacon for *-wait.html", function() {
+			var b = tf.beacons[i];
+			assert.isTrue(b.u.indexOf("-wait.html") !== -1);
+		});
 
-	it("Should have sent the fourth beacon with a timestamp of less than 1 second", function() {
-		// now that the initial page is cached, it should be a quick navigation
-		var b = tf.beacons[3];
-		assert.operator(b.t_done, "<=", 1000);
+		it("Should have sent the fourth beacon with a timestamp of less than 1 second", function() {
+			// now that the initial page is cached, it should be a quick navigation
+			var b = tf.beacons[i];
+			assert.operator(b.t_done, "<=", 1000);
+		});
 	});
 };

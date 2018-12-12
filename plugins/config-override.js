@@ -89,7 +89,9 @@
 			History: {
 				enabled: true,
 				auto: true,
-				disableHardNav: true
+				disableHardNav: true,
+				routeFilter: true,
+				routeChangeWaitFilter: true
 			},
 			PageParams: {
 				enabled: true,
@@ -196,7 +198,7 @@
 		init: function(config) {
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
 				BOOMR.debug("Found BOOMR_config on global scope: " +
-					BOOMR.utils.objectToString(BOOMR.window.BOOMR_config),
+					BOOMR.utils.objectToString(BOOMR.window.BOOMR_config, undefined, 1),
 					"ConfigOverride");
 
 				impl.safeConfigOverride(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);

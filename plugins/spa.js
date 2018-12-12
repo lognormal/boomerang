@@ -286,7 +286,7 @@
 
 		/**
 		 * Callback to let the SPA plugin know whether or not to monitor the current
-		 * route.
+		 * SPA soft route.
 		 *
 		 * Any time a route is changed, if set, this callback will be executed
 		 * with the current framework's route data.
@@ -302,7 +302,8 @@
 
 		/**
 		 * Callback to let the SPA plugin know whether or not the end of monitoring
-		 * should be delayed until {@link BOOMR.plugins.SPA.wait_complete} is called.
+		 * of the current SPA soft route should be delayed until {@link BOOMR.plugins.SPA.wait_complete}
+		 * is called.
 		 *
 		 * If the callback returns `false`, the route will be monitored as normal.
 		 *
@@ -320,6 +321,7 @@
 		 * @param {object} [options] Additional options
 		 * @param {BOOMR.plugins.SPA.spaRouteFilter} [options.routeFilter] Route filter
 		 * @param {BOOMR.plugins.SPA.spaRouteChangeWaitFilter} [options.routeChangeWaitFilter] Route change wait filter
+		 * @param {boolean} [options.disableHardNav] Disable sending SPA hard beacons
 		 *
 		 * @returns {@link BOOMR.plugins.SPA} The SPA plugin for chaining
 		 * @memberof BOOMR.plugins.SPA
@@ -329,9 +331,7 @@
 
 			log("Hooked");
 
-			if (hooked) {
-				return this;
-			}
+			// allow to set options each call in case they change
 
 			if (typeof options.routeFilter === "function") {
 				routeFilter = options.routeFilter;
@@ -343,6 +343,10 @@
 
 			if (options.disableHardNav) {
 				disableHardNav = options.disableHardNav;
+			}
+
+			if (hooked) {
+				return this;
 			}
 
 			if (hadRouteChange) {
@@ -369,18 +373,22 @@
 			log("Route Change");
 
 			var firedEvent = false;
+			var initiator = firstSpaNav && !disableHardNav ? "spa_hard" : "spa";
 
 			if (latestResource && latestResource.wait) {
 				log("Route change wait filter not complete; not tracking this route");
 				return;
 			}
 
-			// if we have a routeFilter, see if they want to track this route
-			if (routeFilter) {
+			// if we have a routeFilter, see if we want to track this SPA soft route
+			if (initiator === "spa" && routeFilter) {
 				try {
 					if (!routeFilter.apply(null, routeFilterArgs)) {
 						log("Route filter returned false; not tracking this route");
 						return;
+					}
+					else {
+						log("Route filter returned true; tracking this route");
 					}
 				}
 				catch (e) {
@@ -405,7 +413,7 @@
 				timing: {
 					requestStart: requestStart
 				},
-				initiator: firstSpaNav && !disableHardNav ? "spa_hard" : "spa",
+				initiator: initiator,
 				url: url
 			};
 
@@ -431,7 +439,9 @@
 			}
 
 			// if we have a routeChangeWaitFilter, make sure AutoXHR waits on the custom event
-			if (routeChangeWaitFilter) {
+			// for this SPA soft route
+			if (initiator === "spa" && routeChangeWaitFilter) {
+				log("Running route change wait filter");
 				try {
 					if (routeChangeWaitFilter.apply(null, arguments)) {
 						resource.wait = true;
@@ -476,7 +486,7 @@
 		},
 
 		/**
-		 * Called by the SPA consumer if they have a `routeChangeWaitFilter` and are manually
+		 * Called by the SPA consumer if we have a `routeChangeWaitFilter` and are manually
 		 * triggering navigation complete events.
 		 *
 		 * @memberof BOOMR.plugins.SPA

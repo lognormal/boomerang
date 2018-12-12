@@ -10,7 +10,7 @@ window.html5_mode = true;
 
 //
 // Routes:
-// 1. Home page (hard nav) - Filter: true, takes: 5 seconds (fires after resource)
+// 1. Home page (hard nav) - Filter: n/a, (hard navs can't be filtered, doesn't wait)
 // 2. Home page (soft nav) - Filter: true, takes: 5 seconds (fires after resource)
 // 3. Home page (soft nav) - Filter: true, takes: 1 ms (fires before resource)
 // 4. Home page (soft nav) - Filter: false (doesn't wait)
@@ -19,7 +19,7 @@ window.nav_routes = ["/widgets/1", "/widgets/2", ""];
 
 // how long we should wait for each route
 var routeWaits = [
-	5000,
+	// spa_hard isn't filtered
 	5000,
 	1,
 	0

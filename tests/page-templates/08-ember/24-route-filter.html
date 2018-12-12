@@ -1,4 +1,7 @@
 <%= header %>
+<!--
+The spa route change back to home is filtered and will trigger an xhr beacon instead
+-->
 <%= boomerangScript %>
 <base href="/pages/08-ember/24-route-filter.html" />
 
@@ -16,7 +19,7 @@ window.ember_nav_routes = ["/widgets/1", ""];
 // filter out the 2nd home nav
 var navs = 0;
 window.ember_route_filter = function() {
-	return (++navs) <= 2;
+	return (++navs) <= 1;
 };
 </script>
 <script src="support/app.js"></script>
@@ -33,11 +36,11 @@ window.ember_route_filter = function() {
 
 <script>
 BOOMR_test.init({
-	testAfterOnBeacon: 2,
+	testAfterOnBeacon: 3,
 	Ember: {
 		enabled: true
 	},
-	instrument_xhr: false,
+	instrument_xhr: true,
 	autorun: false
 });
 </script>

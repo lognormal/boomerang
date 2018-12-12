@@ -116,6 +116,8 @@
 		hadMissedRouteChange: false,
 		routeChangeInProgress: false,  // will store the setTimeout id when set
 		disableHardNav: false,
+		routeFilter: undefined,  // route change filter callback function
+		routeChangeWaitFilter: undefined,  // route change wait filter callback function
 		a: undefined,  // helper anchor object used to cleanup urls
 
 		/**
@@ -368,7 +370,7 @@
 		 * @param {object} history No longer used
 		 * @param {boolean} [hadRouteChange] Whether or not there was a route change
 		 * event prior to this `hook()` call
-		 * @param {object} [options] Options
+		 * @param {object} [options] Optional options. Can contain `routeFilter` and/or `routeChangeWaitFilter`
 		 *
 		 * @returns {@link BOOMR.plugins.History} The History plugin for chaining
 		 * @memberof BOOMR.plugins.History
@@ -379,6 +381,14 @@
 
 			if (impl.hooked) {
 				return this;
+			}
+
+			if (impl.routeFilter) {
+				options.routeFilter = impl.routeFilter;
+			}
+
+			if (impl.routeChangeWaitFilter) {
+				options.routeChangeWaitFilter = impl.routeChangeWaitFilter;
 			}
 
 			if (hook()) {
@@ -408,7 +418,8 @@
 		 * @memberof BOOMR.plugins.History
 		 */
 		init: function(config) {
-			BOOMR.utils.pluginConfig(impl, config, "History", ["auto", "enabled", "disableHardNav"]);
+			BOOMR.utils.pluginConfig(impl, config, "History",
+				["auto", "enabled", "disableHardNav", "routeFilter", "routeChangeWaitFilter"]);
 
 			if (impl.auto && impl.enabled) {
 				this.hook(undefined, true, {});

@@ -1,11 +1,13 @@
 <%= header %>
 <!--
+Same test as 24-route-filter but with filter passed in config instead of hook()
+
 The spa route change back to home is filtered and will trigger an xhr beacon instead
 -->
 <%= boomerangScript %>
 <script src="support/function-bind-polyfill.js" type="text/javascript"></script>
 
-<base href="/pages/12-react/24-route-filter.html" />
+<base href="/pages/12-react/114-route-filter.html" />
 
 <script type="text/javascript">
 window.imgs = [3000];
@@ -13,6 +15,9 @@ window.html5_mode = true;
 
 // view a widget then come back so debugging (F5) is easier
 window.nav_routes = ["/widgets/1", "/"];
+
+//disable hook(), we'll pass the filter in config
+window.disableBoomerangHook = true;
 
 // filter out the 2nd home nav
 var navs = 0;
@@ -26,15 +31,22 @@ window.history_route_filter = function() {
 <script src="support/app.js"></script>
 
 <script src="/test-templates/spa/24-route-filter.js" type="text/javascript"></script>
-<script src="24-route-filter.js" type="text/javascript"></script>
+<script src="114-route-filter.js" type="text/javascript"></script>
 
 <script>
+BOOMR_config = 	{
+	History: {
+		routeFilter: window.history_route_filter
+	}
+};
+
 // React will cause 2 XHRs for the 2nd home nav, filter one of them out using
 // an excludeFilter so that the test template doesn't need special handling
 BOOMR_test.init({
 	testAfterOnBeacon: 3,
 	History: {
-		enabled: true
+		enabled: true,
+		auto: true
 	},
 	instrument_xhr: true,
 	autorun: false,
@@ -51,7 +63,7 @@ BOOMR_test.init({
 				return false;
 			},
 			ctx: null,
-			name: "24-route-filter"
+			name: "xhr-filter"
 		}]
 	}
 });
