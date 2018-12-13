@@ -1040,7 +1040,7 @@
 	 */
 	MutationHandler.prototype.wait_for_node = function(node, index) {
 		var self = this, current_event, els, interesting = false, i, l, url,
-		    exisitingNodeSrcUrlChanged = false, resourceNum, domHeight, domWidth;
+		    exisitingNodeSrcUrlChanged = false, resourceNum, domHeight, domWidth, listener;
 
 		// only images, iframes and links if stylesheet
 		// nodeName for SVG:IMAGE returns `image` in lowercase
@@ -1182,8 +1182,14 @@
 			delete node._bmr.end[resourceNum];
 			node._bmr.url = url;
 
-			node.addEventListener("load", function(ev) { self.load_cb(ev, resourceNum); });
-			node.addEventListener("error", function(ev) { self.load_cb(ev, resourceNum); });
+			listener = function(ev) {
+				self.load_cb(ev, resourceNum);
+				// if either event fires then cleanup both listeners
+				node.removeEventListener("load", listener);
+				node.removeEventListener("error", listener);
+			};
+			node.addEventListener("load", listener);
+			node.addEventListener("error", listener);
 
 			// increase the number of outstanding resources by one
 			current_event.nodes_to_wait++;
