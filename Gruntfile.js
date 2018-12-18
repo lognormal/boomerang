@@ -463,6 +463,17 @@ module.exports = function() {
 						dest: env.publish + "/"
 					}
 				]
+			},
+			"perf-baseline": {
+				files: [
+					{
+						expand: false,
+						nonull: true,
+						src: "tests/perf/results/metrics.json",
+						force: true,
+						dest: "tests/perf/results/baseline.json"
+					}
+				]
 			}
 		},
 		uglify: {
@@ -1005,7 +1016,30 @@ module.exports = function() {
 		grunt.loadTasks("tasks");
 	}
 
-	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", require(path.join(testsDir, "builder")));
+	grunt.registerTask("pages-builder", "Builds our HTML tests/pages", function() {
+		return require(path.join(testsDir, "builder"))(
+			this,
+			path.join(testsDir, "page-templates"),
+			path.join(testsDir, "page-template-snippets"),
+			path.join(testsDir, "pages"),
+			path.join(testsDir, "e2e"),
+			path.join(testsDir, "e2e", "e2e.json")
+		);
+	});
+
+	grunt.registerTask("pages-builder-perf", "Builds our HTML tests/pages for Perf Testing", function() {
+		return require(path.join(testsDir, "builder"))(
+			this,
+			path.join(testsDir, "perf", "page-templates"),
+			path.join(testsDir, "page-template-snippets"),
+			path.join(testsDir, "perf", "pages"),
+			path.join(testsDir, "perf", "pages"),
+			path.join(testsDir, "perf", "scenarios.json")
+		);
+	});
+
+	grunt.registerTask("perf-tests", "Tests Performance", require("./tests/perf/perf-tests"));
+	grunt.registerTask("perf-compare", "Compares current Performance to Baseline", require("./tests/perf/perf-compare"));
 
 	// Custom aliases for configured grunt tasks
 	var aliases = {
@@ -1116,7 +1150,14 @@ module.exports = function() {
 		"test:matrix:e2e": ["pages-builder", "saucelabs-mocha:e2e"],
 		"test:matrix:e2e:debug": ["pages-builder", "saucelabs-mocha:e2e-debug"],
 		"test:matrix:unit": ["saucelabs-mocha:unit"],
-		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"]
+		"test:matrix:unit:debug": ["saucelabs-mocha:unit-debug"],
+
+		//
+		// Perf tasks
+		//
+		"perf": ["build", "pages-builder-perf", "express:dev", "perf-tests"],
+		"perf:baseline": ["build", "pages-builder-perf", "express:dev", "perf-tests", "copy:perf-baseline"],
+		"perf:compare": ["build", "pages-builder-perf", "express:dev", "perf-tests", "perf-compare"]
 	};
 
 	// launch selenium if another address wasn't provided

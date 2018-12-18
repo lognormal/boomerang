@@ -52,6 +52,16 @@
  * otherwise, it is `Date.now()`.
  */
 
+/* BEGIN_DEBUG */
+// we don't yet have BOOMR.utils.mark()
+if ("performance" in window &&
+	window.performance &&
+	typeof window.performance.mark === "function" &&
+	!window.BOOMR_no_mark) {
+	window.performance.mark("boomr:startup");
+}
+/* END_DEBUG */
+
 /**
  * @global
  * @type {TimeStamp}
@@ -86,6 +96,16 @@ BOOMR_start = new Date().getTime();
 function BOOMR_check_doc_domain(domain) {
 	/*eslint no-unused-vars:0*/
 	var test;
+
+	/* BEGIN_DEBUG */
+	// we don't yet have BOOMR.utils.mark()
+	if ("performance" in window &&
+		window.performance &&
+		typeof window.performance.mark === "function" &&
+		!window.BOOMR_no_mark) {
+		window.performance.mark("boomr:check_doc_domain");
+	}
+	/* END_DEBUG */
 
 	if (!window) {
 		return;
@@ -830,6 +850,11 @@ BOOMR_check_doc_domain();
 
 			e_name = e_name.toLowerCase();
 
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("fire_event");
+			BOOMR.utils.mark("fire_event:" + e_name + ":start");
+			/* END_DEBUG */
+
 			// translate old names
 			if (this.translate_events[e_name]) {
 				e_name = this.translate_events[e_name];
@@ -872,6 +897,14 @@ BOOMR_check_doc_domain();
 					i--;
 				}
 			}
+
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("fire_event:" + e_name + ":end");
+			BOOMR.utils.measure(
+				"fire_event:" + e_name,
+				"fire_event:" + e_name + ":start",
+				"fire_event:" + e_name + ":end");
+			/* END_DEBUG */
 
 			return;// true;
 		},
@@ -1201,6 +1234,10 @@ BOOMR_check_doc_domain();
 					return null;
 				}
 
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("get_cookie");
+				/* END_DEBUG */
+
 				name = " " + name + "=";
 
 				var i, cookies;
@@ -1238,6 +1275,10 @@ BOOMR_check_doc_domain();
 					BOOMR.addVar("nocookie", 1);
 					return false;
 				}
+
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("set_cookie");
+				/* END_DEBUG */
 
 				value = this.objectToString(subcookies, "&");
 				nameval = name + "=\"" + value + "\"";
@@ -1339,6 +1380,10 @@ BOOMR_check_doc_domain();
 					return null;
 				}
 
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("get_local_storage");
+				/* END_DEBUG */
+
 				try {
 					value = w.localStorage.getItem(impl.LOCAL_STORAGE_PREFIX + name);
 					if (value === null) {
@@ -1386,6 +1431,10 @@ BOOMR_check_doc_domain();
 				if (!name || !impl.localStorageSupported || typeof items !== "object") {
 					return false;
 				}
+
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("set_local_storage");
+				/* END_DEBUG */
 
 				data = {"items": items};
 
@@ -1671,12 +1720,20 @@ BOOMR_check_doc_domain();
 			addObserver: function(el, config, timeout, callback, callback_data, callback_ctx) {
 				var MO, zs, o = {observer: null, timer: null};
 
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("add_observer");
+				/* END_DEBUG */
+
 				if (!this.isMutationObserverSupported() || !callback || !el) {
 					return null;
 				}
 
 				function done(mutations) {
 					var run_again = false;
+
+					/* BEGIN_DEBUG */
+					BOOMR.utils.mark("mutation_observer_callback");
+					/* END_DEBUG */
 
 					if (o.timer) {
 						clearTimeout(o.timer);
@@ -1733,6 +1790,11 @@ BOOMR_check_doc_domain();
 			 */
 			addListener: function(el, type, fn, passive) {
 				var opts = false;
+
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("add_listener");
+				/* END_DEBUG */
+
 				if (el.addEventListener) {
 					if (passive && BOOMR.browser.supportsPassive()) {
 						opts = {
@@ -1765,6 +1827,10 @@ BOOMR_check_doc_domain();
 			 */
 			removeListener: function(el, type, fn) {
 				var i;
+
+				/* BEGIN_DEBUG */
+				BOOMR.utils.mark("remove_listener");
+				/* END_DEBUG */
 
 				if (el.removeEventListener) {
 					// NOTE: We don't need to match any other options (e.g. passive)
@@ -2124,6 +2190,15 @@ BOOMR_check_doc_domain();
 			}
 
 			/* BEGIN_DEBUG */
+			/**
+			 * DEBUG ONLY
+			 *
+			 * Loops over an array, running a function for each item
+			 *
+			 * @param {Array} array Array to iterate over
+			 * @param {function} fn Function to execute
+			 * @param {object} thisArg 'this' argument
+			 */
 			, forEach: function(array, fn, thisArg) {
 				if (!BOOMR.utils.isArray(array) || typeof fn !== "function") {
 					return;
@@ -2133,6 +2208,38 @@ BOOMR_check_doc_domain();
 					if (array.hasOwnProperty(i)) {
 						fn.call(thisArg, array[i], i, array);
 					}
+				}
+			},
+
+			/**
+			 * DEBUG ONLY
+			 *
+			 * Logs a UserTiming mark
+			 *
+			 * @param {string} name Mark name (prefixed by boomr:)
+			 */
+			mark: function(name) {
+				var p = BOOMR.getPerformance();
+
+				if (p && typeof p.mark === "function" && !BOOMR.window.BOOMR_no_mark) {
+					p.mark("boomr:" + name);
+				}
+			},
+
+			/**
+			 * DEBUG ONLY
+			 *
+			 * Logs a UserTiming measure
+			 *
+			 * @param {string} name Mark name (prefixed by boomr:)
+			 */
+			measure: function(measureName, startMarkName, endMarkName) {
+				var p = BOOMR.getPerformance();
+
+				if (p && typeof p.measure === "function" && !BOOMR.window.BOOMR_no_mark) {
+					p.measure("boomr:" + measureName,
+						startMarkName ? "boomr:" + startMarkName : undefined,
+						endMarkName ? "boomr:" + endMarkName : undefined);
 				}
 			}
 			/* END_DEBUG */
@@ -2232,6 +2339,10 @@ BOOMR_check_doc_domain();
 				    "user_ip"
 			    ];
 
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("init");
+			/* END_DEBUG */
+
 			BOOMR_check_doc_domain();
 
 			if (!config) {
@@ -2267,6 +2378,10 @@ BOOMR_check_doc_domain();
 			if (typeof config.autorun !== "undefined") {
 				impl.autorun = config.autorun;
 			}
+
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("init:plugins:start");
+			/* END_DEBUG */
 
 			for (k in this.plugins) {
 				if (this.plugins.hasOwnProperty(k)) {
@@ -2304,7 +2419,19 @@ BOOMR_check_doc_domain();
 					// plugin exists and has an init method
 					if (typeof this.plugins[k].init === "function") {
 						try {
+							/* BEGIN_DEBUG */
+							BOOMR.utils.mark("init:plugins:" + k + ":start");
+							/* END_DEBUG */
+
 							this.plugins[k].init(config);
+
+							/* BEGIN_DEBUG */
+							BOOMR.utils.mark("init:plugins:" + k + ":end");
+							BOOMR.utils.measure(
+								"init:plugins:" + k,
+								"init:plugins:" + k + ":start",
+								"init:plugins:" + k + ":end");
+							/* END_DEBUG */
 						}
 						catch (err) {
 							BOOMR.addError(err, k + ".init");
@@ -2312,6 +2439,14 @@ BOOMR_check_doc_domain();
 					}
 				}
 			}
+
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("init:plugins:end");
+			BOOMR.utils.measure(
+				"init:plugins",
+				"init:plugins:start",
+				"init:plugins:end");
+			/* END_DEBUG */
 
 			for (i = 0; i < properties.length; i++) {
 				if (config[properties[i]] !== undefined) {
@@ -2792,6 +2927,11 @@ BOOMR_check_doc_domain();
 
 			e_name = e_name.toLowerCase();
 
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("subscribe");
+			BOOMR.utils.mark("subscribe:" + e_name);
+			/* END_DEBUG */
+
 			// translate old names
 			if (impl.translate_events[e_name]) {
 				e_name = impl.translate_events[e_name];
@@ -2882,6 +3022,10 @@ BOOMR_check_doc_domain();
 		 */
 		addError: function BOOMR_addError(err, src, extra) {
 			var str, E = BOOMR.plugins.Errors;
+
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("add_error");
+			/* END_DEBUG */
 
 			BOOMR.error("Boomerang caught error: " + err + ", src: " + src + ", extra: " + extra);
 
@@ -2984,6 +3128,10 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		 addVar: function(name, value, singleBeacon) {
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("add_var");
+			/* END_DEBUG */
+
 			if (typeof name === "string") {
 				impl.vars[name] = value;
 			}
@@ -3359,6 +3507,10 @@ BOOMR_check_doc_domain();
 				return false;
 			}
 
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("send_beacon:start");
+			/* END_DEBUG */
+
 			impl.beaconQueued = false;
 
 			BOOMR.debug("Checking if we can send beacon");
@@ -3500,6 +3652,14 @@ BOOMR_check_doc_domain();
 
 			// send the beacon data
 			BOOMR.sendBeaconData(varsSent);
+
+			/* BEGIN_DEBUG */
+			BOOMR.utils.mark("send_beacon:end");
+			BOOMR.utils.measure(
+				"send_beacon",
+				"send_beacon:start",
+				"send_beacon:end");
+			/* END_DEBUG */
 
 			return true;
 		},

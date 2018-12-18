@@ -43,6 +43,9 @@
 	"page-overrides": {
 		"title": "Page Overrides"
 	},
+	"perf-tests": {
+		"title": "Performance Tests"
+	},
 	"version-history": {
 		"title": "Version History"
 	}

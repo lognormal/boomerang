@@ -57,16 +57,16 @@ function getDirs(dir, callback) {
 //
 // Exports
 //
-module.exports = function() {
+module.exports = function(gruntTask, testTemplatesDir, testSnippetsDir, testPagesDir, e2eDir, e2eJsonPath) {
 	//
-	// Paths
+	// Inputs
 	//
 	var testsDir = __dirname;
-	var testTemplatesDir = path.join(testsDir, "page-templates");
-	var testSnippetsDir = path.join(testsDir, "page-template-snippets");
-	var testPagesDir = path.join(testsDir, "pages");
-	var e2eDir = path.join(testsDir, "e2e");
-	var e2eJsonPath = path.join(e2eDir, "e2e.json");
+	testTemplatesDir = testTemplatesDir || path.join(testsDir, "page-templates");
+	testSnippetsDir = testSnippetsDir || path.join(testsDir, "page-template-snippets");
+	testPagesDir = testPagesDir || path.join(testsDir, "pages");
+	e2eDir = e2eDir || path.join(testsDir, "e2e");
+	e2eJsonPath = e2eJsonPath || path.join(e2eDir, "e2e.json");
 
 	//
 	// Domains for test purposes
@@ -78,7 +78,7 @@ module.exports = function() {
 	var boomerangE2ESecondDomain = grunt.option("secondary-domain") || DEFAULT_TEST_SECONDARY_DOMAIN;
 
 	//make grunt know this task is async.
-	var done = this.async();
+	var done = gruntTask.async();
 
 	async.waterfall([
 		//
