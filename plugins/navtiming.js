@@ -393,8 +393,8 @@
 					/* empty */
 				}
 
-				if (data["nt_load_end"] > 0) {
-				    this.fullySent = true
+				if (data.nt_load_end > 0) {
+					this.fullySent = true;
 				}
 			}
 

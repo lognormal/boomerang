@@ -7,15 +7,14 @@ delete BOOMR.plugins.RT;
 delete BOOMR.plugins.Continuity;
 
 document.addEventListener("DOMContentLoaded", function(event) {
-    BOOMR.sendBeacon();
+	BOOMR.sendBeacon();
 });
 
 // BOOMR sends a beacon itself on pageready...
 
 window.onload = function() {
-
-    window.setTimeout(function() {
-	    BOOMR.sendBeacon();
+	window.setTimeout(function() {
+		BOOMR.sendBeacon();
 	}, 1000);
 };
 
