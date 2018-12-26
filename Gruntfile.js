@@ -39,7 +39,7 @@ var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 	preserveComments: false,
 	mangle: {
 		// for errors.js
-		except: [
+		reserved: [
 			"createStackForSend",
 			"loadFinished",
 			"BOOMR_addError",
@@ -51,6 +51,7 @@ var DEFAULT_UGLIFY_BOOMERANGJS_OPTIONS = {
 			"BOOMR_plugins_errors_wrapped_removeEventListener"
 		]
 	},
+	ie8: true,
 	sourceMap: true,
 	compress: {
 		sequences: false
