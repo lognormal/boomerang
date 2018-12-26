@@ -90,16 +90,18 @@
 			return false;
 		}
 
+		/* BEGIN_DEBUG */
 		/**
 		 * Debug logging for this $rootScope's ID
 		 *
 		 * @param {string} msg Message
 		 */
-		function log(msg) {
+		function debugLog(msg) {
 			BOOMR.debug(msg, "Ember");
 		}
+		/* END_DEBUG */
 
-		log("Startup");
+		debugLog("Startup");
 
 		/**
 		 * Called for the Ember `beforeModel` event.
@@ -118,10 +120,10 @@
 				return true;
 			}
 
-			log("beforeModel");
+			debugLog("beforeModel");
 
 			if (transition && transition.intent && transition.intent.url) {
-				log("[beforeModel] LastLocation: " + transition.intent.url);
+				debugLog("[beforeModel] LastLocation: " + transition.intent.url);
 
 				transition.promise.then(function() {
 					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
@@ -152,10 +154,10 @@
 				return true;
 			}
 
-			log("willTransition");
+			debugLog("willTransition");
 
 			if (transition && transition.intent && transition.intent.url) {
-				log("[willTransition] LastLocation: " + transition.intent.url);
+				debugLog("[willTransition] LastLocation: " + transition.intent.url);
 
 				transition.promise.then(function() {
 					BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
@@ -181,7 +183,7 @@
 				return true;
 			}
 
-			log("didTransition");
+			debugLog("didTransition");
 			routeHooked = false;
 		}
 

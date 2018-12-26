@@ -100,16 +100,18 @@
 			return false;
 		}
 
+		/* BEGIN_DEBUG */
 		/**
 		 * Debug logging
 		 *
 		 * @param {string} msg Message
 		 */
-		function log(msg) {
+		function debugLog(msg) {
 			BOOMR.debug(msg, "Backbone");
 		}
+		/* END_DEBUG */
 
-		log("Startup");
+		debugLog("Startup");
 
 		// Listen for the 'route' event on the Backbone Router, which is fired whenever a
 		// route changes (i.e. a soft navigation, which is associated with the
@@ -122,7 +124,7 @@
 
 			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), BOOMR.window.document.URL]);
 
-			log("route");
+			debugLog("route");
 			BOOMR.plugins.SPA.route_change();
 		});
 

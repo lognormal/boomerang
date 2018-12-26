@@ -29,14 +29,16 @@
 	 */
 	var XHR_RETRY_LOCALSTORAGE_NAME = "akamaiXhrRetry";
 
+	/* BEGIN_DEBUG */
 	/**
 	 * Debug logging
 	 *
 	 * @param {string} msg Message
 	 */
-	function log(msg) {
+	function debugLog(msg) {
 		BOOMR.debug(msg, "Akamai");
 	}
+	/* END_DEBUG */
 
 	var impl = {
 		initialized: false,
@@ -63,7 +65,7 @@
 				return;
 			}
 
-			log("Evaluating DNS prefetch requirements");
+			debugLog("Evaluating DNS prefetch requirements");
 			if (impl.dns_prefetch_enabled) {
 				// We got the dns_prefetch_enabled parameter from the config
 				// response, so we will perform a DNS prefetch against the host, if any,
@@ -75,7 +77,7 @@
 				if (BOOMR.plugins.AK && BOOMR.plugins.AK.akDNSPreFetchDomain) {
 					// akDNSPreFetchDomain is the Mapping host against which we are to
 					// perform a DNS prefetch request.
-					log("Setting up DNS prefetch link tag, against domain: " + BOOMR.plugins.AK.akDNSPreFetchDomain);
+					debugLog("Setting up DNS prefetch link tag, against domain: " + BOOMR.plugins.AK.akDNSPreFetchDomain);
 					var linkRel = document.createElement("link");
 					linkRel.setAttribute("id", "dnsprefetchlink");
 					linkRel.setAttribute("rel", "dns-prefetch");
@@ -87,7 +89,7 @@
 			// Check if information for Mapping XHR calls are present. If so prepare
 			// and issue XHR requests. Only issue XHR request if we havent issued in the
 			// last 30 minutes.
-			log("Evaluating XHR call requirements if XMLHttpRequest feature is enabled");
+			debugLog("Evaluating XHR call requirements if XMLHttpRequest feature is enabled");
 
 			if (window.XMLHttpRequest &&
 				!BOOMR.utils.getLocalStorage(impl.xhrRetryMarker) &&
@@ -99,7 +101,7 @@
 
 				if (impl.mapping_xhr_url_v4_prefix) {
 					var mappingXhrV4RequestUrl = "https://" + impl.mapping_xhr_url_v4_prefix + "." + impl.mapping_xhr_base_url + impl.mapping_xhr_url_path + "?c=p" + BOOMR.pageId;
-					log("Will make a v4 XHR request to: " + mappingXhrV4RequestUrl);
+					debugLog("Will make a v4 XHR request to: " + mappingXhrV4RequestUrl);
 
 					var mappingXhrReq = new XMLHttpRequest();
 					mappingXhrReq.open("GET", mappingXhrV4RequestUrl, true);
@@ -110,7 +112,7 @@
 
 				if (impl.mapping_xhr_url_v6_prefix) {
 					var mappingXhrV6RequestUrl = "https://" + impl.mapping_xhr_url_v6_prefix + "." + impl.mapping_xhr_base_url + impl.mapping_xhr_url_path + "?c=p" + BOOMR.pageId;
-					log("Will make a v6 XHR request to: " + mappingXhrV6RequestUrl);
+					debugLog("Will make a v6 XHR request to: " + mappingXhrV6RequestUrl);
 
 					var mappingXhrV6Req = new XMLHttpRequest();
 					mappingXhrV6Req.open("GET", mappingXhrV6RequestUrl, true);
@@ -125,7 +127,7 @@
 			}
 			else {
 				if (BOOMR.utils.getLocalStorage(impl.xhrRetryMarker)) {
-					log("Not resending XHR request as LocalStorage indicates request was sent recently");
+					debugLog("Not resending XHR request as LocalStorage indicates request was sent recently");
 				}
 			}
 

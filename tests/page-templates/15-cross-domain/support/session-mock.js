@@ -44,9 +44,11 @@
 		beacon_url: "/no-op"
 	};
 
-	function log(message) {
+	/* BEGIN_DEBUG */
+	function debugLog(message) {
 		BOOMR.debug(message, "MockSession");
 	}
+	/* END_DEBUG */
 
 	BOOMR.plugins.MockSession = {
 		init: function(config) {
@@ -76,7 +78,7 @@
 					});
 			}
 
-			log("Current Cookie Content: " + BOOMR.utils.objectToString(rtObj));
+			debugLog("Current Cookie Content: " + BOOMR.utils.objectToString(rtObj));
 
 			// We need to use window.sessionMock instead of the much
 			// more comfortable MockSession as config item in
@@ -84,7 +86,8 @@
 			// CrossDomain has run.
 			impl = BOOMR.window.sessionMock;
 
-			log("Session Mocked: " + BOOMR.utils.objectToString(impl));
+			debugLog("Session Mocked: " + BOOMR.utils.objectToString(impl));
+
 			if (!BOOMR.session.domain) {
 				BOOMR.session.domain = BOOMR.window.location.host;
 			}

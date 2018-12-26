@@ -124,14 +124,16 @@
 		return;
 	}
 
+	/* BEGIN_DEBUG */
 	/**
 	 * Debug logging for this plugin
 	 *
 	 * @param {string} msg Message
 	 */
-	function log(msg) {
+	function debugLog(msg) {
 		BOOMR.debug(msg, "SPA");
 	}
+	/* END_DEBUG */
 
 	var impl = {
 		/**
@@ -329,7 +331,7 @@
 		hook: function(hadRouteChange, options) {
 			options = options || {};
 
-			log("Hooked");
+			debugLog("Hooked");
 
 			// allow to set options each call in case they change
 
@@ -370,13 +372,13 @@
 		 * @memberof BOOMR.plugins.SPA
 		 */
 		route_change: function(onComplete, routeFilterArgs) {
-			log("Route Change");
+			debugLog("Route Change");
 
 			var firedEvent = false;
 			var initiator = firstSpaNav && !disableHardNav ? "spa_hard" : "spa";
 
 			if (latestResource && latestResource.wait) {
-				log("Route change wait filter not complete; not tracking this route");
+				debugLog("Route change wait filter not complete; not tracking this route");
 				return;
 			}
 
@@ -384,11 +386,11 @@
 			if (initiator === "spa" && routeFilter) {
 				try {
 					if (!routeFilter.apply(null, routeFilterArgs)) {
-						log("Route filter returned false; not tracking this route");
+						debugLog("Route filter returned false; not tracking this route");
 						return;
 					}
 					else {
-						log("Route filter returned true; tracking this route");
+						debugLog("Route filter returned true; tracking this route");
 					}
 				}
 				catch (e) {
@@ -441,7 +443,7 @@
 			// if we have a routeChangeWaitFilter, make sure AutoXHR waits on the custom event
 			// for this SPA soft route
 			if (initiator === "spa" && routeChangeWaitFilter) {
-				log("Running route change wait filter");
+				debugLog("Running route change wait filter");
 				try {
 					if (routeChangeWaitFilter.apply(null, arguments)) {
 						resource.wait = true;
@@ -521,7 +523,7 @@
 
 						waiting = mh.nodesWaitingFor(i);
 
-						log("SPA Navigation being marked complete; nodes waiting for: " + waiting);
+						debugLog("SPA Navigation being marked complete; nodes waiting for: " + waiting);
 
 						// note that the navigation was forced complete
 						BOOMR.addVar("spa.forced", "1");
@@ -535,7 +537,7 @@
 					}
 				}
 			}
-			log("No SPA navigation in progress to mark as complete");
+			debugLog("No SPA navigation in progress to mark as complete");
 		},
 
 		/**

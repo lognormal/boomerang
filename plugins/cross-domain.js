@@ -35,14 +35,16 @@
 
 	var d = BOOMR.window.document;
 
+	/* BEGIN_DEBUG */
 	/**
 	 * Debug logging
 	 *
 	 * @param {string} msg Message
 	 */
-	function log(msg) {
+	function debugLog(msg) {
 		BOOMR.debug(msg, "CrossDomain");
 	}
+	/* END_DEBUG */
 
 	// 24h in ms
 	var maxSessionExpiry = 24 * 60 * 60 * 1000;
@@ -177,7 +179,7 @@
 				data = w.JSON.parse(event.data);
 			}
 			catch (error) {
-				log("JSON parsing failed. exiting...");
+				debugLog("JSON parsing failed. exiting...");
 				return;
 			}
 
@@ -206,7 +208,7 @@
 					});
 				}
 
-				log("Session transferred at: " + impl.session_transferred_time + " session data is: " + BOOMR.utils.objectToString(impl.session));
+				debugLog("Session transferred at: " + impl.session_transferred_time + " session data is: " + BOOMR.utils.objectToString(impl.session));
 				impl.session_transferred = true;
 
 				// we may have missed the window to transfer the session to local BOOMR
@@ -231,7 +233,7 @@
 		 */
 		buildIFrame: function(url, name) {
 			var iframe;
-			log("Adding IFrame!");
+			debugLog("Adding IFrame!");
 
 			try {
 				iframe = d.createElement("<IFRAME>"); // IE <= 8
@@ -291,7 +293,7 @@
 				impl.session_transferred = true;
 				impl.enabled = false;
 
-				log("postMessage support is not available. Bailing..");
+				debugLog("postMessage support is not available. Bailing..");
 				return;
 			}
 
@@ -317,7 +319,7 @@
 				}
 				impl.cross_domain_url = a.href;
 
-				log("CrossDomain frame for URL: " + impl.cross_domain_url);
+				debugLog("CrossDomain frame for URL: " + impl.cross_domain_url);
 				impl.setup(impl.cross_domain_url);
 				setTimeout(function() {
 					// Skip this if time out happens after session transfer
@@ -332,7 +334,7 @@
 						d.body.removeChild(d.getElementById(impl.iframe_name));
 					}
 
-					log("Session transfer timedout. Setting transferred and setting timedout flag!");
+					debugLog("Session transfer timedout. Setting transferred and setting timedout flag!");
 
 					// trigger a beacon
 					BOOMR.sendBeacon();
@@ -345,11 +347,11 @@
 				// make sure boomerang doesn't do anything at this point
 				BOOMR.disable();
 
-				log("Client preparing to send postMessage");
+				debugLog("Client preparing to send postMessage");
 
 				// remove hash ('#')
 				var query = w.location.hash.substring(1, w.location.hash.length);
-				log("Session Data passed via Query: " + query);
+				debugLog("Session Data passed via Query: " + query);
 				var items = query.split("&");
 				var values = {};
 
@@ -411,14 +413,14 @@
 
 				// Working around IE8 sending postMessage content as [object Object]
 				if (!w.JSON) {
-					log("JSON not available, not going to try and serialize message!");
+					debugLog("JSON not available, not going to try and serialize message!");
 					return;
 				}
 
 				var messageString = w.JSON.stringify(messageObject);
 
 				w.parent.postMessage(messageString, "*");
-				log("Sending data: session " + messageString);
+				debugLog("Sending data: session " + messageString);
 
 				// Since we're not required to do anything else, other than sending a postMessage
 				// we don't need to block boomerang
@@ -486,13 +488,13 @@
 					}
 				}
 
-				log("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
+				debugLog("It took " + (impl.session_transferred_time - impl.plugin_start) + " miliseconds to transfer session data.");
 				BOOMR.addVar("rt.sstr_dur", impl.session_transferred_time - impl.plugin_start);
 				impl.session_transfer_complete = true;
 			}
 
 			if (impl.session_transfer_timedout) {
-				log("Session transfer timedout setting rt.sstr_to to 1");
+				debugLog("Session transfer timedout setting rt.sstr_to to 1");
 				BOOMR.addVar("rt.sstr_to", 1);
 			}
 

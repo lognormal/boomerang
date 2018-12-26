@@ -825,8 +825,11 @@
 			}
 
 			if (!el || el.resultType !== 9 || !el.singleNodeValue) {
+				/* BEGIN_DEBUG */
 				BOOMR.debug("XPath did not return anything: " + el +
 					", " + el.resultType + ", " + el.singleNodeValue, "PageVars");
+				/* END_DEBUG */
+
 				return null;
 			}
 
@@ -1253,8 +1256,10 @@
 				return false;
 			}
 
+			/* BEGIN_DEBUG */
 			BOOMR.debug("Got ResourceTiming: " + o.parameter1 + ", " +
 				o.parameter2 + ", " + o.url, "PageVars");
+			/* END_DEBUG */
 
 			// Require page URL to match
 			if (!this.checkURLPattern(o.parameter1)) {
@@ -2253,16 +2258,22 @@
 		 */
 		applyTimedResources: function(log) {
 			if (isNaN(this.resourceTime.start) || isNaN(this.resourceTime.stop)) {
+				/* BEGIN_DEBUG */
 				BOOMR.debug("Resource Group '" + this.config.label +
 					"' start or stop time were not numeric (" +
 					this.resourceTime.start + "," + this.resourceTime.stop + ")", "PageVars.ResourceGroup");
+				/* END_DEBUG */
+
 				return false;
 			}
 
 			if (this.resourceTime.stop === 0) {
+				/* BEGIN_DEBUG */
 				BOOMR.debug("Resource Group '" + this.config.label +
 					"' stop time was 0, this should not happen!", "PageVars.ResourceGroup");
 				BOOMR.addVar(this.varname + "_rg.err", "ne|-");
+				/* END_DEBUG */
+
 				return false;
 			}
 
@@ -2276,8 +2287,10 @@
 			}
 
 			if (log) {
+				/* BEGIN_DEBUG */
 				BOOMR.debug("Resource Group '" + this.config.label + "' final values: " +
 					(this.resourceTime.stop - this.resourceTime.start), "PageVars.ResourceGroup");
+				/* END_DEBUG */
 			}
 
 			BOOMR.addVar(this.varname + "_st", Math.round(this.resourceTime.start));
@@ -2422,8 +2435,7 @@
 				}
 				break;
 			default:
-				BOOMR.debug("Found Item of unknown type (" + resource.type +
-					"), skipping...", "PageVars");
+				BOOMR.debug("Found Item of unknown type (" + resource.type + "), skipping...", "PageVars");
 				break;
 			}
 
@@ -2543,11 +2555,13 @@
 				this.resourceTime.stop = responseEnd;
 			}
 
+			/* BEGIN_DEBUG */
 			BOOMR.debug("New Resource Times for resource: '" + this.config.label +
 				"' start(" + this.resourceTime.start + ") , stop (" +
 				this.resourceTime.stop + ") delta(" +
 				(this.resourceTime.stop - this.resourceTime.start) +
 				")", "PageVars.ResourceGroup");
+			/* END_DEBUG */
 		},
 
 		/**

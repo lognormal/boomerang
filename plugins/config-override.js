@@ -197,9 +197,11 @@
 		 */
 		init: function(config) {
 			if (BOOMR.window && BOOMR.window.BOOMR_config) {
+				/* BEGIN_DEBUG */
 				BOOMR.debug("Found BOOMR_config on global scope: " +
 					BOOMR.utils.objectToString(BOOMR.window.BOOMR_config, undefined, 1),
 					"ConfigOverride");
+				/* END_DEBUG */
 
 				impl.safeConfigOverride(BOOMR.window.BOOMR_config, impl.allowedConfigOverrides, config);
 			}

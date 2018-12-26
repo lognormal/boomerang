@@ -115,14 +115,16 @@
 			return false;
 		}
 
+		/* BEGIN_DEBUG */
 		/**
 		 * Debug logging for this $rootScope's ID
 		 *
 		 * @param {string} msg Message
 		 */
-		function log(msg) {
+		function debugLog(msg) {
 			BOOMR.debug($rootScope.$id + ": " + msg, "Angular");
 		}
+		/* END_DEBUG */
 
 		/**
 		 * Fires the SPA route_change event.
@@ -167,7 +169,7 @@
 				return;
 			}
 
-			log("$routeChangeStart: " + (next ? next.templateUrl : ""));
+			debugLog("$routeChangeStart: " + (next ? next.templateUrl : ""));
 
 			fireRouteChange(event, next, current);
 
@@ -182,7 +184,7 @@
 				return;
 			}
 
-			log("$locationChangeStart: " + newState);
+			debugLog("$locationChangeStart: " + newState);
 
 			BOOMR.fireEvent("spa_init", [BOOMR.plugins.SPA.current_spa_nav(), newState]);
 
@@ -206,7 +208,7 @@
 				return;
 			}
 
-			log("$stateChangeStart: " + toState);
+			debugLog("$stateChangeStart: " + toState);
 
 			fireRouteChange(event, toState, toParams, fromState, fromParams);
 

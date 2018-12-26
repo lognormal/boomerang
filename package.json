@@ -53,7 +53,7 @@
     "grunt-react": "^0.12.3",
     "grunt-saucelabs": "^8.6.2",
     "grunt-string-replace": "^1.0.0",
-    "grunt-strip-code": "^0.1.2",
+    "grunt-strip-code": "^1.0.6",
     "grunt-template": "^0.2.3",
     "gruntify-eslint": "^3.1.0",
     "history": "^1.12.5",

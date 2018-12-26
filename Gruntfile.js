@@ -395,6 +395,17 @@ module.exports = function() {
 					end_comment: "END_DEBUG"
 				}
 			},
+			"debug-log": {
+				files: [{
+					src: buildRelease
+				}],
+				options: {
+					patterns: [
+						/BOOMR\.debug\(.*\);/g,
+						/debugLog\(.*\);/g
+					]
+				}
+			},
 			prod: {
 				files: [
 					{
@@ -1057,6 +1068,7 @@ module.exports = function() {
 			"!string-replace:debug-tests",
 			"string-replace:release",
 			"!strip_code:debug",
+			"!strip_code:debug-log",
 			"!strip_code:prod"
 		],
 

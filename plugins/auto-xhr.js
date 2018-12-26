@@ -328,9 +328,11 @@
 		return;
 	}
 
-	function log(msg) {
+	/* BEGIN_DEBUG */
+	function debugLog(msg) {
 		BOOMR.debug(msg, "AutoXHR");
 	}
+	/* END_DEBUG */
 
 	/**
 	 * Tries to resolve `href` links from relative URLs.
@@ -566,7 +568,7 @@
 				// If we have a pending SPA event, send an aborted load beacon before
 				// adding the new SPA event
 				if (BOOMR.utils.inArray(ev.type, BOOMR.constants.BEACON_TYPE_SPAS)) {
-					log("Aborting previous SPA navigation");
+					debugLog("Aborting previous SPA navigation");
 
 					// mark the end of this navigation as now
 					last_ev.resource.timing.loadEventEnd = BOOMR.now();
@@ -655,7 +657,7 @@
 			// if this was a SPA soft nav with no URL change and did not trigger additional resources
 			// then we will not send a beacon
 			if (ev.type === "spa" && ev.total_nodes === 0 && ev.resource.url === self.lastSpaLocation) {
-				log("SPA beacon cancelled, no URL change or resources triggered");
+				debugLog("SPA beacon cancelled, no URL change or resources triggered");
 				BOOMR.fireEvent("spa_cancel");
 				this.pending_events[index] = undefined;
 				return;
@@ -1168,7 +1170,7 @@
 				a.href = url;
 
 				if (impl.excludeFilter(a)) {
-					log("Exclude for " + a.href + " matched. Excluding");
+					debugLog("Exclude for " + a.href + " matched. Excluding");
 					// excluded resource, so abort
 					return false;
 				}
@@ -1910,7 +1912,7 @@
 				if (impl.excludeFilter(a)) {
 					// this xhr should be excluded from instrumentation
 					excluded = true;
-					log("Exclude found for resource: " + a.href + " Skipping XHR instrumentation!");
+					debugLog("Exclude found for resource: " + a.href + " Skipping XHR instrumentation!");
 					// call the original open method
 					return orig_open.apply(req, arguments);
 				}
@@ -2175,15 +2177,18 @@
 				if (typeof impl.excludeFilters[idx].cb === "function") {
 					ctx = impl.excludeFilters[idx].ctx;
 					if (impl.excludeFilters[idx].name) {
-						log("Running filter: " + impl.excludeFilters[idx].name + " on URL: " + anchor.href);
+						debugLog("Running filter: " + impl.excludeFilters[idx].name + " on URL: " + anchor.href);
 					}
 
 					try {
 						ret = impl.excludeFilters[idx].cb.call(ctx, anchor);
 						if (ret) {
-							log("Found matching filter at: " +
+							/* BEGIN_DEBUG */
+							debugLog("Found matching filter at: " +
 								impl.excludeFilters[idx].name + " for URL: " +
 								anchor.href);
+							/* END_DEBUG */
+
 							return true;
 						}
 					}

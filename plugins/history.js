@@ -124,7 +124,7 @@
 		 * Clears routeChangeInProgress flag
 		 */
 		resetRouteChangeInProgress: function() {
-			log("resetting routeChangeInProgress");
+			debugLog("resetting routeChangeInProgress");
 			if (impl.routeChangeInProgress) {
 				clearTimeout(impl.routeChangeInProgress);
 			}
@@ -169,7 +169,7 @@
 		 */
 		routeChange: function(title, url) {
 			if (!impl.enabled) {
-				log("Not enabled - we've missed a routeChange");
+				debugLog("Not enabled - we've missed a routeChange");
 				impl.hadMissedRouteChange = true;
 				impl.resetRouteChangeInProgress();
 			}
@@ -181,12 +181,12 @@
 				}
 
 				if (!impl.routeChangeInProgress) {
-					log("routeChange triggered, sending route_change() event");
+					debugLog("routeChange triggered, sending route_change() event");
 					impl.spaInit(title, url);
 					BOOMR.plugins.SPA.route_change();
 				}
 				else {
-					log("routeChangeInProgress, not triggering");
+					debugLog("routeChangeInProgress, not triggering");
 				}
 			}
 		}
@@ -212,14 +212,16 @@
 
 	impl.a = BOOMR.window.document.createElement("A");
 
+	/* BEGIN_DEBUG */
 	/**
 	 * Debug logging for this instance
 	 *
 	 * @param {string} msg Message
 	 */
-	function log(msg) {
+	function debugLog(msg) {
 		BOOMR.debug(msg, "History");
 	};
+	/* END_DEBUG */
 
 	/**
 	 * Hook into `window.history` Object
@@ -242,7 +244,7 @@
 		 */
 		function aelPopstate() {
 			BOOMR.window.addEventListener("popstate", function(event) {
-				log("popstate");
+				debugLog("popstate");
 				impl.routeChange();
 			});
 		}
@@ -254,7 +256,7 @@
 		if (typeof history.pushState === "function") {
 			history.pushState = (function(_pushState) {
 				return function(state, title, url) {
-					log("pushState, title: " + title + " url: " + url);
+					debugLog("pushState, title: " + title + " url: " + url);
 					impl.routeChange(title, url);
 					return _pushState.apply(this, arguments);
 				};
@@ -274,11 +276,11 @@
 
 					// only issue route change if a nav is not in progress or the URL is changing
 					if (!BOOMR.plugins.SPA.isSpaNavInProgress() || toUrl !== fromUrl) {
-						log("replaceState, title: " + title + " url: " + url);
+						debugLog("replaceState, title: " + title + " url: " + url);
 						impl.routeChange(title, url);
 					}
 					else {
-						log("replaceState ignored (no URL change and a SPA nav is in progress), title: " + title + " url: " + url);
+						debugLog("replaceState ignored (no URL change and a SPA nav is in progress), title: " + title + " url: " + url);
 					}
 
 					return _replaceState.apply(this, arguments);
@@ -292,7 +294,7 @@
 			history.go = (function(_go) {
 				return function(index) {
 					var res;
-					log("go");
+					debugLog("go");
 					impl.routeChange();  // spa_init url will be the url before `go` runs
 					return _go.apply(this, arguments);
 				};
@@ -303,7 +305,7 @@
 			history.back = (function(_back) {
 				return function() {
 					var res;
-					log("back");
+					debugLog("back");
 					impl.routeChange();  // spa_init url will be the url before `back` runs
 					return _back.apply(this, arguments);
 				};
@@ -314,7 +316,7 @@
 			history.forward = (function(_forward) {
 				return function() {
 					var res;
-					log("forward");
+					debugLog("forward");
 					impl.routeChange();  // spa_init url will be the url before `forward` runs
 					return _forward.apply(this, arguments);
 				};
@@ -324,7 +326,7 @@
 		// listen for hash changes
 		BOOMR.window.addEventListener("hashchange", function(event) {
 			var url = (event || {}).newURL;
-			log("hashchange " + url);
+			debugLog("hashchange " + url);
 			impl.routeChange(null, url);
 		});
 
@@ -452,7 +454,7 @@
 				impl.hadMissedRouteChange = false;
 				BOOMR.plugins.SPA.route_change();
 				impl.setRouteChangeInProgress();
-				log("Hooked and hadMissedRouteChange sending route_change!");
+				debugLog("Hooked and hadMissedRouteChange sending route_change!");
 			}
 
 			return this;

@@ -49,11 +49,13 @@
 		return;
 	}
 
-	function log(message) {
+	/* BEGIN_DEBUG */
+	function debugLog(message) {
 		BOOMR.debug(
 			"(url: " + BOOMR.window.location.href + "): " + message,
 			"IFrameDelay");
 	}
+	/* END_DEBUG */
 
 	var impl = {
 		/**
@@ -98,8 +100,10 @@
 			setTimeout(function() {
 				// we are strict parents we will only wait for the children that told us to wait for them
 				if (impl.monitoredCount !== impl.runningCount) {
-					log("monitoredCount(" + impl.monitoredCount + ") did not match " +
+					/* BEGIN_DEBUG */
+					debugLog("monitoredCount(" + impl.monitoredCount + ") did not match " +
 						"registered running count(" + impl.runningCount + ")");
+					/* END_DEBUG */
 
 					impl.monitoredCount = impl.runningCount;
 
@@ -116,7 +120,7 @@
 		 * @param {Event} event postMessage Event
 		 */
 		onIFrameMessage: function(event) {
-			log("Received message: '" + event.data + "' from child IFrame");
+			debugLog("Received message: '" + event.data + "' from child IFrame");
 
 			if (event && event.data && typeof event.data === "string") {
 				if (event.data === impl.messages.start) {
@@ -194,7 +198,7 @@
 			// only run important bits if we're getting the actual configuration
 			if (BOOMR.utils.hasPostMessageSupport()) {
 				if (impl.registerParent) {
-					log("Found registerParent=true, trying to notify parent window");
+					debugLog("Found registerParent=true, trying to notify parent window");
 
 					BOOMR.window.parent.postMessage(impl.messages.start, "*");
 					BOOMR.subscribe("page_load_beacon", function(vars) {
@@ -206,7 +210,7 @@
 					BOOMR.attach_page_ready(impl.checkRunningFrames);
 				}
 				else {
-					log("Missing configuration. Setting monitored, finished and running to 0 and closing this plugin");
+					debugLog("Missing configuration. Setting monitored, finished and running to 0 and closing this plugin");
 					impl.finishedCount = impl.monitoredCount = impl.runningCount = 0;
 				}
 			}
