@@ -276,7 +276,12 @@
 		if (BOOMR.plugins.AK && BOOMR.plugins.AK.akVars) {
 			// Check if `ak.ai` property is defined and if its an integer.
 			var akai = BOOMR.plugins.AK.akVars["ak.ai"];
-			if (BOOMR.utils.isInteger(akai)) {
+
+			// If for some unexpected reason, the AK_ARLID at metadata level is incorrectly set
+			// to a non-numeric string, then we could see AK plugin setting the ak.ai param
+			// in akVars to be NaN.
+			// Let's check for that case as well as string representation of ARL ID in ak.ai param
+			if (!isNaN(akai) && (BOOMR.utils.isInteger(akai) || !isNaN(parseInt(akai, 10)))) {
 				// valid integer expected for ARL ID. Tag it to the config request.
 				url += "&ak.ai=" + akai;
 			}
