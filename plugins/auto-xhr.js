@@ -1315,14 +1315,14 @@
 			});
 		}
 
-		if (!evt.interesting && !this.timeoutExtended) {
+		if (!evt.interesting && !evt.timeoutExtended) {
 			// timeout the event if we haven't already created a timer and
 			// we didn't have any interesting nodes for this MO callback or
 			// any prior callbacks
 			this.setTimeout(UNINTERESTING_MUTATION_TIMEOUT, index);
 
 			// only extend the timeout for an interesting thing to happen once
-			this.timeoutExtended = true;
+			evt.timeoutExtended = true;
 		}
 
 		return true;
