@@ -1613,9 +1613,7 @@
 
 			BOOMR.fireEvent("xhr_send", {resource: resource});
 
-			if (impl.singlePageApp &&
-			    handler.watch &&
-			    !matchesAlwaysSendXhr(resource.url, impl.alwaysSendXhr)) {
+			if (impl.singlePageApp && handler.watch) {
 				// If this is a SPA and we're already watching for resources due
 				// to a route change or other interesting event, add this to the
 				// current event.
