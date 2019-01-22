@@ -108,8 +108,7 @@
 					}, 200);
 				}
 
-				if (impl.mapping_xhr_url_v6_prefix &&
-					BOOMR.getVar("ak.ipv") === "6") {
+				if (impl.mapping_xhr_url_v6_prefix) {
 					var mappingXhrV6RequestUrl = "https://" + impl.mapping_xhr_url_v6_prefix + "." + impl.mapping_xhr_base_url + impl.mapping_xhr_url_path + "?c=p" + BOOMR.pageId;
 					log("Will make a v6 XHR request to: " + mappingXhrV6RequestUrl);
 

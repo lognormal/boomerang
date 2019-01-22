@@ -24,13 +24,13 @@ if (window.XMLHttpRequest && typeof window.XMLHttpRequest.prototype.open === "fu
 		Akamai: {
 			enabled: true,
 			mapping_xhr_base_url: "akamaihd.net",
-			mapping_xhr_url_path: "/eum/getdns.txt",
-			// enable the V6 config parameter, so that the code block to evaluate the v4/v6 possibity
-			// is exercised but set the ak.ipv add var param to be "4" which should prevent an XHR for
-			// V6 from being sent.
-			mapping_xhr_url_v6_prefix: "trial-eum-clientnsv6-s"
+			mapping_xhr_url_path: "/eum/getdns.txt"
+			// disable V6 request by not providing the value for mapping_xhr_url_v6_prefix,
+			// which should result in the evaluation of whether to perform v6 request to fail.
 		}
 	});
+	
+	// Keep this as a validation for not depending on what the ipv parameter tells us.
 	BOOMR.addVar("ak.ipv", "4");
 </script>
 <%= footer %>
