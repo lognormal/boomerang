@@ -1049,7 +1049,7 @@
 		// scripts would be nice to track but their onload event is not reliable
 		if (node && node.nodeName &&
 		    (node.nodeName.toUpperCase().match(/^(IMG|IFRAME|IMAGE)$/) ||
-		    (node.nodeName.toUpperCase() === "LINK" && node.rel && node.rel.match(/\<stylesheet\>/i)))) {
+		    (node.nodeName.toUpperCase() === "LINK" && node.rel && node.rel.match(/\bstylesheet\b/i)))) {
 
 			// if the attribute change affected the src attributes we want to know that
 			// as that means we need to fetch a new Resource from the server
