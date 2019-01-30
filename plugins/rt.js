@@ -248,7 +248,7 @@
 			for (k in subcookies) {
 				if (subcookies.hasOwnProperty(k)) {
 					if (!isNaN(parseInt(k, 10))) {
-						delete subcookies[k];
+						subcookies[k] = null;
 					}
 				}
 			}
@@ -258,7 +258,7 @@
 					if (params.hasOwnProperty(k)) {
 						if (params[k] === undefined) {
 							if (subcookies.hasOwnProperty(k)) {
-								delete subcookies[k];
+								subcookies[k] = null;
 							}
 						}
 						else {

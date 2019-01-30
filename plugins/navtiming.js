@@ -198,7 +198,7 @@
 
 			for (k in data) {
 				if (data.hasOwnProperty(k) && !data[k]) {
-					delete data[k];
+					data[k] = null;
 				}
 			}
 
@@ -364,7 +364,7 @@
 				// Remove any properties that are undefined
 				for (k in data) {
 					if (data.hasOwnProperty(k) && data[k] === undefined) {
-						delete data[k];
+						data[k] = null;
 					}
 				}
 

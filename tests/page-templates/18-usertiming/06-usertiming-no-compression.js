@@ -15,7 +15,7 @@ describe("e2e/18-usertiming/06-usertiming-no-compression", function() {
 			assert.isString(b.usertiming);
 			var data = JSON.parse(b.usertiming);
 			assert.isTrue("mark" in data);
-			var marks = data.mark
+			var marks = data.mark;
 			assert.isTrue("mark1" in marks);
 			assert.isTrue("mark2" in marks);
 			assert.isTrue("measure" in data);

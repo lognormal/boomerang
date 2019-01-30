@@ -3582,7 +3582,7 @@ BOOMR_check_doc_domain();
 					// remove this name from vars so it isn't also added
 					// to the non-prioritized list when pri=0 is called
 					if (pri !== 0) {
-						delete vars[name];
+						vars[name] = null;
 					}
 				}
 			}
@@ -3671,7 +3671,7 @@ BOOMR_check_doc_domain();
 
 
 
-	delete BOOMR_start;
+	BOOMR_start = null;
 
 	/**
 	 * @global
@@ -3690,7 +3690,7 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		boomr.t_lstart = BOOMR_lstart;
-		delete BOOMR_lstart;
+		BOOMR_lstart = null;
 	}
 	else if (typeof BOOMR.window.BOOMR_lstart === "number") {
 		boomr.t_lstart = BOOMR.window.BOOMR_lstart;

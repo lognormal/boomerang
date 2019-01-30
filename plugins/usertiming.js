@@ -114,20 +114,23 @@
 			if (typeof utc === "undefined") {
 				if (entries.length === 0) {
 					return null;
-				} else {
+				}
+				else {
 					var res = {};
 					for (var i = 0, l = entries.length; i < l; i++) {
 						var entry = entries[i];
 						res[entry.entryType] = res[entry.entryType] || {};
 						if (entry.entryType === "mark") {
 							res[entry.entryType][entry.name] = entry.startTime;
-						} else if (entry.entryType === "measure") {
+						}
+						else if (entry.entryType === "measure") {
 							res[entry.entryType][entry.name] = entry.duration;
 						}
 					}
 					return JSON.stringify(res);
 				}
-			} else {
+			}
+			else {
 				var timings, res;
 				timings = utc.compressUserTiming(entries);
 				return utc.compressForUri(timings);
@@ -193,7 +196,8 @@
 				// TODO do we need to offset startTime?
 				entries = frame.performance.getEntriesByType("mark");
 				entries = entries.concat(frame.performance.getEntriesByType("measure"));
-			} catch (e) {
+			}
+			catch (e) {
 				return entries;
 			}
 
