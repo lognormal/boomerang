@@ -52,6 +52,16 @@
  * otherwise, it is `Date.now()`.
  */
 
+ /**
+ * @function
+ * @global
+ * @desc
+ * Checks if we are working with IE version 8 and lower.
+ */
+function isIe8OrLower(){
+	return !document.getElementsByClassName;
+}
+
 /**
  * @global
  * @type {TimeStamp}
@@ -63,7 +73,15 @@
  * time.  We also declare it without `var` so that we can later
  * `delete` it.  This is the only way that works on Internet Explorer.
  */
-BOOMR_start = new Date().getTime();
+if (isIe8OrLower()) {
+	BOOMR_start = new Date().getTime();
+}
+else if (window) {
+	window.BOOMR_start = new Date().getTime();
+}
+else {
+	throw new Error("No window to work with.");
+}
 
 /**
  * @function
@@ -3582,7 +3600,7 @@ BOOMR_check_doc_domain();
 					// remove this name from vars so it isn't also added
 					// to the non-prioritized list when pri=0 is called
 					if (pri !== 0) {
-						vars[name] = null;
+						delete vars[name];
 					}
 				}
 			}
@@ -3669,9 +3687,20 @@ BOOMR_check_doc_domain();
 
 	boomr.url = boomr.utils.getMyURL();
 
-
-
-	BOOMR_start = null;
+	if (isIe8OrLower()) {
+		// This still doesn't work in modern browsers in strict mode,
+		// but now it is very obvious why. When it's finally time to
+		// retire older IE versions or when working with forked versions
+		// of this code, it is prepared for painless refactoring.
+		// Just drop this "if" and retain the body of the "else".
+		delete BOOMR_start;
+	}
+	else if (window) {
+		delete window.BOOMR_start;
+	}
+	else {
+		// no window - no BOOMR_start
+	}
 
 	/**
 	 * @global
@@ -3690,7 +3719,21 @@ BOOMR_check_doc_domain();
 		 * @memberof BOOMR
 		 */
 		boomr.t_lstart = BOOMR_lstart;
-		BOOMR_lstart = null;
+
+		if (isIe8OrLower()) {
+			// This still doesn't work in modern browsers in strict mode,
+			// but now it is very obvious why. When it's finally time to
+			// retire older IE versions or when working with forked versions
+			// of this code, it is prepared for painless refactoring.
+			// Just drop this "if" and retain the body of the "else".
+			delete BOOMR_lstart;
+		}
+		else if (window) {
+			delete window.BOOMR_lstart;
+		}
+		else {
+			// no window - no BOOMR_lstart
+		}
 	}
 	else if (typeof BOOMR.window.BOOMR_lstart === "number") {
 		boomr.t_lstart = BOOMR.window.BOOMR_lstart;
