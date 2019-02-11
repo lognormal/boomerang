@@ -1128,8 +1128,6 @@
 	 *   COLLECTION_INTERVAL intervals).
 	 * * Keeps a log of raw events.
 	 * * Calculates Time to Interactive (TTI) and Visually Ready.
-	 *
-	 * @class BOOMR.plugins.Continuity.Timeline
 	 */
 	var Timeline = function(startTime) {
 		//
@@ -1738,8 +1736,6 @@
 
 	/**
 	 * Monitors LongTasks
-	 *
-	 * @class BOOMR.plugins.Continuity.LongTaskMonitor
 	 */
 	var LongTaskMonitor = function(w, t) {
 		if (!w.PerformanceObserver || !w.PerformanceLongTaskTiming) {
@@ -1964,8 +1960,6 @@
 
 	/**
 	 * Monitors Page Busy if LongTasks isn't supported
-	 *
-	 * @class BOOMR.plugins.Continuity.PageBusyMonitor
 	 */
 	var PageBusyMonitor = function(w, t) {
 		// register this type
@@ -2159,8 +2153,6 @@
 
 	/**
 	 * Monitors framerate (FPS)
-	 *
-	 * @class BOOMR.plugins.Continuity.FrameRateMonitor
 	 */
 	var FrameRateMonitor = function(w, t) {
 		// register this type
@@ -2338,8 +2330,6 @@
 
 	/**
 	 * Monitors scrolling
-	 *
-	 * @class BOOMR.plugins.Continuity.ScrollMonitor
 	 */
 	var ScrollMonitor = function(w, t, i) {
 		if (!w || !w.document || !w.document.body || !w.document.documentElement) {
@@ -2546,8 +2536,6 @@
 
 	/**
 	 * Monitors mouse clicks
-	 *
-	 * @class BOOMR.plugins.Continuity.ClickMonitor
 	 */
 	var ClickMonitor = function(w, t, i) {
 		// register this type
@@ -2684,8 +2672,6 @@
 
 	/**
 	 * Monitors keyboard events
-	 *
-	 * @class BOOMR.plugins.Continuity.KeyMonitor
 	 */
 	var KeyMonitor = function(w, t, i) {
 		// register this type
@@ -2771,8 +2757,6 @@
 
 	/**
 	 * Monitors mouse movement
-	 *
-	 * @class BOOMR.plugins.Continuity.MouseMonitor
 	 */
 	var MouseMonitor = function(w, t, i) {
 		// register the mouse movements and overall percentage moved
@@ -2958,8 +2942,6 @@
 
 	/**
 	 * Interaction monitor
-	 *
-	 * @class BOOMR.plugins.Continuity.InteractionMonitor
 	 */
 	var InteractionMonitor = function(w, t, afterOnloadMinWait) {
 		// register this type
@@ -3250,8 +3232,6 @@
 
 	/**
 	 * Monitors for visibility state changes
-	 *
-	 * @class BOOMR.plugins.Continuity.VisibilityMonitor
 	 */
 	var VisibilityMonitor = function(w, t, i) {
 		// register this type
@@ -3309,8 +3289,6 @@
 
 	/**
 	 * Monitors for orientation changes
-	 *
-	 * @class BOOMR.plugins.Continuity.OrientationMonitor
 	 */
 	var OrientationMonitor = function(w, t, i) {
 		// register this type
@@ -3378,8 +3356,6 @@
 	 *
 	 * Note: Not reporting on ResourceTiming entries or Errors since those
 	 * will be captured by the respective plugins.
-	 *
-	 * @class BOOMR.plugins.Continuity.StatsMonitor
 	 */
 	var StatsMonitor = function(w, t) {
 		// register types
