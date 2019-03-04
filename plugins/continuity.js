@@ -1392,6 +1392,17 @@
 						elements[i].src ||
 						(typeof elements[i].getAttribute === "function" && elements[i].getAttribute("xlink:href"));
 
+					// if src if not defined, look for it in css background image
+					if (!src) {
+						if (typeof BOOMR.window.getComputedStyle === "function") {
+							var bgStyle = BOOMR.window.getComputedStyle(elements[i]).getPropertyValue('background');
+							var bgImgUrl = bgStyle.match(/url\(["']?([^"']*)["']?\)/)
+							if (bgImgUrl && bgImgUrl.length > 0) {
+								src = bgImgUrl[1];
+							}
+						}
+					}
+
 					if (src) {
 						entries = p.getEntriesByName(src);
 						if (entries && entries.length) {
