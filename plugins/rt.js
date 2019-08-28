@@ -159,8 +159,8 @@
 		// Format for each timer is { start: XXX, end: YYY, delta: YYY-XXX }
 		timers: {},
 
-		// Name of the cookie that stores the start time and referrer.
-		cookie: "RT",
+		//Fasterize : set a cookie only if the navtiming is not accessible
+		cookie: w.performance || w.msPerformance || w.webkitPerformance || w.mozPerformance ? false : "RT",
 
 		// Cookie expiry in seconds (7 days)
 		cookie_exp: COOKIE_EXP,
@@ -1418,11 +1418,6 @@
 				BOOMR.addVar("t_other", t_other.join(","));
 				impl.addedVars.push("t_other");
 			}
-
-			if (source === "beacon") {
-				impl.timers = {};
-				impl.complete = false;	// reset this state for the next call
-			}
 		},
 
 		/**
@@ -1444,6 +1439,10 @@
 			    subresource = false;
 
 			// We may have to rerun if this was a pre-rendered page, so set complete to false, and only set to true when we're done
+			if (impl.complete) {
+				//don't send two beacons.
+				return;
+			}
 			impl.complete = false;
 
 			t_done = impl.validateLoadTimestamp(t_now, edata, ename);
@@ -1691,5 +1690,5 @@
 		}
 	};
 
-}(window));
+}(BOOMR.window));
 // End of RT plugin
