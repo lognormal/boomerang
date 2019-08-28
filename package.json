@@ -1,5 +1,221 @@
 {
-  "name": "boomerang",
+  "name": "boomerangjs",
   "private": true,
-  "version": "0.0.8"
+  "version": "1.650.0",
+  "releaseVersion": "1",
+  "description": "boomerang always comes back, except when it hits something",
+  "main": "boomerang.js",
+  "directories": {
+    "doc": "doc",
+    "test": "tests"
+  },
+  "dependencies": {
+    "blueimp-md5": "1.0.1",
+    "credit-card-regex": "2.0.0",
+    "error-stack-parser": "1.3.3",
+    "jsurl": "0.1.3",
+    "usertiming-compression": "^0.1.8"
+  },
+  "devDependencies": {
+    "async": "^0.9.2",
+    "bower": "*",
+    "chai": "^1.10.0",
+    "chrome-launcher": "^0.10.5",
+    "chrome-remote-interface": "^0.27.0",
+    "color-convert": "^1.3.1",
+    "compression": "^1.4.4",
+    "cpuprofile-filter": "^1.1.0",
+    "deepmerge": "^0.2.7",
+    "eslint": "^3.17.0",
+    "eslint-plugin-html": "^1.5.1",
+    "express": "^4.11.1",
+    "express-middleware-server-timing": "^3.0.0",
+    "fast-stats": "0.0.4",
+    "fs-extra": "^5.0.0",
+    "grunt": "^1.0.1",
+    "grunt-babel": "^5.0.3",
+    "grunt-browserify": "^4.0.1",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-compress": "^1.4.3",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-connect": "^0.9.0",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-uglify": "^4.0.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-express-server": "^0.5.1",
+    "grunt-filesize": "0.0.7",
+    "grunt-githash": "^0.1.3",
+    "grunt-jsdoc": "^2.0.0",
+    "grunt-karma": "^0.12.1",
+    "grunt-mkdir": "^0.1.2",
+    "grunt-protractor-runner": "^5.0.0",
+    "grunt-protractor-webdriver": "^0.2.5",
+    "grunt-react": "^0.12.3",
+    "grunt-saucelabs": "^8.6.2",
+    "grunt-string-replace": "^1.0.0",
+    "grunt-strip-code": "^1.0.6",
+    "grunt-template": "^0.2.3",
+    "gruntify-eslint": "^3.1.0",
+    "history": "^1.12.5",
+    "jasmine-reporters": "^2.2.1",
+    "jsdoc": "^3.5.5",
+    "json5": "^2.1.0",
+    "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^0.2.6",
+    "karma-edge-launcher": "^0.4.2",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^0.1.9",
+    "karma-mocha-reporter": "^2.0.0",
+    "karma-opera-launcher": "^1.0.0",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-tap-reporter": "0.0.3",
+    "karma-webdriver-launcher": "^1.0.5",
+    "mocha": "^3.0.2",
+    "performance-now": "^2.1.0",
+    "phantomjs": "^1.9.13",
+    "protractor": "^5.2.0",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "react-router": "^1.0.0-rc3",
+    "sanitize-html": "^1.15.0",
+    "strip-json-comments": "^1.0.2"
+  },
+  "scripts": {
+    "test": "grunt test",
+    "lint": "grunt lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akamai/boomerang.git"
+  },
+  "keywords": [
+    "NavigationTiming",
+    "PerformanceTimeline",
+    "ResourceTiming",
+    "ServerTiming",
+    "UserTiming",
+    "analytics",
+    "boomerang",
+    "performance",
+    "rum"
+  ],
+  "author": {
+    "email": "philip@bluesmoon.info",
+    "name": "Philip Tellis",
+    "url": "http://bluesmoon.info"
+  },
+  "contributors": [
+    {
+      "name": "abarre",
+      "email": "a@fasterize.com"
+    },
+    {
+      "name": "Ariel Barreiro",
+      "email": "abarrei@gmail.com"
+    },
+    {
+      "name": "Erik Fried",
+      "email": "erikmfried@gmail.com"
+    },
+    {
+      "name": "Buddy Brewer",
+      "email": "buddy@buddybrewer.com"
+    },
+    {
+      "name": "Callum Macdonald",
+      "email": "github.com@callum-macdonald.com"
+    },
+    {
+      "name": "Chirag Shah",
+      "email": "chiragshah1@gmail.com"
+    },
+    {
+      "name": "Dominick",
+      "email": "dguzzo@gmail.com"
+    },
+    {
+      "name": "Drew Miller",
+      "email": "drew@drewmiller.net"
+    },
+    {
+      "name": "dweitemeyer",
+      "email": "weitemeyer@weikatec.com"
+    },
+    {
+      "name": "Edgar Klein",
+      "email": "edgar@ididic.com"
+    },
+    {
+      "name": "Eric Goldsmith",
+      "email": "eric@ericgoldsmith.com"
+    },
+    {
+      "name": "Jamis Charles",
+      "email": "Jamis82@gmail.com"
+    },
+    {
+      "name": "Jason Martin",
+      "email": "jhmartin@toger.us"
+    },
+    {
+      "name": "Jon Pliske",
+      "email": "jpliske@groupon.com"
+    },
+    {
+      "name": "Marcel Duran",
+      "email": "contact@marcelduran.com"
+    },
+    {
+      "name": "Parker Seidel",
+      "email": "pseidel@predictivetechnologies.com"
+    },
+    {
+      "name": "Phil Booth",
+      "email": "pmbooth@gmail.com"
+    },
+    {
+      "name": "Ryuichi Okumura",
+      "email": "okuryu@okuryu.com"
+    },
+    {
+      "name": "Tyler Mauthe",
+      "email": "tmauthe@hatsize.com"
+    },
+    {
+      "name": "xzyfer",
+      "email": "xzyfer@gmail.com"
+    },
+    {
+      "name": "Andreas Marschke",
+      "email": "andreas.marschke@gmail.com"
+    },
+    {
+      "name": "Ben Ripkens",
+      "email": "bripkens@gmail.com"
+    },
+    {
+      "name": "Nigel Heron",
+      "email": "nheron@querymetrics.com"
+    },
+    {
+      "name": "Nic Jansma",
+      "email": "nic@nicj.net"
+    },
+    {
+      "name": "Charles Vazac",
+      "email": "cvazac@gmail.com"
+    },
+    {
+      "name": "Avinash Shenoy",
+      "email": "nash.shenoy@gmail.com"
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/akamai/boomerang/issues"
+  },
+  "homepage": "https://github.com/akamai/boomerang"
 }

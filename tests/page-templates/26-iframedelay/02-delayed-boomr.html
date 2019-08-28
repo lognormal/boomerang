@@ -1,0 +1,25 @@
+<%= header %>
+<!--
+	Tests the IFrameDelay child frame postMessage retry.
+	Config on the base page is delayed causing Boomerang not to listen to the child messages
+	when the iframes start and end.
+-->
+<iframe id="frame1" src="/delay?delay=200&file=/pages/26-iframedelay/support/instant-pageready.html"></iframe>
+<iframe id="frame2" src="/delay?delay=100&file=/pages/26-iframedelay/support/instant-pageready.html"></iframe>
+<%= boomerangSnippet %>
+<script src="02-delayed-boomr.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+setTimeout(function() {
+	BOOMR_test.init({
+		testAfterOnBeacon: true,
+		IFrameDelay: {
+			enabled: true,
+			monitoredCount: 2
+		},
+		autorun: false
+	});
+}, 2000);
+</script>
+<img src="/delay?delay=100&file=/assets/img.jpg"/>
+<%= footer %>

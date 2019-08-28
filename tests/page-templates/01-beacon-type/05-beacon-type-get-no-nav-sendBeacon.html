@@ -1,0 +1,23 @@
+<%= header %>
+<script>
+window.sendBeaconUrl = undefined;
+window.sendBeaconData = undefined;
+if (window.navigator && typeof window.navigator.sendBeacon === "function") {
+	window.navigator.sendBeacon = function(url, data) {
+		"[native code]";
+		// ^ fool ourselves
+
+		sendBeaconUrl = url;
+		sendBeaconData = data;
+	};
+}
+</script>
+<%= boomerangSnippet %>
+<script src="05-beacon-type-get-no-nav-sendBeacon.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	beacon_type: "GET"
+});
+</script>
+<%= footer %>

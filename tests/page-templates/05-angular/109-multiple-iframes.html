@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="109-multiple-iframes.js" type="text/javascript"></script>
+
+<iframe id="frame1" src="support/simple-spa-page.html?id=1"></iframe>
+<iframe id="frame2" src="support/simple-spa-page.html?id=2"></iframe>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	IFrameDelay: {
+		enabled: true,
+		monitoredCount: 2
+	},
+	autorun: false
+});
+</script>
+
+<!-- delay onload so that the iframes have time to run their boomerangs -->
+<img src="/delay?delay=2000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

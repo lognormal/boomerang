@@ -1,0 +1,54 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="12-addvar.js" type="text/javascript"></script>
+<script>
+
+// disable sendBeacon so we can look at the URL's parameters
+if (window.navigator) {
+	window.navigator.sendBeacon = null;
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: 3,
+	afterFirstBeacon: function() {
+		// fire two beacons
+		BOOMR.responseEnd("foo");
+
+		setTimeout(function() {
+			BOOMR.responseEnd("foo2");
+		}, 1000);
+	}
+});
+
+// test different variables types
+BOOMR.addVar("var1", 1);
+BOOMR.addVar("var2", "abc");
+BOOMR.addVar("var3", 0);
+BOOMR.addVar("var4");
+BOOMR.addVar("var5", undefined);
+BOOMR.addVar("var6", null);
+BOOMR.addVar("var7", "");
+BOOMR.addVar("var8", { a: 1 });
+BOOMR.addVar("var9", 1.1111111);
+
+// overwrite a var
+BOOMR.addVar("var10", 1);
+BOOMR.addVar("var10", 2);
+
+// set single-beacon vars
+BOOMR.addVar("var11", "single", true);
+
+// remove a var
+BOOMR.addVar("var12", 2);
+BOOMR.removeVar("var12");
+
+// multiple sets
+BOOMR.addVar({
+	var13: 1,
+	var14: 2
+});
+
+// remove a non-existent var
+BOOMR.removeVar("var15");
+</script>
+<%= footer %>

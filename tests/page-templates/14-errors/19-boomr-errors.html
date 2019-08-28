@@ -1,0 +1,32 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="19-boomr-errors.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true
+	}
+});
+
+// Send a Boomerang error with an exception and a source
+function errorFunction() {
+	try {
+		a.bad = 1;
+	}
+	catch (e) {
+		BOOMR.addError(e, "BOOMRtest");
+	}
+}
+errorFunction();
+
+// Send a textual error
+BOOMR.addError("Fault 2", "BOOMRtest2");
+
+// Send a textual error with some extra string
+BOOMR.addError("Fault 3", "BOOMRtest3", "Extra stuff");
+
+// Send a textual error with an extra object
+BOOMR.addError("Fault 4", "BOOMRtest4", {a: true, b: "EXTRASTRING"});
+</script>
+<%= footer %>

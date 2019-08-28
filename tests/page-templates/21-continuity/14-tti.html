@@ -1,0 +1,17 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>14-tti</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="14-tti.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

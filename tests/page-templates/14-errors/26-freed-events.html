@@ -1,0 +1,44 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="26-freed-events.js" type="text/javascript"></script>
+<iframe id="testFrame"></iframe>
+<script>
+var testFrame = document.getElementById("testFrame");
+var testFrameDoc = testFrame.contentWindow.document;
+testFrameDoc.open();
+testFrameDoc.write("\x3cscript\x3efuncInIframe \x3d function(event) { console.log(\x22hello from iframe\x22); }\x3c/script\x3e");
+testFrameDoc.close();
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+		sendAfterOnload: true,
+
+		// turn off global so it doesn't get in the way
+		monitorGlobal: false,
+		monitorTimeout: false
+	}
+});
+
+if (window.addEventListener && window.postMessage) {
+	// by the time the message event callback is called the iframe would have been freed
+	// in IE/Edge this causes a `Can't execute code from freed script` error
+	// in Chrome, the callback will execute
+	window.addEventListener("message", testFrame.contentWindow.funcInIframe);
+
+	// changing the src causes the script to be freed in IE/Edge
+	testFrameDoc.open();
+	testFrameDoc.write("");
+	testFrameDoc.close();
+
+	setTimeout(function() {
+		window.postMessage("foo", "*");
+	}, 100);
+}
+</script>
+
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="01-adobe-cookie-svi-invalid.js" type="text/javascript"></script>
+<script>
+
+window._satellite = {}; // makes the plugin think adobe sitecatalyst is installed on the page
+
+BOOMR_test.clearCookies();
+
+// Set s_vi cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["s_vi=someinvalidstring", "path=/", "domain=" + location.hostname].join("; ");
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

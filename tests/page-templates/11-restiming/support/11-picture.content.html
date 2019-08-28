@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<title>Testing picture source</title>
+</head>
+<body>
+<picture>
+</picture>
+<script>
+var widths = [800, 480, 320];
+(function() {
+	var pict = document.getElementsByTagName("PICTURE")[0];
+	for (var i = 0; i < widths.length; i++) {
+		var src = document.createElement("SOURCE");
+		src.srcset = "09-" + widths[i] + ".jpg?" + Math.random();
+		if (i < widths.length - 1) {
+			src.media = "(min-width: " + widths[i] + "px)";
+		}
+		else {
+			src.media = "(max-width: " + widths[i - 1] + "px)";
+		}
+		pict.appendChild(src);
+	}
+
+	var img = document.createElement("IMG");
+	img.src = "09-" + widths[widths.length - 1] + ".jpg?" + Math.random();
+
+	pict.appendChild(img);
+})();
+</script>
+</body>
+</html>

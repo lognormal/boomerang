@@ -1,0 +1,54 @@
+<%= header %>
+<!--
+Test what happens when a pending event is in idle wait timeout and another event starts.
+
+In this case a spa soft event will start while an xhr pending event is waiting for its timeout.
+-->
+<%= boomerangScript %>
+<img id="main-image" src="" />
+<script src="51-concurrent-events.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 3 : 1,
+	AutoXHR: {
+		xhrIdleTimeout: 2000,  // modify the timeouts to guaranty concurrency
+		spaIdleTimeout: 50  // since the spa timeout is much shorter, the spa beacon willl be sent first
+	},
+	autorun: false,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/pages/07-autoxhr/support/img.jpg?id=xhr&rnd=" + Math.random(), true);
+			xhr.addEventListener("load", function() {
+				// add an img that will be tracked by the xhr event
+				var img = document.createElement("IMG");
+				img.src = "/delay?delay=100&file=/assets/img.jpg?rnd=" + Math.random();
+				img.addEventListener("load", function() {
+					setTimeout(function() {
+						// start a spa soft event while the xhr idle timeout is in progress
+						BOOMR.plugins.SPA.route_change();
+						// add an img that will be tracked by the spa event
+						var img2 = document.createElement("IMG");
+						img2.src = "/delay?delay=400&file=/assets/img.jpg?rnd=" + Math.random();
+						// add an xhr that will be tracked by the spa event in case MutationObserver is not supported
+						document.body.appendChild(img2);
+						var xhr2 = new XMLHttpRequest();
+						xhr2.open("GET", "/pages/07-autoxhr/support/img.jpg?id=xhr&rnd=" + Math.random(), true);
+						xhr2.send();
+
+					}, 200);
+				});
+				document.body.appendChild(img);
+			});
+			xhr.send(null);
+		}
+});
+
+BOOMR.plugins.SPA.route_change();  // start the spa_hard
+</script>
+<%= footer %>

@@ -1,0 +1,6 @@
+Content-Security-Policy: frame-src 'none'
+Content-Security-Policy: child-src 'none'
+Content-Security-Policy: script-src boomerang-test.local:* 'nonce-boomerang-test-1' 'nonce-boomerang-test-2' 'nonce-boomerang-test-3' 'nonce-boomerang-test-4' 'nonce-boomerang-test-5'
+Content-Security-Policy: style-src boomerang-test.local:*
+Content-Security-Policy: img-src boomerang-test.local:*
+Content-Security-Policy: connect-src boomerang-test.local:*

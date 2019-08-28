@@ -1,0 +1,32 @@
+<%= header %>
+<script src="45-sync-xhr-no-error.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	instrument_xhr: true,
+	autorun: true,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		// make sure we listen for XHR error event
+		window.xhrErrorFired = false;
+		BOOMR.subscribe("xhr_error", function() {
+			window.xhrErrorFired = true;
+		});
+
+		setTimeout(function() {
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "/blackhole?rnd=" + Math.random(), false);
+			xhr.send(null);
+		}, 500);
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,38 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="05-no-paint-yet.js" type="text/javascript"></script>
+<script>
+
+window.loadTimesCalled = false;
+if (BOOMR_test.isPaintTimingSupported()) {
+	// Replace any queries for PaintTiming with an empty array
+	window.performance.getEntriesByType = (function(_getEntriesByType) {
+		return function(type) {
+			var result = _getEntriesByType.apply(this, arguments);
+
+			// fake that no paint happened
+			if (type === "paint" && result.length) {
+				result = [];
+			}
+
+			return result;
+		};
+	})(window.performance.getEntriesByType);
+
+	// Note whether chrome.loadTimes() is called at all
+	if (typeof window.chrome !== "undefined") {
+		window.chrome.loadTimes = (function(_loadTimes) {
+			return function() {
+				var result = _loadTimes.apply(this);
+				window.loadTimesCalled = true;
+				return result;
+			};
+		})(window.chrome.loadTimes);
+	}
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

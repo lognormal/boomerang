@@ -1,0 +1,210 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="42-fetch-api.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+var t = BOOMR_test;
+window.xoUrl = "//<%= secondaryServer %>:" + window.location.port + "/blackhole";
+window.results = {};
+
+function afterFirstBeacon() {
+	if (!BOOMR.plugins.AutoXHR || !t.isFetchApiSupported()) {
+		return;
+	}
+
+	function consume(response) {
+		return response.blob();
+	}
+
+	function logFail(reason) {
+		console.error(reason);
+	}
+
+	var xhrNum = 0;
+	function sendBeacon() {
+		setTimeout(function() {
+			var f, req;
+			if (xhrNum === 0) {
+				// GET fetch with string url
+				f = window.fetch("support/script200.js?req=0&rnd=" + Math.random());
+				f.then(consume);
+			}
+			else if (xhrNum === 1) {
+				// GET fetch with Request object
+				req = new Request("support/script200.js?req=1&rnd=" + Math.random());
+				f = window.fetch(req);
+				f.then(consume);
+			}
+			else if (xhrNum === 2) {
+				// fetch with chunked response
+				// Example via: https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+				f = window.fetch("/chunked?chunkSize=1000&chunkCount=10&chunkDelay=500&rnd=" + Math.random());
+				f.then(function(response) {
+					if (response && typeof response.body !== "undefined" &&
+					    typeof response.body.getReader === "function" && window.ReadableStream) {
+						var reader = response.body.getReader();
+						try {
+							// ReadableStream constructor fails in Edge
+							var stream = new ReadableStream({
+								start: function(controller) {
+									function push() {
+										var p = reader.read();
+										// console.log("read");
+										p.then(function(arg) {
+											// arg is {done, value}, `done` is a Boolean and `value` a `Uint8Array`
+											// Is there no more data to read?
+											if (arg.done) {
+												// Tell the browser that we have finished sending data
+												controller.close();
+												return;
+											}
+
+											// Get the data and send it to the browser via the controller
+											controller.enqueue(arg.value);
+											push();
+										});
+									};
+
+									push();
+								}
+							});
+
+							return new Response(stream, { headers: { "Content-Type": "text/plain" } });
+						}
+						catch (e) {
+							console.log(e);
+							throw e;
+						}
+					}
+				}).then(consume);  // if we don't consume it, our stream will never be read and the timings will be wrong
+			}
+			else if (xhrNum === 3) {
+				// fetch with 404 response
+				f = window.fetch("/404?rnd=" + Math.random());
+				f.then(consume);
+			}
+			else if (xhrNum === 4) {
+				// fetch with 500 response
+				f = window.fetch("/500?rnd=" + Math.random());
+				f.then(consume);
+			}
+			else if (xhrNum === 5) {
+				// fetch with network error
+				f = window.fetch("/drop?rnd=" + Math.random());
+				f.then(consume).then(null, logFail);
+			}
+			else if (xhrNum === 6) {
+				// POST fetch with string url
+				f = window.fetch("/chunked?chunkSize=1000&chunkCount=1&chunkDelay=50&req=0&rnd=" + Math.random(), {method: "POST"});
+				// as a test, don't consume the response. The response should be fast enough that we get a RT entry when done
+			}
+			else if (xhrNum === 7) {
+				// POST fetch with Request object
+				req = new Request("/chunked?chunkSize=1000&chunkCount=10&chunkDelay=500&req=1&rnd==" + Math.random(), {method: "POST"});
+				f = window.fetch(req);
+				// as a test, don't consume the response. The response should be slow enough that we do not get a RT entry when done
+			}
+			else if (xhrNum === 8) {
+				// POST fetch with Request object using init override
+				req = new Request("/blackhole?req=1&rnd=" + Math.random(), {method: "GET"});
+				f = window.fetch(req, {method: "POST"});
+				// as a test, don't consume the response
+			}
+			else if (xhrNum === 9) {
+				var controller, init = {method: "GET"};
+				// fetch with AbortController
+				// See https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+				// Safari has AbortController, but this doesn't seem to work
+				if (window.AbortController) {
+					controller = new AbortController();
+					init.signal = controller.signal;
+				}
+				req = new Request("/delay?delay=3000&file=build/boomerang-latest-debug.js&rnd=" + Math.random());
+				f = window.fetch(req, init);
+				f.then(consume).then(null, logFail);
+				if (controller) {
+					setTimeout(function() {
+						controller.abort();
+					}, 250);
+				}
+			}
+			else if (xhrNum === 10) {
+				// cross origin fail (no ACAO header)
+				f = window.fetch(window.xoUrl + "?rnd=" + Math.random(), {method: "GET", "mode": "same-origin"});
+				f.then(consume).then(null, logFail);
+			}
+			else if (xhrNum === 11) {
+				// test text()
+				f = window.fetch("support/data.json?req=text&rnd=" + Math.random());
+				f.then(function(response) {
+					return response.text();
+				}).then(function(data) {
+					window.results.text = data;
+				});
+			}
+			else if (xhrNum === 12) {
+				// test json()
+				f = window.fetch("support/data.json?req=json&rnd=" + Math.random());
+				f.then(function(response) {
+					return response.json();
+				}).then(function(data) {
+					window.results.json = data;
+				});
+			}
+			else if (xhrNum === 13) {
+				// test blob()
+				f = window.fetch("support/data.json?req=blob&rnd=" + Math.random());
+				f.then(function(response) {
+					return response.blob();
+				}).then(function(data) {
+					window.results.blob = data;
+				});
+			}
+			else if (xhrNum === 14) {
+				// test arrayBuffer
+				f = window.fetch("support/data.json?req=arrayBuffer&rnd=" + Math.random());
+				f.then(function(response) {
+					return response.arrayBuffer();
+				}).then(function(data) {
+					window.results.arrayBuffer = data;
+				});
+			}
+			else if (xhrNum === 15) {
+				// test formData
+				f = window.fetch("support/data.json?req=formData&rnd=" + Math.random());
+				f.then(function(response) {
+					return response.arrayBuffer();
+				}).then(function(data) {
+					window.results.formData = data;
+				});
+			}
+			xhrNum++;
+		}, 100);
+	}
+
+	// send a new XHR on each beacon
+	BOOMR.subscribe("beacon", sendBeacon);
+
+	// start the first beacon
+	sendBeacon();
+}
+</script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR && t.isFetchApiSupported() ? 17 : 1,
+	PageParams: {
+		xhr: "all"
+	},
+	AutoXHR: {
+		monitorFetch: true,
+		fetchBodyUsedWait: 250
+	},
+	instrument_xhr: true,
+	autorun: true,
+	afterFirstBeacon: afterFirstBeacon
+});
+</script>
+
+<%= footer %>

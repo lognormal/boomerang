@@ -1,0 +1,41 @@
+<%= header %>
+<!--
+	This test checks that a error reported and re-thrown in an event handler isn't
+	re-sent by the global error handler
+-->
+<%= boomerangScriptMin %>
+<script src="36-events-window-reported.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+		sendAfterOnload: true,
+		monitorGlobal: true
+	}
+});
+
+if (window.addEventListener && window.postMessage) {
+	function errorFunction(message) {
+		if (message && message.data === "foo") {
+			a.foo = false;
+		}
+	}
+
+	window.addEventListener("message", errorFunction);
+
+	window.postMessage("foo", "*");
+
+	setTimeout(function() {
+		// remove event listener
+		window.removeEventListener("message", errorFunction);
+
+		// event listener shouldn't fire
+		window.postMessage("foo", "*");
+	}, 100);
+}
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

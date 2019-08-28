@@ -1,0 +1,38 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="05-adobe-cookie-amcv.js" type="text/javascript"></script>
+<script>
+
+// polyfill for adobe marketing cloud id
+window.Visitor = function Visitor() {};
+window.Visitor.getInstance = function(orgid) {
+	var aid = "";
+	var mid = "";
+	if (orgid === "XXXXXXXXXXXXXXXXXXXXXXXX@AdobeOrg") {
+		mid = "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM";
+		aid = "AAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAA";
+	}
+	return {
+		getMarketingCloudVisitorID: function() {
+			return mid;
+		},
+		getAnalyticsVisitorID: function() {
+			return aid;
+		}
+	};
+};
+
+BOOMR_test.clearCookies();
+
+// Set AMVC_ cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["AMCV_XXXXXXXXXXXXXXXXXXXXXXXX%40AdobeOrg=999999999%7CMCIDTS%7C16898%7CMCMID%MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM%7CMCAAMLH-1111111111%7C7%7CMCAAMB-1111111111%7CNNNNNNNNnNNNNNh-nqAG_A%7CMCAID%7CAAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAA", "path=/", "domain=" + location.hostname].join("; ");
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,23 @@
+<%= header %>
+<script>
+window.lastNav = +(new Date()) - 60000;
+BOOMR_test.setCookie({
+	si: "abc123-1234",
+	sl: (10).toString(36),
+	ss: (lastNav).toString(36),
+	tt: (1000).toString(36),
+	bcn: "/beacon",
+	dm: document.domain,
+	ld: (1000).toString(36),
+	z: 1
+});
+</script>
+<%= boomerangScript %>
+<script src="03-cookie-from-previous-nav.js" type="text/javascript"></script>
+<script>
+BOOMR.session.domain = document.domain;
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

@@ -1,0 +1,79 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="04-xhr-use-rt.js" type="text/javascript"></script>
+
+<script>
+var t = BOOMR_test;
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? (t.isFetchApiSupported() ? 3 : 2) : 1,
+	instrument_xhr: true,
+	AutoXHR: {
+		monitorFetch: true
+	},
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		setTimeout(function() {
+			var xhr1 = new XMLHttpRequest();
+			window.XHR_URL = "/delay?delay=3000&file=build/boomerang-latest-debug.js&id=xhr&rnd=" + Math.random();
+			xhr1.open("GET", XHR_URL);
+
+			xhr1.addEventListener("load", function() {
+				var img1;
+				// do 2 seconds of busy work
+				BOOMR_test.busy(2000);
+
+				// trigger a mutatation that the xhr pending event will track
+				img1 = document.createElement("img");
+				img1.src = "/delay?delay=2000&id=img1&file=/pages/07-autoxhr/support/img.jpg&rnd=" + Math.random();
+				document.body.appendChild(img1);
+			});
+
+			// start sending the first
+			xhr1.send(null);
+		}, 10);
+
+		if (t.isFetchApiSupported()) {
+			BOOMR.subscribe("beacon", function() {
+				setTimeout(function() {
+					// 3 sec so that the promise resolve happens later
+					window.FETCH_URL = "/delay?delay=3000&file=build/boomerang-latest-debug.js&id=fetch&rnd=" + Math.random();
+					var f1 = fetch(FETCH_URL);
+
+					// do 2 seconds of busy work,
+					// should have no side effects
+					setTimeout(function() {
+						BOOMR_test.busy(2000);
+					}, 100);
+
+					f1.then(function(response) {
+						// wait 2 seconds before reading response,
+						// this can cause a delayed responseEnd in Chrome.
+						// In other browsers it will be added to t_page
+						return new Promise(function(resolve) {
+							setTimeout(function() {
+								resolve(response.text());
+							}, 2000);
+						});
+					}).then(function(text) {
+						// do 2 seconds of busy work after reading response,
+						// should increase t_page
+						BOOMR_test.busy(1000);
+					}).then(function() {
+						var img2;
+
+						// trigger a mutatation that the xhr pending event will track
+						img2 = document.createElement("img");
+						img2.src = "/delay?delay=2000&id=img2&file=/pages/07-autoxhr/support/img.jpg&rnd=" + Math.random();
+						document.body.appendChild(img2);
+					});
+				}, 10);
+			}, null, null, true);
+		}
+	}
+});
+</script>
+<%= footer %>

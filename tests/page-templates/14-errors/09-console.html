@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="09-console.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorConsole: true
+	}
+});
+
+function errorFunction() {
+	console.error("Console error!");
+	console.error("Console error 2!", "second arg");
+
+	console.error.apply(console, ["Console error 3!", "second arg"]);
+}
+errorFunction();
+</script>
+<%= footer %>

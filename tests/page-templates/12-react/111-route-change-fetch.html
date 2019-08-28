@@ -1,0 +1,40 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="support/function-bind-polyfill.js" type="text/javascript"></script>
+
+<base href="/pages/12-react/111-route-change-fetch.html" />
+
+<script type="text/javascript">
+window.imgs = [3000];
+window.html5_mode = false;
+
+// view a widget then come back so debugging (F5) is easier
+window.nav_routes = ["/delay/2000/widgets/1", "/"];
+
+window.use_fetch = true;
+</script>
+
+<div id="root"></div>
+
+<script src="/test-templates/spa/04-route-change.js" type="text/javascript"></script>
+<script src="111-route-change-fetch.js"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR_test.isFetchApiSupported() ? 3 : 1,
+	AutoXHR: {
+		monitorFetch: true
+	},
+	History: {
+		enabled: true
+	},
+	Errors: {
+		enabled: false
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<script src="support/app.js"></script>
+
+<%= footer %>

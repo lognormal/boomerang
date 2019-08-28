@@ -1,0 +1,16 @@
+<div>
+	<h1>Home</h1>
+	{{#unless hide_imgs}}
+		{{#each imgs}}
+			<img src="/delay?delay={{this}}&amp;file=pages/09-backbone/support/img.jpg&amp;id=home&amp;rnd={{../rnd}}" style="width: 300px; height: auto;"/>
+		{{/each}}
+	{{/unless}}
+	<div class="cart-container" style="display: none">
+		<div id="cart-total">$444.44</div>
+	</div>
+	<ul>
+		{{#each widgets}}
+			<li><a href="#widget/{{id}}">{{name}}</a></li>
+		{{/each}}
+	</ul>
+</div>

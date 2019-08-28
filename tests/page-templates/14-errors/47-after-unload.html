@@ -1,0 +1,57 @@
+<%= header %>
+<script>
+// keep the original setTimeout
+window.origSetTimeout = window.setTimeout;
+
+// Force IFRAME method
+BOOMR_test.forceSnippetIframe();
+</script>
+<%= boomerangSnippet %>
+<script src="47-after-unload.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: false,
+	Errors: {
+		enabled: true
+	},
+	onBoomerangLoaded: function() {
+		// overwrite the page's onerror to see if a message gets logged
+		window.onerror = function(err) {
+			window.onerrorHit = err;
+		};
+
+		BOOMR.subscribe("page_ready", function() {
+			if (!BOOMR_test.snippetWasLoadedIframe()) {
+				// skip test for IE 6/7
+				BOOMR_test.runTests();
+				return;
+			}
+
+			// let boomerang send a beacon first
+			setTimeout(function() {
+				// unload the Boomerang frame
+				var iframe = document.getElementsByTagName("iframe")[0];
+				iframe.parentNode.removeChild(iframe);
+
+				// use the un-wrapped setTimeout to ensure the DOM unloads the IFRAME
+				window.origSetTimeout(function() {
+					try {
+						// try the still-wrapped setTimeout that should call into
+						// Boomerang's code
+						setTimeout(function() {
+							var a = 1;
+						}, 0);
+					}
+					catch (e) {
+						// we'll catch the error either from here or from onerror
+						window.onerrorHit = e;
+					}
+
+					BOOMR_test.runTests();
+				}, 1000);
+			}, 3000);
+		});
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,32 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>16-tti-framework-ready</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="16-tti-framework-ready.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true,
+		ttiWaitForFrameworkReady: true
+	}
+});
+
+// wait for 2 seconds to trigger Framework Ready
+setTimeout(function() {
+	// mark Visually Ready
+	BOOMR.plugins.Continuity.frameworkReady();
+	window.visuallyReady = BOOMR.now();
+
+	// do another 300ms of work
+	BOOMR_test.busy(300);
+
+	// time to interactive should be around this timestamp
+	window.timeToInteractive = BOOMR.now();
+}, 2000);
+
+</script>
+<%= footer %>

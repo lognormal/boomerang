@@ -1,0 +1,86 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="23-duplicate-event-listener.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+
+		// turn off global so it doesn't get in the way
+		monitorGlobal: false
+	}
+});
+
+var img1 = new Image(); // "load" tracked, capture = false
+var img2 = new Image(); // "load" tracked, capture = true
+var img3 = new Image(); // "load" tracked, then removed, capture = false
+var img4 = new Image(); // "load" tracked, then removed, capture = true
+var img5 = new Image(); // "load" tracked using same as img3, then removed, capture = true
+var img6 = new Image(); // "load" tracked using same fn as img1, then removed, capture = false
+var img7 = new Image(); // "load" tracked using same fn as img1, then removed, capture = true
+var img8 = new Image(); // "load" tracked using same fn as img1
+
+function errorFunction1() {
+	// called 2x from img1,8
+	a.foo1 = false;
+}
+function errorFunction2() {
+	// called 1x from img2
+	a.foo2 = false;
+}
+function errorFunction3() {
+	// called 1x from img5
+	a.foo3 = false;
+}
+function errorFunction4() {
+	// called 1x from img4
+	a.foo4 = false;
+}
+
+if (window.addEventListener) {
+	img1.addEventListener("load", errorFunction1, false);
+	img1.addEventListener("load", errorFunction1, false);
+
+	img2.addEventListener("load", errorFunction2, true);
+	img2.addEventListener("load", errorFunction2, true);
+
+	img3.addEventListener("load", errorFunction3, false);
+	img3.addEventListener("load", errorFunction3, false);
+	// should successfully remove the event
+	img3.removeEventListener("load", errorFunction3, false);
+
+	img4.addEventListener("load", errorFunction4, true);
+	img4.addEventListener("load", errorFunction4, true);
+	// no match because capture is different, so the event stays
+	img4.removeEventListener("load", errorFunction4, false);
+
+	img5.addEventListener("load", errorFunction3, true);
+	img5.addEventListener("load", errorFunction3, true);
+
+	img6.addEventListener("load", errorFunction1, false);
+	img6.addEventListener("load", errorFunction1, false);
+	img6.removeEventListener("load", errorFunction1, false);
+
+	img7.addEventListener("load", errorFunction1, true);
+	img7.addEventListener("load", errorFunction1, true);
+	img7.removeEventListener("load", errorFunction1, true);
+
+	img8.addEventListener("load", errorFunction1, false);
+	img8.addEventListener("load", errorFunction1, false);
+}
+
+img1.src = "/assets/img.jpg?1";
+img2.src = "/assets/img.jpg?2";
+img3.src = "/assets/img.jpg?3";
+img4.src = "/assets/img.jpg?4";
+img5.src = "/assets/img.jpg?5";
+img6.src = "/assets/img.jpg?6";
+img7.src = "/assets/img.jpg?7";
+img8.src = "/assets/img.jpg?8";
+
+</script>
+<!-- delay the page by 1second so onloads can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

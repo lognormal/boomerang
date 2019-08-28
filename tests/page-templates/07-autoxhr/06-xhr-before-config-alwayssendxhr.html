@@ -1,0 +1,45 @@
+<%= header %>
+<script src="06-xhr-before-config-alwayssendxhr.js" type="text/javascript"></script>
+<%= boomerangSnippet %>
+<%= instrumentXHRSnippet %>
+<script>
+
+var xhr;
+
+//opened and completed before config
+xhr = new XMLHttpRequest();
+xhr.open("GET", "/delay?delay=0&file=build/boomerang-latest-debug.js&xhr1", true);
+xhr.addEventListener(
+	"readystatechange",
+	function() {
+		if (xhr.readyState === 4) {
+
+			//opened before init, completed after init
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "/delay?delay=1000&file=build/boomerang-latest-debug.js&xhr2", true);
+			xhr.send(null);
+
+			BOOMR_test.init({
+				testAfterOnBeacon: window.XMLHttpRequest && (new XMLHttpRequest()).addEventListener ? 4 : 1,
+				AutoXHR: {
+					alwaysSendXhr: true
+				},
+				ResourceTiming: {
+					enabled: true
+				},
+				instrument_xhr: true,
+				onBoomerangLoaded: function() {
+					//opened and completed after config
+					setTimeout(function() {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "/delay?delay=0&file=build/boomerang-latest-debug.js&xhr3", true);
+						xhr.send(null);
+					}, 3000);
+				}
+			});
+		}
+	},
+	false);
+xhr.send(null);
+</script>
+<%= footer %>

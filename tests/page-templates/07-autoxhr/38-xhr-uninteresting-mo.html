@@ -1,0 +1,78 @@
+<%= header %>
+<!--
+Verify that creating uninteresting mutation observer events doesn't hold an xhr beacon from being sent
+-->
+<script src="38-xhr-uninteresting-mo.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+// create non interesting MO events a few times per second
+function addDiv() {
+	var div = window.document.createElement("div");
+	window.document.body.appendChild(div);
+	setTimeout(addDiv, 200);
+};
+setTimeout(addDiv, 200);
+
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 8 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			var xhrNum = 0;
+			function sendBeacon() {
+				setTimeout(function() {
+					var xhr;
+					if (xhrNum === 0) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js?rnd=" + Math.random()); //200, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 1) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js?rnd=" + Math.random(), false); //200, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 2) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js?rnd=" + Math.random()); //404, async
+						xhr.send(null);
+					}
+					else if (xhrNum === 3) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script404.js?rnd=" + Math.random(), false); //404, sync
+						xhr.send(null);
+					}
+					else if (xhrNum === 4) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "http://akamai.com/?rnd=" + Math.random()); //X-O error
+						xhr.send(null);
+					}
+					else if (xhrNum === 5) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js?rnd=" + Math.random()); //200, async, abort
+						xhr.send(null);
+						xhr.abort();
+					}
+					else if (xhrNum === 6) {
+						xhr = new XMLHttpRequest();
+						xhr.open("GET", "support/script200.js?rnd=" + Math.random()); //200, async, timeout
+						xhr.timeout = 1;
+						xhr.send(null);
+					}
+					xhrNum++;
+				}, 100);
+			}
+
+			// send a new XHR on each beacon
+			BOOMR.subscribe("beacon", sendBeacon);
+
+			// start the first beacon
+			sendBeacon();
+		}
+});
+</script>
+<%= footer %>

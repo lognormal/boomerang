@@ -1,0 +1,27 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="21-dom.js" type="text/javascript"></script>
+<img src="/delay?delay=3000&amp;file=assets/img.jpg" width="200" height="100" />
+<div id="out"></div>
+<script>
+var mutInterval;
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true
+	},
+	afterFirstBeacon: function() {
+		clearInterval(mutInterval);
+	}
+});
+</script>
+<script>
+// make consistent DOM mutations
+mutInterval = setInterval(function() {
+	var d = document.createElement("div");
+	d.innerHTML = "test";
+	document.getElementById("out").appendChild(d);
+}, 100);
+</script>
+<%= footer %>

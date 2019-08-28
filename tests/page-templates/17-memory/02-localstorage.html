@@ -1,0 +1,24 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="02-localstorage.js" type="text/javascript"></script>
+<script>
+var lst = window.localStorage;
+var sst = window.sessionStorage;
+
+if (lst) {
+	var x = "abcdefghijklmnopqrstuvwxyz";
+	lst.setItem("foo", x);
+	lst.setItem("fool", x.length);
+}
+
+if (sst) {
+	var y = "abcdefg";
+	sst.setItem("bar", y);
+	sst.setItem("barl", y.length);
+	sst.setItem("bart", "abc");
+}
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

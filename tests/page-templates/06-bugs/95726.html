@@ -1,0 +1,45 @@
+<%= header %>
+<script src="95726.js" type="text/javascript"></script>
+<script>
+// GTM-like script
+var s = document.createElement("script");
+s.async = false;
+s.type = "text/javascript";
+s.text = "(function(){\x0d" +
+"var first;\n" +
+"if(!window.BOOMR||!window.BOOMR.version){\n" +
+"var c,b,d,a\x3ddocument.createElement(\x22iframe\x22);\n" +
+// This would stop a beacon in FF: "a.src\x3d\x22javascript:false\x22;\n" +
+"a.src\x3d\x22javascript:void(0)\x22;\n" +
+"a.role\x3d\x22presentation\x22;\n" +
+"(a.frameElement||a).style.cssText\x3d\x22width:0;height:0;border:0;display:none;\x22;\n" +
+"d\x3ddocument.getElementsByTagName(\x22script\x22)[0];\n" +
+"d.parentNode.insertBefore(a,d);\n" +
+"try{\n" +
+"b\x3da.contentWindow.document;\n" +
+"}catch(e){\n" +
+"c\x3ddocument.domain;\n" +
+"a.src\x3d\x22javascript:var d\\x3ddocument.open();d.domain\\x3d\x27\x22+c+\x22\x27;void(0);\x22;\n" +
+"b\x3da.contentWindow.document;\n" +
+"}\n" +
+"var zzz = b.open();\n" +
+"zzz._l\x3dfunction(){\n" +
+"var a\x3dthis.createElement(\x22script\x22);\n" +
+"c\x26\x26(this.domain\x3dc);\n" +
+"a.id\x3d\x22boomr-if-as\x22;\n" +
+"a.src\x3d\x22/build/boomerang-latest-debug.js\x22;\n" +
+"BOOMR_lstart\x3d(new Date).getTime();\n" +
+"this.body.appendChild(a);\n" +
+"};\n" +
+"b.write(\x27\\x3cbody onload\\x3d\x22document._l();\x22\\x3e\x27);\n" +
+"b.close();\n" +
+"b,c,a,d=null;\n" +
+"}})();";
+document.body.insertBefore(s, null);
+</script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

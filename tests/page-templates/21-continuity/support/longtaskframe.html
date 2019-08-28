@@ -1,0 +1,18 @@
+<html>
+<body>
+	<h1>LongTaskFrame</h1>
+	<script>
+	// loop for 1500ms to trigger a long frame
+	var startTime = (new Date()).getTime();
+	var now = startTime;
+	var endTime = startTime + 1500;
+	var math = 1;
+
+	while (now < endTime) {
+		now = (new Date()).getTime();
+		math *= 2;
+		math *= 0.5;
+	}
+	</script>
+</body>
+</html>

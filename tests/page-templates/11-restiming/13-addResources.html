@@ -1,0 +1,71 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="./13-addResources.js"></script>
+<script src="../../vendor/resourcetiming-compression/src/resourcetiming-decompression.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	autorun: false,
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	onBoomerangLoaded: function() {
+
+		// append an image whose data we will supplement
+		var img = document.createElement("img");
+		img.src = "support/spacer.gif";
+		document.body.appendChild(img);
+		img.addEventListener("load", function() {
+			// tell boomerang to do its thing
+			BOOMR.page_ready();
+		});
+
+		var epoch = performance.timeOrigin || performance.timing.navigationStart;
+		epoch += 100; // simulated IFRAME delay
+
+		// should nop
+		BOOMR.plugins.ResourceTiming.addResources();
+
+		// add data for a resource that won't be found by boomerang
+		BOOMR.plugins.ResourceTiming.addResources([{
+			name: "http://example.com/script1.js",
+			startTime: 200,
+			initiatorType: "script",
+			_data: {
+				"ns5": "namespaced_payload_5"
+			}
+		}], epoch);
+
+		BOOMR.plugins.ResourceTiming.addResources([{
+			name: "http://example.com/script2.js",
+			startTime: 300,
+			initiatorType: "script",
+			_data: {
+				"ns6": "namespaced_payload_6",
+				"ns7": "namespaced_payload_7"
+			}
+		}], epoch);
+
+		// add data for the img resource, which will also be found by boomerang
+		BOOMR.plugins.ResourceTiming.addResources([{
+			name: img.src,
+			startTime: performance.now(),
+			initiatorType: "img",
+			_data: {
+				"ns1": "namespaced_payload_1_a",
+				"ns2": "namespaced_payload_2"
+			}
+		}, {
+			name: img.src,
+			startTime: performance.now(),
+			initiatorType: "img",
+			_data: {
+				"ns1": "namespaced_payload_1_b",
+				"ns3": "namespaced_payload_3"
+			}
+		}], epoch);
+
+	}
+});
+</script>
+<%= footer %>

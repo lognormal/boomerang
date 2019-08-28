@@ -1,0 +1,16 @@
+<%= header %>
+<script>
+// save these before we overwrite them
+window.isIE = BOOMR_test.isIE();
+window.isEdge = BOOMR_test.isEdge();
+
+window.forcedSnippetScript = BOOMR_test.forceSnippetScript();
+</script>
+<%= boomerangSnippet %>
+<script src="01-script-mode-forced.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

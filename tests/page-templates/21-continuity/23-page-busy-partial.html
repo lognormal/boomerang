@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	autorun: false,
+	Continuity: {
+		enabled: true,
+		monitorLongTasks: false,
+		monitorPageBusy: true
+	}
+});
+</script>
+<script src="23-page-busy-partial.js" type="text/javascript"></script>
+<script>
+// Loop for 1000ms
+BOOMR_test.busy(1000);
+
+// Have 5000ms of idle
+setTimeout(function() {
+	// Loop for 500ms - we need non-0 time at the end so it's reported on c.t.busy
+	BOOMR_test.busy(500);
+
+	// let the latest busy report
+	setTimeout(function() {
+		BOOMR.page_ready();
+	}, 150);
+}, 5000);
+</script>
+<%= footer %>

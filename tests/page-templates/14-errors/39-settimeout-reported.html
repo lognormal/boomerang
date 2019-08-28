@@ -1,0 +1,30 @@
+<%= header %>
+<!--
+	This test checks that a error reported and re-thrown in a settimeout callback isn't
+	re-sent by the global error handler
+-->
+<%= boomerangScriptMin %>
+<script src="39-settimeout-reported.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+		sendAfterOnload: true,
+		monitorGlobal: true,
+		monitorTimeout: true
+	}
+});
+
+if (window.addEventListener && window.postMessage) {
+	function errorFunction() {
+		a.foo = false;
+	}
+
+	setTimeout(errorFunction, 0);
+}
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

@@ -1,0 +1,15 @@
+<div id="cart-total" style="display:none;">$444.44</div>
+
+<h1>Home</h1>
+
+{{#each delay in model.imgs}}
+  {{#unless model.hide}}
+    <img src="/delay?delay={{delay}}&file=/pages/08-ember/support/img.jpg&id=home&id={{delay}}&rnd={{model.rnd}}" style="width: 300px; height: auto;" />
+  {{/unless}}
+{{/each}}
+
+<ul>
+  {{#each widget in model.widgets}}
+  <li>{{#link-to 'widget' widget}} {{widget.name}} {{/link-to}}</li>
+  {{/each}}
+</ul>

@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="06-send-after-onload-dupe-of-load.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+	BOOMR.plugins.Errors.send("ERROR!");
+}
+
+//
+// Have the error generated in a loop.  Several will get added to the page load
+// beacon, but subsequent errors shouldn't trigger post-load error beacons.
+//
+setInterval(errorFunction, 10);
+
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true
+	}
+});
+</script>
+<!-- delay the page by 5 seconds so several errors can fire -->
+<img src="/delay?delay=5000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

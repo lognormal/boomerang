@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>IFrame w/ Boomerang</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script type="text/javascript">
+	document.cookie = "RT=\"\";domain=.boomerang-test.local;path=/";
+	// BOOMR API Key is required for some multi-app versions of Boomerang
+	window.BOOMR_API_key = "API_KEY";
+	</script>
+	<script src="../../../vendor/mocha/mocha.js"></script>
+	<script src="../../../vendor/assertive-chai/dist/assertive-chai.js"></script>
+	<script src="../../../vendor/lodash/lodash.js"></script>
+
+	<script src="../../../boomerang-test-framework.js" type="text/javascript"></script>
+	<script src="../../../build/boomerang-latest-debug.js" type="text/javascript"></script>
+</head>
+<body>
+	<div id="output"></div>
+	<script>
+	var tf = BOOMR.plugins.TestFramework;
+	window.BOOMR_config = {
+		IFrameDelay: {
+			enabled: true,
+			registerParent: true
+		},
+		autorun: false
+	};
+	BOOMR_test.init({});
+
+	// delay page ready until after browser onload
+	setTimeout(function() {
+		BOOMR.page_ready();
+	}, 1500);
+
+	// helper for our cross origin tests
+	function handler(event) {
+		var data = JSON.parse(event.data);
+		if (data && data.msg === "lastBeacon") {
+			event.source.postMessage(JSON.stringify({msg: "beacon", data: tf.lastBeacon()}), event.origin);
+		}
+		else if (data && data.msg === "ensureBeaconCount") {
+			BOOMR_test.ensureBeaconCount(function(err) {
+				event.source.postMessage(JSON.stringify({msg: "count", data: typeof err === "undefined"}), event.origin);
+			}, data.count);
+		}
+	}
+
+	if (window.addEventListener) {
+		window.addEventListener("message", handler);
+	}
+	else {
+		window.attachEvent("onmessage", handler);
+	}
+	</script>
+	<img src="/delay?delay=200&file=/assets/img.jpg"/>
+</body>
+</html>

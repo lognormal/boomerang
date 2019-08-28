@@ -1,0 +1,31 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>17-tti-hero-images</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=1000&amp;file=assets/img.jpg" class="hero-image" />
+<img src="/delay?delay=2000&amp;file=assets/img.jpg" class="hero-image" onload="lastHeroImageLoad()"/>
+<img src="/delay?delay=3000&amp;file=assets/img.jpg" />
+<img src="/delay?delay=5000&amp;file=assets/img.jpg" />
+<script src="17-tti-hero-images.js" type="text/javascript"></script>
+<script>
+function lastHeroImageLoad() {
+	window.heroImagesLoaded = BOOMR.now();
+
+	// do another 500ms of work
+	BOOMR_test.busy(500);
+
+	// time to interactive should be around this timestamp
+	window.timeToInteractive = BOOMR.now();
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true,
+		ttiWaitForHeroImages: ".hero-image"
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,21 @@
+<%= header %>
+<script nonce="boomerang-test-4">
+if (typeof document.addEventListener === "function") {
+	window.violations = [];
+
+	document.addEventListener("securitypolicyviolation", function(e) {
+		violations.push(e);
+	});
+}
+</script>
+<%= boomerangSnippet %>
+<script src="05-csp.js" type="text/javascript"></script>
+<script nonce="boomerang-test-5">
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<script>
+	// this should fail
+</script>
+<%= footer %>

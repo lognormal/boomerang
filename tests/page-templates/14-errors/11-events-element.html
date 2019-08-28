@@ -1,0 +1,47 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="11-events-element.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+
+		// turn off global so it doesn't get in the way
+		monitorGlobal: false
+	}
+});
+
+var img = new Image();
+
+if (window.addEventListener) {
+	img.addEventListener("load", function errorFunction() {
+		// will throw an error
+		a.foo = false;
+	});
+}
+
+img.src = "/assets/img.jpg";
+
+// Also test adding/removing listener from an element.  this errorFunction2
+// shouldn't be called so our overall error count is only 1 from the above
+// errorFunction
+var img2 = new Image();
+
+if (window.addEventListener) {
+	function errorFunction2() {
+		// this should never be called since we remove right away
+		a.foo = false;
+	}
+
+	img.addEventListener("load", errorFunction2, true);
+	img.removeEventListener("load", errorFunction2, true);
+}
+
+img2.src = "/assets/img.jpg";
+
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

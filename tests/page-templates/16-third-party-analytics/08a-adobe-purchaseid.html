@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="08a-adobe-purchaseid.js" type="text/javascript"></script>
+<script>
+
+// polyfill for adobe analytics
+window.s = {
+	purchaseID: "purchaseid"
+};
+
+BOOMR_test.clearCookies();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

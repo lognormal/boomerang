@@ -1,0 +1,37 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="03-onerror.js" type="text/javascript"></script>
+<script>
+function errorFunction(message) {
+	BOOMR.plugins.Errors.send(message);
+}
+
+window.onErrorFired = false;
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true,
+		onError: function() {
+			if (!window.onErrorFired) {
+				// the first time, stop the error beacon
+				window.onErrorFired = true;
+				return false;
+			}
+			else {
+				// the second time, let it go through
+				return true;
+			}
+		}
+	},
+	afterFirstBeacon: function() {
+		// send an error that will be declinded by our onError
+		setTimeout(function() { errorFunction("BOOM1"); }, 100);
+
+		// send an error that will be approved
+		setTimeout(function() { errorFunction("BOOM2"); }, 200);
+	}
+});
+</script>
+<%= footer %>

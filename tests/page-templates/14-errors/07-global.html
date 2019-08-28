@@ -1,0 +1,27 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="07-global.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+	// a is not defined
+	a.foo = 1;
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorGlobal: true,
+
+		// disable so global can run
+		monitorTimeout: false
+	},
+	onBoomerangLoaded: function() {
+		// trigger error
+		setTimeout(errorFunction, 0);
+	}
+});
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

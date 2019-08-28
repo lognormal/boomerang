@@ -1,0 +1,38 @@
+{
+    // Server locations
+    server: {
+        main: "boomerang-test.local",
+        second: "boomerang-test2.local"
+    },
+    ports: {
+        main: 4002,
+        second: 4003
+    },
+    
+    // Profiler configuration
+    config: {
+        // How many iterations to run
+        iterations: 10,
+        
+        // Profiler sample interval
+        sampleInterval: 100,
+        
+        // How long to wait after onload before stopping the Profiler
+        postLoadWait: 1000,
+        
+        // How long to wait for a page to load before aborting
+        timeout: 60000,
+        
+        // Chrome launch configuration
+        chromeConfig: {
+            port: 9222,
+            chromeFlags: [
+                "--headless",
+                "--disable-gpu",
+                "--timeout 60000",
+                "--no-sandbox",
+                "--disable-setuid-sandbox"
+            ]
+        }
+    }
+}

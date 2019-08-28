@@ -1,0 +1,24 @@
+<%= header %>
+<%= boomerangScript %>
+
+<script src="105-no-xhr-before-hard-nav.js"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	instrument_xhr: true,
+	History: {
+		enabled: true,
+		auto: true
+	},
+	autorun: false
+});
+</script>
+<img src="/delay?delay=500&file=pages/12-react/support/img.jpg&id=home"/>
+<script type="text/javascript">
+var xhr;
+xhr = new XMLHttpRequest();
+xhr.open("GET", "/delay?delay=10&file=pages/12-react/support/widgets.json");
+xhr.send(null);
+</script>
+<%= footer %>

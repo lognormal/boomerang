@@ -1,0 +1,54 @@
+<!--
+	Test that Fetch polyfill doesn't get instrumented
+-->
+<%= header %>
+<%= boomerangSnippet %>
+
+<script src="44-fetch-polyfill.js" type="text/javascript"></script>
+<script type="text/javascript">
+// delete native fetch support from all windows
+function removeFetch(w) {
+	w.fetch = undefined;
+	w.Request = undefined;
+	w.Response = undefined;
+	w.Headers = undefined;
+}
+removeFetch(window);
+for (var i = 0; i < window.frames.length; i++) {
+	removeFetch(window.frames[i]);
+}
+</script>
+<script src="/vendor/promise-polyfill/dist/polyfill.js" type="text/javascript"></script>
+<script src="/vendor/fetch/fetch.js" type="text/javascript"></script>
+<script type="text/javascript">
+var t = BOOMR_test;
+
+function afterFirstBeacon() {
+	if (!t.isFetchApiSupported()) {
+		return;
+	}
+
+	setTimeout(function() {
+		window.fetch("support/script200.js?rnd=" + Math.random());
+	}, 100);
+}
+
+</script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: t.isFetchApiSupported() ? 2 : 1,
+	PageParams: {
+		xhr: "all"
+	},
+	AutoXHR: {
+		monitorFetch: true,
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true,
+	autorun: true,
+	afterFirstBeacon: afterFirstBeacon
+});
+</script>
+
+<%= footer %>

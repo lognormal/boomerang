@@ -1,0 +1,49 @@
+<%= header %>
+<script src="101405.js" type="text/javascript"></script>
+
+<script>
+// double-wrap XHR via the prototype before Boomerang loads
+if (!XMLHttpRequest.prototype.requestWrapped) {
+	// note we've wrapped it
+	XMLHttpRequest.prototype.requestWrapped = true;
+
+	// save the old open
+	XMLHttpRequest.prototype.oldOpen = XMLHttpRequest.prototype.open;
+
+	// overwrite open with our wrap
+	XMLHttpRequest.prototype.open = function() {
+		XMLHttpRequest.prototype.oldOpenCalled = true;
+		XMLHttpRequest.prototype.oldOpen.apply(this, arguments);
+	};
+}
+
+// Next, load Boomerang
+</script>
+
+<%= boomerangScript %>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	instrument_xhr: true,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		// send one 404 XHR that should be double-instrumented
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "support/script404.js", true);
+		xhr.send(null);
+
+		// send one 200 XHR that should be double-instrumented after 1s
+		setTimeout(function() {
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "support/img.jpg");
+			xhr.send(null);
+		}, 1000);
+	}
+});
+</script>
+
+<%= footer %>

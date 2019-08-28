@@ -1,0 +1,10 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="02-cookie-from-new-session.js" type="text/javascript"></script>
+<script>
+BOOMR.session.domain = document.domain;
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

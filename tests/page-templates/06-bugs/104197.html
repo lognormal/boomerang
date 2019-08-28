@@ -1,0 +1,54 @@
+<%= header %>
+<script>
+// polyfill document.hidden if needed
+if (typeof document.hidden === "undefined") {
+	document.hidden = false;
+}
+</script>
+<%= boomerangScript %>
+<script src="104197.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+// polyfill for google analytics
+window.ga = function(cb) {
+	cb(
+		{
+			get: function() {
+				return "XXXXXXXXXX.YYYYYYYYYY";
+			}
+		}
+	);
+};
+
+setTimeout(function() {
+	BOOMR_test.init({
+		testAfterOnBeacon: 3,
+		afterFirstBeacon: function() {
+			setTimeout(function() {
+				// fire fake visibility changed events
+				BOOMR.visibilityState = function() {
+					return "prerender";
+				};
+				BOOMR.fireEvent("visibility_changed");
+
+				// fire another beacon
+				BOOMR.responseEnd("foo");
+
+				// fake visible event
+				BOOMR.visibilityState = function() {
+					return "visible";
+				};
+				BOOMR.fireEvent("visibility_changed");
+			}, 250);
+		},
+		ResourceTiming: {
+			enabled: true
+		},
+		TPAnalytics: {
+			enabled: true,
+			clientids: true
+		}
+	});
+}, 1000);
+</script>
+<%= footer %>

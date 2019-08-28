@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Continuity: {
+		enabled: true,
+		monitorLongTasks: false,
+		monitorPageBusy: true
+	}
+});
+</script>
+<script src="22-page-busy-full.js" type="text/javascript"></script>
+<script>
+// Loop for 5000ms
+BOOMR.debug("Looping for 2000ms");
+BOOMR_test.busy(2000);
+BOOMR.debug("Done looping for 2000ms");
+</script>
+<%= footer %>

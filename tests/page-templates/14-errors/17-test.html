@@ -1,0 +1,54 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="17-test.js" type="text/javascript"></script>
+<script src="../../vendor/json3/lib/json3.js"></script>
+<script>
+function errorFunction() {
+	a.foo = 1;
+}
+
+function goodFunction(propName, value) {
+	value = value || 2;
+	propName = propName || "result";
+
+	// set the property
+	this[propName] = value;
+
+	return value;
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+
+		// turn off global monitor
+		monitorGlobal: false
+	}
+});
+
+try {
+	BOOMR.plugins.Errors.test(errorFunction);
+}
+catch (e) {
+	// exception should have been thrown
+	window.errorFunctionThrown = e;
+}
+
+window.foo = {
+	result: false
+};
+
+// simple function with a return value
+window.testResult1 = BOOMR.plugins.Errors.test(goodFunction);
+
+// specifying which object
+window.testResult2 = BOOMR.plugins.Errors.test(goodFunction, foo);
+
+// arguments
+window.testResult3 = BOOMR.plugins.Errors.test(goodFunction, foo, "result3", 3);
+
+// null this
+window.testResult4 = BOOMR.plugins.Errors.test(goodFunction, null, "result4", 4);
+</script>
+<%= footer %>

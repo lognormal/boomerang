@@ -1,0 +1,56 @@
+{
+  "name": "boomerang",
+  "private": true,
+  "main": "boomerang.js",
+  "version": "1.650.0",
+  "homepage": "https://github.com/akamai/boomerang/",
+  "authors": [
+    "Philip Tellis"
+  ],
+  "description": "End user oriented web performance testing and beaconing",
+  "keywords": [
+    "boomerang",
+    "performance",
+    "NavigationTiming",
+    "ResourceTiming",
+    "UserTiming",
+    "PerformanceTimeline"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular-resource": "~1.3.16",
+    "angular-resource-1.4": "angular-resource#1.4.6",
+    "angular-resource-1.5": "angular-resource#1.5.0-beta.0",
+    "angular-route": "~1.3.16",
+    "angular-route-1.4": "angular-route#1.4.6",
+    "angular-route-1.5": "angular-route#1.5.0-beta.0",
+    "angular-ui-router": "~0.2.15",
+    "angular": "~1.3.16",
+    "angular-1.4": "angular#1.4.6",
+    "angular-1.5": "angular#1.5.0-beta.0",
+    "assertive-chai": "~2.0.0",
+    "backbone": "~1.3.3",
+    "ember": "~1.12.1",
+    "fetch": "^2.0.4",
+    "handlebars": "~3.0.3",
+    "jquery": "~2.1.4",
+    "json3": "~3.3.2",
+    "lodash": "~3.0.0",
+    "mocha": "~3.4.2",
+    "promise-polyfill": "^7.1.2",
+    "resourcetiming-compression": "^1.1.0",
+    "usertiming": "~0.1.8",
+    "usertiming-compression": "^0.1.8",
+    "zone": "^0.8.26"
+  },
+  "resolutions": {
+    "angular": "1.4.6"
+  }
+}

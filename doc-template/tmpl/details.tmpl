@@ -1,0 +1,180 @@
+<?js
+var data = obj;
+var self = this;
+?>
+<dl class="details">
+    <?js
+        var properties = data.properties;
+        if (properties && properties.length && properties.forEach) {
+    ?>
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl><?js= this.partial('properties.tmpl', properties) ?></dl>
+
+    <?js } ?>
+
+	<?js if (data.version) {?>
+	<h4 class="tag-version method-doc-label method-doc-details-label">Version:</h4>
+	<dd class="tag-version">
+		<ul class="dummy">
+			<li><?js= version ?></li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.since) {?>
+	<h4 class="tag-since method-doc-label method-doc-details-label">Since:</h4>
+	<dd class="tag-since">
+		<ul class="dummy">
+			<li><?js= since ?></li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.inherited && data.inherits) { ?>
+	<h4 class="inherited-from method-doc-label method-doc-details-label">Inherited From:</h4>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<?js= this.linkto(data.inherits, this.htmlsafe(data.inherits)) ?>
+			</li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+    <?js if (data.overrides) { ?>
+    <h4 class="tag-overrides">Overrides:</h4>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <?js= this.linkto(data.overrides, this.htmlsafe(data.overrides)) ?>
+    </li></ul></dd>
+    <?js } ?>
+
+    <?js if (data.implementations && data.implementations.length) { ?>
+    <h4 class="implementations">Implementations:</h4>
+    <dd class="implementations"><ul>
+        <?js data.implementations.forEach(function(impl) { ?>
+            <li><?js= self.linkto(impl, self.htmlsafe(impl)) ?></li>
+        <?js }); ?>
+    </ul></dd>
+    <?js } ?>
+
+    <?js if (data.implements && data.implements.length) { ?>
+    <h4 class="implements">Implements:</h4>
+    <dd class="implements"><ul>
+        <?js data.implements.forEach(function(impl) { ?>
+            <li><?js= self.linkto(impl, self.htmlsafe(impl)) ?></li>
+        <?js }); ?>
+    </ul></dd>
+    <?js } ?>
+
+    <?js if (data.mixes && data.mixes.length) { ?>
+    <h4 class="mixes">Mixes In:</h4>
+
+        <dd class="mixes"><ul>
+        <?js data.mixes.forEach(function(a) { ?>
+            <li><?js= self.linkto(a, a) ?></li>
+        <?js }); ?>
+        </ul></dd>
+    <?js } ?>
+
+	<?js if (data.deprecated) { ?>
+	<h4 class="important tag-deprecated method-doc-label method-doc-details-label">Deprecated:</h4>
+	<?js
+            if (data.deprecated === true) { ?>
+    <dd class="yes-def tag-deprecated">
+        <ul class="dummy">
+            <li>Yes</li>
+        </ul>
+    </dd>
+    <?js }
+            else { ?>
+    <dd>
+        <ul class="dummy">
+            <li><?js= data.deprecated ?></li>
+        </ul>
+    </dd>
+    <?js }
+        ?>
+    <?js } ?>
+
+	<?js if (data.author && author.length) {?>
+	<h4 class="tag-author method-doc-label method-doc-details-label">Author:</h4>
+	<dd class="tag-author">
+		<ul><?js author.forEach(function(a) { ?>
+			<li><?js= self.resolveAuthorLinks(a) ?></li>
+			<?js }); ?></ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.copyright) {?>
+	<h4 class="tag-copyright method-doc-label method-doc-details-label">Copyright:</h4>
+	<dd class="tag-copyright">
+		<ul class="dummy">
+			<li><?js= copyright ?></li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.license) {?>
+	<h4 class="tag-license method-doc-label method-doc-details-label">License:</h4>
+	<dd class="tag-license">
+		<ul class="dummy">
+			<li><?js= license ?></li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.defaultvalue) {?>
+	<h4 class="tag-default method-doc-label method-doc-details-label">Default Value:</h4>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li><?js= data.defaultvalue ?></li>
+		</ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.meta && this.navOptions.outputSourceFiles) {?>
+	<h4 class="tag-source method-doc-label method-doc-details-label">Source:</h4>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<?js= self.linkto(meta.shortpath) ?><?js if (this.navOptions.linenums) {?>,
+				 <?js= self.linkto(meta.shortpath, 'line ' + meta.lineno, null, 'sunlight-1-line-' + meta.lineno) ?><?js } ?>
+			</li>
+		</ul>
+	</dd>
+	<?js } else if (data.meta && this.navOptions.outputSourcePath) { ?>
+	<h4 class="tag-source method-doc-label method-doc-details-label">Source:</h4>
+	<dd class="tag-source">
+		<?js= meta.shortpath ?>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.tutorials && tutorials.length) {?>
+	<h4 class="tag-tutorial method-doc-label method-doc-details-label">Tutorials:</h4>
+	<dd class="tag-tutorial">
+		<ul><?js tutorials.forEach(function(t) { ?>
+			<li><?js= self.tutoriallink(t) ?></li>
+			<?js }); ?></ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.see && see.length) {?>
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul><?js see.forEach(function(s) { ?>
+			<li><?js= self.linkto(s) ?></li>
+			<?js }); ?></ul>
+	</dd>
+	<?js } ?>
+
+	<?js if (data.todo && todo.length) {?>
+	<h4 class="tag-todo method-doc-label method-doc-details-label">To Do:</h4>
+	<dd class="tag-todo">
+		<ul><?js todo.forEach(function(t) { ?>
+			<li><?js= t ?></li>
+			<?js }); ?></ul>
+	</dd>
+	<?js } ?>
+</dl>

@@ -1,0 +1,48 @@
+<%= header %>
+<!--
+	This test checks that if a wrapper for XMLHttpRequest is added before boomerang is 
+	loaded then it is called when the event occurs
+-->
+<script>
+// By wrapping this before boomerang is on the page, our addEventListener wrapper will not
+// get called and the error will be caught by the global error handler
+window.listenerCalled = 0;
+if (window.XMLHttpRequest) {
+	var orig_AEL = window.XMLHttpRequest.prototype.addEventListener;
+	window.XMLHttpRequest.prototype.addEventListener = function() {
+		window.listenerCalled++;
+		return orig_AEL.apply(this, arguments);
+	};
+}
+</script>
+<%= boomerangScriptMin %>
+<script src="34-events-xhr-wrap-xhr-before.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorEvents: true,
+
+		// turn on global since monitorEvents won't catch the error
+		monitorGlobal: true
+	}
+});
+
+if (window.XMLHttpRequest) {
+	var xhr = new window.XMLHttpRequest();
+	xhr.open("GET", "/404");
+
+	if (xhr.addEventListener) {
+		xhr.addEventListener("load", function errorFunction() {
+			// will throw an error
+			a.foo = false;
+		});
+	}
+
+	xhr.send(null);
+}
+</script>
+<!-- delay the page by 1second so an error can fire -->
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

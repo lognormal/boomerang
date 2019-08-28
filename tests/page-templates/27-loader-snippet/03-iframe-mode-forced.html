@@ -1,0 +1,14 @@
+<%= header %>
+<script>
+if (BOOMR_test.supportsLoaderIframe()) {
+	BOOMR_test.forceSnippetIframe();
+}
+</script>
+<%= boomerangSnippet %>
+<script src="03-iframe-mode-forced.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

@@ -1,0 +1,63 @@
+<%= header %>
+<%= boomerangScript %>
+
+<div id="clickable">Click Me!</div>
+<div id="picture"></div>
+
+<script type="text/javascript">
+(function(w, d) {
+	var imageHolder = d.getElementById("picture");
+	var clickable = d.getElementById("clickable");
+	function clickCb() {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "support/img.jpg");
+		xhr.send();
+	}
+
+	function addEvent(element, event, funct){
+		if (element.attachEvent) {
+			return element.attachEvent("on" + event, funct);
+		}
+		else {
+			return element.addEventListener(event, funct);
+		}
+	}
+	addEvent(clickable, "mouseup", clickCb);
+}(this, this.document));
+</script>
+<script src="37-xhr-after-click.js"></script>
+<script>
+var eventFired = false;
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 2 : 1,
+	instrument_xhr: true,
+	ResourceTiming: {
+		enabled: true
+	},
+	autorun: true,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR || eventFired) {
+			return;
+		}
+
+		setTimeout(function() {
+			var clickable = document.getElementById("clickable");
+
+			function eventFire(etype){
+				if (clickable.fireEvent) {
+					clickable.fireEvent("on" + etype);
+				}
+				else {
+					var evObj = document.createEvent("MouseEvent");
+					evObj.initEvent(etype, true, false);
+					clickable.dispatchEvent(evObj);
+				}
+				eventFired = true;
+			}
+			eventFire("mouseup");
+		}, 50);
+	}
+});
+</script>
+
+<%= footer %>

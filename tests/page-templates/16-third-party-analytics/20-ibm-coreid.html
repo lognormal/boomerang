@@ -1,0 +1,19 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="20-ibm-coreid.js" type="text/javascript"></script>
+<script>
+
+// polyfill for ibm analytics
+window.cmRetrieveUserID = function(cb) {
+	cb("80031460041999083951624");
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

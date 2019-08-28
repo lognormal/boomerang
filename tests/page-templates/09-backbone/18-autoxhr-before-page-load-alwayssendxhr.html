@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="../../vendor/jquery/dist/jquery.js"></script>
+<script src="../../vendor/handlebars/handlebars.js"></script>
+<script src="../../vendor/backbone/backbone.js"></script>
+<div id="content"></div>
+<script>
+window.backbone_imgs = [1000];
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	Backbone: {
+		enabled: true
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<script src="support/app.js"></script>
+<script src="/test-templates/spa/18-autoxhr-before-page-load-alwayssendxhr.js" type="text/javascript"></script>
+<script src="18-autoxhr-before-page-load-alwayssendxhr.js" type="text/javascript"></script>
+<%= footer %>

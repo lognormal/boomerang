@@ -1,0 +1,27 @@
+<%= header %>
+<script>
+// fake a NavigationTiming browser even if it is one
+if (!window.performance) {
+	window.performance = {
+		timing: {
+			navigationStart: +(new Date()) - 60000
+		}
+	};
+}
+</script>
+<%= boomerangScript %>
+<script src="08-cookie-referrer-nt.js" type="text/javascript"></script>
+<script>
+BOOMR.session.domain = document.domain;
+BOOMR_test.init({
+	// forces it to happen at unload beacon
+	testAfterOnBeacon: 2,
+	afterFirstBeacon: function() {
+		// fake an unload event
+		BOOMR.fireEvent("page_unload", {
+			type: "unload"
+		});
+	}
+});
+</script>
+<%= footer %>

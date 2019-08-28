@@ -1,0 +1,19 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="21-ibm-invalid.js" type="text/javascript"></script>
+<script>
+
+// polyfill for ibm analytics
+window.cmRetrieveUserID = function() {
+	throw new Error("invalid");
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

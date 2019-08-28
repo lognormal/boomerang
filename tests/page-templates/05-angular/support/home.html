@@ -1,0 +1,10 @@
+<div ng-controller="mainCtrl">
+	<h1>Home</h1>
+	<img ng-if="hide_imgs != true" ng-repeat="delay in imgs" ng-src="/delay?delay={{delay}}&amp;file=pages/05-angular/support/img.jpg&amp;id=home&amp;rnd={{rnd}}" style="width: 300px; height: auto;"/>
+	<div class="cart-container" style="display: none">
+		<div id="cart-total">${{carttotal}}</div>
+	</div>
+	<ul>
+		<li ng-repeat="widget in widgets"><a ng-href="widgets/{{widget.id}}">{{widget.name}}</a></li>
+	</ul>
+</div>

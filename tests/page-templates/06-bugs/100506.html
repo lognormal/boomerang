@@ -1,0 +1,87 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+window.BOOMR = window.BOOMR || {};
+window.BOOMR.plugins = window.BOOMR.plugins || {};
+
+var readyToSend = false;
+window.BOOMR.plugins.Hold = {
+	readyToSend: function() {
+		return readyToSend;
+	},
+	is_complete: function() {
+		return true;
+	}
+};
+</script>
+<script src="100506.js" type="text/javascript"></script>
+
+<!--
+     Initiating the first 2 requests for an image with a delay of 100ms
+     EACH should finish before BOOMR.init()
+-->
+<script type="text/javascript">
+var image1 = new XMLHttpRequest();
+
+image1.open("GET", "/delay?delay=100&id=1&file=/pages/06-bugs/support/img.jpg&rnd=" + Math.random(), false);
+var timer1 = BOOMR.requestStart("image1");
+image1.addEventListener("readystatechange", function() {
+	if (image1.readyState === 4) {
+		timer1.loaded(this);
+	}
+});
+image1.send(null);
+
+var image2 = new XMLHttpRequest();
+image2.open("GET", "/delay?delay=100&id=2&file=/pages/06-bugs/support/img.jpg&rnd=" + Math.random(), false);
+var timer2 = BOOMR.requestStart("image2");
+image2.addEventListener("readystatechange", function() {
+	if (image2.readyState === 4) {
+		timer2.loaded(this);
+	}
+});
+image2.send(null);
+</script>
+
+<!--
+     Initializing Boomerang now as if init was called later
+-->
+<script>
+readyToSend = true;
+BOOMR_test.init({
+	testAfterOnBeacon: 3
+});
+</script>
+
+<!--
+     Should add these to the beacon as well as QT
+-->
+<script type="text/javascript">
+var image3 = new XMLHttpRequest();
+
+image3.open("GET", "/delay?delay=100&id=3&file=/pages/06-bugs/support/img.jpg&rnd=" + Math.random(), false);
+var timer3 = BOOMR.requestStart("image3");
+image3.addEventListener("readystatechange", function() {
+	if (image3.readyState === 4) {
+		timer3.loaded(this);
+	}
+});
+image3.send(null);
+
+var image4 = new XMLHttpRequest();
+image4.open("GET", "/delay?delay=100&id=4&file=/pages/06-bugs/support/img.jpg&rnd=" + Math.random(), false);
+var timer4 = BOOMR.requestStart("image4");
+image4.addEventListener("readystatechange", function() {
+	if (image4.readyState === 4) {
+		timer4.loaded(this);
+	}
+});
+image4.send(null);
+</script>
+
+<!--
+     Delaying pageload until all the other XHRs have finished and then autorun should send the beacon
+-->
+<img src="/delay?delay=3000&amp;id=home&amp;file=/pages/06-bugs/support/img.jpg" style="width:100px;"/>
+
+<%= footer %>

@@ -1,0 +1,52 @@
+{
+	"howtos": {
+		"title": "How-Tos",
+		"children": {
+			"howto-add-additional-timers-to-the-beacon": {
+				"title": "Adding additional timers to the beacon"
+			},
+			"howto-add-arbitrary-data-to-the-beacon": {
+				"title": "Adding arbitrary data to the beacon"
+			},
+			"howto-delay-page-load-time": {
+				"title": "Delaying the Page Load time"
+			},
+			"howto-read-data-from-a-beacon": {
+				"title": "Reading data from a beacon"
+			},
+			"howto-resourcetiming-buffer": {
+				"title": "Managing the ResourceTiming Buffer"
+			},
+			"howto-measure-arbitrary-events": {
+				"title": "Measuring arbitrary events"
+			}
+		}
+	},
+	"building": {
+		"title": "Building"
+	},
+	"contributing": {
+		"title": "Contributing"
+	},
+	"methodology": {
+		"title": "Methodology"
+	},
+	"creating-plugins": {
+		"title": "Creating Plugins"
+	},
+	"loader-snippet": {
+		"title": "Non-Blocking Loader Snippet"
+	},
+	"tests": {
+		"title": "Tests"
+	},
+	"page-overrides": {
+		"title": "Page Overrides"
+	},
+	"perf-tests": {
+		"title": "Performance Tests"
+	},
+	"version-history": {
+		"title": "Version History"
+	}
+}

@@ -1,0 +1,30 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="05-send-after-onload-multiple.js" type="text/javascript"></script>
+<script>
+var a = {};
+a["error-,function"] = function(message) {
+	BOOMR.plugins.Errors.send(message);
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true
+	},
+	afterFirstBeacon: function() {
+		// this should 1 error with count of 3
+		setTimeout(function() {
+			for (var i = 0; i <= 2; i++) {
+				a["error-,function"]("BOOM1");
+			}
+		}, 100);
+
+		// and two more errors
+		setTimeout(function() { a["error-,function"]("BOOM2"); }, 150);
+		setTimeout(function() { a["error-,function"]("BOOM3"); }, 200);
+	}
+});
+</script>
+<%= footer %>

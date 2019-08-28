@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+
+<!--
+  this file will override the following methods:
+  `EventTarget.prototype.addEventListener`
+  `XMLHttpRequest.prototype.open`
+-->
+<script src="09-overrides.js" type="text/javascript"></script>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+
+	// error tracking will wrap some globals by default
+	Errors: {
+		enabled: false
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,53 @@
+<%= header %>
+<script src="29-xhrs-in-succession.js" type="text/javascript"></script>
+<%= boomerangScript %>
+<script>
+BOOMR_test.init({
+	instrument_xhr: true,
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	testAfterOnBeacon: (BOOMR.plugins.AutoXHR) ? 5 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			setTimeout(function() {
+				// on completion, send two quick XHRs
+				var xhr1 = new XMLHttpRequest();
+				xhr1.open("GET", "/delay?delay=2000&id=xhr1&file=/pages/07-autoxhr/support/script200.js&rnd=" + Math.random());
+
+				xhr1.addEventListener("load", function() {
+					var xhr4 = new XMLHttpRequest();
+					xhr4.open("GET", "/delay?delay=10000&id=xhr4&file=/pages/07-autoxhr/support/script200.js&rnd=" + Math.random());
+
+					// send the third one
+					xhr4.send(null);
+					xhr4.abort();  // will trigger an xhr error beacon immediately because of alwaysSendXhr
+				});
+
+				// start sending the first
+				xhr1.send(null);
+
+				// wait 1 second to start the second one, it will be tracked by xhr1's pending event since the requests are concurrent
+				setTimeout(function() {
+					var xhr2 = new XMLHttpRequest(), xhr3 = new XMLHttpRequest();
+					xhr2.open("GET", "/delay?delay=2000&id=xhr2&file=/pages/07-autoxhr/support/script200.js&rnd=" + Math.random());
+
+					// send the second one
+					xhr2.send(null);
+
+					xhr3.open("GET", "/delay?delay=2000&id=xhr3&file=/pages/07-autoxhr/support/script200.js&rnd=" + Math.random());
+
+					// send the second one
+					xhr3.send(null);
+					xhr3.abort();  // will trigger an xhr error beacon immediately because of alwaysSendXhr
+				}, 1000);
+
+			}, 100);
+		}
+});
+</script>
+<%= footer %>

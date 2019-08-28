@@ -1,0 +1,13 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="01-cookie-length.js" type="text/javascript"></script>
+<script>
+document.cookie = "Foo=bar; path=/; domain=" + document.domain + "; expires=Fri, 10 Oct 3000 00:00:00 GMT";
+document.cookie = "baz=abcdefghijklmnopqrstuvwxyz; path=/; domain=" + document.domain + "; expires=Fri, 10 Oct 3000 00:00:00 GMT";
+document.cookie = "X=Y; path=/; domain=" + document.domain + "; expires=Fri, 10 Oct 3000 00:00:00 GMT; HttpOnly";
+document.cookie = "Y=Z; path=/; domain=" + document.domain + "; expires=Fri, 10 Oct 3000 00:00:00 GMT; Secure";
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

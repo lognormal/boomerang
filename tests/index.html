@@ -1,17 +1,10 @@
 <html>
-<head>
-</head>
-<body>
-This page should load without javascript errors.<br>
-The debug is done in the console.
-We should find something like "boomerang: [debug] Sending url: //stats.frz.io/beacon?cust=326"
-
-<script type="text/javascript">
-frz_debug=true;FRZ_ENV="testenv";FRZ_GLOBAL_CUSTOMER_KEY="326";BOOMR_GLOBAL_CONFIG = {beacon_url: "//stats.frz.io/beacon"};(function(){var f,d,a,b=document.createElement("iframe");b.src="javascript:false";(b.frameElement||b).style.cssText="width: 0; height: 0; border: 0; display: none;";var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(b,a);try{d=b.contentWindow.document}catch(c){f=document.domain;b.src="javascript:var d=document.open();d.domain='"+f+"';void(0);";d=b.contentWindow.document}d.open()._l=function(){var e=this.createElement("script");if(f){this.domain=f}e.id="boomr-if-as";e.src="../dist/boomerang-0.9.1566469653.js";this.body.appendChild(e)};d.write('<bo' + 'dy onload="document._l();">');d.close()})()
-</script>
-</body>
+	<head>
+		<title>Boomerang Tests</title>
+	</head>
+	<body>
+		<h1>Boomerang Tests</h1>
+		<p><a href="unit/">Unit tests</a></p>
+		<p><a href="pages/">E2E</a></p>
+	</body>
 </html>
-<!--
-    Copyright (c) 2011, Yahoo! Inc.  All rights reserved.
-    Copyrights licensed under the BSD License. See the accompanying LICENSE.txt file for terms.
--->

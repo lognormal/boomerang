@@ -1,0 +1,24 @@
+<%= header %>
+<!--
+	Same as 00-iframedelay but the iframes use the snippet to load boomerang in a sub iframe
+-->
+<iframe id="frame1" src="/delay?delay=200&file=/pages/26-iframedelay/support/delayed-pageready-snippet.html"></iframe>
+<iframe id="frame2" src="/delay?delay=100&file=/pages/26-iframedelay/support/delayed-pageready-snippet.html"></iframe>
+<script>
+window.BOOMR_config = {
+	IFrameDelay: {
+		enabled: true,
+		monitoredCount: 2
+	},
+	autorun: false
+};
+</script>
+<%= boomerangSnippet %>
+<script src="05-iframedelay-snippet.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

@@ -1,0 +1,38 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="18-google-getall-undef.js" type="text/javascript"></script>
+<script>
+
+BOOMR_test.clearCookies();
+
+// Set _ga cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["_ga=GA1.2.XXXXXXXXXX.YYYYYYYYYY", "path=/", "domain=" + location.hostname].join("; ");
+
+// polyfill for google analytics
+function FakeTracker() {};
+FakeTracker.prototype.get = function(key) {
+	if (key === "clientId") {
+		return "XXXXXXXXXX.YYYYYYYYYY";
+	}
+};
+
+// ga.get and ga.getAll won't provide the clientid, should fall back to cookie
+window.ga = function(cb) {
+	cb(
+		{
+			get: function() {
+				return undefined;
+			}
+		}
+	);
+};
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,35 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="../../vendor/jquery/dist/jquery.js"></script>
+<script src="../../vendor/handlebars/handlebars.js"></script>
+<script src="../../vendor/backbone/backbone.js"></script>
+<div id="content"></div>
+<script>
+window.backbone_imgs = [3000];
+
+// Since we're using boomerangSnippet, Boomerang may need some time to load
+// so it can hook its MutationObserver in.  Let's tell the Backbone app
+// not to startup until we say, so we can ensure we're monitoring properly
+// for this test case.
+window.backbone_delay_startup = true;
+</script>
+<script src="support/app.js"></script>
+<script src="/test-templates/spa/00-simple.js" type="text/javascript"></script>
+<script src="00-simple.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Backbone: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false,
+	onBoomerangLoaded: function() {
+		// ensure the app hooks first
+		BOOMR.setImmediate(function() {
+			window.backbone_start();
+		});
+	}
+});
+</script>
+<%= footer %>

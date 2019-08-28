@@ -1,0 +1,55 @@
+<%= header %>
+<!--
+Tests that history.replaceState is ignored if `monitorReplaceState` is false
+-->
+<%= boomerangScript %>
+<script src="support/function-bind-polyfill.js" type="text/javascript"></script>
+
+<base href="/pages/12-react/115-monitorreplacestate.html" />
+
+<script type="text/javascript">
+window.imgs = [3000];
+window.html5_mode = true;
+
+// view a widget then come back so debugging (F5) is easier
+window.nav_routes = ["/widgets/1", "/"];
+
+// disable the hook and use window.history (via auto:true)
+window.disableBoomerangHook = true;
+</script>
+
+<div id="root"></div>
+
+<script src="support/app.js"></script>
+
+<script src="/test-templates/spa/04-route-change.js" type="text/javascript"></script>
+<script src="115-monitorreplacestate.js" type="text/javascript"></script>
+
+<script>
+// issue a replaceState call while the first route change is in progress.. The new URL must be different or it will be ignored
+// regardless of the monitorReplaceState option.
+// This call should be ignored by the History plugin
+if (window.history && typeof history.replaceState === "function") {
+	BOOMR.subscribe("spa_init", function() {
+		setTimeout(function() {
+			// change the url
+			history.replaceState(history.state, document.title, window.location.pathname + "/");
+		}, 500);
+	}, null, null, true);
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: 3,
+	History: {
+		enabled: true,
+		auto: true,
+		monitorReplaceState: false
+	},
+	Errors: {
+		enabled: false
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

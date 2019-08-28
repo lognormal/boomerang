@@ -1,0 +1,38 @@
+<%= header %>
+<!--
+This artificially sends a XHR beacon at the exact moment a XHR beacon is
+just about to be sent (by triggering a BOOMR.responseEnd() in before_beacon).
+-->
+<%= boomerangScript %>
+<script src="51-alwayssendxhr-merging.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	afterFirstBeacon: function() {
+		// fake another "XHR" finishing as the first one is about to go out
+		BOOMR.subscribe("before_beacon", function(beacon) {
+			var now = BOOMR.now();
+
+			BOOMR.responseEnd({
+				initiator: "xhr",
+				url: "http://bad.com",
+				timing: {
+					requestStart: now - 100,
+					loadEventEnd: now,
+					responseEnd: now
+				}
+			});
+		}, {}, this, true);
+
+		// send the first XHR
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "/assets/img.jpg", true);
+		xhr.send(null);
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true
+});
+</script>
+<%= footer %>

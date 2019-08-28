@@ -1,0 +1,19 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="16-google-cookie-universal.js" type="text/javascript"></script>
+<script>
+
+BOOMR_test.clearCookies();
+
+// Set _ga cookie.  Note this won't work on localhost or IP tests
+document.cookie = ["_ga=GA1.2.XXXXXXXXXX.YYYYYYYYYY", "path=/", "domain=" + location.hostname].join("; ");
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="06-longtasks-after-load.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Continuity: {
+		enabled: true,
+		afterOnload: true
+	},
+	afterFirstBeacon: function() {
+		var st = BOOMR.requestStart("test");
+
+		// loop for 1500ms to trigger a long task
+		BOOMR_test.busy(1500);
+
+		st.loaded();
+	}
+});
+</script>
+<%= footer %>

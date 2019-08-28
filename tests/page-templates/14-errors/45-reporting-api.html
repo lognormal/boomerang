@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script>
+window.willReportDeprecation = BOOMR_test.isChrome() &&
+	window.ReportingObserver &&
+	window.chrome &&
+	typeof window.chrome.loadTimes === "function";
+
+function errorFunction() {
+	if (window.willReportDeprecation) {
+		return window.chrome.loadTimes().firstPaintTime;  // cause a deprecation warning
+	}
+}
+errorFunction();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	Errors: {
+		enabled: true,
+		monitorReporting: true
+	}
+});
+</script>
+<img src="/delay?delay=1000&amp;file=/assets/img.jpg" style="width: 100px" />
+<%= footer %>

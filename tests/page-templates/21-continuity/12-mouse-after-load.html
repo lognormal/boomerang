@@ -1,0 +1,44 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="12-mouse-after-load.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Continuity: {
+		enabled: true,
+		afterOnload: true
+	},
+	afterFirstBeacon: function() {
+		setTimeout(function() {
+			var st = BOOMR.requestStart("test");
+
+			// move the mouse from upper-left to lower-right and back and again
+			mouseMove(0, 0);
+			mouseMove(window.innerHeight, window.innerWidth);
+			mouseMove(0, 0);
+			mouseMove(window.innerHeight - 10, window.innerWidth - 10);
+
+			// wait a bit for reporting to catch up
+			setTimeout(function() {
+				st.loaded();
+			}, 2000);
+		}, 1000);
+	}
+});
+
+function mouseMove(x, y) {
+	var ev = document.createEvent("Event");
+	ev.initEvent("mousemove", true, true);
+	ev.clientX = x;
+	ev.clientY = y;
+
+	document.dispatchEvent(ev);
+}
+
+// move the mouse from upper-left to lower-right and back
+mouseMove(0, 0);
+mouseMove(window.innerHeight, window.innerWidth);
+mouseMove(0, 0);
+mouseMove(window.innerHeight, window.innerWidth);
+</script>
+<%= footer %>

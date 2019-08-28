@@ -1,0 +1,38 @@
+{
+	"h.t": {{H_T}},
+	"h.cr": "{{H_CR}}",
+	"h.d": "{{DOMAIN}}",
+	"ResourceTiming": {
+		"enabled": true
+	},
+	"Angular": {
+		"enabled": true
+	},
+	"Ember": {
+		"enabled": true
+	},
+	"Backbone": {
+		"enabled": true
+	},
+	"History": {
+		"enabled": true
+	},
+	"Errors": {
+		"enabled": true
+	},
+	"TPAnalytics": {
+		"enabled": true
+	},
+	"UserTiming": {
+		"enabled": true
+	},
+	"Continuity": {
+		"enabled": true
+	},
+	"IFrameDelay": {
+		"enabled": true
+	},
+	"Akamai": {
+		"enabled": true
+	}
+}

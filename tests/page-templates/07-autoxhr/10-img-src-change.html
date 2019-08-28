@@ -1,0 +1,47 @@
+<%= header %>
+<%= boomerangScript %>
+<img id="main-image" src="" />
+<script src="10-img-src-change.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 1,
+	autorun: false
+});
+
+// start a route change
+BOOMR.plugins.SPA.route_change();
+
+var img = document.getElementById("main-image");
+window.listenersAdded = 0;
+window.listenersRemoved = 0;
+if (BOOMR_test.isMutationObserverSupported()) {
+	img.addEventListener = (function(_aEL) {
+		return function() {
+			window.listenersAdded++;
+			return _aEL.apply(this, arguments);
+		};
+	})(img.addEventListener);
+
+	img.removeEventListener = (function(_rEL) {
+		return function() {
+			window.listenersRemoved++;
+			return _rEL.apply(this, arguments);
+		};
+	})(img.removeEventListener);
+}
+
+// send the first image out with a delay
+img.src = "/delay?delay=5000&file=/assets/img.jpg&rnd=" + Math.random();
+
+// update the same IMG src again after 500ms with a 404
+setTimeout(function() {
+	img.src = "/delay?delay=100&file=/404?rnd=" + Math.random();
+}, 500);
+
+// update the same IMG src again after another 500ms with a valid img
+setTimeout(function() {
+	img.src = "/delay?delay=100&file=/assets/img.jpg?rnd=" + Math.random();
+}, 1000);
+
+</script>
+<%= footer %>

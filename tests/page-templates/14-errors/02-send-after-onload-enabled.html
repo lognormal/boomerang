@@ -1,0 +1,20 @@
+<%= header %>
+<%= boomerangScriptMin %>
+<script src="02-send-after-onload-enabled.js" type="text/javascript"></script>
+<script>
+function errorFunction() {
+	BOOMR.plugins.Errors.send("ERROR!");
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	Errors: {
+		enabled: true,
+		sendAfterOnload: true
+	},
+	afterFirstBeacon: function() {
+		setTimeout(errorFunction, 100);
+	}
+});
+</script>
+<%= footer %>

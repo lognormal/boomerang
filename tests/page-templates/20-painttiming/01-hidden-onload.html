@@ -1,0 +1,20 @@
+<%= header %>
+<!-- add an image so the screen is painted before Boomerang loads -->
+<img src="/assets/img.jpg" />
+<%= boomerangScript %>
+<script src="01-hidden-onload.js" type="text/javascript"></script>
+<script>
+
+// hack visibilityState to always be hidden
+BOOMR.visibilityState = function() {
+	return "hidden";
+};
+
+BOOMR_test.init({
+	PaintTiming: {
+		enabled: true
+	},
+	testAfterOnBeacon: true
+});
+</script>
+<%= footer %>

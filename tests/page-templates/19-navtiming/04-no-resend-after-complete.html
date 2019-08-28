@@ -1,0 +1,29 @@
+<%= header %>
+<%= boomerangScript %>
+<script>
+// RT suppresses BOOMR.sendBeacon after pageready beacon
+delete BOOMR.plugins.RT;
+// Continuity suppresses BOOMR.sendBeacon on domcontentloaded beacon
+delete BOOMR.plugins.Continuity;
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	BOOMR.sendBeacon();
+});
+
+// BOOMR sends a beacon itself on pageready...
+
+window.onload = function() {
+	window.setTimeout(function() {
+		BOOMR.sendBeacon();
+	}, 1000);
+};
+
+</script>
+
+<script src="04-no-resend-after-complete.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: 3
+});
+</script>
+<%= footer %>

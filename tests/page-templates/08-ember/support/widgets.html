@@ -1,0 +1,8 @@
+<h1>Widgets</h1>
+<ul>
+	{{#each widget in model}}
+		<li>{{#link-to 'widget' widget}} {{widget.name}} {{/link-to}}</li>
+	{{/each}}
+</ul>
+
+<img src="/pages/08-ember/support/img.jpg?id=home" style="width: 300px; height: auto;" />

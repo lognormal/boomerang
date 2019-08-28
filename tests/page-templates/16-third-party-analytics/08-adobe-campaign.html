@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="08-adobe-campaign.js" type="text/javascript"></script>
+<script>
+
+// polyfill for adobe analytics
+window.s = {
+	campaign: "campaignid"
+};
+
+BOOMR_test.clearCookies();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>

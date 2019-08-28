@@ -1,0 +1,14 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="01-clear-onbeacon-disabled.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+		// disabled by default:
+		// clearOnBeacon: false
+	}
+});
+</script>
+<%= footer %>

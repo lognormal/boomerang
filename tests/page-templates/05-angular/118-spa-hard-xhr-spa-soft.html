@@ -1,0 +1,63 @@
+<%= header %>
+<%= boomerangScript %>
+<base href="/pages/05-angular/04-route-change.html" />
+<script src="../../vendor/angular/angular.js"></script>
+<script src="../../vendor/angular-resource/angular-resource.js"></script>
+<script src="../../vendor/angular-route/angular-route.js"></script>
+<script>
+window.angular_imgs = [1000];
+
+window.angular_html5_mode = true;
+</script>
+<script src="support/app.js"></script>
+<div ng-app="app" id="ng-app">
+	<div ng-view>
+	</div>
+</div>
+<script src="118-spa-hard-xhr-spa-soft.js" type="text/javascript"></script>
+<script>
+app.run(["$location", "$timeout", function($location, $timeout) {
+	var beaconsSent = 0;
+
+	BOOMR.subscribe("beacon", function() {
+		if (beaconsSent > 0) {
+			return;
+		}
+
+		beaconsSent++;
+
+		// send an xhr after the first beacon
+		$timeout(function() {
+			// this xhr should match the exclude filter
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/pages/05-angular/support/img.jpg?rnd=" + Math.random());
+			xhr.send(null);
+
+			// wait 5 seconds then go to the next page
+			$timeout(function() {
+				// now navigate to the second URL
+				$location.url("/widgets/10");
+
+				// issue a route change while the spa soft is still loading
+				$timeout(function() {
+					BOOMR.plugins.SPA.markNavigationComplete();
+
+					$timeout(function() {
+						$location.url("118-spa-hard-xhr-spa-soft.html");
+					}, 1000);
+				}, 1000);
+			}, 5000);
+		}, 1000);
+	});
+}]);
+
+BOOMR_test.init({
+	testAfterOnBeacon: 4,
+	Angular: {
+		enabled: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+</script>
+<%= footer %>

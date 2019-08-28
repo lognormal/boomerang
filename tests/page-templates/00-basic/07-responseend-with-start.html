@@ -1,0 +1,13 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="07-responseend-with-start.js" type="text/javascript"></script>
+<script type="text/javascript">
+BOOMR_test.init({
+	testAfterOnBeacon: 2,
+	afterFirstBeacon: function() {
+		// fire a beacon with start specified
+		BOOMR.responseEnd("foo", BOOMR.now() - 10);
+	}
+});
+</script>
+<%= footer %>

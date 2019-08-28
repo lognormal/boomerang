@@ -1,0 +1,15 @@
+<%= header %>
+<script>
+window.BOOMR_no_mark = true;
+</script>
+<%= boomerangSnippet %>
+<script src="00-usertiming-none.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	UserTiming: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

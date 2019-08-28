@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="02-resource-dimensions.js" type="text/javascript"></script>
+<style>img, iframe { position: absolute; opacity: 0.5; }</style>
+
+<!-- 1x1 transparent pixel -->
+<img src="/assets/img.jpg" style="top: 500px; left: 100px; width: 400px; height: 200px" />
+<img src="/assets/img.jpg?0" style="left: 50px; top: 50px; width: 107px; height: 107px; border: solid 1px red;">
+<img src="/assets/img.jpg?1" style="left: 120px; top: 120px; width: 201px; height: 201px; border: solid 1px blue;">
+<img src="/assets/img.jpg?2" style="left: -15px; top: 400px; width: 406px; height: 406px; border: solid 1px green;">
+
+
+
+<!-- IFRAME -->
+<iframe src="/assets/blank.html" height="50" width="50" style="top: 800px; left: 200px; border: none"></iframe>
+
+<script>
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	ResourceTiming: {
+		enabled: true
+	}
+});
+</script>
+<%= footer %>

@@ -1,0 +1,93 @@
+<%= header %>
+<%= boomerangScript %>
+<base href="/pages/05-angular/122-alwayssendxhr-markcomplete.html" />
+<script src="../../vendor/angular/angular.js"></script>
+<script src="../../vendor/angular-resource/angular-resource.js"></script>
+<script src="../../vendor/angular-route/angular-route.js"></script>
+<script src="../../vendor/resourcetiming-compression/src/resourcetiming-decompression.js" type="text/javascript"></script>
+<script>
+window.angular_imgs = [5000];
+
+window.angular_html5_mode = true;
+</script>
+<script src="support/app.js"></script>
+<div ng-app="app">
+	<div ng-view>
+	</div>
+</div>
+<script src="122-alwayssendxhr-markcomplete.js" type="text/javascript"></script>
+<script>
+
+// view a widget then come back so debugging (F5) is easier
+app.run(["$location", "$timeout", function($location, $timeout) {
+	// issue a route change while the spa hard is still loading
+	$timeout(function() {
+		window.nav1time = BOOMR.now();
+		BOOMR.plugins.SPA.markNavigationComplete();
+
+		// now navigate to the second URL
+		$location.url("/widgets/10");
+
+		// issue a route change while the spa soft is still loading
+		$timeout(function() {
+			window.nav2time = BOOMR.now();
+			BOOMR.plugins.SPA.markNavigationComplete();
+
+			$location.url("122-alwayssendxhr-markcomplete.html");
+		}, 1000);
+	}, 1000);
+}]);
+
+BOOMR_test.init({
+	testAfterOnBeacon: 9,
+	Angular: {
+		enabled: true
+	},
+	ResourceTiming: {
+		enabled: true
+	},
+	AutoXHR: {
+		alwaysSendXhr: true
+	},
+	instrument_xhr: true,
+	autorun: false,
+	afterFirstBeacon: function() {
+		if (!BOOMR.plugins.AutoXHR) {
+			return;
+		}
+
+		var beaconNum = 1;
+
+		function onBeacon() {
+			beaconNum++;
+			// wait for all the SPA navs to complete
+			if (beaconNum === 8) {
+				//
+				// Send a XHRs, and insert an image after it comes back
+				//
+				setTimeout(function(){
+					var xhr = new XMLHttpRequest();
+					xhr.open("GET", "/delay?delay=1000&file=/pages/05-angular/support/widgets.json&rnd=" + Math.random(), true);
+					xhr.onreadystatechange = function() {
+						// fire another XHR
+						if (xhr.readyState === 4) {
+							var img = document.createElement("img");
+							img.src = "/delay?delay=5000&file=/pages/05-angular/support/img.jpg&rnd=" + Math.random();
+							document.body.appendChild(img);
+							setTimeout(function() {
+								// call `markNavigationComplete` while the xhr event is in flight, this should not stop it
+								BOOMR.plugins.SPA.markNavigationComplete();
+							}, 2000);
+						}
+					};
+					xhr.send(null);
+				}, 0);
+			}
+		}
+
+		// send a new XHR on each beacon
+		BOOMR.subscribe("beacon", onBeacon);
+	}
+});
+</script>
+<%= footer %>

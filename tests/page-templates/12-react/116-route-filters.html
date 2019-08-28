@@ -1,0 +1,74 @@
+<%= header %>
+<!--
+Tests routeChangeWaitFilter and routeFilter being applied together.
+Tests SPA.markNavigationComplete and SPA.waitComplete.
+-->
+<%= boomerangScript %>
+
+
+<div id="root"></div>
+<div id="output"></div>
+
+<script src="116-route-filters.js" type="text/javascript"></script>
+<script>
+BOOMR_config = 	{
+	History: {
+		routeChangeWaitFilter: function() {
+			return true;
+		},
+		routeFilter: function(arg) {
+			// ignore all History automatic routes
+			return (typeof arg === "string" && arg === "force");
+		}
+	}
+};
+
+window.routeStartTimes = [];
+window.routeEndTimes = [];
+
+function navigate(completeFunction) {
+	// change route before history event
+	window.routeStartTimes.push(BOOMR.now());
+	BOOMR.plugins.SPA.route_change(undefined, ["force"]);
+
+	// without a wait filter, this would have been long enough to cancel the spa since
+	// no downloads or url change occurred
+	setTimeout(function() {
+		var img = document.createElement("IMG");
+		img.src = "/delay?delay=2000&file=/assets/img.jpg&rnd=" + Math.random();
+		document.body.appendChild(img);
+
+		// this history event will be ignored
+		window.location.hash = "test" + Math.random();
+
+		setTimeout(function() {
+			window.routeEndTimes.push(BOOMR.now());
+			completeFunction();
+		}, 200);
+	}, 1500);
+}
+
+BOOMR_test.init({
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	afterFirstBeacon: function() {
+		if (BOOMR.plugins.AutoXHR) {
+			// this will not wait for the 2s img
+			navigate(BOOMR.plugins.SPA.markNavigationComplete);
+			BOOMR.subscribe("beacon", function() {
+				// this will wait for the 2s img
+				navigate(BOOMR.plugins.SPA.waitComplete);
+			}, null, null, true);
+		}
+	},
+	History: {
+		enabled: true,
+		auto: true
+	},
+	instrument_xhr: true,
+	autorun: false
+});
+
+</script>
+
+
+<%= footer %>

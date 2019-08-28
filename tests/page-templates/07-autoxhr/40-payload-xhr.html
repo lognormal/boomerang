@@ -1,0 +1,41 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="40-payload-xhr.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+	"instrument_xhr": true,
+	testAfterOnBeacon: BOOMR.plugins.AutoXHR ? 3 : 1,
+	afterFirstBeacon:
+		function() {
+			if (!BOOMR.plugins.AutoXHR) {
+				return;
+			}
+
+			BOOMR.subscribe("xhr_load", function(evt) {
+				window.xhrResponse1 = evt.response;
+				window.xhrRequestPayload1 = evt.requestPayload;
+
+				BOOMR.subscribe("xhr_load", function(evt2) {
+					window.xhrResponse2 = evt2.response;
+					window.xhrRequestPayload2 = evt2.requestPayload;
+				});
+
+				// turn on inspection
+				BOOMR.plugins.AutoXHR.setXhrRequestResponseCapturing(true);
+
+				// fire another XHR
+				var xhr = new XMLHttpRequest();
+				xhr.responseType = "json";
+				xhr.open("POST", "/json?2");
+				xhr.send("ABC");
+			}, null, null, true);
+
+			// start a XHR
+			var xhr = new XMLHttpRequest();
+			xhr.responseType = "json";
+			xhr.open("POST", "/json?1");
+			xhr.send("ABC");
+		}
+});
+</script>
+<%= footer %>

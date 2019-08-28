@@ -1,0 +1,21 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="07d-adobe-invalid-amcv.js" type="text/javascript"></script>
+<script>
+
+// polyfill for adobe marketing cloud id
+window.s = {
+	visitor: {}
+};
+
+BOOMR_test.clearCookies();
+
+BOOMR_test.init({
+	testAfterOnBeacon: true,
+	TPAnalytics: {
+		enabled: true,
+		clientids: true
+	}
+});
+</script>
+<%= footer %>
