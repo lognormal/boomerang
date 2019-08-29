@@ -85,7 +85,8 @@
   },
   "scripts": {
     "test": "grunt test",
-    "lint": "grunt lint"
+    "lint": "grunt lint",
+    "build": "grunt clean build --build-number=$(date \"+%s\") && cp build/boomerang-*.min.js dist"
   },
   "repository": {
     "type": "git",
