@@ -1,27 +1,16 @@
 {
-    "plugins": [
-        "plugins/continuity.js",
-        "plugins/iframe-delay.js",
-        "plugins/auto-xhr.js",
-        "plugins/spa.js",
-        "plugins/angular.js",
-        "plugins/backbone.js",
-        "plugins/ember.js",
-        "plugins/history.js",
-        "plugins/rt.js",
-        "plugins/bw.js",
-        "plugins/painttiming.js",
-        "plugins/navtiming.js",
-        "plugins/restiming.js",
-        "plugins/mobile.js",
-        "plugins/memory.js",
-        "plugins/cache-reload.js",
-        "plugins/md5.js",
-        "plugins/compression.js",
-        "plugins/errors.js",
-        "plugins/third-party-analytics.js",
-        "node_modules/usertiming-compression/dist/usertiming-compression.vanilla.js",
-        "plugins/usertiming.js",
-        "plugins/mq.js"
-    ]
+  "plugins": [
+    "plugins/compression.js",
+    "plugins/continuity.js",
+    "plugins/fasterize.js",
+    "plugins/jserrors.js",
+    "plugins/md5.js",
+    "plugins/mobile.js",
+    "plugins/navtiming.js",
+    "plugins/painttiming.js",
+    "plugins/preload.js",
+    "plugins/speedindex.js",
+    "plugins/zzz-last-plugin.js",
+    "plugins/zzz_init_plugin.js"
+  ]
 }
