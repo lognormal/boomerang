@@ -32,6 +32,7 @@
     "express-middleware-server-timing": "^3.0.0",
     "fast-stats": "0.0.4",
     "fs-extra": "^5.0.0",
+    "git-pre-commit": "^2.1.4",
     "grunt": "^1.0.1",
     "grunt-babel": "^5.0.3",
     "grunt-browserify": "^4.0.1",
@@ -86,7 +87,8 @@
   "scripts": {
     "test": "grunt test",
     "lint": "grunt lint",
-    "build": "grunt clean build --build-number=$(date \"+%s\") && cp build/boomerang-*.min.js dist"
+    "build": "grunt clean build --build-number=$(date \"+%s\") && cp build/boomerang-*.min.js dist",
+    "precommit": "npx grunt test:unit:ChromeHeadless"
   },
   "repository": {
     "type": "git",
