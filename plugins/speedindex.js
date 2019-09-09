@@ -60,21 +60,21 @@ var RUMSpeedIndex = function(win) {
   var GetRects = function() {
     // Walk all of the elements in the DOM (try to only do this once)
     var elements = doc.getElementsByTagName('*');
-    var re = /url\((http.*)\)/ig;
+    var re = /url\(.*(http.*)\)/ig;
     for (var i = 0; i < elements.length; i++) {
       var el = elements[i];
       var style = win.getComputedStyle(el);
 
       // check for Images
       if (el.tagName == 'IMG') {
-        CheckElement(el, el.src);
+        CheckElement(el, el.currentSrc || el.src);
       }
       // Check for background images
       if (style['background-image']) {
         re.lastIndex = 0;
         var matches = re.exec(style['background-image']);
         if (matches && matches.length > 1)
-          CheckElement(el, matches[1]);
+          CheckElement(el, matches[1].replace('"', ''));
       }
       // recursively walk any iFrames
       if (el.tagName == 'IFRAME') {
@@ -108,10 +108,22 @@ var RUMSpeedIndex = function(win) {
 
   // Get the first paint time.
   var GetFirstPaint = function() {
+    // Try the standardized paint timing api
+    try {
+      var entries = performance.getEntriesByType('paint');
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i]['name'] == 'first-paint') {
+          navStart = performance.getEntriesByType("navigation")[0].startTime;
+          firstPaint = entries[i].startTime - navStart;
+          break;
+        }
+      }
+    } catch(e) {
+    }
     // If the browser supports a first paint event, just use what the browser reports
-    if ('msFirstPaint' in win.performance.timing)
+    if (firstPaint === undefined && 'msFirstPaint' in win.performance.timing)
       firstPaint = win.performance.timing.msFirstPaint - navStart;
-    if ('chrome' in win && 'loadTimes' in win.chrome) {
+    if (firstPaint === undefined && 'chrome' in win && 'loadTimes' in win.chrome) {
       var chromeTimes = win.chrome.loadTimes();
       if ('firstPaintTime' in chromeTimes && chromeTimes.firstPaintTime > 0) {
         var startTime = chromeTimes.startLoadTime;
