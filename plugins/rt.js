@@ -499,9 +499,8 @@
 			// If we have a start time, and either a referrer, or a clicked on URL,
 			// we check if the start time is usable.
 			if (subcookies.s && (subcookies.r || subcookies.nu)) {
-				this.r = subcookies.r;
-				urlHash = BOOMR.utils.MD5(d.URL);
-				docReferrerHash = BOOMR.utils.MD5((d && d.referrer) || "");
+				urlHash = this.hashString(d.URL);
+				docReferrerHash = this.hashString((d && d.referrer) || "");
 
 				// Either the URL of the page setting the cookie needs to match document.referrer
 				BOOMR.debug("referrer check: " + this.r + " =?= " + docReferrerHash, "rt");
@@ -1037,7 +1036,7 @@
 			//
 			this.updateCookie(
 				(!impl.navigationStart && impl.strict_referrer) ? {
-					"r": BOOMR.utils.MD5(d.URL)
+					"r": this.hashString(d.URL)
 				} : null,
 				edata.type === "beforeunload" ? "ul" : "hd"
 			);
@@ -1070,7 +1069,7 @@
 
 				this.updateCookie(
 					{
-						"nu": BOOMR.utils.MD5(value)
+						"nu": this.hashString(value)
 					},
 					"cl");
 
@@ -1134,7 +1133,25 @@
 		spaNavigation: function() {
 			// a SPA navigation occured, force onloadfired to true
 			impl.onloadfired = true;
+		},
+
+		/**
+		 * Hashes of string contents.
+		 * 
+		 * @param {string} string Original string
+		 * 
+		 * @returns {string} Hashed string
+		 *
+		 * @memberof BOOMR.utils
+		 */
+		hashString: function(string) {
+			if (!BOOMR.utils.MD5) {
+				return string;
+			}
+
+			return BOOMR.utils.MD5(string);
 		}
+
 	};
 
 	BOOMR.plugins.RT = {
