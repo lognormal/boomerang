@@ -499,6 +499,7 @@
 			// If we have a start time, and either a referrer, or a clicked on URL,
 			// we check if the start time is usable.
 			if (subcookies.s && (subcookies.r || subcookies.nu)) {
+				this.r = subcookies.r;
 				urlHash = this.hashString(d.URL);
 				docReferrerHash = this.hashString((d && d.referrer) || "");
 
