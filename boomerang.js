@@ -386,7 +386,7 @@ BOOMR_check_doc_domain();
 		// Beacon request method, either GET, POST or AUTO. AUTO will check the
 		// request size then use GET if the request URL is less than MAX_GET_LENGTH
 		// chars. Otherwise, it will fall back to a POST request.
-		beacon_type: "AUTO",
+		beacon_type: "GET",
 
 		// Beacon authorization key value. Most systems will use the 'Authentication'
 		// keyword, but some some services use keys like 'X-Auth-Token' or other

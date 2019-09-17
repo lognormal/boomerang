@@ -3,6 +3,7 @@
     "plugins/compression.js",
     "plugins/continuity.js",
     "plugins/fasterize.js",
+    "plugins/domstats.js",
     "plugins/jserrors.js",
     "plugins/md5.js",
     "plugins/mobile.js",
