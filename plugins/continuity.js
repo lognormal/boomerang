@@ -1395,10 +1395,13 @@
 					// if src if not defined, look for it in css background image
 					if (!src) {
 						if (typeof BOOMR.window.getComputedStyle === "function") {
-							var bgStyle = BOOMR.window.getComputedStyle(elements[i]).getPropertyValue('background');
-							var bgImgUrl = bgStyle.match(/url\(["']?([^"']*)["']?\)/)
-							if (bgImgUrl && bgImgUrl.length > 0) {
-								src = bgImgUrl[1];
+							var bgStyle = BOOMR.window.getComputedStyle(elements[i]) &&
+								BOOMR.window.getComputedStyle(elements[i]).getPropertyValue("background");
+							if (bgStyle) {
+								var bgImgUrl = bgStyle.match(/url\(["']?([^"']*)["']?\)/);
+								if (bgImgUrl && bgImgUrl.length > 0) {
+									src = bgImgUrl[1];
+								}
 							}
 						}
 					}
