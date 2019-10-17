@@ -264,6 +264,7 @@ var RUMSpeedIndex = function(win) {
   var complete;
 
   var impl = {
+    speedIndexRatio: w["frz-speed_index_ratio"],
     complete: false,
     done: function() {
       var speedIndex = RUMSpeedIndex(w);
@@ -278,7 +279,13 @@ var RUMSpeedIndex = function(win) {
 
   BOOMR.plugins.SpeedIndex = {
     init: function() {
-      if (w.performance && w.performance.timing && w.performance.getEntriesByType) {
+      if (
+        Math.floor(Math.random() * 100) >= speedIndexRatio ||
+        navigator.userAgent.includes("Chrome-Lighthouse")
+      ) {
+        BOOMR.debug("plugin SpeedIndex is inactive");
+        impl.complete = true;
+      } else if (w.performance && w.performance.timing && w.performance.getEntriesByType) {
         BOOMR.subscribe("page_ready", impl.done, null, impl);
       } else {
         BOOMR.debug("plugin SpeedIndex is inactive");
