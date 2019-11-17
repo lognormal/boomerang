@@ -282,7 +282,7 @@ For boomerang, the asynchronous loader snippet you'll use is:
 
             // Set the src of the iframe to a JavaScript URL that will immediately set its document.domain to match the parent.
             // This lets us access the iframe document long enough to inject our script.
-            // Our script may need to do more domain messaging later.
+            // Our script may need to do more domain massaging later.
             iframe.src = "javascript:var d=document.open();d.domain='" + dom + "';void 0";
             win = iframe.contentWindow;
 
