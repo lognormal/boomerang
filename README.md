@@ -260,9 +260,9 @@ For boomerang, the asynchronous loader snippet you'll use is:
 
         // Hide the iframe
         iframeStyle = (iframe.frameElement || iframe).style;
-        iframeStyle.width = 0;
-        iframeStyle.height = 0;
-        iframeStyle.border = 0;
+        iframeStyle.width = "0";
+        iframeStyle.height = "0";
+        iframeStyle.border = "0";
         iframeStyle.display = "none";
 
         // Append to the end of the current block
@@ -282,15 +282,15 @@ For boomerang, the asynchronous loader snippet you'll use is:
 
             // Set the src of the iframe to a JavaScript URL that will immediately set its document.domain to match the parent.
             // This lets us access the iframe document long enough to inject our script.
-            // Our script may need to do more domain massaging later.
-            iframe.src = "javascript:var d=document.open();d.domain='" + dom + "';void(0);";
+            // Our script may need to do more domain messaging later.
+            iframe.src = "javascript:var d=document.open();d.domain='" + dom + "';void 0";
             win = iframe.contentWindow;
 
             doc = win.document.open();
         }
 
         if (dom) {
-            // Unsafe version for IE8 compatability. If document.domain has changed, we can't use win, but we can use doc.
+            // Unsafe version for IE8 compatibility. If document.domain has changed, we can't use win, but we can use doc.
             doc._boomrl = function() {
                 this.domain = dom;
                 bootstrap();
