@@ -260,9 +260,9 @@ For boomerang, the asynchronous loader snippet you'll use is:
 
         // Hide the iframe
         iframeStyle = (iframe.frameElement || iframe).style;
-        iframeStyle.width = "0";
-        iframeStyle.height = "0";
-        iframeStyle.border = "0";
+        iframeStyle.width = 0;
+        iframeStyle.height = 0;
+        iframeStyle.border = 0;
         iframeStyle.display = "none";
 
         // Append to the end of the current block
