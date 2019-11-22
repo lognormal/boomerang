@@ -280,7 +280,7 @@ var RUMSpeedIndex = function(win) {
   BOOMR.plugins.SpeedIndex = {
     init: function() {
       if (
-        Math.floor(Math.random() * 100) >= speedIndexRatio ||
+        Math.floor(Math.random() * 100) >= impl.speedIndexRatio ||
         navigator.userAgent.includes("Chrome-Lighthouse")
       ) {
         BOOMR.debug("plugin SpeedIndex is inactive");
