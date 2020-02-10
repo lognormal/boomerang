@@ -100,7 +100,7 @@
  * * 1d,a:
  *     * `1`: `initiatorType` = `1` (IMG)
  *     * `d`: `startTime` = `d` (13ms)
- *     * `2`: `responseEnd` = `a` (10ms from startTime, or at 23ms)
+ *     * `a`: `responseEnd` = `a` (10ms from startTime, or at 23ms)
  *
  * @see {@link http://www.w3.org/TR/resource-timing/}
  * @class BOOMR.plugins.ResourceTiming
