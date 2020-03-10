@@ -1,0 +1,16 @@
+name: Compressed Size
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: preactjs/compressed-size-action@v1
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          pattern: '{build/boomerang-1.0.0.min.js,build/plugins/*.js}'
+          compression: brotli
+          show-total: false
