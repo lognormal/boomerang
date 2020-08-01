@@ -2,15 +2,15 @@
  * Plugin to measure DNS latency.
  *
  * This code is based on Carlos Bueno's guide to DNS on the
- * [YDN blog](http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html)
+ * [Facebook Note](https://www.facebook.com/note.php?note_id=10150212498738920)
  *
  * For information on how to include this plugin, see the {@tutorial building} tutorial.
  *
  * ## Setup
  *
  * Measuring DNS requires some server-side set up, as
- * [documented in detail](http://developer.yahoo.net/blog/archives/2009/11/guide_to_dns.html) by
- * Yahoo! engineer Carlos Bueno, so go read his post for everything you'll need to set this up.
+ * [documented in detail](https://www.facebook.com/note.php?note_id=10150212498738920) by
+ * Facebook engineer Carlos Bueno, so go read his post for everything you'll need to set this up.
  *
  * In brief, the points he covers are:
  *
