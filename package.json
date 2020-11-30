@@ -83,11 +83,13 @@
   },
   "scripts": {
     "test": "grunt test",
-    "install": "bower install && webdriver-manager update --versions.chrome=$(google-chrome --product-version)",
+    "postinstall": "npm run bower-install && npm run webdriver-manager-update",
     "build": "grunt clean build",
     "lint": "grunt lint",
     "unit-test": "grunt test:unit",
-    "e2e-test": "grunt test:e2e --webdriver-versions=\"--versions.chrome $(google-chrome --product-version)\""
+    "e2e-test": "grunt test:e2e --webdriver-versions=\"--versions.chrome $(google-chrome --product-version)\"",
+    "bower-install": "./node_modules/.bin/bower install",
+    "webdriver-manager-update": "./node_modules/.bin/webdriver-manager update --versions.chrome=$(google-chrome --product-version)"
   },
   "repository": {
     "type": "git",
