@@ -1185,6 +1185,113 @@
 	}
 	/* END_DEBUG */
 
+	//
+	// Constants
+	//
+	/**
+	 * Number of "idle" intervals (of COLLECTION_INTERVAL ms) before
+	 * Time to Interactive is called.
+	 *
+	 * 5 * 100 = 500ms (of no long tasks > 50ms and FPS >= 20)
+	 */
+	var TIME_TO_INTERACTIVE_IDLE_INTERVALS = 5;
+
+	/**
+	 * For Time to Interactive, minimum FPS.
+	 *
+	 * ~20 FPS or max ~50ms blocked
+	 */
+	var TIME_TO_INTERACTIVE_MIN_FPS = 20;
+
+	/**
+	 * For Time to Interactive, minimum FPS per COLLECTION_INTERVAL.
+	 */
+	var TIME_TO_INTERACTIVE_MIN_FPS_PER_INTERVAL =
+		TIME_TO_INTERACTIVE_MIN_FPS / (1000 / COLLECTION_INTERVAL);
+
+	/**
+	 * For Time to Interactive, max Page Busy (if LongTasks aren't supported)
+	 *
+	 * ~50%
+	 */
+	var TIME_TO_INTERACTIVE_MAX_PAGE_BUSY = 50;
+
+	/**
+	 * Determines TTI based on input timestamps, buckets and data
+	 *
+	 * @param {number} startTime Start time
+	 * @param {number} visuallyReady Visually Ready time
+	 * @param {number} startBucket Start bucket
+	 * @param {number} endBucket End bucket
+	 * @param {number} idleIntervals Idle intervals to start with
+	 * @param {object} data Long Task, FPS, Busy and Interaction Data buckets
+	 */
+	function determineTti(startTime, visuallyReady, startBucket, endBucket, idleIntervals, data) {
+		var tti = 0, lastBucketVisited = startBucket, haveSeenBusyData = false;
+
+		for (var j = startBucket; j <= endBucket; j++) {
+			lastBucketVisited = j;
+
+			if (data.longtask && data.longtask[j]) {
+				// had a long task during this interval
+				idleIntervals = 0;
+				continue;
+			}
+
+			if (data.fps && (!data.fps[j] || data.fps[j] < TIME_TO_INTERACTIVE_MIN_FPS_PER_INTERVAL)) {
+				// No FPS or less than 20 FPS during this interval
+				idleIntervals = 0;
+				continue;
+			}
+
+			if (data.busy) {
+				// Page Busy monitor is activated
+
+				if (haveSeenBusyData && typeof data.busy[j] === "undefined") {
+					// We saw previous Busy data, but no Busy data filled in for this bucket yet!
+					// Break and try again later.
+					// This could happen if the PageBusyMonitor timer hasn't fired for this bucket yet.
+					lastBucketVisited--;
+					break;
+				}
+				else if (!haveSeenBusyData && typeof data.busy[j] !== "undefined") {
+					haveSeenBusyData = true;
+				}
+
+				if (data.busy[j] > TIME_TO_INTERACTIVE_MAX_PAGE_BUSY) {
+					// Too busy
+					idleIntervals = 0;
+					continue;
+				}
+			}
+
+			if (data.interdly && data.interdly[j]) {
+				// a delayed interaction happened
+				idleIntervals = 0;
+				continue;
+			}
+
+			// this was an idle interval
+			idleIntervals++;
+
+			// if we've found enough idle intervals, mark TTI as the beginning
+			// of this idle period
+			if (idleIntervals >= TIME_TO_INTERACTIVE_IDLE_INTERVALS) {
+				tti = startTime + ((j + 1 - TIME_TO_INTERACTIVE_IDLE_INTERVALS) * COLLECTION_INTERVAL);
+
+				// ensure we don't set TTI before TTVR
+				tti = Math.max(tti, visuallyReady);
+				break;
+			}
+		}
+
+		return {
+			tti: tti,
+			idleIntervals: idleIntervals,
+			lastBucketVisited: lastBucketVisited
+		};
+	}
+
 	/**
 	 * Timeline data
 	 *
@@ -1196,37 +1303,6 @@
 	 * * Calculates Time to Interactive (TTI) and Visually Ready.
 	 */
 	var Timeline = function(startTime) {
-		//
-		// Constants
-		//
-		/**
-		 * Number of "idle" intervals (of COLLECTION_INTERVAL ms) before
-		 * Time to Interactive is called.
-		 *
-		 * 5 * 100 = 500ms (of no long tasks > 50ms and FPS >= 20)
-		 */
-		var TIME_TO_INTERACTIVE_IDLE_INTERVALS = 5;
-
-		/**
-		 * For Time to Interactive, minimum FPS.
-		 *
-		 * ~20 FPS or max ~50ms blocked
-		 */
-		var TIME_TO_INTERACTIVE_MIN_FPS = 20;
-
-		/**
-		 * For Time to Interactive, minimum FPS per COLLECTION_INTERVAL.
-		 */
-		var TIME_TO_INTERACTIVE_MIN_FPS_PER_INTERVAL =
-			TIME_TO_INTERACTIVE_MIN_FPS / (1000 / COLLECTION_INTERVAL);
-
-		/**
-		 * For Time to Interactive, max Page Busy (if LongTasks aren't supported)
-		 *
-		 * ~50%
-		 */
-		var TIME_TO_INTERACTIVE_MAX_PAGE_BUSY = 50;
-
 		//
 		// Local Members
 		//
@@ -1251,6 +1327,12 @@
 
 		// whether or not to add Visually Ready to the next beacon
 		var addVisuallyReadyToBeacon = true;
+
+		// last bucket that was analyzed for TTI
+		var lastBucketVisited = false;
+
+		// number of idle intervals up to lastBucketVisited
+		var idleIntervals = 0;
 
 		// check for pre-Boomerang FPS log
 		if (BOOMR.fpsLog && BOOMR.fpsLog.length) {
@@ -1640,9 +1722,7 @@
 		 * @param {number} timeOfLastBeacon Time we last sent a beacon
 		 */
 		function analyze(timeOfLastBeacon) {
-			var endBucket = getTimeBucket(),
-			    j = 0,
-			    idleIntervals = 0;
+			var endBucket = getTimeBucket();
 
 			// add log
 			if (impl.sendLog && typeof timeOfLastBeacon !== "undefined") {
@@ -1687,50 +1767,31 @@
 			}
 
 			// determine the first bucket we'd use
-			var startBucket = Math.floor((visuallyReady - startTime) / COLLECTION_INTERVAL);
+			var startBucket;
 
-			for (j = startBucket; j <= endBucket; j++) {
-				if (data.longtask && data.longtask[j]) {
-					// had a long task during this interval
-					idleIntervals = 0;
-					continue;
-				}
-
-				if (data.fps && (!data.fps[j] || data.fps[j] < TIME_TO_INTERACTIVE_MIN_FPS_PER_INTERVAL)) {
-					// No FPS or less than 20 FPS during this interval
-					idleIntervals = 0;
-					continue;
-				}
-
-				if (data.busy && (data.busy[j] > TIME_TO_INTERACTIVE_MAX_PAGE_BUSY)) {
-					// Too busy
-					idleIntervals = 0;
-					continue;
-				}
-
-				if (data.interdly && data.interdly[j]) {
-					// a delayed interaction happened
-					idleIntervals = 0;
-					continue;
-				}
-
-				// this was an idle interval
-				idleIntervals++;
-
-				// if we've found enough idle intervals, mark TTI as the beginning
-				// of this idle period
-				if (idleIntervals >= TIME_TO_INTERACTIVE_IDLE_INTERVALS) {
-					tti = startTime + ((j - TIME_TO_INTERACTIVE_IDLE_INTERVALS) * COLLECTION_INTERVAL);
-
-					// ensure we don't set TTI before TTVR
-					tti = Math.max(tti, visuallyReady);
-					break;
-				}
+			if (lastBucketVisited === false) {
+				// haven't gone over any buckets yet
+				startBucket = Math.max(Math.floor((visuallyReady - startTime) / COLLECTION_INTERVAL), 0);
+			}
+			else {
+				// already looked at some buckets, continue with the next one
+				startBucket = lastBucketVisited + 1;
 			}
 
-			// we were able to calculate a TTI
-			if (tti > 0) {
-				impl.addToBeacon("c.tti", externalMetrics.timeToInteractive());
+			// calculate TTI
+			var results = determineTti(startTime, visuallyReady, startBucket, endBucket, idleIntervals, data);
+
+			if (results) {
+				// save results for next time
+				idleIntervals = results.idleIntervals;
+				lastBucketVisited = results.lastBucketVisited;
+
+				// we were able to calculate a TTI
+				if (results.tti > 0) {
+					tti = results.tti;
+
+					impl.addToBeacon("c.tti", externalMetrics.timeToInteractive());
+				}
 			}
 		}
 
@@ -1807,7 +1868,17 @@
 			// clear the buckets
 			for (var type in data) {
 				if (data.hasOwnProperty(type)) {
-					data[type] = [];
+
+					if (!tti && lastBucketVisited !== false) {
+						// if we haven't calculated tti yet, keep enough data around so we can continue trying the calc
+						var oldData = data[type];
+						var newData = new Array(lastBucketVisited + 1);
+						data[type] = newData.concat(oldData.slice(lastBucketVisited + 1));
+					}
+					else {
+						// start fresh
+						data[type] = [];
+					}
 				}
 			}
 
@@ -4483,7 +4554,8 @@
 		compressBucketLog: compressBucketLog,
 		decompressBucketLog: decompressBucketLog,
 		decompressBucketLogNumber: decompressBucketLogNumber,
-		decompressLog: decompressLog
+		decompressLog: decompressLog,
+		determineTti: determineTti
 		/* END_DEBUG */
 	};
 }());

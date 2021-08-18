@@ -1383,4 +1383,380 @@ describe("BOOMR.plugins.Continuity", function() {
 			});
 		});
 	});
+
+	describe("determineTti()", function() {
+		//
+		// Minimal / Small bucket calculations with no data
+		//
+		describe("Calculations without data {}", function() {
+			it("Should return no TTI if there are no buckets to analyze", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 0, lastBucketVisited: 0 },
+					BOOMR.plugins.Continuity.determineTti(100, 200, 0, -1, 0, {}));
+			});
+
+			it("Should return no TTI if there was only a single bucket to analyze", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 1, lastBucketVisited: 0 },
+					BOOMR.plugins.Continuity.determineTti(100, 200, 0, 0, 0, {}));
+			});
+
+			it("Should return no TTI if there were only 4 buckets to analyze", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 4, lastBucketVisited: 3 },
+					BOOMR.plugins.Continuity.determineTti(100, 200, 0, 3, 0, {}));
+			});
+
+			it("Should return a TTI at start if there were 5 idle buckets", function() {
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 4, 0, {}));
+			});
+
+			it("Should return a TTI at TTVR if there were 5 idle buckets and TTVR was higher than the start", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 200, 0, 4, 0, {}));
+			});
+		});
+
+		//
+		// With Long Tasks
+		//
+		describe("Calculations with LongTask data", function() {
+			it("Should return a TTI at start time if there is no LongTasks", function() {
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						longtask: [0, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI 100ms after start time if the first bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 5 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						longtask: [1]
+					}));
+			});
+
+			it("Should return a TTI 200ms after start time if the second bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 300, idleIntervals: 5, lastBucketVisited: 6 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						longtask: [0, 1]
+					}));
+			});
+
+			it("Should return a TTI 500ms after start time if the fifth bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						longtask: [0, 0, 0, 0, 1]
+					}));
+			});
+
+			it("Should return a TTI 1000ms after start time if the fifth and tenth buckets were busy", function() {
+				assert.deepEqual(
+					{ tti: 1100, idleIntervals: 5, lastBucketVisited: 14 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						longtask: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+					}));
+			});
+		});
+
+		//
+		// With FPS
+		//
+		describe("Calculations with FPS data", function() {
+			it("Should return a TTI at start time if FPS was at 60 for the entire interval", function() {
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [6, 6, 6, 6, 6, 6]
+					}));
+			});
+
+			//
+			// 0 FPS
+			//
+			it("Should return a TTI 100ms after start time if the first bucket had 0 FPS", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 5 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [0, 6, 6, 6, 6, 6]
+					}));
+			});
+
+			it("Should return a TTI 200ms after start time if the second bucket had 0 FPS", function() {
+				assert.deepEqual(
+					{ tti: 300, idleIntervals: 5, lastBucketVisited: 6 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [6, 0, 6, 6, 6, 6, 6]
+					}));
+			});
+
+			it("Should return a TTI 500ms after start time if the fifth bucket had 0 FPS", function() {
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [6, 6, 6, 6, 0, 6, 6, 6, 6, 6]
+					}));
+			});
+
+			it("Should return a TTI 1000ms after start time if the fifth and tenth buckets had 0 FPS", function() {
+				assert.deepEqual(
+					{ tti: 1100, idleIntervals: 5, lastBucketVisited: 14 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						fps: [6, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6]
+					}));
+			});
+
+			//
+			// 2 FPS min
+			//
+			it("Should return a TTI 100ms after start time if the first bucket had 10 FPS and the rest were 20 FPS", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 5 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [1, 2, 2, 2, 2, 2]
+					}));
+			});
+
+			it("Should return a TTI 200ms after start time if the second bucket had 10 FPS and the rest were 20 FPS", function() {
+				assert.deepEqual(
+					{ tti: 300, idleIntervals: 5, lastBucketVisited: 6 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [2, 1, 2, 2, 2, 2, 2]
+					}));
+			});
+
+			it("Should return a TTI 500ms after start time if the fifth bucket had 10 FPS and the rest were 20 FPS", function() {
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						fps: [2, 2, 2, 2, 1, 2, 2, 2, 2, 2]
+					}));
+			});
+
+			it("Should return a TTI 1000ms after start time if the fifth and tenth buckets had 10 FPS and the rest were 20 FPS", function() {
+				assert.deepEqual(
+					{ tti: 1100, idleIntervals: 5, lastBucketVisited: 14 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						fps: [2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2]
+					}));
+			});
+		});
+
+		//
+		// With Busy Data
+		//
+		describe("Calculations with Page Busy data", function() {
+			it("Should return a TTI at start time if there is no Page Busy", function() {
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [0, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI of 0 if the first bucket is busy and there aren't any following buckets filled in yet", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 0, lastBucketVisited: 0 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [51]
+					}));
+			});
+
+			it("Should return a TTI 100ms after start time if the first bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 5 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [51, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI of 0 if the first bucket is busy and there aren't any following buckets filled in yet", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 0, lastBucketVisited: 1 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [0, 51]
+					}));
+			});
+
+			it("Should return a TTI 200ms after start time if the second bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 300, idleIntervals: 5, lastBucketVisited: 6 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [0, 51, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI of 0 if the fifth bucket is busy and there aren't any following buckets filled in yet", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 0, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [0, 0, 0, 0, 51]
+					}));
+			});
+
+			it("Should return a TTI 500ms after start time if the fifth bucket is busy", function() {
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						busy: [0, 0, 0, 0, 51, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI 0 if the fifth bucket and tenth buckets are busy and there aren't any following buckets filled in yet", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 0, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						busy: [0, 0, 0, 0, 51, 0, 0, 0, 0, 51]
+					}));
+			});
+
+			it("Should return a TTI 1000ms after start time if the fifth and tenth buckets were busy", function() {
+				assert.deepEqual(
+					{ tti: 1100, idleIntervals: 5, lastBucketVisited: 14 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						busy: [0, 0, 0, 0, 51, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return no TTI if the Page Busy data hasn't been filled in for the period yet", function() {
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 4, lastBucketVisited: 3 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						busy: [0, 0, 0, 0]
+					}));
+			});
+
+			it("Should have a TTI of 100ms if Page Busy data is later filled in", function() {
+				var results = BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+					busy: [0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 4, lastBucketVisited: 3 },
+					results);
+
+				results = BOOMR.plugins.Continuity.determineTti(100, 100, results.lastBucketVisited + 1, 20, results.idleIntervals, {
+					busy: [0, 0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					results);
+			});
+		});
+
+		//
+		// With Delayed Interactions
+		//
+		describe("Calculations with Delayed Interaction data", function() {
+			it("Should return a TTI at start time if there is no delayed interaction", function() {
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						interdly: [0, 0, 0, 0, 0, 0]
+					}));
+			});
+
+			it("Should return a TTI 100ms after start time if the first bucket had a delayed interaction", function() {
+				assert.deepEqual(
+					{ tti: 200, idleIntervals: 5, lastBucketVisited: 5 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						interdly: [1]
+					}));
+			});
+
+			it("Should return a TTI 200ms after start time if the second bucket had a delayed interaction", function() {
+				assert.deepEqual(
+					{ tti: 300, idleIntervals: 5, lastBucketVisited: 6 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						interdly: [0, 1]
+					}));
+			});
+
+			it("Should return a TTI 500ms after start time if the fifth bucket had a delayed interaction", function() {
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 10, 0, {
+						interdly: [0, 0, 0, 0, 1]
+					}));
+			});
+
+			it("Should return a TTI 1000ms after start time if the fifth and tenth buckets had delayed interactions", function() {
+				assert.deepEqual(
+					{ tti: 1100, idleIntervals: 5, lastBucketVisited: 14 },
+					BOOMR.plugins.Continuity.determineTti(100, 100, 0, 20, 0, {
+						interdly: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+					}));
+			});
+		});
+
+		//
+		// With previous Idle Intervals
+		//
+		describe("Calculations with previous Idle Intervals calculated", function() {
+			it("Should utilize startBucket and idleIntervals from a previous calculation where idle is at bucket 0", function() {
+				// call it once with two idle buckets
+				var results = BOOMR.plugins.Continuity.determineTti(100, 100, 0, 1, 0, {
+					longtask: [0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 2, lastBucketVisited: 1 },
+					results);
+
+				// call again with 2 more idle buckets
+				results = BOOMR.plugins.Continuity.determineTti(100, 100, results.lastBucketVisited + 1, 3, results.idleIntervals, {
+					longtask: [0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 4, lastBucketVisited: 3 },
+					results);
+
+				// call again with 6 more idle buckets
+				results = BOOMR.plugins.Continuity.determineTti(100, 100, results.lastBucketVisited + 1, 9, results.idleIntervals, {
+					longtask: [0, 0, 0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 100, idleIntervals: 5, lastBucketVisited: 4 },
+					results);
+			});
+
+			it("Should utilize startBucket and idleIntervals from a previous calculation where idle is at bucket 4", function() {
+				// call it once with two idle buckets
+				var results = BOOMR.plugins.Continuity.determineTti(100, 100, 0, 1, 0, {
+					longtask: [0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 2, lastBucketVisited: 1 },
+					results);
+
+				// call again with 2 more idle buckets
+				results = BOOMR.plugins.Continuity.determineTti(100, 100, results.lastBucketVisited + 1, 3, results.idleIntervals, {
+					longtask: [0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 0, idleIntervals: 4, lastBucketVisited: 3 },
+					results);
+
+				// call again with 6 more buckets, with busyness at 5
+				results = BOOMR.plugins.Continuity.determineTti(100, 100, results.lastBucketVisited + 1, 9, results.idleIntervals, {
+					longtask: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+				});
+
+				assert.deepEqual(
+					{ tti: 600, idleIntervals: 5, lastBucketVisited: 9 },
+					results);
+			});
+		});
+	});
 });
