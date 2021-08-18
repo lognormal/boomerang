@@ -139,7 +139,7 @@ potentially delaying the Page Load.</li>
 <p>Note: We split the <code>&lt;body</code> tag insertion into <code>&lt;bo</code> and <code>dy</code> to avoid server-side output filters that may replace <code>&lt;body</code> tags with their own code.</p>
 <p>For proof that the non-blocking script loader pattern does not affect page load,
 you can look at this
-<a href="http://dev.nicj.net/boomerang-audit/test-mpulse-loader-snippet-delayed.html">test case</a>
+<a href="https://dev.nicj.net/boomerang-audit/test-mpulse-loader-snippet-delayed.html">test case</a>
 that delays JavaScript from loading by 5 seconds or these
 <a href="https://www.webpagetest.org/result/171221_HD_bb090190517fa8dd101859e8c1f327fe/">WebPagetest results</a>.</p>
 <h2>The Snippet</h2>
@@ -578,6 +578,23 @@ boomerang.js is loaded.</p>
 <p>Minified:</p>
 <pre class="prettyprint source lang-javascript"><code>&lt;script>(function(){if(window.BOOMR&amp;&amp;(window.BOOMR.version||window.BOOMR.snippetExecuted)){return}window.BOOMR=window.BOOMR||{};window.BOOMR.snippetStart=(new Date).getTime();window.BOOMR.snippetExecuted=true;window.BOOMR.snippetVersion=14;window.BOOMR.url=&quot;&quot;;var e=document.currentScript||document.getElementsByTagName(&quot;script&quot;)[0],r=e.parentNode,s=false,n=3e3;function t(){if(s){return}var e=document.createElement(&quot;script&quot;);e.id=&quot;boomr-scr-as&quot;;e.src=window.BOOMR.url;e.async=true;r.appendChild(e);s=true}function i(e){s=true;var n,i=document,t,o,d,a=window;window.BOOMR.snippetMethod=e?&quot;if&quot;:&quot;i&quot;;t=function(e,n){var t=i.createElement(&quot;script&quot;);t.id=n||&quot;boomr-if-as&quot;;t.src=window.BOOMR.url;BOOMR_lstart=(new Date).getTime();e=e||i.body;e.appendChild(t)};if(!window.addEventListener&amp;&amp;window.attachEvent&amp;&amp;navigator.userAgent.match(/MSIE [67]\./)){window.BOOMR.snippetMethod=&quot;s&quot;;t(r,&quot;boomr-async&quot;);return}o=document.createElement(&quot;IFRAME&quot;);o.src=&quot;about:blank&quot;;o.title=&quot;&quot;;o.role=&quot;presentation&quot;;o.loading=&quot;eager&quot;;d=(o.frameElement||o).style;d.width=0;d.height=0;d.border=0;d.display=&quot;none&quot;;r.appendChild(o);try{a=o.contentWindow;i=a.document.open()}catch(e){n=document.domain;o.src=&quot;javascript:var d=document.open();d.domain='&quot;+n+&quot;';void 0;&quot;;a=o.contentWindow;i=a.document.open()}if(n){i._boomrl=function(){this.domain=n;t()};i.write(&quot;&lt;bo&quot;+&quot;dy onload='document._boomrl();'&gt;&quot;)}else{a._boomrl=function(){t()};if(a.addEventListener){a.addEventListener(&quot;load&quot;,a._boomrl,false)}else if(a.attachEvent){a.attachEvent(&quot;onload&quot;,a._boomrl)}}i.close()}function o(){var e=document.createElement(&quot;link&quot;);if(e.relList&amp;&amp;typeof e.relList.supports===&quot;function&quot;&amp;&amp;e.relList.supports(&quot;preload&quot;)&amp;&amp;&quot;as&quot;in e){window.BOOMR.snippetMethod=&quot;p&quot;;e.href=window.BOOMR.url;e.rel=&quot;preload&quot;;e.as=&quot;script&quot;;e.addEventListener(&quot;load&quot;,t);e.addEventListener(&quot;error&quot;,function(){i(true)});setTimeout(function(){if(!s){i(true)}},n);BOOMR_lstart=(new Date).getTime();r.appendChild(e)}else{i(false)}}function d(e){window.BOOMR_onload=e&amp;&amp;e.timeStamp||(new Date).getTime()}if(window.addEventListener){window.addEventListener(&quot;load&quot;,d,false)}else if(window.attachEvent){window.attachEvent(&quot;onload&quot;,d)}function a(e){d(e);setTimeout(o,0)}if(&quot;performance&quot;in win&amp;&amp;win.performance&amp;&amp;win.performance.timing&amp;&amp;win.performance.timing.loadEventStart||document.readyState===&quot;complete&quot;){o()}else{if(win.addEventListener){win.addEventListener(&quot;load&quot;,a,false)}else if(win.attachEvent){win.attachEvent(&quot;onload&quot;,a)}}})();&lt;/script>
 </code></pre>
+<h2>Known Issues</h2>
+<ul>
+<li>Websites using Google Tag Manager (GTM) to inject the Loader Snippet may not see beacons from Firefox &lt;= 74
+<ul>
+<li>These versions of Firefox do not support Preload, so fallback to using the IFRAME loader</li>
+<li>boomerang.js is not fetched due to a Firefox bug with setting the <code>iframe.src = &quot;about:blank&quot;</code>, which is done for Content Security Policies (CSP) compatibility</li>
+<li>Websites that are not using Content Security Policies can change:<pre class="prettyprint source"><code>// An empty frame
+iframe.src = &quot;about:blank&quot;;
+</code></pre>
+to<pre class="prettyprint source"><code>// An empty frame
+iframe.src = &quot;javascript:void(0)&quot;;
+</code></pre>
+</li>
+<li>Websites that are using Content Security Policies should use a <code>&lt;script async&gt;</code> tag to load boomerang.js instead of the Loader Snippet</li>
+</ul>
+</li>
+</ul>
 </article>
 
 
@@ -615,13 +632,13 @@ boomerang.js is loaded.</p>
 
 
 	<span class="copyright">
-	© 2010-2020 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	© 2010-2021 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
 	</span>
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
 	
-		on Wed Sep 30th 2020
+		on Wed Aug 18th 2021
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

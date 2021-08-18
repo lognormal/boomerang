@@ -121,6 +121,8 @@
 (XHRs) and other in-page interactions after the page has been loaded.</p>
 <p>This plugin also monitors DOM manipulations following a XHR to filter out
 &quot;background&quot; XHRs.</p>
+<p>This plugin provides the backbone for the <a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a> plugin.  Single Page App navigations
+use XHR and DOM monitoring to determine when the SPA navigations are complete.</p>
 <p>This plugin has a corresponding <a href="tutorial-header-snippets.html">Header Snippets</a> that helps monitor XHRs prior to Boomerang loading.</p>
 <p>For information on how to include this plugin, see the <a href="tutorial-building.html">Building</a> tutorial.</p>
 <h2>What is Measured</h2>
@@ -141,15 +143,15 @@ more HTML that added images to the page, the entire event will be measured
 from the click to the last image completing.</p>
 <h2>Usage</h2>
 <p>To enable AutoXHR, you should set <a href="BOOMR.plugins.AutoXHR.html#.init"><code>instrument_xhr</code></a> to <code>true</code>:</p>
-<pre><code>BOOMR.init({
-  instrument_xhr: true
+<pre class="prettyprint source"><code>BOOMR.init({
+    instrument_xhr: true
 });
 </code></pre>
 <p>Once enabled and initialized, the <code>window.XMLHttpRequest</code> object will be
 replaced with a &quot;proxy&quot; object that instruments all XHRs.</p>
 <h2>Monitoring XHRs</h2>
 <p>After <code>AutoXHR</code> is enabled, any <code>XMLHttpRequest.send</code> will be monitored:</p>
-<pre><code>xhr = new XMLHttpRequest();
+<pre class="prettyprint source"><code>xhr = new XMLHttpRequest();
 xhr.open(&quot;GET&quot;, &quot;/api/foo&quot;);
 xhr.send(null);
 </code></pre>
@@ -163,10 +165,35 @@ from a Page Load beacon.  See <a href="BOOMR.plugins.RT.html"><code>BOOMR.plugin
 XHR beacon.  The <code>u</code> (URL) will be of the first XHR.</p>
 <p>If you don't want this behavior, and want to measure <em>every</em> XHR on the page, you
 can enable <a href="BOOMR.plugins.AutoXHR.html#.init"><code>alwaysSendXhr=true</code></a>.  When set, every
-distinct XHR will get its own XHR beacon.
-<a href="BOOMR.plugins.AutoXHR.html#.init"><code>alwaysSendXhr</code></a> can also be a list of strings
+distinct XHR will get its own XHR beacon.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: true
+    }
+});
+</code></pre>
+<p><a href="BOOMR.plugins.AutoXHR.html#.init"><code>alwaysSendXhr</code></a> can also be a list of strings
 (matching URLs), regular expressions (matching URLs), or a function which returns
 true for URLs to always send XHRs for.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: [
+            &quot;domain.com&quot;,
+            /regexmatch/,
+        ]
+   }
+});
+
+// or
+
+BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: function(url) {
+            return url.indexOf(&quot;domain.com&quot;) !== -1;
+        }
+   }
+});
+</code></pre>
 <h3>Compatibility and Browser Support</h3>
 <p>Currently supported Browsers and platforms that AutoXHR will work on:</p>
 <ul>
@@ -179,12 +206,14 @@ true for URLs to always send XHRs for.</p>
 and <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a>.</p>
 <p>We will not use MutationObserver in IE 11 due to several browser bugs.
 See <a href="BOOMR.utils.html#.isMutationObserverSupported"><code>BOOMR.utils.isMutationObserverSupported</code></a> for details.</p>
-<h2>Excluding Certain Requests From Instrumentation</h2>
-<p>Whenever Boomerang intercepts an <code>XMLHttpRequest</code>, it will check if that request
+<h2>Excluding Certain Requests or DOM Elements From Instrumentation</h2>
+<p>Whenever Boomerang intercepts an <code>XMLHttpRequest</code> (or Fetch), it will check if that request
 matches anything in the XHR exclude list. If it does, Boomerang will not
 instrument, time, send a beacon for that request, or include it in the
 <a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a> calculations.</p>
-<p>The XHR exclude list is defined by creating an <code>BOOMR.xhr_excludes</code> map, and
+<p>There are two methods of excluding XHRs: Defining the <code>BOOMR.xhr_excludes</code> array,
+or using the <a href="BOOMR.plugins.AutoXHR.html#.init"><code>excludeFilters</code></a> option.</p>
+<p>The <code>BOOMR.xhr_excludes</code> XHR excludes list is defined by creating a map, and
 adding URL parts that you would like to exclude from instrumentation. You
 can put any of the following in <code>BOOMR.xhr_excludes</code>:</p>
 <ol>
@@ -202,6 +231,31 @@ BOOMR.xhr_excludes = {
   &quot;https://mydomain.com/dashboard/&quot;: true
 };
 </code></pre>
+<p>The <a href="BOOMR.plugins.AutoXHR.html#.init"><code>excludeFilters</code></a> gives you more control by allowing you
+to specify one or more callbacks that will be run for each XHR/Fetch.  If any callback
+returns <code>true</code>, the XHR/Fetch will <em>not</em> be instrumented.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+  AutoXHR: {
+    excludeFilters: [
+      function(anchor) {
+        return anchor.href.match(/non-trackable/);
+      }
+    ]
+  }
+});
+</code></pre>
+<p>Finally, the <a href="BOOMR.plugins.AutoXHR.html#.init"><code>domExcludeFilters</code></a> DOM filters can be used to filter out
+specific DOM elements from being tracked (marked as &quot;uninteresting&quot;).</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+  AutoXHR: {
+    domExcludeFilters: [
+      function(elem) {
+        return elem.id === &quot;ignore&quot;;
+      }
+    ]
+  }
+});
+</code></pre>
 <h2>Beacon Parameters</h2>
 <p>XHR beacons have different parameters in general than Page Load beacons.</p>
 <ul>
@@ -212,21 +266,25 @@ BOOMR.xhr_excludes = {
 <li><code>http.initiator</code>: <code>xhr</code> for both XHR and Fetch requests</li>
 </ul>
 <h2>Interesting Nodes</h2>
-<p>MutationObserver is used to detect &quot;interesting&quot; nodes. Interesting nodes are
+<p>A <code>MutationObserver</code> is used to detect &quot;interesting&quot; nodes. Interesting nodes are
 new IMG/IMAGE/IFRAME/LINK (rel=stylesheet) nodes or existing nodes that are
-changing their source URL.
-We consider the following &quot;uninteresting&quot; nodes:</p>
+changing their source URL.</p>
+<p>We consider the following &quot;uninteresting&quot; nodes:</p>
 <ul>
 <li>Nodes that have either a width or height &lt;= 1px.</li>
+<li>Nodes with either a width or height of 0px.</li>
 <li>Nodes that have display:none.</li>
 <li>Nodes that have visibility:hidden.</li>
+<li>Nodes with an opacity:0.</li>
 <li>Nodes that update their source URL to the same value.</li>
 <li>Nodes that have a blank source URL.</li>
+<li>Images with a loading=&quot;lazy&quot; attribute</li>
 <li>Nodes that have a source URL starting with <code>about:</code>, <code>javascript:</code> or <code>data:</code>.</li>
 <li>SCRIPT nodes because there is no consistent way to detect when they have loaded.</li>
 <li>Existing IFRAME nodes that are changing their source URL because is no consistent
 way to detect when they have loaded.</li>
 <li>Nodes that have a source URL that matches a AutoXHR exclude filter rule.</li>
+<li>Nodes that have been manually excluded</li>
 </ul>
 <h2>Algorithm</h2>
 <p>Here's how the general AutoXHR algorithm works:</p>
@@ -283,6 +341,16 @@ activity or not.</li>
 <li>We do not know if the developer's event listener has already run before
 ours or if it will run in the future or even if they do have an event listener.</li>
 <li>Our best bet is the same as 0.1 above.</li>
+</ul>
+</li>
+<li>
+<p><code>0.3</code> SPA soft route change from a click that triggers a XHR before the state is
+changed (when <a href="BOOMR.plugins.AutoXHR.html#.init"><code>spaStartFromClick</code></a> is enabled).</p>
+<ul>
+<li>We store the time of the click</li>
+<li>If any additional XHRs come next, we track those</li>
+<li>When a pushState comes after the XHRs (before the timeout), we will &quot;migrate&quot; the
+click to a SPA event</li>
 </ul>
 </li>
 <li>
@@ -493,6 +561,219 @@ SPA beacon. If not, drop the pending event.</li>
 <hr>
 <dt>
     
+        <h3 class="method-name" class="name" id=".addDomExcludeFilter">addDomExcludeFilter(cb, ctx [, name])</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Add a DOM filter function to the list of functions to run to validate if an
+DOM element should be instrumented.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="BOOMR.plugins.AutoXHR.html#.htmlElementCallback">BOOMR.plugins.AutoXHR.htmlElementCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Callback to run to validate filtering of an XHR Request</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Context to run {@param cb} in</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional name for the filter, called out when running exclude filters for debugging purposes</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4>Example</h4>
+        
+    <pre class="sunlight-highlight-javascript">BOOMR.plugins.AutoXHR.addDomExcludeFilter(function(elem) {
+  return elem.id === &quot;ignore&quot;;
+}, null, &quot;exampleFilter&quot;);</pre>
+
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
         <h3 class="method-name" class="name" id=".addExcludeFilter">addExcludeFilter(cb, ctx [, name])</h3>
     
 
@@ -502,7 +783,7 @@ SPA beacon. If not, drop the pending event.</li>
 
     
     <div class="description">
-        <p>Add a filter function to the list of functions to run to validate if an
+        <p>Add a XHR filter function to the list of functions to run to validate if an
 XHR should be instrumented.</p>
     </div>
     
@@ -1115,6 +1396,8 @@ necessary.</p>
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -1151,6 +1434,10 @@ necessary.</p>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"><p>Whether or not to instrument XHR</p></td>
         </tr>
@@ -1184,6 +1471,10 @@ necessary.</p>
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>Default resources to count as
@@ -1220,6 +1511,10 @@ Back-End during a SPA nav</p></td>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"><p>Whether or not to instrument fetch()</p></td>
         </tr>
@@ -1228,7 +1523,7 @@ Back-End during a SPA nav</p></td>
 
         <tr>
             
-                <td class="name"><code>AuthXHR.fetchBodyUsedWait</code></td>
+                <td class="name"><code>AutoXHR.fetchBodyUsedWait</code></td>
             
 
             <td class="type">
@@ -1254,6 +1549,10 @@ Back-End during a SPA nav</p></td>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"><p>If the fetch response's bodyUsed flag is false,
 we'll wait this amount of ms before checking RT for an entry. Setting to 0 will disable this feature</p></td>
@@ -1270,6 +1569,15 @@ we'll wait this amount of ms before checking RT for an entry. Setting to 0 will 
             
                 
 <span class="param-type">boolean</span>
+|
+
+<span class="param-type">Array.&lt;string></span>
+|
+
+<span class="param-type">Array.&lt;RegExp></span>
+|
+
+<span class="param-type">Array.&lt;function()></span>
 
 
 
@@ -1288,6 +1596,10 @@ we'll wait this amount of ms before checking RT for an entry. Setting to 0 will 
                 </td>
             
 
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>Whether or not to send XHR
@@ -1324,9 +1636,177 @@ beacons for every XHR.</p></td>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"><p>Whether or not to capture an XHR's
 request and response bodies on for the <code>xhr_load</code> event.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.spaIdleTimeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
+
+            <td class="description last"><p>Timeout for Single Page Applications after the final
+resource fetch has completed before calling the SPA navigation complete. Default is 1000ms.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.xhrIdleTimeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    50
+                
+                </td>
+            
+
+            <td class="description last"><p>Timeout for XHRs after final resource fetch has completed
+before calling the XHR complete.  Default is 50ms.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.xhrRequireChanges</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not a XHR beacon will only be triggered
+if there were DOM changes.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.spaStartFromClick</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>In Single Page Apps, start tracking
+the SPA Soft Navigation from any preceeding clicks.  If false, will start from the most recent pushState.</p></td>
         </tr>
 
     
@@ -1853,7 +2333,7 @@ checked against <code>BOOMR.xhr_excludes</code></p></td>
 
             
 
-            <td class="description last"><p>HTML a element</p></td>
+            <td class="description last"><p>HTML element</p></td>
         </tr>
 
     
@@ -1961,13 +2441,13 @@ checked against <code>BOOMR.xhr_excludes</code></p></td>
 
 
 	<span class="copyright">
-	© 2010-2020 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	© 2010-2021 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
 	</span>
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
 	
-		on Wed Sep 30th 2020
+		on Wed Aug 18th 2021
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

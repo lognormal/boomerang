@@ -94,6 +94,7 @@
     <p>Boomerang is split into the main framework (<code>boomerang.js</code>) and plugins (<code>plugins/*.js</code>).</p>
 <p><code>boomerang.js</code> on its own will not do anything interesting.  To enable performance
 measurements of your site, you will want to include several plugins.</p>
+<p><a name="choosing-plugins"></a></p>
 <h2>Choosing Plugins</h2>
 <p>Each plugin lives on its own in the <code>plugins/</code> directory.  Plugins are split into
 core measurement components, though some depend on each other.</p>
@@ -103,27 +104,34 @@ measurement.</p>
 <p>You can read about each plugin in its documentation.  Here is a basic description
 of each plugin:</p>
 <ul>
-<li><code>BOOMR.plugins.Angular</code> enables support for measuring AngularJS websites</li>
+<li><code>BOOMR.plugins.Angular</code> enables support for measuring AngularJS websites (now part of the <a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a> plugin)</li>
 <li><a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a> tracks <code>XMLHttpRequest</code>s and other in-page interactions</li>
-<li><code>BOOMR.plugins.Backbone</code> enables support for measuring Backbone.js websites</li>
+<li><code>BOOMR.plugins.Backbone</code> enables support for measuring Backbone.js websites (now part of the <a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a> plugin)</li>
 <li><a href="BOOMR.plugins.BW.html"><code>BOOMR.plugins.BW</code></a> measures HTTP bandwidth</li>
 <li><a href="BOOMR.plugins.CACHE_RELOAD.html"><code>BOOMR.plugins.CACHE_RELOAD</code></a> forces the browser to update its cached copy of boomerang</li>
 <li><a href="BOOMR.plugins.Clicks.html"><code>BOOMR.plugins.Clicks</code></a> tracks in-page clicks</li>
-<li><code>BOOMR.plugins.CrossDomain</code> allows cross-domain session tracking</li>
+<li><a href="BOOMR.plugins.ConsentInlinedPlugin.html"><code>BOOMR.plugins.ConsentInlinedPlugin</code></a> allows for Opt-In and Opt-Out via user consent</li>
+<li><code>BOOMR.plugins.Continuty</code> measures user-experience metrics such as Time to Interactive, Cumulative Layout Shift, Rage Clicks, etc</li>
 <li><a href="BOOMR.plugins.CT.html"><code>BOOMR.plugins.CT</code></a> tests whether a script was cached</li>
 <li><a href="BOOMR.plugins.DNS.html"><code>BOOMR.plugins.DNS</code></a> measures DNS latency</li>
-<li><code>BOOMR.plugins.Ember</code> enables support for measuring Ember.js websites</li>
+<li><a href="BOOMR.plugins.Early.html"><code>BOOMR.plugins.Early</code></a> allows sending pre-Page Load beacons to ensure all page loads are tracked</li>
+<li><code>BOOMR.plugins.Ember</code> enables support for measuring Ember.js websites (now part of the <a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a> plugin)</li>
 <li><a href="BOOMR.plugins.Errors.html"><code>BOOMR.plugins.Errors</code></a> adds JavaScript error tracking</li>
+<li><a href="BOOMR.plugins.EventTiming.html"><code>BOOMR.plugins.EventTiming</code></a> measures user input events via the EventTiming API such as First Input Delay (FID)</li>
 <li><a href="BOOMR.plugins.GUID.html"><code>BOOMR.plugins.GUID</code></a> adds a unique ID for each session</li>
 <li><a href="BOOMR.plugins.IPv6.html"><code>BOOMR.plugins.IPv6</code></a> measures various IPv6 metrics</li>
+<li><a href="BOOMR.plugins.IFrameDelay.html"><code>BOOMR.plugins.IFrameDelay</code></a> allows delaying the page load measurements until IFRAMEs are loaded</li>
 <li><a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a> enables support for measuring React and other <code>window.history</code> websites</li>
 <li><a href="BOOMR.plugins.Memory.html"><code>BOOMR.plugins.Memory</code></a> captures browser memory metrics</li>
 <li><a href="BOOMR.plugins.Mobile.html"><code>BOOMR.plugins.Mobile</code></a> captures mobile connection type</li>
+<li><code>BOOMR.plugins.MQ</code> adds a &quot;method queue&quot; API for Boomerang</li>
 <li><a href="BOOMR.plugins.NavigationTiming.html"><code>BOOMR.plugins.NavigationTiming</code></a> captures NavigationTiming data</li>
+<li><a href="BOOMR.plugins.PaintTiming.html"><code>BOOMR.plugins.PaintTiming</code></a> captures paint events such as First Contentful Paint (FCP) and Largest Contentful Paint (LCP)</li>
 <li><a href="BOOMR.plugins.ResourceTiming.html"><code>BOOMR.plugins.ResourceTiming</code></a> captures ResoureTiming (waterfall) data</li>
 <li><a href="BOOMR.plugins.RT.html"><code>BOOMR.plugins.RT</code></a> captures round-trip (load) performance</li>
 <li><a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a> is required by any of the SPA plugins</li>
 <li><a href="BOOMR.plugins.TPAnalytics.html"><code>BOOMR.plugins.TPAnalytics</code></a> adds third-party analytics IDs to the beacon</li>
+<li><a href="BOOMR.plugins.UserTiming.html"><code>BOOMR.plugins.UserTiming</code></a> captures all UserTiming marks and measures</li>
 </ul>
 <p>There are also a few utility plugins:</p>
 <ul>
@@ -134,12 +142,13 @@ of each plugin:</p>
 <li><a href="BOOMR.plugins.RT.html"><code>BOOMR.plugins.RT</code></a></li>
 <li><a href="BOOMR.plugins.NavigationTiming.html"><code>BOOMR.plugins.NavigationTiming</code></a> captures NavigationTiming data</li>
 </ul>
-<p>To monitor a Single Page App website, we would additionally recommend:</p>
+<p>To monitor a Single Page App website, we would additionally recommend the following:</p>
 <ul>
+<li><a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a></li>
 <li><a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a></li>
-<li><code>BOOMR.plugins.Angular</code>, <code>BOOMR.plugins.Ember</code>, <code>BOOMR.plugins.Backbone</code> or
-<a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a></li>
+<li><a href="BOOMR.plugins.History.html"><code>BOOMR.plugins.History</code></a></li>
 </ul>
+<p>See the <a href="#build-flavors">build flavors</a> section below for suggested ways of building Boomerang.</p>
 <h2>Including Boomerang on your site.</h2>
 <p>boomerang can be included on your page in one of two ways: <a href="#synchronously">synchronously</a> or <a href="#asynchronously">asynchronously</a>.</p>
 <p>The asynchronous method is recommended.</p>
@@ -185,14 +194,14 @@ a timer to measure when boomerang has finished loading (as above).</p>
 <h3>2. Build boomerang</h3>
 <p>The build process bundles <code>boomerang.js</code> and all of the plugins listed in
 <code>plugins.json</code> (in that order).</p>
+<p>If you want to have a custom set of plugins, you can create a <code>plugins.user.json</code> and that file will be used instead (this file is excluded from this repository's Git).</p>
 <p>To build boomerang with all of your desired plugins, you would run:</p>
 <pre class="prettyprint source lang-bash"><code>grunt clean build
 </code></pre>
 <p>This creates a deployable boomerang in the <code>build</code> directory, e.g.
 <code>build/boomerang-&lt;version&gt;.min.js</code>.</p>
 <p>Install this file on your web server or origin server where your CDN can pick it
-up.  Set a far future <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">max-age</a>
-header for it.  This file will never change.</p>
+up.  Set a far future <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">max-age</a> header for it.  This file will never change.</p>
 <h2>The Build Process</h2>
 <p>Build requires <a href="https://nodejs.org/">NodeJS</a> to execute <a href="https://gruntjs.com/">Grunt.js</a>
 to build Boomerang.</p>
@@ -225,6 +234,27 @@ to build Boomerang.</p>
 change the minor version.</p>
 <p>The revision defaults to 0.  Each build can then specify its <code>--build-revision</code>
 to change the revision.</p>
+<h2>Build Flavors</h2>
+<p>By default Boomerang will bundle all plugins defined in <code>plugins.json</code> (under the top-level <code>&quot;plugins&quot;: []</code> key) into the build.</p>
+<p>It is recommended that you tune your build to include just the plugins/features you need, so you can reduce the size and complexity of the Boomerang build.</p>
+<p>Some guidance on choosing plugins is <a href="#choosing-plugins">above</a>, but Boomerang also defines a few &quot;flavors&quot; of builds that bundle common plugins together.</p>
+<p>These flavors are also defined in <code>plugins.json</code> under the <code>&quot;flavors&quot;: {}</code> key.</p>
+<p>For example, here's a definition of the <strong>&quot;minimal&quot;</strong> build we recommend:</p>
+<pre class="prettyprint source"><code>&quot;minimal&quot;: {
+    &quot;comment&quot;: &quot;Minimal recommended plugins&quot;,
+    &quot;revision&quot;: 10,
+    &quot;plugins&quot;: [
+        &quot;plugins/rt.js&quot;,
+        &quot;plugins/navtiming.js&quot;
+    ]
+},
+</code></pre>
+<p>For each flavor, the <code>&quot;plugins&quot;: []</code> key lists which plugins apply to that flavor.</p>
+<p>To build Boomerang with a specific flavor, you can add a <code>--build-flavor=</code> argument to grunt:</p>
+<pre class="prettyprint source lang-bash"><code>grunt clean build --build-flavor=minimal --build-number=1000
+</code></pre>
+<p>The resulting output file will be set to the specified Revision in the <code>&quot;revision&quot;</code> field above, e.g. <code>1.1000.10</code> for the <code>minimal</code> flavor.</p>
+<p>You can also create a <code>plugins.user.json</code> file and that will be used instead of <code>plugins.json</code> (this file is excluded from this repository's Git).</p>
 </article>
 
 
@@ -262,13 +292,13 @@ to change the revision.</p>
 
 
 	<span class="copyright">
-	© 2010-2020 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	© 2010-2021 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
 	</span>
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
 	
-		on Wed Sep 30th 2020
+		on Wed Aug 18th 2021
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
