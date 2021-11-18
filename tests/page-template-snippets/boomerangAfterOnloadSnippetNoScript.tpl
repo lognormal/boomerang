@@ -5,8 +5,12 @@
 		return;
 	}
 
+	function now() {
+		return new Date().getTime();
+	}
+
 	w.BOOMR = w.BOOMR || {};
-	w.BOOMR.snippetStart = new Date().getTime();
+	w.BOOMR.snippetStart = now();
 	w.BOOMR.snippetExecuted = true;
 	w.BOOMR.snippetVersion = 14;
 
@@ -56,7 +60,7 @@
 			script.id = scriptId || "boomr-if-as";
 			script.src = w.BOOMR.url;
 
-			BOOMR_lstart = new Date().getTime();
+			BOOMR_lstart = now();
 
 			parent = parent || doc.body;
 			parent.appendChild(script);
@@ -173,7 +177,7 @@
 			}, LOADER_TIMEOUT);
 
 			// Note the timestamp we started trying to Preload
-			BOOMR_lstart = new Date().getTime();
+			BOOMR_lstart = now();
 
 			// Append our link tag
 			parentNode.appendChild(link);
@@ -186,7 +190,7 @@
 
 	// Save when the onload event happened, in case this is a non-NavigationTiming browser
 	function boomerangSaveLoadTime(e) {
-		w.BOOMR_onload = (e && e.timeStamp) || new Date().getTime();
+		w.BOOMR_onload = (e && e.timeStamp) || now();
 	}
 
 	if (w.addEventListener) {
