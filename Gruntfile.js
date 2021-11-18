@@ -736,7 +736,9 @@ function getConfig() {
 			snippets: {
 				options: {
 					preserveComments: false,
-					mangle: true,
+					mangle: {
+						reserved: ["w"]
+					},
 					banner: "",
 					// NOTE: Not compressing so things like our <bo + dy> optimization aren't removed
 					compress: false

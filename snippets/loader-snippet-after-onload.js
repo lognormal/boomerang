@@ -1,17 +1,17 @@
 /* eslint-disable no-script-url */
-(function() {
+(function(w) {
 	// Boomerang Loader Snippet version 14
-	if (window.BOOMR && (window.BOOMR.version || window.BOOMR.snippetExecuted)) {
+	if (w.BOOMR && (w.BOOMR.version || w.BOOMR.snippetExecuted)) {
 		return;
 	}
 
-	window.BOOMR = window.BOOMR || {};
-	window.BOOMR.snippetStart = new Date().getTime();
-	window.BOOMR.snippetExecuted = true;
-	window.BOOMR.snippetVersion = 14;
+	w.BOOMR = w.BOOMR || {};
+	w.BOOMR.snippetStart = new Date().getTime();
+	w.BOOMR.snippetExecuted = true;
+	w.BOOMR.snippetVersion = 14;
 
 	// NOTE: Set Boomerang URL here
-	window.BOOMR.url = "";
+	w.BOOMR.url = "";
 
 	var // document.currentScript is supported in all browsers other than IE
 	    where = document.currentScript || document.getElementsByTagName("script")[0],
@@ -30,7 +30,7 @@
 
 		var script = document.createElement("script");
 		script.id = "boomr-scr-as";
-		script.src = window.BOOMR.url;
+		script.src = w.BOOMR.url;
 
 		// Not really needed since dynamic scripts are async by default and the script is already in cache at this point,
 		// but some naive parsers will see a missing async attribute and think we're not async
@@ -46,15 +46,15 @@
 	function iframeLoader(wasFallback) {
 		promoted = true;
 
-		var dom, doc = document, bootstrap, iframe, iframeStyle, win = window;
+		var dom, doc = document, bootstrap, iframe, iframeStyle, win = w;
 
-		window.BOOMR.snippetMethod = wasFallback ? "if" : "i";
+		w.BOOMR.snippetMethod = wasFallback ? "if" : "i";
 
 		// Adds Boomerang within the iframe
 		bootstrap = function(parent, scriptId) {
 			var script = doc.createElement("script");
 			script.id = scriptId || "boomr-if-as";
-			script.src = window.BOOMR.url;
+			script.src = w.BOOMR.url;
 
 			BOOMR_lstart = new Date().getTime();
 
@@ -64,8 +64,8 @@
 
 		// For IE 6/7, we'll just load the script in the current frame, as those browsers don't support 'about:blank'
 		// for an iframe src (it triggers warnings on secure sites).  This means loading on IE 6/7 may cause SPoF.
-		if (!window.addEventListener && window.attachEvent && navigator.userAgent.match(/MSIE [67]\./)) {
-			window.BOOMR.snippetMethod = "s";
+		if (!w.addEventListener && w.attachEvent && navigator.userAgent.match(/MSIE [67]\./)) {
+			w.BOOMR.snippetMethod = "s";
 
 			bootstrap(parentNode, "boomr-async");
 			return;
@@ -152,10 +152,10 @@
 		    typeof link.relList.supports === "function" &&
 		    link.relList.supports("preload") &&
 		    ("as" in link)) {
-			window.BOOMR.snippetMethod = "p";
+			w.BOOMR.snippetMethod = "p";
 
 			// Set attributes to trigger a Preload
-			link.href = window.BOOMR.url;
+			link.href = w.BOOMR.url;
 			link.rel  = "preload";
 			link.as   = "script";
 
@@ -186,14 +186,14 @@
 
 	// Save when the onload event happened, in case this is a non-NavigationTiming browser
 	function boomerangSaveLoadTime(e) {
-		window.BOOMR_onload = (e && e.timeStamp) || new Date().getTime();
+		w.BOOMR_onload = (e && e.timeStamp) || new Date().getTime();
 	}
 
-	if (window.addEventListener) {
-		window.addEventListener("load", boomerangSaveLoadTime, false);
+	if (w.addEventListener) {
+		w.addEventListener("load", boomerangSaveLoadTime, false);
 	}
-	else if (window.attachEvent) {
-		window.attachEvent("onload", boomerangSaveLoadTime);
+	else if (w.attachEvent) {
+		w.attachEvent("onload", boomerangSaveLoadTime);
 	}
 
 	// Run at onload
@@ -216,4 +216,4 @@
 			win.attachEvent("onload", windowOnLoad);
 		}
 	}
-})();
+})(window);

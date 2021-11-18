@@ -1,22 +1,22 @@
-(function() {
-	if (window && window.requestAnimationFrame) {
-		window.BOOMR = window.BOOMR || {};
-		window.BOOMR.fpsLog = [];
+(function(w) {
+	if (w && w.requestAnimationFrame) {
+		w.BOOMR = w.BOOMR || {};
+		w.BOOMR.fpsLog = [];
 
 		function frame(now) {
-			// window.BOOMR.fpsLog will get deleted once Boomerang has loaded
-			if (window.BOOMR.fpsLog) {
-				window.BOOMR.fpsLog.push(Math.round(now));
+			// w.BOOMR.fpsLog will get deleted once Boomerang has loaded
+			if (w.BOOMR.fpsLog) {
+				w.BOOMR.fpsLog.push(Math.round(now));
 
 				// if we've added more than 30 seconds of data, stop
-				if (window.BOOMR.fpsLog.length > 30 * 60) {
+				if (w.BOOMR.fpsLog.length > 30 * 60) {
 					return;
 				}
 
-				window.requestAnimationFrame(frame);
+				w.requestAnimationFrame(frame);
 			}
 		}
 
-		window.requestAnimationFrame(frame);
+		w.requestAnimationFrame(frame);
 	}
-})();
+})(window);
