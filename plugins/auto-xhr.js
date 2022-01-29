@@ -1352,6 +1352,7 @@
 			// but does not return a string
 			url = node.src ||
 				(typeof node.getAttribute === "function" && node.getAttribute("xlink:href")) ||
+				(node.href instanceof SVGAnimatedString && node.href.baseVal) ||
 				node.href;
 
 			// we get called from src/href attribute changes but also from nodes being added
