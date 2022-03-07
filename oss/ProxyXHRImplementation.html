@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>OSS Boomerang Class: ProxyXHRImplementation</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.akamai.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">OSS Boomerang</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html">BOOMR</a></li><li><a href="BOOMR.browser.html">BOOMR.browser</a></li><li><a href="BOOMR.constants.html">BOOMR.constants</a></li><li><a href="BOOMR.plugins.html">BOOMR.plugins</a></li><li><a href="BOOMR.plugins.AutoXHR.html">BOOMR.plugins.AutoXHR</a></li><li><a href="BOOMR.plugins.BW.html">BOOMR.plugins.BW</a></li><li><a href="BOOMR.plugins.CACHE_RELOAD.html">BOOMR.plugins.CACHE_RELOAD</a></li><li><a href="BOOMR.plugins.Clicks.html">BOOMR.plugins.Clicks</a></li><li><a href="BOOMR.plugins.ConsentInlinedPlugin.html">BOOMR.plugins.ConsentInlinedPlugin</a></li><li><a href="BOOMR.plugins.Continuity.html">BOOMR.plugins.Continuity</a></li><li><a href="BOOMR.plugins.CT.html">BOOMR.plugins.CT</a></li><li><a href="BOOMR.plugins.DNS.html">BOOMR.plugins.DNS</a></li><li><a href="BOOMR.plugins.Early.html">BOOMR.plugins.Early</a></li><li><a href="BOOMR.plugins.Errors.html">BOOMR.plugins.Errors</a></li><li><a href="BOOMR.plugins.EventTiming.html">BOOMR.plugins.EventTiming</a></li><li><a href="BOOMR.plugins.GUID.html">BOOMR.plugins.GUID</a></li><li><a href="BOOMR.plugins.History.html">BOOMR.plugins.History</a></li><li><a href="BOOMR.plugins.IFrameDelay.html">BOOMR.plugins.IFrameDelay</a></li><li><a href="BOOMR.plugins.IPv6.html">BOOMR.plugins.IPv6</a></li><li><a href="BOOMR.plugins.Memory.html">BOOMR.plugins.Memory</a></li><li><a href="BOOMR.plugins.Mobile.html">BOOMR.plugins.Mobile</a></li><li><a href="BOOMR.plugins.NavigationTiming.html">BOOMR.plugins.NavigationTiming</a></li><li><a href="BOOMR.plugins.PaintTiming.html">BOOMR.plugins.PaintTiming</a></li><li><a href="BOOMR.plugins.ResourceTiming.html">BOOMR.plugins.ResourceTiming</a></li><li><a href="BOOMR.plugins.RT.html">BOOMR.plugins.RT</a></li><li><a href="BOOMR.plugins.SPA.html">BOOMR.plugins.SPA</a></li><li><a href="BOOMR.plugins.TPAnalytics.html">BOOMR.plugins.TPAnalytics</a></li><li><a href="BOOMR.plugins.UserTiming.html">BOOMR.plugins.UserTiming</a></li><li><a href="BOOMR.session.html">BOOMR.session</a></li><li><a href="BOOMR.utils.html">BOOMR.utils</a></li><li><a href="BOOMR.utils.Compression.html">BOOMR.utils.Compression</a></li><li><a href="BOOMR_mq.html">BOOMR_mq</a></li><li><a href="MutationHandler.html">MutationHandler</a></li><li><a href="ProxyXHRImplementation.html">ProxyXHRImplementation</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html#event:beacon">BOOMR#event:beacon</a></li><li><a href="BOOMR.html#event:before_beacon">BOOMR#event:before_beacon</a></li><li><a href="BOOMR.html#event:before_early_beacon">BOOMR#event:before_early_beacon</a></li><li><a href="BOOMR.html#event:before_unload">BOOMR#event:before_unload</a></li><li><a href="BOOMR.html#event:click">BOOMR#event:click</a></li><li><a href="BOOMR.html#event:config">BOOMR#event:config</a></li><li><a href="BOOMR.html#event:dom_loaded">BOOMR#event:dom_loaded</a></li><li><a href="BOOMR.html#event:error">BOOMR#event:error</a></li><li><a href="BOOMR.html#event:form_submit">BOOMR#event:form_submit</a></li><li><a href="BOOMR.html#event:netinfo">BOOMR#event:netinfo</a></li><li><a href="BOOMR.html#event:page_load_beacon">BOOMR#event:page_load_beacon</a></li><li><a href="BOOMR.html#event:page_ready">BOOMR#event:page_ready</a></li><li><a href="BOOMR.html#event:page_unload">BOOMR#event:page_unload</a></li><li><a href="BOOMR.html#event:prerender_to_visible">BOOMR#event:prerender_to_visible</a></li><li><a href="BOOMR.html#event:rage_click">BOOMR#event:rage_click</a></li><li><a href="BOOMR.html#event:spa_cancel">BOOMR#event:spa_cancel</a></li><li><a href="BOOMR.html#event:spa_init">BOOMR#event:spa_init</a></li><li><a href="BOOMR.html#event:spa_navigation">BOOMR#event:spa_navigation</a></li><li><a href="BOOMR.html#event:visibility_changed">BOOMR#event:visibility_changed</a></li><li><a href="BOOMR.html#event:xhr_error">BOOMR#event:xhr_error</a></li><li><a href="BOOMR.html#event:xhr_init">BOOMR#event:xhr_init</a></li><li><a href="BOOMR.html#event:xhr_load">BOOMR#event:xhr_load</a></li><li><a href="BOOMR.html#event:xhr_send">BOOMR#event:xhr_send</a></li><li><a href="document.html#event:onBeforeBoomerangBeacon">document#event:onBeforeBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangBeacon">document#event:onBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangLoaded">document#event:onBoomerangLoaded</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-README.template.html">README.template</a></li><li><a href="tutorial-building.html">Building</a></li><li><a href="tutorial-contributing.html">Contributing</a></li><li><a href="tutorial-creating-plugins.html">Creating Plugins</a></li><li><a href="tutorial-header-snippets.html">Header Snippets</a></li><li><a href="tutorial-howtos.html">How-Tos</a></li><li><a href="tutorial-loader-snippet.html">Non-Blocking Loader Snippet</a></li><li><a href="tutorial-methodology.html">Methodology</a></li><li><a href="tutorial-page-overrides.html">Page Overrides</a></li><li><a href="tutorial-perf-tests.html">Performance Tests</a></li><li><a href="tutorial-tests.html">Tests</a></li><li><a href="tutorial-version-history.html">Version History</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#BOOMR_check_doc_domain">BOOMR_check_doc_domain</a></li><li><a href="global.html#BOOMR_lstart">BOOMR_lstart</a></li><li><a href="global.html#BOOMR_onload">BOOMR_onload</a></li><li><a href="global.html#BOOMR_start">BOOMR_start</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+
+    
+    <section>
+
+    <header>
+        
+            <h1>
+            ProxyXHRImplementation
+            </h1>
+            
+        
+    </header>
+
+
+    <article>
+        <div class="container-overview">
+        
+            
+<hr>
+<dt>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Proxy <code>XMLHttpRequest</code> object</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+        </div>
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Methods</h2>
+
+            <dl>
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".addListener">addListener(ename, stat)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Setup an {EventListener} for Event @param{ename}. This function will
+make sure the timestamp for the resources request is set and calls
+loadFinished should the resource have finished.</p>
+<p>See <code>open()</code> for it's usage</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ename</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Eventname to listen on via addEventListener</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if that <code>ename</code> is reached set this
+as the status of the resource</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".BOOMR.proxy_XMLHttpRequest">BOOMR.proxy_XMLHttpRequest(method, url [, async])</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Open an XMLHttpRequest.
+If the URL passed as a second argument is in the BOOMR.xhr_exclude list ignore it and move on to request it
+Otherwise add it to our list of resources to monitor and later beacon on.</p>
+<p>If an exception is caught will call loadFinished and set resource.status to <code>XHR_STATUS_OPEN_EXCEPTION</code>
+Should the resource fail to load for any of the following reasons resource.stat status code will be set to:</p>
+<ul>
+<li>timeout {Event} <code>XHR_STATUS_TIMEOUT</code></li>
+<li>error {Event} <code>XHR_STATUS_ERROR</code></li>
+<li>abort {Event} <code>XHR_STATUS_ABORT</code></li>
+</ul>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>method</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>HTTP request method</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>URL to request on</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>async</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>If <code>true</code> will setup the EventListeners for XHR events otherwise will set the resource
+to synchronous. If <code>true</code> or <code>undefined</code> will be automatically set to asynchronous</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".req.send">req.send()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Mark requestStart timestamp and start the request unless the resource
+has already been marked as having an error code or a result to itself.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">Object</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>The data normal XHR.send() would return</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            </dl>
+        
+
+        
+
+        
+    </article>
+
+    </section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© 2010-2019 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
+	
+		on Tue Mar 1st 2022
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

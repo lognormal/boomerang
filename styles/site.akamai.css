@@ -6967,6 +6967,7 @@ img.branding-logo {
 footer {
   border-top: 1px solid #1967be;
   padding-top: 15px;
+  margin-top: 15px;
 }
 code {
   background-color: rgba(0,0,0,0.05);
@@ -7066,4 +7067,16 @@ code {
 
 table.params, table.props, .method-returns {
     margin-left: 20px;
+}
+
+.Akamai {
+  color: #fff;
+  background-color: #1967be;
+  border-color: #1862b5;
+}
+
+.Akamai:hover {
+  color: #fff;
+  background-color: #165ba8;
+  border-color: #1862b5;
 }

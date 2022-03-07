@@ -1,0 +1,4755 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>OSS Boomerang Class: utils</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.akamai.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">OSS Boomerang</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html">BOOMR</a></li><li><a href="BOOMR.browser.html">BOOMR.browser</a></li><li><a href="BOOMR.constants.html">BOOMR.constants</a></li><li><a href="BOOMR.plugins.html">BOOMR.plugins</a></li><li><a href="BOOMR.plugins.AutoXHR.html">BOOMR.plugins.AutoXHR</a></li><li><a href="BOOMR.plugins.BW.html">BOOMR.plugins.BW</a></li><li><a href="BOOMR.plugins.CACHE_RELOAD.html">BOOMR.plugins.CACHE_RELOAD</a></li><li><a href="BOOMR.plugins.Clicks.html">BOOMR.plugins.Clicks</a></li><li><a href="BOOMR.plugins.ConsentInlinedPlugin.html">BOOMR.plugins.ConsentInlinedPlugin</a></li><li><a href="BOOMR.plugins.Continuity.html">BOOMR.plugins.Continuity</a></li><li><a href="BOOMR.plugins.CT.html">BOOMR.plugins.CT</a></li><li><a href="BOOMR.plugins.DNS.html">BOOMR.plugins.DNS</a></li><li><a href="BOOMR.plugins.Early.html">BOOMR.plugins.Early</a></li><li><a href="BOOMR.plugins.Errors.html">BOOMR.plugins.Errors</a></li><li><a href="BOOMR.plugins.EventTiming.html">BOOMR.plugins.EventTiming</a></li><li><a href="BOOMR.plugins.GUID.html">BOOMR.plugins.GUID</a></li><li><a href="BOOMR.plugins.History.html">BOOMR.plugins.History</a></li><li><a href="BOOMR.plugins.IFrameDelay.html">BOOMR.plugins.IFrameDelay</a></li><li><a href="BOOMR.plugins.IPv6.html">BOOMR.plugins.IPv6</a></li><li><a href="BOOMR.plugins.Memory.html">BOOMR.plugins.Memory</a></li><li><a href="BOOMR.plugins.Mobile.html">BOOMR.plugins.Mobile</a></li><li><a href="BOOMR.plugins.NavigationTiming.html">BOOMR.plugins.NavigationTiming</a></li><li><a href="BOOMR.plugins.PaintTiming.html">BOOMR.plugins.PaintTiming</a></li><li><a href="BOOMR.plugins.ResourceTiming.html">BOOMR.plugins.ResourceTiming</a></li><li><a href="BOOMR.plugins.RT.html">BOOMR.plugins.RT</a></li><li><a href="BOOMR.plugins.SPA.html">BOOMR.plugins.SPA</a></li><li><a href="BOOMR.plugins.TPAnalytics.html">BOOMR.plugins.TPAnalytics</a></li><li><a href="BOOMR.plugins.UserTiming.html">BOOMR.plugins.UserTiming</a></li><li><a href="BOOMR.session.html">BOOMR.session</a></li><li><a href="BOOMR.utils.html">BOOMR.utils</a></li><li><a href="BOOMR.utils.Compression.html">BOOMR.utils.Compression</a></li><li><a href="BOOMR_mq.html">BOOMR_mq</a></li><li><a href="MutationHandler.html">MutationHandler</a></li><li><a href="ProxyXHRImplementation.html">ProxyXHRImplementation</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html#event:beacon">BOOMR#event:beacon</a></li><li><a href="BOOMR.html#event:before_beacon">BOOMR#event:before_beacon</a></li><li><a href="BOOMR.html#event:before_early_beacon">BOOMR#event:before_early_beacon</a></li><li><a href="BOOMR.html#event:before_unload">BOOMR#event:before_unload</a></li><li><a href="BOOMR.html#event:click">BOOMR#event:click</a></li><li><a href="BOOMR.html#event:config">BOOMR#event:config</a></li><li><a href="BOOMR.html#event:dom_loaded">BOOMR#event:dom_loaded</a></li><li><a href="BOOMR.html#event:error">BOOMR#event:error</a></li><li><a href="BOOMR.html#event:form_submit">BOOMR#event:form_submit</a></li><li><a href="BOOMR.html#event:netinfo">BOOMR#event:netinfo</a></li><li><a href="BOOMR.html#event:page_load_beacon">BOOMR#event:page_load_beacon</a></li><li><a href="BOOMR.html#event:page_ready">BOOMR#event:page_ready</a></li><li><a href="BOOMR.html#event:page_unload">BOOMR#event:page_unload</a></li><li><a href="BOOMR.html#event:prerender_to_visible">BOOMR#event:prerender_to_visible</a></li><li><a href="BOOMR.html#event:rage_click">BOOMR#event:rage_click</a></li><li><a href="BOOMR.html#event:spa_cancel">BOOMR#event:spa_cancel</a></li><li><a href="BOOMR.html#event:spa_init">BOOMR#event:spa_init</a></li><li><a href="BOOMR.html#event:spa_navigation">BOOMR#event:spa_navigation</a></li><li><a href="BOOMR.html#event:visibility_changed">BOOMR#event:visibility_changed</a></li><li><a href="BOOMR.html#event:xhr_error">BOOMR#event:xhr_error</a></li><li><a href="BOOMR.html#event:xhr_init">BOOMR#event:xhr_init</a></li><li><a href="BOOMR.html#event:xhr_load">BOOMR#event:xhr_load</a></li><li><a href="BOOMR.html#event:xhr_send">BOOMR#event:xhr_send</a></li><li><a href="document.html#event:onBeforeBoomerangBeacon">document#event:onBeforeBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangBeacon">document#event:onBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangLoaded">document#event:onBoomerangLoaded</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-README.template.html">README.template</a></li><li><a href="tutorial-building.html">Building</a></li><li><a href="tutorial-contributing.html">Contributing</a></li><li><a href="tutorial-creating-plugins.html">Creating Plugins</a></li><li><a href="tutorial-header-snippets.html">Header Snippets</a></li><li><a href="tutorial-howtos.html">How-Tos</a></li><li><a href="tutorial-loader-snippet.html">Non-Blocking Loader Snippet</a></li><li><a href="tutorial-methodology.html">Methodology</a></li><li><a href="tutorial-page-overrides.html">Page Overrides</a></li><li><a href="tutorial-perf-tests.html">Performance Tests</a></li><li><a href="tutorial-tests.html">Tests</a></li><li><a href="tutorial-version-history.html">Version History</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#BOOMR_check_doc_domain">BOOMR_check_doc_domain</a></li><li><a href="global.html#BOOMR_lstart">BOOMR_lstart</a></li><li><a href="global.html#BOOMR_onload">BOOMR_onload</a></li><li><a href="global.html#BOOMR_start">BOOMR_start</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+
+    
+    <section>
+
+    <header>
+        
+            <h1>
+                <span class="ancestors"><a href="BOOMR.html">BOOMR</a>.</span>
+            
+            utils
+            </h1>
+            
+        
+    </header>
+
+
+    <article>
+        <div class="container-overview">
+        
+            
+<hr>
+<dt>
+    
+
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+        </div>
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Classes</h2>
+
+            <ul>
+                
+                    <li>
+                        <a href="BOOMR.utils.Compression.html">Compression</a>
+                        
+                    </li>
+                
+            </ul>
+        
+
+        
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Methods</h2>
+
+            <dl>
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".addListener">addListener(el, type, fn, passiveOrOpts)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Adds an event listener.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>el</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>DOM element</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Event name</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback function</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passiveOrOpts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Passive mode or Options object</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".addObserver">addObserver(el, config, timeout, callback, callback_data, callback_ctx)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Add a MutationObserver for a given element and terminate after <code>timeout</code>ms.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>el</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>DOM element to watch for mutations</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">MutationObserverInit</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>MutationObserverInit object (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#MutationObserverInit)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of milliseconds of no mutations after which the observer should be automatically disconnected.
+If set to a falsy value, the observer will wait indefinitely for Mutations.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="BOOMR.html#~addObserverCallback">BOOMR~addObserverCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback function to call either on timeout or if mutations are detected.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Any data to be passed to the callback function as its second parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback_ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>An object that represents the <code>this</code> object of the <code>callback</code> method.
+Leave unset the callback function is not a method of an object.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">object</span>
+|
+
+<span class="param-type">null</span>
+
+
+</p>
+
+<div class="param-desc">
+    <ul>
+<li><code>null</code> if a MutationObserver could not be created OR</li>
+<li>An object containing the observer and the timer object:
+<code>{ observer: &lt;MutationObserver&gt;, timer: &lt;Timeout Timer if any&gt; }</code></li>
+<li>The caller can use this to disconnect the observer at any point
+by calling <code>retval.observer.disconnect()</code></li>
+<li>Note that the caller should first check to see if <code>retval.observer</code>
+is set before calling <code>disconnect()</code> as it may have been cleared automatically.</li>
+</ul>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".arrayFilter">arrayFilter(array, predicate)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p><code>filter</code> for arrays</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>array</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The array to iterate over.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>predicate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The function invoked per iteration.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">Array</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Returns the new filtered array.</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".arrayFind">arrayFind(array, predicate)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p><code>find</code> for Arrays</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>array</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The array to iterate over</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>predicate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The function invoked per iteration</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">Array</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Returns the value of first element that satisfies
+the predicate</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".cleanupURL">cleanupURL(url, urlLimit)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Cleans up a URL by removing the query string (if configured), and
+limits the URL to the specified size.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>URL to clean</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>urlLimit</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Maximum size, in characters, of the URL</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Cleaned up URL</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".generateId">generateId(chars)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Generates a random ID based on the specified number of characters.  Uses
+characters a-z0-9.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of characters (max 40)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Random ID</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".generateUUID">generateUUID()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Generates a pseudo-random UUID (Version 4):
+https://en.wikipedia.org/wiki/Universally_unique_identifier</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>UUID</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getCookie">getCookie(name)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the cached value of the cookie identified by <code>name</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Cookie name</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+|
+
+<span class="param-type">undefined</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Cookie value, if set.</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getLocalStorage">getLocalStorage(name)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Retrieve items from localStorage</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of storage</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">object</span>
+|
+
+<span class="param-type">null</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Returns object retrieved from localStorage.
+Returns undefined if not found or expired.
+Returns null if parameters are invalid or an error occured</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getQueryParamValue">getQueryParamValue(param [, url])</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Get a query parameter value from a URL's query string</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>param</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Query parameter name</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>URL containing the query string, or a link object.
+Defaults to <code>BOOMR.window.location</code></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>URI decoded value or null if param isn't a query parameter</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getRawCookie">getRawCookie(name)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the value of the cookie identified by <code>name</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Cookie name</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Cookie value, if set.</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getSameSiteAttributeParts">getSameSiteAttributeParts()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Depending on Boomerang configuration and checks of current protocol and
+compatible browsers the logic below will provide an array of cookie
+attributes that are needed for a successful creation of a cookie that
+contains the SameSite attribute.</p>
+<p>How it works:</p>
+<ol>
+<li>We read the Boomerang configuration key <code>same_site_cookie</code> where
+one of the following values <code>None</code>, <code>Lax</code> or <code>Strict</code> is expected.</li>
+<li>A configuration value of <code>same_site_cookie</code> will be read in case-insensitive
+manner. E.g. <code>Lax</code>, <code>lax</code> and <code>lAx</code> will produce same result - <code>SameSite=Lax</code>.</li>
+<li>If a <code>same_site_cookie</code> configuration value is not specified a cookie
+will be created with <code>SameSite=Lax</code>.</li>
+<li>If a <code>same_site_cookie</code> configuration value does't match any of
+<code>None</code>, <code>Lax</code> or <code>Strict</code> then a cookie will be created with <code>SameSite=Lax</code>.</li>
+<li>The <code>Secure</code> cookie attribute will be added when a cookie is created
+with <code>SameSite=None</code>.</li>
+<li>It's possible that a Boomerang plugin or external code may need cookies
+to be created with <code>SameSite=None</code>. In such cases we check a special
+flag <code>forced_same_site_cookie_none</code>. If the value of this flag is equal to <code>true</code>
+then the <code>same_site_cookie</code> value will be ignored and Boomerang cookies
+will be created with <code>SameSite=None</code>.</li>
+</ol>
+<p>SameSite=None - INCOMPATIBILITIES and EXCEPTIONS:</p>
+<p>There are known problems with older browsers where cookies created
+with <code>SameSite=None</code> are <code>dropped</code> or created with <code>SameSite=Strict</code>.
+Reference: https://www.chromium.org/updates/same-site/incompatible-clients</p>
+<ol>
+<li>If we detect a browser that can't create safely a cookie with <code>SameSite=None</code>
+then Boomerang will create a cookie without the <code>SameSite</code> attribute.</li>
+<li>A cookie with <code>SameSite=None</code> can be created only over <code>HTTPS</code> connection.
+If current connection is <code>HTTP</code> then a cookie will be created
+without the <code>SameSite</code> attribute.</li>
+</ol>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">Array</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>of cookie attributes used for setting a cookie with SameSite attribute</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getSubCookies">getSubCookies(cookie)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Parse a cookie string returned by <a href="BOOMR.utils.html#.getCookie"><code>BOOMR.utils.getCookie</code></a> and
+split it into its constituent subcookies.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>cookie</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Cookie value</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">object</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>On success, an object of key/value pairs of all
+sub cookies. Note that some subcookies may have empty values.
+<code>null</code> if <code>cookie</code> was not set or did not contain valid subcookies.</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".hashQueryString">hashQueryString(url, stripHash)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the URL with the query string replaced with a hash of its contents.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>URL</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stripHash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Whether or not to strip the hash</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>URL with query string hashed</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".inArray">inArray(val, ary)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Determines if the specified value is in the array</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>val</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Value to check</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ary</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object in question</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if the value is in the Array</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".isArray">isArray(ary)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Determines if the specified object is an <code>Array</code> or not</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ary</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object in question</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if the object is an <code>Array</code></p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".isCurrentUASameSiteNoneCompatible">isCurrentUASameSiteNoneCompatible()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Wrapper of isUASameSiteNoneCompatible() that ensures that we pass correct User Agent string</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if a browser can safely create SameSite=None cookie</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".isInteger">isInteger(input)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Determines if the given input is an Integer.
+Relies on standard Number.isInteger() function that available
+is most browsers except IE. For IE, this relies on the polyfill
+provided by MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>input</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>dat</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Random ID</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".isMutationObserverSupported">isMutationObserverSupported()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>MutationObserver feature detection</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Returns true if MutationObserver is supported.
+Always returns false for IE 11 due several bugs in it's implementation that MS flagged as Won't Fix.
+In IE11, XHR responseXML might be malformed if MO is enabled (where extra newlines get added in nodes with UTF-8 content).
+Another IE 11 MO bug can cause the process to crash when certain mutations occur.
+For the process crash issue, see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/8137215/ and
+https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/15167323/</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".isUASameSiteNoneCompatible">isUASameSiteNoneCompatible(uaString)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>uaString</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>User agent string</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if a browser can safely create SameSite=None cookie</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".objectToString">objectToString(o, separator, nest_level)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Converts an object to a string.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>o</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>separator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Member separator</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nest_level</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of levels to recurse</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>String representation of the object</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".pluginConfig">pluginConfig(o, config, plugin_name, properties)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Sets the object's properties if anything in config matches
+one of the property names.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>o</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The plugin's <code>impl</code> object within which it stores
+all its configuration and private properties</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The config object passed in to the plugin's
+<code>init()</code> method.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>plugin_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The plugin's name in the <a href="BOOMR.plugins.html"><code>BOOMR.plugins</code></a> object.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>properties</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>An array containing a list of all configurable
+properties that this plugin has.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if a property was set</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".removeCookie">removeCookie(name)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Removes the cookie identified by <code>name</code> by nullifying its value,
+and making it a session cookie.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Cookie name</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".removeListener">removeListener(el, type, fn)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Removes an event listener.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>el</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>DOM element</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Event name</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback function</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".removeLocalStorage">removeLocalStorage(name)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Remove items from localStorage</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of storage</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if item was removed from localStorage.</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".setCookie">setCookie(name, subcookies, max_age)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Sets the cookie named <code>name</code> to the serialized value of <code>subcookies</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the cookie</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>subcookies</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Key/value pairs to write into the cookie.
+These will be serialized as an &amp; separated list of URL encoded key=value pairs.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max_age</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Lifetime in seconds of the cookie.
+Set this to 0 to create a session cookie that expires when
+the browser is closed. If not set, defaults to 0.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if the cookie was set successfully</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+        <h4>Example</h4>
+        
+    <pre class="sunlight-highlight-javascript">BOOMR.utils.setCookie(&quot;RT&quot;, { s: t_start, r: url });</pre>
+
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".setLocalStorage">setLocalStorage(name, items, max_age)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Saves items in localStorage
+The value stored in localStorage will be a JSON string representation of {&quot;items&quot;: items, &quot;expiry&quot;: expiry}
+where items is the object we're saving and expiry is an optional epoch number of when the data is to be
+considered expired</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of storage</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>items</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Items to be saved</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max_age</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Age in seconds before items are to be considered expired</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>True if the localStorage was set successfully</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            </dl>
+        
+
+        
+
+        
+    </article>
+
+    </section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© 2010-2019 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a>
+	
+		on Tue Mar 1st 2022
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

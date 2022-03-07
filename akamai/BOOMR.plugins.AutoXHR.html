@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>mPulse Boomerang Class: AutoXHR</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.akamai.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">mPulse Boomerang</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html">BOOMR</a></li><li><a href="BOOMR.browser.html">BOOMR.browser</a></li><li><a href="BOOMR.constants.html">BOOMR.constants</a></li><li><a href="BOOMR.plugins.html">BOOMR.plugins</a></li><li><a href="BOOMR.plugins.Akamai.html">BOOMR.plugins.Akamai</a></li><li><a href="BOOMR.plugins.AutoXHR.html">BOOMR.plugins.AutoXHR</a></li><li><a href="BOOMR.plugins.BW.html">BOOMR.plugins.BW</a></li><li><a href="BOOMR.plugins.CACHE_RELOAD.html">BOOMR.plugins.CACHE_RELOAD</a></li><li><a href="BOOMR.plugins.Clicks.html">BOOMR.plugins.Clicks</a></li><li><a href="BOOMR.plugins.ConfigOverride.html">BOOMR.plugins.ConfigOverride</a></li><li><a href="BOOMR.plugins.ConsentInlinedPlugin.html">BOOMR.plugins.ConsentInlinedPlugin</a></li><li><a href="BOOMR.plugins.Continuity.html">BOOMR.plugins.Continuity</a></li><li><a href="BOOMR.plugins.CrossDomain.html">BOOMR.plugins.CrossDomain</a></li><li><a href="BOOMR.plugins.CT.html">BOOMR.plugins.CT</a></li><li><a href="BOOMR.plugins.DNS.html">BOOMR.plugins.DNS</a></li><li><a href="BOOMR.plugins.Early.html">BOOMR.plugins.Early</a></li><li><a href="BOOMR.plugins.Errors.html">BOOMR.plugins.Errors</a></li><li><a href="BOOMR.plugins.EventTiming.html">BOOMR.plugins.EventTiming</a></li><li><a href="BOOMR.plugins.GUID.html">BOOMR.plugins.GUID</a></li><li><a href="BOOMR.plugins.History.html">BOOMR.plugins.History</a></li><li><a href="BOOMR.plugins.IFrameDelay.html">BOOMR.plugins.IFrameDelay</a></li><li><a href="BOOMR.plugins.IPv6.html">BOOMR.plugins.IPv6</a></li><li><a href="BOOMR.plugins.LOGN.html">BOOMR.plugins.LOGN</a></li><li><a href="BOOMR.plugins.Memory.html">BOOMR.plugins.Memory</a></li><li><a href="BOOMR.plugins.Mobile.html">BOOMR.plugins.Mobile</a></li><li><a href="BOOMR.plugins.NavigationTiming.html">BOOMR.plugins.NavigationTiming</a></li><li><a href="BOOMR.plugins.PageParams.html">BOOMR.plugins.PageParams</a></li><li><a href="BOOMR.plugins.PaintTiming.html">BOOMR.plugins.PaintTiming</a></li><li><a href="BOOMR.plugins.ResourceTiming.html">BOOMR.plugins.ResourceTiming</a></li><li><a href="BOOMR.plugins.RT.html">BOOMR.plugins.RT</a></li><li><a href="BOOMR.plugins.SPA.html">BOOMR.plugins.SPA</a></li><li><a href="BOOMR.plugins.TPAnalytics.html">BOOMR.plugins.TPAnalytics</a></li><li><a href="BOOMR.plugins.UserTiming.html">BOOMR.plugins.UserTiming</a></li><li><a href="BOOMR.session.html">BOOMR.session</a></li><li><a href="BOOMR.utils.html">BOOMR.utils</a></li><li><a href="BOOMR.utils.Compression.html">BOOMR.utils.Compression</a></li><li><a href="BOOMR_mq.html">BOOMR_mq</a></li><li><a href="MutationHandler.html">MutationHandler</a></li><li><a href="ProxyXHRImplementation.html">ProxyXHRImplementation</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html#event:beacon">BOOMR#event:beacon</a></li><li><a href="BOOMR.html#event:before_beacon">BOOMR#event:before_beacon</a></li><li><a href="BOOMR.html#event:before_early_beacon">BOOMR#event:before_early_beacon</a></li><li><a href="BOOMR.html#event:before_unload">BOOMR#event:before_unload</a></li><li><a href="BOOMR.html#event:click">BOOMR#event:click</a></li><li><a href="BOOMR.html#event:config">BOOMR#event:config</a></li><li><a href="BOOMR.html#event:dom_loaded">BOOMR#event:dom_loaded</a></li><li><a href="BOOMR.html#event:error">BOOMR#event:error</a></li><li><a href="BOOMR.html#event:form_submit">BOOMR#event:form_submit</a></li><li><a href="BOOMR.html#event:netinfo">BOOMR#event:netinfo</a></li><li><a href="BOOMR.html#event:page_load_beacon">BOOMR#event:page_load_beacon</a></li><li><a href="BOOMR.html#event:page_ready">BOOMR#event:page_ready</a></li><li><a href="BOOMR.html#event:page_unload">BOOMR#event:page_unload</a></li><li><a href="BOOMR.html#event:prerender_to_visible">BOOMR#event:prerender_to_visible</a></li><li><a href="BOOMR.html#event:rage_click">BOOMR#event:rage_click</a></li><li><a href="BOOMR.html#event:spa_cancel">BOOMR#event:spa_cancel</a></li><li><a href="BOOMR.html#event:spa_init">BOOMR#event:spa_init</a></li><li><a href="BOOMR.html#event:spa_navigation">BOOMR#event:spa_navigation</a></li><li><a href="BOOMR.html#event:visibility_changed">BOOMR#event:visibility_changed</a></li><li><a href="BOOMR.html#event:xhr_error">BOOMR#event:xhr_error</a></li><li><a href="BOOMR.html#event:xhr_init">BOOMR#event:xhr_init</a></li><li><a href="BOOMR.html#event:xhr_load">BOOMR#event:xhr_load</a></li><li><a href="BOOMR.html#event:xhr_send">BOOMR#event:xhr_send</a></li><li><a href="document.html#event:onBeforeBoomerangBeacon">document#event:onBeforeBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangBeacon">document#event:onBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangLoaded">document#event:onBoomerangLoaded</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-README.template.html">README.template</a></li><li><a href="tutorial-building.html">Building</a></li><li><a href="tutorial-contributing.html">Contributing</a></li><li><a href="tutorial-creating-plugins.html">Creating Plugins</a></li><li><a href="tutorial-header-snippets.html">Header Snippets</a></li><li><a href="tutorial-howtos.html">How-Tos</a></li><li><a href="tutorial-loader-snippet.html">Non-Blocking Loader Snippet</a></li><li><a href="tutorial-methodology.html">Methodology</a></li><li><a href="tutorial-page-overrides.html">Page Overrides</a></li><li><a href="tutorial-perf-tests.html">Performance Tests</a></li><li><a href="tutorial-tests.html">Tests</a></li><li><a href="tutorial-version-history.html">Version History</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#BOOMR_check_doc_domain">BOOMR_check_doc_domain</a></li><li><a href="global.html#BOOMR_lstart">BOOMR_lstart</a></li><li><a href="global.html#BOOMR_onload">BOOMR_onload</a></li><li><a href="global.html#BOOMR_start">BOOMR_start</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+
+    
+    <section>
+
+    <header>
+        
+            <h1>
+                <span class="ancestors"><a href="BOOMR.html">BOOMR</a><a href="BOOMR.plugins.html">.plugins</a>.</span>
+            
+            AutoXHR
+            </h1>
+            
+        
+    </header>
+
+
+    <article>
+        <div class="container-overview">
+        
+            
+<hr>
+<dt>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Instrument and measure <code>XMLHttpRequest</code> (AJAX) requests.</p>
+<p>With this plugin, sites can measure the performance of <code>XMLHttpRequests</code>
+(XHRs) and other in-page interactions after the page has been loaded.</p>
+<p>This plugin also monitors DOM manipulations following a XHR to filter out
+&quot;background&quot; XHRs.</p>
+<p>This plugin provides the backbone for the <a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a> plugin.  Single Page App navigations
+use XHR and DOM monitoring to determine when the SPA navigations are complete.</p>
+<p>This plugin has a corresponding <a href="tutorial-header-snippets.html">Header Snippets</a> that helps monitor XHRs prior to Boomerang loading.</p>
+<p>For information on how to include this plugin, see the <a href="tutorial-building.html">Building</a> tutorial.</p>
+<h2>What is Measured</h2>
+<p>When <code>AutoXHR</code> is enabled, this plugin will monitor several events:</p>
+<ul>
+<li><code>XMLHttpRequest</code> requests</li>
+<li><code>Fetch</code> API requests</li>
+<li>Clicks</li>
+<li><code>window.History</code> changes indirectly through SPA plugins (History, Angular, etc.)</li>
+</ul>
+<p>When any of these events occur, <code>AutoXHR</code> will start monitoring the page for
+other events, DOM manipulations and other networking activity.</p>
+<p>As long as the event isn't determined to be background activity (i.e an XHR
+that didn't change the DOM at all), the event will be measured until all networking
+activity has completed.</p>
+<p>This means if your click generated an XHR that triggered an updated view to fetch
+more HTML that added images to the page, the entire event will be measured
+from the click to the last image completing.</p>
+<h2>Usage</h2>
+<p>To enable AutoXHR, you should set <a href="BOOMR.plugins.AutoXHR.html#.init"><code>instrument_xhr</code></a> to <code>true</code>:</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+    instrument_xhr: true
+});
+</code></pre>
+<p>Once enabled and initialized, the <code>window.XMLHttpRequest</code> object will be
+replaced with a &quot;proxy&quot; object that instruments all XHRs.</p>
+<h2>Monitoring XHRs</h2>
+<p>After <code>AutoXHR</code> is enabled, any <code>XMLHttpRequest.send</code> will be monitored:</p>
+<pre class="prettyprint source"><code>xhr = new XMLHttpRequest();
+xhr.open(&quot;GET&quot;, &quot;/api/foo&quot;);
+xhr.send(null);
+</code></pre>
+<p>If this XHR triggers DOM changes, a beacon will eventually be sent.</p>
+<p>This beacon will have <code>http.initiator=xhr</code> and the beacon parameters will differ
+from a Page Load beacon.  See <a href="BOOMR.plugins.RT.html"><code>BOOMR.plugins.RT</code></a> and
+<a href="BOOMR.plugins.NavigationTiming.html"><code>BOOMR.plugins.NavigationTiming</code></a> for details.</p>
+<h2>Combining XHR Beacons</h2>
+<p>By default <code>AutoXHR</code> groups all XHR activity that happens in the same event together.</p>
+<p>If you have one XHR that immediately triggers a second XHR, you will get a single
+XHR beacon.  The <code>u</code> (URL) will be of the first XHR.</p>
+<p>If you don't want this behavior, and want to measure <em>every</em> XHR on the page, you
+can enable <a href="BOOMR.plugins.AutoXHR.html#.init"><code>alwaysSendXhr=true</code></a>.  When set, every
+distinct XHR will get its own XHR beacon.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: true
+    }
+});
+</code></pre>
+<p><a href="BOOMR.plugins.AutoXHR.html#.init"><code>alwaysSendXhr</code></a> can also be a list of strings
+(matching URLs), regular expressions (matching URLs), or a function which returns
+true for URLs to always send XHRs for.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: [
+            &quot;domain.com&quot;,
+            /regexmatch/,
+        ]
+   }
+});
+
+// or
+
+BOOMR.init({
+    AutoXHR: {
+        alwaysSendXhr: function(url) {
+            return url.indexOf(&quot;domain.com&quot;) !== -1;
+        }
+   }
+});
+</code></pre>
+<h3>Compatibility and Browser Support</h3>
+<p>Currently supported Browsers and platforms that AutoXHR will work on:</p>
+<ul>
+<li>IE 9+ (not in quirks mode)</li>
+<li>Chrome 38+</li>
+<li>Firefox 25+</li>
+</ul>
+<p>In general we support all browsers that support
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver">MutationObserver</a>
+and <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a>.</p>
+<p>We will not use MutationObserver in IE 11 due to several browser bugs.
+See <a href="BOOMR.utils.html#.isMutationObserverSupported"><code>BOOMR.utils.isMutationObserverSupported</code></a> for details.</p>
+<h2>Excluding Certain Requests or DOM Elements From Instrumentation</h2>
+<p>Whenever Boomerang intercepts an <code>XMLHttpRequest</code> (or Fetch), it will check if that request
+matches anything in the XHR exclude list. If it does, Boomerang will not
+instrument, time, send a beacon for that request, or include it in the
+<a href="BOOMR.plugins.SPA.html"><code>BOOMR.plugins.SPA</code></a> calculations.</p>
+<p>There are two methods of excluding XHRs: Defining the <code>BOOMR.xhr_excludes</code> array,
+or using the <a href="BOOMR.plugins.AutoXHR.html#.init"><code>excludeFilters</code></a> option.</p>
+<p>The <code>BOOMR.xhr_excludes</code> XHR excludes list is defined by creating a map, and
+adding URL parts that you would like to exclude from instrumentation. You
+can put any of the following in <code>BOOMR.xhr_excludes</code>:</p>
+<ol>
+<li>A full HREF</li>
+<li>A hostname</li>
+<li>A path</li>
+</ol>
+<p>Example:</p>
+<pre class="prettyprint source"><code>BOOMR = window.BOOMR || {};
+
+BOOMR.xhr_excludes = {
+  &quot;www.mydomain.com&quot;:  true,
+  &quot;a.anotherdomain.net&quot;: true,
+  &quot;/api/v1/foobar&quot;:  true,
+  &quot;https://mydomain.com/dashboard/&quot;: true
+};
+</code></pre>
+<p>The <a href="BOOMR.plugins.AutoXHR.html#.init"><code>excludeFilters</code></a> gives you more control by allowing you
+to specify one or more callbacks that will be run for each XHR/Fetch.  If any callback
+returns <code>true</code>, the XHR/Fetch will <em>not</em> be instrumented.</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+  AutoXHR: {
+    excludeFilters: [
+      function(anchor) {
+        return anchor.href.match(/non-trackable/);
+      }
+    ]
+  }
+});
+</code></pre>
+<p>Finally, the <a href="BOOMR.plugins.AutoXHR.html#.init"><code>domExcludeFilters</code></a> DOM filters can be used to filter out
+specific DOM elements from being tracked (marked as &quot;uninteresting&quot;).</p>
+<pre class="prettyprint source"><code>BOOMR.init({
+  AutoXHR: {
+    domExcludeFilters: [
+      function(elem) {
+        return elem.id === &quot;ignore&quot;;
+      }
+    ]
+  }
+});
+</code></pre>
+<h2>Beacon Parameters</h2>
+<p>XHR beacons have different parameters in general than Page Load beacons.</p>
+<ul>
+<li>Many of the timestamps will differ, see <a href="BOOMR.plugins.RT.html"><code>BOOMR.plugins.RT</code></a></li>
+<li>All of the <code>nt_*</code> parameters are ResourceTiming, see <a href="BOOMR.plugins.NavigationTiming.html"><code>BOOMR.plugins.NavigationTiming</code></a></li>
+<li><code>u</code>: the URL of the resource that was fetched</li>
+<li><code>pgu</code>: The URL of the page the resource was fetched on</li>
+<li><code>http.initiator</code>: <code>xhr</code> for both XHR and Fetch requests</li>
+</ul>
+<h2>Interesting Nodes</h2>
+<p>A <code>MutationObserver</code> is used to detect &quot;interesting&quot; nodes. Interesting nodes are
+new IMG/IMAGE/IFRAME/LINK (rel=stylesheet) nodes or existing nodes that are
+changing their source URL.</p>
+<p>We consider the following &quot;uninteresting&quot; nodes:</p>
+<ul>
+<li>Nodes that have either a width or height &lt;= 1px.</li>
+<li>Nodes with either a width or height of 0px.</li>
+<li>Nodes that have display:none.</li>
+<li>Nodes that have visibility:hidden.</li>
+<li>Nodes with an opacity:0.</li>
+<li>Nodes that update their source URL to the same value.</li>
+<li>Nodes that have a blank source URL.</li>
+<li>Images with a loading=&quot;lazy&quot; attribute</li>
+<li>Nodes that have a source URL starting with <code>about:</code>, <code>javascript:</code> or <code>data:</code>.</li>
+<li>SCRIPT nodes because there is no consistent way to detect when they have loaded.</li>
+<li>Existing IFRAME nodes that are changing their source URL because is no consistent
+way to detect when they have loaded.</li>
+<li>Nodes that have a source URL that matches a AutoXHR exclude filter rule.</li>
+<li>Nodes that have been manually excluded</li>
+</ul>
+<h2>Algorithm</h2>
+<p>Here's how the general AutoXHR algorithm works:</p>
+<ul>
+<li>
+<p><code>0.0</code> SPA hard route change (page navigation)</p>
+<ul>
+<li>Monitor for XHR resource requests and interesting Mutation resource requests
+for 1s or at least until page onload. We extend our 1s timeout after all
+interesting resource requests have completed.</li>
+</ul>
+</li>
+<li>
+<p><code>0.1</code> SPA soft route change from a synchronous call (eg. History changes as a
+result of a pushState or replaceState call)</p>
+<ul>
+<li>In this case we get the new URL when the developer calls pushState or
+replaceState.</li>
+<li>We create a pending event with the start time and the new URL.</li>
+<li>We do not know if they plan to make an XHR call or use a dynamic script
+node, or do nothing interesting (eg: just make a div visible/invisible).</li>
+<li>We also do not know if they will do this before or after they've called
+pushState/replaceState.</li>
+<li>Our best bet is to monitor if either a XHR resource requests or interesting
+Mutation resource requests will happen in the next 1s.</li>
+<li>When interesting resources are detected, we wait until they complete.</li>
+<li>We restart our 1s timeout after all interesting resources have completed.</li>
+</ul>
+</li>
+<li>
+<p>If something uninteresting happens, we set the timeout for 1 second if
+it wasn't already started.</p>
+<ul>
+<li>We'll only do this once per event since we don't want to continuously
+extend the timeout with each uninteresting event.</li>
+</ul>
+</li>
+<li>
+<p>If nothing happens during the additional timeout, we stop watching and fire the
+event. The event end time will be end time of the last tracked resource.</p>
+</li>
+<li>
+<p>If nothing interesting was detected during the first timeout and the URL has not
+changed then we drop the event.</p>
+</li>
+<li>
+<p><code>0.2</code> SPA soft route change from an asynchronous call (eg. History changes as a
+result of the user hitting Back/Forward and we get a window.popstate event)</p>
+<ul>
+<li>In this case we get the new URL from location.href when our event listener
+runs.</li>
+<li>We do not know if this event change will result in some interesting network
+activity or not.</li>
+<li>We do not know if the developer's event listener has already run before
+ours or if it will run in the future or even if they do have an event listener.</li>
+<li>Our best bet is the same as 0.1 above.</li>
+</ul>
+</li>
+<li>
+<p><code>0.3</code> SPA soft route change from a click that triggers a XHR before the state is
+changed (when <a href="BOOMR.plugins.AutoXHR.html#.init"><code>spaStartFromClick</code></a> is enabled).</p>
+<ul>
+<li>We store the time of the click</li>
+<li>If any additional XHRs come next, we track those</li>
+<li>When a pushState comes after the XHRs (before the timeout), we will &quot;migrate&quot; the
+click to a SPA event</li>
+</ul>
+</li>
+<li>
+<p><code>1</code> Click initiated (Only available when no SPA plugins are enabled)</p>
+<ul>
+<li>User clicks on something.</li>
+<li>We create a pending event with the start time and no URL.</li>
+<li>We turn on DOM observer, and wait up to 50 milliseconds for activity.
+<ul>
+<li>If nothing happens during the first timeout, we stop watching and clear the
+event without firing it.</li>
+<li>Else if something uninteresting happens, we set the timeout for 1s
+if it wasn't already started.
+<ul>
+<li>We'll only do this once per event since we don't want to continuously
+extend the timeout with each uninteresting event.</li>
+</ul>
+</li>
+<li>Else if an interesting node is added, we add load and error listeners
+and turn off the timeout but keep watching.
+<ul>
+<li>Once all listeners have fired, we start waiting again up to 50ms for activity.</li>
+</ul>
+</li>
+<li>If nothing happens during the additional timeout, we stop watching and fire the event.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>2</code> XHR/Fetch initiated</p>
+<ul>
+<li>XHR or Fetch request is sent.</li>
+<li>We create a pending event with the start time and the request URL.</li>
+<li>We watch for all changes in XHR state (for async requests) and for load (for
+all requests).</li>
+<li>We turn on DOM observer at XHR Onload or when the Fetch Promise resolves.
+We then wait up to 50 milliseconds for activity.
+<ul>
+<li>If nothing happens during the first timeout, we stop watching and clear the
+event without firing it.</li>
+<li>If something uninteresting happens, we set the timeout for 1 second if
+it wasn't already started.
+<ul>
+<li>We'll only do this once per event since we don't want to continuously
+extend the timeout with each uninteresting event.</li>
+</ul>
+</li>
+<li>Else if an interesting node is added, we add load and error listeners
+and turn off the timeout.
+<ul>
+<li>Once all listeners have fired, we start waiting again up to 50ms for activity.</li>
+</ul>
+</li>
+<li>If nothing happens during the additional timeout, we stop watching and fire the event.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>What about overlap?</p>
+<ul>
+<li>
+<p><code>3.1</code> XHR/Fetch initiated while a click event is pending</p>
+<ul>
+<li>If first click watcher has not detected anything interesting or does not
+have a URL, abort it</li>
+<li>If the click watcher has detected something interesting and has a URL, then
+<ul>
+<li>Proceed with 2 above.</li>
+<li>Concurrently, click stops watching for new resources
+<ul>
+<li>Once all resources click is waiting for have completed then fire the event.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>3.2</code> Click initiated while XHR/Fetch event is pending</p>
+<ul>
+<li>Ignore click</li>
+</ul>
+</li>
+<li>
+<p><code>3.3</code> Click initiated while a click event is pending</p>
+<ul>
+<li>If first click watcher has not detected anything interesting or does not
+have a URL, abort it.</li>
+<li>Else proceed with parallel event steps from 3.1 above.</li>
+</ul>
+</li>
+<li>
+<p><code>3.4</code> XHR/Fetch initiated while an XHR/Fetch event is pending</p>
+<ul>
+<li>Add the second XHR/Fetch as an interesting resource to be tracked by the
+XHR pending event in progress.</li>
+</ul>
+</li>
+<li>
+<p><code>3.5</code> XHR/Fetch initiated while SPA event is pending</p>
+<ul>
+<li>Add the second XHR/Fetch as an interesting resource to be tracked by the
+XHR pending event in progress.</li>
+</ul>
+</li>
+<li>
+<p><code>3.6</code> SPA event initiated while an XHR event is pending</p>
+<ul>
+<li>Proceed with 0 above.</li>
+<li>Concurrently, XHR event stops watching for new resources. Once all resources
+the XHR event is waiting for have completed, fire the event.</li>
+</ul>
+</li>
+<li>
+<p><code>3.7</code> SPA event initiated while a SPA event is pending</p>
+<ul>
+<li>If the pending SPA event had detected something interesting then send an aborted
+SPA beacon. If not, drop the pending event.</li>
+<li>Proceed with 0 above.</li>
+</ul>
+</li>
+</ul>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+        </div>
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Methods</h2>
+
+            <dl>
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".addDomExcludeFilter">addDomExcludeFilter(cb, ctx [, name])</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Add a DOM filter function to the list of functions to run to validate if an
+DOM element should be instrumented.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="BOOMR.plugins.AutoXHR.html#.htmlElementCallback">BOOMR.plugins.AutoXHR.htmlElementCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Callback to run to validate filtering of an XHR Request</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Context to run {@param cb} in</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional name for the filter, called out when running exclude filters for debugging purposes</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4>Example</h4>
+        
+    <pre class="sunlight-highlight-javascript">BOOMR.plugins.AutoXHR.addDomExcludeFilter(function(elem) {
+  return elem.id === &quot;ignore&quot;;
+}, null, &quot;exampleFilter&quot;);</pre>
+
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".addExcludeFilter">addExcludeFilter(cb, ctx [, name])</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Add a XHR filter function to the list of functions to run to validate if an
+XHR should be instrumented.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="BOOMR.plugins.AutoXHR.html#.htmlElementCallback">BOOMR.plugins.AutoXHR.htmlElementCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Callback to run to validate filtering of an XHR Request</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Context to run {@param cb} in</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional name for the filter, called out when running exclude filters for debugging purposes</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h4>Example</h4>
+        
+    <pre class="sunlight-highlight-javascript">BOOMR.plugins.AutoXHR.addExcludeFilter(function(anchor) {
+  var m = anchor.href.match(/some-page\.html/g);
+
+  // If matching flag to not instrument
+  if (m &amp;&amp; m.length &gt; 0) {
+    return true;
+  }
+  return false;
+}, null, &quot;exampleFilter&quot;);</pre>
+
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".enableAutoXhr">enableAutoXhr()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Enables AutoXHR if not already enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getMutationHandler">getMutationHandler()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the <a href="MutationHandler.html"><code>MutationHandler</code></a></p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type"><a href="MutationHandler.html">MutationHandler</a></span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>Handler</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".getPathName">getPathName(anchor)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Tries to resolve <code>href</code> links from relative URLs.</p>
+<p>This implementation takes into account a bug in the way IE handles relative
+paths on anchors and resolves this by assigning <code>a.href</code> to itself which
+triggers the URL resolution in IE and will fix missing leading slashes if
+necessary.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>anchor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The anchor object to resolve</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">string</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p>The unrelativized URL href</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".init">init(config)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Initializes the plugin.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Configuration</p>
+                <h5 class="method-params-label method-subparams-label">Properties</h5>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>instrument_xhr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not to instrument XHR</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.spaBackEndResources</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default resources to count as
+Back-End during a SPA nav</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.monitorFetch</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not to instrument fetch()</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.fetchBodyUsedWait</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>If the fetch response's bodyUsed flag is false,
+we'll wait this amount of ms before checking RT for an entry. Setting to 0 will disable this feature</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.alwaysSendXhr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">Array.&lt;string></span>
+|
+
+<span class="param-type">Array.&lt;RegExp></span>
+|
+
+<span class="param-type">Array.&lt;function()></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not to send XHR
+beacons for every XHR.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>captureXhrRequestResponse</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not to capture an XHR's
+request and response bodies on for the <code>xhr_load</code> event.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.spaIdleTimeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
+
+            <td class="description last"><p>Timeout for Single Page Applications after the final
+resource fetch has completed before calling the SPA navigation complete. Default is 1000ms.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.xhrIdleTimeout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    50
+                
+                </td>
+            
+
+            <td class="description last"><p>Timeout for XHRs after final resource fetch has completed
+before calling the XHR complete.  Default is 50ms.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.xhrRequireChanges</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not a XHR beacon will only be triggered
+if there were DOM changes.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>AutoXHR.spaStartFromClick</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>In Single Page Apps, start tracking
+the SPA Soft Navigation from any preceeding clicks.  If false, will start from the most recent pushState.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+<div class="param-desc">
+    <p><a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a> The AutoXHR plugin for chaining</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".is_complete">is_complete()</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>This plugin is always complete (ready to send a beacon)</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p><code>true</code></p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".loadFinished">loadFinished(resource)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Mark this as the time load ended via resources loadEventEnd property, if this resource has been added
+to the <a href="MutationHandler.html"><code>MutationHandler</code></a> already notify that the resource has finished.
+Otherwise add this call to the lise of Events that occured.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>resource</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Resource</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".shouldExcludeXhr">shouldExcludeXhr(anchor)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Based on the contents of BOOMR.xhr_excludes check if the URL that we instrumented as XHR request
+matches any of the URLs we are supposed to not send a beacon about.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>anchor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">HTMLAnchorElement</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>HTML anchor element with URL of the element
+checked against <code>BOOMR.xhr_excludes</code></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h4>Returns:</h4>
+    <div class="method-returns">
+        
+                
+    <p>Type: 
+<span class="param-type">boolean</span>
+
+
+</p>
+
+<div class="param-desc">
+    <p><code>true</code> if intended to be excluded, <code>false</code> if it is not in the list of excludables</p>
+</div>
+
+
+            
+    </div>
+    
+
+    
+</dd>
+
+            </dl>
+        
+
+        
+            <h2 class="subsection-title">Type Definitions</h2>
+
+            <dl>
+                    
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id=".htmlElementCallback">htmlElementCallback(elem)</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>A callback with a HTML element.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h4>Parameters:</h4>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>elem</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">HTMLAnchorElement</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>HTML element</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+                </dl>
+        
+
+        
+    </article>
+
+    </section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© 2010-2021 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a>
+	
+		on Tue Mar 1st 2022
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

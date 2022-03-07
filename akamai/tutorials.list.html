@@ -1,0 +1,3550 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>mPulse Boomerang Tutorials</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.akamai.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">mPulse Boomerang</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html">BOOMR</a></li><li><a href="BOOMR.browser.html">BOOMR.browser</a></li><li><a href="BOOMR.constants.html">BOOMR.constants</a></li><li><a href="BOOMR.plugins.html">BOOMR.plugins</a></li><li><a href="BOOMR.plugins.Akamai.html">BOOMR.plugins.Akamai</a></li><li><a href="BOOMR.plugins.AutoXHR.html">BOOMR.plugins.AutoXHR</a></li><li><a href="BOOMR.plugins.BW.html">BOOMR.plugins.BW</a></li><li><a href="BOOMR.plugins.CACHE_RELOAD.html">BOOMR.plugins.CACHE_RELOAD</a></li><li><a href="BOOMR.plugins.Clicks.html">BOOMR.plugins.Clicks</a></li><li><a href="BOOMR.plugins.ConfigOverride.html">BOOMR.plugins.ConfigOverride</a></li><li><a href="BOOMR.plugins.ConsentInlinedPlugin.html">BOOMR.plugins.ConsentInlinedPlugin</a></li><li><a href="BOOMR.plugins.Continuity.html">BOOMR.plugins.Continuity</a></li><li><a href="BOOMR.plugins.CrossDomain.html">BOOMR.plugins.CrossDomain</a></li><li><a href="BOOMR.plugins.CT.html">BOOMR.plugins.CT</a></li><li><a href="BOOMR.plugins.DNS.html">BOOMR.plugins.DNS</a></li><li><a href="BOOMR.plugins.Early.html">BOOMR.plugins.Early</a></li><li><a href="BOOMR.plugins.Errors.html">BOOMR.plugins.Errors</a></li><li><a href="BOOMR.plugins.EventTiming.html">BOOMR.plugins.EventTiming</a></li><li><a href="BOOMR.plugins.GUID.html">BOOMR.plugins.GUID</a></li><li><a href="BOOMR.plugins.History.html">BOOMR.plugins.History</a></li><li><a href="BOOMR.plugins.IFrameDelay.html">BOOMR.plugins.IFrameDelay</a></li><li><a href="BOOMR.plugins.IPv6.html">BOOMR.plugins.IPv6</a></li><li><a href="BOOMR.plugins.LOGN.html">BOOMR.plugins.LOGN</a></li><li><a href="BOOMR.plugins.Memory.html">BOOMR.plugins.Memory</a></li><li><a href="BOOMR.plugins.Mobile.html">BOOMR.plugins.Mobile</a></li><li><a href="BOOMR.plugins.NavigationTiming.html">BOOMR.plugins.NavigationTiming</a></li><li><a href="BOOMR.plugins.PageParams.html">BOOMR.plugins.PageParams</a></li><li><a href="BOOMR.plugins.PaintTiming.html">BOOMR.plugins.PaintTiming</a></li><li><a href="BOOMR.plugins.ResourceTiming.html">BOOMR.plugins.ResourceTiming</a></li><li><a href="BOOMR.plugins.RT.html">BOOMR.plugins.RT</a></li><li><a href="BOOMR.plugins.SPA.html">BOOMR.plugins.SPA</a></li><li><a href="BOOMR.plugins.TPAnalytics.html">BOOMR.plugins.TPAnalytics</a></li><li><a href="BOOMR.plugins.UserTiming.html">BOOMR.plugins.UserTiming</a></li><li><a href="BOOMR.session.html">BOOMR.session</a></li><li><a href="BOOMR.utils.html">BOOMR.utils</a></li><li><a href="BOOMR.utils.Compression.html">BOOMR.utils.Compression</a></li><li><a href="BOOMR_mq.html">BOOMR_mq</a></li><li><a href="MutationHandler.html">MutationHandler</a></li><li><a href="ProxyXHRImplementation.html">ProxyXHRImplementation</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BOOMR.html#event:beacon">BOOMR#event:beacon</a></li><li><a href="BOOMR.html#event:before_beacon">BOOMR#event:before_beacon</a></li><li><a href="BOOMR.html#event:before_early_beacon">BOOMR#event:before_early_beacon</a></li><li><a href="BOOMR.html#event:before_unload">BOOMR#event:before_unload</a></li><li><a href="BOOMR.html#event:click">BOOMR#event:click</a></li><li><a href="BOOMR.html#event:config">BOOMR#event:config</a></li><li><a href="BOOMR.html#event:dom_loaded">BOOMR#event:dom_loaded</a></li><li><a href="BOOMR.html#event:error">BOOMR#event:error</a></li><li><a href="BOOMR.html#event:form_submit">BOOMR#event:form_submit</a></li><li><a href="BOOMR.html#event:netinfo">BOOMR#event:netinfo</a></li><li><a href="BOOMR.html#event:page_load_beacon">BOOMR#event:page_load_beacon</a></li><li><a href="BOOMR.html#event:page_ready">BOOMR#event:page_ready</a></li><li><a href="BOOMR.html#event:page_unload">BOOMR#event:page_unload</a></li><li><a href="BOOMR.html#event:prerender_to_visible">BOOMR#event:prerender_to_visible</a></li><li><a href="BOOMR.html#event:rage_click">BOOMR#event:rage_click</a></li><li><a href="BOOMR.html#event:spa_cancel">BOOMR#event:spa_cancel</a></li><li><a href="BOOMR.html#event:spa_init">BOOMR#event:spa_init</a></li><li><a href="BOOMR.html#event:spa_navigation">BOOMR#event:spa_navigation</a></li><li><a href="BOOMR.html#event:visibility_changed">BOOMR#event:visibility_changed</a></li><li><a href="BOOMR.html#event:xhr_error">BOOMR#event:xhr_error</a></li><li><a href="BOOMR.html#event:xhr_init">BOOMR#event:xhr_init</a></li><li><a href="BOOMR.html#event:xhr_load">BOOMR#event:xhr_load</a></li><li><a href="BOOMR.html#event:xhr_send">BOOMR#event:xhr_send</a></li><li><a href="document.html#event:onBeforeBoomerangBeacon">document#event:onBeforeBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangBeacon">document#event:onBoomerangBeacon</a></li><li><a href="document.html#event:onBoomerangLoaded">document#event:onBoomerangLoaded</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-README.template.html">README.template</a></li><li><a href="tutorial-building.html">Building</a></li><li><a href="tutorial-contributing.html">Contributing</a></li><li><a href="tutorial-creating-plugins.html">Creating Plugins</a></li><li><a href="tutorial-header-snippets.html">Header Snippets</a></li><li><a href="tutorial-howtos.html">How-Tos</a></li><li><a href="tutorial-loader-snippet.html">Non-Blocking Loader Snippet</a></li><li><a href="tutorial-methodology.html">Methodology</a></li><li><a href="tutorial-page-overrides.html">Page Overrides</a></li><li><a href="tutorial-perf-tests.html">Performance Tests</a></li><li><a href="tutorial-tests.html">Tests</a></li><li><a href="tutorial-version-history.html">Version History</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#BOOMR_check_doc_domain">BOOMR_check_doc_domain</a></li><li><a href="global.html#BOOMR_lstart">BOOMR_lstart</a></li><li><a href="global.html#BOOMR_onload">BOOMR_onload</a></li><li><a href="global.html#BOOMR_start">BOOMR_start</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+
+    
+        <h1 class="page-title">Tutorials</h1>
+    
+    <section>
+
+    <header>
+        
+            <h1>
+            
+            </h1>
+            
+        
+    </header>
+
+
+    <article>
+        <div class="container-overview">
+        
+            
+
+            
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+            
+        
+        </div>
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Classes</h2>
+
+            <ul>
+                
+                    <li>
+                        <a href="BOOMR.html">BOOMR</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.browser.html">browser</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.constants.html">constants</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.html">plugins</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Akamai.html">Akamai</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.AutoXHR.html">AutoXHR</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.BW.html">BW</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.CACHE_RELOAD.html">CACHE_RELOAD</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Clicks.html">Clicks</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.ConfigOverride.html">ConfigOverride</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.ConsentInlinedPlugin.html">ConsentInlinedPlugin</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Continuity.html">Continuity</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.CrossDomain.html">CrossDomain</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.CT.html">CT</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.DNS.html">DNS</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Early.html">Early</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Errors.html">Errors</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.EventTiming.html">EventTiming</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.GUID.html">GUID</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.History.html">History</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.IFrameDelay.html">IFrameDelay</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.IPv6.html">IPv6</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.LOGN.html">LOGN</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Memory.html">Memory</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.Mobile.html">Mobile</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.NavigationTiming.html">NavigationTiming</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.PageParams.html">PageParams</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.PaintTiming.html">PaintTiming</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.ResourceTiming.html">ResourceTiming</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.RT.html">RT</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.SPA.html">SPA</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.TPAnalytics.html">TPAnalytics</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.plugins.UserTiming.html">UserTiming</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.session.html">session</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.utils.html">utils</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR.utils.Compression.html">Compression</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="BOOMR_mq.html">BOOMR_mq</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="MutationHandler.html">MutationHandler</a>
+                        
+                    </li>
+                
+                    <li>
+                        <a href="ProxyXHRImplementation.html">ProxyXHRImplementation</a>
+                        
+                    </li>
+                
+            </ul>
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+            <h2 class="subsection-title">Events</h2>
+
+            <dl>
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:beacon">beacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when a beacon was sent.</p>
+<p>The beacon variables cannot be modified at this point.  Any calls
+to <a href="BOOMR.html#.addVar"><code>BOOMR.addVar</code></a> or <a href="BOOMR.html#.removeVar"><code>BOOMR.removeVar</code></a> will apply to the
+next beacon.</p>
+<p>Also known as <code>onbeacon</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Beacon variables</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:before_beacon">before_beacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when a beacon is about to be sent.</p>
+<p>The subscriber can still add variables to the beacon at this point,
+either by modifying the <code>vars</code> paramter or calling <a href="BOOMR.html#.addVar"><code>BOOMR.addVar</code></a>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Beacon variables</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:before_early_beacon">before_early_beacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when an early beacon is about to be sent.</p>
+<p>The subscriber can still add variables to the early beacon at this point
+by calling <a href="BOOMR.html#.addVar"><code>BOOMR.addVar</code></a>.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.Early.html"><code>BOOMR.plugins.Early</code></a> is enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Event data</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:before_unload">before_unload</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired before the document is about to be unloaded.</p>
+<p><code>window.beforeunload</code> will trigger this.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload">https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:click">click</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when the <code>click</code> event has happened on the <code>document</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick">https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onclick</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:config">config</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever new configuration data is applied via <a href="BOOMR.html#.init"><code>BOOMR.init</code></a>.</p>
+<p>Also known as <code>onconfig</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Configuration data</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:dom_loaded">dom_loaded</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired on <code>document.DOMContentLoaded</code>.</p>
+<p>The <code>DOMContentLoaded</code> event is fired when the initial HTML document
+has been completely loaded and parsed, without waiting for stylesheets,
+images, and subframes to finish loading</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded">https://developer.mozilla.org/en-US/docs/Web/Events/DOMContentLoaded</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:error">error</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever a page error has happened.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.Errors.html"><code>BOOMR.plugins.Errors</code></a> is enabled.</p>
+<p>Also known as <code>onerror</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>err</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Error</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:form_submit">form_submit</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when any <code>FORM</code> element is submitted.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit">https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:netinfo">netinfo</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever connection information changes via the
+Network Information API.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.Mobile.html"><code>BOOMR.plugins.Mobile</code></a> is enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>connection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><code>navigator.connection</code></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:page_load_beacon">page_load_beacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when the page load beacon has been sent.</p>
+<p>This event should only happen once on a page.  It does not apply
+to SPA soft navigations.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Beacon variables</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:page_ready">page_ready</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when the page is usable by the user.</p>
+<p>By default this is fired when <code>window.onload</code> fires, but if you
+set <code>autorun</code> to false when calling <a href="BOOMR.html#.init"><code>BOOMR.init</code></a>, then you
+must explicitly fire this event by calling <a href="BOOMR.html#event:page_ready"><code>BOOMR#event:page_ready</code></a>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Event</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Event triggering the page_ready</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload">https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onload</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:page_unload">page_unload</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired just before the browser unloads the page.</p>
+<p>The first event of <code>window.pagehide</code>, <code>window.beforeunload</code>,
+or <code>window.unload</code> will trigger this.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/Events/pagehide">https://developer.mozilla.org/en-US/docs/Web/Events/pagehide</a></li>
+			
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload">https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload</a></li>
+			
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunload">https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunload</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:prerender_to_visible">prerender_to_visible</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when the <code>visibilityState</code> of the document has changed from
+<code>prerender</code> to <code>visible</code></p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:rage_click">rage_click</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever a Rage Click is detected.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.Continuity.html"><code>BOOMR.plugins.Continuity</code></a> is enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>e</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Event</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Event</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:spa_cancel">spa_cancel</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever a SPA navigation is cancelled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:spa_init">spa_init</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever a SPA plugin is about to track a new navigation.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>navType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Navigation type (<code>spa</code> or <code>spa_hard</code>)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>param</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>SPA navigation parameters</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:spa_navigation">spa_navigation</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever a SPA navigation is complete.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:visibility_changed">visibility_changed</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired on <code>document.visibilitychange</code>.</p>
+<p>The <code>visibilitychange</code> event is fired when the content of a tab has
+become visible or has been hidden.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<h4 class="tag-see method-doc-label method-doc-details-label">See:</h4>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:xhr_error">xhr_error</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever and <code>XMLHttpRequest</code> has an error (if its <code>status</code> is
+set).</p>
+<p>This event will only happen if <a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a> is enabled.</p>
+<p>Also known as <code>onxhrerror</code>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>XHR data</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:xhr_init">xhr_init</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever <code>XMLHttpRequest.open</code> is called.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a> is enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>XHR type (&quot;xhr&quot;)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:xhr_load">xhr_load</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired when an XMLHttpRequest has finished, or, if something calls
+<a href="BOOMR.html#.responseEnd"><code>BOOMR.responseEnd</code></a>.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Event data</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:xhr_send">xhr_send</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Boomerang event, subscribe via <a href="BOOMR.html#.subscribe"><code>BOOMR.subscribe</code></a>.</p>
+<p>Fired whenever <code>XMLHttpRequest.send</code> is called.</p>
+<p>This event will only happen if <a href="BOOMR.plugins.AutoXHR.html"><code>BOOMR.plugins.AutoXHR</code></a> is enabled.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>xhr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><code>XMLHttpRequest</code> object</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:onBeforeBoomerangBeacon">onBeforeBoomerangBeacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Public event (fired on <code>document</code>), and can be subscribed via
+<code>document.addEventListener(&quot;onBeforeBoomerangBeacon&quot;, ...)</code> or
+<code>document.attachEvent(&quot;onpropertychange&quot;, ...)</code>.</p>
+<p>Maps to <a href="BOOMR.html#event:before_beacon"><code>BOOMR#event:before_beacon</code></a></p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Beacon variables</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:onBoomerangBeacon">onBoomerangBeacon</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Public event (fired on <code>document</code>), and can be subscribed via
+<code>document.addEventListener(&quot;onBoomerangBeacon&quot;, ...)</code> or
+<code>document.attachEvent(&quot;onpropertychange&quot;, ...)</code>.</p>
+<p>Maps to <a href="BOOMR.html#event:before_beacon"><code>BOOMR#event:before_beacon</code></a></p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+    <h4 class="subsection-title">Properties:</h4>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Beacon variables</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    
+        <h3 class="method-name" class="name" id="event:onBoomerangLoaded">onBoomerangLoaded</h3>
+    
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Public event (fired on <code>document</code>), and can be subscribed via
+<code>document.addEventListener(&quot;onBoomerangLoaded&quot;, ...)</code> or
+<code>document.attachEvent(&quot;onpropertychange&quot;, ...)</code>.</p>
+<p>Fired when <a href="BOOMR.html"><code>BOOMR</code></a> has loaded and can be used.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            </dl>
+        
+    </article>
+
+    </section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© 2010-2021 the contributors to the Open Source Boomerang project and Akamai Technologies, Inc.
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a>
+	
+		on Tue Mar 1st 2022
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
