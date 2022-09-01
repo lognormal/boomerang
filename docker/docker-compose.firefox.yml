@@ -2,7 +2,7 @@ version: '3'
 
 services: 
   firefox:
-    image: selenium/node-firefox
+    image: selenium/node-firefox:3
     environment:
       - HUB_PORT_4444_TCP_ADDR=selenium-hub
       - HUB_PORT_4444_TCP_PORT=4444

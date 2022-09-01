@@ -39,11 +39,11 @@ describe("e2e/33-autoxhr-spa-startfromclick/12-click-img-xhr.js", function() {
     });
 
     it("Should have rt.tstart around the time of the click", function() {
-      assert.closeTo(tf.beacons[1]["rt.tstart"], t.mouseEventTimes[0], 100);
+      assert.closeTo(tf.beacons[1]["rt.tstart"], t.mouseEventTimes[0], 200);
     });
 
     it("Should have Page Load Time ~4030ms", function() {
-      assert.closeTo(tf.beacons[1].t_done, t.xhrTimes.xhr1.duration + t.imgTimes.img1.duration + 30, 100);
+      assert.closeTo(tf.beacons[1].t_done, t.xhrTimes.xhr1.duration + t.imgTimes.img1.duration + 30, 200);
     });
 
     it("Should have Page Load Time >= 4030ms", function() {
@@ -51,11 +51,11 @@ describe("e2e/33-autoxhr-spa-startfromclick/12-click-img-xhr.js", function() {
     });
 
     it("Should have Back End Time ~2000ms", function() {
-      assert.closeTo(tf.beacons[1].t_resp, t.xhrTimes.xhr1.duration, 100);
+      assert.closeTo(tf.beacons[1].t_resp, t.xhrTimes.xhr1.duration, 200);
     });
 
     it("Should have Front End Time ~2030ms", function() {
-      assert.closeTo(tf.beacons[1].t_page, t.imgTimes.img1.duration + 30, 100);
+      assert.closeTo(tf.beacons[1].t_page, t.imgTimes.img1.duration + 30, 200);
     });
   });
 });

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   selenium-hub:
-    image: selenium/hub
+    image: selenium/hub:3
     # environment:
     #   - SE_OPTS="-debug"  # debugging
     # ports:
