@@ -86,9 +86,11 @@
               if (entry.responseEnd !== 0) {
                 resource.timing.responseEnd = Math.round(navSt + entry.responseEnd);
               }
+
               if (entry.responseStart !== 0) {
                 resource.timing.responseStart = Math.round(navSt + entry.responseStart);
               }
+
               if (entry.startTime !== 0) {
                 resource.timing.requestStart = Math.round(navSt + entry.startTime);
               }
@@ -110,6 +112,7 @@
           function() {
             if (ename === "readystatechange") {
               resource.timing[readyStateMap[xhr.readyState]] = now();
+
               if (xhr.readyState === 4) {
                 loadFinished();
               }
@@ -151,6 +154,7 @@
         loadFinished();
       }
     };
+
     return xhr;
   };
 })(window);

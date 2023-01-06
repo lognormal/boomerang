@@ -625,7 +625,7 @@
       var singlePageApp = false,
           frameworks = this.supported_frameworks();
 
-      for (i = 0; i < frameworks.length; i++) {
+      for (var i = 0; i < frameworks.length; i++) {
         var spa = frameworks[i];
 
         if (config[spa] && config[spa].enabled) {

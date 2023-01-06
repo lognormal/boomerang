@@ -1452,7 +1452,7 @@
         target._bmrEvents = [];
       }
 
-      // 3rd argment can be useCapture flag or options object that may contain a `capture` key.
+      // 3rd argument can be useCapture flag or options object that may contain a `capture` key.
       // Default is false in both cases
       useCapture = (useCapture && useCapture.capture || useCapture) === true;
 
@@ -1482,7 +1482,7 @@
         target._bmrEvents = [];
       }
 
-      // 3rd argment can be useCapture flag or options object that may contain a `capture` key.
+      // 3rd argument can be useCapture flag or options object that may contain a `capture` key.
       // Default is false in both cases
       useCapture = (useCapture && useCapture.capture || useCapture) === true;
 

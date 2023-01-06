@@ -13,8 +13,8 @@
   // NOTE: Set Boomerang URL here
   window.BOOMR.url = "";
 
-  var // document.currentScript is supported in all browsers other than IE
-      where = document.currentScript || document.getElementsByTagName("script")[0],
+  // document.currentScript is supported in all browsers other than IE
+  var where = document.currentScript || document.getElementsByTagName("script")[0],
       // Parent element of the script we inject
       parentNode = where.parentNode,
       // Whether or not Preload method has worked
@@ -38,7 +38,10 @@
     prefix = prefix.replace("build/", "../build/");
   }
 
-  window.BOOMR.url = prefix + (window.BOOMR_script_minified ? "boomerang-latest-debug.min.js" : "boomerang-latest-debug.js") + suffix;
+  window.BOOMR.url = prefix +
+    (window.BOOMR_script_minified ? "boomerang-latest-debug.min.js" : "boomerang-latest-debug.js") +
+    suffix;
+
   /* END_TEST_CODE */
   // Tells the browser to execute the Preloaded script by adding it to the DOM
   function promote() {
@@ -47,6 +50,7 @@
     }
 
     var script = document.createElement("script");
+
     script.id = "boomr-scr-as";
     script.src = window.BOOMR.url;
 
@@ -64,13 +68,17 @@
   function iframeLoader(wasFallback) {
     promoted = true;
 
-    var dom, doc = document, bootstrap, iframe, iframeStyle, win = window;
+    var dom,
+        doc = document,
+        bootstrap, iframe, iframeStyle,
+        win = window;
 
     window.BOOMR.snippetMethod = wasFallback ? "if" : "i";
 
     // Adds Boomerang within the iframe
     bootstrap = function(parent, scriptId) {
       var script = doc.createElement("script");
+
       script.id = scriptId || "boomr-if-as";
       script.src = window.BOOMR.url;
 
@@ -88,6 +96,7 @@
       window.BOOMR.snippetMethod = "s";
 
       bootstrap(parentNode, "boomr-async");
+
       return;
     }
 
@@ -126,7 +135,8 @@
       // Get document.domain of the parent window
       dom = document.domain;
 
-      // Set the src of the iframe to a JavaScript URL that will immediately set its document.domain to match the parent.
+      // Set the src of the iframe to a JavaScript URL that will immediately set its document.domain
+      // to match the parent.
       // This lets us access the iframe document long enough to inject our script.
       // Our script may need to do more domain massaging later.
       iframe.src = "javascript:var d=document.open();d.domain='" + dom + "';void 0;";

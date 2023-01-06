@@ -627,4 +627,13 @@ describe("common", function() {
       throw window._BOOMR_userAgentCheck;
     }
   });
+
+  it("Should not leak global variables", function() {
+    var leakedVariables = BOOMR_test.findGlobalLeaks(
+      window,
+      BOOMR_test.initialGlobals.concat(BOOMR_test.addedGlobals),
+      BOOMR_test.globalProps(window));
+
+    assert.deepEqual(leakedVariables, []);
+  });
 });

@@ -111,8 +111,70 @@
   //
   // Constants
   //
+
+  // Default location for Beacon URL
   t.BEACON_URL = "/beacon";
-  t.MAX_RESOURCE_WAIT = 500;
+
+  // Globals boomerang.js or the test framework adds to window
+  t.EXPORTED_GLOBALS = [
+    // Main Boomerang object
+    "BOOMR",
+
+    // This test suite
+    "BOOMR_test",
+
+    // Timestamp of config.json loading, deleted by LOGN plugin
+    "BOOMR_configt",
+
+    // Timestamp of boomerang.js loading
+    "BOOMR_onload",
+
+    // Timestamp of loader start
+    "BOOMR_lstart",
+
+    // Function to verify Boomerang is in the correct document.domain
+    "BOOMR_check_doc_domain",
+
+    // Added by Errors plugin for any functions that were wrapped
+    "_bmrEvents",
+
+    // Breadcrumb this framework leaves if the UserAgent window.navigator was accessed, used by tests in common.js
+    "_BOOMR_userAgentCheck",
+
+    // Set by some tests to indicate LOGN should run even in test mode
+    "BOOMR_LOGN_always",
+
+    // Boomerang Method Queue
+    "BOOMR_mq",
+
+    // Boomerang Overrides
+    "BOOMR_config",
+
+    // Boomerang Errors Plugin parser
+    "ErrorStackParser",
+
+    // Boomerang UserTimingCompression plugin
+    "UserTimingCompression",
+
+    // Added by Mocha
+    "before",
+    "after",
+    "beforeEach",
+    "afterEach",
+    "run",
+    "context",
+    "describe",
+    "xcontext",
+    "xdescribe",
+    "specify",
+    "it",
+    "xspecify",
+    "xit",
+    "mochaResults",
+
+    // Added by Chai
+    "assert"
+  ];
 
   //
   // Exports
@@ -314,21 +376,11 @@
   };
 
   t.configureTestEnvironment = function(config) {
-    // setup Mocha
-    var globals = [
-      "BOOMR",
-      "PageGroupVariable",
-      "mochaResults",
-      "BOOMR_configt",
-      "_bmrEvents",
-      "_BOOMR_userAgentCheck"
-    ];
-
     if (config && config.ignoreGlobals) {
       Array.prototype.push.apply(globals, config.ignoreGlobals);
     }
 
-    window.mocha.globals(globals);
+    window.mocha.globals(t.EXPORTED_GLOBALS);
     window.mocha.checkLeaks();
 
     // set globals
@@ -1809,6 +1861,83 @@
     return Math.round(Math.random() * 999999999999).toString(36);
   };
 
+  /**
+   * Gets any globals defined
+   *
+   * @param {object} global Global object, i.e. `window`
+   */
+  t.globalProps = function(global) {
+    if (!Object.keys) {
+      return [];
+    }
+
+    return Object.keys(global);
+  };
+
+  /**
+   * Globals when BOOMR_test initializes
+   */
+  t.initialGlobals = t.globalProps(window || {}).concat(t.EXPORTED_GLOBALS);
+
+  /**
+   * Globals added by this specific test
+   */
+  t.addedGlobals = [];
+
+  /**
+   * Find globals that have leaked since startup, mins any exclusions.
+   *
+   * @param {Object} global Global object
+   * @param {string[]} ok List of Globals that are excluded
+   * @param {string[]} globals List of current Globals
+   *
+   * @returns {string[]} List of leaked globals
+   */
+  t.findGlobalLeaks = function(global, ok, globals) {
+    return globals.filter(function(key) {
+      // Firefox and Chrome exposes iframes as index inside the window object
+      if (/^\d+/.test(key)) {
+        return false;
+      }
+
+      // in firefox
+      // if runner runs in an iframe, this iframe's window.getInterface method
+      // not init at first it is assigned in some seconds
+      if (global.navigator && (/^getInterface/).test(key)) {
+        return false;
+      }
+
+      // an iframe could be approached by window[iframeIndex]
+      // in ie6,7,8 and opera, iframeIndex is enumerable, this could cause leak
+      if (global.navigator && (/^\d+/).test(key)) {
+        return false;
+      }
+
+      // Opera and IE expose global variables for HTML element IDs (issue #243)
+      if (/^mocha-/.test(key)) {
+        return false;
+      }
+
+      // TEST prefixed globals
+      if (/^TEST_/.test(key)) {
+        return false;
+      }
+
+      var matched = ok.filter(function(okItem) {
+        if (~okItem.indexOf("*")) {
+          return key.indexOf(okItem.split("*")[0]) === 0;
+        }
+
+        return key === okItem;
+      });
+
+      return !matched.length && (!global.navigator || key !== "onerror");
+    });
+  };
+
+  //
+  // Configure global window.BOOMR_test
+  //
   window.BOOMR_test = t;
 
   // force LOGN plugin not to run. Individual tests will override this if needed.
