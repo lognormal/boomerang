@@ -597,7 +597,7 @@
 		 * @returns {boolean} true if one of the SPA frameworks is enabled
 		 */
 		isSinglePageApp: function(config) {
-			var singlePageApp = false, frameworks = this.supported_frameworks();
+			var singlePageApp = false, frameworks = this.supported_frameworks(), i;
 			for (i = 0; i < frameworks.length; i++) {
 				var spa = frameworks[i];
 				if (config[spa] && config[spa].enabled) {
