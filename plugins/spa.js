@@ -426,6 +426,10 @@
       var navigationStart = (BOOMR.plugins.RT && BOOMR.plugins.RT.navigationStart());
       var requestStart = (firstSpaNav && !initialRouteChangeCompleted) ? navigationStart : now;
 
+      if (firstSpaNav && waitingOnHardMissedComplete) {
+        requestStart = navigationStart;
+      }
+
       // use the document.URL even though it may be the URL of the previous nav. We will updated
       // it in AutoXHR sendEvent
       var url = BOOMR.window.document.URL;

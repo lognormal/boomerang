@@ -1,0 +1,28 @@
+<%= header %>
+<script src="00-delayed-boomerang.js" type="text/javascript"></script>
+<script type="text/javascript">
+setTimeout(function() {
+  var script = document.createElement("script");
+
+  script.src = "../../build/boomerang-latest-debug.js";
+  document.head.appendChild(script);
+
+  // save the timing data from the spa_navigation event
+  window.BOOMR_mq = window.BOOMR_mq || [];
+  window.BOOMR_mq.push(["subscribe", "spa_navigation", function(res) {
+    window.BOOMR_spa = res;
+
+    BOOMR_test.runTests();
+  }]);
+
+  BOOMR_test.init({
+    autorun: false,
+    History: {
+      enabled: true,
+      auto: true
+    },
+    testAfterOnBeacon: false
+  });
+}, 2000);
+</script>
+<%= footer %>
