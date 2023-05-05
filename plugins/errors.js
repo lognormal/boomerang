@@ -1206,6 +1206,12 @@
           return;
         }
 
+        if (impl.isDuringLoad && impl.sendIntervalDuringLoad <= 0){
+          // if this is during a load and sending during load has been
+          // disabled via config, do not try to send
+          return;
+        }
+
         // errors outside of a load will be sent at the next interval
         impl.sendIntervalId = setTimeout(function() {
           impl.sendIntervalId = -1;
@@ -2010,8 +2016,9 @@
      * @param {boolean} [config.Errors.sendAfterOnload] Whether or not to
      * send errors after the page load beacon.  If set to false, only errors
      * that happened up to the page load beacon will be captured.
-     * @param {boolean} [config.Errors.sendInterval] If `sendAfterOnload` is
+     * @param {number} [config.Errors.sendInterval] If `sendAfterOnload` is
      * true, how often to send the latest batch of errors.
+     * @param {number} [config.Errors.sendIntervalDuringLoad] How often to send a beacon during onload if autorun=false
      * @param {number} [config.Errors.maxErrors] Maximum number of errors
      * to track per page.
      *
@@ -2025,7 +2032,7 @@
       BOOMR.utils.pluginConfig(impl, config, "Errors",
         ["onError", "monitorGlobal", "monitorNetwork", "monitorConsole",
           "monitorEvents", "monitorTimeout", "monitorReporting", "monitorRejections",
-          "sendAfterOnload", "sendInterval", "maxErrors"]);
+          "sendAfterOnload", "sendInterval", "sendIntervalDuringLoad", "maxErrors"]);
 
       if (impl.initialized) {
         return this;
