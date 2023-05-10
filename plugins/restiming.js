@@ -193,7 +193,16 @@
     "eventsource": "j",
 
     /** The root HTML page itself */
-    "navigation": 6
+    "navigation": 6,
+
+    /** Early Hints */
+    "early-hints": "k",
+
+    /** HTML <a> ping Attribute */
+    "ping": "l",
+
+    /** CSS font at-rule */
+    "font": "m"
   };
 
   /**

@@ -19,6 +19,38 @@ BOOMR_test.init({
   testAfterOnBeacon: true,
   ResourceTiming: {
     enabled: true
+  },
+  onBoomerangLoaded: function() {
+    var epoch = performance.timeOrigin || performance.timing.navigationStart;
+
+    epoch += 100; // simulated IFRAME delay
+
+    BOOMR.plugins.ResourceTiming.addResources([{
+      name: "http://example.com/early-hints?id=early-hints",
+      startTime: 200,
+      initiatorType: "early-hints",
+      _data: {
+        "ns5": "namespaced_payload_5"
+      }
+    }], epoch);
+
+    BOOMR.plugins.ResourceTiming.addResources([{
+      name: "http://example.com/ping?id=ping",
+      startTime: 200,
+      initiatorType: "ping",
+      _data: {
+        "ns5": "namespaced_payload_5"
+      }
+    }], epoch);
+
+    BOOMR.plugins.ResourceTiming.addResources([{
+      name: "http://example.com/font?id=font",
+      startTime: 200,
+      initiatorType: "font",
+      _data: {
+        "ns5": "namespaced_payload_5"
+      }
+    }], epoch);
   }
 });
 </script>

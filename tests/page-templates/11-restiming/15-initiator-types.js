@@ -48,7 +48,10 @@ describe("e2e/11-restiming/15-initiator-types", function() {
       ["assertive-chai.js", ["script"]],
       ["lodash.js", ["script"]],
       ["resourcetiming-decompression.js", ["script"]],
-      ["common.js", ["script"]]
+      ["common.js", ["script"]],
+      ["id=early-hints", ["early-hints"]],
+      ["id=ping", ["ping"]],
+      ["id=font", ["font"]]
     ];
 
     BOOMR.utils.forEach(types, function(type) {
