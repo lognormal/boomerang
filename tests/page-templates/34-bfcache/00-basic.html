@@ -1,0 +1,22 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="00-basic.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+  testAfterOnBeacon: 2,
+  BFCache: {
+    enabled: true
+  },
+  afterFirstBeacon: function() {
+    // fake a BFCache navigation
+    BOOMR.plugins.BFCache.onPageShow({
+      persisted: true,
+      timeStamp: BOOMR.hrNow() - 100
+    });
+
+    // add some delay so FCP and LCP are high
+    BOOMR_test.busy(500);
+  }
+});
+</script>
+<%= footer %>

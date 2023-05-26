@@ -1,0 +1,64 @@
+<%= header %>
+<script>
+// Polyfill
+window.performance = window.performance || {};
+window.performance.getEntriesByType = function(type) {
+  if (type === "navigation") {
+    return [{
+      notRestoredReasons: {
+        blocked: true,
+        reasons: ["Unload handler", "Unknown"],
+        children: [
+          {
+            blocked: false,
+            reasons: ["not-a-reason1"],
+            id: "id1",
+            name: "name1"
+          },
+          {
+            blocked: null,
+            reasons: ["not-a-reason2"],
+            id: "id2",
+            name: "name2"
+          },
+          {
+            blocked: true,
+            reasons: ["a-reason3"],
+            id: "id3",
+            name: null
+          },
+          {
+            blocked: true,
+            reasons: ["a-reason4"],
+            id: null,
+            name: "name4"
+          },
+          {
+            blocked: true,
+            reasons: ["a-reason5"],
+            id: null,
+            name: null
+          }
+        ]
+      }
+    }];
+  }
+  else {
+    return [];
+  }
+};
+</script>
+<%= boomerangScript %>
+<script src="01-nrr.js" type="text/javascript"></script>
+<script>
+// break bfcache for debugging
+BOOMR.utils.addListener(BOOMR.window, "unload", function() {});
+
+BOOMR_test.init({
+  testAfterOnBeacon: 1,
+  BFCache: {
+    enabled: true
+  }
+});
+</script>
+<%= footer %>

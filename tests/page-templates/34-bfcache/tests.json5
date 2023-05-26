@@ -1,0 +1,5 @@
+{
+    all: {
+        requires: ["bfcache"]
+    }
+}

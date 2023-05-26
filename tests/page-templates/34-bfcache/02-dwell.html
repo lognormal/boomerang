@@ -1,0 +1,26 @@
+<%= header %>
+<%= boomerangScript %>
+<script src="02-dwell.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+  testAfterOnBeacon: 1,
+  BFCache: {
+    enabled: true,
+    minimumDwellTime: 1000
+  },
+  afterFirstBeacon: function() {
+    // fake the BFCache nav
+    BOOMR.plugins.BFCache.onPageShow({
+      persisted: true,
+      timeStamp: BOOMR.hrNow() - 100
+    });
+
+    // have them wait 100ms then navigate away before
+    // dwell time has been reached
+    setTimeout(function() {
+      BOOMR.plugins.BFCache.onPageHide();
+    }, 100);
+  }
+});
+</script>
+<%= footer %>

@@ -382,6 +382,10 @@ describe("common", function() {
           // error beacon
           assert.equal(b.api, "1", prefix + "has the api param value equal to 1");
         }
+        else if (b["http.initiator"] === "bfcache") {
+          // BFCache navigation
+          assert.equal(b["rt.start"], "manual", prefix + "has rt.start set to manual");
+        }
         else if (b["http.initiator"] === "interaction") {
           // Interaction beacon
           // nothing special

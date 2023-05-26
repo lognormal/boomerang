@@ -1731,6 +1731,7 @@
       // allow error and early beacons to go through even if we're not complete
       return impl.complete ||
           (vars && vars["http.initiator"] === "error") ||
+          (vars && vars["http.initiator"] === "bfcache") ||
           (vars && typeof vars.early !== "undefined");
     },
 

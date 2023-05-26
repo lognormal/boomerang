@@ -20,6 +20,7 @@ of each plugin:
 * {@link BOOMR.plugins.History BOOMR.plugins.Angular} enables support for measuring AngularJS websites (now part of the {@link BOOMR.plugins.History} plugin)
 * {@link BOOMR.plugins.AutoXHR} tracks `XMLHttpRequest`s and other in-page interactions
 * {@link BOOMR.plugins.History BOOMR.plugins.Backbone} enables support for measuring Backbone.js websites (now part of the {@link BOOMR.plugins.History} plugin)
+* {@link BOOMR.plugins.BFCache} measures BFCache navigations
 * {@link BOOMR.plugins.BW} measures HTTP bandwidth
 * {@link BOOMR.plugins.CACHE_RELOAD} forces the browser to update its cached copy of boomerang
 * {@link BOOMR.plugins.Clicks} tracks in-page clicks

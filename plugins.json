@@ -20,7 +20,8 @@
         "plugins/usertiming.js",
         "plugins/mq.js",
         "plugins/early.js",
-        "plugins/eventtiming.js"
+        "plugins/eventtiming.js",
+        "plugins/bfcache.js"
     ],
     "flavors": {
         "minimal": {
@@ -33,7 +34,8 @@
                 "plugins/mobile.js",
                 "plugins/memory.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "default": {
@@ -48,7 +50,8 @@
                 "plugins/memory.js",
                 "plugins/compression.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "default-errors": {
@@ -65,7 +68,7 @@
                 "plugins/errors.js",
                 "plugins/mq.js",
                 "plugins/eventtiming.js",
-                "06-bugs/104197"
+                "plugins/bfcache.js"
             ]
         },
         "default-spa": {
@@ -83,7 +86,8 @@
                 "plugins/memory.js",
                 "plugins/compression.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "default-spa-errors": {
@@ -102,7 +106,8 @@
                 "plugins/compression.js",
                 "plugins/errors.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "cutting-edge": {
@@ -118,7 +123,8 @@
                 "plugins/memory.js",
                 "plugins/compression.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "cutting-edge-errors": {
@@ -135,7 +141,8 @@
                 "plugins/compression.js",
                 "plugins/errors.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         },
         "cutting-edge-spa": {
@@ -154,7 +161,8 @@
                 "plugins/memory.js",
                 "plugins/compression.js",
                 "plugins/mq.js",
-                "plugins/eventtiming.js"
+                "plugins/eventtiming.js",
+                "plugins/bfcache.js"
             ]
         }
     }

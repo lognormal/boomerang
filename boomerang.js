@@ -830,7 +830,22 @@ BOOMR_check_doc_domain();
        * @event BOOMR#before_early_beacon
        * @property {object} data Event data
        */
-      "before_early_beacon": []
+      "before_early_beacon": [],
+
+      /**
+       * Boomerang event, subscribe via {@link BOOMR.subscribe}.
+       *
+       * Fired when an BFCache navigation occurs.
+       *
+       * The subscriber can still add variables to the BFCache beacon at this point
+       * by calling {@link BOOMR.addVar}.
+       *
+       * This event will only happen if {@link BOOMR.plugins.BFCache} is enabled.
+       *
+       * @event BOOMR#bfcache
+       * @property {object} data Event data
+       */
+      "bfcache": []
     },
 
     /**
