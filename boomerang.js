@@ -400,9 +400,17 @@ BOOMR_check_doc_domain();
     visibilityChange = "webkitvisibilitychange";
   }
 
+  //
+  // Internal implementation (impl)
+  //
   // impl is a private object not reachable from outside the BOOMR object.
   // Users can set properties by passing in to the init() method.
+  //
   impl = {
+    //
+    // Private Members
+    //
+
     // Beacon URL
     beacon_url: "",
 
@@ -444,7 +452,7 @@ BOOMR_check_doc_domain();
       replace(/.*?([^.]+\.[^.]+)\.?$/, "$1").
       toLowerCase(),
 
-    // User's ip address determined on the server.  Used for the BW cookie.
+    // User's IP address determined on the server.  Used for the BW cookie.
     user_ip: "",
 
     // Whether or not to send beacons on page load
@@ -456,13 +464,17 @@ BOOMR_check_doc_domain();
     // document.referrer
     r: undefined,
 
-    // strip_query_string: false,
+    // Whether or not to strip the Query String
+    strip_query_string: false,
 
-    // onloadfired: false,
+    // Whether or not the page's 'onload' event has fired
+    onloadFired: false,
 
-    // handlers_attached: false,
+    // Whether or not we've attached all of the page event handlers we want on startup
+    handlers_attached: false,
 
-    // waiting_for_config: false,
+    // Whether or not we're waiting for configuration to initialize
+    waiting_for_config: false,
 
     // All Boomerang cookies will be created with SameSite=Lax by default
     same_site_cookie: "Lax",
@@ -476,12 +488,62 @@ BOOMR_check_doc_domain();
     // Navigator User Agent data object holding Architecture, Model and Platform information from Client Hints API
     userAgentData: undefined,
 
-    // Client hints use for Architecture, Model and Platform detail is disabled by default
+    // Client Hints use for Architecture, Model and Platform detail is disabled by default
     request_client_hints: false,
 
     // Disables all Unload handlers and Unload beacons
     no_unload: false,
 
+    // Number of page_unload or before_unload callbacks registered
+    unloadEventsCount: 0,
+
+    // Number of page_unload or before_unload callbacks called
+    unloadEventCalled: 0,
+
+    // Event listener callbacks
+    listenerCallbacks: {},
+
+    // Beacon variables
+    vars: {},
+
+    // Beacon variables for only the next beacon
+    singleBeaconVars: {},
+
+    /**
+     * Variable priority lists:
+     * -1 = first
+     *  1 = last
+     */
+    varPriority: {
+      "-1": {},
+      "1": {}
+    },
+
+    // Internal boomerang.js errors
+    errors: {},
+
+    // Plugins that are disabled
+    disabled_plugins: {},
+
+    // Whether or not localStorage is supported
+    localStorageSupported: false,
+
+    // Prefix for localStorage
+    LOCAL_STORAGE_PREFIX: "_boomr_",
+
+    // Native functions that were overwritten and should be restored when
+    // the Boomerang IFRAME is unloaded
+    nativeOverwrites: [],
+
+    // (End Private Members)
+
+    //
+    // Events (internal and public)
+    //
+
+    /**
+     * Internal Events
+     */
     events: {
       /**
        * Boomerang event, subscribe via {@link BOOMR.subscribe}.
@@ -821,45 +883,19 @@ BOOMR_check_doc_domain();
       "onxhrerror": "xhr_error"
     },
 
-    /**
-     * Number of page_unload or before_unload callbacks registered
-     */
-    unloadEventsCount: 0,
+    // (End events)
+
+    //
+    // Private Functions
+    //
 
     /**
-     * Number of page_unload or before_unload callbacks called
+     * Creates a callback handler for the specified event type
+     *
+     * @param {string} type Event type
+     * @returns {function} Callback handler
      */
-    unloadEventCalled: 0,
-
-    listenerCallbacks: {},
-
-    vars: {},
-    singleBeaconVars: {},
-
-    /**
-     * Variable priority lists:
-     * -1 = first
-     *  1 = last
-     */
-    varPriority: {
-      "-1": {},
-      "1": {}
-    },
-
-    errors: {},
-
-    disabled_plugins: {},
-
-    localStorageSupported: false,
-    LOCAL_STORAGE_PREFIX: "_boomr_",
-
-    /**
-     * Native functions that were overwritten and should be restored when
-     * the Boomerang IFRAME is unloaded
-     */
-    nativeOverwrites: [],
-
-    xb_handler: function(type) {
+    createCallbackHandler: function(type) {
       return function(ev) {
         var target;
 
@@ -892,6 +928,9 @@ BOOMR_check_doc_domain();
       };
     },
 
+    /**
+     * Clears all events
+     */
     clearEvents: function() {
       var eventName;
 
@@ -902,6 +941,9 @@ BOOMR_check_doc_domain();
       }
     },
 
+    /**
+     * Clears all event listeners
+     */
     clearListeners: function() {
       var type, i;
 
@@ -921,6 +963,12 @@ BOOMR_check_doc_domain();
       impl.listenerCallbacks = {};
     },
 
+    /**
+     * Fires the specified boomerang.js event.
+     *
+     * @param {string} e_name Event name
+     * @param {object} data Event data
+     */
     fireEvent: function(e_name, data) {
       var i, handler, handlers, handlersLen;
 
@@ -985,6 +1033,9 @@ BOOMR_check_doc_domain();
       return;
     },
 
+    /**
+     * Notes when a SPA navigation has happened.
+     */
     spaNavigation: function() {
       // a SPA navigation occured, force onloadfired to true
       impl.onloadfired = true;
@@ -1060,6 +1111,9 @@ BOOMR_check_doc_domain();
     }
   };
 
+  //
+  // Public BOOMR object
+  //
   // We create a boomr object and then copy all its properties to BOOMR so that
   // we don't overwrite anything additional that was added to BOOMR before this
   // was called... for example, a plugin.
@@ -3160,6 +3214,11 @@ BOOMR_check_doc_domain();
         impl.waiting_for_config = true;
       }
 
+      //
+      // Page handlers to attach once
+      //
+
+      // Listen for pageshow/load for the main Page Load
       BOOMR.attach_page_ready(function() {
         // if we're not using the loader snippet, save the onload time for
         // browsers that do not support NavigationTiming.
@@ -3170,10 +3229,12 @@ BOOMR_check_doc_domain();
         }
       });
 
+      // Listen for DOMContentLoaded to fire the internal dom_loaded event
       BOOMR.utils.addListener(w, "DOMContentLoaded", function() {
         impl.fireEvent("dom_loaded");
       });
 
+      // Fire and Listen for config events to refresh config for us and plugins
       BOOMR.fireEvent("config", config);
       BOOMR.subscribe("config", function(beaconConfig) {
         if (beaconConfig.beacon_url) {
@@ -3181,8 +3242,10 @@ BOOMR_check_doc_domain();
         }
       });
 
+      // Listen for SPA navigations
       BOOMR.subscribe("spa_navigation", impl.spaNavigation, null, impl);
 
+      // Listen for Visibility Change notifications
       (function() {
         var forms, iterator;
 
@@ -3215,13 +3278,16 @@ BOOMR_check_doc_domain();
           });
         }
 
-        BOOMR.utils.addListener(d, "mouseup", impl.xb_handler("click"));
+        // Listen for mouseup events
+        BOOMR.utils.addListener(d, "mouseup", impl.createCallbackHandler("click"));
 
+        // Listen for FORM submissions
         forms = d.getElementsByTagName("form");
         for (iterator = 0; iterator < forms.length; iterator++) {
-          BOOMR.utils.addListener(forms[iterator], "submit", impl.xb_handler("form_submit"));
+          BOOMR.utils.addListener(forms[iterator], "submit", impl.createCallbackHandler("form_submit"));
         }
 
+        // Listen for pagehide
         if (!w.onpagehide && w.onpagehide !== null) {
           // This must be the last one to fire
           // We only clear w on browsers that don't support onpagehide because

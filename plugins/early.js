@@ -70,7 +70,6 @@
     /**
      * Send an early beacon
      *
-     * @param {object} config
      * @param {string} edata Event data
      * @param {string} ename Event name: spa, spa_hard, onconfig or prerender_to_visible
      */
