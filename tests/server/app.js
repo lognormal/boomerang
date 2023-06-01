@@ -132,6 +132,52 @@ app.post("/json", require("./route-json"));
 app.get("/drop", dropRequest);
 app.post("/drop", dropRequest);
 
+app.get("/pages/34-bw/support/images/*", function(req, res, next) {
+  // Values copied from plugins/bw.js
+  images = [
+    { name: "image-0.png", size: 11773, timeout: 1400 },
+    { name: "image-1.png", size: 40836, timeout: 1200 },
+    { name: "image-2.png", size: 165544, timeout: 1300 },
+    { name: "image-3.png", size: 382946, timeout: 1500 },
+    { name: "image-4.png", size: 1236278, timeout: 1200 },
+    { name: "image-5.png", size: 4511798, timeout: 1200 },
+    { name: "image-6.png", size: 9092136, timeout: 1200 },
+    { name: "image-l.gif", size: 35, timeout: 1000 }
+  ];
+  reqimg = req.params[0];
+  matches = images.filter(function(i) {
+    return i.name === reqimg;
+  });
+
+  if (matches.length !== 1) {
+    return res.status(404).send();
+  }
+
+  sz = matches[0].size;
+
+  if (reqimg === "image-l.gif") {
+    img = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x21, 0xf9,
+      0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x00, 0x00]);
+    res.type("gif");
+  }
+  else {
+    imgheader = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10 ]);
+    imgbody0  = new Uint8Array([0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 5, 0, 0, 0, 5, 8, 6, 0, 0, 0, 141,
+      111, 38, 229, 0, 0, 0, 28, 73, 68, 65, 84, 8, 215]);
+    imgbody1 = new Uint8Array(sz).fill(5);
+    imgbody = new Uint8Array(imgbody0.length + imgbody1.length);
+    imgbody.set(imgbody0, 0);
+    imgbody.set(imgbody1, imgbody0.length);
+    img = new Uint8Array(imgheader.length + imgbody.length);
+    img.set(imgheader, 0);
+    img.set(imgbody, imgheader.length);
+    res.type("png");
+  }
+
+  res.set("Cache-Control", "no-store");
+  res.send(new Buffer(img, "binary"));
+});
+
 // load in any additional routes
 if (fs.existsSync(path.resolve(path.join(__dirname, "routes.js")))) {
   require("./routes")(app);
