@@ -177,10 +177,10 @@
     },
 
     /**
-     * Performance Listener for adding Largest Contentful Paint
-     * to beacon data. Allows LCP to be added to both pageload and
-     * early beacons, while avoiding sending it on error beacons,
-     * or sending redundant LCPs.
+     * `before_beacon` listener for adding Largest Contentful Paint
+     * to beacon data. Allows LCP to be added to both Page Load and
+     * Early beacons, while avoiding sending it on Error beacons,
+     * SPA Soft Navigations, or sending redundant LCPs.
      */
     onBeforeBeacon: function(data){
       if (!BOOMR.isPageLoadBeacon(data)) {
@@ -191,6 +191,13 @@
       if (impl.lcpDataSent) {
         // prevents LCP data from being sent redundantly
         return;
+      }
+
+      // LCP isn't supported for Soft Navigations or any other non-Page Load beacons, so
+      // don't listen any more if LCP hasn't happened by the Page Load beacon.
+      if (!data.early && impl.observer) {
+        impl.observer.disconnect();
+        impl.observer = null;
       }
 
       if (!impl.lcp.time) {

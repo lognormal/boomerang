@@ -1,0 +1,40 @@
+<%= header %>
+<!-- not visible so no LCP should happen on Page Load -->
+<img src="/delay?delay=2000&amp;file=/assets/img.jpg&amp;id=2000" style="width:400px; display:none" id="lcp" />
+
+<%= boomerangScript %>
+
+<script src="08-lcp-spa-soft-no-hard-lcp.js" type="text/javascript"></script>
+
+<script>
+  BOOMR_test.init({
+    testAfterOnBeacon: 3,
+    autorun: true,
+    PaintTiming: {
+      enabled: true
+    },
+    History: {
+      enabled: true
+    },
+    autorun: false,
+    afterFirstBeacon: function() {
+      setTimeout(function() {
+        // navigate to "nav2" first, adding a larger element (and visible) that should trigger a LCP
+        var id = "nav2";
+
+        document.getElementById("lcp").src = "/delay?delay=0&file=/assets/img.jpg&id=2";
+        document.getElementById("lcp").style = "width: 1000px; display: block";
+        window.history.pushState({ id: id }, "", id);
+
+        setTimeout(function() {
+          // navigate back to the original page for easier debugging
+          id = "08-lcp-spa-soft-no-hard-lcp.html";
+
+          window.history.pushState({ id: id }, "", id);
+        }, 2000);
+      }, 2000);
+    }
+  });
+</script>
+
+<%= footer %>

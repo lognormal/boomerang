@@ -10,5 +10,11 @@
     },
     "06-lcp-error-after-pageload": {
         requires: ["errors"]
+    },
+    "07-lcp-spa-soft": {
+        requires: ["spa"]
+    },
+    "08-lcp-spa-soft-no-hard-lcp": {
+        requires: ["spa"]
     }
 }
