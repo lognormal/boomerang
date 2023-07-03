@@ -100,6 +100,8 @@
  * * `http.initiator`
  *     * `spa_hard` for Hard Navigations
  *     * `spa` for Soft Navigations
+ * * `spa.snh.s`: When Soft Navigation Heuristics is active, the latest start time (Unix Epoch)
+ * * `spa.snh.n`: When Soft Navigation Heuristics is active, the number of Soft Navs detected for this beacon
  *
  * @class BOOMR.plugins.SPA
  */
@@ -116,7 +118,15 @@
       disableHardNav = false,
       supported = [],
       latestResource,
-      waitingOnHardMissedComplete = false;
+      waitingOnHardMissedComplete = false,
+      //
+      // Soft Navigation Heuristics
+      //
+      /* BEGIN_DEBUG */
+      softNavEntries = [],
+      /* END_DEBUG */
+      lastSoftNavStart = 0,
+      softNavsSeen = 0;
 
   BOOMR = window.BOOMR || {};
   BOOMR.plugins = BOOMR.plugins || {};
@@ -137,6 +147,14 @@
   /* END_DEBUG */
 
   var impl = {
+    //
+    // Variables
+    //
+    /**
+     * Whether or not to use Soft Nav Heuristic's startTime for SPA navigation start
+     */
+    useSoftNavStart: false,
+
     /**
      * Called after a SPA Hard navigation that missed the route change
      * completes.
@@ -195,6 +213,66 @@
     pageReady: function() {
       // a non-spa page load fired, disableHardNav might be enabled
       initialRouteChangeCompleted = true;
+    },
+
+    /**
+     * Soft Navigation Observer
+     *
+     * Example entry:
+     *
+     * ```json
+     * {
+     *  "name": "https://boomerang-test.local:4002/pages/35-spa/nav1",
+     *  "entryType":"soft-navigation",
+     *  "startTime":781746.3000000119,
+     *  "duration":0,
+     *  "navigationId":"3c27699b-af3c-4750-823b-7c63b99571b0"
+     * }
+     * ```
+     *
+     * @param {PerformanceEntry[]} list Entries
+     */
+    onSoftNavObserver: function(list) {
+      var entries = list.getEntries();
+
+      if (entries.length === 0) {
+        return;
+      }
+
+      /* BEGIN_DEBUG */
+      softNavEntries = softNavEntries.concat(entries);
+      /* END_DEBUG */
+
+      // Track the latest Soft Nav start
+      lastSoftNavStart = entries[entries.length - 1].startTime;
+      softNavsSeen += entries.length;
+    },
+
+    /**
+     * beforebeacon: Soft Navigation data
+     *
+     * @param {object} data Baecon data
+     */
+    onSoftNavObserverBeforeBeacon: function(data) {
+      // only apply to soft navs
+      if (data["http.initiator"] !== "spa") {
+        return;
+      }
+
+      if (lastSoftNavStart) {
+        var startTime = Math.floor(
+          (BOOMR.plugins.RT.navigationStart() || BOOMR.t_lstart || BOOMR.t_start) +
+          lastSoftNavStart);
+
+        BOOMR.addVar("spa.snh.s", startTime, true);
+
+        lastSoftNavStart = 0;
+      }
+
+      // Number of Soft Navs Seen
+      BOOMR.addVar("spa.snh.n", softNavsSeen, true);
+
+      softNavsSeen = 0;
     }
   };
 
@@ -218,11 +296,15 @@
     /**
      * Called to initialize the plugin via BOOMR.init()
      *
-     * @param {object} config Configuration
+     * @param {object} [config] Configuration
+     * @param {boolean} [config.useSoftNavStart] Use the Soft Navigation Heuristics' Start Time for SPA Soft Navigations
      *
      * @memberof BOOMR.plugins.SPA
      */
     init: function(config) {
+      BOOMR.utils.pluginConfig(impl, config, "SPA",
+        ["useSoftNavStart"]);
+
       if (config && config.instrument_xhr) {
         autoXhrEnabled = config.instrument_xhr;
 
@@ -237,8 +319,33 @@
         return;
       }
 
-      initialized = true;
+      //
+      // Origin trial: Soft Navigation Heuristics
+      // For: go-mpulse.net and *.go-mpulse.net
+      // Duration: Up to Chrome 120, no later than Mar 6, 2024
+      //
+      var metaTag = document.createElement("meta");
+
+      metaTag.httpEquiv = "origin-trial";
+      metaTag.content = "A6MWCkFp/4goXtWiSJNfo09g03RCQpXkuDZDGnlApjvSPZL4CIhvZx3xGfg6bCT4TRppCXmFXWDEkxA7DO3nZgQ" +
+        "AAACGeyJvcmlnaW4iOiJodHRwczovL2dvLW1wdWxzZS5uZXQ6NDQzIiwiZmVhdHVyZSI6IlNvZnROYXZpZ2F0aW9uSGV1cmlzdGljcy" +
+        "IsImV4cGlyeSI6MTcwOTY4MzE5OSwiaXNTdWJkb21haW4iOnRydWUsImlzVGhpcmRQYXJ0eSI6dHJ1ZX0=";
+      document.head.append(metaTag);
+
       BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
+
+      // Soft Navigation Heuristics
+      if (typeof BOOMR.window.PerformanceObserver === "function" &&
+        typeof BOOMR.window.SoftNavigationEntry === "function") {
+        // add an observer
+        impl.observer = new BOOMR.window.PerformanceObserver(impl.onSoftNavObserver);
+        impl.observer.observe({ type: "soft-navigation", buffered: true });
+
+        // add SPA Soft Heuristic parameters to the beacon
+        BOOMR.subscribe("before_beacon", impl.onSoftNavObserverBeforeBeacon, null, impl);
+      }
+
+      initialized = true;
     },
 
     /**
@@ -455,6 +562,18 @@
         if (!firedEvent) {
           firedEvent = true;
 
+          // For debugging differences with Soft Nav Heuristics
+          /* BEGIN_DEBUG */
+          if (impl.useSoftNavStart && lastSoftNavStart) {
+            this.timing.requestStart = Math.floor(window.performance.timing.navigationStart + lastSoftNavStart);
+
+            BOOMR.debug("Soft Nav @ " + lastSoftNavStart +
+              " now @ " + now +
+              " diff @ " + (now - lastSoftNavStart),
+            "spa");
+          }
+          /* END_DEBUG */
+
           // fire a SPA navigation completed event so that other plugins can act on it
           BOOMR.fireEvent("spa_navigation", [resource.timing]);
         }
@@ -637,6 +756,19 @@
       return singlePageApp;
     }
 
+    /* BEGIN_DEBUG */
+    ,
+    test: {
+      /**
+       * Gets the list of seen Soft Nav Observer entries
+       *
+       * @param {PerformanceEntry[]} list Entries
+       */
+      getSoftNavEntries: function() {
+        return impl.softNavEntries;
+      }
+    }
+    /* END_DEBUG */
   };
   BOOMR.plugins.SPA.waitComplete = BOOMR.plugins.SPA.wait_complete;
 }());

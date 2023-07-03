@@ -1,20 +1,7 @@
 <%= header %>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing EventTiming data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill EventTiming
 window.PerformanceEventTiming = {};
@@ -30,19 +17,17 @@ BOOMR_test.init({
 });
 
 // trigger some events
-window.POs["first-input"].trigger({
-  getEntries: function() {
-    return [{
-      entryType: "first-input",
-      startTime: 100,
-      duration: 900,
-      processingStart: 150,
-      processingEnd: 1000,
-      cancelable: false,
-      interactionId: 10
-    }];
-  }
-});
+BOOMR_test.fireMockPerformanceObserverEvent("first-input", [
+  {
+    entryType: "first-input",
+    startTime: 100,
+    duration: 900,
+    processingStart: 150,
+    processingEnd: 1000,
+    cancelable: false,
+    interactionId: 10
+  }]
+);
 
 window.EVENT_TYPES = {
   "click": 0,
@@ -87,30 +72,30 @@ window.EVENT_TYPES = {
   "touchcancel": 41
 };
 
-window.POs.event.trigger({
-  getEntries: function() {
-    var events = [];
+(function() {
+  var allEvents = [];
 
-    // add one of each event
-    var i = 0;
+  // add one of each event
+  var i = 0;
 
-    for (var eventName in window.EVENT_TYPES) {
-      i++;
-      events.push({
-        name: eventName,
-        entryType: "event",
-        startTime: 1000 + i,
-        duration: 50 + i,
-        processingStart: 1000 + i,
-        processingEnd: 1050 + i,
-        cancelable: false,
-        interactionId: 100 + i
-      });
-    }
+  for (var eventName in window.EVENT_TYPES) {
+    i++;
 
-    return events;
+    allEvents.push({
+      name: eventName,
+      entryType: "event",
+      startTime: 1000 + i,
+      duration: 50 + i,
+      processingStart: 1000 + i,
+      processingEnd: 1050 + i,
+      cancelable: false,
+      interactionId: 100 + i
+    });
   }
-});
+
+  BOOMR_test.fireMockPerformanceObserverEvent("event", allEvents);
+})();
+
 </script>
 <img src="/delay?delay=5000&file=/assets/img.jpg" />
 <%= footer %>

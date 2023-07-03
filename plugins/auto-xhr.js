@@ -1917,7 +1917,7 @@
         // native fetch needs Promise support
         typeof w.Promise !== "function" ||
         // if our window doesn't have fetch then it was probably polyfilled in the top window
-        typeof window.fetch !== "function" ||
+        typeof BOOMR.window.fetch !== "function" ||
         // Github's `whatwg-fetch` polyfill sets this flag
         w.fetch.polyfill) {
       return;

@@ -68,6 +68,11 @@
     supported: null,
 
     /**
+     * Whether or not the browser supports Soft Navigation Heuristics
+     */
+    supportedSoftNavHeuristics: null,
+
+    /**
      * Cached PaintTiming values
      */
     timingCache: {},
@@ -193,9 +198,14 @@
         return;
       }
 
-      // LCP isn't supported for Soft Navigations or any other non-Page Load beacons, so
-      // don't listen any more if LCP hasn't happened by the Page Load beacon.
-      if (!data.early && impl.observer) {
+      //
+      // LCP isn't supported for Soft Navigations (unless Soft Nav Heuristics are enabled),
+      // or any other non-Page Load beacons, so don't listen any more if LCP hasn't happened by
+      // the Page Load beacon.
+      //
+      if (!data.early &&
+          impl.observer &&
+          !impl.supportedSoftNavHeuristics) {
         impl.observer.disconnect();
         impl.observer = null;
       }
@@ -302,6 +312,25 @@
         s: impl.lcp.s
       });
       /* END_DEBUG */
+    },
+
+    /**
+     * Soft Navigation Observer
+     *
+     * If a Soft Nav happens, we can expect LCP updates.
+     *
+     * @param {PerformanceEntry[]} list Entries
+     */
+    onSoftNavObserver: function(list) {
+      var entries = list.getEntries();
+
+      if (entries.length === 0) {
+        return;
+      }
+
+      BOOMR.debug("Detected a Soft Navigation, resetting LCP data", "PaintTiming");
+
+      impl.lcpDataSent = false;
     }
   };
 
@@ -342,9 +371,29 @@
 
         // create a PO for LCP
         if (typeof BOOMR.window.PerformanceObserver === "function" &&
-            typeof window.LargestContentfulPaint === "function") {
+            typeof BOOMR.window.LargestContentfulPaint === "function") {
           impl.observer = new BOOMR.window.PerformanceObserver(impl.onObserver);
-          impl.observer.observe({ type: "largest-contentful-paint", buffered: true });
+
+          // check for support of Soft Navigation Heuristics
+          if (typeof BOOMR.window.SoftNavigationEntry === "function") {
+            impl.supportedSoftNavHeuristics = true;
+
+            // add an observer
+            impl.softNavObserver = new BOOMR.window.PerformanceObserver(impl.onSoftNavObserver);
+            impl.softNavObserver.observe({ type: "soft-navigation" });
+          }
+
+          var options = {
+            type: "largest-contentful-paint",
+            buffered: true
+          };
+
+          // listen to soft navs to know if we should 'reset' our expected state
+          if (impl.supportedSoftNavHeuristics) {
+            options.includeSoftNavigationObservations = true;
+          }
+
+          impl.observer.observe(options);
         }
 
         impl.initialized = true;
@@ -390,7 +439,7 @@
       var p = BOOMR.getPerformance();
 
       impl.supported = p &&
-        typeof window.PerformancePaintTiming !== "undefined" &&
+        typeof BOOMR.window.PerformancePaintTiming !== "undefined" &&
         typeof p.getEntriesByType === "function";
 
       return impl.supported;

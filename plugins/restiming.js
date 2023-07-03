@@ -1933,7 +1933,7 @@
 
       impl.supported = p &&
           typeof p.getEntriesByType === "function" &&
-          typeof window.PerformanceResourceTiming !== "undefined";
+          typeof BOOMR.window.PerformanceResourceTiming !== "undefined";
 
       return impl.supported;
     },

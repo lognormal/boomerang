@@ -447,6 +447,10 @@ function getConfig() {
         options: {
           replacements: [
             {
+              pattern: "%boomerang_version%",
+              replacement: "1.0.0"
+            },
+            {
               // Send beacons to null
               pattern: /beacon_url: .*/,
               replacement: "beacon_url: \"/beacon\","

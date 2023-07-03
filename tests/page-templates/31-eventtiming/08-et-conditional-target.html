@@ -1,20 +1,7 @@
 <%= header %>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing EventTiming data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill EventTiming
 window.PerformanceEventTiming = {};
@@ -36,40 +23,37 @@ BOOMR_test.init({
     enabled: true
   },
   onBoomerangLoaded: function() {
-    window.POs.event.trigger({
-      getEntries: function() {
-        return [{
-          name: "click",
-          entryType: "event",
-          startTime: 1000,
-          duration: 50,
-          processingStart: 1000,
-          processingEnd: 1050,
-          cancelable: false,
-          target: testSelector({"type": "element", "tag": "div", "class": "test", "nodeType": 1})
-        },
-        {
-          name: "mouseup",
-          entryType: "event",
-          startTime: 2000,
-          duration: 50,
-          processingStart: 2000,
-          processingEnd: 2050,
-          cancelable: false
-        },
-        {
-          name: "dblclick",
-          entryType: "event",
-          startTime: 3000,
-          duration: 80,
-          processingStart: 3000,
-          processingEnd: 3100,
-          cancelable: false,
-          target: null
-        }
-        ];
+    BOOMR_test.fireMockPerformanceObserverEvent("event", [
+      {
+        name: "click",
+        entryType: "event",
+        startTime: 1000,
+        duration: 50,
+        processingStart: 1000,
+        processingEnd: 1050,
+        cancelable: false,
+        target: testSelector({"type": "element", "tag": "div", "class": "test", "nodeType": 1})
+      },
+      {
+        name: "mouseup",
+        entryType: "event",
+        startTime: 2000,
+        duration: 50,
+        processingStart: 2000,
+        processingEnd: 2050,
+        cancelable: false
+      },
+      {
+        name: "dblclick",
+        entryType: "event",
+        startTime: 3000,
+        duration: 80,
+        processingStart: 3000,
+        processingEnd: 3100,
+        cancelable: false,
+        target: null
       }
-    });
+    ]);
   }
 });
 </script>

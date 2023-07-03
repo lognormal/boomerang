@@ -1,0 +1,131 @@
+<%= header %>
+<!--
+  This test is mocking PerformanceObserver to send specific soft-navigation and largest-contentful-paint
+  events.
+-->
+<script src="../../vendor/jquery/dist/jquery.js"></script>
+<script>
+BOOMR_test.mockPerformanceObserver();
+</script>
+<%= boomerangScript %>
+
+<button class="nav-btn" id="nav-btn-1" data-id="nav1">Nav 1</button>
+<button class="nav-btn" id="nav-btn-2" data-id="nav2">Nav 2</button>
+
+<script>
+var imgSize = 100;
+var imgLatest = null;
+
+$(".nav-btn").click(function(e) {
+  if (!window.history) {
+    return;
+  }
+
+  // remove old images
+  $(imgLatest).remove();
+
+  var id = $(e.target).data("id");
+
+  // navigate via history API
+  window.history.pushState({ id: id }, "", id);
+
+  // add a new image (slightly larger than before)
+  imgLatest = window.document.createElement("img");
+
+  imgLatest.src = "/assets/img.jpg?rnd" + Math.random() + "&id=" + id;
+  imgLatest.className = "dyn-img";
+  imgLatest.style = "width: " + imgSize + "px; height: " + imgSize + "px";
+  window.document.body.appendChild(imgLatest);
+
+  imgSize += 50;
+});
+</script>
+
+<script src="01-soft-nav.js"></script>
+
+<script>
+function getLcpPoEntry(time) {
+  return {
+    startTime: time,
+    renderTime: time,
+    loadTime: time,
+    size: imgSize * imgSize,
+    element: imgLatest
+  };
+}
+
+BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint", [
+  getLcpPoEntry(BOOMR.hrNow())
+]);
+
+BOOMR_test.init({
+  testAfterOnBeacon: window.history ? 4 : 1,
+  History: {
+    enabled: true
+  },
+  SPA: {
+    useSoftNavStart: true
+  },
+  autorun: false,
+  afterFirstBeacon: function() {
+    setTimeout(function() {
+      $("#nav-btn-1").click();
+
+      // need to fake it, as Soft Nav Observer only listens to hardware input
+      var startTime = BOOMR.hrNow();
+
+      BOOMR_test.fireMockPerformanceObserverEvent("soft-navigation", [{
+        startTime: startTime
+      }]);
+
+      BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint", [
+        getLcpPoEntry(startTime + 100)
+      ]);
+
+      setTimeout(function() {
+        // page 2 (with four SNH events)
+        $("#nav-btn-2").click();
+
+        // need to fake it, as Soft Nav Observer only listens to hardware input
+        startTime = BOOMR.hrNow();
+
+        // two SNH entries
+        BOOMR_test.fireMockPerformanceObserverEvent("soft-navigation", [{
+          startTime: startTime - 300
+        }]);
+
+        BOOMR_test.fireMockPerformanceObserverEvent("soft-navigation", [{
+          startTime: startTime - 200
+        }]);
+
+        BOOMR_test.fireMockPerformanceObserverEvent("soft-navigation", [{
+          startTime: startTime - 100
+        },
+        {
+          // this one is wildly off, to verify the useSoftNavStart works
+          startTime: startTime - 10000
+        }]);
+
+        // LCPs approximately 50ms after the start times above
+        BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint", [
+          getLcpPoEntry(startTime - 250),
+          getLcpPoEntry(startTime - 150),
+          getLcpPoEntry(startTime - 50),
+          getLcpPoEntry(startTime - 950)
+        ]);
+
+        setTimeout(function() {
+          // return to the original page (without an SNH event)
+          window.history.pushState({}, "", "01-soft-nav.html");
+
+          BOOMR_test.fireMockPerformanceObserverEvent("soft-navigation", [{
+            startTime: BOOMR.hrNow()
+          }]);
+        }, 3000);
+      }, 3000);
+    }, 3000);
+  }
+});
+</script>
+
+<%= footer %>

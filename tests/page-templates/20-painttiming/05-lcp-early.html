@@ -2,21 +2,8 @@
 <img src="/delay?delay=100&amp;file=/assets/img.jpg&amp;id=100" style="width:100px;" id="img_id1"/>
 <img src="/delay?delay=2000&amp;file=/assets/img.jpg&amp;id=2000" style="width:2000px;" id="img_id2"/>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing LCP data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill PaintTiming
 window.LargestContentfulPaint = function() {};
@@ -53,14 +40,12 @@ function generateLCP(id) {
   };
 }
 
-window.POs["largest-contentful-paint"].trigger({
-  getEntries: function() {
-    return [
-      generateLCP("img_id1"),
-      generateLCP("img_id2")
-    ];
-  }
-});
+BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
+  [
+    generateLCP("img_id1"),
+    generateLCP("img_id2")
+  ]
+);
 
 // simulate delayed config
 setTimeout(function() {

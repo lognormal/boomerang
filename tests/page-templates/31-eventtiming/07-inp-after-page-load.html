@@ -1,21 +1,8 @@
 <%= header %>
 <span id="interaction-target"></span>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing EventTiming data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill EventTiming
 window.PerformanceEventTiming = {};
@@ -30,14 +17,10 @@ BOOMR_test.init({
   },
   afterFirstBeacon: function() {
     // trigger some events
-    window.POs.event.trigger({
-      getEntries: function() {
-        return [
-          // worst interaction
-          generateEvent(1000, 1000, 3)
-        ];
-      }
-    });
+    BOOMR_test.fireMockPerformanceObserverEvent("event", [
+      // worst interaction
+      generateEvent(1000, 1000, 3)
+    ]);
 
     // fake an unload
     BOOMR.fireEvent("page_unload", {
@@ -65,23 +48,19 @@ function generateEvent(processing, duration, interactionId) {
 }
 
 // trigger some events
-window.POs.event.trigger({
-  getEntries: function() {
-    return [
-      // a few non-interactions
-      generateEvent(10, 50, 0),
-      generateEvent(100, 100, 0),
-      generateEvent(10, 10, 0),
+BOOMR_test.fireMockPerformanceObserverEvent("event", [
+  // a few non-interactions
+  generateEvent(10, 50, 0),
+  generateEvent(100, 100, 0),
+  generateEvent(10, 10, 0),
 
-      // an interaction
-      generateEvent(100, 100, 1),
-      generateEvent(10, 10, 1),
-      generateEvent(20, 20, 1),
+  // an interaction
+  generateEvent(100, 100, 1),
+  generateEvent(10, 10, 1),
+  generateEvent(20, 20, 1),
 
-      // another interaction
-      generateEvent(50, 50, 2)
-    ];
-  }
-});
+  // another interaction
+  generateEvent(50, 50, 2)
+]);
 </script>
 <%= footer %>

@@ -1,20 +1,7 @@
 <%= header %>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing EventTiming data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill EventTiming
 window.PerformanceEventTiming = {};
@@ -33,32 +20,24 @@ BOOMR_test.init({
   },
   onBoomerangLoaded: function() {
     // trigger some events
-    window.POs["first-input"].trigger({
-      getEntries: function() {
-        return [{
-          entryType: "first-input",
-          startTime: 100,
-          duration: 900,
-          processingStart: 150,
-          processingEnd: 1000,
-          cancelable: false
-        }];
-      }
-    });
+    BOOMR_test.fireMockPerformanceObserverEvent("first-input", [{
+      entryType: "first-input",
+      startTime: 100,
+      duration: 900,
+      processingStart: 150,
+      processingEnd: 1000,
+      cancelable: false
+    }]);
 
-    window.POs.event.trigger({
-      getEntries: function() {
-        return [{
-          name: "click",
-          entryType: "event",
-          startTime: 1000,
-          duration: 50,
-          processingStart: 1000,
-          processingEnd: 1050,
-          cancelable: false
-        }];
-      }
-    });
+    BOOMR_test.fireMockPerformanceObserverEvent("event", [{
+      name: "click",
+      entryType: "event",
+      startTime: 1000,
+      duration: 50,
+      processingStart: 1000,
+      processingEnd: 1050,
+      cancelable: false
+    }]);
   }
 });
 </script>

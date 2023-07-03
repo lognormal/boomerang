@@ -1,21 +1,8 @@
 <%= header %>
 <span id="interaction-target"></span>
 <script>
-// polyfill / overwrite PO for testing
-window.PerformanceObserver = function(callback) {
-  window.POs = window.POs || {};
-
-  return {
-    entryTypes: undefined,
-    observe: function(config) {
-      this.type = config.type;
-      window.POs[this.type] = this;
-    },
-    trigger: function(data) {
-      callback(data);
-    }
-  };
-};
+// mock PerformanceObserver for testing EventTiming data
+BOOMR_test.mockPerformanceObserver();
 
 // polyfill EventTiming
 window.PerformanceEventTiming = {};
@@ -37,9 +24,9 @@ BOOMR_test.init({
 });
 
 // trigger some events
-window.POs["first-input"].trigger({
-  getEntries: function() {
-    return [{
+BOOMR_test.fireMockPerformanceObserverEvent("first-input",
+  [
+    {
       entryType: "first-input",
       startTime: 100,
       duration: 900,
@@ -48,8 +35,7 @@ window.POs["first-input"].trigger({
       cancelable: false,
       interactionId: 10,
       target: document.getElementById("interaction-target")
-    }];
-  }
-});
+    }
+  ]);
 </script>
 <%= footer %>

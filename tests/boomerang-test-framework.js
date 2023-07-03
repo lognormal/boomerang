@@ -568,6 +568,10 @@
         typeof window.Response === "function");
   };
 
+  t.isSoftNavHeuristicsSupported = function() {
+    return typeof window.SoftNavigationEntry === "function";
+  };
+
   t.validateBeaconWasImg = function(done) {
     if (!t.isResourceTimingSupported()) {
       // need RT to validate
@@ -1941,6 +1945,70 @@
 
       return !matched.length && (!global.navigator || key !== "onerror");
     });
+  };
+
+  //
+  // List of mocked PerformanceObserver listeners, keyed by their type
+  //
+  t.mockPO = {};
+
+  /**
+   * Mock the PeformanceObserver object.
+   *
+   * Use `BOOMR_test.fireMockPerformanceObserverEvent` to trigger them later
+   */
+  t.mockPerformanceObserver = function() {
+    t.origPerformanceObserver = window.PerformanceObserver;
+
+    // polyfill / overwrite PO for testing
+    window.PerformanceObserver = function(callback) {
+      return {
+        entryTypes: undefined,
+        observe: function(config) {
+          this.type = config.type;
+
+          t.mockPO[config.type] = t.mockPO[config.type] || [];
+          t.mockPO[config.type].push(callback);
+        },
+        disconnect: function() {
+          // find and slice out callback
+          for (var i = 0; i < t.mockPO[this.type].length; i++) {
+            if (t.mockPO[this.type][i] === callback) {
+              t.mockPO[this.type].splice(i, 1);
+
+              return;
+            }
+          }
+        }
+      };
+    };
+  };
+
+  /**
+   * Fires a mock PerformanceObserver event.
+   *
+   * @param {string} type PO type
+   * @param {object} data PO data
+   */
+  t.fireMockPerformanceObserverEvent = function(type, data) {
+    if (!t.mockPO[type]) {
+      return;
+    }
+
+    // run all callbacks
+    for (var i = 0; i < t.mockPO[type].length; i++) {
+      try {
+        t.mockPO[type][i]({
+          getEntries: function() {
+            // return the given data
+            return data;
+          }
+        });
+      }
+      catch (e) {
+        // NOP
+      }
+    }
   };
 
   //
