@@ -1082,10 +1082,20 @@ BOOMR_check_doc_domain();
 
         w.localStorage.setItem(name, name);
         impl.localStorageSupported = (w.localStorage.getItem(name) === name);
-        w.localStorage.removeItem(name);
       }
       catch (ignore) {
         impl.localStorageSupported = false;
+      }
+      finally {
+        // If unsupported, then setItem threw and removeItem will also throw.
+        try {
+          if (w.localStorage) {
+            w.localStorage.removeItem(name);
+          }
+        }
+        catch (ignore) {
+          // empty
+        }
       }
     },
 
