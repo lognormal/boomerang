@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["ResourceTimingDecompression"]);
+
 describe("e2e/06-bug/issue-606", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["sendBeaconUrl", "sendBeaconData"]);
+
 describe("e2e/01-beacon-type/04-send-beacon", function() {
   it("Should send an beacon via navigator.sendBeacon if it is available", function() {
     if (window && window.navigator && typeof window.navigator.sendBeacon === "function") {

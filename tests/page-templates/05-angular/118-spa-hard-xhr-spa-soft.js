@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["angular", "ng339", "angular_imgs", "angular_html5_mode", "modules", "app", "custom_metric_1", "custom_metric_2", "custom_timer_1", "custom_timer_2", "i"]);
+
 describe("e2e/05-angular/118-spa-hard-xhr-spa-soft.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

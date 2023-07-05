@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["xhr"]);
+
 describe("06-xhr-before-config-alwayssendxhr", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

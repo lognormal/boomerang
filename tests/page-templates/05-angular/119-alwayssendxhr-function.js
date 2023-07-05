@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["angular", "ng339", "modules", "app", "angular_imgs", "angular_nav_routes", "custom_metric_1", "custom_metric_2", "custom_timer_1", "custom_timer_2", "i"]);
+
 describe("e2e/05-angular/119-alwayssendxhr-function.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

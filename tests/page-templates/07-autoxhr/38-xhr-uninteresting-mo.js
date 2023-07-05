@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["addDiv"]);
+
 describe("e2e/07-autoxhr/38-xhr-uninteresting-mo", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

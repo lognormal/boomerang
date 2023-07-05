@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["lastNav", "unloadTimeFired"]);
+
 describe("e2e/25-cookie/05-cookie-after-beforeunload", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["lastNav"]);
+
 describe("e2e/25-cookie/14-cookie-non-compressed", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

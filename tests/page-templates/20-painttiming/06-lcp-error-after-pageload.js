@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["errorFunction"]);
+
 describe("e2e/20-painttiming/06-lcp-error-after-pageload", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

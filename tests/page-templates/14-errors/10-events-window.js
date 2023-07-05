@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["errorFunction", "callCount"]);
+
 describe("e2e/14-errors/10-events-window", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

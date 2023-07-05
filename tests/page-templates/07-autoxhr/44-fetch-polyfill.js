@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["removeFetch", "i", "t", "afterFirstBeacon"]);
+
 describe("e2e/07-autoxhr/44-fetch-polyfill", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

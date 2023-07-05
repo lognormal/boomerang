@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["p1", "p2", "p3"]);
+
 describe("e2e/14-errors/44-unhandled-rejection", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

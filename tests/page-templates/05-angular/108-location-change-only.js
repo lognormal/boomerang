@@ -1,4 +1,7 @@
 /* eslint-env mocha */
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["angular", "ng339", "angular_imgs", "angular_html5_mode", "angular_nav_routes", "angular_no_route", "modules", "app", "i"]);
+
 describe("e2e/05-angular/108-location-change-only", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

@@ -1,6 +1,39 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, [
+  "Zone",
+  "__zone_symbol__Promise",
+  "__zone_symbol__ZoneAwarePromise",
+  "__zone_symbol__setTimeout",
+  "__zone_symbol__clearTimeout",
+  "__zone_symbol__setInterval",
+  "__zone_symbol__clearInterval",
+  "__zone_symbol__requestAnimationFrame",
+  "__zone_symbol__cancelAnimationFrame",
+  "__zone_symbol__webkitRequestAnimationFrame",
+  "__zone_symbol__webkitCancelAnimationFrame",
+  "__zone_symbol__alert",
+  "__zone_symbol__prompt",
+  "__zone_symbol__confirm",
+  "__zone_symbol__MutationObserver",
+  "__zone_symbol__WebKitMutationObserver",
+  "__zone_symbol__IntersectionObserver",
+  "__zone_symbol__FileReader",
+  "__zone_symbol__pagehidefalse",
+  "__zone_symbol__pageshowfalse",
+  "__zone_symbol__DOMContentLoadedfalse",
+  "img",
+  "xhr",
+  "beaconCount",
+  "zoneSpec",
+  "Zone1",
+  "ZONE_MO_USED",
+  "__zone_symbol__ON_PROPERTYerror",
+  "__zone_symbol__errorfalse"
+]);
+
 describe("e2e/07-autoxhr/48-zonejs-mo", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

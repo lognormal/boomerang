@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["eventFired"]);
+
 describe("e2e/32-autoxhr-spa/10-click-img.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_script_delay"]);
+
 describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

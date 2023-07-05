@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["xhrResponse1", "xhrRequestPayload1", "xhrResponse2", "xhrRequestPayload2"]);
+
 describe("e2e/07-autoxhr/40-payload-xhr", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

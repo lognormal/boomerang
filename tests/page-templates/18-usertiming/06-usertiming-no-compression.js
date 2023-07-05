@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_no_mark"]);
+
 describe("e2e/18-usertiming/06-usertiming-no-compression", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

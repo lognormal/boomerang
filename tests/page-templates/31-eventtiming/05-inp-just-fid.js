@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["PerformanceEventTiming", "POs"]);
+
 describe("e2e/31-eventtiming/05-inp-just-fid.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

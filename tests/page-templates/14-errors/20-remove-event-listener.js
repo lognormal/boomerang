@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["img1", "img2", "img3", "img4", "img5", "img6", "img7", "img8", "errorFunction1", "errorFunction2", "errorFunction3", "errorFunction4", "errorFunction5", "options", "aELPassiveSupported", "aELCaptureSupported"]);
+
 describe("e2e/14-errors/20-remove-event-listener", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

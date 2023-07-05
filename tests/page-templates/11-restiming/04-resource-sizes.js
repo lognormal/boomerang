@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["ResourceTimingDecompression", "t", "xhr1", "xhr2", "f1", "f2", "consume"]);
+
 describe("e2e/11-restiming/04-resource-sizes", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

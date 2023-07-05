@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["t", "afterFirstBeacon", "xoUrl", "results"]);
+
 describe("e2e/07-autoxhr/42-fetch-api", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

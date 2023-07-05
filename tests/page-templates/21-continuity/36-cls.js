@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["clsScoreOnBeaconSend", "clsScore", "topScoreOnBeaconSend", "topScore", "observer", "onBeforeBeaconSend"]);
+
 describe("e2e/21-continuity/36-cls", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

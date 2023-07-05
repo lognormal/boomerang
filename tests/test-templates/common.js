@@ -89,7 +89,7 @@ describe("common", function() {
       assert.isUndefined(b["rt.quit"], prefix + "does not have the rt.quit param");
     }
 
-    for (i = 0; i < fieldsUndefined.length; i++) {
+    for (var i = 0; i < fieldsUndefined.length; i++) {
       field = fieldsUndefined[i];
       assert.isUndefined(b[field], prefix + field + " must not be on spa soft beacon");
     }

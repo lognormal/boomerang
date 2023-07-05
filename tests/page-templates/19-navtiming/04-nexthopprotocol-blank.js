@@ -1,7 +1,10 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
-describe("e2e/19-navtiming/04-nextHopProtocol-blank", function() {
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["loadTimesCalled"]);
+
+describe("e2e/19-navtiming/04-nexthopprotocol-blank", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;
 

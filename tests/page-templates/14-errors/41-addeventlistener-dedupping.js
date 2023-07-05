@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 
-describe("e2e/14-errors/41-addEventListener-dedupping", function() {
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_script_delay", "handler", "attach"]);
+
+describe("e2e/14-errors/41-addeventlistener-dedupping", function() {
   var tf = BOOMR.plugins.TestFramework;
 
   it("Should have only fired the foo handler once", function(done) {

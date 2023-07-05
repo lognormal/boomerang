@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["boomrxhr", "xhrparams"]);
+
 describe("e2e/01-beacon-type/06-beacon-type-get-no-xhr", function() {
   it("Should not send an beacon via XHR when beacon type is GET", function() {
     if (BOOMR && typeof BOOMR.sendXhrPostBeacon === "function") {

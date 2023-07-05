@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["xhr"]);
+
 describe("e2e/07-autoxhr/52-autoxhr-restiming", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

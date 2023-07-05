@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["errorFunction", "willReportDeprecation"]);
+
 describe("e2e/14-errors/45-reporting-api", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;
@@ -92,7 +95,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
     var b = tf.lastBeacon();
     var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
-    assert.include(err.message, "chrome.loadTimes() is deprecated");
+    assert.include(err.message, "chrome.loadTimes()");
   });
 
   it("Should have source = APP", function() {
@@ -155,7 +158,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
     }
   });
 
-  it("Should have lineNumber ~ " + (HEADER_LINES + 7), function() {
+  it("Should have lineNumber ~ " + (HEADER_LINES + 12), function() {
     if (!window.willReportDeprecation) {
       return this.skip();
     }
@@ -164,7 +167,7 @@ describe("e2e/14-errors/45-reporting-api", function() {
     var err = BOOMR.plugins.Errors.decompressErrors(C.jsUrlDecompress(b.err))[0];
 
     if (err.lineNumber) {
-      assert.closeTo(err.lineNumber, HEADER_LINES + 7, 5);
+      assert.closeTo(err.lineNumber, HEADER_LINES + 12, 5);
     }
     else {
       this.skip();

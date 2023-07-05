@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_CONSENT_CONFIG", "BOOMR_OPT_OUT", "BOOMR_OPT_IN", "testRunOnce", "eventFired"]);
+
 describe("e2e/29-opt-out-opt-in/17-spa-opted-out-in-previous-visit-2-beacons-not-sent", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

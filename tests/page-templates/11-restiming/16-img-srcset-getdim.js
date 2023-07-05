@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["ResourceTimingDecompression", "widths"]);
+
 describe("e2e/11-restiming/16-img-srcset-getdim", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

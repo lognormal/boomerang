@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["ga"]);
+
 describe("e2e/16-third-party-analytics/14-google-drop-params", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["img"]);
+
 describe("e2e/06-bugs/101515-01", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

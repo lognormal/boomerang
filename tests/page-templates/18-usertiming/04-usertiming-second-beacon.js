@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_no_mark", "UserTimingDecompression", "sendPostLoadMark"]);
+
 describe("e2e/18-usertiming/04-usertiming-second-beacon", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

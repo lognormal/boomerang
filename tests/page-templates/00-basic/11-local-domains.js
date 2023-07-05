@@ -11,6 +11,9 @@
   In this set of tests we ensure that both the port and domain are setup as expected in our environment.
  */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["mainServer", "secondaryServer", "mainPort", "secondaryPort"]);
+
 describe("e2e/00-basic/11-local-domains", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

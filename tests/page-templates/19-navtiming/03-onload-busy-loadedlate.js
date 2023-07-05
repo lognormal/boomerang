@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_script_delay"]);
+
 describe("e2e/19-navtiming/03-onload-busy-loadedlate", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

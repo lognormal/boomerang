@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["BOOMR_CONSENT_CONFIG", "BOOMR_OPT_OUT", "BOOMR_OPT_IN"]);
+
 describe("e2e/29-opt-out-opt-in/14-spa-opt-in-after-hard-nav.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

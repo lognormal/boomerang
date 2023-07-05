@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["eventFired"]);
+
 describe("e2e/07-autoxhr/27-onclick-iframe", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

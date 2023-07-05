@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["cookieconsent", "onCookieConsentChange", "BOOMR_CONSENT_CONFIG", "clickEvent", "BOOMR_OPT_OUT", "BOOMR_OPT_IN"]);
+
 describe("e2e/29-opt-out-opt-in/12-opt-in-osano-lib", function() {
   var t = BOOMR_test;
 

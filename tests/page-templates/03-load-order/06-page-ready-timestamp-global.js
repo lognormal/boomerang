@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["pageReadyTs", "BOOMR_page_ready"]);
+
 describe("e2e/03-load-order/06-page-ready-timestamp-global", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

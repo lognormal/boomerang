@@ -1,5 +1,25 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, [
+  "angular",
+  "ng339",
+  "angular_imgs",
+  "angular_html5_mode",
+  "angular_nav_routes",
+  "angular_nav_route_timeout",
+  "total_spa_navigations",
+  "total_spa_inits",
+  "total_spa_cancels",
+  "handler",
+  "custom_metric_1",
+  "custom_metric_2",
+  "custom_timer_1",
+  "custom_timer_2",
+  "angular_timerid",
+  "i"
+]);
+
 describe("e2e/05-angular/115-no-url-change", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

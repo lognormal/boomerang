@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global chai */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["lastNav"]);
+
 describe("e2e/28-rt/02-keep-beacon-url-on-load", function() {
   var assert = chai.assert;
   var tf = BOOMR.plugins.TestFramework;

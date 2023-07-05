@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["img", "img2", "errorFunction2"]);
+
 describe("e2e/14-errors/11-events-element", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

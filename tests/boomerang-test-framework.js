@@ -377,7 +377,7 @@
 
   t.configureTestEnvironment = function(config) {
     if (config && config.ignoreGlobals) {
-      Array.prototype.push.apply(globals, config.ignoreGlobals);
+      Array.prototype.push.apply(t.EXPORTED_GLOBALS, config.ignoreGlobals);
     }
 
     window.mocha.globals(t.EXPORTED_GLOBALS);

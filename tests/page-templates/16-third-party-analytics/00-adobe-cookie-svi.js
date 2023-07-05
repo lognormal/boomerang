@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["_satellite"]);
+
 describe("e2e/16-third-party-analytics/00-adobe-cookie-svi", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

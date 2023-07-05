@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["onBeaconHandler", "testFrame"]);
+
 describe("e2e/05-angular/105-hard-redirect", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

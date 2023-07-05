@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,t_visible */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["t_visible"]);
+
 describe("e2e/22-early/02-prerender-onload-not-fired", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

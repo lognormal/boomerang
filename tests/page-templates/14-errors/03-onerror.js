@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["errorFunction", "onErrorFired"]);
+
 describe("e2e/14-errors/03-onerror", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

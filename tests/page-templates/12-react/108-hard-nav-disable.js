@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,describe,it,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["imgs", "html5_mode", "call_page_ready", "nav_routes", "disableBoomerangHook", "custom_metric_1", "custom_metric_2", "custom_timer_1", "custom_timer_2", "boomr_t_done", "i"]);
+
 describe("e2e/12-react/108-hard-nav-disable", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

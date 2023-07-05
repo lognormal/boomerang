@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert,it,describe */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["errorCount"]);
+
 describe("e2e/07-autoxhr/36-response-type", function() {
   var t = BOOMR_test;
   var tf = BOOMR.plugins.TestFramework;

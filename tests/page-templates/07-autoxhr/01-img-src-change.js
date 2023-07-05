@@ -1,5 +1,8 @@
 /* eslint-env mocha */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["i"]);
+
 describe("e2e/07-autoxhr/01-img-src-change", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

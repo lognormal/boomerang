@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["XMLHttpRequestCopy", "orig_XMLHttpRequest", "origXhrCalled"]);
+
 describe("e2e/06-bugs/111096-2", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

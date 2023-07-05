@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["Visitor", "s"]);
+
 describe("e2e/16-third-party-analytics/07f-adobe-invalid-amcv", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

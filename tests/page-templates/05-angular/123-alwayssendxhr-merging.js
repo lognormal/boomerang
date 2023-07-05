@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["angular", "ng339", "modules", "app", "angular_html5_mode", "angular_nav_routes", "custom_metric_1", "custom_metric_2", "custom_timer_1", "custom_timer_2", "i"]);
+
 describe("e2e/05-angular/123-alwayssendxhr-merging", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

@@ -1,5 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,it,describe,assert */
+
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["xhr"]);
+
 describe("e2e/12-react/105-no-xhr-before-hard-nav", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

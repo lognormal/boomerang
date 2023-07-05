@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["JSON3", "errorFunction", "goodFunction", "errorFunctionThrown", "foo", "result", "testResult1", "testResult2", "testResult3", "result4", "testResult4"]);
+
 describe("e2e/14-errors/17-test", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

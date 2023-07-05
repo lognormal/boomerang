@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR,BOOMR_test,describe,it */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["eventFired", "i"]);
+
 describe("e2e/33-autoxhr-spa-startfromclick/17-click-routechange-xhr-no-dom.js", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

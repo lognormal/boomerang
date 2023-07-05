@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["isIE", "isEdge", "addEventListener", "attachEvent", "forcedSnippetScript"]);
+
 describe("e2e/27-loader-snippet/01-script-mode-forced", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

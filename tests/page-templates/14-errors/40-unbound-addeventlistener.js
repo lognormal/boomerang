@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-describe("e2e/14-errors/40-unbound-addEventListener", function() {
+describe("e2e/14-errors/40-unbound-addeventlistener", function() {
   it("Should infer BOOMR.window as context for unbound addEventListener calls", function(done) {
     if (typeof window.EventTarget === "undefined") {
       return this.skip();

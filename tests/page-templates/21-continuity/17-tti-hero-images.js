@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["lastHeroImageLoad", "heroImagesLoaded", "timeToInteractive"]);
+
 describe("e2e/21-continuity/17-tti-hero-images", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;

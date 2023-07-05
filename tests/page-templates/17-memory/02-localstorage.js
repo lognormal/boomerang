@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 /* global BOOMR_test,assert */
 
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, ["lst", "sst", "x", "y"]);
+
 describe("e2e/17-memory/02-localstorage", function() {
   var tf = BOOMR.plugins.TestFramework;
 
