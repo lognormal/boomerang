@@ -173,7 +173,10 @@
     "mochaResults",
 
     // Added by Chai
-    "assert"
+    "assert",
+
+    // From Chromium E2E test suite
+    "ret_nodes"
   ];
 
   //
@@ -1924,7 +1927,12 @@
       }
 
       var matched = ok.filter(function(okItem) {
-        if (~okItem.indexOf("*")) {
+        if (okItem instanceof RegExp) {
+          if (okItem.test(key)) {
+            return true;
+          }
+        }
+        else if (~okItem.indexOf("*")) {
           return key.indexOf(okItem.split("*")[0]) === 0;
         }
 

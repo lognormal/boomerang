@@ -1,11 +1,10 @@
 /* eslint-env mocha */
 /* global BOOMR_test */
 
-/*
- * This app uses a delayed angular.bootstrap (and no ng-app)
- * directive.
- */
-describe("e2e/34-spa/00-delayed-boomerang", function() {
+// globals from this test
+Array.prototype.push.apply(BOOMR_test.addedGlobals, [ "BOOMR_spa" ]);
+
+describe("e2e/35-spa/00-delayed-boomerang", function() {
   var tf = BOOMR.plugins.TestFramework;
   var t = BOOMR_test;
 
