@@ -1,5 +1,40 @@
 # Boomerang Release Notes
 
+## 1.785.0 (July 17, 2023)
+
+### Breaking Changes
+
+* Boomerang now measures Back-Forward Cache (BFCache) navigations, resulting in an additional beacon for each BFCache nav.  You can stop this behavior by disabling the `BFCache` plugin.  See the plugin for details on more configuration options.
+
+### New Features
+
+* Issue 1148: EventTiming: Add target to EventTiming information captured
+* Issue 1161: ResourceTiming: Add initiator types `early-hints`, `ping`, `font`
+* Issue 1164: BFCache: BFCache plugin added
+
+### Bug Fixes
+
+* Issue 1154: EventTiming: Fix 'Object.values is not a function' warning
+* Issue 1162: AutoXHR: Add support for SVGAnimatedString
+* Issue 1149: ConsentInline: Making the ConsentInline plugin compatible with Boomerang in SPA mode
+* Issue 1156: PaintTiming: Updated listeners and LCP data population conditions to handle Error & Early beacons
+* Issue 1160: Errors: Allow override and disabling of sending interval during page load for error beacon
+* Issue 1166: Boomerang: Run `localStorage.removeItem` in the finally block
+* Issue 1158: SPA: Ensure `spa_navigation` event has correct `requestStart` time
+* Issue 1168: PaintTiming: Disconnect LCP observer after sending LCP on Page Load
+* Issue 1152: SPA: Lint: Fix incorrectly globally exported variable
+
+### Misc
+
+* Issue 1147: Lint: Added new lint rules (changed tabs to spaces)
+* Issue 1150: Tests: Code coverage for unit and end-to-end tests
+* Issue 1159: Lint: Added `spaced-comment` rule
+* Issue 1157: Docs: Update to 1.766; Improve Continuity docs for FID
+* Issue 1163: Docs: Misc docs cleanup
+* Issue 1152: Tests: Allow-list in existing globals added per-test
+* Issue 1139: Tests: Update timing checks to be more reliable in Docker tests
+* Issue 1169: Tests: Fix test issues
+
 ## 1.766.0 (October 10, 2022)
 
 ### New Features
