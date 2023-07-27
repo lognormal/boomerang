@@ -81,6 +81,12 @@
         return;
       }
 
+      // XHR beacons might go out during a SPA Navigation if alwaysSendXhr:true.  In that case, don't reset the current
+      // route change.
+      if (edata && edata["http.initiator"] === "xhr") {
+        return;
+      }
+
       debugLog("resetting routeChangeInProgress");
 
       if (impl.routeChangeInProgress) {
