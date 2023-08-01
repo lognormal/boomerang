@@ -85,7 +85,11 @@
     sendBeacon: function(edata, pageShowStart, fcpLcp) {
       var p = BOOMR.getPerformance();
 
-      var restoreDuration = Math.floor(pageShowStart - edata.timeStamp);
+      // pre-round timestamps
+      pageShowStart = Math.floor(pageShowStart);
+      var bfCacheNavTimestamp = Math.floor(edata.timeStamp);
+
+      var restoreDuration = pageShowStart - bfCacheNavTimestamp;
 
       // Increment session length
       BOOMR.plugins.RT.incrementSessionDetails();
@@ -102,7 +106,7 @@
       BOOMR.addVar("t_resp", 0, true);
 
       // Set start / End times
-      BOOMR.addVar("rt.tstart", Math.floor(edata.timeStamp + p.timing.navigationStart), true);
+      BOOMR.addVar("rt.tstart", Math.floor(bfCacheNavTimestamp + p.timing.navigationStart), true);
       BOOMR.addVar("rt.end", Math.floor(pageShowStart + p.timing.navigationStart), true);
 
       // Technically a Back-Forward Navigation
