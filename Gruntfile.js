@@ -1127,20 +1127,20 @@ function getConfig() {
       dev: {
         options: {
           script: "tests/server/app.js",
-          args: [TEST_SCHEME || "http"]
+          args: TEST_SCHEME
         }
       },
       secondary: {
         options: {
           script: "tests/server/app.js",
           port: (TEST_DEBUG_PORT + 1),
-          args: [TEST_SCHEME || "http"]
+          args: TEST_SCHEME
         }
       },
       "coverage-e2e": {
         options: {
           script: "tests/instrumented/tests/server/app.js",
-          args: [TEST_SCHEME || "http"],
+          args: TEST_SCHEME,
           bases: ["tests/instrumented/tests/e2e", "tests/instrumented/tests/pages", "tests/instrumented/tests/server"]
         }
       },

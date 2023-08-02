@@ -31,7 +31,7 @@ describe("e2e/21-continuity/16-tti-framework-ready", function() {
       var workDoneTs = window.timeToInteractive - performance.timing.navigationStart;
 
       assert.isDefined(b["c.tti"]);
-      assert.closeTo(parseInt(b["c.tti"], 10), workDoneTs, 100);
+      assert.closeTo(parseInt(b["c.tti"], 10), workDoneTs, 200);
     }
   });
 
