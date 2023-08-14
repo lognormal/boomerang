@@ -15,7 +15,7 @@
  * * `t_resp`: (Back End Time) Set to 0
  * * `rt.tstart`: (Event start) Set to the timestamp of the `pageshow` event
  * * `rt.end`: (Event end) Set to the timestamp when the `pageshow` event fired
- * * `nt_nav_type`: Set to Back-Forward Navigation (`1`)
+ * * `nt_nav_type`: Set to Back-Forward Navigation (`2`)
  * * `pt.fcp`: First Contentful Paint (from two `requestAnimationFrame`s)
  * * `pt.lcp`: Largest Contentful Paint (from two `requestAnimationFrame`s)
  * * `bfc.nrr`: BFCache "Not Restored Reasons" (list of strings) if BFCache
@@ -106,7 +106,7 @@
       BOOMR.addVar("rt.end", Math.floor(pageShowStart + p.timing.navigationStart), true);
 
       // Technically a Back-Forward Navigation
-      BOOMR.addVar("nt_nav_type", 1);
+      BOOMR.addVar("nt_nav_type", 2);
 
       // FCP and LCP
       BOOMR.addVar("pt.fcp", Math.floor(fcpLcp - pageShowStart), true);
@@ -224,14 +224,18 @@
         return this;
       }
 
-      // Origin trial: Expires Aug 8, 2023 / Chrome 114
-      var metaTag = document.createElement("meta");
+      if (document && document.head && typeof document.head.append === "function") {
+        // Origin trial: Expires Aug 8, 2023 / Chrome 114
+        var metaTag = document.createElement("meta");
 
-      metaTag.httpEquiv = "origin-trial";
-      metaTag.content = "A2uWz2bbyoykT6h7LZQlNUdwVAFfb3IL5LU+YR1qxtW5T1dCRKjJ5/h3zur1LmuLWk0B1kyAAwyCxJzDCzNxUAQAAAB6" +
-        "eyJvcmlnaW4iOiJodHRwczovL2FrYW1haS5jb206NDQzIiwiZmVhdHVyZSI6IkJhY2tGb3J3YXJkQ2FjaGVOb3RSZXN0b3JlZFJlYXNvbnMi" +
-        "LCJleHBpcnkiOjE2OTE1MzkxOTksImlzVGhpcmRQYXJ0eSI6dHJ1ZX0=";
-      document.head.append(metaTag);
+        metaTag.httpEquiv = "origin-trial";
+        metaTag.content = "A2uWz2bbyoykT6h7LZQlNUdwVAFfb3IL5LU+YR1qxtW5T1dCRKjJ5/h3zur1LmuLWk0B1kyA" +
+          "AwyCxJzDCzNxUAQAAAB6eyJvcmlnaW4iOiJodHRwczovL2FrYW1haS5jb206NDQzIiwiZmVhdHVyZSI6IkJhY2tG" +
+          "b3J3YXJkQ2FjaGVOb3RSZXN0b3JlZFJlYXNvbnMiLCJleHBpcnkiOjE2OTE1MzkxOTksImlzVGhpcmRQYXJ0eSI6" +
+          "dHJ1ZX0=";
+
+        document.head.append(metaTag);
+      }
 
       BOOMR.registerEvent("bfcache");
 
