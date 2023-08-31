@@ -1,0 +1,25 @@
+<%= header %>
+<%= boomerangSnippet %>
+<script src="11-lcp-src-datauri.js" type="text/javascript"></script>
+
+<!-- 1px orange image stretched -->
+<img
+  id="lcp-id"
+  style="width: 100px; height: 100px"
+  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdj+L+U4T8ABu8CpCYJ1DQAAAAASUVORK5CYII="
+/>
+
+<script>
+BOOMR_test.init({
+  PaintTiming: {
+    enabled: true
+  },
+  testAfterOnBeacon: 2,
+  afterFirstBeacon: function() {
+    // send a second beacon, shouldn't have elements
+    BOOMR.responseEnd("beacon 2");
+  }
+});
+</script>
+<script src="/delay?delay=2500&amp;file=/assets/blank.js"></script>
+<%= footer %>

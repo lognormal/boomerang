@@ -276,12 +276,19 @@
       // size
       impl.lcp.s = lcp.size ? lcp.size : 0;
 
+      // prioritize getting the source URL directly from the event
+      if (lcp.url) {
+        impl.lcp.src = lcp.url;
+      }
+
       if (lcp.element) {
         // tag name
         impl.lcp.el = lcp.element.tagName;
 
         // src / href
-        impl.lcp.src = (lcp.element.href || lcp.element.src) || "";
+        if (!impl.lcp.src) {
+          impl.lcp.src = (lcp.element.href || lcp.element.src) || "";
+        }
 
         // element ID
         impl.lcp.id = lcp.element.id || "";
@@ -294,6 +301,15 @@
 
         // sizes attribute
         impl.lcp.sizes = lcp.element.sizes || "";
+      }
+
+      // don't bring data: URI src URLs
+      if (impl.lcp.src && impl.lcp.src.indexOf("data:") === 0) {
+        // gather the image type if we can
+        var semiIdx = impl.lcp.src.indexOf(";");
+
+        // replace without the actual data:
+        impl.lcp.src = semiIdx !== -1 ? impl.lcp.src.substr(0, semiIdx) : "data:";
       }
 
       /* BEGIN_DEBUG */
