@@ -66,10 +66,10 @@ describe("e2e/34-bfcache/00-basic", function() {
       assert.equal(parseInt(b["rt.end"], 10), parseInt(b["rt.tstart"], 10) + parseInt(b.t_done));
     });
 
-    it("Should have set nt_nav_type = 1", function() {
+    it("Should have set nt_nav_type = 2", function() {
       var b = tf.beacons[1];
 
-      assert.equal(b.nt_nav_type, "1");
+      assert.equal(b.nt_nav_type, "2");
     });
 
     it("Should have set pt.fcp > 0", function() {
