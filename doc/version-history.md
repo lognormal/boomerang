@@ -1,5 +1,22 @@
 # Boomerang Release Notes
 
+## 1.792.0 (October 23, 2023)
+
+### New Features
+
+* Issue 1167: SPA: Soft Navigation Heuristics
+
+### Bug Fixes
+
+* Issue 1175: BFCache: Only append OT if document.head.append is available
+* Issue 1172: BFCache: Round timestamps to avoid microsecond timing differences
+* Issue 1171: History: Don't reset a SPA route change for XHR beacons
+
+### Misc
+
+* Issue 1170: Docs: 1.785 Release Notes
+* Issue 1174: Tests: Ensure HTTPS-requiring tests alert if not on HTTPS; Loosen required timings
+
 ## 1.785.0 (July 17, 2023)
 
 ### Breaking Changes
