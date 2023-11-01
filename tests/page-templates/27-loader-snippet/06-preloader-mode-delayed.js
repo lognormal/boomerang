@@ -13,7 +13,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have used the Preload Snippet method (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -21,7 +21,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have set sm=if (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -29,7 +29,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should not have used the Preload Snippet method (if Preload is not supported)", function() {
-    if (t.supportsPreload()) {
+    if (t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -37,7 +37,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added LINK rel 'preload' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -47,7 +47,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added LINK as 'script' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -57,7 +57,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added LINK to the same block (BODY) as the loader snippet (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -67,7 +67,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should not have added SCRIPT id 'boomr-scr-as' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -75,7 +75,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with src 'about:blank' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -85,7 +85,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME to the same block (BODY) as the loader snippet (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -95,7 +95,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with title '' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -105,7 +105,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with role 'presentation' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -115,7 +115,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with width 0 (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -125,7 +125,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with height 0 (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -135,7 +135,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with border '0px' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -145,7 +145,7 @@ describe("e2e/27-loader-snippet/06-preloader-mode-delayed", function() {
   });
 
   it("Should have added a IFRAME with display 'none' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 

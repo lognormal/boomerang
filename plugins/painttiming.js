@@ -6,6 +6,15 @@
  *
  * For information on how to include this plugin, see the {@tutorial building} tutorial.
  *
+ * ## Prerendering
+ *
+ * The following beacon parameters are affected by Prerendering and will be offset by the
+ * `activationStart` time (if any):
+ *
+ * * `pt.fp` (First Paint)
+ * * `pt.fcp` (First Contentful Paint)
+ * * `pt.lcp` (Largest Contentful Paint)
+ *
  * ## Beacon Parameters
  *
  * All beacon parameters are prefixed with `pt.`.
@@ -167,10 +176,13 @@
           impl.timingCache[paintTimings[i].name] = paintTimings[i].startTime;
 
           if (PAINT_TIMING_MAP[paintTimings[i].name]) {
+            // get the timestamp, offset by Prerendered, if it happened
+            var ts = BOOMR.getPrerenderedOffset(paintTimings[i].startTime);
+
             // add pt.* to a single beacon
             BOOMR.addVar(
               "pt." + PAINT_TIMING_MAP[paintTimings[i].name],
-              Math.floor(paintTimings[i].startTime),
+              ts,
               true);
           }
         }
@@ -215,7 +227,8 @@
         return;
       }
 
-      BOOMR.addVar("pt.lcp", Math.floor(impl.lcp.time), true);
+      // get the timestamp, offset by Prerendered, if it happened
+      BOOMR.addVar("pt.lcp", BOOMR.getPrerenderedOffset(impl.lcp.time), true);
 
       if (impl.lcp.src) {
         BOOMR.addVar("pt.lcp.src", impl.lcp.src, true);

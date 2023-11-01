@@ -1,0 +1,20 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>45-tti-prerendered</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="45-tti-prerendered.js" type="text/javascript"></script>
+<script>
+// fake activationStart offset 100ms
+BOOMR_test.fakeActivationStart(100);
+
+BOOMR_test.init({
+  testAfterOnBeacon: true,
+  Continuity: {
+    enabled: true
+  }
+});
+</script>
+<%= footer %>

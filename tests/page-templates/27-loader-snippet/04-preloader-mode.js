@@ -10,7 +10,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have used the Preload Snippet method (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -18,7 +18,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have set sm=p (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -26,7 +26,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should not have used the Preload Snippet method (if Preload is not supported)", function() {
-    if (t.supportsPreload()) {
+    if (t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -34,7 +34,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added LINK rel 'preload' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -44,7 +44,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added LINK as 'script' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -54,7 +54,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added LINK to the same block (BODY) as the loader snippet (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -64,7 +64,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added SCRIPT id 'boomr-scr-as' (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -74,7 +74,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added SCRIPT async (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -84,7 +84,7 @@ describe("e2e/27-loader-snippet/04-preloader-mode", function() {
   });
 
   it("Should have added SCRIPT to the same block (BODY) as the loader snippet (if Preload is supported )", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 

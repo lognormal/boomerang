@@ -14,7 +14,7 @@ describe("e2e/27-loader-snippet/02-iframe-mode", function() {
       return this.skip();
     }
 
-    if (t.supportsPreload()) {
+    if (t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -26,7 +26,7 @@ describe("e2e/27-loader-snippet/02-iframe-mode", function() {
       return this.skip();
     }
 
-    if (t.supportsPreload()) {
+    if (t.isPreloadSupported()) {
       return this.skip();
     }
 

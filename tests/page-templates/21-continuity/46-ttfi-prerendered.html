@@ -1,0 +1,31 @@
+<%= header %>
+<%= continuitySnippet %>
+<%= boomerangScript %>
+<!-- trigger First Paint -->
+<h1>46-ttfi-prerendered</h1>
+<!-- before this delayed image -->
+<img src="/delay?delay=5000&amp;file=assets/img.jpg"/>
+<script src="46-ttfi-prerendered.js" type="text/javascript"></script>
+<script>
+// fake activationStart offset 1.9s
+BOOMR_test.fakeActivationStart(1900);
+
+BOOMR_test.init({
+  testAfterOnBeacon: true,
+  Continuity: {
+    enabled: true
+  }
+});
+
+// fake a key event after 2s
+setTimeout(function() {
+  BOOMR_test.dispatchedEvent = document.createEvent("Event");
+
+  BOOMR_test.dispatchedEvent.initEvent("keydown", true, true);
+  BOOMR_test.dispatchedEvent.keyCode = 27;
+
+  BOOMR_test.dispatchedAt = BOOMR.hrNow();
+  document.dispatchEvent(BOOMR_test.dispatchedEvent);
+}, 2000);
+</script>
+<%= footer %>

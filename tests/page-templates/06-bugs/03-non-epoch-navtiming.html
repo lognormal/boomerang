@@ -6,7 +6,6 @@ https://bugs.webkit.org/show_bug.cgi?id=168057
 -->
 <script src="03-non-epoch-navtiming.js" type="text/javascript"></script>
 <script>
-// Patch getPerformance to return our buggy data instead
 BOOMR.getPerformance = function() {
   var data = BOOMR_test.getPerformanceCopy();
 

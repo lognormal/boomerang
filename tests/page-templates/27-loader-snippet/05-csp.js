@@ -13,7 +13,7 @@ describe("e2e/27-loader-snippet/05-csp", function() {
   });
 
   it("Should have used the Preload Snippet method (if Preload is supported)", function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return this.skip();
     }
 
@@ -21,7 +21,7 @@ describe("e2e/27-loader-snippet/05-csp", function() {
   });
 
   it("Should not have used the Preload Snippet method (if Preload is not supported)", function() {
-    if (t.supportsPreload()) {
+    if (t.isPreloadSupported()) {
       return this.skip();
     }
 

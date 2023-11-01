@@ -217,7 +217,7 @@
     next_beacon_url: undefined,
 
     // These timers are added directly as beacon variables.
-    basic_timers: {
+    BASIC_TIMERS: {
       t_done: 1,
       t_resp: 1,
       t_page: 1
@@ -725,44 +725,131 @@
     },
 
     /**
-     * Check if we're in a prerender state, and if we are, set additional timers.
-     * In Chrome/IE, a prerender state is when a page is completely rendered in an in-memory buffer, before
-     * a user requests that page.  We do not beacon at this point because the user has not shown intent
-     * to view the page.  If the user opens the page, the visibility state changes to visible, and we
-     * fire the beacon at that point, including any timing details for prerendering.
+     * Check if we're in a legacy prerender state, and if we are, set additional timers.
+     *
+     * In old versions of Chrome that support <link rel="prerender">, a prerender state is when a
+     * page is completely rendered in an in-memory buffer, before a user requests that page.  We do
+     * not beacon at this point because the user has not shown intent to view the page.  If the
+     * user opens the page, the visibility state changes to visible, and we fire the beacon at that
+     * point, including any timing details for prerendering.
      *
      * Sets the `t_load` timer to the actual value of page load time (request initiated by browser to onload)
      *
-     * @returns true if this is a prerender state, false if not (or not supported)
+     * @returns true if this is a legacy prerender state, false if not (or not supported)
      */
-    checkPreRender: function() {
-      if (BOOMR.visibilityState() !== "prerender") {
-        return false;
+    checkLegacyPrerender: function() {
+      if (BOOMR.visibilityState() === "prerender") {
+        //
+        // Older versions of Chrome via <link rel="prerender">
+        //
+
+        // This means that onload fired through a pre-render.  We'll capture this
+        // time, but wait for t_done until after the page has become either visible
+        // or hidden (ie, it moved out of the pre-render state)
+
+        // this will measure actual onload time for a prerendered page
+        BOOMR.plugins.RT.startTimer("t_load", this.navigationStart);
+        BOOMR.plugins.RT.endTimer("t_load");
+
+        // time from navigation start to visible state
+        BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
+
+        // time from prerender to visible or hidden
+        BOOMR.plugins.RT.startTimer("t_postrender");
+
+        return true;
       }
 
-      // This means that onload fired through a pre-render.  We'll capture this
-      // time, but wait for t_done until after the page has become either visible
-      // or hidden (ie, it moved out of the pre-render state)
-      // http://code.google.com/chrome/whitepapers/pagevisibility.html
-      // http://www.w3.org/TR/2011/WD-page-visibility-20110602/
-      // http://code.google.com/chrome/whitepapers/prerender.html
-      BOOMR.plugins.RT.startTimer("t_load", this.navigationStart);
-
-      // this will measure actual onload time for a prerendered page
-      BOOMR.plugins.RT.endTimer("t_load");
-
-      BOOMR.plugins.RT.startTimer("t_prerender", this.navigationStart);
-
-      // time from prerender to visible or hidden
-      BOOMR.plugins.RT.startTimer("t_postrender");
-
-      return true;
+      return false;
     },
 
     /**
-     * Initialise timers from the NavigationTiming API.  This method looks at various sources for
+     * Check if we're in a modern prerender state, and if we are, adjust and set some  timers.
+     *
+     * In recent versions of Chrome that support Prerendering via the Speculation Rules API,
+     * there is now an activationStart timestamp available in NavigationTiming that tells us when in
+     * the Page Load process did the user activate the page (before or after onload, for example).
+     *
+     * Sets the `t_load` timer to the actual value of page load time (request initiated by browser to onload)
+     *
+     * @returns true if this is a modern prerender state, false if not (or not supported)
+     */
+    checkModernPrerender: function() {
+      var actSt = BOOMR.getActivationStart();
+
+      if (actSt === false) {
+        return;
+      }
+
+      //
+      // Newer versions of Chrome with Speculation Rules API, had Prerendered
+      //
+
+      var actStEpoch = actSt + impl.cached_t_start;
+
+      if (actStEpoch > impl.timers.t_done.end) {
+        //
+        // Activation after Page Load is complete
+        //
+
+        // Page Load time was 1ms
+        impl.timers.t_done = {
+          delta: 1
+        };
+
+        // Front-End Time was 1ms
+        impl.timers.t_page = {
+          delta: 1
+        };
+
+        // Back-End Time was 0
+        impl.timers.t_resp = {
+          delta: 0
+        };
+      }
+      else {
+        //
+        // Activation before Page Load was complete
+        //
+
+        // Page Load needs to be offset by the difference
+        impl.timers.t_done = {
+          // loadEventEnd - navigationStart - activationStart
+          delta: (impl.timers.t_done.end - impl.cached_t_start - actSt)
+        };
+
+        if (actStEpoch > impl.timers.t_resp.end) {
+          // Activation after the Back-End was done
+
+          // Front-End Time was same as total Page Load Time
+          impl.timers.t_page = {
+            delta: impl.timers.t_done.delta
+          };
+
+          // Back-End Time was 0
+          impl.timers.t_resp = {
+            delta: 0
+          };
+        }
+        else {
+          // Activation before Back-End was done
+
+          // Front-End Time stays the same
+
+          // Back-End Time was offset by Act St
+          impl.timers.t_resp = {
+            // reponseStart - navigationStart - activationStart
+            delta: (impl.timers.t_resp.end - impl.cached_t_start - actSt)
+          };
+        }
+      }
+    },
+
+    /**
+     * Initialize timers from the NavigationTiming API.  This method looks at various sources for
      * Navigation Timing, and also patches around bugs in various browser implementations.
-     * It sets the beacon parameter `rt.start` to the source of the timer
+     *
+     * It sets the beacon parameter `rt.start` to the source of the timer.
      */
     initFromNavTiming: function() {
       var ti, p;
@@ -871,10 +958,10 @@
     /**
      * Set timers appropriate at page load time.  This method should be called from done() only when
      * the page_ready event fires.  It sets the following timer values:
-     *    - t_resp:  time from request start to first byte
-     *    - t_page:  time from first byte to load
-     *    - t_postrender  time from prerender state to visible state
-     *    - t_prerender  time from navigation start to visible state
+     *    - t_resp: time from request start to first byte
+     *    - t_page: time from first byte to load
+     *    - t_postrender: time from prerender state to visible state
+     *    - t_prerender: time from navigation start to visible state
      *
      * @param {string} ename The Event name that initiated this control flow
      * @param {number} t_done The timestamp when the done() method was called
@@ -884,7 +971,7 @@
      * @returns true if timers were set, false if we're in a prerender state, caller should abort on false.
      */
     setPageLoadTimers: function(ename, t_done, data) {
-      var t_resp_start, t_fetch_start, p, navSt;
+      var t_resp_start, t_fetch_start;
 
       if (ename !== "xhr" &&
           !(ename === "early" &&
@@ -896,7 +983,7 @@
         // add rt.start for the source
         BOOMR.addVar("rt.start", this.navigationStartSource);
 
-        if (impl.checkPreRender()) {
+        if (impl.checkLegacyPrerender()) {
           return false;
         }
       }
@@ -1532,7 +1619,7 @@
             continue;
           }
 
-          if (impl.basic_timers.hasOwnProperty(t_name)) {
+          if (impl.BASIC_TIMERS.hasOwnProperty(t_name)) {
             BOOMR.addVar(t_name, timer.delta, true);
           }
           else {
@@ -1610,6 +1697,11 @@
       // else, it will stop the page load timer
       if (ename !== "early") {
         this.endTimer("t_done", t_done);
+      }
+
+      if (ename === "load") {
+        // check if we need to offset Page Load timers for Prerender
+        impl.checkModernPrerender();
       }
 
       // For XHR events, ensure t_done is set with the proper start, end, and

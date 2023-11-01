@@ -1,0 +1,100 @@
+<%= header %>
+<script>
+// mock PerformanceObserver for testing LCP data
+BOOMR_test.mockPerformanceObserver();
+
+// polyfill PaintTiming
+window.LargestContentfulPaint = function() {};
+</script>
+<%= boomerangScript %>
+
+<img src="/assets/img.jpg"  style="width: 100px" id="img_id1" />
+
+<script src="09-prerendered.js" type="text/javascript"></script>
+<script>
+// fake activationStart offset of 30s
+BOOMR_test.ACT_ST_OFFSET = 30000;
+
+if (BOOMR_test.isNavigationTiming2Supported() &&
+    BOOMR_test.isPaintTimingSupported()) {
+  // Replace any queries for 'navigation' with our updated entry
+  window.performance.getEntriesByType = (function(_getEntriesByType) {
+    return function(type) {
+      var result = _getEntriesByType.apply(this, arguments);
+
+      if (!result || !result.length) {
+        return;
+      }
+
+      if (type === "navigation") {
+        // swap in our timestamps, with an offset
+        result = [{
+          navigationStart: result[0].navigationStart,
+          redirectStart: result[0].redirectStart,
+          redirectEnd: result[0].redirectEnd,
+          fetchStart: result[0].fetchStart,
+          domainLookupStart: result[0].domainLookupStart,
+          domainLookupEnd: result[0].domainLookupEnd,
+          connectStart: result[0].connectStart,
+          connectEnd: result[0].connectEnd,
+          requestStart: result[0].requestStart,
+          responseStart: result[0].responseStart,
+          responseEnd: result[0].responseEnd,
+          domLoading: result[0].domLoading,
+          domInteractive: result[0].domInteractive,
+          domContentLoadedEventStart: result[0].domContentLoadedEventStart,
+          domContentLoadedEventEnd: result[0].domContentLoadedEventEnd,
+          domComplete: result[0].domComplete,
+          loadEventStart: result[0].loadEventStart,
+          loadEventEnd: result[0].loadEventEnd,
+          activationStart: BOOMR_test.ACT_ST_OFFSET
+        }];
+      }
+      else if (type === "paint") {
+        // add in our offset
+        for (var i = 0; i < result.length; i++) {
+          result[i] = {
+            startTime: result[i].startTime + BOOMR_test.ACT_ST_OFFSET,
+            name: result[i].name,
+            duration: 0
+          };
+        }
+      }
+
+      return result;
+    };
+  })(window.performance.getEntriesByType);
+}
+
+function generateLCP(id) {
+  var curLoadTime = BOOMR.hrNow() + BOOMR_test.ACT_ST_OFFSET;
+  var renderTime = curLoadTime + 20;
+
+  return {
+    duration: 0,
+    element: document.getElementById(id),
+    entryType: "largest-contentful-paint",
+    loadTime: curLoadTime,
+    renderTime: renderTime,
+    size: 3000,
+    startTime: renderTime,
+    url: document.URL + document.getElementById(id).src
+  };
+}
+
+// fake LCP event
+BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
+  [
+    generateLCP("img_id1")
+  ]
+);
+
+BOOMR_test.init({
+  testAfterOnBeacon: true,
+  PaintTiming: {
+    enabled: true
+  }
+});
+</script>
+<script src="/delay?delay=2500&amp;file=/assets/blank.js"></script>
+<%= footer %>

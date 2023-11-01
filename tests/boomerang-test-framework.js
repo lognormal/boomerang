@@ -576,6 +576,30 @@
     return typeof window.SoftNavigationEntry === "function";
   };
 
+  /**
+   * Whether or not the browser supports link rel="preload"
+   *
+   * @returns {boolean} True if the browser supports Preload
+   */
+  t.isPreloadSupported = function() {
+    // See if Preload is supported or not
+    var link = document.createElement("link");
+
+    return (link.relList &&
+      typeof link.relList.supports === "function" &&
+      link.relList.supports("preload") &&
+      ("as" in link));
+  };
+
+  /**
+   * Whether or not the browser supports modern Prerender
+   *
+   * @returns {boolean} True if the browser supports Prerendering
+   */
+  t.isPrerenderingSupported = function() {
+    return typeof document.prerendering === "boolean";
+  };
+
   t.validateBeaconWasImg = function(done) {
     if (!t.isResourceTimingSupported()) {
       // need RT to validate
@@ -1124,6 +1148,55 @@
   };
 
   /**
+   * Fake ActivationStart offset
+   */
+  t.fakeActivationStartOffset = undefined;
+
+  /**
+   * Fake ActivationStart
+   */
+  t.fakeActivationStart = function(time) {
+    t.fakeActivationStartOffset = time;
+
+    if (BOOMR_test.isNavigationTiming2Supported()) {
+      // Replace any queries for 'navigation' with our updated entry
+      window.performance.getEntriesByType = (function(_getEntriesByType) {
+        return function(type) {
+          var result = _getEntriesByType.apply(this, arguments);
+
+          if (!result || !result.length) {
+            return;
+          }
+
+          // fake that no paint happened
+          if (type === "navigation") {
+            // get a copy of the object first, so we can modify it
+            result[0] = BOOMR_test.getObjectCopy(result[0]);
+
+            // add our activation time
+            result[0].activationStart = t.fakeActivationStartOffset;
+          }
+
+          return result;
+        };
+      })(window.performance.getEntriesByType);
+    }
+  };
+
+  /**
+   * Creates a copy of the object that can be modified
+   */
+  t.getObjectCopy = function(obj) {
+    var copy = {};
+
+    for (var prop in obj) {
+      copy[prop] = obj[prop];
+    }
+
+    return copy;
+  };
+
+  /**
    * Gets the latest of First Paint or First Contentful Paint
    *
    * @returns {number} FP or FCP
@@ -1255,21 +1328,6 @@
     }
 
     return true;
-  };
-
-  /**
-   * Whether or not the browser supports link rel="preload"
-   *
-   * @returns {boolean} True if the browser supports Preload
-   */
-  t.supportsPreload = function() {
-    // See if Preload is supported or not
-    var link = document.createElement("link");
-
-    return (link.relList &&
-      typeof link.relList.supports === "function" &&
-      link.relList.supports("preload") &&
-      ("as" in link));
   };
 
   /**
@@ -1537,7 +1595,7 @@
    * Forces the Boomerang Loader Snippet to use the IFRAME fallback
    */
   t.forceSnippetIframe = function() {
-    if (!t.supportsPreload()) {
+    if (!t.isPreloadSupported()) {
       return;
     }
 

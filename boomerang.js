@@ -535,6 +535,11 @@ BOOMR_check_doc_domain();
     // the Boomerang IFRAME is unloaded
     nativeOverwrites: [],
 
+    // Prerendered offset (via activationStart).  null if not yet checked,
+    // false if Prerender is supported but did not occur, an integer if
+    // there was a Prerender (activationStart time).
+    prerenderedOffset: null,
+
     // (End Private Members)
 
     //
@@ -3453,8 +3458,22 @@ BOOMR_check_doc_domain();
         return this;
       }
 
-      impl.fireEvent("page_ready", ev);
-      impl.onloadfired = true;
+      // if we're prerendering, wait until complete before firing
+      if (d.prerendering) {
+        BOOMR.utils.addListener(d, "prerenderingchange", function() {
+          // wait 500ms for other events (like LCP) to fire before we send the beacon
+          setTimeout(function() {
+            impl.fireEvent("page_ready", ev);
+          }, 500);
+
+          impl.onloadfired = true;
+        });
+      }
+      else {
+        // not prerendering
+        impl.fireEvent("page_ready", ev);
+        impl.onloadfired = true;
+      }
 
       return this;
     },
@@ -4915,6 +4934,65 @@ BOOMR_check_doc_domain();
       return (typeof data["rt.quit"] === "undefined" || typeof data["rt.abld"] !== "undefined") &&
         (typeof data["http.initiator"] === "undefined" ||
           BOOMR.utils.inArray(data["http.initiator"], BOOMR.constants.BEACON_TYPE_SPAS));
+    },
+
+    /**
+     * Returns the timestamp offset by the Prerendered value, if it happened
+     *
+     * @param {number} ts Timestamp
+     *
+     * @returns {number} Offset timestamp if Prerendered, original timestamp if not
+     */
+    getPrerenderedOffset: function(ts) {
+      var actSt = BOOMR.getActivationStart();
+
+      if (actSt === false) {
+        // Prerender not supported or did not happen, return original timestamp
+        return ts;
+      }
+      else if (actSt !== null) {
+        // integer offset, return the difference
+        var newTs = Math.floor(ts) - actSt;
+
+        // return the offset (at least 1ms)
+        return newTs >= 0 ? Math.max(1, newTs) : ts;
+      }
+    },
+
+    /**
+     * Gets the Activation Start time for Prerendered navigations.
+     *
+     * @returns {false|number} false if Prerender isn't supported, false if there was no Prerender, or a timestamp
+     *  of the Activation if there was one
+     */
+    getActivationStart: function() {
+      if (impl.prerenderedOffset !== null) {
+        // we've previously calculated, return the value
+        return impl.prerenderedOffset;
+      }
+
+      // we're going to now check/set it, default to false (not supported or didn't happen)
+      impl.prerenderedOffset = false;
+
+      // check if prerendering is supported first
+      if (typeof d.prerendering !== "boolean") {
+        // not supported, return false
+        return impl.prerenderedOffset;
+      }
+
+      // check if there was an activation via NavigationTiming
+      var p = BOOMR.getPerformance();
+
+      if (p) {
+        // get the navigation entry
+        var navEntry = p.getEntriesByType("navigation")[0];
+
+        if (navEntry && navEntry.activationStart) {
+          impl.prerenderedOffset = Math.floor(navEntry.activationStart);
+        }
+      }
+
+      return impl.prerenderedOffset;
     }
 
     /* BEGIN_DEBUG */,

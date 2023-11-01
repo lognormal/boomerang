@@ -713,6 +713,14 @@
  * When Long Tasks aren't supported by the browser, Page Busy monitoring via
  * `setInterval` should only 1-2ms CPU during and after page load.
  *
+ * ## Prerendering
+ *
+ * The following beacon parameters are affected by Prerendering and will be offset by the
+ * `activationStart` time (if any):
+ *
+ * * `c.tti` (Time to Interactive)
+ * * `c.ttfi` (Time to First Interaction)
+ *
  * ## Beacon Parameters
  *
  * The following parameters will be added to the beacon:
@@ -1803,7 +1811,7 @@
         // add Framework Ready to the beacon
         impl.addToBeacon("c.tti.fr", externalMetrics.timeToFrameworkReady());
 
-        // add Framework Ready to the beacon
+        // add Hero Images Ready to the beacon
         impl.addToBeacon("c.tti.hi", externalMetrics.timeToHeroImagesReady());
 
         // only add to the first beacon
@@ -1854,8 +1862,8 @@
      */
     externalMetrics.timeToInteractive = function() {
       if (tti) {
-        // milliseconds since nav start
-        return tti - epoch;
+        // milliseconds since nav start, offset by Prerendered Activation Start (if it happened)
+        return BOOMR.getPrerenderedOffset(tti - epoch);
       }
 
       // no data
@@ -3810,8 +3818,8 @@
         if (typeof fid === "number") {
           impl.addToBeacon("c.fid", Math.ceil(fid), true);
 
-          impl.addToBeacon("c.ttfi", BOOMR.plugins.EventTiming.metrics.timeToFirstInteraction() ||
-              externalMetrics.timeToFirstInteraction());
+          impl.addToBeacon("c.ttfi",
+            BOOMR.plugins.EventTiming.metrics.timeToFirstInteraction() || externalMetrics.timeToFirstInteraction());
 
           sentTimers = true;
         }
@@ -3868,7 +3876,7 @@
     externalMetrics.timeToFirstInteraction = function() {
       if (timeToFirstInteraction) {
         // milliseconds since nav start
-        return Math.floor(timeToFirstInteraction - epoch);
+        return BOOMR.getPrerenderedOffset(Math.floor(timeToFirstInteraction - epoch));
       }
 
       // no data

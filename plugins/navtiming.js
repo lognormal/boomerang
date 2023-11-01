@@ -17,9 +17,9 @@
  *
  * This plugin adds the following parameters to the beacon for Page Loads:
  *
+ * * `nt_nav_st`: `performance.timing.navigationStart`
  * * `nt_red_cnt`: `performance.navigation.redirectCount`
  * * `nt_nav_type`: `performance.navigation.type`
- * * `nt_nav_st`: `performance.timing.navigationStart`
  * * `nt_red_st`: `performance.timing.redirectStart`
  * * `nt_red_end`: `performance.timing.redirectEnd`
  * * `nt_fet_st`: `performance.timing.fetchStart`
@@ -40,6 +40,7 @@
  * * `nt_unload_st`: `performance.timing.unloadEventStart`
  * * `nt_unload_end`: `performance.timing.unloadEventEnd`
  * * `nt_ssl_st`: `performance.timing.secureConnectionStart`
+ * * `nt_act_st`: NavigationTiming2's `activationStart`
  * * `nt_spdy`: `1` if page was loaded over SPDY, `0` otherwise.  Only available
  *   in Chrome when it _doesn't_ support NavigationTiming2.  If NavigationTiming2
  *   is supported, `nt_protocol` will be added instead.
@@ -120,12 +121,32 @@
 
   // A private object to encapsulate all your implementation details
   var impl = {
+    /**
+     * Whether or not the plugin is complete (beacon has been sent)
+     */
     complete: false,
+
+    /**
+     * Whether or not all data has been sent (the document 'load' event is complete
+     * and loadEventEnd is set)
+     */
     fullySent: false,
+
+    /**
+     * Sends the beacon.
+     */
     sendBeacon: function() {
       this.complete = true;
+
       BOOMR.sendBeacon();
     },
+
+    /**
+     * Called when an `xhr_load` event is fired (when an XHR beacon is
+     * about to be sent)
+     *
+     * @param {object} edata Event data
+     */
     xhr_done: function(edata) {
       var p;
 
@@ -224,6 +245,10 @@
       impl.sendBeacon();
     },
 
+    /**
+     * Called when an `page_ready` or 'before_unload' event to add
+     * data to the beacon
+     */
     done: function() {
       var w = BOOMR.window,
           p, pn, chromeTimes, pt,
@@ -241,6 +266,7 @@
       p = BOOMR.getPerformance();
 
       if (p) {
+        // Prioritize getting data from the PerformanceTimeline
         if (typeof p.getEntriesByType === "function") {
           pt = p.getEntriesByType("navigation");
 
@@ -257,6 +283,7 @@
           }
         }
 
+        // If not, get data from window.performance.timing
         if (!pt && p.timing) {
           BOOMR.info("This user agent supports NavigationTiming", "nt");
           pt = p.timing;
@@ -286,7 +313,8 @@
             nt_load_st: calcNavTimingTimestamp(offset, pt.loadEventStart),
             nt_load_end: calcNavTimingTimestamp(offset, pt.loadEventEnd),
             nt_unload_st: calcNavTimingTimestamp(offset, pt.unloadEventStart),
-            nt_unload_end: calcNavTimingTimestamp(offset, pt.unloadEventEnd)
+            nt_unload_end: calcNavTimingTimestamp(offset, pt.unloadEventEnd),
+            nt_act_st: calcNavTimingTimestamp(offset, pt.activationStart)
           };
 
           // domLoading doesn't exist on NavigationTiming2, so fetch it

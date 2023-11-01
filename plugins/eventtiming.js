@@ -354,7 +354,9 @@
       impl.entries = impl.entries.concat(newEntries);
 
       impl.firstInputDelay = Math.ceil(fid.processingStart - fid.startTime);
-      impl.timeToFirstInteraction = Math.floor(fid.startTime);
+
+      // TTFI -- can be offset by Prerendered activationStart
+      impl.timeToFirstInteraction = BOOMR.getPrerenderedOffset(Math.floor(fid.startTime));
 
       // consider FID for INP
       impl.interactionsSinceLastBeacon.fid = {
