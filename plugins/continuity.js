@@ -2264,7 +2264,7 @@
      */
     function analyze(startTime) {
       // add compressed data to beacon
-      impl.addToBeacon("c.cls", compressClsScore(externalMetrics.clsScore()));
+      impl.addToBeacon("c.cls", compressClsScore(externalMetrics.clsScore()), true);
       impl.addToBeacon("c.cls.d", compressClsSources(externalMetrics.clsSources()));
       impl.addToBeacon("c.cls.tops", compressClsScore(externalMetrics.topScore()));
       impl.addToBeacon("c.cls.topid", externalMetrics.topID());

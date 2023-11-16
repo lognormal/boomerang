@@ -449,6 +449,10 @@
     return typeof BOOMR.plugins.RT.navigationStart() !== "undefined";
   };
 
+  t.isCLSSupported = function() {
+    return (!BOOMR.window.PerformanceObserver || !BOOMR.window.LayoutShift) ? false : true;
+  };
+
   t.isNavigationTiming2Supported = function() {
     // check for NavTiming1 first
     if (!t.isNavigationTimingSupported()) {

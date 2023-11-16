@@ -46,18 +46,19 @@ BOOMR_test.init({
       testRunOnce = true;
 
       // 1. click
-      // 2. wait 30ms
+      // 2. wait 300ms
       // 3. Opt-out
-      // 4. XHR (2000ms)
-      // 5. oncomplete, route change <- beacon 1
-      // 6. wait 10ms
-      // 7. add IMG to DOM (2000ms)
-      // 8. Run tests 500ms after the image was loaded
+      // 4. Wait 300ms
+      // 5. XHR (2000ms)
+      // 6. oncomplete, route change <- beacon 1
+      // 7. wait 10ms
+      // 8. add IMG to DOM (2000ms)
+      // 9. Run tests 500ms after the image was loaded
       BOOMR_test.fireMouseEvent("mouseup");
 
       setTimeout(function() {
         BOOMR_OPT_OUT();
-      }, 30);
+      }, 300);
 
       setTimeout(function() {
         BOOMR_test.xhrDelayed("xhr1", 2000, function() {
@@ -71,7 +72,7 @@ BOOMR_test.init({
             }, 2500);
           }, 10);
         });
-      }, 30);
+      }, 600);
     });
   }
 });
