@@ -1390,9 +1390,6 @@
       // as that means we need to fetch a new Resource from the server
       // We don't look at currentSrc here because that isn't set until after the resource fetch has started,
       // which will be after the MO observer completes.
-      if (node._bmr && typeof node._bmr.res === "number" && node._bmr.end[node._bmr.res]) {
-        exisitingNodeSrcUrlChanged = true;
-      }
 
       // we put xlink:href before href because node.href works for <SVG:IMAGE> elements,
       // but does not return a string
@@ -1422,8 +1419,14 @@
         debugLog("mutation URL changed from " + node._bmr.url +
           " to " + url +
           " for event idx: " + node._bmr.idx +
-          " node:" + node._bmr.res);
+          " res num:" + node._bmr.res);
         /* END_DEBUG */
+      }
+
+      current_event = this.pending_events[index];
+
+      if (!current_event) {
+        return false;
       }
 
       // no URL or javascript: or about: or data: URL, so no network activity
@@ -1510,12 +1513,6 @@
         return false;
       }
 
-      current_event = this.pending_events[index];
-
-      if (!current_event) {
-        return false;
-      }
-
       // determine the resource number for this request
       resourceNum = current_event.resources.length;
 
@@ -1566,10 +1563,10 @@
 
         delete node._bmr.listener;
 
-        debugLog("mutation URL on" + ev.type + ", for event idx: " + index + " node: " + resourceNum);
+        debugLog("Mutation URL on" + ev.type + ", for event idx: " + index + " res num: " + resourceNum);
       };
 
-      debugLog("Monitoring mutation URL: " + url + " for event idx: " + index + " node: " + resourceNum);
+      debugLog("Monitoring mutation URL: " + url + " for event idx: " + index + " res num: " + resourceNum);
 
       node._bmr.listener = listener;
       node.addEventListener("load", listener);
@@ -1597,6 +1594,7 @@
         els = node.getElementsByTagName(tagName);
 
         if (els && els.length) {
+          debugLog("Mutation on element node, " + tagName + " cnt: " + els.length);
           for (i = 0, l = els.length; i < l; i++) {
             interesting |= this.wait_for_node(els[i], index);
           }
@@ -1702,11 +1700,18 @@
         var i, l, node;
 
         if (mutation.type === "attributes") {
+          debugLog("Mutation detected (attributes): " + mutation.target.nodeName + "." + mutation.attributeName);
           evt.interesting |= self.wait_for_node(mutation.target, index);
         }
         else if (mutation.type === "childList") {
           // Go through any new nodes and see if we should wait for them
           l = mutation.addedNodes.length;
+
+          /* BEGIN_DEBUG */
+          if (l > 0) {
+            debugLog("Mutation detected (childList), addedNodes cnt: " + l);
+          }
+          /* END_DEBUG */
           for (i = 0; i < l; i++) {
             evt.interesting |= self.wait_for_node(mutation.addedNodes[i], index);
           }
@@ -1715,6 +1720,12 @@
           // waiting for them.  If so, stop waiting, as removed IFRAMEs
           // don't trigger load or error events.
           l = mutation.removedNodes.length;
+
+          /* BEGIN_DEBUG */
+          if (l > 0) {
+            debugLog("Mutation detected (childList), removedNodes cnt: " + l);
+          }
+          /* END_DEBUG */
           for (i = 0; i < l; i++) {
             node = mutation.removedNodes[i];
 
@@ -2730,6 +2741,12 @@
         }
       }
 
+      /* BEGIN_DEBUG */
+      if (impl.xhrExcludeFilters.length) {
+        debugLog("XHR exclude filters did not match for URL: " + anchor.href);
+      }
+      /* END_DEBUG */
+
       return false;
     },
 
@@ -2744,6 +2761,11 @@
      */
     domExcludeFilter: function(elem) {
       var idx, ret, ctx;
+
+      // If elem is null we just throw it out period
+      if (!elem) {
+        return false;
+      }
 
       for (idx = 0; idx < impl.domExcludeFilters.length; idx++) {
         if (typeof impl.domExcludeFilters[idx].cb === "function") {
@@ -2771,7 +2793,11 @@
         }
       }
 
-      debugLog("XHR exclude filters did not match for URL: " + elem.href);
+      /* BEGIN_DEBUG */
+      if (impl.domExcludeFilters.length) {
+        debugLog("DOM exclude filters did not match for element " + elem.nodeName + " id: " + elem.id);
+      }
+      /* END_DEBUG */
 
       return false;
     },

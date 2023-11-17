@@ -1,0 +1,58 @@
+<%= header %>
+<!--
+Test scenario:
+* Page has an IMG element contained inside an A element
+* SPA event is triggered and the IMG is mutated
+* A second SPA event is triggers and the A HREF is mutated. The IMG is not.
+* The IMG should not be monitored by the second SPA event
+-->
+<%= boomerangScript %>
+<script src="58-element-nodes.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+  testAfterOnBeacon: 1,
+  autorun: false
+});
+
+window.listenersAdded = 0;
+window.listenersRemoved = 0;
+
+function countListeners(img) {
+  if (BOOMR_test.isMutationObserverSupported()) {
+    img.addEventListener = (function(_aEL) {
+      return function() {
+        window.listenersAdded++;
+
+        return _aEL.apply(this, arguments);
+      };
+    })(img.addEventListener);
+
+    img.removeEventListener = (function(_rEL) {
+      return function() {
+        window.listenersRemoved++;
+
+        return _rEL.apply(this, arguments);
+      };
+    })(img.removeEventListener);
+  }
+}
+
+function appendElementNode(tagName, imgId) {
+  var elm = window.document.createElement(tagName);
+  var img = window.document.createElement("img");
+
+  img.id = imgId;
+  countListeners(img);
+  img.src = "/delay?delay=250&file=/assets/img.jpg?rnd" + Math.random() + "&id=" + imgId;
+  elm.appendChild(img);
+  window.document.body.appendChild(elm);
+}
+
+// start a route change
+BOOMR.plugins.SPA.route_change();
+
+appendElementNode("div", "img-1");
+appendElementNode("p", "img-2");
+appendElementNode("a", "img-3");
+</script>
+<%= footer %>

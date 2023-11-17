@@ -1,0 +1,80 @@
+<%= header %>
+<!--
+Test scenario:
+* Page has an IMG element contained inside an A element
+* SPA event is triggered and the IMG is mutated
+* A second SPA event is triggers and the A HREF is mutated. The IMG is not.
+* The IMG should not be monitored by the second SPA event
+-->
+<%= boomerangScript %>
+<a id="main-a" href="#foo">
+  <div>
+    <img id="main-image" src=""/>
+  </div>
+</a>
+<script src="57-a-href-change.js" type="text/javascript"></script>
+<script>
+BOOMR_test.init({
+  testAfterOnBeacon: BOOMR_test.isMutationObserverSupported() ? 2 : 1,
+  autorun: false
+});
+
+window.listenersAdded = 0;
+window.listenersRemoved = 0;
+
+function countListeners(img) {
+  if (BOOMR_test.isMutationObserverSupported()) {
+    img.addEventListener = (function(_aEL) {
+      return function() {
+        window.listenersAdded++;
+
+        return _aEL.apply(this, arguments);
+      };
+    })(img.addEventListener);
+
+    img.removeEventListener = (function(_rEL) {
+      return function() {
+        window.listenersRemoved++;
+
+        return _rEL.apply(this, arguments);
+      };
+    })(img.removeEventListener);
+  }
+}
+
+var beaconNum = 0;
+
+if (BOOMR_test.isMutationObserverSupported()) {
+  BOOMR.subscribe("beacon", function() {
+    if (!BOOMR.plugins.AutoXHR) {
+      return;
+    }
+
+    if (beaconNum === 0) {
+      setTimeout(function() {
+        var img;
+
+        // start a route change
+        BOOMR.plugins.SPA.route_change();
+
+        img = window.document.createElement("img");
+        countListeners(img);
+        img.src = "/assets/img.jpg?rnd" + Math.random();
+        window.document.body.appendChild(img);
+
+        // the main-img is loaded, let's change the href of the container A element
+        document.getElementById("main-a").href = "#bar";
+      }, 100);
+    }
+
+    beaconNum++;
+  });
+}
+
+// start a route change
+BOOMR.plugins.SPA.route_change();
+
+// send the first image out with a delay
+document.getElementById("main-image").src = "/delay?delay=5000&file=/assets/img.jpg&rnd=" + Math.random();
+</script>
+<%= footer %>
