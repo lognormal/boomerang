@@ -432,17 +432,46 @@
      * If set to `false`, the React snippet should be used.
      * @param {boolean} [config.History.disableHardNav] Whether or not to disable SPA hard beacons
      * @param {function} [config.History.routeFilter] Route change filter callback function
-     * @param {function} [config.History.routeChangeWaitFilter] Route change wait filter callback function
-     * @param {boolean} [config.History.routeChangeWaitFilterHardNavs] Whether to apply wait filter on hard navs
+     * @param {function} [config.History.routeChangeWaitFilter] Route change wait filter callback function.
+     * This is called on each route change, and if returns true, Boomerang will wait for
+     * a `BOOMR.plugins.SPA.wait_complete()` call before marking a navigation complete. By default, this only
+     * applies to SPA Soft navigations.
+     * @param {boolean} [config.History.routeChangeWaitFilterHardNavs] Whether to apply wait filter on hard navs.
+     * If set to `true`, the `routeChangeWaitFilter` function will apply to SPA hard
+     * navigations in addition to soft navigations.
      * @param {boolean} [config.History.monitorReplaceState] Whether or not to hook History.replaceState
      *
      * @returns {@link BOOMR.plugins.History} The History plugin for chaining
-     * @example
+     * @example <caption>Basic</caption>
      * BOOMR.init({
      *   History: {
      *     enabled: true
-     *   });
+     *   }
      * });
+     *
+     * @example <caption>With routeChangeWaitFilter and routeChangeWaitFilterHardNavs</caption>
+     * BOOMR.init({
+     *   History: {
+     *     enabled: true,
+     *     routeChangeWaitFilter: function() {
+     *       if (window.location.href.indexOf("route-that-needs-to-wait/") !== -1) {
+     *         // You're telling Boomerang that in addition to the standard SPA heuristics,
+     *         // Boomerang should additionally wait for your application to call this API:
+     *         //
+     *         //   BOOMR.plugins.SPA.wait_complete();
+     *         //
+     *         return true;
+     *       }
+     *
+     *       // You're telling Boomerang that the standard SPA heuristics will be applied to this
+     *       // route, no custom endpoint is needed. BOOMR.plugins.SPA.wait_complete()
+     *       // should not be called.
+     *       return false;
+     *     },
+     *     routeChangeWaitFilterHardNavs: true
+     *   }
+     * });
+     *
      * @memberof BOOMR.plugins.History
      */
     init: function(config) {
