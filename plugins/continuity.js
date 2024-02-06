@@ -4312,13 +4312,18 @@
 
     // Battery
     if (w.navigator && typeof w.navigator.getBattery === "function") {
-      w.navigator.getBattery().then(function(b) {
-        battery = b;
+      try {
+        w.navigator.getBattery().then(function(b) {
+          battery = b;
 
-        if (battery.onlevelchange) {
-          battery.onlevelchange = onBatteryLevelChange;
-        }
-      });
+          if (battery.onlevelchange) {
+            battery.onlevelchange = onBatteryLevelChange;
+          }
+        });
+      }
+      catch (e) {
+        // Unknown error with Battery API, ignore!
+      }
     }
 
     // MutationObserver
