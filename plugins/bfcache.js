@@ -95,8 +95,8 @@
       BOOMR.plugins.RT.incrementSessionDetails();
 
       // Mark as a BFCache nav
-      BOOMR.addVar("http.initiator", "bfcache");
-      BOOMR.addVar("rt.start", "manual");
+      BOOMR.addVar("http.initiator", "bfcache", true);
+      BOOMR.addVar("rt.start", "manual", true);
 
       // All timing is categorized as front-end time
       BOOMR.addVar("t_done", restoreDuration, true);
@@ -110,11 +110,18 @@
       BOOMR.addVar("rt.end", Math.floor(pageShowStart + p.timing.navigationStart), true);
 
       // Technically a Back-Forward Navigation
-      BOOMR.addVar("nt_nav_type", 2);
+      BOOMR.addVar("nt_nav_type", 2, true);
 
       // FCP and LCP
       BOOMR.addVar("pt.fcp", Math.floor(fcpLcp - pageShowStart), true);
       BOOMR.addVar("pt.lcp", Math.floor(fcpLcp - pageShowStart), true);
+
+      if (BOOMR.plugins.PageParams) {
+        // re-attach any dimensions to this beacon
+        BOOMR.plugins.PageParams.runAllDimensions(function(name, val) {
+          BOOMR.addVar(name, val, true);
+        });
+      }
 
       // Let other plugins add data to the bfcache beacon
       BOOMR.fireEvent("bfcache", edata);
@@ -226,19 +233,6 @@
       // skip re-initialization
       if (impl.initialized) {
         return this;
-      }
-
-      if (document && document.head && typeof document.head.append === "function") {
-        // Origin trial: Expires Aug 8, 2023 / Chrome 114
-        var metaTag = document.createElement("meta");
-
-        metaTag.httpEquiv = "origin-trial";
-        metaTag.content = "A2uWz2bbyoykT6h7LZQlNUdwVAFfb3IL5LU+YR1qxtW5T1dCRKjJ5/h3zur1LmuLWk0B1kyA" +
-          "AwyCxJzDCzNxUAQAAAB6eyJvcmlnaW4iOiJodHRwczovL2FrYW1haS5jb206NDQzIiwiZmVhdHVyZSI6IkJhY2tG" +
-          "b3J3YXJkQ2FjaGVOb3RSZXN0b3JlZFJlYXNvbnMiLCJleHBpcnkiOjE2OTE1MzkxOTksImlzVGhpcmRQYXJ0eSI6" +
-          "dHJ1ZX0=";
-
-        document.head.append(metaTag);
       }
 
       BOOMR.registerEvent("bfcache");
