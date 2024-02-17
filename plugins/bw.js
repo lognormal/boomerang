@@ -184,7 +184,7 @@
     latency_runs: 10,
     user_ip: "",
     block_beacon: false,
-    test_https: false,
+    test_https: true,
     cookie_exp: 7 * 86400,
     cookie: "BA",
 
