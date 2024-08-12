@@ -4946,13 +4946,15 @@ BOOMR_check_doc_domain();
     getPrerenderedOffset: function(ts) {
       var actSt = BOOMR.getActivationStart();
 
+      ts = Math.floor(ts);
+
       if (actSt === false) {
         // Prerender not supported or did not happen, return original timestamp
         return ts;
       }
       else if (actSt !== null) {
         // integer offset, return the difference
-        var newTs = Math.floor(ts) - actSt;
+        var newTs = ts - actSt;
 
         // return the offset (at least 1ms)
         return newTs >= 0 ? Math.max(1, newTs) : ts;

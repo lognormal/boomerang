@@ -793,19 +793,16 @@
         //
 
         // Page Load time was 1ms
-        impl.timers.t_done = {
-          delta: 1
-        };
+        impl.timers.t_done = impl.timers.t_done || {};
+        impl.timers.t_done.delta = 1;
 
         // Front-End Time was 1ms
-        impl.timers.t_page = {
-          delta: 1
-        };
+        impl.timers.t_page = impl.timers.t_page || {};
+        impl.timers.t_page.delta = 1;
 
         // Back-End Time was 0
-        impl.timers.t_resp = {
-          delta: 0
-        };
+        impl.timers.t_resp = impl.timers.t_resp || {};
+        impl.timers.t_resp.delta = 0;
       }
       else {
         //
@@ -813,23 +810,20 @@
         //
 
         // Page Load needs to be offset by the difference
-        impl.timers.t_done = {
-          // loadEventEnd - navigationStart - activationStart
-          delta: (impl.timers.t_done.end - impl.cached_t_start - actSt)
-        };
+        // loadEventEnd - navigationStart - activationStart
+        impl.timers.t_done = impl.timers.t_done || {};
+        impl.timers.t_done.delta = (impl.timers.t_done.end - impl.cached_t_start - actSt);
 
         if (actStEpoch > impl.timers.t_resp.end) {
           // Activation after the Back-End was done
 
           // Front-End Time was same as total Page Load Time
-          impl.timers.t_page = {
-            delta: impl.timers.t_done.delta
-          };
+          impl.timers.t_page = impl.timers.t_page || {};
+          impl.timers.t_page.delta = impl.timers.t_done.delta;
 
           // Back-End Time was 0
-          impl.timers.t_resp = {
-            delta: 0
-          };
+          impl.timers.t_resp = impl.timers.t_resp || {};
+          impl.timers.t_resp.delta = 0;
         }
         else {
           // Activation before Back-End was done
@@ -837,10 +831,9 @@
           // Front-End Time stays the same
 
           // Back-End Time was offset by Act St
-          impl.timers.t_resp = {
-            // reponseStart - navigationStart - activationStart
-            delta: (impl.timers.t_resp.end - impl.cached_t_start - actSt)
-          };
+          // reponseStart - navigationStart - activationStart
+          impl.timers.t_resp = impl.timers.t_resp || {};
+          impl.timers.t_resp.delta = (impl.timers.t_resp.end - impl.cached_t_start - actSt);
         }
       }
     },

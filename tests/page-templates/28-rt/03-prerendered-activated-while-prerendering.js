@@ -64,4 +64,8 @@ describe("e2e/28-rt/03-prerendered-activated-while-prerendering", function() {
 
     assert.equal(tf.lastBeacon().t_resp, 0);
   });
+
+  it("Should have set rt.end", function() {
+    assert.operator(tf.lastBeacon()["rt.end"], ">", 0);
+  });
 });

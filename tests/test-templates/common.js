@@ -480,7 +480,23 @@ describe("common", function() {
       prefix = "ensure beacon " + (i + 1) + " ";
 
       if (typeof b["rt.tstart"] !== "undefined" && typeof b["rt.end"] !== "undefined" && typeof b.t_done !== "undefined") {
-        assert.equal(parseInt(b["rt.end"]) - parseInt(b["rt.tstart"]), parseInt(b.t_done), prefix + "has rt.end - rt.tstart == t_done");
+        if (!t.isPrerenderingSupported() || !b.nt_act_st) {
+          assert.equal(parseInt(b["rt.end"]) - parseInt(b["rt.tstart"]), parseInt(b.t_done), prefix + "has rt.end - rt.tstart == t_done");
+        }
+        else {
+          // prerendering and activation_st exists.
+          if (b.nt_act_st > b["rt.end"]) {
+            // Activation happened after page load, so expect page load to be 1ms
+            assert.equal(1, parseInt(b.t_done), prefix + "Expected t_done to be 1ms");
+          }
+          else {
+            // Activation started before page load. Expect pageload to be offset by activationTime
+            var actTime = parseInt(b.nt_act_st, 10) - parseInt(b.nt_nav_st, 10);
+
+            // allow for rounding
+            assert.closeTo(parseInt(b.t_done), parseInt(b["rt.end"]) - parseInt(b["rt.tstart"]) - actTime, 1, "has (rt.end - rt.tstart) approximately close to t_done");
+          }
+        }
       }
 
       for (var j = 0; j < TIMERS.length; j++) {
@@ -583,6 +599,9 @@ describe("common", function() {
           assert.closeTo(tm, now, (70 * 60 * 1000), prefix + "has " + param + "  as a valid timestamp");
         }
       }
+
+      // rt.end should never be set to string "undefined"
+      assert.notEqual(b["rt.end"], "undefined", "rt.end should not be undefined");
     }
   });
 
