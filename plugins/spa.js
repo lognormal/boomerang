@@ -319,19 +319,6 @@
         return;
       }
 
-      //
-      // Origin trial: Soft Navigation Heuristics
-      // For: go-mpulse.net and *.go-mpulse.net
-      // Duration: Up to Chrome 120, no later than Mar 6, 2024
-      //
-      var metaTag = document.createElement("meta");
-
-      metaTag.httpEquiv = "origin-trial";
-      metaTag.content = "A6MWCkFp/4goXtWiSJNfo09g03RCQpXkuDZDGnlApjvSPZL4CIhvZx3xGfg6bCT4TRppCXmFXWDEkxA7DO3nZgQ" +
-        "AAACGeyJvcmlnaW4iOiJodHRwczovL2dvLW1wdWxzZS5uZXQ6NDQzIiwiZmVhdHVyZSI6IlNvZnROYXZpZ2F0aW9uSGV1cmlzdGljcy" +
-        "IsImV4cGlyeSI6MTcwOTY4MzE5OSwiaXNTdWJkb21haW4iOnRydWUsImlzVGhpcmRQYXJ0eSI6dHJ1ZX0=";
-      document.head.append(metaTag);
-
       BOOMR.subscribe("page_ready", impl.pageReady, null, impl);
 
       // Soft Navigation Heuristics
