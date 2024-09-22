@@ -27,15 +27,10 @@
 ### Misc
 
 * Issue 1119: Tests: Fix many Docker failures, Remove PhantomJS, fix Dockerfiles
-* Issue 1133: BOOMR_config: Simplify override list to true if everything is allowed
 * Issue 1130: Build: Strip [BOOMR.info](http://BOOMR.info), .warn, .error on production builds
 * Issue 1141: Docs: Memory's dev.mem
 
 ## 1.750.0 (May 30, 2022)
-
-### New Features
-
-* Issue 1117: PageParams: Ability to have UserTiming Marks be measured from the most recent navigation
 
 ### Bug Fixes
 
@@ -57,7 +52,6 @@
 
 ### Bug Fixes
 
-* Issue 1105: PageParams: If XHR is set to match but there are no rules defined, Boomerang was monitoring XHRs still
 * Issue 1116: AutoXHR: Avoid re-wrapping XHR/fetch during config refreshes
 
 ### Misc
