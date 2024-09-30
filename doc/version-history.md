@@ -1,5 +1,37 @@
 # Boomerang Release Notes
 
+## 1.815.0 (Sep 30, 2024)
+
+### New Features
+
+* Boomerang: Initial Prerendered Support: The following durations will be offset by the Activation Start time (when the user clicked to view the prerendered page):
+  * First Paint (FP) `pt.fp`
+  * First Contentful Paint (FCP) `pt.fcp`
+  * Largest Contentful Paint (LCP) `pt.fcp`
+  * Time to Interactive (TTI) `c.tti`
+  * Time to First Interaction (TTFI) `c.ttfi`
+  * Back-End Time `t_resp`
+  * Front-End Time `t_page`
+  * Page Load Time `t_done`
+  * There are more timers that will need to be offset, and work will continue in future versions.
+
+## 1.803.0 (March 7, 2024)
+
+### Bug Fixes
+
+* Issue 1190: SPA: Only append OriginTrails if document.head.append is available
+* Issue 1189: BW: Change default HTTPS behaviour of bandwidth test to "run"
+* Issue 1187: BFCache: Set Page Dimensions: Page Group, AB, Custom Dimensions
+* Issue 1185: Continuity: Ignore errors from Battery API
+* Issue 1183: History: Clarify documentation about routeChangeWaitFilter
+* Issue 1182: AutoXHR: Do not wait for unchanged resources contained in a node element
+* Issue 1181: Continuity: Include zero CLS values on beacon
+* Issue 1176: PaintTiming: Use URL from LCP object directly if available, skip data: URIs
+
+### Misc
+
+* Issue 1179: Docs: 1.792 Release Notes
+
 ## 1.792.0 (October 23, 2023)
 
 ### New Features
