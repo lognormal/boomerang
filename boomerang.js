@@ -4985,7 +4985,7 @@ BOOMR_check_doc_domain();
       // check if there was an activation via NavigationTiming
       var p = BOOMR.getPerformance();
 
-      if (p) {
+      if (p && typeof p.getEntriesByType === "function") {
         // get the navigation entry
         var navEntry = p.getEntriesByType("navigation")[0];
 

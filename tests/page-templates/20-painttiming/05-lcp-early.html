@@ -40,13 +40,6 @@ function generateLCP(id) {
   };
 }
 
-BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
-  [
-    generateLCP("img_id1"),
-    generateLCP("img_id2")
-  ]
-);
-
 // simulate delayed config
 setTimeout(function() {
   BOOMR_test.init({
@@ -59,7 +52,15 @@ setTimeout(function() {
       enabled: true
     }
   });
+
+  BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
+    [
+      generateLCP("img_id1"),
+      generateLCP("img_id2")
+    ]
+  );
 }, 200);
+
 </script>
 <img src="/delay?delay=3000&amp;file=/assets/img.jpg&amp;id=1000" style="width:101px;"/>
 <%= footer %>

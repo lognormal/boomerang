@@ -19,7 +19,7 @@
 
 ### Bug Fixes
 
-* Issue 1190: SPA: Only append OriginTrails if document.head.append is available
+* Issue 1190: SPA: Only append OriginTrials if document.head.append is available
 * Issue 1189: BW: Change default HTTPS behaviour of bandwidth test to "run"
 * Issue 1187: BFCache: Set Page Dimensions: Page Group, AB, Custom Dimensions
 * Issue 1185: Continuity: Ignore errors from Battery API

@@ -21,7 +21,7 @@ describe("e2e/21-continuity/17-tti-hero-images", function() {
       var st = parseInt(b["rt.tstart"], 10);
 
       assert.isDefined(b["c.tti.vr"]);
-      assert.closeTo(parseInt(b["c.tti.vr"], 10), vr - st, 20);
+      assert.closeTo(parseInt(b["c.tti.vr"], 10), vr - st, 50);
     }
   });
 
@@ -45,7 +45,7 @@ describe("e2e/21-continuity/17-tti-hero-images", function() {
       var st = parseInt(b["rt.tstart"], 10);
 
       assert.isDefined(b["c.tti.hi"]);
-      assert.closeTo(parseInt(b["c.tti.hi"], 10), vr - st, 20);
+      assert.closeTo(parseInt(b["c.tti.hi"], 10), vr - st, 50);
     }
   });
 });

@@ -8,7 +8,7 @@ window.LargestContentfulPaint = function() {};
 </script>
 <%= boomerangScript %>
 
-<img src="/assets/img.jpg"  style="width: 100px" id="img_id1" />
+<img src="/assets/img.jpg" style="width: 100px" id="img_id1" />
 
 <script src="09-prerendered.js" type="text/javascript"></script>
 <script>
@@ -82,19 +82,19 @@ function generateLCP(id) {
   };
 }
 
-// fake LCP event
-BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
-  [
-    generateLCP("img_id1")
-  ]
-);
-
 BOOMR_test.init({
   testAfterOnBeacon: true,
   PaintTiming: {
     enabled: true
   }
 });
+
+// fake LCP event
+BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint",
+  [
+    generateLCP("img_id1")
+  ]
+);
 </script>
 <script src="/delay?delay=2500&amp;file=/assets/blank.js"></script>
 <%= footer %>

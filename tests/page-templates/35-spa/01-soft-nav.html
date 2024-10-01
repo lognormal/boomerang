@@ -37,7 +37,7 @@ $(".nav-btn").click(function(e) {
   imgLatest.style = "width: " + imgSize + "px; height: " + imgSize + "px";
   window.document.body.appendChild(imgLatest);
 
-  imgSize += 50;
+  imgSize += 100;
 });
 </script>
 
@@ -53,10 +53,6 @@ function getLcpPoEntry(time) {
     element: imgLatest
   };
 }
-
-BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint", [
-  getLcpPoEntry(BOOMR.hrNow())
-]);
 
 BOOMR_test.init({
   testAfterOnBeacon: window.history ? 4 : 1,
@@ -126,6 +122,10 @@ BOOMR_test.init({
     }, 3000);
   }
 });
-</script>
 
+BOOMR_test.fireMockPerformanceObserverEvent("largest-contentful-paint", [
+  getLcpPoEntry(BOOMR.hrNow())
+]);
+</script>
+<script src="/delay?delay=2500&amp;file=/assets/blank.js"></script>
 <%= footer %>
